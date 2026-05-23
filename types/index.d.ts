@@ -1,3 +1,5 @@
+declare module 'lucide-react';
+
 interface Feedback {
   id: string;
   interviewId: string;
@@ -11,6 +13,8 @@ interface Feedback {
   areasForImprovement: string[];
   finalAssessment: string;
   createdAt: string;
+  averageWpm?: number;
+  topFillerWords?: Array<{ word: string; count: number }>;
 }
 
 interface Interview {
@@ -23,6 +27,15 @@ interface Interview {
   userId: string;
   type: string;
   finalized: boolean;
+  resumeText?: string;
+  jobDescription?: string;
+  firstMessage?: string;
+  codingProblem?: {
+    title: string;
+    description: string;
+    templateCode: string;
+    language: string;
+  } | null;
 }
 
 interface CreateFeedbackParams {
@@ -30,12 +43,16 @@ interface CreateFeedbackParams {
   userId: string;
   transcript: { role: string; content: string }[];
   feedbackId?: string;
+  averageWpm?: number;
+  topFillerWords?: { word: string; count: number }[];
 }
 
 interface User {
   name: string;
   email: string;
   id: string;
+  resumeLink?: string;
+  profileURL?: string;
 }
 
 interface InterviewCardProps {
@@ -55,6 +72,13 @@ interface AgentProps {
   type: "generate" | "interview";
   questions?: string[];
   profileImage?: string;
+  firstMessage?: string;
+  codingProblem?: {
+    title: string;
+    description: string;
+    templateCode: string;
+    language: string;
+  } | null;
 }
 
 interface RouteParams {

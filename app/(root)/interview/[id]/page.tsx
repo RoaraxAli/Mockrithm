@@ -55,6 +55,8 @@ const InterviewDetails = async ({ params }: RouteParams) => {
         type="interview"
         questions={interview.questions}
         feedbackId={feedback?.id}
+        firstMessage={interview.firstMessage}
+        codingProblem={interview.codingProblem}
       />
     </>
   );

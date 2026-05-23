@@ -3,11 +3,12 @@
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { cn } from "@/lib/utils"
-import { LayoutDashboard, PlayCircle, FileText, MessageSquare, User } from "lucide-react"
+import { LayoutDashboard, PlayCircle, FileText, MessageSquare, User, Sparkles } from "lucide-react"
 
 const navigation = [
   { name: "Dashboard", href: "/user/dashboard", icon: LayoutDashboard },
   { name: "Take Interview", href: "/user/take-interview", icon: PlayCircle },
+  { name: "Resume Builder", href: "/user/resume", icon: Sparkles },
   { name: "Your Interviews", href: "/user/interviews", icon: FileText },
   { name: "Feedback", href: "/user/feedback", icon: MessageSquare },
   { name: "Profile", href: "/user/profile", icon: User },

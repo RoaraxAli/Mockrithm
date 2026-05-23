@@ -103,7 +103,7 @@ export default function AboutPage() {
   ]
 
   // Animation variants
-  const containerVariants = {
+  const containerVariants: any = {
     hidden: { opacity: 0 },
     visible: {
       opacity: 1,
@@ -113,7 +113,7 @@ export default function AboutPage() {
     },
   }
 
-  const itemVariants = {
+  const itemVariants: any = {
     hidden: { opacity: 0, y: 20 },
     visible: {
       opacity: 1,
@@ -125,7 +125,7 @@ export default function AboutPage() {
     },
   }
 
-  const slideInLeft = {
+  const slideInLeft: any = {
     hidden: { opacity: 0, x: -50 },
     visible: {
       opacity: 1,
@@ -137,7 +137,7 @@ export default function AboutPage() {
     },
   }
 
-  const slideInRight = {
+  const slideInRight: any = {
     hidden: { opacity: 0, x: 50 },
     visible: {
       opacity: 1,
@@ -149,7 +149,7 @@ export default function AboutPage() {
     },
   }
 
-  const fadeInUp = {
+  const fadeInUp: any = {
     hidden: { opacity: 0, y: 30 },
     visible: {
       opacity: 1,

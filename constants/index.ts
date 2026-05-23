@@ -1,4 +1,3 @@
-import { CreateAssistantDTO } from "@vapi-ai/web/dist/api";
 import { z } from "zod";
 
 export const mappings = {
@@ -97,10 +96,19 @@ export const mappings = {
   "aws amplify": "amplify",
 };
 
-export const interviewer: CreateAssistantDTO = {
+export const interviewer = {
   name: "Interviewer",
-  firstMessage:
-    "Hello! Thank you for taking the time to speak with me today. I'm excited to learn more about you and your experience.",
+  get firstMessage() {
+    const greetings = [
+      "Hello! Welcome to your interview session. I'm glad you're here. Let's start by looking at your background.",
+      "Hi there! Thank you for joining me today. I'm looking forward to our conversation about your experience.",
+      "Welcome! I appreciate you taking the time for this session. Let's get started and discuss your career history.",
+      "Hello and welcome! I'm excited to speak with you today. Let's kick things off with a few questions about your projects.",
+      "Hi! Thanks for connecting. I'm ready to learn more about your skills and professional journey today.",
+      "Welcome! Thank you for joining. I'm excited to run through this mock interview and see how you tackle problems."
+    ];
+    return greetings[Math.floor(Math.random() * greetings.length)];
+  },
   transcriber: {
     provider: "deepgram",
     model: "nova-2",

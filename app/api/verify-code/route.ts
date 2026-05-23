@@ -24,6 +24,13 @@ export async function POST(req: Request) {
 
     const data = snapshot.data();
 
+    if (!data) {
+      return NextResponse.json(
+        { success: false, message: "Reset request data missing." },
+        { status: 500 }
+      );
+    }
+
     if (data.code !== code) {
       return NextResponse.json(
         { success: false, message: "Invalid code." },

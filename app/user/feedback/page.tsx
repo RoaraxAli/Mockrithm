@@ -84,14 +84,16 @@ export default function FeedbackPage() {
   // Aggregate category scores across all feedback
   const aggregatedCategories = feedback.reduce(
     (acc, fb) => {
-      fb.categoryScores.forEach((category) => {
-        if (!acc[category.category]) {
-          acc[category.category] = { totalScore: 0, totalMax: 0, count: 0 }
-        }
-        acc[category.category].totalScore += category.score
-        acc[category.category].totalMax += category.maxScore
-        acc[category.category].count += 1
-      })
+      if (fb.categoryScores) {
+        fb.categoryScores.forEach((category) => {
+          if (!acc[category.category]) {
+            acc[category.category] = { totalScore: 0, totalMax: 0, count: 0 }
+          }
+          acc[category.category].totalScore += category.score
+          acc[category.category].totalMax += category.maxScore
+          acc[category.category].count += 1
+        })
+      }
       return acc
     },
     {} as Record<string, { totalScore: number; totalMax: number; count: number }>,
