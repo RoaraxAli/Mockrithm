@@ -795,30 +795,30 @@ ${code}
       
       {/* Settings Row */}
       {callStatus === CallStatus.INACTIVE && (
-        <div className="w-full max-w-xl mx-auto p-5 bg-dark-200/50 border border-border/50 rounded-2xl flex flex-col gap-3.5 backdrop-blur-md">
+        <div className="w-full max-w-xl mx-auto p-6 glass-card rounded-2xl flex flex-col gap-4 border border-white/10 shadow-2xl animate-fadeIn">
           <div className="flex items-center justify-between">
-            <h4 className="text-sm font-bold text-primary-100 flex items-center gap-2">
-              <Settings className="size-4 text-primary-200" />
+            <h4 className="text-sm font-bold text-gray-200 flex items-center gap-2">
+              <Settings className="size-4 text-violet-400" />
               Configure Voice & LLM Engine
             </h4>
             <button
               onClick={() => setShowSettings(!showSettings)}
-              className="text-xs text-primary-200 hover:text-white cursor-pointer"
+              className="text-xs font-bold text-violet-400 hover:text-white cursor-pointer transition-colors duration-200"
             >
               {showSettings ? "Hide Settings" : "Show Settings"}
             </button>
           </div>
 
           {showSettings && (
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-1 border-t border-border/40 pt-4 animate-fadeIn">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-1 border-t border-white/5 pt-4 animate-fadeIn">
               <div className="flex flex-col gap-1.5">
-                <label className="text-xs text-light-100 font-medium flex items-center gap-1">
-                  <Brain className="size-3.5" /> LLM Model
+                <label className="text-xs text-gray-300 font-semibold flex items-center gap-1">
+                  <Brain className="size-3.5 text-violet-400" /> LLM Model
                 </label>
                 <select
                   value={selectedModel}
                   onChange={(e) => setSelectedModel(e.target.value)}
-                  className="bg-dark-300 text-white text-xs rounded-xl p-2.5 border border-border focus:ring-1 focus:ring-primary-200 outline-none cursor-pointer"
+                  className="bg-zinc-900 text-white text-xs rounded-xl p-2.5 border border-white/10 focus:ring-1 focus:ring-violet-500 outline-none cursor-pointer hover:bg-zinc-800 transition-colors"
                 >
                   <option value="llama-3.3-70b-versatile">Llama 3.3 70B (Versatile)</option>
                   <option value="llama-3.1-8b-instant">Llama 3.1 8B (Instant)</option>
@@ -826,13 +826,13 @@ ${code}
               </div>
 
               <div className="flex flex-col gap-1.5">
-                <label className="text-xs text-light-100 font-medium flex items-center gap-1">
-                  <Volume2 className="size-3.5" /> TTS Voice
+                <label className="text-xs text-gray-300 font-semibold flex items-center gap-1">
+                  <Volume2 className="size-3.5 text-violet-400" /> TTS Voice
                 </label>
                 <select
                   value={selectedVoice}
                   onChange={(e) => setSelectedVoice(e.target.value)}
-                  className="bg-dark-300 text-white text-xs rounded-xl p-2.5 border border-border focus:ring-1 focus:ring-primary-200 outline-none cursor-pointer"
+                  className="bg-zinc-900 text-white text-xs rounded-xl p-2.5 border border-white/10 focus:ring-1 focus:ring-violet-500 outline-none cursor-pointer hover:bg-zinc-800 transition-colors"
                 >
                   <option value="groq-autumn">Autumn (Female)</option>
                   <option value="groq-diana">Diana (Female)</option>
@@ -875,7 +875,7 @@ ${code}
               </div>
               <h3>AI Interviewer Alex</h3>
               {callStatus === CallStatus.ACTIVE && (
-                <span className="text-xs font-bold text-success-100 bg-success-100/10 px-3 py-1 rounded-full animate-pulse flex items-center gap-1.5">
+                <span className="text-xs font-bold text-emerald-400 bg-emerald-500/10 px-3 py-1 rounded-full animate-pulse flex items-center gap-1.5 border border-emerald-500/20">
                   <Mic className="size-3" /> Call in Session
                 </span>
               )}
@@ -889,7 +889,7 @@ ${code}
                   alt="profile-image"
                   width={120}
                   height={120}
-                  className="rounded-full object-cover size-[120px]"
+                  className="rounded-full object-cover size-[120px] border border-white/10 shadow-lg"
                 />
                 <h3>{userName}</h3>
               </div>
@@ -915,53 +915,61 @@ ${code}
 
           {/* Behavioral STAR Framework Checklist Widget */}
           {callStatus === CallStatus.ACTIVE && (
-            <div className="p-5 bg-dark-200/50 border border-border/50 rounded-2xl flex flex-col gap-4 backdrop-blur-md animate-fadeIn">
-              <div className="flex items-center justify-between border-b border-border/40 pb-2">
-                <h4 className="text-sm font-bold text-primary-100 flex items-center gap-2">
-                  <Sparkles className="size-4 text-primary-200" />
+            <div className="p-6 glass-card border border-white/10 rounded-2xl flex flex-col gap-4 shadow-2xl animate-fadeIn">
+              <div className="flex items-center justify-between border-b border-white/5 pb-3">
+                <h4 className="text-sm font-bold text-gray-200 flex items-center gap-2">
+                  <Sparkles className="size-4 text-violet-400" />
                   Live Behavioral STAR Tracker
                 </h4>
-                <span className="text-[10px] bg-primary-200/20 text-primary-200 font-bold px-2 py-0.5 rounded-full uppercase tracking-wider">STAR Analyzer</span>
+                <span className="text-[10px] bg-violet-500/10 text-violet-400 font-bold px-2 py-0.5 rounded-full uppercase tracking-wider border border-violet-500/20">STAR Analyzer</span>
               </div>
               
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
                 {/* Situation */}
                 <div className={cn(
-                  "p-3 rounded-xl border flex flex-col gap-1 items-center justify-center text-center",
-                  starChecklist.situation ? "bg-success-100/5 border-success-100/30 text-success-100" : "bg-dark-300/40 border-border/40 text-light-400"
+                  "p-3 rounded-xl border flex flex-col gap-1.5 items-center justify-center text-center transition-all duration-300",
+                  starChecklist.situation 
+                    ? "bg-emerald-500/10 border-emerald-500/30 text-emerald-400 shadow-[0_0_15px_rgba(16,185,129,0.1)]" 
+                    : "bg-white/[0.02] border-white/5 text-gray-500"
                 )}>
-                  <CheckCircle2 className={cn("size-5", starChecklist.situation ? "text-success-100" : "text-light-600")} />
-                  <span className="text-xs font-bold mt-1">Situation</span>
+                  <CheckCircle2 className={cn("size-5 transition-colors duration-300", starChecklist.situation ? "text-emerald-400" : "text-gray-600")} />
+                  <span className="text-[10px] font-bold mt-1 uppercase tracking-wide">Situation</span>
                 </div>
                 {/* Task */}
                 <div className={cn(
-                  "p-3 rounded-xl border flex flex-col gap-1 items-center justify-center text-center",
-                  starChecklist.task ? "bg-success-100/5 border-success-100/30 text-success-100" : "bg-dark-300/40 border-border/40 text-light-400"
+                  "p-3 rounded-xl border flex flex-col gap-1.5 items-center justify-center text-center transition-all duration-300",
+                  starChecklist.task 
+                    ? "bg-emerald-500/10 border-emerald-500/30 text-emerald-400 shadow-[0_0_15px_rgba(16,185,129,0.1)]" 
+                    : "bg-white/[0.02] border-white/5 text-gray-500"
                 )}>
-                  <CheckCircle2 className={cn("size-5", starChecklist.task ? "text-success-100" : "text-light-600")} />
-                  <span className="text-xs font-bold mt-1">Task</span>
+                  <CheckCircle2 className={cn("size-5 transition-colors duration-300", starChecklist.task ? "text-emerald-400" : "text-gray-600")} />
+                  <span className="text-[10px] font-bold mt-1 uppercase tracking-wide">Task</span>
                 </div>
                 {/* Action */}
                 <div className={cn(
-                  "p-3 rounded-xl border flex flex-col gap-1 items-center justify-center text-center",
-                  starChecklist.action ? "bg-success-100/5 border-success-100/30 text-success-100" : "bg-dark-300/40 border-border/40 text-light-400"
+                  "p-3 rounded-xl border flex flex-col gap-1.5 items-center justify-center text-center transition-all duration-300",
+                  starChecklist.action 
+                    ? "bg-emerald-500/10 border-emerald-500/30 text-emerald-400 shadow-[0_0_15px_rgba(16,185,129,0.1)]" 
+                    : "bg-white/[0.02] border-white/5 text-gray-500"
                 )}>
-                  <CheckCircle2 className={cn("size-5", starChecklist.action ? "text-success-100" : "text-light-600")} />
-                  <span className="text-xs font-bold mt-1">Action</span>
+                  <CheckCircle2 className={cn("size-5 transition-colors duration-300", starChecklist.action ? "text-emerald-400" : "text-gray-600")} />
+                  <span className="text-[10px] font-bold mt-1 uppercase tracking-wide">Action</span>
                 </div>
                 {/* Result */}
                 <div className={cn(
-                  "p-3 rounded-xl border flex flex-col gap-1 items-center justify-center text-center",
-                  starChecklist.result ? "bg-success-100/5 border-success-100/30 text-success-100" : "bg-dark-300/40 border-border/40 text-light-400"
+                  "p-3 rounded-xl border flex flex-col gap-1.5 items-center justify-center text-center transition-all duration-300",
+                  starChecklist.result 
+                    ? "bg-emerald-500/10 border-emerald-500/30 text-emerald-400 shadow-[0_0_15px_rgba(16,185,129,0.1)]" 
+                    : "bg-white/[0.02] border-white/5 text-gray-500"
                 )}>
-                  <CheckCircle2 className={cn("size-5", starChecklist.result ? "text-success-100" : "text-light-600")} />
-                  <span className="text-xs font-bold mt-1">Result</span>
+                  <CheckCircle2 className={cn("size-5 transition-colors duration-300", starChecklist.result ? "text-emerald-400" : "text-gray-600")} />
+                  <span className="text-[10px] font-bold mt-1 uppercase tracking-wide">Result</span>
                 </div>
               </div>
 
               {/* Warnings and Dynamic Feedback */}
               {starChecklist.result && !starChecklist.hasMetrics && (
-                <div className="bg-destructive-100/10 border border-destructive-100/30 text-destructive-100 rounded-xl p-3 text-xs flex gap-2.5 items-start">
+                <div className="bg-amber-500/10 border border-amber-500/20 text-amber-400 rounded-xl p-3.5 text-xs flex gap-2.5 items-start">
                   <AlertTriangle className="size-4 shrink-0 mt-0.5" />
                   <span>
                     <strong>Missing Result Metrics!</strong> You described an outcome, but forgot to state a quantifiable result (e.g. improved speed by 20%, saved $500). Alex will likely ask a follow-up.
@@ -969,7 +977,7 @@ ${code}
                 </div>
               )}
 
-              <div className="text-xs text-light-400 italic bg-dark-300/40 p-3 rounded-xl border border-border/30">
+              <div className="text-xs text-gray-300 leading-relaxed italic bg-white/[0.02] p-3.5 rounded-xl border border-white/5">
                 <strong>Analysis:</strong> {starChecklist.feedback}
               </div>
             </div>
@@ -978,10 +986,10 @@ ${code}
           {/* Action Trigger Buttons */}
           <div className="w-full flex justify-center mt-2">
             {callStatus !== "ACTIVE" ? (
-              <button className="relative btn-call cursor-pointer flex items-center justify-center" onClick={() => handleCall()}>
+              <button className="relative btn-call cursor-pointer flex items-center justify-center font-bold text-sm bg-emerald-600 hover:bg-emerald-500 hover:shadow-[0_0_20px_rgba(16,185,129,0.4)] text-white px-8 py-3.5 rounded-full transition-all duration-300" onClick={() => handleCall()}>
                 <span
                   className={cn(
-                    "absolute animate-ping rounded-full opacity-75 bg-success-100 h-[85%] w-[65%]",
+                    "absolute animate-ping rounded-full opacity-75 bg-emerald-500 h-[85%] w-[65%]",
                     callStatus !== "CONNECTING" && "hidden"
                   )}
                 />
@@ -990,7 +998,7 @@ ${code}
                 </span>
               </button>
             ) : (
-              <button className="btn-disconnect cursor-pointer flex items-center justify-center gap-1.5" onClick={() => handleDisconnect()}>
+              <button className="btn-disconnect cursor-pointer flex items-center justify-center gap-1.5 font-bold text-sm bg-rose-600 hover:bg-rose-500 hover:shadow-[0_0_20px_rgba(225,29,72,0.4)] text-white px-8 py-3.5 rounded-full transition-all duration-300" onClick={() => handleDisconnect()}>
                 <PhoneOff className="size-4" /> End Interview
               </button>
             )}
@@ -999,52 +1007,57 @@ ${code}
 
         {/* Right Side: Technical Coding Sandbox Editor */}
         {codingProblem && (
-          <div className="lg:col-span-6 flex flex-col gap-5 p-6 bg-dark-200/50 border border-border/50 rounded-2xl backdrop-blur-md w-full">
-            <div className="flex items-center justify-between border-b border-border/40 pb-3">
-              <h3 className="text-lg font-bold text-primary-100 flex items-center gap-2">
-                <Code className="size-5 text-primary-200" />
+          <div className="lg:col-span-6 flex flex-col gap-5 p-6 glass-card rounded-2xl border border-white/10 shadow-2xl w-full">
+            <div className="flex items-center justify-between border-b border-white/5 pb-3">
+              <h3 className="text-base font-bold text-gray-200 flex items-center gap-2">
+                <Code className="size-5 text-violet-400" />
                 Live Technical Sandbox
               </h3>
-              <span className="bg-primary-200/20 text-primary-200 text-xs px-2.5 py-1 rounded-full font-extrabold capitalize">
+              <span className="bg-violet-500/10 border border-violet-500/20 text-violet-400 text-xs px-3 py-1 rounded-full font-bold capitalize">
                 {codingProblem.language}
               </span>
             </div>
 
             {/* Problem Statement Display */}
-            <div className="flex flex-col gap-2 bg-dark-300/55 p-4 rounded-xl border border-border/30 max-h-[160px] overflow-y-auto">
+            <div className="flex flex-col gap-2 bg-white/[0.02] p-4 rounded-xl border border-white/5 max-h-[160px] overflow-y-auto">
               <h4 className="text-sm font-bold text-white flex items-center gap-1.5">
-                <Lightbulb className="size-4 text-primary-200" />
+                <Lightbulb className="size-4 text-amber-400" />
                 {codingProblem.title}
               </h4>
-              <p className="text-xs text-light-100 whitespace-pre-line leading-relaxed">
+              <p className="text-xs text-gray-300 whitespace-pre-line leading-relaxed">
                 {codingProblem.description}
               </p>
             </div>
 
             {/* Code Textarea mimicking IDE */}
             <div className="flex flex-col gap-1 relative">
-              <div className="flex bg-dark-300 px-4 py-2 border border-b-0 border-border/30 rounded-t-xl text-[11px] text-light-400 font-mono flex-row justify-between items-center">
-                <span>sandbox_editor.js</span>
-                <span>Active Editing</span>
+              <div className="flex px-4 py-3 border border-b-0 border-white/8 rounded-t-2xl text-xs text-gray-400 font-mono flex-row justify-between items-center bg-zinc-950/60 backdrop-blur-md">
+                <div className="flex items-center gap-2">
+                  <span className="w-3 h-3 rounded-full bg-rose-500/80 shadow-[0_0_8px_rgba(239,68,68,0.4)]" />
+                  <span className="w-3 h-3 rounded-full bg-amber-500/80 shadow-[0_0_8px_rgba(245,158,11,0.4)]" />
+                  <span className="w-3 h-3 rounded-full bg-emerald-500/80 shadow-[0_0_8px_rgba(16,185,129,0.4)]" />
+                  <span className="ml-2 font-semibold text-gray-300">sandbox_editor.tsx</span>
+                </div>
+                <span className="text-[10px] uppercase font-bold tracking-wider text-violet-400 bg-violet-500/10 px-2.5 py-0.5 rounded border border-violet-500/20">Active IDE</span>
               </div>
               <textarea
                 value={code}
                 onChange={(e) => handleCodeChange(e.target.value)}
-                placeholder="// Type your code solution here..."
-                className="font-mono bg-dark-300 text-sm text-primary-100 border border-t-0 border-border/30 rounded-b-xl p-4 w-full h-[340px] outline-none focus:ring-1 focus:ring-primary-200 resize-none leading-relaxed"
+                placeholder="// Implement your algorithm here... Alex will observe your code logic."
+                className="font-mono bg-black/60 text-sm text-indigo-100 border border-t-0 border-white/8 rounded-b-2xl p-5 w-full h-[360px] outline-none focus:border-violet-500/40 focus:ring-1 focus:ring-violet-500/15 resize-none leading-relaxed shadow-[inset_0_2px_8px_rgba(0,0,0,0.8)] backdrop-blur-sm"
                 disabled={callStatus !== CallStatus.ACTIVE}
               />
 
               {/* Socratic Hint Alerts */}
               {isCodingStuck && callStatus === CallStatus.ACTIVE && (
-                <div className="absolute bottom-4 left-4 right-4 bg-primary-200/10 border border-primary-200/30 text-primary-200 rounded-xl p-3 text-xs flex gap-2.5 items-center justify-between shadow-xl animate-fadeIn backdrop-blur-md">
+                <div className="absolute bottom-4 left-4 right-4 bg-violet-500/10 border border-violet-500/30 text-violet-400 rounded-xl p-3 text-xs flex gap-2.5 items-center justify-between shadow-xl animate-fadeIn backdrop-blur-md">
                   <div className="flex gap-2 items-center">
-                    <Lightbulb className="size-4 animate-bounce shrink-0" />
+                    <Lightbulb className="size-4 animate-bounce shrink-0 text-violet-400" />
                     <span>Stuck? Get a Socratic hint about your implementation.</span>
                   </div>
                   <Button
                     onClick={requestSocraticHint}
-                    className="h-7 text-[10px] font-bold px-2.5 rounded-md bg-primary-200 text-dark-100 hover:bg-primary-200/90 shrink-0"
+                    className="h-7 text-[10px] font-bold px-2.5 rounded-md bg-violet-500 text-white hover:bg-violet-600 shrink-0 border border-violet-400/20"
                   >
                     Get Hint
                   </Button>
@@ -1058,9 +1071,9 @@ ${code}
                 <Button
                   variant="outline"
                   onClick={requestSocraticHint}
-                  className="text-xs font-bold px-4 py-2 h-9 flex items-center gap-1.5 border border-border text-light-100 hover:bg-dark-300"
+                  className="text-xs font-bold px-4 py-2 h-9 flex items-center gap-1.5 border border-white/10 text-gray-300 hover:bg-white/5 hover:text-white transition-all rounded-xl"
                 >
-                  <Sparkles className="size-3.5" /> Request Socratic Hint
+                  <Sparkles className="size-3.5 text-violet-400" /> Request Socratic Hint
                 </Button>
               </div>
             )}

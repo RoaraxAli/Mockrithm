@@ -23,22 +23,21 @@ const Feedback = async ({ params }: RouteParams) => {
   });
 
   return (
-    <section className="section-feedback">
+    <section className="section-feedback animate-fadeIn">
       <div className="flex flex-row justify-center">
-        <h1 className="text-4xl font-semibold">
-          Feedback on the Interview -{" "}
-          <span className="capitalize">{interview.role}</span> Interview
+        <h1 className="text-3xl sm:text-4xl font-black bg-clip-text text-transparent bg-gradient-to-r from-white via-violet-200 to-indigo-300 tracking-tight text-center">
+          Feedback Assessment - <span className="capitalize text-violet-400">{interview.role}</span>
         </h1>
       </div>
 
-      <div className="flex flex-row justify-center ">
-        <div className="flex flex-row gap-5">
+      <div className="flex flex-row justify-center">
+        <div className="flex flex-row gap-6 items-center flex-wrap">
           {/* Overall Impression */}
-          <div className="flex flex-row gap-2 items-center">
-            <Image src="/star.svg" width={22} height={22} alt="star" />
-            <p>
-              Overall Impression:{" "}
-              <span className="text-primary-200 font-bold">
+          <div className="flex flex-row gap-2 items-center bg-white/[0.02] border border-white/5 px-4 py-2 rounded-full">
+            <Image src="/star.svg" width={18} height={18} alt="star" className="filter drop-shadow-[0_0_8px_rgba(250,204,21,0.4)]" />
+            <p className="text-sm font-bold text-gray-300">
+              Overall Rating:{" "}
+              <span className="text-violet-400 font-black">
                 {feedback?.totalScore}
               </span>
               /100
@@ -46,9 +45,9 @@ const Feedback = async ({ params }: RouteParams) => {
           </div>
 
           {/* Date */}
-          <div className="flex flex-row gap-2">
-            <Image src="/calendar.svg" width={22} height={22} alt="calendar" />
-            <p>
+          <div className="flex flex-row gap-2 items-center bg-white/[0.02] border border-white/5 px-4 py-2 rounded-full">
+            <Image src="/calendar.svg" width={18} height={18} alt="calendar" />
+            <p className="text-sm font-bold text-gray-300">
               {feedback?.createdAt
                 ? dayjs(feedback.createdAt).format("MMM D, YYYY h:mm A")
                 : "N/A"}
@@ -57,17 +56,20 @@ const Feedback = async ({ params }: RouteParams) => {
         </div>
       </div>
 
-      <hr />
+      <hr className="border-white/5" />
 
-      <p>{feedback?.finalAssessment}</p>
+      <div className="p-6 glass-card rounded-2xl border border-white/10 shadow-lg bg-white/[0.01]">
+        <h3 className="text-lg font-bold text-gray-200 mb-3">AI Executive Summary</h3>
+        <p className="text-sm text-gray-300 leading-relaxed font-medium">{feedback?.finalAssessment}</p>
+      </div>
 
       {/* Verbal & Pacing Analytics Dashboard */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 bg-dark-200/30 p-6 border border-border/50 rounded-2xl backdrop-blur-md">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 glass-card p-6 border border-white/10 rounded-2xl shadow-xl">
         
         {/* WPM Speed Gauge */}
         <div className="flex flex-col gap-4">
-          <h3 className="text-lg font-bold text-white flex items-center gap-2">
-            <svg className="size-5 text-primary-200" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <h3 className="text-base font-bold text-white flex items-center gap-2">
+            <svg className="size-5 text-violet-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
             </svg>
             Speech Pacing (WPM)
@@ -78,7 +80,7 @@ const Feedback = async ({ params }: RouteParams) => {
             <div className="relative size-24 flex items-center justify-center shrink-0">
               <svg className="size-full transform -rotate-90" viewBox="0 0 36 36">
                 <path
-                  className="stroke-dark-300"
+                  className="stroke-white/[0.04]"
                   strokeWidth="3.5"
                   fill="none"
                   strokeLinecap="round"
@@ -87,10 +89,10 @@ const Feedback = async ({ params }: RouteParams) => {
                 <path
                   className={
                     feedback?.averageWpm && feedback.averageWpm >= 130 && feedback.averageWpm <= 150
-                      ? "stroke-success-100"
+                      ? "stroke-emerald-400"
                       : feedback?.averageWpm && ((feedback.averageWpm >= 110 && feedback.averageWpm < 130) || (feedback.averageWpm > 150 && feedback.averageWpm <= 170))
-                      ? "stroke-primary-200"
-                      : "stroke-destructive-100"
+                      ? "stroke-violet-400"
+                      : "stroke-rose-400"
                   }
                   strokeWidth="3.5"
                   strokeDasharray={`${Math.min(100, Math.round(((feedback?.averageWpm || 0) / 200) * 100))}, 100`}
@@ -101,19 +103,19 @@ const Feedback = async ({ params }: RouteParams) => {
               </svg>
               <div className="absolute flex flex-col items-center justify-center">
                 <span className="text-xl font-black text-white">{feedback?.averageWpm || 0}</span>
-                <span className="text-[9px] text-light-400 font-bold uppercase">WPM</span>
+                <span className="text-[9px] text-gray-400 font-bold uppercase">WPM</span>
               </div>
             </div>
 
             <div className="flex flex-col gap-1.5">
-              <span className="text-xs font-bold text-light-100">
+              <span className="text-xs font-bold text-gray-300">
                 Pacing Score:{" "}
                 <span className={
                   feedback?.averageWpm && feedback.averageWpm >= 130 && feedback.averageWpm <= 150
-                    ? "text-success-100 font-extrabold"
+                    ? "text-emerald-400 font-extrabold"
                     : feedback?.averageWpm && ((feedback.averageWpm >= 110 && feedback.averageWpm < 130) || (feedback.averageWpm > 150 && feedback.averageWpm <= 170))
-                    ? "text-primary-200 font-extrabold"
-                    : "text-destructive-100 font-extrabold"
+                    ? "text-violet-400 font-extrabold"
+                    : "text-rose-400 font-extrabold"
                 }>
                   {feedback?.averageWpm && feedback.averageWpm >= 130 && feedback.averageWpm <= 150
                     ? "Ideal Pace"
@@ -122,7 +124,7 @@ const Feedback = async ({ params }: RouteParams) => {
                     : "Unbalanced Pace"}
                 </span>
               </span>
-              <p className="text-xs text-light-400 leading-relaxed">
+              <p className="text-xs text-gray-400 leading-relaxed font-medium">
                 {feedback?.averageWpm && feedback.averageWpm < 110
                   ? "Your delivery is a bit slow. Express thoughts with more composure and momentum to keep interest."
                   : feedback?.averageWpm && feedback.averageWpm >= 110 && feedback.averageWpm < 130
@@ -138,9 +140,9 @@ const Feedback = async ({ params }: RouteParams) => {
         </div>
 
         {/* Filler Word Counter */}
-        <div className="flex flex-col gap-4 border-t md:border-t-0 md:border-l border-border/40 pt-4 md:pt-0 md:pl-6">
-          <h3 className="text-lg font-bold text-white flex items-center gap-2">
-            <svg className="size-5 text-primary-200" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <div className="flex flex-col gap-4 border-t md:border-t-0 md:border-l border-white/5 pt-4 md:pt-0 md:pl-6">
+          <h3 className="text-base font-bold text-white flex items-center gap-2">
+            <svg className="size-5 text-violet-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z" />
             </svg>
             Filler Words Detected
@@ -152,22 +154,22 @@ const Feedback = async ({ params }: RouteParams) => {
                 feedback.topFillerWords.map((item, index) => (
                   <span
                     key={index}
-                    className="text-xs font-bold px-3 py-1.5 rounded-full bg-destructive-100/10 border border-destructive-100/30 text-destructive-100 capitalize flex items-center gap-1.5"
+                    className="text-xs font-bold px-3 py-1.5 rounded-full bg-rose-500/10 border border-rose-500/20 text-rose-400 capitalize flex items-center gap-1.5"
                   >
                     <span>"{item.word}"</span>
-                    <span className="bg-destructive-200 text-white text-[9px] px-1.5 py-0.5 rounded-full font-black">
+                    <span className="bg-rose-500 text-white text-[9px] px-1.5 py-0.5 rounded-full font-black">
                       {item.count}x
                     </span>
                   </span>
                 ))
               ) : (
-                <span className="text-xs font-bold px-3 py-1.5 rounded-full bg-success-100/10 border border-success-100/30 text-success-100 flex items-center gap-1.5">
+                <span className="text-xs font-bold px-3 py-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 flex items-center gap-1.5">
                   Excellent! No filler words detected.
                 </span>
               )}
             </div>
             
-            <p className="text-xs text-light-400 leading-relaxed mt-1">
+            <p className="text-xs text-gray-400 leading-relaxed mt-1 font-medium">
               Filler words dilute the strength of your arguments. Focus on pausing silently instead of using fillers like "um" or "like" to transition.
             </p>
           </div>
@@ -177,52 +179,66 @@ const Feedback = async ({ params }: RouteParams) => {
 
       {/* Interview Breakdown */}
       <div className="flex flex-col gap-4">
-        <h2>Breakdown of the Interview:</h2>
-        {feedback?.categoryScores?.map((category, index) => (
-          <div key={index}>
-            <p className="font-bold">
-              {index + 1}. {category.name} ({category.score}/100)
-            </p>
-            <p>{category.comment}</p>
-          </div>
-        ))}
+        <h2 className="text-xl font-bold tracking-tight text-white flex items-center gap-2">
+          <span className="h-5 w-1 bg-gradient-to-b from-violet-600 to-indigo-600 rounded-full" />
+          Interview Category Scores
+        </h2>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          {feedback?.categoryScores?.map((category, index) => (
+            <div key={index} className="p-5 bg-white/[0.01] border border-white/5 rounded-2xl flex flex-col gap-2 relative overflow-hidden">
+              <div className="absolute top-0 left-0 w-full h-[2px] bg-gradient-to-r from-violet-600 to-indigo-600 opacity-20" />
+              <div className="flex justify-between items-center text-sm font-bold text-gray-200">
+                <span>{category.name}</span>
+                <span className="text-violet-400 bg-violet-500/10 border border-violet-500/20 px-2.5 py-0.5 rounded-full text-xs font-bold">{category.score}/100</span>
+              </div>
+              <p className="text-xs text-gray-400 leading-relaxed font-medium mt-1">{category.comment}</p>
+            </div>
+          ))}
+        </div>
       </div>
 
-      <div className="flex flex-col gap-3">
-        <h3>Strengths</h3>
-        <ul>
-          {feedback?.strengths?.map((strength, index) => (
-            <li key={index}>{strength}</li>
-          ))}
-        </ul>
-      </div>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="p-6 bg-white/[0.01] border border-white/5 rounded-2xl flex flex-col gap-4">
+          <h3 className="text-lg font-bold text-emerald-400 flex items-center gap-2">
+            <span className="h-2 w-2 rounded-full bg-emerald-400" />
+            Key Strengths
+          </h3>
+          <ul className="space-y-2.5">
+            {feedback?.strengths?.map((strength, index) => (
+              <li key={index} className="text-gray-300 text-sm font-medium flex items-start gap-2 leading-relaxed">
+                <span className="text-emerald-400 font-black">•</span>
+                {strength}
+              </li>
+            ))}
+          </ul>
+        </div>
 
-      <div className="flex flex-col gap-3">
-        <h3>Areas for Improvement</h3>
-        <ul>
-          {feedback?.areasForImprovement?.map((area, index) => (
-            <li key={index}>{area}</li>
-          ))}
-        </ul>
+        <div className="p-6 bg-white/[0.01] border border-white/5 rounded-2xl flex flex-col gap-4">
+          <h3 className="text-lg font-bold text-amber-400 flex items-center gap-2">
+            <span className="h-2 w-2 rounded-full bg-amber-400" />
+            Areas for Improvement
+          </h3>
+          <ul className="space-y-2.5">
+            {feedback?.areasForImprovement?.map((area, index) => (
+              <li key={index} className="text-gray-300 text-sm font-medium flex items-start gap-2 leading-relaxed">
+                <span className="text-amber-400 font-black">•</span>
+                {area}
+              </li>
+            ))}
+          </ul>
+        </div>
       </div>
 
       <div className="buttons">
-        <Button className="btn-secondary flex-1">
-          <Link href="/" className="flex w-full justify-center">
-            <p className="text-sm font-semibold text-primary-200 text-center">
-              Back to dashboard
-            </p>
+        <Button className="btn-secondary flex-1 rounded-full cursor-pointer h-12" asChild>
+          <Link href="/">
+            Back to dashboard
           </Link>
         </Button>
 
-        <Button className="btn-primary flex-1">
-          <Link
-            href={`/interview/${id}`}
-            className="flex w-full justify-center"
-          >
-            <p className="text-sm font-semibold text-black text-center">
-              Retake Interview
-            </p>
+        <Button className="btn-primary flex-1 rounded-full cursor-pointer h-12" asChild>
+          <Link href={`/interview/${id}`}>
+            Retake Interview
           </Link>
         </Button>
       </div>

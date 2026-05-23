@@ -28,43 +28,42 @@ export function InterviewTable({ interviews }: InterviewTableProps) {
   };
 
   return (
-    <div className="border border-gray-200 rounded-lg">
+    <div className="border border-white/5 rounded-2xl bg-zinc-950/20 backdrop-blur-md overflow-hidden shadow-xl animate-fadeIn">
       <Table>
-        <TableHeader>
-          <TableRow className="border-gray-200">
-            <TableHead className="text-white">Role</TableHead>
-            <TableHead className="text-white">Level</TableHead>
-            <TableHead className="text-white">Type</TableHead>
-            <TableHead className="text-white">Status</TableHead>
-            <TableHead className="text-white">Date</TableHead>
+        <TableHeader className="bg-white/[0.02]">
+          <TableRow className="border-white/5 hover:bg-transparent">
+            <TableHead className="text-gray-300 font-bold text-xs uppercase tracking-wider">Role</TableHead>
+            <TableHead className="text-gray-300 font-bold text-xs uppercase tracking-wider">Level</TableHead>
+            <TableHead className="text-gray-300 font-bold text-xs uppercase tracking-wider">Type</TableHead>
+            <TableHead className="text-gray-300 font-bold text-xs uppercase tracking-wider">Status</TableHead>
+            <TableHead className="text-gray-300 font-bold text-xs uppercase tracking-wider">Date</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
           {interviews.map((interview) => (
             <TableRow
               key={interview.id}
-              className="cursor-pointer hover:bg-gray-900 border-gray-200"
+              className="cursor-pointer hover:bg-white/[0.03] border-white/5 transition-colors duration-300"
               onClick={() => router.push(`/user/interviews/${interview.id}`)}
             >
-              <TableCell className="font-medium text-gray-300">
+              <TableCell className="font-semibold text-white capitalize">
                 {interview.role}
               </TableCell>
-              <TableCell className="text-gray-300">{interview.level}</TableCell>
-              <TableCell className="text-gray-300">{interview.type}</TableCell>
+              <TableCell className="text-gray-300 font-medium">{interview.level}</TableCell>
+              <TableCell className="text-gray-300 font-medium">{interview.type}</TableCell>
               <TableCell>
-               <Badge
-  variant={interview.finalized ? "default" : "secondary"}
-  className={
-    interview.finalized
-      ? "bg-black text-white hover:bg-gray-800 border border-white"
-      : "bg-gray-200 text-gray-700 hover:bg-gray-300 border border-rounded border-gray-400"
-  }
->
-  {interview.finalized ? "Completed" : "In Progress"}
-</Badge>
-
+                <Badge
+                  variant={interview.finalized ? "default" : "secondary"}
+                  className={
+                    interview.finalized
+                      ? "bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500/20 border border-emerald-500/30 font-bold"
+                      : "bg-amber-500/10 text-amber-400 hover:bg-amber-500/20 border border-amber-500/30 font-bold"
+                  }
+                >
+                  {interview.finalized ? "Completed" : "In Progress"}
+                </Badge>
               </TableCell>
-              <TableCell className="text-gray-300">
+              <TableCell className="text-gray-400 font-medium">
                 {formatDate(interview.createdAt)}
               </TableCell>
             </TableRow>

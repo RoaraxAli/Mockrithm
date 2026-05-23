@@ -69,12 +69,12 @@ export default function DashboardPage() {
     feedback.length > 0 ? Math.round(feedback.reduce((sum, f) => sum + f.totalScore, 0) / feedback.length) : 0
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-8 animate-fadeIn">
       <div>
-        <h1 className="text-2xl font-bold text-white mb-2 ">
+        <h1 className="text-3xl font-black tracking-tight text-white mb-2">
           Welcome back, {userData?.name || "User"}!
         </h1>
-        <p className="text-gray-400">Here's your interview progress overview</p>
+        <p className="text-sm text-gray-400 font-medium">Here&apos;s your interview portfolio and progress analysis overview.</p>
       </div>
 
       <div className="grid gap-6 md:grid-cols-3">

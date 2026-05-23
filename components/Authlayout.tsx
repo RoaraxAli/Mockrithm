@@ -22,15 +22,15 @@ export default function AuthLayout({
 
   const pathname = usePathname();
 const hideNavbar =
-  pathname.startsWith("/interview/") && pathname !== "/interview" ||
+  (pathname.startsWith("/interview/") && pathname !== "/interview") ||
+  pathname.startsWith("/user") ||
+  pathname.startsWith("/admin") ||
   [
     "/sign-in",
     "/sign-up",
     "/forgot-password",
     "/verify-code",
     "/reset-password",
-    // "/interview", // Let's show it on the main interview selection page if not already hidden
-    "/admin"
   ].includes(pathname);
 
 // If we have an initialUserId (from server) or a userId (from client), use it.

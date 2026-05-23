@@ -123,17 +123,10 @@ const Navbar = ({ userId, userName }: NavbarProps) => {
       <nav
         className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 font-mona-sans ${
           isScrolled
-            ? "bg-black/95 backdrop-blur-md shadow-2xl border-b border-white/20"
-            : "bg-black/80 backdrop-blur-sm"
+            ? "bg-zinc-950/75 backdrop-blur-xl shadow-2xl border-b border-white/10"
+            : "bg-black/50 backdrop-blur-md border-b border-white/5"
         }`}
-        style={{
-          backgroundImage: "url('/pattern.png')",
-          backgroundRepeat: "repeat",
-          backgroundSize: "200px 200px",
-        }}
       >
-        <div className="absolute inset-0 bg-black/90" />
-        <div className="absolute inset-0 opacity-5 bg-[radial-gradient(circle_at_1px_1px,rgba(255,255,255,0.3)_1px,transparent_0)] bg-[length:20px_20px]" />
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 z-10">
           <div className="relative flex items-center h-16 justify-between">
             {/* Logo */}
@@ -143,8 +136,8 @@ const Navbar = ({ userId, userName }: NavbarProps) => {
               aria-label="Mockrithm Home"
             >
               <div className="relative">
-                <div className="absolute inset-0 bg-white rounded-lg blur opacity-10 group-hover:opacity-20 transition-opacity duration-300" />
-                <div className="relative bg-white/10 p-2 rounded-lg border border-white/20 group-hover:border-white/40 transition-colors duration-300 backdrop-blur-sm">
+                <div className="absolute inset-0 bg-violet-500 rounded-lg blur opacity-20 group-hover:opacity-40 transition-opacity duration-300" />
+                <div className="relative bg-white/5 p-2 rounded-lg border border-white/10 group-hover:border-violet-500/30 transition-colors duration-300 backdrop-blur-sm">
                   <Image
                     src="/logo.svg"
                     alt="Mockrithm Logo"
@@ -156,32 +149,32 @@ const Navbar = ({ userId, userName }: NavbarProps) => {
                 </div>
               </div>
               <div className="flex flex-col leading-tight">
-                <span className="text-[17px] font-bold text-white group-hover:text-gray-200 transition-colors duration-300">
+                <span className="text-[16px] font-black tracking-wider text-white group-hover:text-gray-200 transition-colors duration-300">
                   MOCKRITHM
                 </span>
-                <span className="text-[12px] font-medium text-gray-400 group-hover:text-gray-300 transition-colors duration-300">
+                <span className="text-[10px] font-bold tracking-widest text-violet-400 group-hover:text-violet-300 transition-colors duration-300 uppercase">
                   Face the Machine
                 </span>
               </div>
             </Link>
 
             {/* Desktop Nav Links */}
-            <div className="hidden md:flex items-center space-x-4 absolute left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2">
+            <div className="hidden md:flex items-center space-x-2 absolute left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2">
               {navLinks.map((link) => {
                 const isActive = pathname === link.href;
                 return (
                   <Link
                     key={link.href}
                     href={link.href}
-                    className={`group relative px-3 py-2 rounded-lg transition-all duration-300 ${
+                    className={`group relative px-4 py-2 rounded-xl transition-all duration-300 ${
                       isActive
-                        ? "text-white bg-white/10"
-                        : "text-gray-300 hover:text-white"
+                        ? "text-white bg-white/5 border border-white/10 shadow-[0_0_15px_rgba(124,58,237,0.1)]"
+                        : "text-gray-300 hover:text-white hover:bg-white/5"
                     }`}
                   >
-                    <span className="text-sm">{link.label}</span>
+                    <span className="text-sm font-semibold tracking-wide">{link.label}</span>
                     <span
-                      className={`absolute left-1/2 -translate-x-1/2 bottom-0 h-[2px] w-full bg-white transition-transform duration-300 origin-center ${
+                      className={`absolute left-1/2 -translate-x-1/2 bottom-0 h-[2px] w-1/2 bg-gradient-to-r from-violet-500 to-indigo-500 transition-transform duration-300 origin-center ${
                         isActive
                           ? "scale-x-100"
                           : "scale-x-0 group-hover:scale-x-100"
@@ -197,7 +190,7 @@ const Navbar = ({ userId, userName }: NavbarProps) => {
               {!userId ? (
                 <Link
                   href="/sign-in"
-                  className="px-6 py-2 rounded-full bg-white text-black text-sm font-bold hover:bg-gray-200 transition-all duration-300"
+                  className="px-6 py-2 rounded-full bg-gradient-to-r from-violet-600 to-indigo-600 text-white text-sm font-bold hover:from-violet-500 hover:to-indigo-500 hover:shadow-[0_0_15px_rgba(124,58,237,0.4)] transition-all duration-300"
                 >
                   Sign In
                 </Link>
@@ -205,51 +198,51 @@ const Navbar = ({ userId, userName }: NavbarProps) => {
                 <div className="relative dropdown-container">
                   <button
                     onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-                    className="group flex items-center space-x-2 px-4 py-2 rounded-lg bg-white/10 hover:bg-white/20 border border-white/20 hover:border-white/40 text-gray-300 hover:text-white transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-white/50 backdrop-blur-sm"
+                    className="group flex items-center space-x-2 px-4 py-2 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 hover:border-violet-500/30 text-gray-300 hover:text-white transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-violet-500/50 backdrop-blur-sm cursor-pointer"
                   >
                     <div className="flex items-center space-x-2">
-                      <div className="w-6 h-6 bg-white rounded-full flex items-center justify-center">
-                        <User className="w-4 h-4 text-black" />
+                      <div className="w-6 h-6 bg-gradient-to-tr from-violet-600 to-indigo-600 rounded-full flex items-center justify-center border border-white/10">
+                        <User className="w-3.5 h-3.5 text-white" />
                       </div>
-                      <span className="text-sm max-w-24 truncate">
+                      <span className="text-sm font-semibold max-w-24 truncate">
                         {userName}
                       </span>
                     </div>
                     <ChevronDown
-                      className={`w-4 h-4 transition-transform duration-300 ${
+                      className={`w-4 h-4 transition-transform duration-300 text-violet-400 group-hover:text-white ${
                         isDropdownOpen ? "rotate-180" : "rotate-0"
                       }`}
                     />
                   </button>
 
                   {isDropdownOpen && (
-                    <div className="absolute right-0 mt-2 w-56 bg-black/95 backdrop-blur-md rounded-xl shadow-2xl border border-white/20 py-2 z-10 animate-in slide-in-from-top-2 duration-200">
+                    <div className="absolute right-0 mt-2 w-56 bg-zinc-950/90 backdrop-blur-xl rounded-2xl shadow-2xl border border-white/10 py-2.5 z-10 animate-in fade-in slide-in-from-top-2 duration-200">
                       {/* User Info */}
-                      <div className="px-4 py-3 border-b border-white/20">
-                        <p className="text-sm font-medium text-white">
+                      <div className="px-4 py-3 border-b border-white/5">
+                        <p className="text-sm font-bold text-white">
                           {userName}
                         </p>
-                        <p className="text-xs text-gray-400 truncate">{userId}</p>
+                        <p className="text-xs text-violet-400 truncate">{userId}</p>
                       </div>
 
                       {isAdmin ? (
                         // Admin only → Admin Panel
                         <Link
                           href="/admin"
-                          className="group flex items-center space-x-3 w-full px-4 py-3 text-sm text-gray-300 hover:text-white hover:bg-white/10 transition-all duration-200"
+                          className="group flex items-center space-x-3 w-full px-4 py-3 text-sm text-gray-300 hover:text-white hover:bg-white/5 transition-all duration-200"
                         >
-                          <Home className="w-4 h-4 group-hover:scale-110 transition-transform duration-200" />
-                          <span>Admin Panel</span>
+                          <Home className="w-4 h-4 text-violet-400 group-hover:scale-110 transition-transform duration-200" />
+                          <span className="font-medium">Admin Panel</span>
                         </Link>
                       ) : (
                         <>
                           {/* User Panel */}
                           <Link
                             href="/user"
-                            className="group flex items-center space-x-3 w-full px-4 py-3 text-sm text-gray-300 hover:text-white hover:bg-white/10 transition-all duration-200"
+                            className="group flex items-center space-x-3 w-full px-4 py-3 text-sm text-gray-300 hover:text-white hover:bg-white/5 transition-all duration-200"
                           >
-                            <User className="w-4 h-4 group-hover:scale-110 transition-transform duration-200" />
-                            <span>User Panel</span>
+                            <User className="w-4 h-4 text-violet-400 group-hover:scale-110 transition-transform duration-200" />
+                            <span className="font-medium">User Panel</span>
                           </Link>
 
                           {/* Sign Out */}
@@ -258,10 +251,10 @@ const Navbar = ({ userId, userName }: NavbarProps) => {
                               handleLogout();
                               setIsDropdownOpen(false);
                             }}
-                            className="group flex items-center space-x-3 w-full px-4 py-3 text-sm text-gray-300 hover:text-white hover:bg-white/10 transition-all duration-200"
+                            className="group flex items-center space-x-3 w-full px-4 py-3 text-sm text-gray-300 hover:text-white hover:bg-white/5 transition-all duration-200 cursor-pointer"
                           >
-                            <LogOut className="w-4 h-4 group-hover:scale-110 transition-transform duration-200" />
-                            <span>Sign Out</span>
+                            <LogOut className="w-4 h-4 text-rose-500 group-hover:scale-110 transition-transform duration-200" />
+                            <span className="font-medium">Sign Out</span>
                           </button>
                         </>
                       )}

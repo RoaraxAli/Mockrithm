@@ -38,60 +38,63 @@ const InterviewCard = async ({
   ).format("MMM D, YYYY");
 
   return (
-    <div className="card-border w-[360px] max-sm:w-full min-h-96">
-      <div className="card-interview">
+    <div className="w-[360px] max-sm:w-full min-h-96 relative flex items-stretch">
+      <div className="card-interview flex-1">
         <div>
           {/* Type Badge */}
           <div
             className={cn(
-              "absolute top-0 right-0 w-fit px-4 py-2 rounded-bl-lg",
+              "absolute top-0 right-0 w-fit px-4 py-1.5 rounded-bl-xl text-[10px] font-bold uppercase tracking-wider text-white",
               badgeColor
             )}
           >
-            <p className="badge-text ">{normalizedType}</p>
+            {normalizedType}
           </div>
 
           {/* Cover Image */}
-          <Image
-            src={getRandomInterviewCover()}
-            alt="cover-image"
-            width={90}
-            height={90}
-            className="rounded-full object-fit size-[90px]"
-          />
+          <div className="relative w-fit">
+            <div className="absolute inset-0 bg-violet-500 rounded-full blur opacity-15" />
+            <Image
+              src={getRandomInterviewCover()}
+              alt="cover-image"
+              width={80}
+              height={80}
+              className="rounded-full object-cover size-[80px] border border-white/10 relative"
+            />
+          </div>
 
           {/* Interview Role */}
-          <h3 className="mt-5 capitalize">{role} Interview</h3>
+          <h3 className="mt-5 capitalize text-lg font-bold text-white tracking-wide">{role} Interview</h3>
 
           {/* Date & Score */}
-          <div className="flex flex-row gap-5 mt-3">
-            <div className="flex flex-row gap-2">
+          <div className="flex flex-row gap-3 mt-4 items-center flex-wrap">
+            <div className="flex flex-row gap-1.5 items-center bg-white/[0.03] border border-white/5 px-3 py-1 rounded-full">
               <Image
                 src="/calendar.svg"
-                width={22}
-                height={22}
+                width={14}
+                height={14}
                 alt="calendar"
               />
-              <p>{formattedDate}</p>
+              <p className="text-xs text-gray-300 font-semibold">{formattedDate}</p>
             </div>
 
-            <div className="flex flex-row gap-2 items-center">
-              <Image src="/star.svg" width={22} height={22} alt="star" />
-              <p>{feedback?.totalScore || "---"}/100</p>
+            <div className="flex flex-row gap-1.5 items-center bg-white/[0.03] border border-white/5 px-3 py-1 rounded-full">
+              <Image src="/star.svg" width={14} height={14} alt="star" />
+              <p className="text-xs text-gray-300 font-semibold">{feedback?.totalScore ? `${feedback.totalScore}/100` : "---/100"}</p>
             </div>
           </div>
 
           {/* Feedback or Placeholder Text */}
-          <p className="line-clamp-2 mt-5">
+          <p className="line-clamp-2 mt-5 text-xs text-gray-400 font-medium leading-relaxed">
             {feedback?.finalAssessment ||
-              "You haven't taken this interview yet. Take it now to improve your skills."}
+              "You haven't taken this mock interview yet. Challenge yourself now to practice."}
           </p>
         </div>
 
-        <div className="flex flex-row justify-between">
+        <div className="flex flex-row justify-between items-center mt-6 pt-4 border-t border-white/5">
           <DisplayTechIcons techStack={techstack} />
 
-          <Button className="btn-primary">
+          <Button className="btn-primary text-xs" asChild>
             <Link
               href={
                 feedback
@@ -99,7 +102,7 @@ const InterviewCard = async ({
                   : `/interview/${interviewId}`
               }
             >
-              {feedback ? "Check Feedback" : "View Interview"}
+              {feedback ? "Review Analytics" : "Start Session"}
             </Link>
           </Button>
         </div>

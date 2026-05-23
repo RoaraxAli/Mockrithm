@@ -101,67 +101,69 @@ export default function ProfilePage() {
   }
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
+    <div className="space-y-8 animate-fadeIn">
+      <div className="flex items-center justify-between flex-wrap gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-white mb-2">Profile</h1>
-          <p className="text-gray-200">Manage your account information</p>
+          <h1 className="text-3xl font-black text-white mb-1">Profile Settings</h1>
+          <p className="text-sm text-gray-400 font-medium">Manage and configure your personal account details.</p>
         </div>
         <ProfileForm user={userData} onUpdate={handleUserUpdate} />
       </div>
 
-      <Card className="max-w-2xl border-gray-200">
+      <Card className="max-w-2xl glass-card rounded-2xl border border-white/10 shadow-xl relative overflow-hidden">
+        <div className="absolute top-0 left-0 w-full h-[2px] bg-gradient-to-r from-violet-600 to-indigo-600 opacity-20" />
         <CardHeader>
-          <CardTitle className="text-white flex items-center">
-            <UserIcon className="mr-2 h-5 w-5" />
+          <CardTitle className="text-base font-bold text-gray-200 flex items-center">
+            <UserIcon className="mr-2.5 h-5 w-5 text-violet-400" />
             Personal Information
           </CardTitle>
         </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="flex items-center justify-between py-2">
-            <span className="text-white">Name:</span>
-            <span className="font-medium text-white">{userData.name}</span>
+        <CardContent className="space-y-4 text-sm font-medium">
+          <div className="flex items-center justify-between py-2 border-b border-white/5">
+            <span className="text-gray-400">Full Name:</span>
+            <span className="text-white font-semibold">{userData.name}</span>
           </div>
 
-          <div className="flex items-center justify-between py-2">
-            <span className="text-white">Email:</span>
-            <span className="font-medium text-white flex items-center">
-              <Mail className="mr-2 h-4 w-4" />
+          <div className="flex items-center justify-between py-2 border-b border-white/5">
+            <span className="text-gray-400">Email Address:</span>
+            <span className="text-white font-semibold flex items-center">
+              <Mail className="mr-2 h-4 w-4 text-violet-400" />
               {userData.email}
             </span>
           </div>
 
-          <div className="flex items-center justify-between py-2">
-            <span className="text-white">Role:</span>
-<span className="font-medium text-white">{userData?.role || "User"}</span>
+          <div className="flex items-center justify-between py-2 border-b border-white/5">
+            <span className="text-gray-400">System Role:</span>
+            <span className="text-white font-semibold capitalize">{userData?.role || "User"}</span>
           </div>
 
           {userData.resumeLink && (
-            <div className="flex items-center justify-between py-2">
-              <span className="text-gray-600">Resume:</span>
+            <div className="flex items-center justify-between py-2 border-b border-white/5">
+              <span className="text-gray-400">Optimized Resume:</span>
               <a
                 href={userData.resumeLink}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="font-medium text-black hover:text-gray-700 flex items-center"
+                className="text-violet-400 hover:text-violet-300 flex items-center transition-colors"
               >
                 <ExternalLink className="mr-2 h-4 w-4" />
-                View Resume
+                View Document
               </a>
             </div>
           )}
         </CardContent>
       </Card>
 
-      <div className="pt-6 border-t border-gray-700">
-        <div className="bg-red-500/10 border border-red-500/20 rounded-xl p-6">
-          <h3 className="text-lg font-semibold text-white mb-2">Danger Zone</h3>
-          <p className="text-gray-400 text-sm mb-4">
-            Once you delete your account, there is no going back. Please be certain.
+      <div className="pt-6 border-t border-white/5">
+        <div className="bg-rose-500/5 border border-rose-500/20 rounded-2xl p-6 relative overflow-hidden">
+          <div className="absolute top-0 left-0 w-full h-[2px] bg-rose-500 opacity-20" />
+          <h3 className="text-base font-bold text-white mb-2">Danger Zone</h3>
+          <p className="text-gray-400 text-xs mb-4 font-medium leading-relaxed">
+            Deleting your profile deletes all previous mock interview sessions, saved resumes, and audio analytics. This is irreversible.
           </p>
           <button
             onClick={handleDeleteAccount}
-            className="flex items-center gap-2 px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-colors font-medium shadow-lg shadow-red-600/20"
+            className="flex items-center gap-2 px-5 py-2.5 bg-rose-600 hover:bg-rose-500 text-white rounded-full transition-all font-bold text-xs shadow-lg hover:shadow-rose-600/20 active:scale-95 cursor-pointer"
           >
             <Trash2 className="w-4 h-4" />
             Delete Account

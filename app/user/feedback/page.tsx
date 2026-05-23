@@ -36,20 +36,20 @@ export default function FeedbackPage() {
 
   if (loading) {
     return (
-      <div className="space-y-6">
+      <div className="space-y-8 bg-black">
         <div>
-          <h1 className="text-2xl font-bold text-white mb-2">Feedback Overview</h1>
-          <p className="text-gray-200">Your aggregated interview feedback and performance</p>
+          <h1 className="text-3xl font-black text-white mb-1">Feedback Analytics</h1>
+          <p className="text-sm text-gray-400 font-medium">Your aggregated interview feedback and performance metrics</p>
         </div>
         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
           {[...Array(6)].map((_, i) => (
-            <Card key={i} className="border-gray-200">
-              <CardHeader>
-                <Skeleton className="h-4 w-24 bg-gray-200" />
+            <Card key={i} className="glass-card rounded-2xl">
+              <CardHeader className="pb-2">
+                <Skeleton className="h-4 w-24 bg-zinc-800" />
               </CardHeader>
               <CardContent>
-                <Skeleton className="h-8 w-16 bg-gray-200 mb-2" />
-                <Skeleton className="h-2 w-full bg-gray-200" />
+                <Skeleton className="h-8 w-16 bg-zinc-800 mb-3" />
+                <Skeleton className="h-2 w-full bg-zinc-800" />
               </CardContent>
             </Card>
           ))}
@@ -60,22 +60,22 @@ export default function FeedbackPage() {
 
   if (error) {
     return (
-      <Alert className="border-red-200 bg-red-50">
-        <AlertDescription className="text-red-700">{error}</AlertDescription>
+      <Alert className="border-red-500/20 bg-red-500/10 text-red-400 rounded-2xl">
+        <AlertDescription className="text-red-400 font-medium">{error}</AlertDescription>
       </Alert>
     )
   }
 
   if (feedback.length === 0) {
     return (
-      <div className="space-y-6">
+      <div className="space-y-8">
         <div>
-          <h1 className="text-2xl font-bold text-white mb-2">Feedback Overview</h1>
-          <p className="text-gray-200">Your aggregated interview feedback and performance</p>
+          <h1 className="text-3xl font-black text-white mb-1">Feedback Analytics</h1>
+          <p className="text-sm text-gray-400 font-medium font-medium">Your aggregated interview feedback and performance metrics</p>
         </div>
-        <div className="text-center py-12">
-          <p className="text-gray-200 mb-4">No feedback available yet</p>
-          <p className="text-sm text-gray-400">Complete your first interview to see feedback here</p>
+        <div className="text-center py-16 glass-card rounded-2xl border border-white/5">
+          <p className="text-gray-400 mb-2 font-medium">No feedback assessments available yet.</p>
+          <p className="text-xs text-gray-500">Complete your first mock interview to view analytics here.</p>
         </div>
       </div>
     )
@@ -131,11 +131,13 @@ export default function FeedbackPage() {
     .map(([improvement]) => improvement)
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-8 animate-fadeIn">
       <div>
-        <h1 className="text-2xl font-bold text-white mb-2">Feedback Overview</h1>
-        <p className="text-gray-300">
-          Aggregated feedback from {feedback.length} interview{feedback.length === 1 ? "" : "s"}
+        <h1 className="text-3xl font-black text-white mb-1">
+          Feedback Analytics
+        </h1>
+        <p className="text-sm text-gray-400 font-medium font-medium">
+          Aggregated competency analysis and metrics from {feedback.length} interview{feedback.length === 1 ? "" : "s"}
         </p>
       </div>
 
@@ -151,18 +153,24 @@ export default function FeedbackPage() {
       </div>
 
       <div className="grid gap-6 md:grid-cols-2">
-        <Card className="border-gray-200">
+        <Card className="glass-card rounded-2xl border border-white/10 shadow-xl relative overflow-hidden">
+          <div className="absolute top-0 left-0 w-full h-[2px] bg-emerald-500 opacity-25" />
           <CardHeader>
-            <CardTitle className="text-white">Top Strengths</CardTitle>
+            <CardTitle className="text-base font-bold text-emerald-400 flex items-center gap-2">
+              <span className="h-2.5 w-2.5 rounded-full bg-emerald-400" />
+              Key Strengths
+            </CardTitle>
           </CardHeader>
           <CardContent>
-            <ul className="space-y-2">
+            <ul className="space-y-3">
               {topStrengths.map((strength, index) => (
-                <li key={index} className="text-gray-200 flex items-start">
-                  <span className="text-green-600 mr-2">•</span>
-                  {strength}
+                <li key={index} className="text-gray-200 text-sm font-medium flex items-start gap-2 leading-relaxed">
+                  <span className="text-emerald-400 font-black">•</span>
+                  <span>{strength}</span>
                   {strengthCounts[strength] > 1 && (
-                    <span className="ml-2 text-xs text-gray-500">({strengthCounts[strength]}x)</span>
+                    <span className="ml-1 text-[10px] bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 px-1.5 py-0.5 rounded font-black">
+                      {strengthCounts[strength]}x
+                    </span>
                   )}
                 </li>
               ))}
@@ -170,18 +178,24 @@ export default function FeedbackPage() {
           </CardContent>
         </Card>
 
-        <Card className="border-gray-200">
+        <Card className="glass-card rounded-2xl border border-white/10 shadow-xl relative overflow-hidden">
+          <div className="absolute top-0 left-0 w-full h-[2px] bg-amber-500 opacity-25" />
           <CardHeader>
-            <CardTitle className="text-white">Areas to Focus On</CardTitle>
+            <CardTitle className="text-base font-bold text-amber-400 flex items-center gap-2">
+              <span className="h-2.5 w-2.5 rounded-full bg-amber-400" />
+              Areas to Focus On
+            </CardTitle>
           </CardHeader>
           <CardContent>
-            <ul className="space-y-2">
+            <ul className="space-y-3">
               {topImprovements.map((improvement, index) => (
-                <li key={index} className="text-gray-200 flex items-start">
-                  <span className="text-orange-600 mr-2">•</span>
-                  {improvement}
+                <li key={index} className="text-gray-200 text-sm font-medium flex items-start gap-2 leading-relaxed">
+                  <span className="text-amber-400 font-black">•</span>
+                  <span>{improvement}</span>
                   {improvementCounts[improvement] > 1 && (
-                    <span className="ml-2 text-xs text-gray-500">({improvementCounts[improvement]}x)</span>
+                    <span className="ml-1 text-[10px] bg-amber-500/10 text-amber-400 border border-amber-500/20 px-1.5 py-0.5 rounded font-black">
+                      {improvementCounts[improvement]}x
+                    </span>
                   )}
                 </li>
               ))}
@@ -190,17 +204,18 @@ export default function FeedbackPage() {
         </Card>
       </div>
 
-      <Card className="border-gray-200">
+      <Card className="glass-card rounded-2xl border border-white/10 shadow-xl relative overflow-hidden">
+        <div className="absolute top-0 left-0 w-full h-[2px] bg-gradient-to-r from-violet-600 to-indigo-600 opacity-20" />
         <CardHeader>
-          <CardTitle className="text-white">Recent Assessments</CardTitle>
+          <CardTitle className="text-base font-bold text-gray-200">Recent Assessments</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="space-y-4">
+          <div className="space-y-5">
             {feedback.slice(0, 3).map((fb, index) => (
-              <div key={fb.id} className="border-b border-gray-200 pb-4 last:border-b-0">
+              <div key={fb.id} className="border-b border-white/5 pb-4 last:border-b-0 last:pb-0">
                 <div className="flex items-center justify-between mb-2">
-                  <span className="font-medium text-white">Interview #{feedback.length - index}</span>
-                  <span className="text-sm text-gray-200">
+                  <span className="font-semibold text-gray-200">Interview Session #{feedback.length - index}</span>
+                  <span className="text-xs text-gray-400 font-medium">
                     {new Intl.DateTimeFormat("en-US", {
                       month: "short",
                       day: "numeric",
@@ -208,7 +223,7 @@ export default function FeedbackPage() {
                     }).format(fb.createdAt)}
                   </span>
                 </div>
-                <p className="text-gray-400 text-sm leading-relaxed">{fb.finalAssessment}</p>
+                <p className="text-gray-400 text-xs leading-relaxed font-medium">{fb.finalAssessment}</p>
               </div>
             ))}
           </div>

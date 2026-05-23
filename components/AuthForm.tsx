@@ -139,14 +139,17 @@ const AuthForm = ({ type }: { type: FormType }) => {
   const isSignIn = type === "sign-in";
 
   return (
-    <div className="card-border lg:min-w-[566px]">
-      <div className="flex flex-col gap-6 card py-8 px-10">
-        <div className="flex flex-row gap-2 justify-center">
-          <Image src="/logo.svg" alt="logo" height={32} width={38} />
-          <h2 className="text-primary-100">Mockrithm</h2>
+    <div className="border border-white/10 p-0.5 rounded-3xl lg:min-w-[500px] shadow-2xl relative overflow-hidden bg-white/[0.015] backdrop-blur-xl">
+      <div className="absolute top-0 left-0 w-full h-[3px] bg-gradient-to-r from-violet-600 via-indigo-600 to-indigo-500" />
+      <div className="flex flex-col gap-6 py-10 px-10 bg-transparent">
+        <div className="flex flex-col items-center gap-3">
+          <div className="bg-white/5 p-2.5 rounded-xl border border-white/10 shadow-lg">
+            <Image src="/logo.svg" alt="logo" height={36} width={36} />
+          </div>
+          <h2 className="text-2xl font-black text-white tracking-wide bg-clip-text text-transparent bg-gradient-to-r from-white via-violet-200 to-indigo-300 uppercase">Mockrithm</h2>
         </div>
 
-        <h3 className="text-center">Practice job interviews with AI</h3>
+        <h3 className="text-center text-sm font-semibold text-gray-400">Practice job interviews with conversational AI</h3>
 
         <Form {...form}>
           <form
@@ -181,7 +184,7 @@ const AuthForm = ({ type }: { type: FormType }) => {
                 <button
                   type="button"
                   onClick={() => setShowPassword((prev) => !prev)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 cursor-pointer"
                   aria-label={showPassword ? "Hide password" : "Show password"}
                   tabIndex={-1}
                 >
@@ -193,16 +196,17 @@ const AuthForm = ({ type }: { type: FormType }) => {
                 </button>
               }
             />
-{isSignIn && (
-  <div className="text-sm text-right">
-    <Link
-      href="/forgot-password"
-      className="text-user-primary hover:underline"
-    >
-      Forgot Password?
-    </Link>
-  </div>
-)}            <Button className="btn" type="submit" disabled={form.formState.isSubmitting}>
+            {isSignIn && (
+              <div className="text-sm text-right">
+                <Link
+                  href="/forgot-password"
+                  className="text-violet-400 hover:text-violet-300 font-bold transition-colors"
+                >
+                  Forgot Password?
+                </Link>
+              </div>
+            )}
+            <Button className="btn" type="submit" disabled={form.formState.isSubmitting}>
               {form.formState.isSubmitting ? (
                 <div className="flex items-center gap-2">
                   <Loader2 className="animate-spin h-5 w-5" />
@@ -215,11 +219,11 @@ const AuthForm = ({ type }: { type: FormType }) => {
           </form>
         </Form>
 
-        <p className="text-center">
+        <p className="text-center text-sm text-gray-400">
           {isSignIn ? "No account yet?" : "Have an account already?"}
           <Link
             href={!isSignIn ? "/sign-in" : "/sign-up"}
-            className="font-bold text-user-primary ml-1"
+            className="text-violet-400 hover:text-violet-300 font-bold ml-1 transition-colors"
           >
             {!isSignIn ? "Sign In" : "Sign Up"}
           </Link>

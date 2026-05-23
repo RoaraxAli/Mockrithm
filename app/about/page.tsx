@@ -162,16 +162,9 @@ export default function AboutPage() {
   }
 
   return (
-    <div
-      className="min-h-screen bg-black text-white relative overflow-hidden"
-      style={{
-        backgroundImage: "url('/pattern.png')",
-        backgroundRepeat: "repeat",
-        backgroundSize: "400px 400px",
-      }}
-    >
+    <div className="min-h-screen bg-transparent text-white relative overflow-hidden">
       {/* Dark overlay to ensure readability */}
-      <div className="absolute inset-0 bg-black/80" />
+      <div className="absolute inset-0 bg-black/55" />
 
       {/* Animated background elements */}
       <div className="absolute inset-0 opacity-20">
