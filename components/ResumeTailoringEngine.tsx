@@ -4,8 +4,10 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { 
   FileText, Sparkles, CheckCircle2, XCircle, AlertCircle, 
-  ArrowRight, Copy, Check, Loader2, RefreshCw, Briefcase, Code, Award 
+  ArrowRight, Copy, Check, Loader2, RefreshCw, Briefcase, Code, Award,
+  Cpu, Terminal, ArrowLeft
 } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 
@@ -31,8 +33,8 @@ export default function ResumeTailoringEngine({
 }) {
   const router = useRouter();
   
-  // Tabs
-  const [activeTab, setActiveTab] = useState<"input" | "report">("input");
+  // Wizard Steps: 1 = Resume Setup, 2 = Job Description, 3 = Match Diagnosis Report
+  const [currentStep, setCurrentStep] = useState<1 | 2 | 3>(1);
   const [resumeMode, setResumeMode] = useState<"paste" | "build">("paste");
 
   // Inputs
@@ -83,22 +85,43 @@ export default function ResumeTailoringEngine({
     `.trim();
   };
 
-  // Call the ATS Analysis API
-  const handleAnalyze = async () => {
+  // Check validation for Step 1
+  const validateStep1 = () => {
     setError(null);
     const content = getCombinedResumeText();
-    
     if (!content.trim()) {
-      setError("Please paste your resume or build it using the form.");
-      return;
+      setError("Please paste your resume narrative or build it using the form.");
+      return false;
     }
-    
+    return true;
+  };
+
+  // Check validation for Step 2
+  const validateStep2 = () => {
+    setError(null);
     if (!jobDescription.trim()) {
-      setError("Please provide a target job description to match against.");
-      return;
+      setError("Please provide the job requirements description to match against.");
+      return false;
     }
+    return true;
+  };
+
+  // Go to Step 2
+  const handleGoToStep2 = () => {
+    if (validateStep1()) {
+      setCurrentStep(2);
+    }
+  };
+
+  // Call the ATS Analysis API & Advance to Step 3
+  const handleAnalyze = async () => {
+    setError(null);
+    if (!validateStep1()) return;
+    if (!validateStep2()) return;
 
     setIsAnalyzing(true);
+    const content = getCombinedResumeText();
+    
     try {
       const response = await fetch("/api/resume/analyze", {
         method: "POST",
@@ -115,7 +138,7 @@ export default function ResumeTailoringEngine({
 
       const data = await response.json();
       setAnalysis(data);
-      setActiveTab("report");
+      setCurrentStep(3);
     } catch (err: any) {
       setError(err.message || "An error occurred during analysis.");
     } finally {
@@ -143,7 +166,6 @@ export default function ResumeTailoringEngine({
       level = builderLevel;
       techstack = builderTechStack || builderSkills || "React, Node, TypeScript";
     } else {
-      // For pasted text, attempt to infer from ATS suggestions or default
       role = builderTitle || "Software Engineer";
       level = builderLevel;
       techstack = builderTechStack || "React, Node, TypeScript";
@@ -188,7 +210,6 @@ export default function ResumeTailoringEngine({
   };
 
   const applyBulletSuggestion = (suggested: string, index: number) => {
-    // If build mode, append or replace
     if (resumeMode === "build") {
       setBuilderExperience((prev) => prev + "\n- " + suggested);
     } else {
@@ -198,504 +219,652 @@ export default function ResumeTailoringEngine({
   };
 
   return (
-    <div className="w-full max-w-5xl mx-auto flex flex-col gap-6 animate-fadeIn">
+    <div className="w-full max-w-5xl mx-auto flex flex-col gap-8 font-mona-sans">
       
-      {/* Navigation Tabs */}
-      <div className="flex border-b border-white/5 items-center justify-between">
-        <div className="flex gap-4">
-          <button
-            onClick={() => setActiveTab("input")}
+      {/* High-Tech Cockpit Steppers Guide Header */}
+      <div className="w-full backdrop-blur-md bg-slate-950/40 border border-slate-900 rounded-2xl p-6 shadow-xl relative overflow-hidden flex flex-col md:flex-row md:items-center justify-between gap-6">
+        <div className="absolute top-0 left-0 w-full h-[1px] bg-slate-800" />
+        
+        <div className="flex flex-col gap-1">
+          <span className="text-[9px] font-mono tracking-[0.2em] text-slate-500 uppercase">INTELLIGENT PIPELINE</span>
+          <h2 className="text-xl font-bold font-mono tracking-wide text-white flex items-center gap-2">
+            <Cpu className="size-5 text-cyan-400 animate-pulse" />
+            ATS CONTEXT ENGINE
+          </h2>
+        </div>
+
+        {/* The 3 Stepper Dials */}
+        <div className="flex items-center gap-2.5 sm:gap-6 font-mono text-[10px] sm:text-xs">
+          {/* Step 1 */}
+          <div 
+            onClick={() => currentStep > 1 && setCurrentStep(1)}
             className={cn(
-              "py-3.5 px-4 text-sm font-bold transition-all border-b-2 cursor-pointer",
-              activeTab === "input" 
-                ? "border-violet-500 text-violet-400" 
-                : "border-transparent text-gray-400 hover:text-white"
+              "flex items-center gap-2 transition-all duration-300",
+              currentStep === 1 ? "text-cyan-400 font-bold" : currentStep > 1 ? "text-emerald-400 cursor-pointer hover:text-emerald-300" : "text-slate-600"
             )}
           >
-            1. Resume & Job Setup
-          </button>
-          {analysis && (
-            <button
-              onClick={() => setActiveTab("report")}
-              className={cn(
-                "py-3.5 px-4 text-sm font-bold transition-all border-b-2 cursor-pointer flex items-center gap-2",
-                activeTab === "report" 
-                  ? "border-violet-500 text-violet-400" 
-                  : "border-transparent text-gray-400 hover:text-white"
-              )}
-            >
-              2. ATS Tailoring Report
-              <span className="bg-violet-500/10 text-violet-400 border border-violet-500/20 text-xs px-2.5 py-0.5 rounded-full font-bold">
-                {analysis.atsScore}% Match
-              </span>
-            </button>
-          )}
-        </div>
-        
-        {analysis && activeTab === "input" && (
-          <button
-            onClick={() => setActiveTab("report")}
-            className="text-xs font-bold text-violet-400 hover:text-white flex items-center gap-1 cursor-pointer transition-colors"
+            <span className={cn(
+              "size-6 rounded-full flex items-center justify-center border font-bold text-[9px] transition-all duration-300",
+              currentStep === 1 
+                ? "border-cyan-500/50 bg-cyan-950/40 text-cyan-400 shadow-[0_0_12px_rgba(6,182,212,0.2)]" 
+                : currentStep > 1 ? "border-emerald-500/50 bg-emerald-950/30 text-emerald-400" : "border-slate-800 text-slate-600"
+            )}>
+              {currentStep > 1 ? "✓" : "01"}
+            </span>
+            <span className="hidden sm:inline">SETUP</span>
+          </div>
+
+          <div className="w-6 h-[1px] bg-slate-800" />
+
+          {/* Step 2 */}
+          <div 
+            onClick={() => currentStep > 2 && setCurrentStep(2)}
+            className={cn(
+              "flex items-center gap-2 transition-all duration-300",
+              currentStep === 2 ? "text-cyan-400 font-bold" : currentStep > 2 ? "text-emerald-400 cursor-pointer hover:text-emerald-300" : "text-slate-600"
+            )}
           >
-            View Tailoring Report <ArrowRight className="size-3.5" />
-          </button>
-        )}
+            <span className={cn(
+              "size-6 rounded-full flex items-center justify-center border font-bold text-[9px] transition-all duration-300",
+              currentStep === 2 
+                ? "border-cyan-500/50 bg-cyan-950/40 text-cyan-400 shadow-[0_0_12px_rgba(6,182,212,0.2)]" 
+                : currentStep > 2 ? "border-emerald-500/50 bg-emerald-950/30 text-emerald-400" : "border-slate-800 text-slate-600"
+            )}>
+              {currentStep > 2 ? "✓" : "02"}
+            </span>
+            <span className="hidden sm:inline">TARGETS</span>
+          </div>
+
+          <div className="w-6 h-[1px] bg-slate-800" />
+
+          {/* Step 3 */}
+          <div 
+            className={cn(
+              "flex items-center gap-2 transition-all duration-300",
+              currentStep === 3 ? "text-cyan-400 font-bold" : "text-slate-600"
+            )}
+          >
+            <span className={cn(
+              "size-6 rounded-full flex items-center justify-center border font-bold text-[9px] transition-all duration-300",
+              currentStep === 3 
+                ? "border-cyan-500/50 bg-cyan-950/40 text-cyan-400 shadow-[0_0_12px_rgba(6,182,212,0.2)]" 
+                : "border-slate-800 text-slate-600"
+            )}>
+              03
+            </span>
+            <span className="hidden sm:inline">MATCH</span>
+          </div>
+        </div>
       </div>
 
-      {error && (
-        <div className="bg-rose-500/10 border border-rose-500/20 text-rose-400 rounded-2xl p-4 text-sm flex gap-3 items-start animate-fadeIn">
-          <AlertCircle className="size-5 shrink-0 mt-0.5" />
-          <span>{error}</span>
-        </div>
-      )}
+      {/* Error Output Screen */}
+      <AnimatePresence mode="wait">
+        {error && (
+          <motion.div 
+            initial={{ opacity: 0, y: -5 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0 }}
+            className="bg-rose-950/30 border border-rose-500/30 text-rose-400 rounded-xl p-4 text-xs flex gap-3 items-start font-mono shadow-lg"
+          >
+            <AlertCircle className="size-5 shrink-0 mt-0.5" />
+            <span className="font-semibold leading-relaxed">
+              <strong className="uppercase">VALIDATION_ERROR // </strong> {error}
+            </span>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
-      {/* Input Setup Tab */}
-      {activeTab === "input" && (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-start">
-          
-          {/* Resume Source Panel */}
-          <div className="flex flex-col gap-5 p-6 glass-card rounded-2xl border border-white/10 shadow-2xl">
-            <div className="flex items-center justify-between">
-              <h3 className="text-base font-bold text-gray-200 flex items-center gap-2">
-                <FileText className="size-5 text-violet-400" />
-                Resume Portfolio
-              </h3>
-              <div className="flex bg-zinc-900 p-0.5 rounded-xl border border-white/5 text-xs font-bold">
-                <button
-                  onClick={() => handleModeChange("paste")}
-                  className={cn(
-                    "px-3 py-1.5 rounded-lg cursor-pointer transition-all",
-                    resumeMode === "paste" ? "bg-white/5 text-violet-400 shadow-sm" : "text-gray-400"
-                  )}
-                >
-                  Quick Paste
-                </button>
-                <button
-                  onClick={() => handleModeChange("build")}
-                  className={cn(
-                    "px-3 py-1.5 rounded-lg cursor-pointer transition-all",
-                    resumeMode === "build" ? "bg-white/5 text-violet-400 shadow-sm" : "text-gray-400"
-                  )}
-                >
-                  Build Custom
-                </button>
-              </div>
-            </div>
-
-            {resumeMode === "paste" ? (
-              <div className="flex flex-col gap-4">
-                <p className="text-xs text-gray-400 font-medium leading-relaxed">
-                  Paste the full text of your current resume (e.g., from a Word document or PDF) below.
-                </p>
-                <div className="flex flex-col gap-2">
-                  <label className="text-xs font-bold text-gray-300 uppercase tracking-wide">Target Role Title</label>
-                  <input
-                    type="text"
-                    value={builderTitle}
-                    onChange={(e) => setBuilderTitle(e.target.value)}
-                    placeholder="e.g. Frontend Engineer, Product Manager"
-                    className="bg-white/[0.02] text-white text-sm rounded-xl p-3 border border-white/10 focus:border-violet-500/50 focus:ring-1 focus:ring-violet-500/20 outline-none placeholder:text-gray-600 transition-colors"
-                  />
-                </div>
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="flex flex-col gap-2">
-                    <label className="text-xs font-bold text-gray-300 uppercase tracking-wide">Experience Level</label>
-                    <select
-                      value={builderLevel}
-                      onChange={(e) => setBuilderLevel(e.target.value)}
-                      className="bg-white/[0.02] text-white text-sm rounded-xl p-3 border border-white/10 focus:border-violet-500/50 focus:ring-1 focus:ring-violet-500/20 outline-none cursor-pointer hover:bg-white/5 transition-colors"
-                    >
-                      <option value="Intern">Intern</option>
-                      <option value="Junior">Junior</option>
-                      <option value="Mid-level">Mid-level</option>
-                      <option value="Senior">Senior</option>
-                      <option value="Lead / Manager">Lead / Manager</option>
-                    </select>
-                  </div>
-                  <div className="flex flex-col gap-2">
-                    <label className="text-xs font-bold text-gray-300 uppercase tracking-wide">Tech Stack</label>
-                    <input
-                      type="text"
-                      value={builderTechStack}
-                      onChange={(e) => setBuilderTechStack(e.target.value)}
-                      placeholder="e.g. React, Next.js, Node.js"
-                      className="bg-white/[0.02] text-white text-sm rounded-xl p-3 border border-white/10 focus:border-violet-500/50 focus:ring-1 focus:ring-violet-500/20 outline-none placeholder:text-gray-600 transition-colors"
-                    />
-                  </div>
-                </div>
-                <div className="flex flex-col gap-2">
-                  <label className="text-xs font-bold text-gray-300 uppercase tracking-wide">Resume Content Text</label>
-                  <textarea
-                    value={resumeText}
-                    onChange={(e) => setResumeText(e.target.value)}
-                    placeholder="Paste details of your resume here: profile description, experiences, projects, skills..."
-                    rows={12}
-                    className="bg-white/[0.02] text-indigo-100 text-sm rounded-xl p-3.5 border border-white/10 focus:border-violet-500/50 focus:ring-1 focus:ring-violet-500/20 outline-none resize-none placeholder:text-gray-600 font-mono"
-                  />
+      {/* Active Step Panel rendering */}
+      <div className="w-full">
+        {currentStep === 1 && (
+          <motion.div 
+            initial={{ opacity: 0, y: 15 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="grid grid-cols-1 md:grid-cols-12 gap-8 items-start"
+          >
+            {/* Left Resume Entry Portal */}
+            <div className="md:col-span-8 p-6 backdrop-blur-xl bg-slate-950/70 border border-slate-800 rounded-2xl flex flex-col gap-5 shadow-[0_0_50px_rgba(0,0,0,0.8)] relative overflow-hidden group">
+              {/* Corner Indicators */}
+              <div className="absolute top-3 left-3 w-2.5 h-2.5 border-t border-l border-slate-700" />
+              <div className="absolute top-3 right-3 w-2.5 h-2.5 border-t border-r border-slate-700" />
+              <div className="absolute bottom-3 left-3 w-2.5 h-2.5 border-b border-l border-slate-700" />
+              <div className="absolute bottom-3 right-3 w-2.5 h-2.5 border-b border-r border-slate-700" />
+              
+              <div className="flex items-center justify-between">
+                <h3 className="text-[11px] font-mono font-bold text-slate-300 tracking-[0.2em] uppercase flex items-center gap-2">
+                  <FileText className="size-4.5 text-cyan-400" />
+                  RESUME DATA SOURCE
+                </h3>
+                
+                {/* Custom Toggle Mode */}
+                <div className="flex bg-slate-950 p-0.5 rounded-lg border border-slate-900 text-[9px] font-mono font-bold uppercase tracking-wider shadow-inner">
+                  <button
+                    onClick={() => handleModeChange("paste")}
+                    className={cn(
+                      "px-3 py-1.5 rounded cursor-pointer transition-all",
+                      resumeMode === "paste" ? "bg-cyan-500 text-slate-950 font-extrabold shadow" : "text-slate-400 hover:text-slate-200"
+                    )}
+                  >
+                    Quick Paste
+                  </button>
+                  <button
+                    onClick={() => handleModeChange("build")}
+                    className={cn(
+                      "px-3 py-1.5 rounded cursor-pointer transition-all",
+                      resumeMode === "build" ? "bg-cyan-500 text-slate-950 font-extrabold shadow" : "text-slate-400 hover:text-slate-200"
+                    )}
+                  >
+                    Form Builder
+                  </button>
                 </div>
               </div>
-            ) : (
-              <div className="flex flex-col gap-4 animate-fadeIn">
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div className="flex flex-col gap-1.5">
-                    <label className="text-xs font-bold text-gray-300 uppercase tracking-wide flex items-center gap-1">
-                      <Briefcase className="size-3.5 text-violet-400" /> Target Role Title
-                    </label>
+
+              {resumeMode === "paste" ? (
+                <div className="flex flex-col gap-4 animate-fadeIn">
+                  <p className="text-xs text-slate-400 leading-relaxed font-semibold">
+                    Paste the raw details of your current curriculum vitae (work history, competencies, metrics) below to load the context.
+                  </p>
+                  
+                  <div className="flex flex-col gap-1.5 font-mono text-[10px]">
+                    <label className="text-slate-500 uppercase tracking-widest">// TARGET_TITLE</label>
                     <input
                       type="text"
                       value={builderTitle}
                       onChange={(e) => setBuilderTitle(e.target.value)}
-                      placeholder="e.g. Senior React Developer"
-                      className="bg-white/[0.02] text-white text-sm rounded-xl p-3 border border-white/10 focus:border-violet-500/50 focus:ring-1 focus:ring-violet-500/20 outline-none placeholder:text-gray-600 transition-colors"
+                      placeholder="e.g. Senior Frontend Developer"
+                      className="bg-slate-950/80 text-white text-xs rounded-lg p-3 border border-slate-800 focus:border-cyan-500/40 focus:ring-1 focus:ring-cyan-500/10 outline-none placeholder:text-slate-700 transition-all font-semibold"
                     />
                   </div>
-                  <div className="flex flex-col gap-1.5">
-                    <label className="text-xs font-bold text-gray-300 uppercase tracking-wide">Experience Level</label>
-                    <select
-                      value={builderLevel}
-                      onChange={(e) => setBuilderLevel(e.target.value)}
-                      className="bg-white/[0.02] text-white text-sm rounded-xl p-3 border border-white/10 focus:border-violet-500/50 focus:ring-1 focus:ring-violet-500/20 outline-none cursor-pointer hover:bg-white/5 transition-colors"
-                    >
-                      <option value="Intern">Intern</option>
-                      <option value="Junior">Junior</option>
-                      <option value="Mid-level">Mid-level</option>
-                      <option value="Senior">Senior</option>
-                      <option value="Lead / Manager">Lead / Manager</option>
-                    </select>
+                  
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div className="flex flex-col gap-1.5 font-mono text-[10px]">
+                      <label className="text-slate-500 uppercase tracking-widest">// TARGET_LEVEL</label>
+                      <select
+                        value={builderLevel}
+                        onChange={(e) => setBuilderLevel(e.target.value)}
+                        className="bg-slate-950 text-white text-xs rounded-lg p-3 border border-slate-800 focus:border-cyan-500/40 focus:ring-1 focus:ring-cyan-500/10 outline-none cursor-pointer hover:bg-slate-900 transition-all font-bold"
+                      >
+                        <option value="Intern">Intern</option>
+                        <option value="Junior">Junior</option>
+                        <option value="Mid-level">Mid-level</option>
+                        <option value="Senior">Senior</option>
+                        <option value="Lead / Manager">Lead / Manager</option>
+                      </select>
+                    </div>
+                    
+                    <div className="flex flex-col gap-1.5 font-mono text-[10px]">
+                      <label className="text-slate-500 uppercase tracking-widest">// TECH_STACK</label>
+                      <input
+                        type="text"
+                        value={builderTechStack}
+                        onChange={(e) => setBuilderTechStack(e.target.value)}
+                        placeholder="e.g. Next.js, React, Node.js"
+                        className="bg-slate-950/80 text-white text-xs rounded-lg p-3 border border-slate-800 focus:border-cyan-500/40 focus:ring-1 focus:ring-cyan-500/10 outline-none placeholder:text-slate-700 transition-all font-semibold"
+                      />
+                    </div>
                   </div>
-                </div>
-
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div className="flex flex-col gap-1.5">
-                    <label className="text-xs font-bold text-gray-300 uppercase tracking-wide flex items-center gap-1">
-                      <Code className="size-3.5 text-violet-400" /> Tech Stack
-                    </label>
-                    <input
-                      type="text"
-                      value={builderTechStack}
-                      onChange={(e) => setBuilderTechStack(e.target.value)}
-                      placeholder="e.g. Next.js, TypeScript, Tailwind"
-                      className="bg-white/[0.02] text-white text-sm rounded-xl p-3 border border-white/10 focus:border-violet-500/50 focus:ring-1 focus:ring-violet-500/20 outline-none placeholder:text-gray-600 transition-colors"
+                  
+                  <div className="flex flex-col gap-1.5 font-mono text-[10px]">
+                    <label className="text-slate-500 uppercase tracking-widest">// RAW_CURRICULUM_VITAE_PASTE</label>
+                    <textarea
+                      value={resumeText}
+                      onChange={(e) => setResumeText(e.target.value)}
+                      placeholder="Paste narrative of experiences, achievements, and core metrics here..."
+                      rows={12}
+                      className="bg-slate-950/80 text-cyan-100 text-xs rounded-lg p-3.5 border border-slate-800 focus:border-cyan-500/40 focus:ring-1 focus:ring-cyan-500/10 outline-none resize-none placeholder:text-slate-700 leading-relaxed font-mono"
                     />
                   </div>
-                  <div className="flex flex-col gap-1.5">
-                    <label className="text-xs font-bold text-gray-300 uppercase tracking-wide flex items-center gap-1">
-                      <Award className="size-3.5 text-violet-400" /> Core Skills
-                    </label>
-                    <input
-                      type="text"
-                      value={builderSkills}
-                      onChange={(e) => setBuilderSkills(e.target.value)}
-                      placeholder="e.g. System Design, REST APIs, Git"
-                      className="bg-white/[0.02] text-white text-sm rounded-xl p-3 border border-white/10 focus:border-violet-500/50 focus:ring-1 focus:ring-violet-500/20 outline-none placeholder:text-gray-600 transition-colors"
-                    />
-                  </div>
                 </div>
-
-                <div className="flex flex-col gap-1.5">
-                  <label className="text-xs font-bold text-gray-300 uppercase tracking-wide">Experience (with Bullet Points)</label>
-                  <textarea
-                    value={builderExperience}
-                    onChange={(e) => setBuilderExperience(e.target.value)}
-                    placeholder="Company - Role - Duration&#10;- Built a SaaS dashboard utilizing Next.js, reducing load times by 20%.&#10;- Coordinated a team of 4 engineers to deliver an analytics pipeline..."
-                    rows={6}
-                    className="bg-white/[0.02] text-white text-sm rounded-xl p-3.5 border border-white/10 focus:border-violet-500/50 focus:ring-1 focus:ring-violet-500/20 outline-none resize-none placeholder:text-gray-600 font-mono"
-                  />
-                </div>
-
-                <div className="flex flex-col gap-1.5">
-                  <label className="text-xs font-bold text-gray-300 uppercase tracking-wide">Key Projects</label>
-                  <textarea
-                    value={builderProjects}
-                    onChange={(e) => setBuilderProjects(e.target.value)}
-                    placeholder="Project 1: E-commerce Platform&#10;- Designed shopping cart API with Express and PostgreSQL.&#10;- Optimized queries, boosting response speeds."
-                    rows={4}
-                    className="bg-white/[0.02] text-white text-sm rounded-xl p-3.5 border border-white/10 focus:border-violet-500/50 focus:ring-1 focus:ring-violet-500/20 outline-none resize-none placeholder:text-gray-600 font-mono"
-                  />
-                </div>
-              </div>
-            )}
-          </div>
-
-          {/* Job Description & Match Trigger Panel */}
-          <div className="flex flex-col gap-6 w-full">
-            <div className="flex flex-col gap-5 p-6 glass-card rounded-2xl border border-white/10 shadow-2xl">
-              <h3 className="text-base font-bold text-gray-200 flex items-center gap-2">
-                <Sparkles className="size-5 text-violet-400" />
-                Target Job Description
-              </h3>
-              <p className="text-xs text-gray-400 font-medium leading-relaxed">
-                Paste the job description of the role you are applying to. Our ATS Engine will analyze keywords and rephrase points to match.
-              </p>
-              <textarea
-                value={jobDescription}
-                onChange={(e) => setJobDescription(e.target.value)}
-                placeholder="Paste the target job description here. Include key requirements, tech stack, and responsibilities."
-                rows={14}
-                className="bg-white/[0.02] text-white text-sm rounded-xl p-3.5 border border-white/10 focus:border-violet-500/50 focus:ring-1 focus:ring-violet-500/20 outline-none resize-none placeholder:text-gray-600 transition-colors font-mono"
-              />
-            </div>
-
-            <button
-              onClick={handleAnalyze}
-              disabled={isAnalyzing}
-              className={cn(
-                "w-full flex items-center justify-center gap-2 min-h-12 py-3.5 px-6 rounded-full font-bold text-white bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-500 hover:to-indigo-500 hover:shadow-[0_0_20px_rgba(124,58,237,0.4)] active:scale-[0.98] transition-all cursor-pointer shadow-lg",
-                isAnalyzing && "opacity-75 cursor-not-allowed"
-              )}
-            >
-              {isAnalyzing ? (
-                <>
-                  <Loader2 className="size-5 animate-spin" />
-                  Analyzing Resume against ATS filters...
-                </>
               ) : (
-                <>
-                  <Sparkles className="size-5" />
-                  Analyze & Tailor Resume
-                </>
+                <div className="flex flex-col gap-4 animate-fadeIn">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div className="flex flex-col gap-1.5 font-mono text-[10px]">
+                      <label className="text-slate-500 uppercase tracking-widest flex items-center gap-1">
+                        <Briefcase className="size-3.5 text-cyan-400" /> Target Job Title
+                      </label>
+                      <input
+                        type="text"
+                        value={builderTitle}
+                        onChange={(e) => setBuilderTitle(e.target.value)}
+                        placeholder="e.g. React Lead"
+                        className="bg-slate-950/80 text-white text-xs rounded-lg p-3 border border-slate-800 focus:border-cyan-500/40 focus:ring-1 focus:ring-cyan-500/10 outline-none placeholder:text-slate-700 transition-all font-semibold"
+                      />
+                    </div>
+                    <div className="flex flex-col gap-1.5 font-mono text-[10px]">
+                      <label className="text-slate-500 uppercase tracking-widest">Experience Level</label>
+                      <select
+                        value={builderLevel}
+                        onChange={(e) => setBuilderLevel(e.target.value)}
+                        className="bg-slate-950 text-white text-xs rounded-lg p-3 border border-slate-800 focus:border-cyan-500/40 focus:ring-1 focus:ring-cyan-500/10 outline-none cursor-pointer hover:bg-slate-900 transition-all font-bold"
+                      >
+                        <option value="Intern">Intern</option>
+                        <option value="Junior">Junior</option>
+                        <option value="Mid-level">Mid-level</option>
+                        <option value="Senior">Senior</option>
+                        <option value="Lead / Manager">Lead / Manager</option>
+                      </select>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div className="flex flex-col gap-1.5 font-mono text-[10px]">
+                      <label className="text-slate-500 uppercase tracking-widest flex items-center gap-1">
+                        <Code className="size-3.5 text-cyan-400" /> Tech Stack
+                      </label>
+                      <input
+                        type="text"
+                        value={builderTechStack}
+                        onChange={(e) => setBuilderTechStack(e.target.value)}
+                        placeholder="e.g. React, Next.js, Go"
+                        className="bg-slate-950/80 text-white text-xs rounded-lg p-3 border border-slate-800 focus:border-cyan-500/40 focus:ring-1 focus:ring-cyan-500/10 outline-none placeholder:text-slate-700 transition-all font-semibold"
+                      />
+                    </div>
+                    <div className="flex flex-col gap-1.5 font-mono text-[10px]">
+                      <label className="text-slate-500 uppercase tracking-widest flex items-center gap-1">
+                        <Award className="size-3.5 text-cyan-400" /> Core Competencies
+                      </label>
+                      <input
+                        type="text"
+                        value={builderSkills}
+                        onChange={(e) => setBuilderSkills(e.target.value)}
+                        placeholder="e.g. AWS Cloud, API Architectures"
+                        className="bg-slate-950/80 text-white text-xs rounded-lg p-3 border border-slate-800 focus:border-cyan-500/40 focus:ring-1 focus:ring-cyan-500/10 outline-none placeholder:text-slate-700 transition-all font-semibold"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="flex flex-col gap-1.5 font-mono text-[10px]">
+                    <label className="text-slate-500 uppercase tracking-widest">Professional History (Bullet Points)</label>
+                    <textarea
+                      value={builderExperience}
+                      onChange={(e) => setBuilderExperience(e.target.value)}
+                      placeholder="Company | Role | Timeline&#10;- Designed responsive dashboards leading to 35% performance speeds.&#10;- Refactored high-traffic APIs..."
+                      rows={6}
+                      className="bg-slate-950/80 text-white text-xs rounded-lg p-3.5 border border-slate-800 focus:border-cyan-500/40 focus:ring-1 focus:ring-cyan-500/10 outline-none resize-none placeholder:text-slate-700 leading-relaxed font-mono"
+                    />
+                  </div>
+
+                  <div className="flex flex-col gap-1.5 font-mono text-[10px]">
+                    <label className="text-slate-500 uppercase tracking-widest">Key Projects</label>
+                    <textarea
+                      value={builderProjects}
+                      onChange={(e) => setBuilderProjects(e.target.value)}
+                      placeholder="Project Title&#10;- Designed high-performance server architectures.&#10;- Integrated payment gateways..."
+                      rows={4}
+                      className="bg-slate-950/80 text-white text-xs rounded-lg p-3.5 border border-slate-800 focus:border-cyan-500/40 focus:ring-1 focus:ring-cyan-500/10 outline-none resize-none placeholder:text-slate-700 leading-relaxed font-mono"
+                    />
+                  </div>
+                </div>
               )}
-            </button>
-          </div>
-        </div>
-      )}
-
-      {/* ATS Tailoring Report Tab */}
-      {activeTab === "report" && analysis && (
-        <div className="flex flex-col gap-8 animate-fadeIn">
-          
-          {/* Top Score Dashboard */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            
-            {/* ATS Score Card */}
-            <div className="md:col-span-1 p-6 glass-card rounded-2xl border border-white/10 shadow-2xl flex flex-col items-center justify-center text-center gap-4">
-              <h4 className="text-xs font-bold text-gray-400 uppercase tracking-wider">ATS Score</h4>
-              <div className="relative size-36 flex items-center justify-center">
-                
-                {/* SVG Radial Progress with Neon Glow */}
-                <svg className="size-full transform -rotate-90 drop-shadow-[0_0_8px_rgba(139,92,246,0.3)]" viewBox="0 0 100 100">
-                  <circle
-                    cx="50"
-                    cy="50"
-                    r="40"
-                    className="stroke-white/[0.04]"
-                    strokeWidth="8"
-                    fill="transparent"
-                  />
-                  {/* Glowing Blur Backing */}
-                  <circle
-                    cx="50"
-                    cy="50"
-                    r="40"
-                    className={cn(
-                      "transition-all duration-1000 ease-out opacity-40 blur-[2px]",
-                      analysis.atsScore >= 80 ? "stroke-emerald-400" : analysis.atsScore >= 60 ? "stroke-violet-400" : "stroke-rose-400"
-                    )}
-                    strokeWidth="8"
-                    fill="transparent"
-                    strokeDasharray="251.2"
-                    strokeDashoffset={251.2 - (251.2 * analysis.atsScore) / 100}
-                    strokeLinecap="round"
-                  />
-                  {/* Crisp Front Ring */}
-                  <circle
-                    cx="50"
-                    cy="50"
-                    r="40"
-                    className={cn(
-                      "transition-all duration-1000 ease-out",
-                      analysis.atsScore >= 80 ? "stroke-emerald-400" : analysis.atsScore >= 60 ? "stroke-violet-400" : "stroke-rose-400"
-                    )}
-                    strokeWidth="8"
-                    fill="transparent"
-                    strokeDasharray="251.2"
-                    strokeDashoffset={251.2 - (251.2 * analysis.atsScore) / 100}
-                    strokeLinecap="round"
-                  />
-                </svg>
-                <div className="absolute text-3xl font-black text-white">
-                  {analysis.atsScore}%
-                </div>
-              </div>
-              <div className="flex flex-col gap-1">
-                <span className={cn(
-                  "text-xs font-bold px-3 py-1 rounded-full border",
-                  analysis.atsScore >= 80 
-                    ? "bg-emerald-500/10 border-emerald-500/20 text-emerald-400" 
-                    : analysis.atsScore >= 60 
-                    ? "bg-violet-500/10 border-violet-500/20 text-violet-400" 
-                    : "bg-rose-500/10 border-rose-500/20 text-rose-400"
-                )}>
-                  {analysis.atsScore >= 80 ? "High Match Readiness" : analysis.atsScore >= 60 ? "Moderate Match" : "Needs Optimization"}
-                </span>
-                <span className="text-[10px] text-gray-400 mt-1 font-semibold">Recommended target: 80%+ match rate</span>
-              </div>
             </div>
 
-            {/* Keyword Match Stats Card */}
-            <div className="md:col-span-2 p-6 glass-card rounded-2xl border border-white/10 shadow-2xl flex flex-col gap-4">
-              <h4 className="text-xs font-bold text-gray-400 uppercase tracking-wider flex items-center gap-1.5">
-                <Code className="size-4 text-violet-400" /> Keywords Alignment Tracker
-              </h4>
+            {/* Right Guide Panel */}
+            <div className="md:col-span-4 flex flex-col gap-6">
+              <div className="p-6 backdrop-blur-xl bg-slate-950/40 border border-slate-900 rounded-2xl flex flex-col gap-4 shadow-xl">
+                <span className="text-[8px] font-mono tracking-widest text-cyan-400 uppercase">// COGNITIVE_ADVISOR</span>
+                <h4 className="text-xs font-mono font-bold text-white uppercase tracking-wider">Step 1 Instructions</h4>
+                <p className="text-xs text-slate-400 leading-relaxed font-semibold">
+                  Provide your professional profile details. Pasting or compiling active experience metrics allows the ATS context engine to measure keyword overlaps.
+                </p>
+                <div className="border-t border-slate-900 pt-3 flex flex-col gap-2.5 text-[11px] font-mono text-slate-500">
+                  <div className="flex items-center gap-2">
+                    <span className="w-1.5 h-1.5 rounded-full bg-cyan-400" />
+                    <span>Paste complete bullets</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <span className="w-1.5 h-1.5 rounded-full bg-cyan-400" />
+                    <span>Define specific level</span>
+                  </div>
+                </div>
+              </div>
+
+              <Button
+                onClick={handleGoToStep2}
+                className="w-full h-12 rounded-lg bg-cyan-500 text-slate-950 hover:bg-cyan-400 hover:shadow-[0_0_20px_rgba(6,182,212,0.4)] flex items-center justify-center gap-2 font-mono font-bold text-xs uppercase tracking-wider"
+              >
+                PROCEED TO TARGETS <ArrowRight className="size-4" />
+              </Button>
+            </div>
+          </motion.div>
+        )}
+
+        {/* Step 2 Panel: Targets & Analysis */}
+        {currentStep === 2 && (
+          <motion.div 
+            initial={{ opacity: 0, y: 15 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="grid grid-cols-1 md:grid-cols-12 gap-8 items-start"
+          >
+            {/* Target Job Requirements Text Input */}
+            <div className="md:col-span-8 p-6 backdrop-blur-xl bg-slate-950/70 border border-slate-800 rounded-2xl flex flex-col gap-5 shadow-[0_0_50px_rgba(0,0,0,0.8)] relative overflow-hidden group">
+              <div className="absolute top-3 left-3 w-2.5 h-2.5 border-t border-l border-slate-700" />
+              <div className="absolute top-3 right-3 w-2.5 h-2.5 border-t border-r border-slate-700" />
+              <div className="absolute bottom-3 left-3 w-2.5 h-2.5 border-b border-l border-slate-700" />
+              <div className="absolute bottom-3 right-3 w-2.5 h-2.5 border-b border-r border-slate-700" />
               
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 h-full overflow-y-auto max-h-[170px] pr-2">
-                {/* Matched Keywords */}
-                <div className="flex flex-col gap-2.5">
-                  <span className="text-xs font-bold text-emerald-400 flex items-center gap-1.5">
-                    <CheckCircle2 className="size-4 shrink-0" />
-                    Matched ({analysis.matchedKeywords.length})
-                  </span>
-                  <div className="flex flex-wrap gap-1.5">
-                    {analysis.matchedKeywords.length > 0 ? (
-                      analysis.matchedKeywords.map((kw, i) => (
-                        <span key={i} className="text-xs font-bold px-2.5 py-1.5 bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 rounded-lg">
-                          {kw}
-                        </span>
-                      ))
-                    ) : (
-                      <span className="text-xs text-gray-500">No matching keywords found.</span>
-                    )}
-                  </div>
-                </div>
-
-                {/* Missing Keywords */}
-                <div className="flex flex-col gap-2.5">
-                  <span className="text-xs font-bold text-rose-400 flex items-center gap-1.5">
-                    <XCircle className="size-4 shrink-0" />
-                    Missing ({analysis.missingKeywords.length})
-                  </span>
-                  <div className="flex flex-wrap gap-1.5">
-                    {analysis.missingKeywords.length > 0 ? (
-                      analysis.missingKeywords.map((kw, i) => (
-                        <span key={i} className="text-xs font-bold px-2.5 py-1.5 bg-rose-500/10 border border-rose-500/20 text-rose-400 rounded-lg">
-                          {kw}
-                        </span>
-                      ))
-                    ) : (
-                      <span className="text-xs text-emerald-400">Excellent! No missing key skills found.</span>
-                    )}
-                  </div>
-                </div>
+              <h3 className="text-[11px] font-mono font-bold text-slate-300 tracking-[0.2em] uppercase flex items-center gap-2">
+                <Terminal className="size-4.5 text-cyan-400 animate-pulse" />
+                JOB DESCRIPTION REQUIREMENTS
+              </h3>
+              
+              <p className="text-xs text-slate-400 leading-relaxed font-semibold">
+                Paste the targets description, qualifications, or exact hiring requirements to execute the matching algorithms.
+              </p>
+              
+              <div className="flex flex-col gap-1.5 font-mono text-[10px] relative">
+                <label className="text-slate-500 uppercase tracking-widest">// TARGET_SPEC_METRICS</label>
+                <textarea
+                  value={jobDescription}
+                  onChange={(e) => setJobDescription(e.target.value)}
+                  placeholder="Paste complete hiring requirements, qualifications, and core developer competencies..."
+                  rows={14}
+                  className="bg-slate-950/80 text-cyan-100 text-xs rounded-lg p-3.5 border border-slate-800 focus:border-cyan-500/40 focus:ring-1 focus:ring-cyan-500/10 outline-none resize-none placeholder:text-slate-700 leading-relaxed font-mono"
+                />
               </div>
             </div>
 
-          </div>
+            {/* Back & Submit Navigation Right Deck */}
+            <div className="md:col-span-4 flex flex-col gap-4">
+              <div className="p-6 backdrop-blur-xl bg-slate-950/40 border border-slate-900 rounded-2xl flex flex-col gap-4 shadow-xl">
+                <span className="text-[8px] font-mono tracking-widest text-cyan-400 uppercase">// TARGETS_ALIGNED</span>
+                <h4 className="text-xs font-mono font-bold text-white uppercase tracking-wider">Parameters Seeding</h4>
+                <p className="text-xs text-slate-400 leading-relaxed font-semibold">
+                  Once requirements are mapped, click the matching analyzer. The engine will run a lexical keyword alignment diagnosis.
+                </p>
+              </div>
 
-          {/* Bullet Point Suggestion Rephrasing List */}
-          <div className="flex flex-col gap-4">
-            <div className="flex items-center justify-between border-b border-white/5 pb-2">
-              <h3 className="text-base font-bold text-gray-200 flex items-center gap-2">
-                <Sparkles className="size-5 text-violet-400" />
-                ATS Rephrasing Recommendations (STAR Format)
-              </h3>
-              <span className="text-[10px] uppercase font-bold tracking-wider text-gray-400">Suggests keywords + results structure</span>
+              <div className="flex flex-col gap-3">
+                <button
+                  onClick={handleAnalyze}
+                  disabled={isAnalyzing}
+                  className={cn(
+                    "w-full h-12 rounded-lg bg-cyan-500 text-slate-950 hover:bg-cyan-400 hover:shadow-[0_0_20px_rgba(6,182,212,0.4)] flex items-center justify-center gap-2 font-mono font-bold text-xs uppercase tracking-wider cursor-pointer",
+                    isAnalyzing && "opacity-75 cursor-not-allowed"
+                  )}
+                >
+                  {isAnalyzing ? (
+                    <>
+                      <Loader2 className="size-4 animate-spin text-black" />
+                      EXTRACTING MATCH...
+                    </>
+                  ) : (
+                    <>
+                      <Sparkles className="size-4 text-black animate-pulse" />
+                      EXECUTE DIAGNOSTICS
+                    </>
+                  )}
+                </button>
+
+                <button
+                  onClick={() => setCurrentStep(1)}
+                  className="w-full h-12 rounded-lg border border-slate-800 text-slate-300 hover:bg-slate-900 flex items-center justify-center gap-2 font-mono font-bold text-xs uppercase tracking-wider cursor-pointer"
+                >
+                  <ArrowLeft className="size-4" /> RE-CALIBRATE RESUME
+                </button>
+              </div>
             </div>
+          </motion.div>
+        )}
 
-            <div className="flex flex-col gap-4">
-              {analysis.bulletPointSuggestions.map((suggestion, idx) => (
-                <div key={idx} className="grid grid-cols-1 lg:grid-cols-12 gap-5 p-5 bg-white/[0.01] border border-white/5 rounded-2xl relative hover:border-violet-500/30 hover:bg-white/[0.02] transition-all duration-300">
-                  
-                  {/* Original Bullet */}
-                  <div className="lg:col-span-5 flex flex-col gap-2">
-                    <span className="text-xs font-bold text-gray-500 uppercase tracking-wider">Original Bullet Point</span>
-                    <p className="text-sm text-gray-300 bg-white/[0.01] p-3.5 rounded-xl border border-white/5 h-full min-h-[50px] font-medium leading-relaxed">
-                      {suggestion.original}
-                    </p>
+        {/* Step 3: Match & Diagnosis Report */}
+        {currentStep === 3 && analysis && (
+          <motion.div 
+            initial={{ opacity: 0, y: 15 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="flex flex-col gap-8 animate-fadeIn"
+          >
+            {/* Top Score Dash widgets */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              
+              {/* ATS radial match gauge card */}
+              <div className="p-6 backdrop-blur-xl bg-slate-950/70 border border-slate-800 rounded-2xl shadow-[0_0_50px_rgba(0,0,0,0.8)] flex flex-col items-center justify-center text-center gap-5 relative overflow-hidden group">
+                <div className="absolute top-0 left-0 w-full h-[1px] bg-slate-800" />
+                <h4 className="text-[10px] font-mono font-bold text-slate-500 uppercase tracking-widest">ATS MATCH METRIC</h4>
+                
+                <div className="relative size-36 flex items-center justify-center">
+                  <svg className="size-full transform -rotate-90 drop-shadow-[0_0_20px_rgba(6,182,212,0.15)]" viewBox="0 0 100 100">
+                    <circle
+                      cx="50"
+                      cy="50"
+                      r="40"
+                      className="stroke-slate-900/60"
+                      strokeWidth="8"
+                      fill="transparent"
+                    />
+                    <circle
+                      cx="50"
+                      cy="50"
+                      r="40"
+                      className={cn(
+                        "transition-all duration-1000 ease-out",
+                        analysis.atsScore >= 80 ? "stroke-emerald-400" : analysis.atsScore >= 60 ? "stroke-cyan-400" : "stroke-rose-400"
+                      )}
+                      strokeWidth="8"
+                      fill="transparent"
+                      strokeDasharray="251.2"
+                      strokeDashoffset={251.2 - (251.2 * analysis.atsScore) / 100}
+                      strokeLinecap="round"
+                    />
+                  </svg>
+                  <div className="absolute text-3xl font-mono font-black text-white">
+                    {analysis.atsScore}%
                   </div>
-                  
-                  {/* arrow indicator */}
-                  <div className="lg:col-span-1 flex items-center justify-center max-lg:rotate-90">
-                    <ArrowRight className="size-5 text-gray-600" />
-                  </div>
-                  
-                  {/* Tailored Suggestion */}
-                  <div className="lg:col-span-6 flex flex-col gap-3 justify-between">
-                    <div className="flex flex-col gap-2">
-                      <span className="text-xs font-bold text-violet-400 uppercase tracking-wider flex items-center gap-1.5">
-                        <Sparkles className="size-3.5 text-violet-400" /> Suggested Rephrase
-                      </span>
-                      <p className="text-sm text-white bg-violet-950/20 p-3.5 rounded-xl border border-violet-500/30 font-semibold leading-relaxed shadow-[0_0_15px_rgba(124,58,237,0.04)] backdrop-blur-xs">
-                        {suggestion.suggested}
-                      </p>
-                      <span className="text-xs text-gray-400 leading-relaxed">
-                        <strong className="text-violet-400">Insight:</strong> {suggestion.explanation}
-                      </span>
+                </div>
+                
+                <div className="flex flex-col gap-2.5 items-center">
+                  <span className={cn(
+                    "text-[9px] font-mono font-bold uppercase tracking-widest px-3 py-1 rounded border shadow-md",
+                    analysis.atsScore >= 80 
+                      ? "bg-emerald-950/20 border-emerald-500/30 text-emerald-400" 
+                      : analysis.atsScore >= 60 
+                      ? "bg-cyan-950/20 border-cyan-500/30 text-cyan-400" 
+                      : "bg-rose-950/20 border-rose-500/30 text-rose-400"
+                  )}>
+                    {analysis.atsScore >= 80 ? "OPTIMAL HARMONY" : analysis.atsScore >= 60 ? "COMPATIBLE PROSPECT" : "SYSTEM DEGRADED"}
+                  </span>
+                  <span className="text-[8px] text-slate-500 font-mono tracking-wider uppercase font-bold">
+                    Target 80% to bypass gatekeeping filters
+                  </span>
+                </div>
+              </div>
+
+              {/* Keyword list badges alignment dashboard */}
+              <div className="md:col-span-2 p-6 backdrop-blur-xl bg-slate-950/70 border border-slate-800 rounded-2xl shadow-[0_0_50px_rgba(0,0,0,0.8)] flex flex-col gap-4 relative overflow-hidden">
+                <div className="absolute top-0 left-0 w-full h-[1px] bg-slate-800" />
+                <h4 className="text-[10px] font-mono font-bold text-slate-300 tracking-widest flex items-center gap-1.5 uppercase border-b border-slate-900 pb-2">
+                  <Code className="size-4 text-cyan-400" /> LEXICAL ALIGNMENT ALGORITHMS
+                </h4>
+                
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 h-full overflow-y-auto max-h-[170px] pr-2 custom-scrollbar">
+                  {/* Matched Keywords */}
+                  <div className="flex flex-col gap-2.5">
+                    <span className="text-[9px] font-mono font-bold uppercase tracking-widest text-emerald-400 flex items-center gap-1.5">
+                      <CheckCircle2 className="size-4 shrink-0" />
+                      ALIGNED BADGES ({analysis.matchedKeywords.length})
+                    </span>
+                    <div className="flex flex-wrap gap-1.5">
+                      {analysis.matchedKeywords.length > 0 ? (
+                        analysis.matchedKeywords.map((kw, i) => (
+                          <span key={i} className="text-[10px] font-mono font-bold px-2 py-1 bg-slate-950 border border-emerald-500/20 text-emerald-400 rounded">
+                            {kw}
+                          </span>
+                        ))
+                      ) : (
+                        <span className="text-[10px] text-slate-600 font-mono">No active matches found.</span>
+                      )}
                     </div>
+                  </div>
 
-                    <div className="flex gap-2 justify-end mt-1">
-                      <Button
-                        variant="secondary"
-                        onClick={() => copyToClipboard(suggestion.suggested, idx)}
-                        className="text-xs font-bold px-4 py-2 h-9 flex items-center gap-1.5 border border-white/10 hover:bg-white/5 hover:text-white rounded-xl"
-                      >
-                        {copiedIndex === idx ? (
-                          <>
-                            <Check className="size-3.5 text-emerald-400" /> Copied!
-                          </>
-                        ) : (
-                          <>
-                            <Copy className="size-3.5 text-violet-400" /> Copy
-                          </>
-                        )}
-                      </Button>
-                      <Button
-                        onClick={() => applyBulletSuggestion(suggestion.suggested, idx)}
-                        disabled={appliedIndices.includes(idx)}
-                        className="text-xs font-bold px-4 py-2 h-9 flex items-center gap-1.5 bg-gradient-to-r from-violet-600 to-indigo-600 text-white hover:from-violet-500 hover:to-indigo-500 rounded-xl hover:shadow-[0_0_15px_rgba(124,58,237,0.3)] disabled:opacity-50"
-                      >
-                        {appliedIndices.includes(idx) ? (
-                          <>
-                            <CheckCircle2 className="size-3.5" /> Applied
-                          </>
-                        ) : (
-                          <>
-                            <RefreshCw className="size-3.5" /> Apply
-                          </>
-                        )}
-                      </Button>
+                  {/* Missing Keywords */}
+                  <div className="flex flex-col gap-2.5">
+                    <span className="text-[9px] font-mono font-bold uppercase tracking-widest text-rose-400 flex items-center gap-1.5">
+                      <XCircle className="size-4 shrink-0" />
+                      MISSING DEFICITS ({analysis.missingKeywords.length})
+                    </span>
+                    <div className="flex flex-wrap gap-1.5">
+                      {analysis.missingKeywords.length > 0 ? (
+                        analysis.missingKeywords.map((kw, i) => (
+                          <span key={i} className="text-[10px] font-mono font-bold px-2 py-1 bg-slate-950 border border-rose-500/20 text-rose-400 rounded">
+                            {kw}
+                          </span>
+                        ))
+                      ) : (
+                        <span className="text-[10px] text-emerald-400 font-mono">Perfect alignment! Deficits zero.</span>
+                      )}
                     </div>
                   </div>
                 </div>
-              ))}
-            </div>
-          </div>
+              </div>
 
-          {/* Action Footer: Seed & Launch Interview */}
-          <div className="flex flex-row justify-between items-center glass-card p-6 border border-white/10 rounded-2xl shadow-2xl mt-4 gap-4 max-sm:flex-col">
-            <div className="flex flex-col gap-1">
-              <h4 className="text-sm font-bold text-white">Seed tailored resume details into interview</h4>
-              <p className="text-xs text-gray-400 font-medium">The AI interviewer will reference your projects and match terms dynamically.</p>
             </div>
-            
-            <div className="flex gap-4">
-              <Button
-                variant="outline"
-                onClick={() => setActiveTab("input")}
-                className="rounded-full font-bold text-xs px-5 border border-white/10 text-gray-200 hover:bg-white/5 hover:text-white transition-all duration-300"
-              >
-                Back to Edit
-              </Button>
-              <Button
-                onClick={handleStartInterview}
-                disabled={isGeneratingInterview}
-                className="rounded-full font-black text-xs px-6 bg-gradient-to-r from-violet-600 to-indigo-600 text-white hover:from-violet-500 hover:to-indigo-500 hover:shadow-[0_0_15px_rgba(124,58,237,0.4)] flex items-center gap-1.5 transition-all duration-300"
-              >
-                {isGeneratingInterview ? (
-                  <>
-                    <Loader2 className="size-4 animate-spin" />
-                    Generating Session...
-                  </>
-                ) : (
-                  <>
-                    Launch AI Mock Interview <ArrowRight className="size-4" />
-                  </>
-                )}
-              </Button>
-            </div>
-          </div>
 
-        </div>
-      )}
+            {/* Glowing comparative before/after dockets list */}
+            <div className="flex flex-col gap-5 mt-2">
+              <div className="flex items-center justify-between border-b border-slate-900 pb-3">
+                <h3 className="text-[10px] font-mono font-bold text-slate-300 tracking-[0.2em] uppercase flex items-center gap-2">
+                  <Sparkles className="size-4 text-cyan-400 animate-pulse" />
+                  BEFORE & AFTER HOLOGRAPHIC REPHRASING DOCKETS
+                </h3>
+                <span className="text-[8px] font-mono text-slate-500 uppercase tracking-widest">
+                  STAR FRAMEWORK QUANTIFICATION
+                </span>
+              </div>
+
+              {/* comparative dockets mapping */}
+              <div className="flex flex-col gap-6">
+                {analysis.bulletPointSuggestions.map((suggestion, idx) => (
+                  <motion.div 
+                    key={idx} 
+                    initial={{ opacity: 0, y: 15 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: idx * 0.08 }}
+                    className="grid grid-cols-1 lg:grid-cols-12 gap-5 p-5 backdrop-blur-xl bg-slate-950/50 border border-slate-900 rounded-2xl relative hover:border-cyan-500/30 transition-all duration-300 overflow-hidden"
+                  >
+                    {/* Cyber corner markings */}
+                    <div className="absolute top-0 left-0 w-2.5 h-2.5 border-t border-l border-slate-800" />
+                    <div className="absolute top-0 right-0 w-2.5 h-2.5 border-t border-r border-slate-800" />
+                    <div className="absolute bottom-0 left-0 w-2.5 h-2.5 border-b border-l border-slate-800" />
+                    <div className="absolute bottom-0 right-0 w-2.5 h-2.5 border-b border-r border-slate-800" />
+                    
+                    {/* Original Narrative - Neon Rose Border Wrapper */}
+                    <div className="lg:col-span-5 flex flex-col gap-2">
+                      <span className="text-[9px] font-mono font-bold text-slate-500 uppercase tracking-widest flex items-center gap-1.5">
+                        <span className="w-1.5 h-1.5 rounded-full bg-rose-500" />
+                        ORIGINAL NARRATIVE
+                      </span>
+                      <p className="text-xs text-slate-400 bg-slate-950 border border-rose-950/20 p-4 rounded-xl font-semibold leading-relaxed min-h-[64px]">
+                        {suggestion.original}
+                      </p>
+                    </div>
+                    
+                    {/* Diagnostic Vector Arrow */}
+                    <div className="lg:col-span-1 flex items-center justify-center max-lg:rotate-90">
+                      <ArrowRight className="size-5 text-slate-700 animate-[pulse_1.5s_infinite]" />
+                    </div>
+                    
+                    {/* Targeted Suggestion - Neon Green/Emerald Border Wrapper */}
+                    <div className="lg:col-span-6 flex flex-col gap-4 justify-between">
+                      <div className="flex flex-col gap-2">
+                        <span className="text-[9px] font-mono font-bold text-cyan-400 uppercase tracking-widest flex items-center gap-1.5">
+                          <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 animate-pulse" />
+                          ATS PROTOCOL SUGGESTION
+                        </span>
+                        <p className="text-xs text-white bg-slate-950 border border-cyan-500/30 p-4 rounded-xl font-bold leading-relaxed shadow-[0_0_15px_rgba(6,182,212,0.05)]">
+                          {suggestion.suggested}
+                        </p>
+                        
+                        <div className="text-[11px] text-slate-400 leading-relaxed font-semibold bg-slate-950/60 p-3 rounded-lg border border-slate-900 font-mono mt-1">
+                          <span className="text-cyan-400 font-bold uppercase tracking-wider mr-1.5">// DIAGNOSTIC_REASON:</span>
+                          {suggestion.explanation}
+                        </div>
+                      </div>
+
+                      {/* Action buttons inside comparative docket */}
+                      <div className="flex gap-3 justify-end mt-1.5">
+                        <Button
+                          variant="secondary"
+                          onClick={() => copyToClipboard(suggestion.suggested, idx)}
+                          className="text-[9px] font-mono font-bold uppercase tracking-wider px-4 py-2 h-9 flex items-center gap-1.5 border border-slate-800 hover:bg-slate-900 rounded-lg cursor-pointer"
+                        >
+                          {copiedIndex === idx ? (
+                            <>
+                              <Check className="size-3.5 text-emerald-400" /> SECURED
+                            </>
+                          ) : (
+                            <>
+                              <Copy className="size-3.5 text-cyan-400" /> COPY TEXT
+                            </>
+                          )}
+                        </Button>
+                        <Button
+                          onClick={() => applyBulletSuggestion(suggestion.suggested, idx)}
+                          disabled={appliedIndices.includes(idx)}
+                          className="text-[9px] font-mono font-bold uppercase tracking-wider px-4 py-2 h-9 flex items-center gap-1.5 bg-cyan-500 text-black hover:bg-cyan-400 hover:shadow-[0_0_15px_rgba(6,182,212,0.3)] rounded-lg disabled:opacity-50 cursor-pointer"
+                        >
+                          {appliedIndices.includes(idx) ? (
+                            <>
+                              <CheckCircle2 className="size-3.5 text-black" /> INJECTED
+                            </>
+                          ) : (
+                            <>
+                              <RefreshCw className="size-3.5 text-black animate-spin" style={{ animationDuration: '4s' }} /> INJECT PROTOCOL
+                            </>
+                          )}
+                        </Button>
+                      </div>
+                    </div>
+                  </motion.div>
+                ))}
+              </div>
+            </div>
+
+            {/* Bottom Cockpit Action Panel */}
+            <motion.div 
+              initial={{ opacity: 0, y: 15 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="flex flex-col md:flex-row justify-between items-center backdrop-blur-2xl bg-slate-950/70 p-6 border border-slate-800 rounded-2xl shadow-2xl mt-4 gap-4 relative overflow-hidden"
+            >
+              <div className="absolute top-0 left-0 w-full h-[1px] bg-slate-800" />
+              
+              <div className="flex flex-col gap-1 w-full md:max-w-xl">
+                <h4 className="text-xs font-mono font-bold text-white uppercase tracking-wider flex items-center gap-1.5">
+                  <span className="size-2 bg-emerald-400 rounded-full animate-pulse" />
+                  SYNC INTEGRATION PARAMETERS
+                </h4>
+                <p className="text-xs text-slate-400 leading-relaxed font-semibold mt-0.5">
+                  Seed your tailored impact achievements directly into the AI interviewer session, instructing the evaluator to refer to these specific outcomes.
+                </p>
+              </div>
+              
+              <div className="flex gap-3 shrink-0">
+                <button
+                  onClick={() => setCurrentStep(1)}
+                  className="rounded-lg font-mono font-bold text-[10px] uppercase tracking-wider px-5 py-2.5 border border-slate-800 text-slate-200 hover:bg-slate-900 transition-all cursor-pointer"
+                >
+                  Edit Resume
+                </button>
+                <button
+                  onClick={handleStartInterview}
+                  disabled={isGeneratingInterview}
+                  className="rounded-lg font-mono font-bold text-[10px] uppercase tracking-wider px-6 py-2.5 bg-cyan-500 text-black hover:bg-cyan-400 hover:shadow-[0_0_20px_rgba(6,182,212,0.4)] flex items-center gap-2 transition-all cursor-pointer shadow-lg border border-cyan-400/40"
+                >
+                  {isGeneratingInterview ? (
+                    <>
+                      <Loader2 className="size-4 animate-spin text-black" />
+                      GENERATING...
+                    </>
+                  ) : (
+                    <>
+                      LAUNCH EVAL COCKPIT <ArrowRight className="size-4 text-black animate-pulse" />
+                    </>
+                  )}
+                </button>
+              </div>
+            </motion.div>
+
+          </motion.div>
+        )}
+      </div>
     </div>
   );
 }

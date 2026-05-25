@@ -1,0 +1,3 @@
+@echo off
+echo Starting Mockrithm Development Server...
+npm run dev

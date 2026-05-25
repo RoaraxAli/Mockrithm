@@ -194,7 +194,7 @@ export default function ContactPage() {
           }}
           className="inline-block"
         >
-          <span className="bg-gradient-to-r from-white via-gray-100 to-white bg-clip-text text-transparent">
+          <span className="text-white">
             Get in
           </span>
         </motion.div>
@@ -210,7 +210,7 @@ export default function ContactPage() {
           }}
           className="inline-block relative"
         >
-          <span className="bg-gradient-to-r from-gray-200 via-white to-gray-300 bg-clip-text text-transparent">
+          <span className="text-white">
             Touch
           </span>
           {/* Animated underline */}
@@ -218,7 +218,7 @@ export default function ContactPage() {
             initial={{ scaleX: 0 }}
             animate={{ scaleX: 1 }}
             transition={{ duration: 0.8, delay: 0.8 }}
-            className="absolute -bottom-2 left-0 right-0 h-1 bg-gradient-to-r from-transparent via-white to-transparent origin-left"
+            className="absolute -bottom-2 left-0 right-0 h-0.5 bg-white origin-left"
           />
         </motion.div>
       </motion.h1>
@@ -253,7 +253,7 @@ export default function ContactPage() {
           primary: "+03001477141714",
           secondary: "Mon-Fri 9AM-6PM",
           href: "tel:+03001477141714",
-          gradient: "from-violet-600/10 to-indigo-600/10",
+          gradient: "bg-white/5",
           iconColor: "text-violet-400"
         },
         {
@@ -262,7 +262,7 @@ export default function ContactPage() {
           primary: "mockrithm@gmail.com",
           secondary: "We reply within 24 hours",
           href: "mailto:mockrithm@gmail.com",
-          gradient: "from-violet-600/10 to-indigo-600/10",
+          gradient: "bg-white/5",
           iconColor: "text-violet-400"
         },
         {
@@ -271,7 +271,7 @@ export default function ContactPage() {
           primary: "24/7 Available",
           secondary: "Live chat always open",
           href: "#",
-          gradient: "from-violet-600/10 to-indigo-600/10",
+          gradient: "bg-white/5",
           iconColor: "text-violet-400"
         }
       ].map((contact, index) => (
@@ -294,14 +294,14 @@ export default function ContactPage() {
           whileTap={{ scale: 0.98 }}
           className="group block"
         >
-          <div className="relative overflow-hidden bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl p-6 h-full transition-all duration-300 group-hover:bg-white/10 group-hover:border-white/20">
-            {/* Gradient Overlay */}
-            <div className={`absolute inset-0 bg-gradient-to-br ${contact.gradient} opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-2xl`} />
+          <div className="relative overflow-hidden bg-white/5 backdrop-blur-sm border border-white/10 rounded-md p-6 h-full transition-all duration-300 group-hover:bg-white/10 group-hover:border-white/20">
+            {/* Hover overlay */}
+            <div className={`absolute inset-0 ${contact.gradient} opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-md`} />
             
             {/* Content */}
             <div className="relative">
               <div className="flex items-center justify-center mb-4">
-                <div className="p-3 bg-white/10 rounded-xl group-hover:bg-white/20 transition-colors duration-300">
+                <div className="p-3 bg-white/10 rounded-md group-hover:bg-white/20 transition-colors duration-300">
                   <contact.icon className={`w-6 h-6 ${contact.iconColor} group-hover:scale-110 transition-transform duration-300`} />
                 </div>
               </div>
@@ -320,7 +320,7 @@ export default function ContactPage() {
 
               {/* Hover indicator */}
               <div className="mt-4 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                <div className="w-8 h-0.5 bg-gradient-to-r from-transparent via-white to-transparent" />
+                <div className="w-8 h-0.5 bg-cyan-500" />
               </div>
             </div>
           </div>
@@ -359,13 +359,13 @@ export default function ContactPage() {
               initial={{ opacity: 0, x: -50 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.8, delay: 0.3 }}
-              className="backdrop-blur-2xl bg-white/[0.015] p-8 md:p-10 rounded-3xl border border-white/10 shadow-2xl hover:border-violet-500/20 transition-all duration-300 relative overflow-hidden"
+              className="backdrop-blur-2xl bg-white/[0.015] p-8 md:p-10 rounded-md border border-white/10 shadow-2xl hover:border-cyan-500/30 transition-all duration-300 relative overflow-hidden"
             >
-              <div className="absolute top-0 left-0 w-full h-[3px] bg-gradient-to-r from-violet-600 via-indigo-600 to-indigo-500" />
+              <div className="absolute top-0 left-0 w-full h-[2px] bg-cyan-500" />
               <div className="mb-8">
                 <h2 className="text-3xl md:text-4xl font-bold mb-4 flex items-center gap-3 text-white">
-                  <div className="p-2 bg-gradient-to-r from-violet-600 to-indigo-600 rounded-xl shadow-[0_0_15px_rgba(124,58,237,0.2)]">
-                    <Send className="w-6 h-6 text-white" />
+                  <div className="p-2 bg-cyan-500/20 border border-cyan-500/30 text-cyan-400 rounded-md">
+                    <Send className="w-6 h-6" />
                   </div>
                   Send Feedback
                 </h2>
@@ -392,7 +392,7 @@ export default function ContactPage() {
                             <Input
                               {...field}
                               readOnly
-                              className="bg-white/5 border-white/10 text-white placeholder:text-gray-500 h-12 rounded-xl focus:border-violet-500/50 focus:ring-2 focus:ring-violet-500/10 transition-all duration-200"
+                              className="bg-white/5 border-white/10 text-white placeholder:text-gray-500 h-12 rounded-md focus:border-cyan-500/50 focus:ring-1 focus:ring-cyan-500/10 transition-all duration-200"
                             />
                           </FormControl>
                           <FormMessage />
@@ -412,7 +412,7 @@ export default function ContactPage() {
                             <Input
                               {...field}
                               readOnly
-                              className="bg-white/5 border-white/10 text-white placeholder:text-gray-500 h-12 rounded-xl focus:border-violet-500/50 focus:ring-2 focus:ring-violet-500/10 transition-all duration-200"
+                              className="bg-white/5 border-white/10 text-white placeholder:text-gray-500 h-12 rounded-md focus:border-cyan-500/50 focus:ring-1 focus:ring-cyan-500/10 transition-all duration-200"
                             />
                           </FormControl>
                           <FormMessage />
@@ -434,7 +434,7 @@ export default function ContactPage() {
                           defaultValue={field.value}
                         >
                           <FormControl>
-                            <SelectTrigger className="bg-white/5 border-gray-700 text-white h-12 rounded-xl focus:border-gray-400 focus:ring-2 focus:ring-gray-400/20 transition-all duration-200">
+                            <SelectTrigger className="bg-white/5 border-gray-700 text-white h-12 rounded-md focus:border-cyan-500/50 focus:ring-1 focus:ring-cyan-500/10 transition-all duration-200">
                               <SelectValue placeholder="Select feedback type" />
                             </SelectTrigger>
                           </FormControl>
@@ -482,7 +482,7 @@ export default function ContactPage() {
                             <Textarea
                               {...field}
                               placeholder="Tell us what's on your mind..."
-                              className="bg-white/5 border-white/10 text-white placeholder:text-gray-500 min-h-[140px] resize-none rounded-xl focus:border-violet-500/50 focus:ring-2 focus:ring-violet-500/10 transition-all duration-200"
+                              className="bg-white/5 border-white/10 text-white placeholder:text-gray-500 min-h-[140px] resize-none rounded-md focus:border-cyan-500/50 focus:ring-1 focus:ring-cyan-500/10 transition-all duration-200"
                             />
                           </FormControl>
                         <FormMessage />
@@ -493,7 +493,7 @@ export default function ContactPage() {
                   <Button
                     type="submit"
                     disabled={isSubmitting}
-                    className="w-full h-12 bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-500 hover:to-indigo-500 hover:shadow-[0_0_20px_rgba(124,58,237,0.4)] text-white font-bold rounded-xl transition-all duration-300 transform hover:scale-[1.01] disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none cursor-pointer"
+                    className="w-full h-12 bg-[#06b6d4] text-black font-extrabold rounded-md border border-cyan-500/60 hover:bg-cyan-400 hover:shadow-[0_0_15px_rgba(6,182,212,0.4)] transition-all duration-300 transform hover:scale-[1.01] disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none cursor-pointer"
                   >
                     {isSubmitting ? (
                       <div className="flex items-center gap-2">
@@ -519,10 +519,10 @@ export default function ContactPage() {
               className="space-y-6"
             >
               {/* Location Info */}
-              <div className="backdrop-blur-2xl bg-white/[0.015] p-6 rounded-3xl border border-white/10 relative overflow-hidden">
-                <div className="absolute top-0 left-0 w-full h-[3px] bg-gradient-to-r from-violet-600 via-indigo-600 to-indigo-500" />
+              <div className="backdrop-blur-2xl bg-white/[0.015] p-6 rounded-md border border-white/10 relative overflow-hidden">
+                <div className="absolute top-0 left-0 w-full h-[2px] bg-cyan-500" />
                 <h3 className="text-2xl font-bold mb-4 flex items-center gap-3 text-white">
-                  <div className="p-2 bg-gradient-to-r from-violet-600 to-indigo-600 rounded-xl shadow-[0_0_15px_rgba(124,58,237,0.2)]">
+                  <div className="p-2 bg-cyan-500/20 border border-cyan-500/30 text-cyan-400 rounded-md">
                     <svg
                       className="w-5 h-5 text-white"
                       fill="currentColor"

@@ -174,7 +174,7 @@ const Navbar = ({ userId, userName }: NavbarProps) => {
                   >
                     <span className="text-sm font-semibold tracking-wide">{link.label}</span>
                     <span
-                      className={`absolute left-1/2 -translate-x-1/2 bottom-0 h-[2px] w-1/2 bg-gradient-to-r from-violet-500 to-indigo-500 transition-transform duration-300 origin-center ${
+                      className={`absolute left-1/2 -translate-x-1/2 bottom-0 h-[2px] w-1/2 bg-cyan-500 transition-transform duration-300 origin-center ${
                         isActive
                           ? "scale-x-100"
                           : "scale-x-0 group-hover:scale-x-100"
@@ -190,7 +190,7 @@ const Navbar = ({ userId, userName }: NavbarProps) => {
               {!userId ? (
                 <Link
                   href="/sign-in"
-                  className="px-6 py-2 rounded-full bg-gradient-to-r from-violet-600 to-indigo-600 text-white text-sm font-bold hover:from-violet-500 hover:to-indigo-500 hover:shadow-[0_0_15px_rgba(124,58,237,0.4)] transition-all duration-300"
+                  className="px-6 py-2 rounded-md bg-cyan-500 text-black text-sm font-bold hover:bg-cyan-400 hover:shadow-[0_0_15px_rgba(6,182,212,0.4)] transition-all duration-300 border border-cyan-500/60"
                 >
                   Sign In
                 </Link>
@@ -201,8 +201,8 @@ const Navbar = ({ userId, userName }: NavbarProps) => {
                     className="group flex items-center space-x-2 px-4 py-2 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 hover:border-violet-500/30 text-gray-300 hover:text-white transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-violet-500/50 backdrop-blur-sm cursor-pointer"
                   >
                     <div className="flex items-center space-x-2">
-                      <div className="w-6 h-6 bg-gradient-to-tr from-violet-600 to-indigo-600 rounded-full flex items-center justify-center border border-white/10">
-                        <User className="w-3.5 h-3.5 text-white" />
+                      <div className="w-6 h-6 bg-cyan-500/20 rounded-md flex items-center justify-center border border-cyan-500/30">
+                        <User className="w-3.5 h-3.5 text-cyan-400" />
                       </div>
                       <span className="text-sm font-semibold max-w-24 truncate">
                         {userName}

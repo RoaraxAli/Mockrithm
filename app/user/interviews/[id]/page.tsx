@@ -82,7 +82,7 @@ export default function InterviewDetailPage() {
     <div className="space-y-8 animate-fadeIn">
       <div className="flex items-center justify-between flex-wrap gap-4">
         <div>
-          <h1 className="text-3xl font-black text-white mb-1 bg-clip-text text-transparent bg-gradient-to-r from-white via-gray-200 to-gray-400">
+          <h1 className="text-3xl font-black text-white mb-1">
             Interview Review
           </h1>
           <p className="text-sm text-gray-400 font-medium">Detailed breakdown and analytics of your mock interview performance.</p>
@@ -90,7 +90,7 @@ export default function InterviewDetailPage() {
         {interview.reportUrl && (
           <Button
             variant="outline"
-            className="border-white/10 text-gray-200 hover:text-white hover:bg-white/5 bg-transparent rounded-full"
+            className="border-white/10 text-gray-200 hover:text-white hover:bg-white/5 bg-transparent rounded-md"
             onClick={() => window.open(interview.reportUrl, "_blank")}
           >
             <Download className="mr-2 h-4 w-4" />
@@ -100,11 +100,11 @@ export default function InterviewDetailPage() {
       </div>
 
       <div className="grid gap-6 md:grid-cols-3">
-        <Card className="md:col-span-2 glass-card rounded-2xl border border-white/10 shadow-xl overflow-hidden relative">
-          <div className="absolute top-0 left-0 w-full h-[2px] bg-gradient-to-r from-violet-600 to-indigo-600 opacity-20" />
+        <Card className="md:col-span-2 glass-card rounded-md border border-white/10 shadow-xl overflow-hidden relative">
+          <div className="absolute top-0 left-0 w-full h-[2px] bg-cyan-500 opacity-20" />
           <CardHeader>
             <CardTitle className="text-base font-bold text-gray-200 flex items-center">
-              <Briefcase className="mr-2.5 h-5 w-5 text-violet-400" />
+              <Briefcase className="mr-2.5 h-5 w-5 text-cyan-400" />
               Interview Metadata
             </CardTitle>
           </CardHeader>
@@ -126,8 +126,8 @@ export default function InterviewDetailPage() {
               <Badge
                 className={
                   interview.finalized 
-                    ? "bg-emerald-500/10 border-emerald-500/20 text-emerald-400 font-bold hover:bg-emerald-500/20" 
-                    : "bg-amber-500/10 border-amber-500/20 text-amber-400 font-bold hover:bg-amber-500/20"
+                    ? "bg-emerald-500/10 border-emerald-500/20 text-emerald-400 font-bold hover:bg-emerald-500/20 rounded-md" 
+                    : "bg-amber-500/10 border-amber-500/20 text-amber-400 font-bold hover:bg-amber-500/20 rounded-md"
                 }
               >
                 {interview.finalized ? "Completed" : "In Progress"}
@@ -141,14 +141,14 @@ export default function InterviewDetailPage() {
         </Card>
 
         {feedback && (
-          <Card className="md:col-span-1 glass-card rounded-2xl border border-white/10 shadow-xl flex flex-col items-center justify-center text-center p-6 relative overflow-hidden">
-            <div className="absolute top-0 left-0 w-full h-[2px] bg-gradient-to-r from-violet-600 to-indigo-600 opacity-20" />
+          <Card className="md:col-span-1 glass-card rounded-md border border-white/10 shadow-xl flex flex-col items-center justify-center text-center p-6 relative overflow-hidden">
+            <div className="absolute top-0 left-0 w-full h-[2px] bg-cyan-500 opacity-20" />
             <CardHeader className="pb-2">
               <CardTitle className="text-xs font-bold text-gray-400 uppercase tracking-wider">Overall Impression Score</CardTitle>
             </CardHeader>
             <CardContent className="flex flex-col items-center justify-center">
-              <div className="text-5xl font-black text-white bg-clip-text bg-gradient-to-br from-white to-gray-400 mb-2">{feedback.totalScore}%</div>
-              <p className="text-xs text-violet-400 font-bold bg-violet-500/10 border border-violet-500/20 px-3 py-1 rounded-full uppercase tracking-wider">
+              <div className="text-5xl font-black text-white mb-2">{feedback.totalScore}%</div>
+              <p className="text-xs text-cyan-400 font-bold bg-cyan-500/10 border border-cyan-500/20 px-3 py-1 rounded-md uppercase tracking-wider">
                 {feedback.totalScore >= 80 ? "Excellent Match" : feedback.totalScore >= 60 ? "Satisfactory" : "Needs Practice"}
               </p>
             </CardContent>
@@ -157,8 +157,8 @@ export default function InterviewDetailPage() {
       </div>
 
       {interview.questions && interview.questions.length > 0 && (
-        <Card className="glass-card rounded-2xl border border-white/10 shadow-xl relative overflow-hidden">
-          <div className="absolute top-0 left-0 w-full h-[2px] bg-gradient-to-r from-violet-600 to-indigo-600 opacity-20" />
+        <Card className="glass-card rounded-md border border-white/10 shadow-xl relative overflow-hidden">
+          <div className="absolute top-0 left-0 w-full h-[2px] bg-cyan-500 opacity-20" />
           <CardHeader>
             <CardTitle className="text-base font-bold text-gray-200">Questions & Response Log</CardTitle>
           </CardHeader>
@@ -166,11 +166,11 @@ export default function InterviewDetailPage() {
             {interview.questions.map((question, index) => (
               <div key={question.id || index} className="border-b border-white/5 pb-5 last:border-b-0 last:pb-0 flex flex-col gap-2.5">
                 <h3 className="font-bold text-white text-sm flex items-start gap-2 leading-relaxed">
-                  <span className="text-violet-400 font-extrabold shrink-0">Q{index + 1}:</span>
+                  <span className="text-cyan-400 font-extrabold shrink-0">Q{index + 1}:</span>
                   <span>{question.question}</span>
                 </h3>
                 {question.answer ? (
-                  <p className="text-xs text-indigo-200 bg-[#09090b]/75 border border-white/5 p-4 rounded-xl font-mono leading-relaxed max-w-full overflow-x-auto">
+                  <p className="text-xs text-indigo-200 bg-[#09090b]/75 border border-white/5 p-4 rounded-md font-mono leading-relaxed max-w-full overflow-x-auto">
                     {question.answer}
                   </p>
                 ) : (
@@ -178,7 +178,7 @@ export default function InterviewDetailPage() {
                 )}
                 {question.category && (
                   <div className="w-fit">
-                    <Badge className="bg-white/5 text-gray-300 border-white/10 text-[10px] font-bold">
+                    <Badge className="bg-white/5 text-gray-300 border-white/10 text-[10px] font-bold rounded-md">
                       {question.category}
                     </Badge>
                   </div>
@@ -191,11 +191,11 @@ export default function InterviewDetailPage() {
 
       {feedback && (
         <div className="grid gap-6 md:grid-cols-2">
-          <Card className="glass-card rounded-2xl border border-white/10 shadow-xl relative overflow-hidden">
-            <div className="absolute top-0 left-0 w-full h-[2px] bg-gradient-to-r from-emerald-500 to-emerald-400 opacity-25" />
+          <Card className="glass-card rounded-md border border-white/10 shadow-xl relative overflow-hidden">
+            <div className="absolute top-0 left-0 w-full h-[2px] bg-emerald-500 opacity-25" />
             <CardHeader>
               <CardTitle className="text-base font-bold text-emerald-400 flex items-center gap-2">
-                <span className="h-2.5 w-2.5 rounded-full bg-emerald-400" />
+                <span className="h-2.5 w-2.5 rounded-md bg-emerald-400" />
                 Demonstrated Strengths
               </CardTitle>
             </CardHeader>
@@ -211,11 +211,11 @@ export default function InterviewDetailPage() {
             </CardContent>
           </Card>
 
-          <Card className="glass-card rounded-2xl border border-white/10 shadow-xl relative overflow-hidden">
-            <div className="absolute top-0 left-0 w-full h-[2px] bg-gradient-to-r from-amber-500 to-amber-400 opacity-25" />
+          <Card className="glass-card rounded-md border border-white/10 shadow-xl relative overflow-hidden">
+            <div className="absolute top-0 left-0 w-full h-[2px] bg-amber-500 opacity-25" />
             <CardHeader>
               <CardTitle className="text-base font-bold text-amber-400 flex items-center gap-2">
-                <span className="h-2.5 w-2.5 rounded-full bg-amber-400" />
+                <span className="h-2.5 w-2.5 rounded-md bg-amber-400" />
                 Areas to Target
               </CardTitle>
             </CardHeader>
@@ -234,24 +234,24 @@ export default function InterviewDetailPage() {
       )}
 
       {feedback?.categoryScores && feedback.categoryScores.length > 0 && (
-        <Card className="glass-card rounded-2xl border border-white/10 shadow-xl relative overflow-hidden">
-          <div className="absolute top-0 left-0 w-full h-[2px] bg-gradient-to-r from-violet-600 to-indigo-600 opacity-20" />
+        <Card className="glass-card rounded-md border border-white/10 shadow-xl relative overflow-hidden">
+          <div className="absolute top-0 left-0 w-full h-[2px] bg-cyan-500 opacity-20" />
           <CardHeader>
             <CardTitle className="text-base font-bold text-gray-200">Competency Breakdown</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
               {feedback.categoryScores.map((category, index) => (
-                <div key={index} className="space-y-2 bg-white/[0.01] p-4 rounded-xl border border-white/5">
+                <div key={index} className="space-y-2 bg-white/[0.01] p-4 rounded-md border border-white/5">
                   <div className="flex justify-between items-center text-xs font-bold uppercase tracking-wider">
                     <span className="text-gray-300 truncate mr-2">{category.category}</span>
-                    <span className="text-violet-400">
+                    <span className="text-cyan-400">
                       {category.score}/{category.maxScore}
                     </span>
                   </div>
-                  <div className="w-full bg-white/5 rounded-full h-2">
+                  <div className="w-full bg-white/5 rounded-md h-2">
                     <div
-                      className="bg-gradient-to-r from-violet-600 to-indigo-500 h-2 rounded-full transition-all duration-1000 ease-out"
+                      className="bg-cyan-500 h-2 rounded-md transition-all duration-1000 ease-out"
                       style={{
                         width: `${(category.score / category.maxScore) * 100}%`,
                       }}
@@ -265,8 +265,8 @@ export default function InterviewDetailPage() {
       )}
 
       {feedback?.finalAssessment && (
-        <Card className="glass-card rounded-2xl border border-white/10 shadow-xl relative overflow-hidden bg-white/[0.01]">
-          <div className="absolute top-0 left-0 w-full h-[2px] bg-gradient-to-r from-violet-600 to-indigo-600 opacity-20" />
+        <Card className="glass-card rounded-md border border-white/10 shadow-xl relative overflow-hidden bg-white/[0.01]">
+          <div className="absolute top-0 left-0 w-full h-[2px] bg-cyan-500 opacity-20" />
           <CardHeader>
             <CardTitle className="text-base font-bold text-gray-200">AI Evaluation Narrative</CardTitle>
           </CardHeader>

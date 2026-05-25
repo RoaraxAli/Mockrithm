@@ -139,14 +139,14 @@ const AuthForm = ({ type }: { type: FormType }) => {
   const isSignIn = type === "sign-in";
 
   return (
-    <div className="border border-white/10 p-0.5 rounded-3xl lg:min-w-[500px] shadow-2xl relative overflow-hidden bg-white/[0.015] backdrop-blur-xl">
-      <div className="absolute top-0 left-0 w-full h-[3px] bg-gradient-to-r from-violet-600 via-indigo-600 to-indigo-500" />
+    <div className="border border-white/10 p-0.5 rounded-md lg:min-w-[500px] shadow-2xl relative overflow-hidden bg-white/[0.015] backdrop-blur-xl">
+      <div className="absolute top-0 left-0 w-full h-[2px] bg-cyan-500" />
       <div className="flex flex-col gap-6 py-10 px-10 bg-transparent">
         <div className="flex flex-col items-center gap-3">
-          <div className="bg-white/5 p-2.5 rounded-xl border border-white/10 shadow-lg">
+          <div className="bg-white/5 p-2.5 rounded-md border border-white/10 shadow-lg">
             <Image src="/logo.svg" alt="logo" height={36} width={36} />
           </div>
-          <h2 className="text-2xl font-black text-white tracking-wide bg-clip-text text-transparent bg-gradient-to-r from-white via-violet-200 to-indigo-300 uppercase">Mockrithm</h2>
+          <h2 className="text-2xl font-black text-white tracking-wide uppercase">Mockrithm</h2>
         </div>
 
         <h3 className="text-center text-sm font-semibold text-gray-400">Practice job interviews with conversational AI</h3>

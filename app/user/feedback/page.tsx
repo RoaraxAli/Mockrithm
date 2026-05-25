@@ -204,8 +204,8 @@ export default function FeedbackPage() {
         </Card>
       </div>
 
-      <Card className="glass-card rounded-2xl border border-white/10 shadow-xl relative overflow-hidden">
-        <div className="absolute top-0 left-0 w-full h-[2px] bg-gradient-to-r from-violet-600 to-indigo-600 opacity-20" />
+      <Card className="glass-card rounded-md border border-white/10 shadow-xl relative overflow-hidden">
+        <div className="absolute top-0 left-0 w-full h-[2px] bg-cyan-500 opacity-20" />
         <CardHeader>
           <CardTitle className="text-base font-bold text-gray-200">Recent Assessments</CardTitle>
         </CardHeader>

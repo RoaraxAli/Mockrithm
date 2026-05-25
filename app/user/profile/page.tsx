@@ -110,11 +110,11 @@ export default function ProfilePage() {
         <ProfileForm user={userData} onUpdate={handleUserUpdate} />
       </div>
 
-      <Card className="max-w-2xl glass-card rounded-2xl border border-white/10 shadow-xl relative overflow-hidden">
-        <div className="absolute top-0 left-0 w-full h-[2px] bg-gradient-to-r from-violet-600 to-indigo-600 opacity-20" />
+      <Card className="max-w-2xl glass-card rounded-md border border-white/10 shadow-xl relative overflow-hidden">
+        <div className="absolute top-0 left-0 w-full h-[2px] bg-cyan-500 opacity-20" />
         <CardHeader>
           <CardTitle className="text-base font-bold text-gray-200 flex items-center">
-            <UserIcon className="mr-2.5 h-5 w-5 text-violet-400" />
+            <UserIcon className="mr-2.5 h-5 w-5 text-cyan-400" />
             Personal Information
           </CardTitle>
         </CardHeader>
