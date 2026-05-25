@@ -43,8 +43,8 @@ export function Sidebar() {
           className="group flex items-center space-x-3 transition-all duration-300 hover:scale-102"
         >
           <div className="relative">
-            <div className="absolute inset-0 bg-violet-500 rounded-lg blur opacity-15 group-hover:opacity-30 transition-opacity duration-300" />
-            <div className="relative bg-white/5 p-1.5 rounded-lg border border-white/10 group-hover:border-violet-500/30 transition-colors duration-300">
+            <div className="absolute inset-0 bg-white rounded-lg blur opacity-15 group-hover:opacity-30 transition-opacity duration-300" />
+            <div className="relative bg-white/5 p-1.5 rounded-lg border border-white/10 group-hover:border-white/30 transition-colors duration-300">
               <Image
                 src="/logo.svg"
                 alt="Mockrithm Logo"
@@ -58,7 +58,7 @@ export function Sidebar() {
             <span className="text-[13px] font-black tracking-wider text-white group-hover:text-gray-200 transition-colors duration-300">
               MOCKRITHM
             </span>
-            <span className="text-[8px] font-bold tracking-widest text-violet-400 group-hover:text-violet-300 transition-colors duration-300 uppercase">
+            <span className="text-[8px] font-bold tracking-widest text-zinc-400 group-hover:text-zinc-300 transition-colors duration-300 uppercase">
               Face the Machine
             </span>
           </div>
@@ -76,17 +76,17 @@ export function Sidebar() {
               className={cn(
                 "group flex items-center px-3.5 py-2.5 text-xs font-black tracking-wider uppercase rounded-md transition-all duration-300 border relative overflow-hidden",
                 isActive
-                  ? "bg-cyan-500/10 border-cyan-500/25 text-white font-black"
+                  ? "bg-white/5 border-white/10 text-white font-black"
                   : "text-gray-400 hover:bg-white/5 hover:text-white border-transparent"
               )}
             >
               {isActive && (
-                <span className="absolute left-0 top-1/4 bottom-1/4 w-[3px] bg-cyan-500 rounded-r-md" />
+                <span className="absolute left-0 top-1/4 bottom-1/4 w-[3px] bg-white rounded-r-md" />
               )}
               <item.icon
                 className={cn(
                   "mr-3 h-4.5 w-4.5 flex-shrink-0 transition-colors duration-300",
-                  isActive ? "text-cyan-400" : "text-gray-500 group-hover:text-gray-300",
+                  isActive ? "text-white" : "text-gray-500 group-hover:text-gray-300",
                 )}
               />
               {item.name}

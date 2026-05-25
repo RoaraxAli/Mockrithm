@@ -47,6 +47,9 @@ export default function LandingDashboard({
 
   return (
     <div className="w-full flex flex-col font-mona-sans relative z-10">
+      {/* Background patterns */}
+      <div className="absolute inset-0 premium-grid-dot pointer-events-none opacity-30 z-0" />
+      <div className="absolute top-0 left-0 right-0 h-[600px] bg-gradient-to-b from-white/[0.015] to-transparent pointer-events-none z-0" />
       
       {/* 1. Immersive Premium SaaS Hero Header */}
       <motion.section 
@@ -113,28 +116,129 @@ export default function LandingDashboard({
             </motion.div>
           </div>
 
-          {/* Right Column: Visualizer Showcase */}
+          {/* Right Column: Visualizer & Active AI Showcase */}
           <div className="lg:col-span-5 flex justify-center lg:justify-end w-full">
-            <div className="w-full max-w-sm p-6 bg-zinc-900/30 border border-zinc-800/80 rounded-2xl flex flex-col gap-4 relative overflow-hidden backdrop-blur-md shadow-[0_8px_32px_rgba(0,0,0,0.6)]">
-              <div className="flex items-center justify-between text-[9px] font-bold text-zinc-550 tracking-wider uppercase">
-                <span className="flex items-center gap-1.5">
-                  <span className="h-1.5 w-1.5 rounded-full bg-white animate-pulse" />
-                  Live Vocal Cadence
+            <motion.div 
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.8, delay: 0.3 }}
+              className="w-full max-w-md p-6 bg-zinc-900/30 border border-zinc-800/80 rounded-2xl flex flex-col gap-6 relative overflow-hidden backdrop-blur-md shadow-[0_12px_40px_rgba(0,0,0,0.7)]"
+            >
+              {/* Border shine effect */}
+              <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/20 to-transparent" />
+
+              {/* Status Header */}
+              <div className="flex items-center justify-between text-[10px] font-black text-zinc-400 tracking-widest uppercase">
+                <span className="flex items-center gap-2">
+                  <span className="relative flex h-2 w-2">
+                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-white opacity-75" />
+                    <span className="relative inline-flex rounded-full h-2 w-2 bg-white" />
+                  </span>
+                  AI SESSION ACTIVE
                 </span>
-                <span className="text-zinc-500 font-mono">STAR Mode</span>
+                <span className="text-zinc-500 font-mono">ID: SEC_804</span>
               </div>
-              
-              {/* Waveform Bars */}
-              <div className="flex items-end justify-center gap-2.5 h-12 w-full select-none mt-2">
-                <div className="w-1.5 bg-zinc-450 rounded-full h-4 animate-[pulse_1.2s_infinite]" />
-                <div className="w-1.5 bg-zinc-450 rounded-full h-9 animate-[pulse_0.9s_infinite] delay-100" />
-                <div className="w-1.5 bg-zinc-450 rounded-full h-6 animate-[pulse_1.4s_infinite] delay-300" />
-                <div className="w-1.5 bg-zinc-450 rounded-full h-11 animate-[pulse_0.8s_infinite] delay-200" />
-                <div className="w-1.5 bg-zinc-450 rounded-full h-4 animate-[pulse_1.1s_infinite] delay-400" />
-                <div className="w-1.5 bg-zinc-450 rounded-full h-8 animate-[pulse_1s_infinite] delay-150" />
-                <div className="w-1.5 bg-zinc-450 rounded-full h-3 animate-[pulse_1.3s_infinite]" />
+
+              {/* Visualizer & Orb Block */}
+              <div className="flex flex-col items-center justify-center p-6 bg-zinc-950/40 rounded-xl border border-white/5 relative group">
+                <div className="absolute inset-0 premium-grid-dot opacity-20 pointer-events-none" />
+                
+                {/* Voice Orb Halo */}
+                <div className="relative size-24 flex items-center justify-center mb-6">
+                  {/* Concentric expanding circles */}
+                  <motion.div 
+                    animate={{ scale: [1, 1.8, 1], opacity: [0.15, 0, 0.15] }}
+                    transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
+                    className="absolute inset-0 rounded-full border border-white/30"
+                  />
+                  <motion.div 
+                    animate={{ scale: [1, 1.4, 1], opacity: [0.25, 0, 0.25] }}
+                    transition={{ duration: 2.2, repeat: Infinity, ease: "easeInOut", delay: 0.4 }}
+                    className="absolute inset-2 rounded-full border border-white/40"
+                  />
+                  {/* Outer glow core */}
+                  <div className="absolute inset-4 rounded-full bg-white/5 blur-sm" />
+                  
+                  {/* Core Speaker Orb */}
+                  <motion.div 
+                    animate={{ scale: [1, 1.08, 1] }}
+                    transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
+                    className="relative size-12 rounded-full bg-white flex items-center justify-center border border-white shadow-[0_0_20px_rgba(255,255,255,0.25)] animate-pulse"
+                  >
+                    <Activity className="size-5 text-black" />
+                  </motion.div>
+                </div>
+
+                {/* Compact Waveform Bars */}
+                <div className="flex items-end justify-center gap-1.5 h-6 w-full select-none">
+                  {[2, 4, 3, 5, 2, 4, 2].map((height, idx) => (
+                    <motion.div
+                      key={idx}
+                      animate={{ height: [`${height * 3}px`, `${height * 6}px`, `${height * 3}px`] }}
+                      transition={{ 
+                        duration: 0.8 + idx * 0.15, 
+                        repeat: Infinity, 
+                        ease: "easeInOut",
+                        delay: idx * 0.1
+                      }}
+                      className="w-1 bg-white/70 rounded-full"
+                    />
+                  ))}
+                </div>
               </div>
-            </div>
+
+              {/* Chat Stream */}
+              <div className="flex flex-col gap-4 font-mona-sans">
+                {/* AI Question */}
+                <motion.div 
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.5 }}
+                  className="flex flex-col gap-1.5 items-start"
+                >
+                  <span className="text-[9px] font-extrabold text-zinc-500 uppercase tracking-wider">AI INTERVIEWER (SPEAKER)</span>
+                  <div className="px-4 py-2.5 rounded-2xl rounded-tl-none bg-zinc-900/60 border border-zinc-800 text-xs font-semibold text-zinc-200 max-w-[90%] leading-relaxed shadow-md">
+                    "Explain closures in JavaScript and how they retrieve lexical scope."
+                  </div>
+                </motion.div>
+
+                {/* Candidate Response */}
+                <motion.div 
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.9 }}
+                  className="flex flex-col gap-1.5 items-end"
+                >
+                  <span className="text-[9px] font-extrabold text-zinc-500 uppercase tracking-wider">YOU (TRANSCRIBING...)</span>
+                  <div className="px-4 py-2.5 rounded-2xl rounded-tr-none bg-white text-black text-xs font-semibold max-w-[90%] leading-relaxed shadow-[0_4px_12px_rgba(255,255,255,0.1)] border border-white/20">
+                    "A closure is when a function remembers its outer lexical environment..."
+                  </div>
+                </motion.div>
+              </div>
+
+              {/* Metrics Divider */}
+              <div className="h-px bg-zinc-800/80" />
+
+              {/* Metrics Grid */}
+              <div className="grid grid-cols-2 gap-3 text-[10px]">
+                <div className="flex flex-col p-2.5 rounded-lg bg-zinc-950/25 border border-white/5">
+                  <span className="text-zinc-500 font-bold uppercase tracking-wider">Speech Latency</span>
+                  <span className="text-sm font-black text-white mt-0.5">180ms</span>
+                </div>
+                <div className="flex flex-col p-2.5 rounded-lg bg-zinc-950/25 border border-white/5">
+                  <span className="text-zinc-500 font-bold uppercase tracking-wider">Vocal Fillers</span>
+                  <span className="text-sm font-black text-white mt-0.5">0 count</span>
+                </div>
+                <div className="flex flex-col p-2.5 rounded-lg bg-zinc-950/25 border border-white/5">
+                  <span className="text-zinc-500 font-bold uppercase tracking-wider">Tone Match</span>
+                  <span className="text-sm font-black text-white mt-0.5">98% Neutral</span>
+                </div>
+                <div className="flex flex-col p-2.5 rounded-lg bg-zinc-950/25 border border-white/5">
+                  <span className="text-zinc-500 font-bold uppercase tracking-wider">Confidence Index</span>
+                  <span className="text-sm font-black text-white mt-0.5">97% Stable</span>
+                </div>
+              </div>
+            </motion.div>
           </div>
         </div>
       </motion.section>

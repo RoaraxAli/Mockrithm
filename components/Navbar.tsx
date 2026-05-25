@@ -136,8 +136,8 @@ const Navbar = ({ userId, userName }: NavbarProps) => {
               aria-label="Mockrithm Home"
             >
               <div className="relative">
-                <div className="absolute inset-0 bg-violet-500 rounded-lg blur opacity-20 group-hover:opacity-40 transition-opacity duration-300" />
-                <div className="relative bg-white/5 p-2 rounded-lg border border-white/10 group-hover:border-violet-500/30 transition-colors duration-300 backdrop-blur-sm">
+                <div className="absolute inset-0 bg-white rounded-lg blur opacity-10 group-hover:opacity-30 transition-opacity duration-300" />
+                <div className="relative bg-white/5 p-2 rounded-lg border border-white/10 group-hover:border-white/30 transition-colors duration-300 backdrop-blur-sm">
                   <Image
                     src="/logo.svg"
                     alt="Mockrithm Logo"
@@ -152,7 +152,7 @@ const Navbar = ({ userId, userName }: NavbarProps) => {
                 <span className="text-[16px] font-black tracking-wider text-white group-hover:text-gray-200 transition-colors duration-300">
                   MOCKRITHM
                 </span>
-                <span className="text-[10px] font-bold tracking-widest text-violet-400 group-hover:text-violet-300 transition-colors duration-300 uppercase">
+                <span className="text-[10px] font-bold tracking-widest text-zinc-500 group-hover:text-zinc-400 transition-colors duration-300 uppercase">
                   Face the Machine
                 </span>
               </div>
@@ -168,13 +168,13 @@ const Navbar = ({ userId, userName }: NavbarProps) => {
                     href={link.href}
                     className={`group relative px-4 py-2 rounded-xl transition-all duration-300 ${
                       isActive
-                        ? "text-white bg-white/5 border border-white/10 shadow-[0_0_15px_rgba(124,58,237,0.1)]"
+                        ? "text-white bg-white/5 border border-white/10 shadow-[0_0_15px_rgba(255,255,255,0.05)]"
                         : "text-gray-300 hover:text-white hover:bg-white/5"
                     }`}
                   >
                     <span className="text-sm font-semibold tracking-wide">{link.label}</span>
                     <span
-                      className={`absolute left-1/2 -translate-x-1/2 bottom-0 h-[2px] w-1/2 bg-cyan-500 transition-transform duration-300 origin-center ${
+                      className={`absolute left-1/2 -translate-x-1/2 bottom-0 h-[2px] w-1/2 bg-white transition-transform duration-300 origin-center ${
                         isActive
                           ? "scale-x-100"
                           : "scale-x-0 group-hover:scale-x-100"
@@ -190,7 +190,7 @@ const Navbar = ({ userId, userName }: NavbarProps) => {
               {!userId ? (
                 <Link
                   href="/sign-in"
-                  className="px-6 py-2 rounded-md bg-cyan-500 text-black text-sm font-bold hover:bg-cyan-400 hover:shadow-[0_0_15px_rgba(6,182,212,0.4)] transition-all duration-300 border border-cyan-500/60"
+                  className="px-6 py-2 rounded-md bg-white text-black text-sm font-bold hover:bg-zinc-200 hover:shadow-[0_0_15px_rgba(255,255,255,0.15)] transition-all duration-300 border border-white"
                 >
                   Sign In
                 </Link>
@@ -198,18 +198,18 @@ const Navbar = ({ userId, userName }: NavbarProps) => {
                 <div className="relative dropdown-container">
                   <button
                     onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-                    className="group flex items-center space-x-2 px-4 py-2 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 hover:border-violet-500/30 text-gray-300 hover:text-white transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-violet-500/50 backdrop-blur-sm cursor-pointer"
+                    className="group flex items-center space-x-2 px-4 py-2 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 hover:border-white/30 text-gray-300 hover:text-white transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-white/20 backdrop-blur-sm cursor-pointer"
                   >
                     <div className="flex items-center space-x-2">
-                      <div className="w-6 h-6 bg-cyan-500/20 rounded-md flex items-center justify-center border border-cyan-500/30">
-                        <User className="w-3.5 h-3.5 text-cyan-400" />
+                      <div className="w-6 h-6 bg-zinc-800 rounded-md flex items-center justify-center border border-zinc-700">
+                        <User className="w-3.5 h-3.5 text-white" />
                       </div>
                       <span className="text-sm font-semibold max-w-24 truncate">
                         {userName}
                       </span>
                     </div>
                     <ChevronDown
-                      className={`w-4 h-4 transition-transform duration-300 text-violet-400 group-hover:text-white ${
+                      className={`w-4 h-4 transition-transform duration-300 text-zinc-400 group-hover:text-white ${
                         isDropdownOpen ? "rotate-180" : "rotate-0"
                       }`}
                     />
@@ -222,7 +222,7 @@ const Navbar = ({ userId, userName }: NavbarProps) => {
                         <p className="text-sm font-bold text-white">
                           {userName}
                         </p>
-                        <p className="text-xs text-violet-400 truncate">{userId}</p>
+                        <p className="text-xs text-zinc-400 truncate">{userId}</p>
                       </div>
 
                       {isAdmin ? (
@@ -231,7 +231,7 @@ const Navbar = ({ userId, userName }: NavbarProps) => {
                           href="/admin"
                           className="group flex items-center space-x-3 w-full px-4 py-3 text-sm text-gray-300 hover:text-white hover:bg-white/5 transition-all duration-200"
                         >
-                          <Home className="w-4 h-4 text-violet-400 group-hover:scale-110 transition-transform duration-200" />
+                          <Home className="w-4 h-4 text-zinc-400 group-hover:scale-110 transition-transform duration-200" />
                           <span className="font-medium">Admin Panel</span>
                         </Link>
                       ) : (
@@ -241,7 +241,7 @@ const Navbar = ({ userId, userName }: NavbarProps) => {
                             href="/user"
                             className="group flex items-center space-x-3 w-full px-4 py-3 text-sm text-gray-300 hover:text-white hover:bg-white/5 transition-all duration-200"
                           >
-                            <User className="w-4 h-4 text-violet-400 group-hover:scale-110 transition-transform duration-200" />
+                            <User className="w-4 h-4 text-zinc-400 group-hover:scale-110 transition-transform duration-200" />
                             <span className="font-medium">User Panel</span>
                           </Link>
 

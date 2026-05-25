@@ -36,7 +36,7 @@
   --card-foreground: oklch(0.98 0 0);
   --popover: oklch(0.15 0.02 250);
   --popover-foreground: oklch(0.98 0 0);
-  --primary: oklch(0.696 0.17 162.48); /* Solid Cyan */
+  --primary: oklch(0.99 0 0); /* Crisp Monochrome White */
   --primary-foreground: oklch(0.1 0 0); /* Black */
   --secondary: oklch(0.2 0.02 250);
   --secondary-foreground: oklch(0.98 0 0);
@@ -47,20 +47,20 @@
   --destructive: oklch(0.6 0.18 20);
   --border: oklch(1 0 0 / 8%);
   --input: oklch(1 0 0 / 10%);
-  --ring: oklch(0.696 0.17 162.48);
-  --chart-1: oklch(0.696 0.17 162.48);
-  --chart-2: oklch(0.488 0.243 264.376);
-  --chart-3: oklch(0.769 0.188 70.08);
-  --chart-4: oklch(0.627 0.265 303.9);
-  --chart-5: oklch(0.645 0.246 16.439);
+  --ring: oklch(0.99 0 0 / 15%);
+  --chart-1: oklch(0.99 0 0);
+  --chart-2: oklch(0.7 0 0);
+  --chart-3: oklch(0.5 0 0);
+  --chart-4: oklch(0.3 0 0);
+  --chart-5: oklch(0.1 0 0);
   --sidebar: oklch(0.15 0.02 250);
   --sidebar-foreground: oklch(0.98 0 0);
-  --sidebar-primary: oklch(0.696 0.17 162.48);
+  --sidebar-primary: oklch(0.99 0 0);
   --sidebar-primary-foreground: oklch(0.1 0 0);
   --sidebar-accent: oklch(0.2 0.02 250);
   --sidebar-accent-foreground: oklch(0.98 0 0);
   --sidebar-border: oklch(1 0 0 / 8%);
-  --sidebar-ring: oklch(0.696 0.17 162.48);
+  --sidebar-ring: oklch(0.99 0 0 / 10%);
 }
 
 .dark {
@@ -145,7 +145,7 @@
     border-radius: 9999px;
   }
   ::-webkit-scrollbar-thumb:hover {
-    background: rgba(6, 182, 212, 0.3);
+    background: rgba(255, 255, 255, 0.2);
   }
 
   /* Shadcn card glassmorphic global override - flat premium */
@@ -160,27 +160,27 @@
   }
   
   [data-slot=card]:hover {
-    border-color: rgba(6, 182, 212, 0.4) !important;
+    border-color: rgba(255, 255, 255, 0.2) !important;
     box-shadow: 0 12px 40px 0 rgba(0, 0, 0, 0.7),
-                0 0 25px 0 rgba(6, 182, 212, 0.1) !important;
+                0 0 25px 0 rgba(255, 255, 255, 0.03) !important;
     transform: translateY(-2px);
   }
 
-  /* Primary Button - premium solid neon cyan with zero gradient */
+  /* Primary Button - premium solid neon white with zero gradient */
   [data-slot=button].bg-primary {
-    background: #06b6d4 !important;
+    background: #ffffff !important;
     color: #000000 !important;
     font-weight: 800 !important;
     border-radius: 6px !important;
-    border: 1px solid rgba(6, 182, 212, 0.6) !important;
-    box-shadow: 0 4px 14px rgba(6, 182, 212, 0.2) !important;
+    border: 1px solid rgba(255, 255, 255, 0.8) !important;
+    box-shadow: 0 4px 14px rgba(255, 255, 255, 0.05) !important;
     transition: all 0.2s ease-in-out !important;
     cursor: pointer;
   }
 
   [data-slot=button].bg-primary:hover {
-    background: #22d3ee !important;
-    box-shadow: 0 4px 20px rgba(6, 182, 212, 0.4) !important;
+    background: #e4e4e7 !important;
+    box-shadow: 0 4px 20px rgba(255, 255, 255, 0.1) !important;
     transform: translateY(-1px);
   }
 
@@ -198,8 +198,8 @@
   }
 
   [data-slot=input]:focus, [data-slot=select]:focus, [data-slot=textarea]:focus {
-    border-color: rgba(6, 182, 212, 0.5) !important;
-    box-shadow: 0 0 0 2px rgba(6, 182, 212, 0.15) !important;
+    border-color: rgba(255, 255, 255, 0.25) !important;
+    box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.05) !important;
     background-color: rgba(0, 0, 0, 0.6) !important;
   }
 }
@@ -215,13 +215,13 @@
   
   .btn-primary {
     @apply w-fit text-black font-extrabold px-6 py-2.5 cursor-pointer min-h-10 transition-all duration-200 shadow-md;
-    background-color: #06b6d4 !important;
-    border: 1px solid rgba(6, 182, 212, 0.6);
+    background-color: #ffffff !important;
+    border: 1px solid rgba(255, 255, 255, 0.8);
     border-radius: 6px;
   }
   .btn-primary:hover {
-    background-color: #22d3ee !important;
-    box-shadow: 0 0 15px rgba(6, 182, 212, 0.35);
+    background-color: #e4e4e7 !important;
+    box-shadow: 0 0 15px rgba(255, 255, 255, 0.1);
   }
   
   .btn-secondary {
@@ -231,7 +231,7 @@
   .btn-secondary:hover {
     background-color: #1a1f29 !important;
     color: #ffffff;
-    border-color: #06b6d4;
+    border-color: rgba(255, 255, 255, 0.2);
   }
 
   .btn-upload {
@@ -254,12 +254,12 @@
     }
 
     .input {
-      @apply !bg-slate-950/60 !text-white !border-slate-800 focus:!border-cyan-500/50 focus:!ring-1 focus:!ring-cyan-500/20 !rounded-lg !min-h-12 !px-5 placeholder:!text-slate-700 transition-all duration-200;
+      @apply !bg-slate-950/60 !text-white !border-slate-800 focus:!border-white/30 focus:!ring-1 focus:!ring-white/10 !rounded-lg !min-h-12 !px-5 placeholder:!text-slate-700 transition-all duration-200;
     }
 
     .btn {
-      @apply !w-full text-black hover:shadow-[0_0_20px_rgba(6,182,212,0.3)] active:scale-[0.98] !rounded-lg !min-h-12 !font-black !px-5 cursor-pointer transition-all duration-200;
-      background-color: #06b6d4;
+      @apply !w-full text-black hover:shadow-[0_0_20px_rgba(255,255,255,0.1)] active:scale-[0.98] !rounded-lg !min-h-12 !font-black !px-5 cursor-pointer transition-all duration-200;
+      background-color: #ffffff;
     }
   }
 
@@ -279,7 +279,7 @@
       @apply z-10 flex items-center justify-center bg-slate-900 rounded-full size-[120px] relative border border-slate-800 shadow-xl;
 
       .animate-speak {
-        @apply absolute inline-flex size-full animate-ping rounded-full bg-cyan-500/10 opacity-75;
+        @apply absolute inline-flex size-full animate-ping rounded-full bg-white/10 opacity-75;
       }
     }
 
@@ -336,7 +336,7 @@
   }
 
   .progress {
-    @apply h-2 text-[5px] font-bold bg-cyan-500 rounded-full flex-center;
+    @apply h-2 text-[5px] font-bold bg-white rounded-full flex-center;
   }
 
   .tech-tooltip {
@@ -344,12 +344,17 @@
   }
 
   .card-interview {
-    @apply glass-card rounded-lg min-h-full flex flex-col p-6 relative overflow-hidden gap-8 justify-between border border-slate-800 hover:border-cyan-500/40 hover:shadow-[0_0_30px_rgba(6,182,212,0.1)] hover:-translate-y-1.5 transition-all duration-200;
+    @apply glass-card rounded-lg min-h-full flex flex-col p-6 relative overflow-hidden gap-8 justify-between border border-slate-800 hover:border-white/20 hover:shadow-[0_0_30px_rgba(255,255,255,0.02)] hover:-translate-y-1.5 transition-all duration-200;
 
     .badge-text {
       @apply text-xs font-bold capitalize tracking-wide;
     }
   }
+}
+
+@utility premium-grid-dot {
+  background-image: radial-gradient(rgba(255, 255, 255, 0.05) 1px, transparent 1px);
+  background-size: 24px 24px;
 }
 
 @utility dark-gradient {

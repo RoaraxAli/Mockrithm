@@ -73,7 +73,7 @@ export default function DashboardPage() {
       
       {/* Welcome Header */}
       <div className="flex flex-col gap-2">
-        <span className="w-fit text-[9px] font-black tracking-widest uppercase text-violet-400 bg-violet-500/10 px-3 py-1 rounded-full border border-violet-500/20">Operational Portfolio</span>
+        <span className="w-fit text-[9px] font-black tracking-widest uppercase text-zinc-400 bg-white/5 px-3 py-1 rounded-full border border-white/10">Operational Portfolio</span>
         <h1 className="text-3xl sm:text-4xl font-black tracking-tight text-white">
           Welcome back, {userData?.name || "User"}!
         </h1>
@@ -82,22 +82,22 @@ export default function DashboardPage() {
 
       {/* Metrics Row */}
       <div className="grid gap-6 md:grid-cols-3">
-        <div className="relative p-6 backdrop-blur-2xl bg-zinc-950/40 rounded-md border border-white/8 shadow-2xl overflow-hidden group hover:border-cyan-500/30 transition-all duration-300">
-          <div className="absolute top-0 left-0 w-full h-[2px] bg-cyan-500 opacity-20 group-hover:opacity-60 transition-opacity duration-300" />
+        <div className="relative p-6 backdrop-blur-2xl bg-zinc-950/40 rounded-md border border-white/8 shadow-2xl overflow-hidden group hover:border-white/20 transition-all duration-300">
+          <div className="absolute top-0 left-0 w-full h-[2px] bg-white opacity-20 group-hover:opacity-60 transition-opacity duration-300" />
           <h4 className="text-[10px] font-black text-gray-500 uppercase tracking-widest mb-4">Total Evaluations</h4>
           <span className="text-4xl font-black text-white">{interviews.length}</span>
           <p className="text-[10px] text-gray-400 font-bold uppercase tracking-wider mt-3">Completed and ongoing sessions</p>
         </div>
 
-        <div className="relative p-6 backdrop-blur-2xl bg-zinc-950/40 rounded-md border border-white/8 shadow-2xl overflow-hidden group hover:border-cyan-500/30 transition-all duration-300">
-          <div className="absolute top-0 left-0 w-full h-[2px] bg-cyan-500 opacity-20 group-hover:opacity-60 transition-opacity duration-300" />
+        <div className="relative p-6 backdrop-blur-2xl bg-zinc-950/40 rounded-md border border-white/8 shadow-2xl overflow-hidden group hover:border-white/20 transition-all duration-300">
+          <div className="absolute top-0 left-0 w-full h-[2px] bg-white opacity-20 group-hover:opacity-60 transition-opacity duration-300" />
           <h4 className="text-[10px] font-black text-gray-500 uppercase tracking-widest mb-4">Most Recent Score</h4>
           <span className="text-4xl font-black text-white">{lastScore > 0 ? `${lastScore}%` : "N/A"}</span>
           <p className="text-[10px] text-gray-400 font-bold uppercase tracking-wider mt-3">Your latest preparation matching rate</p>
         </div>
 
-        <div className="relative p-6 backdrop-blur-2xl bg-zinc-950/40 rounded-md border border-white/8 shadow-2xl overflow-hidden group hover:border-cyan-500/30 transition-all duration-300">
-          <div className="absolute top-0 left-0 w-full h-[2px] bg-cyan-500 opacity-20 group-hover:opacity-60 transition-opacity duration-300" />
+        <div className="relative p-6 backdrop-blur-2xl bg-zinc-950/40 rounded-md border border-white/8 shadow-2xl overflow-hidden group hover:border-white/20 transition-all duration-300">
+          <div className="absolute top-0 left-0 w-full h-[2px] bg-white opacity-20 group-hover:opacity-60 transition-opacity duration-300" />
           <h4 className="text-[10px] font-black text-gray-500 uppercase tracking-widest mb-4">Average Prep score</h4>
           <span className="text-4xl font-black text-white">{averageScore > 0 ? `${averageScore}%` : "N/A"}</span>
           <p className="text-[10px] text-gray-400 font-bold uppercase tracking-wider mt-3">Aggregated score across all trials</p>
