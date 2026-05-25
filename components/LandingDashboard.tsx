@@ -6,6 +6,7 @@ import { useState } from "react";
 import { motion } from "framer-motion";
 import { Sparkles, Terminal, Play, ShieldAlert, Cpu, Activity, User, BookOpen } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 import InterviewCard from "./InterviewCard";
 
 interface LandingDashboardProps {
@@ -21,7 +22,7 @@ export default function LandingDashboard({
 }: LandingDashboardProps) {
   const [filter, setFilter] = useState<"all" | "past" | "available">("all");
 
-  const containerVariants = {
+  const containerVariants: any = {
     hidden: { opacity: 1 },
     visible: {
       opacity: 1,
@@ -31,7 +32,7 @@ export default function LandingDashboard({
     },
   };
 
-  const itemVariants = {
+  const itemVariants: any = {
     hidden: { opacity: 1, y: 0 },
     visible: {
       opacity: 1,
@@ -252,9 +253,4 @@ export default function LandingDashboard({
       </div>
     </div>
   );
-}
-
-// Inline HSL Cn tool helper
-function cn(...classes: any[]) {
-  return classes.filter(Boolean).join(" ");
 }
