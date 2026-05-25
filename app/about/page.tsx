@@ -466,9 +466,9 @@ export default function AboutPage() {
                 <div className="absolute inset-0 bg-gradient-to-r from-white/[0.01] to-transparent pointer-events-none" />
                 <CardContent className="p-8 sm:p-12 relative z-10 text-center flex flex-col gap-6 items-center">
                   <Badge variant="outline" className="border-white/20 text-white font-bold text-[10px] px-3 py-0.5 rounded-full uppercase">Creator Base</Badge>
-                  <h3 className="text-2xl sm:text-3xl font-black tracking-tight text-white">Built by Ahmed, for Everyone</h3>
+                  <h3 className="text-2xl sm:text-3xl font-black tracking-tight text-white">Built by Ali & Ahmed, for Everyone</h3>
                   <p className="text-xs sm:text-sm text-zinc-400 leading-relaxed font-medium max-w-2xl">
-                    Mockrithm was created by Ahmed — someone who understands the challenges of technical interviews firsthand. Having experienced the cognitive friction, delivery pacing hurdles, and prep bottlenecks, I built this system to represent what high-density preparation should feel like.
+                    Mockrithm was created by Ali & Ahmed — developers who understand the challenges of technical interviews firsthand. Having experienced the cognitive friction, delivery pacing hurdles, and prep bottlenecks, we built this system to represent what high-density preparation should feel like.
                   </p>
                   <p className="text-[10px] text-zinc-500 font-bold uppercase tracking-widest mt-2">
                     Minimalist Interface • Robust AI Diagnostics • Zero Fillers

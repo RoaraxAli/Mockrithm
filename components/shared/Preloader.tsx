@@ -5,15 +5,18 @@ import { motion, AnimatePresence } from "framer-motion";
 
 export default function Preloader() {
   const [progress, setProgress] = useState(0);
-  const [isVisible, setIsVisible] = useState(true);
+  const [isVisible, setIsVisible] = useState(false);
+  const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
+    setMounted(true);
     // Check sessionStorage to show only on first launch of the session
     const hasVisited = sessionStorage.getItem("mockrithm_visited");
     if (hasVisited) {
-      setIsVisible(false);
       return;
     }
+
+    setIsVisible(true);
 
     let start = 0;
     const end = 100;
@@ -34,6 +37,8 @@ export default function Preloader() {
 
     return () => clearInterval(timer);
   }, []);
+
+  if (!mounted) return null;
 
   return (
     <AnimatePresence>
