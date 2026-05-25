@@ -3,6 +3,7 @@ import { Mona_Sans } from "next/font/google";
 import { Toaster } from "sonner";
 
 import AuthLayout from "@/components/Authlayout";
+import Preloader from "@/components/shared/Preloader";
 import FooterWrapper from "@/components/shared/FooterWrapper";
 import { getCurrentUser } from "@/lib/actions/auth.action";
 import { Analytics } from "@vercel/analytics/react";
@@ -31,6 +32,7 @@ export default async function RootLayout({
       <body
         className={`${monaSans.className} bg-black text-white antialiased pattern`}
       >
+        <Preloader />
         <Analytics />
         <AuthLayout initialUserId={user?.id} initialUserName={user?.name}>
           {children}
@@ -41,4 +43,3 @@ export default async function RootLayout({
     </html>
   );
 }
-

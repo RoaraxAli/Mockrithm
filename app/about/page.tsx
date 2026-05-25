@@ -1,10 +1,11 @@
 "use client"
 
+import { useRef } from "react"
 import { Badge } from "@/components/ui/badge"
 import { Card, CardContent } from "@/components/ui/card"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
-import { motion } from "framer-motion"
+import { motion, useScroll, useTransform } from "framer-motion"
 import {
   Mic,
   Brain,
@@ -98,11 +99,11 @@ export default function AboutPage() {
     {
       number: "04",
       title: "Track & Improve",
-      description: "Monitor your improvement over time with detailed analytics and personalized recommendations.",
+      description: "Monitor your improvement over time with detailed analytics and recommendations.",
     },
   ]
 
-  // Viewport trigger variants
+  // Animation variants
   const containerVariants: any = {
     hidden: { opacity: 0 },
     visible: {
@@ -138,6 +139,26 @@ export default function AboutPage() {
     }
   }
 
+  // Scroll Pinned Telemetry
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const { scrollYProgress } = useScroll({
+    target: scrollRef,
+    offset: ["start start", "end end"]
+  });
+
+  // Transform values for text and background zoom (AURA scroll style)
+  const bgScale = useTransform(scrollYProgress, [0, 1], [0.8, 1.25]);
+  const bgOpacity = useTransform(scrollYProgress, [0, 0.2, 0.8, 1], [0, 0.25, 0.25, 0]);
+
+  const text1Opacity = useTransform(scrollYProgress, [0, 0.12, 0.26, 0.36], [0, 1, 1, 0]);
+  const text1Y = useTransform(scrollYProgress, [0, 0.12, 0.26, 0.36], [40, 0, 0, -40]);
+
+  const text2Opacity = useTransform(scrollYProgress, [0.38, 0.48, 0.62, 0.72], [0, 1, 1, 0]);
+  const text2Y = useTransform(scrollYProgress, [0.38, 0.48, 0.62, 0.72], [40, 0, 0, -40]);
+
+  const text3Opacity = useTransform(scrollYProgress, [0.74, 0.84, 0.94, 1], [0, 1, 1, 0]);
+  const text3Y = useTransform(scrollYProgress, [0.74, 0.84, 0.94, 1], [40, 0, 0, -40]);
+
   return (
     <div className="min-h-screen bg-black text-white relative overflow-hidden font-mona-sans">
       {/* Absolute dot matrix overlay and ambient glow */}
@@ -160,7 +181,7 @@ export default function AboutPage() {
             >
               <Badge
                 variant="secondary"
-                className="bg-zinc-900 border border-zinc-800 text-zinc-400 hover:text-white px-4 py-1 text-2xs font-bold tracking-widest uppercase transition-colors"
+                className="bg-zinc-900 border border-zinc-800 text-zinc-400 hover:text-white px-4 py-1 text-[10px] font-bold tracking-widest uppercase transition-colors"
               >
                 AI-Powered Evaluation Platform
               </Badge>
@@ -229,7 +250,71 @@ export default function AboutPage() {
           </div>
         </section>
 
-        {/* 3. Steps (How It Works) */}
+        {/* 3. AURA Pinned Interactive Scroll Reveal Section */}
+        <section ref={scrollRef} className="w-full relative h-[300vh] bg-black select-none z-10 border-b border-zinc-900">
+          <div className="sticky top-0 h-screen w-full flex items-center justify-center overflow-hidden">
+            {/* Ambient Background visual scaling/zooming */}
+            <motion.div 
+              style={{ scale: bgScale, opacity: bgOpacity }}
+              className="absolute inset-0 flex items-center justify-center pointer-events-none"
+            >
+              <div className="size-[500px] sm:size-[700px] rounded-full border border-white/5 bg-zinc-950/20 backdrop-blur-sm relative flex items-center justify-center">
+                <div className="absolute inset-20 rounded-full border border-white/5" />
+                <div className="absolute inset-40 rounded-full border border-white/5" />
+                <div className="absolute inset-0 premium-grid-dot opacity-20" />
+              </div>
+            </motion.div>
+
+            {/* Pinned text reveals */}
+            <div className="relative z-10 w-full max-w-4xl px-6 text-center h-full">
+              
+              {/* Segment 1 */}
+              <motion.div 
+                style={{ opacity: text1Opacity, y: text1Y }}
+                className="absolute inset-x-0 top-1/2 -translate-y-1/2 flex flex-col items-center gap-4 px-6 pointer-events-none"
+              >
+                <span className="text-[10px] font-black text-zinc-500 tracking-widest uppercase">METHODOLOGY 01 // SPEECH CADENCE</span>
+                <h3 className="text-3xl sm:text-5xl lg:text-6xl font-black text-white leading-none tracking-tight">
+                  Design that breathes.
+                </h3>
+                <p className="text-xs sm:text-sm text-zinc-400 font-semibold uppercase tracking-wider max-w-md mt-2 leading-relaxed">
+                  Analyze vocal filler ratios and silent pauses to establish relaxed, rhythmic speech patterns.
+                </p>
+              </motion.div>
+
+              {/* Segment 2 */}
+              <motion.div 
+                style={{ opacity: text2Opacity, y: text2Y }}
+                className="absolute inset-x-0 top-1/2 -translate-y-1/2 flex flex-col items-center gap-4 px-6 pointer-events-none"
+              >
+                <span className="text-[10px] font-black text-zinc-500 tracking-widest uppercase">METHODOLOGY 02 // VOCAL METRICS</span>
+                <h3 className="text-3xl sm:text-5xl lg:text-6xl font-black text-white leading-none tracking-tight">
+                  Luxury in every detail.
+                </h3>
+                <p className="text-xs sm:text-sm text-zinc-400 font-semibold uppercase tracking-wider max-w-md mt-2 leading-relaxed">
+                  Real-time sentiment parsing evaluates technical vocabulary accuracy and delivery pacing.
+                </p>
+              </motion.div>
+
+              {/* Segment 3 */}
+              <motion.div 
+                style={{ opacity: text3Opacity, y: text3Y }}
+                className="absolute inset-x-0 top-1/2 -translate-y-1/2 flex flex-col items-center gap-4 px-6 pointer-events-none"
+              >
+                <span className="text-[10px] font-black text-zinc-500 tracking-widest uppercase">METHODOLOGY 03 // MASTER THE INTERVIEW</span>
+                <h3 className="text-3xl sm:text-5xl lg:text-6xl font-black text-white leading-none tracking-tight">
+                  Welcome home.
+                </h3>
+                <p className="text-xs sm:text-sm text-zinc-400 font-semibold uppercase tracking-wider max-w-md mt-2 leading-relaxed">
+                  Aggregate granular speech reports to anchor confidence and lock down dream tech offers.
+                </p>
+              </motion.div>
+
+            </div>
+          </div>
+        </section>
+
+        {/* 4. Steps (How It Works) */}
         <section className="w-full py-28 border-b border-zinc-900 relative bg-zinc-950/5">
           <div className="max-w-6xl mx-auto px-6">
             <motion.div
@@ -239,7 +324,7 @@ export default function AboutPage() {
               variants={fadeInUp}
               className="text-center mb-20"
             >
-              <h2 className="text-xs font-black uppercase tracking-widest text-zinc-550 mb-4">Core Framework</h2>
+              <h2 className="text-xs font-black uppercase tracking-widest text-zinc-500 mb-4">Core Framework</h2>
               <h3 className="text-3xl font-black text-white">How Mockrithm Operates</h3>
               <p className="mt-4 text-xs text-zinc-400 font-semibold uppercase tracking-wider">A four-stage cycle to refine your verbal and technical mastery</p>
             </motion.div>
@@ -268,7 +353,7 @@ export default function AboutPage() {
           </div>
         </section>
 
-        {/* 4. Interactive Key Features */}
+        {/* 5. Interactive Key Features */}
         <section className="w-full py-28 border-b border-zinc-900">
           <div className="max-w-6xl mx-auto px-6">
             <motion.div
@@ -315,7 +400,7 @@ export default function AboutPage() {
           </div>
         </section>
 
-        {/* 5. Modern Tech Stack Showcase */}
+        {/* 6. Modern Tech Stack Showcase */}
         <section className="w-full py-28 border-b border-zinc-900 bg-zinc-950/5">
           <div className="max-w-6xl mx-auto px-6">
             <motion.div
@@ -353,7 +438,7 @@ export default function AboutPage() {
                     {stack.technologies.map((tech, techIndex) => (
                       <motion.li
                         key={techIndex}
-                        className="flex items-center gap-2 text-2xs text-zinc-400 font-bold uppercase tracking-wide"
+                        className="flex items-center gap-2 text-[10px] text-zinc-400 font-bold uppercase tracking-wide"
                       >
                         <CheckCircle className="h-3 w-3 text-white" />
                         {tech}
@@ -366,7 +451,7 @@ export default function AboutPage() {
           </div>
         </section>
 
-        {/* 6. Premium Creator Card */}
+        {/* 7. Premium Creator Card */}
         <section className="w-full py-28 relative">
           <div className="absolute inset-x-0 bottom-0 h-px bg-gradient-to-r from-transparent via-white/5 to-transparent" />
           <div className="max-w-4xl mx-auto px-6">
