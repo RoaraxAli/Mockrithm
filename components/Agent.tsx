@@ -5,7 +5,7 @@ import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { 
   Phone, PhoneOff, Mic, Brain, Volume2, Settings, 
-  Code, Sparkles, CheckCircle2, AlertTriangle, Lightbulb, Play 
+  Code, Sparkles, CheckCircle2, AlertTriangle, Lightbulb, Play, User
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
@@ -813,8 +813,8 @@ ${code}
         >
           <div className="flex items-center gap-3">
             <span className="relative flex h-2 w-2">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-violet-400 opacity-75"></span>
-              <span className="relative inline-flex rounded-full h-2 w-2 bg-violet-500"></span>
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-white opacity-75"></span>
+              <span className="relative inline-flex rounded-full h-2 w-2 bg-white"></span>
             </span>
             <span className="text-[11px] font-bold text-zinc-300 uppercase tracking-wider">
               Practice Session Active
@@ -848,14 +848,14 @@ ${code}
         >
           <div className="flex items-center justify-between">
             <h4 className="text-xs font-bold text-white uppercase tracking-widest flex items-center gap-2.5">
-              <span className="p-1.5 bg-violet-500/10 rounded-lg border border-violet-500/25">
-                <Settings className="size-4 text-violet-400" />
+              <span className="p-1.5 bg-zinc-900 rounded-lg border border-zinc-800">
+                <Settings className="size-4 text-white" />
               </span>
               Practice Calibration
             </h4>
             <button
               onClick={() => setShowSettings(!showSettings)}
-              className="text-[10px] font-bold text-violet-400 hover:text-violet-300 cursor-pointer transition-colors duration-200 px-3 py-1.5 bg-zinc-950 border border-zinc-900 rounded-lg hover:border-violet-500/30 shadow-md uppercase tracking-wider"
+              className="text-[10px] font-bold text-white hover:text-zinc-350 cursor-pointer transition-colors duration-200 px-3 py-1.5 bg-zinc-950 border border-zinc-900 rounded-lg hover:border-zinc-800 shadow-md uppercase tracking-wider"
             >
               {showSettings ? "Hide Settings" : "Show Settings"}
             </button>
@@ -872,12 +872,12 @@ ${code}
               >
                 <div className="flex flex-col gap-2">
                   <label className="text-[10px] text-zinc-500 font-semibold uppercase tracking-wider flex items-center gap-1.5">
-                    <Brain className="size-3.5 text-violet-400" /> Interview Model
+                    <Brain className="size-3.5 text-zinc-400" /> Interview Model
                   </label>
                   <select
                     value={selectedModel}
                     onChange={(e) => setSelectedModel(e.target.value)}
-                    className="bg-zinc-950 text-zinc-100 text-xs rounded-xl p-3 border border-zinc-900 focus:border-violet-500/40 focus:ring-1 focus:ring-violet-500/20 outline-none cursor-pointer hover:bg-zinc-900 transition-all font-semibold"
+                    className="bg-zinc-950 text-zinc-100 text-xs rounded-xl p-3 border border-zinc-900 focus:border-zinc-700 focus:ring-1 focus:ring-zinc-800 outline-none cursor-pointer hover:bg-zinc-900 transition-all font-semibold"
                   >
                     <option value="llama-3.3-70b-versatile">Llama 3.3 70B (Recommended)</option>
                     <option value="llama-3.1-8b-instant">Llama 3.1 8B (Fast)</option>
@@ -886,12 +886,12 @@ ${code}
 
                 <div className="flex flex-col gap-2">
                   <label className="text-[10px] text-zinc-500 font-semibold uppercase tracking-wider flex items-center gap-1.5">
-                    <Volume2 className="size-3.5 text-violet-400" /> Speech Engine Voice
+                    <Volume2 className="size-3.5 text-zinc-400" /> Speech Engine Voice
                   </label>
                   <select
                     value={selectedVoice}
                     onChange={(e) => setSelectedVoice(e.target.value)}
-                    className="bg-zinc-950 text-zinc-100 text-xs rounded-xl p-3 border border-zinc-900 focus:border-violet-500/40 focus:ring-1 focus:ring-violet-500/20 outline-none cursor-pointer hover:bg-zinc-900 transition-all font-semibold"
+                    className="bg-zinc-950 text-zinc-100 text-xs rounded-xl p-3 border border-zinc-900 focus:border-zinc-700 focus:ring-1 focus:ring-zinc-800 outline-none cursor-pointer hover:bg-zinc-900 transition-all font-semibold"
                   >
                     <option value="groq-autumn">Autumn (Female - Natural)</option>
                     <option value="groq-diana">Diana (Female - Crisp)</option>
@@ -927,30 +927,30 @@ ${code}
               className={cn(
                 "flex items-center justify-center flex-col gap-3.5 p-4 min-h-[175px] backdrop-blur-xl border rounded-2xl flex-1 w-full shadow-2xl relative overflow-hidden transition-all duration-500",
                 callStatus === CallStatus.ACTIVE && isSpeaking
-                  ? "bg-zinc-950/60 border-violet-500/30 shadow-[0_0_50px_rgba(124,58,237,0.1)]"
+                  ? "bg-zinc-950/60 border-zinc-700 shadow-[0_0_50px_rgba(255,255,255,0.03)]"
                   : "bg-zinc-950/20 border-zinc-900"
               )}
             >
               <div className="relative flex justify-center items-center h-16 w-16">
                 {/* Modern circular breathing halo aura */}
                 <div className={cn(
-                  "absolute inset-0 border border-violet-500/10 rounded-full transition-all duration-1000",
-                  callStatus === CallStatus.ACTIVE && isSpeaking ? "scale-110 opacity-100 bg-violet-500/5" : "scale-100 opacity-0"
+                  "absolute inset-0 border border-zinc-700/10 rounded-full transition-all duration-1000",
+                  callStatus === CallStatus.ACTIVE && isSpeaking ? "scale-110 opacity-100 bg-white/5" : "scale-100 opacity-0"
                 )} />
                 <div className={cn(
-                  "absolute inset-1.5 border border-indigo-500/10 rounded-full transition-all duration-1000",
-                  callStatus === CallStatus.ACTIVE && isSpeaking ? "scale-105 opacity-100 bg-indigo-500/5 animate-pulse" : "scale-100 opacity-0"
+                  "absolute inset-1.5 border border-zinc-700/10 rounded-full transition-all duration-1000",
+                  callStatus === CallStatus.ACTIVE && isSpeaking ? "scale-105 opacity-100 bg-white/5 animate-pulse" : "scale-100 opacity-0"
                 )} />
                 
                 {/* Voice core orb */}
                 <div className={cn(
                   "z-10 flex items-center justify-center rounded-full size-[48px] relative border transition-all duration-500 shadow-2xl bg-zinc-950",
                   callStatus === CallStatus.ACTIVE && isSpeaking 
-                    ? "border-violet-500/80 scale-105 shadow-[0_0_20px_rgba(124,58,237,0.25)]" 
+                    ? "border-white scale-105 shadow-[0_0_20px_rgba(255,255,255,0.1)]" 
                     : "border-zinc-800"
                 )}>
                   {/* Glowing core animation */}
-                  <svg className={cn("w-5 h-5 text-violet-400", callStatus === CallStatus.ACTIVE && isSpeaking ? "animate-pulse" : "opacity-60")} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <svg className={cn("w-5 h-5 text-white", callStatus === CallStatus.ACTIVE && isSpeaking ? "animate-pulse" : "opacity-60")} fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <circle cx="12" cy="12" r="9" strokeWidth="1.5" />
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z" />
                   </svg>
@@ -959,7 +959,7 @@ ${code}
               
               <div className="text-center flex flex-col gap-0.5 items-center">
                 <h3 className="text-xs font-bold text-white tracking-wider uppercase">Alex</h3>
-                <span className="text-[8px] text-zinc-450 font-bold tracking-widest bg-zinc-900/60 border border-zinc-850 px-2 py-0.5 rounded-full uppercase">
+                <span className="text-[8px] text-zinc-455 font-bold tracking-widest bg-zinc-900/60 border border-zinc-850 px-2 py-0.5 rounded-full uppercase">
                   AI Voice Interviewer
                 </span>
               </div>
@@ -969,10 +969,10 @@ ${code}
                   {/* Subtle clean visualizer */}
                   {isSpeaking ? (
                     <div className="flex items-end justify-center gap-1 h-3.5">
-                      <div className="w-1 bg-violet-500 rounded-full h-2 animate-[pulse_0.7s_infinite]" />
-                      <div className="w-1 bg-indigo-400 rounded-full h-3.5 animate-[pulse_1s_infinite] delay-100" />
-                      <div className="w-1 bg-violet-400 rounded-full h-2.5 animate-[pulse_0.6s_infinite] delay-200" />
-                      <div className="w-1 bg-indigo-500 rounded-full h-1.5 animate-[pulse_0.8s_infinite] delay-150" />
+                      <div className="w-1 bg-white rounded-full h-2 animate-[pulse_0.7s_infinite]" />
+                      <div className="w-1 bg-zinc-400 rounded-full h-3.5 animate-[pulse_1s_infinite] delay-100" />
+                      <div className="w-1 bg-zinc-350 rounded-full h-2.5 animate-[pulse_0.6s_infinite] delay-200" />
+                      <div className="w-1 bg-white rounded-full h-1.5 animate-[pulse_0.8s_infinite] delay-150" />
                     </div>
                   ) : (
                     <div className="flex items-center gap-1 h-3.5 opacity-35">

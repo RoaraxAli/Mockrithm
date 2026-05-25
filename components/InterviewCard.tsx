@@ -30,17 +30,17 @@ const InterviewCard = ({
     },
     Mixed: {
       label: "Mixed Session",
-      themeColor: "from-violet-500/5 to-transparent",
-      borderColor: "group-hover:border-violet-500/30",
-      textTheme: "text-violet-400 border-violet-500/10 bg-violet-500/5",
-      pulseColor: "bg-violet-400",
+      themeColor: "from-zinc-500/5 to-transparent",
+      borderColor: "group-hover:border-zinc-700",
+      textTheme: "text-white border-zinc-800 bg-zinc-900/60",
+      pulseColor: "bg-white",
     },
     Technical: {
       label: "Technical Protocol",
-      themeColor: "from-cyan-500/5 to-transparent",
-      borderColor: "group-hover:border-cyan-500/30",
-      textTheme: "text-cyan-400 border-cyan-500/10 bg-cyan-500/5",
-      pulseColor: "bg-cyan-400",
+      themeColor: "from-zinc-550/5 to-transparent",
+      borderColor: "group-hover:border-zinc-750",
+      textTheme: "text-zinc-300 border-zinc-800 bg-zinc-900/40",
+      pulseColor: "bg-zinc-400",
     },
   }[normalizedType as "Behavioral" | "Mixed" | "Technical"] || {
     label: "Practice Session",
@@ -126,13 +126,13 @@ const InterviewCard = ({
             <div className="flex flex-col justify-center">
               <div className="flex justify-between items-center">
                 <span className="text-[8px] font-bold text-zinc-500 uppercase tracking-wider">Score</span>
-                <span className={`text-[9px] font-bold tracking-wider ${feedback ? "text-violet-400" : "text-zinc-500"}`}>
+                <span className={`text-[9px] font-bold tracking-wider ${feedback ? "text-white font-black" : "text-zinc-500"}`}>
                   {feedback ? `${matchPercentage}%` : "---"}
                 </span>
               </div>
               <div className="h-1 w-full bg-zinc-800 rounded-full overflow-hidden mt-1">
                 <div
-                  className="h-full bg-violet-500 transition-all duration-1000"
+                  className="h-full bg-white transition-all duration-1000"
                   style={{ width: `${feedback ? matchPercentage : 0}%` }}
                 />
               </div>
