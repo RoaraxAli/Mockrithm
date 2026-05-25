@@ -123,7 +123,7 @@ const InterviewCard = ({
             {role} Assessment
           </h3>
           <p className="text-[10px] font-mono text-cyan-400/80 text-center tracking-widest mt-1 mb-5">
-            [IDENT: MOCK-SYS-{interviewId.slice(0, 6).toUpperCase()}]
+            [IDENT: MOCK-SYS-{interviewId ? interviewId.slice(0, 6).toUpperCase() : "NEW"}]
           </p>
 
           {/* Telemetry Widgets Grid */}

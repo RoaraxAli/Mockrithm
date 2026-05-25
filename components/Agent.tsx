@@ -827,7 +827,7 @@ ${code}
           <div className="flex gap-6 items-center text-slate-400 font-mono text-[10px]">
             <div>
               <span className="text-slate-600 mr-1.5">// ID:</span>
-              <span className="text-slate-300">SYS-{interviewId.slice(0, 8).toUpperCase()}</span>
+              <span className="text-slate-300">SYS-{interviewId ? interviewId.slice(0, 8).toUpperCase() : "GENERATE"}</span>
             </div>
             <div className="max-sm:hidden">
               <span className="text-slate-600 mr-1.5">// MODE:</span>
