@@ -2,25 +2,143 @@
 
 import Link from "next/link";
 import Image from "next/image";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { Sparkles, Terminal, Play, ShieldAlert, Cpu, Activity, User, BookOpen } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import InterviewCard from "./InterviewCard";
+import { auth, db } from "@/firebase/client";
+import { onAuthStateChanged } from "firebase/auth";
+import { doc, getDoc } from "firebase/firestore";
+import SessionTracker from "@/components/SessionTracker";
 
 interface LandingDashboardProps {
-  user: any;
-  userInterviews: any[];
-  allInterviews: any[];
+  user?: any;
+  userInterviews?: any[];
+  allInterviews?: any[];
 }
+
+const SkeletonCard = () => (
+  <div className="h-44 border border-zinc-900 bg-zinc-950/20 rounded-xl animate-pulse flex flex-col justify-between p-6 select-none">
+    <div className="flex justify-between items-start">
+      <div className="space-y-2 w-2/3">
+        <div className="h-3.5 bg-zinc-900 rounded-md w-3/4" />
+        <div className="h-2.5 bg-zinc-900/60 rounded-md w-1/2" />
+      </div>
+      <div className="h-4 bg-zinc-900 rounded-full w-12" />
+    </div>
+    <div className="flex flex-wrap gap-1.5 mt-2">
+      <div className="h-4 bg-zinc-900/50 rounded-md w-12" />
+      <div className="h-4 bg-zinc-900/50 rounded-md w-16" />
+    </div>
+    <div className="flex justify-between items-center border-t border-zinc-900/40 pt-4 mt-2">
+      <div className="h-2 bg-zinc-900 rounded w-1/4" />
+      <div className="h-3.5 bg-zinc-900 rounded w-16" />
+    </div>
+  </div>
+);
 
 export default function LandingDashboard({
   user,
-  userInterviews,
-  allInterviews,
+  userInterviews: initialUserInterviews = [],
+  allInterviews: initialAllInterviews = [],
 }: LandingDashboardProps) {
   const [filter, setFilter] = useState<"all" | "past" | "available">("all");
+  const [userInterviews, setUserInterviews] = useState<any[]>(initialUserInterviews);
+  const [allInterviews, setAllInterviews] = useState<any[]>(initialAllInterviews);
+  const [loadingData, setLoadingData] = useState(true);
+  const [clientUser, setClientUser] = useState<any>(user || null);
+  const [authResolved, setAuthResolved] = useState(false);
+
+  // 1. Subscribe to Client Auth State
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
+      if (firebaseUser) {
+        try {
+          const userDocRef = doc(db, "users", firebaseUser.uid);
+          const userDoc = await getDoc(userDocRef);
+          if (userDoc.exists()) {
+            setClientUser({
+              id: firebaseUser.uid,
+              ...userDoc.data()
+            });
+          } else {
+            setClientUser({
+              id: firebaseUser.uid,
+              email: firebaseUser.email || "",
+              name: firebaseUser.displayName || "User"
+            });
+          }
+        } catch (error) {
+          console.error("Failed to fetch user doc in LandingDashboard:", error);
+          setClientUser({
+            id: firebaseUser.uid,
+            email: firebaseUser.email || "",
+            name: firebaseUser.displayName || "User"
+          });
+        }
+      } else {
+        setClientUser(null);
+      }
+      setAuthResolved(true);
+    });
+
+    return () => unsubscribe();
+  }, []);
+
+  // 2. Load Dashboard Data
+  useEffect(() => {
+    async function loadDashboardData() {
+      try {
+        setLoadingData(true);
+        const userId = clientUser?.id || null;
+
+        const fetchUserInterviewsAction = async () => {
+          if (!userId) return [];
+          const { getInterviewsByUserId, getFeedbackByInterviewId } = await import("@/lib/actions/general.action");
+          const rawUserInterviews = await getInterviewsByUserId(userId) || [];
+          const userInterviewsWithFeedback = await Promise.all(
+            rawUserInterviews.map(async (interview) => {
+              const feedback = await getFeedbackByInterviewId({ interviewId: interview.id, userId });
+              return { ...interview, feedback };
+            })
+          );
+          return userInterviewsWithFeedback;
+        };
+
+        const fetchLatestInterviewsAction = async () => {
+          const { getLatestInterviews, getFeedbackByInterviewId } = await import("@/lib/actions/general.action");
+          const rawAllInterviews = await getLatestInterviews({ userId: userId || "" }) || [];
+          const allInterviewsWithFeedback = await Promise.all(
+            rawAllInterviews.map(async (interview) => {
+              const feedback = userId 
+                ? await getFeedbackByInterviewId({ interviewId: interview.id, userId })
+                : null;
+              return { ...interview, feedback };
+            })
+          );
+          return allInterviewsWithFeedback;
+        };
+
+        const [userInterviewsData, allInterviewsData] = await Promise.all([
+          fetchUserInterviewsAction(),
+          fetchLatestInterviewsAction()
+        ]);
+
+        setUserInterviews(userInterviewsData);
+        setAllInterviews(allInterviewsData);
+      } catch (error) {
+        console.error("Failed to load async dashboard data:", error);
+      } finally {
+        setLoadingData(false);
+      }
+    }
+
+    if (authResolved) {
+      loadDashboardData();
+    }
+  }, [clientUser?.id, authResolved]);
 
   const containerVariants: any = {
     hidden: { opacity: 1 },
@@ -47,6 +165,7 @@ export default function LandingDashboard({
 
   return (
     <div className="w-full flex flex-col font-mona-sans relative z-10">
+      <SessionTracker userId={clientUser?.id || null} />
       {/* Background patterns */}
       <div className="absolute inset-0 premium-grid-dot pointer-events-none opacity-30 z-0" />
       <div className="absolute top-0 left-0 right-0 h-[600px] bg-gradient-to-b from-white/[0.015] to-transparent pointer-events-none z-0" />
@@ -172,12 +291,18 @@ export default function LandingDashboard({
               <User className="size-3.5 text-zinc-400" /> Past Session History
             </h3>
             
-            {userInterviews.length > 0 ? (
+            {loadingData ? (
+              <div className="interviews-section">
+                {[...Array(3)].map((_, i) => (
+                  <SkeletonCard key={i} />
+                ))}
+              </div>
+            ) : userInterviews.length > 0 ? (
               <div className="interviews-section">
                 {userInterviews.map((interview) => (
                   <motion.div key={interview.id} whileHover={{ y: -2 }} className="h-full">
                     <InterviewCard
-                      userId={user?.id}
+                      userId={clientUser?.id}
                       interviewId={interview.id}
                       role={interview.role}
                       type={interview.type}
@@ -204,12 +329,18 @@ export default function LandingDashboard({
               <BookOpen className="size-3.5 text-zinc-400" /> Curated Practice Categories
             </h3>
             
-            {allInterviews.length > 0 ? (
+            {loadingData ? (
+              <div className="interviews-section">
+                {[...Array(3)].map((_, i) => (
+                  <SkeletonCard key={i} />
+                ))}
+              </div>
+            ) : allInterviews.length > 0 ? (
               <div className="interviews-section">
                 {allInterviews.map((interview) => (
                   <motion.div key={interview.id} whileHover={{ y: -2 }} className="h-full">
                     <InterviewCard
-                      userId={user?.id}
+                      userId={clientUser?.id}
                       interviewId={interview.id}
                       role={interview.role}
                       type={interview.type}
