@@ -794,7 +794,7 @@ ${code}
   const currentWpmList = userWPMsRef.current;
   const currentAverageWpm = currentWpmList.length > 0
     ? Math.round(currentWpmList.reduce((a, b) => a + b, 0) / currentWpmList.length)
-    : 135; // Fallback typical conversation rate for aesthetic preview
+    : 135; // Fallback typical conversation rate
 
   const fillerUm = fillerCountsRef.current?.um || 0;
   const fillerLike = fillerCountsRef.current?.like || 0;
@@ -802,74 +802,62 @@ ${code}
   const fillerSo = fillerCountsRef.current?.so || 0;
 
   return (
-    <div className="w-full flex flex-col gap-6 font-mona-sans text-slate-100 selection:bg-cyan-500/30 selection:text-white">
-      {/* Premium Sci-Fi Telemetry Banner Header */}
+    <div className="w-full flex flex-col gap-6 font-mona-sans text-zinc-100 selection:bg-violet-500/30 selection:text-white">
+      {/* Sleek Modern Session Status Bar */}
       {callStatus !== CallStatus.INACTIVE && (
         <motion.div
-          initial={{ opacity: 0, y: -20 }}
+          initial={{ opacity: 0, y: -10 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5 }}
-          className="w-full backdrop-blur-md bg-slate-950/40 border border-slate-900 px-6 py-3 rounded-xl flex items-center justify-between flex-wrap gap-4 shadow-xl"
+          transition={{ duration: 0.4 }}
+          className="w-full backdrop-blur-xl bg-zinc-950/40 border border-zinc-900 px-6 py-3.5 rounded-2xl flex items-center justify-between flex-wrap gap-4 shadow-xl"
         >
           <div className="flex items-center gap-3">
-            <span className="relative flex h-2.5 w-2.5">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-cyan-400 opacity-75"></span>
-              <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-cyan-500"></span>
+            <span className="relative flex h-2 w-2">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-violet-400 opacity-75"></span>
+              <span className="relative inline-flex rounded-full h-2 w-2 bg-violet-500"></span>
             </span>
-            <div className="flex flex-col">
-              <span className="text-[9px] font-mono tracking-[0.2em] text-slate-500 uppercase">EVALUATION CONSOLE</span>
-              <span className="text-[11px] font-mono text-cyan-400 font-bold uppercase tracking-wider">
-                LINK STATE: [ONLINE_ACTIVE]
-              </span>
-            </div>
+            <span className="text-[11px] font-bold text-zinc-300 uppercase tracking-wider">
+              Practice Session Active
+            </span>
           </div>
 
-          <div className="flex gap-6 items-center text-slate-400 font-mono text-[10px]">
+          <div className="flex gap-6 items-center text-zinc-500 text-[11px] font-semibold">
             <div>
-              <span className="text-slate-600 mr-1.5">// ID:</span>
-              <span className="text-slate-300">SYS-{interviewId ? interviewId.slice(0, 8).toUpperCase() : "GENERATE"}</span>
+              <span className="text-zinc-600 mr-1.5">Session ID:</span>
+              <span className="text-zinc-300 font-mono">#{interviewId ? interviewId.slice(0, 8).toUpperCase() : "GENERATE"}</span>
             </div>
             <div className="max-sm:hidden">
-              <span className="text-slate-600 mr-1.5">// MODE:</span>
-              <span className="text-slate-300">{type.toUpperCase()}</span>
+              <span className="text-zinc-600 mr-1.5">Type:</span>
+              <span className="text-zinc-300 uppercase">{type}</span>
             </div>
             <div>
-              <span className="text-slate-600 mr-1.5">// TELEMETRY:</span>
-              <span className="text-emerald-400 font-bold">100% STABLE</span>
+              <span className="text-zinc-600 mr-1.5">Connection:</span>
+              <span className="text-emerald-400 font-bold">Stable</span>
             </div>
           </div>
         </motion.div>
       )}
 
-      {/* Settings Panel: Styled as Cockpit Calibration Unit */}
+      {/* Settings Panel: Styled as Modern Calibration Drawer */}
       {callStatus === CallStatus.INACTIVE && (
         <motion.div 
-          initial={{ opacity: 0, y: 15 }}
+          initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, ease: "easeOut" }}
-          className="w-full max-w-xl mx-auto p-6 backdrop-blur-2xl bg-slate-950/70 rounded-md flex flex-col gap-5 border border-slate-800 shadow-[0_0_50px_rgba(0,0,0,0.8)] relative overflow-hidden group"
+          transition={{ duration: 0.4, ease: "easeOut" }}
+          className="w-full max-w-xl mx-auto p-6 backdrop-blur-2xl bg-zinc-950/40 rounded-2xl flex flex-col gap-5 border border-zinc-900 shadow-2xl relative overflow-hidden group"
         >
-          {/* Neon Top Bar */}
-          <div className="absolute top-0 left-0 w-full h-[2px] bg-slate-800 opacity-40 group-hover:opacity-100 transition-opacity duration-500" />
-          
-          {/* Cybernetic Accent Markers */}
-          <div className="absolute top-0 left-0 w-3 h-3 border-t border-l border-slate-700" />
-          <div className="absolute top-0 right-0 w-3 h-3 border-t border-r border-slate-700" />
-          <div className="absolute bottom-0 left-0 w-3 h-3 border-b border-l border-slate-700" />
-          <div className="absolute bottom-0 right-0 w-3 h-3 border-b border-r border-slate-700" />
-
           <div className="flex items-center justify-between">
-            <h4 className="text-xs font-bold text-white font-mono uppercase tracking-widest flex items-center gap-2.5">
-              <span className="p-1.5 bg-cyan-500/10 rounded-md border border-cyan-500/20">
-                <Settings className="size-4 text-cyan-400 animate-[spin_10s_linear_infinite]" />
+            <h4 className="text-xs font-bold text-white uppercase tracking-widest flex items-center gap-2.5">
+              <span className="p-1.5 bg-violet-500/10 rounded-lg border border-violet-500/25">
+                <Settings className="size-4 text-violet-400" />
               </span>
-              CALIBRATE PROTOCOLS
+              Practice Calibration
             </h4>
             <button
               onClick={() => setShowSettings(!showSettings)}
-              className="text-[10px] font-mono font-bold text-cyan-400 hover:text-cyan-300 cursor-pointer transition-colors duration-200 px-3 py-1.5 bg-slate-950 border border-slate-800 rounded-md hover:border-cyan-500/50 shadow-md"
+              className="text-[10px] font-bold text-violet-400 hover:text-violet-300 cursor-pointer transition-colors duration-200 px-3 py-1.5 bg-zinc-950 border border-zinc-900 rounded-lg hover:border-violet-500/30 shadow-md uppercase tracking-wider"
             >
-              {showSettings ? "CLOSE INTERFACE" : "OPEN OPTIONS"}
+              {showSettings ? "Hide Settings" : "Show Settings"}
             </button>
           </div>
 
@@ -880,30 +868,30 @@ ${code}
                 animate={{ opacity: 1, height: "auto" }}
                 exit={{ opacity: 0, height: 0 }}
                 transition={{ duration: 0.3 }}
-                className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-2 border-t border-slate-900 pt-4 overflow-hidden"
+                className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-2 border-t border-zinc-900 pt-4 overflow-hidden"
               >
                 <div className="flex flex-col gap-2">
-                  <label className="text-[10px] text-slate-400 font-mono uppercase tracking-wider flex items-center gap-1.5">
-                    <Brain className="size-3.5 text-cyan-400" /> AI Diagnostic Model
+                  <label className="text-[10px] text-zinc-500 font-semibold uppercase tracking-wider flex items-center gap-1.5">
+                    <Brain className="size-3.5 text-violet-400" /> Interview Model
                   </label>
                   <select
                     value={selectedModel}
                     onChange={(e) => setSelectedModel(e.target.value)}
-                    className="bg-slate-950 text-slate-100 text-xs rounded-lg p-3 border border-slate-800 focus:border-cyan-500/40 focus:ring-1 focus:ring-cyan-500/20 outline-none cursor-pointer hover:bg-slate-900 transition-all font-mono font-bold"
+                    className="bg-zinc-950 text-zinc-100 text-xs rounded-xl p-3 border border-zinc-900 focus:border-violet-500/40 focus:ring-1 focus:ring-violet-500/20 outline-none cursor-pointer hover:bg-zinc-900 transition-all font-semibold"
                   >
-                    <option value="llama-3.3-70b-versatile">Llama 3.3 70B [REC]</option>
-                    <option value="llama-3.1-8b-instant">Llama 3.1 8B [FAST]</option>
+                    <option value="llama-3.3-70b-versatile">Llama 3.3 70B (Recommended)</option>
+                    <option value="llama-3.1-8b-instant">Llama 3.1 8B (Fast)</option>
                   </select>
                 </div>
 
                 <div className="flex flex-col gap-2">
-                  <label className="text-[10px] text-slate-400 font-mono uppercase tracking-wider flex items-center gap-1.5">
-                    <Volume2 className="size-3.5 text-cyan-400" /> Speech Synthesis Voice
+                  <label className="text-[10px] text-zinc-500 font-semibold uppercase tracking-wider flex items-center gap-1.5">
+                    <Volume2 className="size-3.5 text-violet-400" /> Speech Engine Voice
                   </label>
                   <select
                     value={selectedVoice}
                     onChange={(e) => setSelectedVoice(e.target.value)}
-                    className="bg-slate-950 text-slate-100 text-xs rounded-lg p-3 border border-slate-800 focus:border-cyan-500/40 focus:ring-1 focus:ring-cyan-500/20 outline-none cursor-pointer hover:bg-slate-900 transition-all font-mono font-bold"
+                    className="bg-zinc-950 text-zinc-100 text-xs rounded-xl p-3 border border-zinc-900 focus:border-violet-500/40 focus:ring-1 focus:ring-violet-500/20 outline-none cursor-pointer hover:bg-zinc-900 transition-all font-semibold"
                   >
                     <option value="groq-autumn">Autumn (Female - Natural)</option>
                     <option value="groq-diana">Diana (Female - Crisp)</option>
@@ -920,169 +908,136 @@ ${code}
         </motion.div>
       )}
 
-      {/* Main Split Grid for Interviewing & Sandbox */}
+      {/* Main Split Grid for Practice & Editor */}
       <div className={cn(
         "grid grid-cols-1 gap-8 items-start w-full",
         codingProblem ? "lg:grid-cols-12" : "max-w-4xl mx-auto"
       )}>
         
-        {/* Left Side: Voice Card, Transcript, STAR Checklist */}
+        {/* Left Side: Voice Card, Transcript, STAR Tracker */}
         <div className={cn(
           "flex flex-col gap-6 w-full",
           codingProblem ? "lg:col-span-6" : "col-span-1"
         )}>
           
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 w-full items-stretch">
-            {/* AI Interviewer - alex Concentric Orb Telemetry Capsule */}
+            {/* AI Voice Interviewer Orb Card */}
             <motion.div 
-              whileHover={{ y: -2 }}
+              whileHover={{ y: -1 }}
               className={cn(
-                "flex items-center justify-center flex-col gap-5 p-8 min-h-[340px] backdrop-blur-xl border rounded-md flex-1 w-full shadow-2xl relative overflow-hidden transition-all duration-500",
+                "flex items-center justify-center flex-col gap-5 p-8 min-h-[340px] backdrop-blur-xl border rounded-2xl flex-1 w-full shadow-2xl relative overflow-hidden transition-all duration-500",
                 callStatus === CallStatus.ACTIVE && isSpeaking
-                  ? "bg-slate-950/80 border-cyan-500/30 shadow-[0_0_50px_rgba(6,182,212,0.15)]"
-                  : "bg-slate-950/40 border-slate-800/80"
+                  ? "bg-zinc-950/60 border-violet-500/30 shadow-[0_0_50px_rgba(124,58,237,0.1)]"
+                  : "bg-zinc-950/20 border-zinc-900"
               )}
             >
-              {/* Top Accent Lines */}
-              <div className="absolute top-0 left-0 w-full h-[2px] bg-slate-800" />
-              
               <div className="relative flex justify-center items-center h-36 w-36">
-                {/* Orbital concentric circles rotation */}
+                {/* Modern circular breathing halo aura */}
                 <div className={cn(
-                  "absolute inset-0 border border-dashed border-cyan-500/20 rounded-full",
-                  callStatus === CallStatus.ACTIVE && isSpeaking ? "animate-[spin_30s_linear_infinite] border-cyan-400/40" : "animate-[spin_60s_linear_infinite]"
+                  "absolute inset-0 border border-violet-500/10 rounded-full transition-all duration-1000",
+                  callStatus === CallStatus.ACTIVE && isSpeaking ? "scale-110 opacity-100 bg-violet-500/5" : "scale-100 opacity-0"
                 )} />
                 <div className={cn(
-                  "absolute inset-3 border border-dashed border-violet-500/20 rounded-full",
-                  callStatus === CallStatus.ACTIVE && isSpeaking ? "animate-[spin_15s_linear_infinite_reverse] border-violet-400/40" : "animate-[spin_40s_linear_infinite_reverse]"
+                  "absolute inset-3 border border-indigo-500/10 rounded-full transition-all duration-1000",
+                  callStatus === CallStatus.ACTIVE && isSpeaking ? "scale-105 opacity-100 bg-indigo-500/5 animate-pulse" : "scale-100 opacity-0"
                 )} />
-                <div className="absolute inset-6 border border-slate-800 rounded-full" />
                 
-                {/* Live pulsating concentric core rings */}
-                {callStatus === CallStatus.ACTIVE && isSpeaking && (
-                  <>
-                    <span className="absolute inset-6 bg-cyan-500/10 rounded-full animate-ping opacity-60 pointer-events-none" />
-                    <span className="absolute inset-10 bg-violet-500/10 rounded-full animate-[ping_1.5s_infinite] opacity-40 pointer-events-none" />
-                  </>
-                )}
-
-                {/* Cyber holographic orb mesh container */}
+                {/* Voice core orb */}
                 <div className={cn(
-                  "z-10 flex items-center justify-center rounded-full size-[90px] relative border transition-all duration-500 shadow-2xl overflow-hidden bg-slate-950",
+                  "z-10 flex items-center justify-center rounded-full size-[90px] relative border transition-all duration-500 shadow-2xl bg-zinc-950",
                   callStatus === CallStatus.ACTIVE && isSpeaking 
-                    ? "border-cyan-400 scale-105 shadow-[0_0_30px_rgba(6,182,212,0.3)]" 
-                    : "border-slate-800"
+                    ? "border-violet-500/80 scale-105 shadow-[0_0_30px_rgba(124,58,237,0.25)]" 
+                    : "border-zinc-800"
                 )}>
-                  {/* Holographic AI Sphere Drawing instead of boring avatar file */}
-                  <svg className="w-14 h-14 text-cyan-400 animate-pulse" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364-6.364l-.707.707M6.343 17.657l-.707.707m0-12.728l.707.707m12.728 12.728l.707-.707M12 8a4 4 0 100 8 4 4 0 000-8z" />
-                    <circle cx="12" cy="12" r="2" className="fill-cyan-400 animate-[ping_2s_infinite]" />
+                  {/* Glowing core animation */}
+                  <svg className={cn("w-10 h-10 text-violet-400", callStatus === CallStatus.ACTIVE && isSpeaking ? "animate-pulse" : "opacity-60")} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <circle cx="12" cy="12" r="9" strokeWidth="1.5" />
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z" />
                   </svg>
-                  
-                  {/* Hexagon scanner layout lines */}
-                  <div className="absolute inset-0 bg-transparent pointer-events-none" />
                 </div>
               </div>
               
               <div className="text-center flex flex-col gap-1 items-center">
-                <h3 className="text-base font-bold text-white tracking-widest uppercase font-mono">ALEX // EVALUATOR</h3>
-                <span className="text-[9px] text-cyan-400 font-mono font-bold tracking-widest bg-cyan-500/10 px-2.5 py-0.5 rounded border border-cyan-500/20">
-                  SYS CORE PROMPT
+                <h3 className="text-sm font-bold text-white tracking-wider uppercase">Alex</h3>
+                <span className="text-[9px] text-zinc-400 font-bold tracking-widest bg-zinc-900 border border-zinc-800 px-3 py-1 rounded-full uppercase">
+                  AI Voice Interviewer
                 </span>
               </div>
 
               {callStatus === CallStatus.ACTIVE && (
                 <div className="flex flex-col items-center gap-2.5 w-full mt-2">
-                  {/* Futuristic visualizer bars */}
+                  {/* Subtle clean visualizer */}
                   {isSpeaking ? (
                     <div className="flex items-end justify-center gap-1.5 h-6">
-                      <div className="w-1 bg-cyan-400 rounded-full animate-[pulse_0.7s_infinite] h-5" />
-                      <div className="w-1.5 bg-violet-400 rounded-full animate-[pulse_1s_infinite] h-6" style={{ animationDelay: '0.2s' }} />
-                      <div className="w-1 bg-cyan-300 rounded-full animate-[pulse_0.6s_infinite] h-4" style={{ animationDelay: '0.4s' }} />
-                      <div className="w-1.5 bg-violet-500 rounded-full animate-[pulse_0.9s_infinite] h-7" style={{ animationDelay: '0.1s' }} />
-                      <div className="w-1 bg-cyan-500 rounded-full animate-[pulse_0.8s_infinite] h-3" style={{ animationDelay: '0.3s' }} />
+                      <div className="w-1 bg-violet-500 rounded-full h-4 animate-[pulse_0.7s_infinite]" />
+                      <div className="w-1 bg-indigo-400 rounded-full h-6 animate-[pulse_1s_infinite] delay-100" />
+                      <div className="w-1 bg-violet-400 rounded-full h-5 animate-[pulse_0.6s_infinite] delay-200" />
+                      <div className="w-1 bg-indigo-500 rounded-full h-3 animate-[pulse_0.8s_infinite] delay-150" />
                     </div>
                   ) : (
                     <div className="flex items-center gap-1.5 h-6 opacity-35">
-                      <span className="w-1.5 h-1.5 bg-slate-600 rounded-full animate-ping" />
-                      <span className="w-1.5 h-1.5 bg-slate-600 rounded-full" />
-                      <span className="w-1.5 h-1.5 bg-slate-600 rounded-full" />
+                      <span className="w-1.5 h-1.5 bg-zinc-600 rounded-full" />
+                      <span className="w-1.5 h-1.5 bg-zinc-600 rounded-full animate-ping" />
+                      <span className="w-1.5 h-1.5 bg-zinc-600 rounded-full" />
                     </div>
                   )}
                 </div>
               )}
             </motion.div>
 
-            {/* Candidate Holographic Telemetry Panel */}
+            {/* Candidate Premium Profile Panel */}
             <motion.div 
-              whileHover={{ y: -2 }}
-              className="flex items-center justify-center flex-col gap-4 p-6 min-h-[340px] backdrop-blur-xl border border-slate-800/80 bg-slate-950/40 rounded-2xl flex-1 w-full shadow-2xl relative overflow-hidden transition-all duration-500 max-md:hidden"
+              whileHover={{ y: -1 }}
+              className="flex items-center justify-center flex-col gap-5 p-6 min-h-[340px] backdrop-blur-xl border border-zinc-900 bg-zinc-950/20 rounded-2xl flex-1 w-full shadow-2xl relative overflow-hidden transition-all duration-500 max-md:hidden"
             >
-              {/* Cyber Crosshairs */}
-              <div className="absolute top-3 left-3 w-2.5 h-2.5 border-t border-l border-slate-700" />
-              <div className="absolute top-3 right-3 w-2.5 h-2.5 border-t border-r border-slate-700" />
-              <div className="absolute bottom-3 left-3 w-2.5 h-2.5 border-b border-l border-slate-700" />
-              <div className="absolute bottom-3 right-3 w-2.5 h-2.5 border-b border-r border-slate-700" />
-
               <div className="relative">
-                {callStatus === CallStatus.ACTIVE && !isSpeaking && (
-                  <span className="absolute -inset-4 bg-emerald-500/10 rounded-full animate-ping opacity-60 pointer-events-none" />
-                )}
-                
-                {/* Circular ring telemetry dial */}
-                <div className={cn(
-                  "flex items-center justify-center rounded-full size-[90px] border transition-all duration-500 bg-slate-950 shadow-2xl overflow-hidden",
-                  callStatus === CallStatus.ACTIVE && !isSpeaking
-                    ? "border-emerald-400 scale-105 shadow-[0_0_30px_rgba(16,185,129,0.2)]"
-                    : "border-slate-800"
-                )}>
+                <div className="absolute -inset-1.5 rounded-full bg-gradient-to-tr from-zinc-800 to-zinc-700 group-hover:from-violet-500 group-hover:to-cyan-400 p-[1px] transition-all duration-500" />
+                <div className="relative w-[86px] h-[86px] rounded-full overflow-hidden bg-zinc-900">
                   {profileImage ? (
                     <Image
                       src={profileImage}
                       alt={userName}
-                      width={90}
-                      height={90}
-                      className="rounded-full object-cover size-full transition-transform duration-500"
+                      width={86}
+                      height={86}
+                      className="rounded-full object-cover size-full"
                     />
                   ) : (
-                    <svg className="w-12 h-12 text-slate-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                    </svg>
+                    <div className="w-full h-full flex items-center justify-center bg-zinc-900 border border-zinc-850">
+                      <User className="w-8 h-8 text-zinc-500" />
+                    </div>
                   )}
-                  {/* Cyber matrix layout lines */}
-                  <div className="absolute inset-0 bg-transparent pointer-events-none" />
                 </div>
               </div>
               
               <div className="text-center flex flex-col gap-0.5 items-center w-full">
-                <h3 className="text-sm font-bold text-white tracking-widest uppercase font-mono truncate max-w-[140px]">
+                <h3 className="text-sm font-bold text-white tracking-wide truncate max-w-[140px]">
                   {userName}
                 </h3>
-                <span className="text-[8px] text-slate-400 font-mono tracking-widest uppercase">
-                  CANDIDATE LINK
+                <span className="text-[9px] text-zinc-500 font-bold uppercase tracking-wider">
+                  Candidate Profile
                 </span>
               </div>
 
-              {/* Dynamic verbal diagnostics tracking */}
+              {/* Dynamic stats tracking */}
               {callStatus === CallStatus.ACTIVE && (
-                <div className="w-full flex flex-col gap-2 mt-2 bg-slate-950/60 border border-slate-900/60 p-2.5 rounded-lg">
-                  <div className="flex justify-between items-center text-[9px] font-mono">
-                    <span className="text-slate-500">PACE DIAGNOSTIC</span>
-                    <span className="text-emerald-400 font-bold">{currentAverageWpm} WPM</span>
+                <div className="w-full flex flex-col gap-2.5 mt-2 bg-zinc-950/40 border border-zinc-900 p-3 rounded-xl">
+                  <div className="flex justify-between items-center text-[10px] font-bold">
+                    <span className="text-zinc-500">Speaking Pace</span>
+                    <span className="text-emerald-400">{currentAverageWpm} WPM</span>
                   </div>
-                  {/* Speedometer mini line */}
-                  <div className="w-full h-1 bg-slate-900 rounded-md overflow-hidden">
+                  {/* Speedometer line */}
+                  <div className="w-full h-1 bg-zinc-900 rounded-full overflow-hidden">
                     <div 
-                      className="h-full bg-emerald-500 transition-all duration-500"
+                      className="h-full bg-emerald-400 transition-all duration-500"
                       style={{ width: `${Math.min(100, (currentAverageWpm / 200) * 100)}%` }}
                     />
                   </div>
 
                   {/* Filler words indicator */}
-                  <div className="flex justify-between text-[8px] font-mono text-slate-500 border-t border-slate-900/80 pt-1.5 mt-0.5">
-                    <span>FILLER DETECT:</span>
-                    <span className="text-amber-400/90 font-bold uppercase">
-                      LIKE ({fillerLike}) // UM ({fillerUm}) // UH ({fillerUh})
+                  <div className="flex justify-between text-[9px] font-bold text-zinc-500 border-t border-zinc-900/60 pt-2 mt-0.5">
+                    <span>Fillers Detected:</span>
+                    <span className="text-amber-400">
+                      Like ({fillerLike}) / Um ({fillerUm}) / Uh ({fillerUh})
                     </span>
                   </div>
                 </div>
@@ -1090,88 +1045,84 @@ ${code}
             </motion.div>
           </div>
 
-          {/* Typewriter Holographic Output Console */}
+          {/* Premium Chat Bubble Transcript */}
           {messages.length > 0 && (
             <motion.div 
-              initial={{ opacity: 0, y: 10 }}
+              initial={{ opacity: 0, y: 5 }}
               animate={{ opacity: 1, y: 0 }}
-              className="border border-slate-800 p-0.5 rounded-md w-full shadow-2xl relative overflow-hidden backdrop-blur-xl bg-slate-950/80 shrink-0"
+              className="border border-zinc-900 rounded-2xl w-full shadow-2xl relative overflow-hidden backdrop-blur-xl bg-zinc-950/30"
             >
-              <div className="absolute top-0 left-0 w-full h-[1px] bg-slate-800" />
-              <div className="absolute top-1 left-3 font-mono text-[8px] text-cyan-400/60">// CORE_FEEDBACK_OUTPUT</div>
-              <div className="rounded-md min-h-16 px-6 py-5 flex items-center justify-center border border-slate-900 bg-slate-950/40">
+              <div className="rounded-2xl px-6 py-5 flex items-center justify-center bg-zinc-950/20">
                 <p
                   key={lastMessage}
-                  className="text-xs text-center text-cyan-100 font-mono leading-relaxed animate-fadeIn"
+                  className="text-xs text-center text-zinc-300 font-semibold leading-relaxed animate-fadeIn"
                 >
-                  &gt;&gt; {lastMessage}
+                  "{lastMessage}"
                 </p>
               </div>
             </motion.div>
           )}
 
-          {/* Behavioral STAR Framework Tracker: Premium Light-up Console */}
+          {/* STAR Response Analyzer Board */}
           {callStatus === CallStatus.ACTIVE && (
             <motion.div 
               initial={{ opacity: 0, scale: 0.98 }}
               animate={{ opacity: 1, scale: 1 }}
-              className="p-5 backdrop-blur-2xl bg-slate-950/70 border border-slate-800 rounded-md flex flex-col gap-4 shadow-2xl relative overflow-hidden"
+              className="p-5 backdrop-blur-2xl bg-zinc-950/40 border border-zinc-900 rounded-2xl flex flex-col gap-4 shadow-2xl relative overflow-hidden"
             >
-              <div className="absolute top-0 left-0 w-full h-[2px] bg-slate-800 pointer-events-none" />
-              
-              <div className="flex items-center justify-between border-b border-slate-900 pb-2.5">
-                <h4 className="text-[10px] font-mono font-bold uppercase text-slate-300 tracking-[0.15em] flex items-center gap-2">
-                  <Sparkles className="size-4 text-cyan-400 animate-pulse" />
-                  STAR COGNITIVE DIAGNOSTIC
+              <div className="flex items-center justify-between border-b border-zinc-900 pb-2.5">
+                <h4 className="text-[10px] font-bold uppercase text-zinc-400 tracking-wider flex items-center gap-2">
+                  <Sparkles className="size-4 text-violet-400" />
+                  STAR Response Analyzer
                 </h4>
-                <span className="text-[8px] bg-cyan-500/10 text-cyan-400 font-mono font-bold px-2 py-0.5 rounded border border-cyan-500/25 uppercase tracking-widest">
-                  LIVE TRACKER
+                <span className="text-[8px] bg-violet-500/10 text-violet-400 font-bold px-2 py-0.5 rounded-full border border-violet-500/25 uppercase tracking-wider">
+                  Live Insights
                 </span>
               </div>
               
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
                 {/* Situation */}
                 <div className={cn(
-                  "p-3 rounded-xl border flex flex-col gap-1.5 items-center justify-center text-center transition-all duration-500 backdrop-blur-md font-mono",
+                  "p-3 rounded-xl border flex flex-col gap-1.5 items-center justify-center text-center transition-all duration-500 backdrop-blur-md",
                   starChecklist.situation 
-                    ? "bg-emerald-950/20 border-emerald-500/40 text-emerald-400 shadow-[0_0_15px_rgba(16,185,129,0.1)]" 
-                    : "bg-slate-950/40 border-slate-900 text-slate-600 hover:border-slate-800"
+                    ? "bg-emerald-950/10 border-emerald-500/20 text-emerald-400 shadow-md" 
+                    : "bg-zinc-900/10 border-zinc-900 text-zinc-600 hover:border-zinc-800"
                 )}>
-                  <CheckCircle2 className={cn("size-4.5 transition-colors duration-500", starChecklist.situation ? "text-emerald-400" : "text-slate-800")} />
-                  <span className="text-[9px] font-bold uppercase tracking-wider">SITUATION</span>
+                  <CheckCircle2 className={cn("size-4 transition-colors duration-500", starChecklist.situation ? "text-emerald-400" : "text-zinc-800")} />
+                  <span className="text-[9px] font-bold uppercase tracking-wider">Situation</span>
                 </div>
                 
                 {/* Task */}
                 <div className={cn(
-                  "p-3 rounded-xl border flex flex-col gap-1.5 items-center justify-center text-center transition-all duration-500 backdrop-blur-md font-mono",
+                  "p-3 rounded-xl border flex flex-col gap-1.5 items-center justify-center text-center transition-all duration-500 backdrop-blur-md",
                   starChecklist.task 
-                    ? "bg-emerald-950/20 border-emerald-500/40 text-emerald-400 shadow-[0_0_15px_rgba(16,185,129,0.1)]" 
-                    : "bg-slate-950/40 border-slate-900 text-slate-600 hover:border-slate-800"
+                    ? "bg-emerald-950/10 border-emerald-500/20 text-emerald-400 shadow-md" 
+                    : "bg-zinc-900/10 border-zinc-900 text-zinc-600 hover:border-zinc-800"
                 )}>
-                  <CheckCircle2 className={cn("size-4.5 transition-colors duration-500", starChecklist.task ? "text-emerald-400" : "text-slate-800")} />
-                  <span className="text-[9px] font-bold uppercase tracking-wider">TASK</span>
+                  <CheckCircle2 className={cn("size-4 transition-colors duration-500", starChecklist.task ? "text-emerald-400" : "text-zinc-800")} />
+                  <span className="text-[9px] font-bold uppercase tracking-wider">Task</span>
                 </div>
                 
                 {/* Action */}
                 <div className={cn(
-                  "p-3 rounded-xl border flex flex-col gap-1.5 items-center justify-center text-center transition-all duration-500 backdrop-blur-md font-mono",
+                  "p-3 rounded-xl border flex flex-col gap-1.5 items-center justify-center text-center transition-all duration-500 backdrop-blur-md",
                   starChecklist.action 
-                    ? "bg-emerald-950/20 border-emerald-500/40 text-emerald-400 shadow-[0_0_15px_rgba(16,185,129,0.1)]" 
-                    : "bg-slate-950/40 border-slate-900 text-slate-600 hover:border-slate-800"
+                    ? "bg-emerald-950/10 border-emerald-500/20 text-emerald-400 shadow-md" 
+                    : "bg-zinc-900/10 border-zinc-900 text-zinc-600 hover:border-zinc-800"
                 )}>
-                  <CheckCircle2 className={cn("size-4.5 transition-colors duration-500", starChecklist.action ? "text-emerald-400" : "text-slate-800")} />
-                  <span className="text-[9px] font-bold uppercase tracking-wider">ACTION</span>
+                  <CheckCircle2 className={cn("size-4 transition-colors duration-500", starChecklist.action ? "text-emerald-400" : "text-zinc-800")} />
+                  <span className="text-[9px] font-bold uppercase tracking-wider">Action</span>
                 </div>
                 
                 {/* Result */}
                 <div className={cn(
-                  "p-3 rounded-xl border flex flex-col gap-1.5 items-center justify-center text-center transition-all duration-500 backdrop-blur-md font-mono",
+                  "p-3 rounded-xl border flex flex-col gap-1.5 items-center justify-center text-center transition-all duration-500 backdrop-blur-md",
                   starChecklist.result 
-                    ? "bg-emerald-950/20 border-emerald-500/40 text-emerald-400 shadow-[0_0_15px_rgba(16,185,129,0.1)]" 
-                    : "bg-slate-950/40 border-slate-900 text-slate-600 hover:border-slate-800"
+                    ? "bg-emerald-950/10 border-emerald-500/20 text-emerald-400 shadow-md" 
+                    : "bg-zinc-900/10 border-zinc-900 text-zinc-600 hover:border-zinc-800"
                 )}>
-                  <CheckCircle2 className={cn("size-4.5 transition-colors duration-500", starChecklist.result ? "text-emerald-400" : "text-slate-800")} />
-                  <span className="text-[9px] font-bold uppercase tracking-wider">RESULT</span>
+                  <CheckCircle2 className={cn("size-4 transition-colors duration-500", starChecklist.result ? "text-emerald-400" : "text-zinc-800")} />
+                  <span className="text-[9px] font-bold uppercase tracking-wider">Result</span>
                 </div>
               </div>
 
@@ -1182,18 +1133,18 @@ ${code}
                     initial={{ opacity: 0, y: 5 }}
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0 }}
-                    className="bg-amber-950/20 border border-amber-500/30 text-amber-400 rounded-xl p-3 text-[11px] flex gap-2.5 items-start shadow-md font-mono"
+                    className="bg-amber-950/10 border border-amber-500/20 text-amber-400 rounded-xl p-3.5 text-[11px] flex gap-2.5 items-start shadow-md"
                   >
                     <AlertTriangle className="size-4 shrink-0 mt-0.5 text-amber-400" />
                     <span>
-                      <strong className="text-amber-300 font-bold uppercase">MISSING QUANTIFIABLE DATA:</strong> You described a result, but failed to support it with quantitative metrics (e.g. speedups, exact percentages, dollar amount saved). Provide measurable outcomes.
+                      <strong className="text-amber-300 font-bold uppercase">Missing Quantifiable Data:</strong> You outlined a result, but did not support it with metrics (e.g. speedups, percentages, saved time).
                     </span>
                   </motion.div>
                 )}
               </AnimatePresence>
 
-              <div className="text-[11px] text-cyan-200/90 leading-relaxed bg-slate-950/80 p-3.5 rounded-xl border border-slate-900 font-mono">
-                <span className="text-cyan-400 font-bold uppercase tracking-widest mr-2">// DIAG_COMMENTARY:</span>
+              <div className="text-[11px] text-zinc-400 leading-relaxed bg-zinc-950/40 p-3.5 rounded-xl border border-zinc-900 font-semibold">
+                <span className="text-violet-400 font-bold uppercase tracking-wider mr-2">Evaluation Insights:</span>
                 {starChecklist.feedback}
               </div>
             </motion.div>
@@ -1203,86 +1154,79 @@ ${code}
           <div className="w-full flex justify-center mt-1">
             {callStatus !== "ACTIVE" ? (
               <button 
-                className="relative cursor-pointer flex items-center justify-center font-mono font-bold text-xs bg-cyan-500 text-slate-950 px-8 py-3.5 rounded-lg hover:bg-cyan-400 hover:shadow-[0_0_30px_rgba(6,182,212,0.5)] transition-all duration-300 active:scale-95 border border-cyan-400 shadow-xl overflow-hidden uppercase tracking-[0.15em]" 
+                className="relative cursor-pointer flex items-center justify-center font-bold text-xs bg-white text-black px-8 py-3.5 rounded-full hover:bg-zinc-200 transition-all duration-300 active:scale-95 border border-white shadow-xl uppercase tracking-wider shadow-[0_4px_25px_rgba(255,255,255,0.15)]" 
                 onClick={() => handleCall()}
               >
                 <span
                   className={cn(
-                    "absolute animate-ping rounded-full opacity-40 bg-cyan-400 h-[80%] w-[80%]",
+                    "absolute animate-ping rounded-full opacity-40 bg-zinc-400 h-[80%] w-[80%]",
                     callStatus !== "CONNECTING" && "hidden"
                   )}
                 />
-                <span className="relative flex items-center gap-2 text-black font-extrabold">
+                <span className="relative flex items-center gap-2 font-black">
                   <span className="size-2 rounded-full bg-black animate-pulse" />
-                  {callStatus === "INACTIVE" || callStatus === "FINISHED" ? "ESTABLISH COGNITIVE LINK" : "STREAMING DATALINK..."}
+                  {callStatus === "INACTIVE" || callStatus === "FINISHED" ? "Start Voice Session" : "Connecting..."}
                 </span>
               </button>
             ) : (
               <button 
-                className="cursor-pointer flex items-center justify-center gap-2 font-mono font-bold text-xs bg-rose-600 hover:bg-rose-500 hover:shadow-[0_0_30px_rgba(225,29,72,0.4)] text-white px-8 py-3.5 rounded-lg transition-all duration-300 active:scale-95 border border-rose-500 shadow-xl tracking-[0.15em] uppercase" 
+                className="cursor-pointer flex items-center justify-center gap-2 font-bold text-xs bg-rose-600 hover:bg-rose-500 text-white px-8 py-3.5 rounded-full transition-all duration-300 active:scale-95 border border-rose-500 shadow-xl tracking-wider uppercase hover:shadow-[0_4px_25px_rgba(225,29,72,0.25)]" 
                 onClick={() => handleDisconnect()}
               >
-                <PhoneOff className="size-4" /> DISCONNECT COGNITIVE SESSION
+                <PhoneOff className="size-4" /> End Practice Session
               </button>
             )}
           </div>
         </div>
 
-        {/* Right Side: Technical Coding Sandbox Redesigned as Sliding IDE Workbench */}
+        {/* Right Side: Technical Coding Sandbox Redesigned as Premium IDE */}
         {codingProblem && (
           <motion.div 
             initial={{ opacity: 0, x: 20 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.6, ease: "easeOut" }}
-            className="lg:col-span-6 flex flex-col gap-4 p-5 backdrop-blur-2xl bg-slate-950/70 rounded-2xl border border-slate-800 shadow-[0_0_50px_rgba(0,0,0,0.8)] w-full relative overflow-hidden"
+            className="lg:col-span-6 flex flex-col gap-4 p-5 backdrop-blur-2xl bg-zinc-950/20 rounded-2xl border border-zinc-900 shadow-2xl w-full relative overflow-hidden"
           >
-            {/* Cyber Corner Marks */}
-            <div className="absolute top-0 left-0 w-3 h-3 border-t-2 border-l-2 border-slate-700" />
-            <div className="absolute top-0 right-0 w-3 h-3 border-t-2 border-r-2 border-slate-700" />
-            <div className="absolute bottom-0 left-0 w-3 h-3 border-b-2 border-l-2 border-slate-700" />
-            <div className="absolute bottom-0 right-0 w-3 h-3 border-b-2 border-r-2 border-slate-700" />
-
-            <div className="flex items-center justify-between border-b border-slate-900 pb-3">
-              <h3 className="text-[10px] font-mono font-bold text-slate-300 tracking-[0.2em] uppercase flex items-center gap-2">
-                <Code className="size-4.5 text-cyan-400" />
-                ALGORITHMIC EDITOR WORKBENCH
+            <div className="flex items-center justify-between border-b border-zinc-900 pb-3">
+              <h3 className="text-[10px] font-bold text-zinc-400 tracking-wider uppercase flex items-center gap-2">
+                <Code className="size-4.5 text-violet-400" />
+                Coding Sandbox
               </h3>
-              <span className="bg-cyan-500/10 border border-cyan-500/25 text-cyan-400 font-mono text-[9px] px-3 py-1 rounded-md font-bold uppercase tracking-wider shadow-inner">
-                PROTOCOL // {codingProblem.language.toUpperCase()}
+              <span className="bg-zinc-900 border border-zinc-800 text-zinc-300 font-mono text-[9px] px-3 py-1 rounded-full font-bold uppercase tracking-wider shadow-inner">
+                {codingProblem.language.toUpperCase()}
               </span>
             </div>
 
             {/* Problem Statement Display */}
-            <div className="flex flex-col gap-2 bg-slate-950 border border-slate-900 p-4 rounded-xl max-h-[150px] overflow-y-auto custom-scrollbar relative">
-              <div className="absolute top-1 right-2 font-mono text-[8px] text-slate-600">// DESCR_SPEC</div>
-              <h4 className="text-xs font-mono font-bold text-white flex items-center gap-2 pr-16">
+            <div className="flex flex-col gap-2 bg-zinc-950/40 border border-zinc-900 p-4 rounded-xl max-h-[150px] overflow-y-auto custom-scrollbar relative">
+              <h4 className="text-xs font-bold text-white flex items-center gap-2">
                 <Lightbulb className="size-4 text-amber-400 shrink-0" />
                 {codingProblem.title}
               </h4>
-              <p className="text-[11px] text-slate-400 whitespace-pre-line leading-relaxed font-medium mt-1">
+              <p className="text-[11px] text-zinc-400 whitespace-pre-line leading-relaxed font-semibold mt-1">
                 {codingProblem.description}
               </p>
             </div>
 
-            {/* Premium Code Textarea with custom brackets, lines, and glassmorphic look */}
+            {/* Premium Code Textarea */}
             <div className="flex flex-col gap-0 relative">
               {/* IDE Top Window Bar */}
-              <div className="flex px-4 py-2.5 border border-slate-800 rounded-t-xl text-[9px] text-slate-400 font-mono flex-row justify-between items-center bg-slate-950/90 shadow-md">
+              <div className="flex px-4 py-2.5 border border-zinc-900 rounded-t-xl text-[9px] text-zinc-500 font-semibold flex-row justify-between items-center bg-zinc-950/60 shadow-md">
                 <div className="flex items-center gap-2">
-                  <span className="w-2 h-2 rounded-full bg-rose-500/70" />
-                  <span className="w-2 h-2 rounded-full bg-amber-500/70" />
-                  <span className="w-2 h-2 rounded-full bg-emerald-500/70" />
-                  <span className="ml-2 text-slate-300 font-bold">solution.{codingProblem.language === "python" ? "py" : "ts"}</span>
+                  <span className="w-2 h-2 rounded-full bg-rose-500/40" />
+                  <span className="w-2 h-2 rounded-full bg-amber-500/40" />
+                  <span className="w-2 h-2 rounded-full bg-emerald-500/40" />
+                  <span className="ml-2 text-zinc-400 font-bold">solution.{codingProblem.language === "python" ? "py" : "ts"}</span>
                 </div>
-                <span className="text-[8px] uppercase font-bold tracking-widest text-cyan-400 bg-cyan-500/10 px-2 py-0.5 rounded border border-cyan-500/20">
-                  SANDBOX STATUS: RUNNING
+                <span className="text-[8px] uppercase font-bold tracking-widest text-violet-400 bg-violet-500/10 px-2.5 py-0.5 rounded-full border border-violet-500/20">
+                  Ready
                 </span>
               </div>
 
               {/* Gutter + TextArea Container */}
-              <div className="relative flex items-stretch border border-t-0 border-slate-800 rounded-b-xl overflow-hidden bg-slate-950/50 shadow-[inset_0_4px_16px_rgba(0,0,0,0.85)]">
+              <div className="relative flex items-stretch border border-t-0 border-zinc-900 rounded-b-xl overflow-hidden bg-zinc-950/10 shadow-[inset_0_4px_16px_rgba(0,0,0,0.4)]">
                 {/* Gutter Line Numbers Simulation */}
-                <div className="w-9 bg-slate-950/80 border-r border-slate-900 font-mono text-[10px] text-slate-600 py-4 select-none flex flex-col items-center gap-1.5 leading-relaxed text-right pr-2">
+                <div className="w-9 bg-zinc-950/40 border-r border-zinc-900/60 font-mono text-[10px] text-zinc-600 py-4 select-none flex flex-col items-center gap-1.5 leading-relaxed text-right pr-2">
                   {Array.from({ length: 15 }).map((_, i) => (
                     <div key={i}>{String(i + 1).padStart(2, "0")}</div>
                   ))}
@@ -1291,8 +1235,8 @@ ${code}
                 <textarea
                   value={code}
                   onChange={(e) => handleCodeChange(e.target.value)}
-                  placeholder="// Implement your algorithm here... alex will observe your code logic."
-                  className="font-mono bg-transparent text-cyan-100 text-xs py-4 px-4 w-full h-[320px] outline-none focus:ring-0 resize-none leading-relaxed"
+                  placeholder="// Implement your algorithm here... Alex will observe your code logic."
+                  className="font-mono bg-transparent text-zinc-200 text-xs py-4 px-4 w-full h-[320px] outline-none focus:ring-0 resize-none leading-relaxed"
                   disabled={callStatus !== CallStatus.ACTIVE}
                 />
               </div>
@@ -1301,22 +1245,22 @@ ${code}
               <AnimatePresence>
                 {isCodingStuck && callStatus === CallStatus.ACTIVE && (
                   <motion.div 
-                    initial={{ opacity: 0, y: 15 }}
+                    initial={{ opacity: 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: 15 }}
-                    className="absolute bottom-4 left-4 right-4 bg-slate-950 border border-violet-500/40 text-violet-400 rounded-xl p-3.5 text-xs flex gap-3 items-center justify-between shadow-[0_10px_30px_rgba(0,0,0,0.8)] backdrop-blur-xl"
+                    exit={{ opacity: 0, y: 10 }}
+                    className="absolute bottom-4 left-4 right-4 bg-zinc-950 border border-violet-500/20 text-violet-400 rounded-xl p-3.5 text-xs flex gap-3 items-center justify-between shadow-2xl backdrop-blur-xl"
                   >
                     <div className="flex gap-2.5 items-center">
                       <div className="p-1.5 bg-violet-500/10 rounded-lg border border-violet-500/20 animate-pulse">
                         <Lightbulb className="size-4 text-violet-400" />
                       </div>
-                      <span className="font-mono font-bold text-slate-200">System detected stalled state. Trigger helper?</span>
+                      <span className="font-semibold text-zinc-300">Need a hint with your code?</span>
                     </div>
                     <Button
                       onClick={requestSocraticHint}
-                      className="h-8 text-[9px] font-mono font-bold uppercase tracking-wider px-3.5 rounded-lg bg-violet-600 text-white hover:bg-violet-500 border border-violet-500/30 cursor-pointer shadow-lg active:scale-95"
+                      className="h-8 text-[9px] font-bold uppercase tracking-wider px-3.5 rounded-lg bg-violet-600 text-white hover:bg-violet-500 border border-violet-500/30 cursor-pointer shadow-lg active:scale-95"
                     >
-                      REQUEST SCRIPT
+                      Get Hint
                     </Button>
                   </motion.div>
                 )}
@@ -1329,9 +1273,9 @@ ${code}
                 <Button
                   variant="outline"
                   onClick={requestSocraticHint}
-                  className="text-[9px] font-mono font-bold uppercase tracking-widest px-4 py-2 h-9 border border-slate-900 text-slate-400 hover:bg-slate-900 hover:text-white hover:border-cyan-500/30 transition-all rounded-lg cursor-pointer"
+                  className="text-[9px] font-bold uppercase tracking-widest px-4 py-2 h-9 border border-zinc-900 text-zinc-500 hover:bg-zinc-900 hover:text-white hover:border-violet-500/30 transition-all rounded-lg cursor-pointer"
                 >
-                  <Sparkles className="size-3.5 text-cyan-400" /> REQUEST SOCRATIC SCRIPTS
+                  <Sparkles className="size-3.5 text-violet-400" /> Request Socratic Hint
                 </Button>
               </div>
             )}

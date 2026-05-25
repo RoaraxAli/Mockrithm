@@ -5,7 +5,7 @@ import { Toaster } from "sonner";
 import AuthLayout from "@/components/Authlayout";
 import FooterWrapper from "@/components/shared/FooterWrapper";
 import { getCurrentUser } from "@/lib/actions/auth.action";
-import { Analytics } from "@vercel/analytics/next"
+import { Analytics } from "@vercel/analytics/react";
 
 import "./globals.css";
 
