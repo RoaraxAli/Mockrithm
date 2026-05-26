@@ -19,6 +19,7 @@ import { Button } from "@/components/ui/button";
 import { Eye, EyeOff, Loader2 } from "lucide-react";
 
 import { signIn, signUp, checkRateLimit, recordLoginAttempt, checkEmailExists } from "@/lib/actions/auth.action";
+import { hasUploadedResume } from "@/lib/actions/resume.action";
 import FormField from "./FormField";
 
 const authFormSchema = (type: FormType) => {
@@ -121,13 +122,19 @@ const AuthForm = ({ type }: { type: FormType }) => {
 
         if (email === "ahmed@gmail.com") {
           localStorage.setItem("isAdmin", "true");
-          router.push("/admin");
+          router.replace("/admin");
         } else {
           localStorage.removeItem("isAdmin");
-          router.push("/");
+          
+          const uid = userCredential.user.uid;
+          const hasResume = await hasUploadedResume(uid);
+          
+          if (!hasResume) {
+            router.replace("/user/onboarding");
+          } else {
+            router.replace("/user/dashboard");
+          }
         }
-
-        router.refresh();
       }
     } catch (error) {
       console.error(error);
