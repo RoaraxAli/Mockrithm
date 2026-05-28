@@ -17,6 +17,7 @@ const nextConfig = {
   typescript: {
     ignoreBuildErrors: true,
   },
+  serverExternalPackages: ["pdf-parse"],
 } as any;
 
 export default nextConfig;

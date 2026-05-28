@@ -4,9 +4,9 @@ import { useState, useEffect } from "react"
 import { useAuthState } from "react-firebase-hooks/auth"
 import { auth } from "@/firebase/client"
 import type { User, Interview, Feedback } from "@/app/user/types"
-import { getUserData, getUserInterviews, getUserFeedback } from "../lib/firestore"
-import { DashboardCard } from "../components/DashboardCard"
-import { DashboardSkeleton } from "../components/Skeletons"
+import { getUserData, getUserInterviews, getUserFeedback } from "@/app/user/lib/firestore"
+import { DashboardCard } from "@/app/user/components/DashboardCard"
+import { DashboardSkeleton } from "@/app/user/components/Skeletons"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 
 export default function DashboardPage() {
@@ -32,8 +32,9 @@ export default function DashboardPage() {
         setUserData(userDataResult)
         setInterviews(interviewsResult)
         setFeedback(feedbackResult)
-      } catch (err) {
-        setError("Failed to load dashboard data")
+      } catch (err: any) {
+        console.error("Dashboard fetch error:", err)
+        setError(`Failed to load dashboard data: ${err.message || err}`)
       } finally {
         setLoading(false)
       }

@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react"
 import { useParams } from "next/navigation"
 import type { Interview, Feedback } from "@/app/user/types"
-import { getInterviewById, getInterviewFeedback } from "../../lib/firestore"
+import { getInterviewById, getInterviewFeedback } from "@/app/user/lib/firestore"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"

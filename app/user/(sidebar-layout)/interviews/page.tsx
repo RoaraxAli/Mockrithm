@@ -4,9 +4,9 @@ import { useState, useEffect } from "react"
 import { useAuthState } from "react-firebase-hooks/auth"
 import { auth } from "@/firebase/client"
 import type { Interview} from "@/app/user/types"
-import { getUserInterviews } from "../lib/firestore"
-import { InterviewTable } from "../components/InterviewTable"
-import { TableSkeleton } from "../components/Skeletons"
+import { getUserInterviews } from "@/app/user/lib/firestore"
+import { InterviewTable } from "@/app/user/components/InterviewTable"
+import { TableSkeleton } from "@/app/user/components/Skeletons"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 
 export default function InterviewsPage() {

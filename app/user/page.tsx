@@ -16,7 +16,7 @@ export default function UserPage() {
         router.push("/user/dashboard")
       } else {
         // Redirect to login page or show login form
-        router.push("/login")
+        router.push("/sign-in")
       }
     }
   }, [user, loading, router])
