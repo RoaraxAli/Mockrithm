@@ -32,7 +32,7 @@ export default function WorkspaceGateway() {
           initial={{ opacity: 0, x: -20 }}
           animate={{ opacity: 1, x: 0 }}
           transition={{ delay: 0.1 }}
-          onClick={() => router.push("/user/onboarding/upload")}
+          onClick={() => router.push("/user/dashboard/resume/upload")}
           className="group relative cursor-pointer"
         >
           <div className="absolute inset-0 bg-gradient-to-br from-cyan-500/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 rounded-3xl blur-xl" />
@@ -61,7 +61,7 @@ export default function WorkspaceGateway() {
           initial={{ opacity: 0, x: 20 }}
           animate={{ opacity: 1, x: 0 }}
           transition={{ delay: 0.2 }}
-          onClick={() => router.push("/user/onboarding/templates")}
+          onClick={() => router.push("/user/dashboard/resume/templates")}
           className="group relative cursor-pointer"
         >
           <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 rounded-3xl blur-xl" />

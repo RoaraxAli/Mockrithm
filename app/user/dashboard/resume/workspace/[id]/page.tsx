@@ -3,11 +3,12 @@ import { getResumeById } from "@/lib/actions/resume.action";
 import { redirect } from "next/navigation";
 import ResumeWorkspace from "@/components/resume/builder/ResumeWorkspace";
 
-export default async function WorkspacePage({ params }: { params: { id: string } }) {
+export default async function WorkspacePage({ params }: { params: Promise<{ id: string }> }) {
+  const resolvedParams = await params;
   const user = await getCurrentUser();
   if (!user) redirect("/sign-in");
 
-  const resume = await getResumeById(user.id, params.id);
+  const resume = await getResumeById(user.id, resolvedParams.id);
 
   if (!resume) {
     return (

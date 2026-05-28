@@ -5,11 +5,12 @@ import { redirect } from "next/navigation";
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 
-export default async function ResumeAnalysisPage({ params }: { params: { id: string } }) {
+export default async function ResumeAnalysisPage({ params }: { params: Promise<{ id: string }> }) {
+  const resolvedParams = await params;
   const user = await getCurrentUser();
   if (!user) redirect("/sign-in");
 
-  const resume = await getResumeById(user.id, params.id);
+  const resume = await getResumeById(user.id, resolvedParams.id);
 
   if (!resume) {
     return (

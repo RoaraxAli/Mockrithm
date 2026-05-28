@@ -54,7 +54,12 @@ const parsedResumeSchema = z.object({
 
 export async function POST(request: Request) {
   try {
-    const pdf = require("pdf-parse");
+    // Polyfill DOMMatrix for Node.js environment (required by pdf-parse/pdfjs-dist)
+    if (typeof globalThis.DOMMatrix === "undefined") {
+      (globalThis as any).DOMMatrix = class DOMMatrix {
+        constructor() {}
+      };
+    }
     // 1. Authenticate user
     const user = await getCurrentUser();
     if (!user) {
@@ -79,7 +84,9 @@ export async function POST(request: Request) {
 
     // 3. Extract text using pdf-parse
     const buffer = await file.arrayBuffer();
-    const pdfData = await pdf(Buffer.from(buffer));
+    const pdfModule = require("pdf-parse");
+    const pdfParseFunc = typeof pdfModule === "function" ? pdfModule : (pdfModule.default || pdfModule);
+    const pdfData = await pdfParseFunc(Buffer.from(buffer));
     const extractedText = pdfData.text;
 
     if (!extractedText || extractedText.trim().length === 0) {

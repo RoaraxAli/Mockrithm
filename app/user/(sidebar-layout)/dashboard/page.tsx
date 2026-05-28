@@ -32,8 +32,9 @@ export default function DashboardPage() {
         setUserData(userDataResult)
         setInterviews(interviewsResult)
         setFeedback(feedbackResult)
-      } catch (err) {
-        setError("Failed to load dashboard data")
+      } catch (err: any) {
+        console.error("Dashboard fetch error:", err)
+        setError(`Failed to load dashboard data: ${err.message || err}`)
       } finally {
         setLoading(false)
       }
