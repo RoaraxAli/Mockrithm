@@ -12,7 +12,8 @@ const FooterWrapper = () => {
     "/forgot-password",
     "/reset-password",
     "/verify-code",
-    "/admin" 
+    "/admin",
+    "/user"
   ];
 
   const shouldHideFooter = hiddenRoutes.some((route) =>

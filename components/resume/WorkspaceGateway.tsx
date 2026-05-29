@@ -9,24 +9,24 @@ export default function WorkspaceGateway() {
   const router = useRouter();
 
   return (
-    <div className="flex flex-col items-center max-w-5xl mx-auto w-full py-12">
+    <div className="flex flex-col items-center max-w-5xl mx-auto w-full py-6 md:py-12">
       <motion.div 
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="text-center mb-12"
+        className="text-center mb-6 md:mb-12"
       >
-        <div className="inline-flex items-center justify-center p-3 bg-cyan-950/50 border border-cyan-500/30 rounded-2xl mb-6 shadow-[0_0_30px_rgba(6,182,212,0.2)]">
+        <div className="inline-flex items-center justify-center p-3 bg-cyan-950/50 border border-cyan-500/30 rounded-2xl mb-4 md:mb-6 shadow-[0_0_30px_rgba(6,182,212,0.2)]">
           <Sparkles className="size-8 text-cyan-400" />
         </div>
-        <h1 className="text-4xl md:text-5xl font-black text-white tracking-tight mb-4">
+        <h1 className="text-3xl md:text-5xl font-black text-white tracking-tight mb-3 md:mb-4">
           Choose Your Path
         </h1>
-        <p className="text-lg text-slate-400 max-w-2xl mx-auto">
+        <p className="text-sm md:text-lg text-slate-400 max-w-2xl mx-auto px-2">
           Create a standout resume tailored for ATS success. Import your existing data or start fresh with a premium template.
         </p>
       </motion.div>
 
-      <div className="grid md:grid-cols-2 gap-8 w-full max-w-4xl">
+      <div className="grid md:grid-cols-2 gap-4 md:gap-8 w-full max-w-4xl px-2">
         {/* Path 1: Upload PDF */}
         <motion.div 
           initial={{ opacity: 0, x: -20 }}
