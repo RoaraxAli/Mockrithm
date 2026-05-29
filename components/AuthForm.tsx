@@ -113,10 +113,15 @@ const AuthForm = ({ type }: { type: FormType }) => {
           return;
         }
 
-        await signIn({
+        const signInResult = await signIn({
           email,
           idToken,
         });
+
+        if (!signInResult || !signInResult.success) {
+          toast.error(signInResult?.message || "Failed to establish a secure session. Please try again.");
+          return;
+        }
 
         toast.success("Signed in successfully.");
 
