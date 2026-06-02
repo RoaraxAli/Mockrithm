@@ -1,19 +1,19 @@
-import { getCurrentUser } from "@/lib/actions/auth.action";
-import { getUserResumes } from "@/lib/actions/resume.action";
-import { redirect } from "next/navigation";
-import Link from "next/link";
-import { FileText, Plus, Activity, ArrowRight, Calendar } from "lucide-react";
-import WorkspaceGateway from "@/components/resume/WorkspaceGateway";
-import { Sidebar } from "@/app/user/components/Sidebar";
-import HeroSection from "@/components/resume/HeroSection";
+import { getCurrentUser } from '@/lib/actions/auth.action';
+import { getUserResumes } from '@/lib/actions/resume.action';
+import { redirect } from 'next/navigation';
+import Link from 'next/link';
+import { FileText, Plus, Activity, ArrowRight, Calendar } from 'lucide-react';
+import WorkspaceGateway from '@/components/resume/WorkspaceGateway';
+import { Sidebar } from '@/app/user/components/Sidebar';
+import HeroSection from '@/components/resume/HeroSection';
 
 export default async function ResumeDashboardPage() {
   const user = await getCurrentUser();
-  if (!user) redirect("/sign-in");
+  if (!user) redirect('/sign-in');
 
   const resumes = await getUserResumes(user.id);
 
-  // 1. Onboarding Mode (0 resumes): Fullscreen, no sidebar, responsive padding, no scroll unless overflows
+  // Onboarding Mode (no resumes)
   if (resumes.length === 0) {
     return (
       <div className="min-h-screen w-full bg-black flex items-center justify-center p-4 sm:p-6 md:p-8">
@@ -22,14 +22,13 @@ export default async function ResumeDashboardPage() {
     );
   }
 
-  // 2. Dashboard Mode (1+ resumes): Render with the standard Sidebar layout manually
+  // Dashboard Mode
   return (
     <div className="flex h-screen bg-transparent">
       <Sidebar />
       <main className="flex-1 overflow-y-auto bg-transparent">
         <div className="p-8 max-w-6xl mx-auto w-full font-mona-sans animate-fadeIn">
           <HeroSection />
-
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {resumes.map((resume) => {
               const atsScore = resume.atsAnalysis?.atsScore || 0;
@@ -47,7 +46,6 @@ export default async function ResumeDashboardPage() {
                         {resume.fileName}
                       </span>
                     </div>
-
                     <div className="flex items-center gap-1.5 text-[10px] font-mono font-bold text-slate-500 uppercase">
                       <Calendar className="size-3.5" />
                       {date}
@@ -65,7 +63,6 @@ export default async function ResumeDashboardPage() {
                         {atsScore}%
                       </span>
                     </div>
-
                     <Link
                       href={`/user/dashboard/resume/analysis/${resume.id}`}
                       className="flex items-center gap-1 text-[10px] font-mono font-bold text-white uppercase tracking-wider group-hover:text-gray-300 transition-colors"

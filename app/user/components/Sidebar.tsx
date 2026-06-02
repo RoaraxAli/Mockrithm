@@ -14,6 +14,7 @@ import {
 const navigation = [
   { name: "Dashboard", href: "/user/dashboard", icon: LayoutDashboard },
   { name: "Take Interview", href: "/user/take-interview", icon: PlayCircle },
+  { name: "Resume Dashboard", href: "/user/resume/dashboard", icon: LayoutDashboard },
   { name: "Resume Builder", href: "/user/resume", icon: Sparkles },
   { name: "Your Interviews", href: "/user/interviews", icon: FileText },
   { name: "Feedback", href: "/user/feedback", icon: MessageSquare },

@@ -69,6 +69,9 @@ const AuthForm = ({ type }: { type: FormType }) => {
           password
         );
 
+        // Sign out immediately so they have to manually log in
+        await auth.signOut();
+
         const result = await signUp({
           uid: userCredential.user.uid,
           name: name!,

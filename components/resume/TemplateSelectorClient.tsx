@@ -4,55 +4,181 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import { createResumeFromTemplate } from "@/lib/actions/resume.action";
-import { Layout, Check, Sparkles, Loader2, ArrowRight } from "lucide-react";
+import { Layout, Check, Sparkles, Loader2, ArrowRight, User, Briefcase, Calendar } from "lucide-react";
 import { toast } from "sonner";
+import { Props } from "next/script";
 
-interface Props {
-  userId: string;
+// Sample data for mini-resume previews (same as before)
+const SAMPLE_PROFILES = {
+  minimal: {
+    name: "Alex Johnson",
+    title: "Software Engineer",
+    summary: "Full‑stack developer with 5+ years experience building scalable web applications.",
+    skills: ["JavaScript", "React", "Node.js", "TypeScript", "AWS"],
+    experience: [
+      { role: "Senior Engineer", company: "TechCorp", years: "2021‑Present" },
+      { role: "Developer", company: "WebStart", years: "2018‑2021" }
+    ],
+    education: [{ degree: "B.Sc. Computer Science", school: "State University", year: "2018" }]
+  },
+  corporate: {
+    name: "Maria Lopez",
+    title: "Financial Analyst",
+    summary: "Analytical professional with 6 years in banking and investment analysis.",
+    skills: ["Excel", "Financial Modeling", "SQL", "PowerBI", "Risk Management"],
+    experience: [
+      { role: "Senior Analyst", company: "Global Bank", years: "2020‑Present" },
+      { role: "Analyst", company: "Capital Advisors", years: "2017‑2020" }
+    ],
+    education: [{ degree: "M.B.A. Finance", school: "Harvard Business School", year: "2017" }]
+  },
+  cyber: {
+    name: "Samir Patel",
+    title: "Full‑Stack Developer",
+    summary: "Passionate about cutting‑edge web tech and building performant UI/UX.",
+    skills: ["React", "Next.js", "Tailwind", "GraphQL", "Docker"],
+    experience: [
+      { role: "Lead Engineer", company: "Neon Labs", years: "2022‑Present" },
+      { role: "Junior Developer", company: "Pixel Forge", years: "2020‑2022" }
+    ],
+    education: [{ degree: "B.Tech Computer Engineering", school: "MIT", year: "2020" }]
+  },
+  modern: {
+    name: "Lena Chen",
+    title: "Creative Designer",
+    summary: "Design specialist with a focus on brand identity and digital experiences.",
+    skills: ["Figma", "Adobe CC", "UI/UX", "Brand Strategy", "Illustration"],
+    experience: [
+      { role: "Senior Designer", company: "CreativeWorks", years: "2021‑Present" },
+      { role: "Designer", company: "Studio 9", years: "2018‑2021" }
+    ],
+    education: [{ degree: "B.A. Visual Communication", school: "Art Institute", year: "2018" }]
+  },
+  creative: {
+    name: "Jenna Ruiz",
+    title: "Content Creator & Copywriter",
+    summary: "Storyteller crafting compelling copy for brands across media platforms.",
+    skills: ["Copywriting", "SEO", "Social Media", "WordPress", "Video Editing"],
+    experience: [
+      { role: "Lead Content Strategist", company: "MediaSpark", years: "2019‑Present" },
+      { role: "Freelance Writer", company: "Various", years: "2016‑2019" }
+    ],
+    education: [{ degree: "B.Sc. Journalism", school: "Columbia University", year: "2016" }]
+  },
+  academic: {
+    name: "Daniel Kim",
+    title: "Ph.D. Candidate in Biology",
+    summary: "Researcher focused on cellular signaling pathways and gene expression analysis.",
+    skills: ["R", "Python", "Bioinformatics", "NGS", "Lab Techniques"],
+    experience: [
+      { role: "Research Assistant", company: "University Lab", years: "2019‑Present" }
+    ],
+    education: [
+      { degree: "M.Sc. Molecular Biology", school: "UCLA", year: "2019" },
+      { degree: "B.Sc. Biochemistry", school: "UCLA", year: "2017" }
+    ]
+  }
+};
+
+function MiniResumeCard({ templateId }: { templateId: string }) {
+  const profile = SAMPLE_PROFILES[templateId];
+  if (!profile) return null;
+  const { name, title, summary, skills, experience, education } = profile;
+  const gradientMap: Record<string, string> = {
+    minimal: "from-gray-800 to-gray-700",
+    corporate: "from-indigo-800 to-indigo-600",
+    cyber: "from-purple-800 to-pink-600",
+    modern: "from-blue-800 to-cyan-600",
+    creative: "from-pink-800 to-red-600",
+    executive: "from-green-800 to-emerald-600",
+    academic: "from-yellow-800 to-amber-600",
+  };
+  const gradient = gradientMap[templateId] || "from-gray-800 to-gray-700";
+  return (
+    <motion.div
+      className={`bg-gradient-to-br ${gradient} rounded-xl shadow-xl p-4 text-gray-200 text-xs overflow-hidden`}
+      initial={{ opacity: 0, scale: 0.9 }}
+      animate={{ opacity: 1, scale: 1 }}
+      whileHover={{ scale: 1.03, rotate: 0.5 }}
+      transition={{ duration: 0.6 }}
+    >
+      {/* Header with avatar */}
+      <div className="flex items-center mb-2">
+        <div className="w-8 h-8 bg-gray-300 rounded-full flex items-center justify-center text-xs mr-2 text-gray-800">
+          {name.split(' ')[0][0]}
+          {name.split(' ')[1] ? name.split(' ')[1][0] : ''}
+        </div>
+        <div>
+          <div className="font-bold text-white">{name}</div>
+          <div className="italic text-gray-300">{title}</div>
+        </div>
+      </div>
+      <p className="mb-2 text-gray-100">{summary}</p>
+      <div className="mb-2"><span className="font-semibold text-white">Skills:</span> {skills.join(', ')}</div>
+      <div className="mb-2"><span className="font-semibold text-white">Experience:</span>
+        <ul className="list-disc list-inside">
+          {experience.map((exp: any, i: number) => (
+            <li key={i}>{exp.role} @ {exp.company} ({exp.years})</li>
+          ))}
+        </ul>
+      </div>
+      <div className="mb-2"><span className="font-semibold text-white">Education:</span>
+        <ul className="list-disc list-inside">
+          {education.map((ed: any, i: number) => (
+            <li key={i}>{ed.degree}, {ed.school} ({ed.year})</li>
+          ))}
+        </ul>
+      </div>
+    </motion.div>
+  );
+}
+
+function renderPreview(id: string) {
+  return <MiniResumeCard templateId={id} />;
 }
 
 const TEMPLATES = [
   {
     id: "minimal",
     name: "Minimalist",
-    description: "Ultra-clean, single-column design focused on clarity and readability. Highly recommended for standard ATS engines.",
-    color: "from-slate-600 to-slate-800",
-    tags: ["ATS Friendly", "Clean", "Universal"]
+    color: "from-white/10 to-white/5",
+    tags: ["ATS Friendly", "Clean", "Universal"],
   },
   {
     id: "corporate",
     name: "Classic Corporate",
-    description: "Traditional corporate layout with structured dividers. Ideal for banking, finance, consulting, and management roles.",
-    color: "from-blue-600 to-blue-800",
-    tags: ["Professional", "Structured", "Traditional"]
-  },
+    color: "from-white/10 to-white/5",
+    tags: ["Professional", "Structured", "Traditional"],
+    },
   {
     id: "cyber",
     name: "Tech & Cyberpunk",
-    description: "Vibrant accents, futuristic fonts, and dark/neon accents. Perfect for front-end developers, game devs, and creative technologists.",
-    color: "from-cyan-500 to-indigo-600",
-    tags: ["Tech", "Modern", "Creative"]
+    color: "from-white/10 to-white/5",
+    tags: ["Tech", "Modern", "Creative"],
   },
   {
     id: "modern",
     name: "Modern Sidebar",
-    description: "A sleek two-column layout separating contact details and skills from core professional experience. Great for designers and marketers.",
-    color: "from-emerald-500 to-teal-700",
-    tags: ["Two-Column", "Designer", "Sleek"]
+    color: "from-white/10 to-white/5",
+    tags: ["Two-Column", "Designer", "Sleek"],
   },
   {
     id: "creative",
     name: "Vibrant Creative",
-    description: "Bold headings and artistic highlights designed to stand out. Recommended for content creators, copywriters, and UI/UX designers.",
-    color: "from-pink-500 to-rose-600",
-    tags: ["Artistic", "Bold", "Impactful"]
+    color: "from-white/10 to-white/5",
+    tags: ["Artistic", "Bold", "Impactful"],
+  },
+  {
+    id: "executive",
+    name: "Executive Leader",
+    color: "from-white/10 to-white/5",
+    tags: ["Executive", "Formal", "Leadership"],
   },
   {
     id: "academic",
     name: "Academic CV",
-    description: "Extended spacing, formal typography, and sections built for publications, teaching, and research grants. Built for academia.",
-    color: "from-amber-600 to-orange-700",
-    tags: ["Academic", "Extended", "Detailed"]
+    color: "from-white/10 to-white/5",
+    tags: ["Academic", "Extended", "Detailed"],
   }
 ];
 
@@ -88,22 +214,12 @@ export default function TemplateSelectorClient({ userId }: Props) {
           key={tpl.id}
           whileHover={{ y: -4 }}
           onClick={() => !isSubmitting && handleSelect(tpl.id)}
-          className={`group cursor-pointer relative rounded-2xl bg-slate-900 border border-slate-800 p-6 flex flex-col justify-between hover:border-cyan-500/50 hover:shadow-[0_0_30px_rgba(6,182,212,0.1)] transition-all ${
-            isSubmitting && selectedId === tpl.id ? "border-cyan-500" : ""
+          className={`group cursor-pointer relative rounded-2xl bg-slate-900 border border-slate-800 p-6 flex flex-col justify-between hover:border-white/20 hover:shadow-xl transition-all ${
+            isSubmitting && selectedId === tpl.id ? "border-white" : ""
           }`}
         >
           <div>
-            <div className={`h-32 rounded-xl bg-gradient-to-br ${tpl.color} relative overflow-hidden flex items-center justify-center mb-6`}>
-              <div className="absolute inset-0 bg-slate-950/20 backdrop-blur-[1px]" />
-              <Layout className="size-12 text-white/40 group-hover:text-white/60 group-hover:scale-110 transition-all duration-300 relative z-10" />
-              {isSubmitting && selectedId === tpl.id ? (
-                <div className="absolute inset-0 bg-slate-950/80 flex flex-col items-center justify-center gap-2 z-20">
-                  <Loader2 className="size-6 text-cyan-400 animate-spin" />
-                  <span className="text-[10px] font-mono text-cyan-400 font-bold uppercase tracking-wider">Creating...</span>
-                </div>
-              ) : null}
-            </div>
-
+            {/* Tags */}
             <div className="flex flex-wrap gap-1.5 mb-3">
               {tpl.tags.map((tag) => (
                 <span key={tag} className="text-[9px] font-mono font-bold px-2 py-0.5 rounded bg-slate-950 text-slate-400 uppercase border border-slate-850">
@@ -112,13 +228,22 @@ export default function TemplateSelectorClient({ userId }: Props) {
               ))}
             </div>
 
+            {/* Title */}
             <h3 className="text-xl font-bold text-white mb-2 flex items-center justify-between">
               {tpl.name}
-              <ArrowRight className="size-4 text-cyan-400 opacity-0 group-hover:opacity-100 group-hover:translate-x-1 transition-all duration-300" />
+              <ArrowRight className="size-4 text-white opacity-0 group-hover:opacity-100 group-hover:translate-x-1 transition-all duration-300" />
             </h3>
-            <p className="text-xs text-slate-400 leading-relaxed font-medium mb-6">
+            {/* Description */}
+            <p className="text-xs text-slate-400 leading-relaxed font-medium mb-2">
               {tpl.description}
             </p>
+            {/* Audience label */}
+            <p className="text-sm text-gray-300 italic mb-4">{tpl.audience}</p>
+
+            {/* Mini resume preview */}
+            <div className="bg-slate-950/30 backdrop-blur-xl rounded-xl p-4 border border-slate-800 mb-4">
+              {renderPreview(tpl.id)}
+            </div>
           </div>
 
           <div className="w-full h-[1px] bg-slate-850 mb-4" />
@@ -128,7 +253,7 @@ export default function TemplateSelectorClient({ userId }: Props) {
             className={`w-full py-2.5 rounded-lg border font-mono font-bold text-xs uppercase tracking-wider transition-all flex items-center justify-center gap-2 ${
               isSubmitting && selectedId === tpl.id
                 ? "bg-slate-900 border-slate-800 text-slate-500 cursor-not-allowed"
-                : "bg-cyan-500/10 border-cyan-500/20 hover:border-cyan-500/50 hover:bg-cyan-500 text-cyan-400 hover:text-slate-950"
+                : "bg-white/5 border-white/10 hover:border-white/20 hover:bg-white hover:text-black text-white"
             }`}
           >
             {isSubmitting && selectedId === tpl.id ? (
@@ -137,7 +262,7 @@ export default function TemplateSelectorClient({ userId }: Props) {
               </>
             ) : (
               <>
-                <Sparkles className="size-3.5" /> Start Building
+                <Sparkles className="size-3.5" /> Use Template
               </>
             )}
           </button>
