@@ -99,6 +99,8 @@ interface GetLatestInterviewsParams {
 interface SignInParams {
   email: string;
   idToken: string;
+  uid?: string;
+  displayName?: string;
 }
 
 interface SignUpParams {

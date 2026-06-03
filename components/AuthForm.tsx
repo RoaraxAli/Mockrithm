@@ -119,6 +119,8 @@ const AuthForm = ({ type }: { type: FormType }) => {
         const signInResult = await signIn({
           email,
           idToken,
+          uid: userCredential.user.uid,
+          displayName: userCredential.user.displayName || undefined,
         });
 
         if (!signInResult || !signInResult.success) {
@@ -135,8 +137,7 @@ const AuthForm = ({ type }: { type: FormType }) => {
           localStorage.removeItem("isAdmin");
         }
 
-        const uid = userCredential.user.uid;
-        const hasResume = await hasUploadedResume(uid);
+        const hasResume = signInResult.hasResume;
 
         if (!hasResume) {
           router.replace("/user/dashboard/resume");

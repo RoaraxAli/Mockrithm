@@ -2,6 +2,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
+import { signOut as serverSignOut } from "@/lib/actions/auth.action";
 import { gsap } from "gsap";
 import { auth } from "@/firebase/client";
 import {
@@ -119,9 +120,11 @@ export function AdminSidebar() {
     }
   };
 
+
 const handleLogout = async () => {
   try {
     await auth.signOut();        // Log out properly
+    await serverSignOut();
     router.push("/sign-in");     // Then navigate to sign-in
   } catch (error) {
     console.error("Logout failed:", error);

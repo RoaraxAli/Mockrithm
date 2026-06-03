@@ -1,5 +1,6 @@
 "use server";
 
+import { cache } from "react";
 import { generateObject } from "ai";
 import { google } from "@ai-sdk/google";
 
@@ -91,9 +92,9 @@ export async function getInterviewById(id: string): Promise<Interview | null> {
   return interview.data() as Interview | null;
 }
 
-export async function getFeedbackByInterviewId(
+export const getFeedbackByInterviewId = cache(async (
   params: GetFeedbackByInterviewIdParams
-): Promise<Feedback | null> {
+): Promise<Feedback | null> => {
   const { interviewId, userId } = params;
 
   const querySnapshot = await db
@@ -106,11 +107,23 @@ export async function getFeedbackByInterviewId(
 
   const feedbackDoc = querySnapshot.docs[0];
   return { id: feedbackDoc.id, ...feedbackDoc.data() } as Feedback;
-}
+});
 
-export async function getLatestInterviews(
+export const getFeedbacksForUser = cache(async (userId: string): Promise<Feedback[]> => {
+  if (!userId) return [];
+  const querySnapshot = await db
+    .collection("interviewsfeedback")
+    .where("userId", "==", userId)
+    .get();
+  return querySnapshot.docs.map((doc) => ({
+    id: doc.id,
+    ...doc.data(),
+  })) as Feedback[];
+});
+
+export const getLatestInterviews = cache(async (
   params: GetLatestInterviewsParams
-): Promise<Interview[] | null> {
+): Promise<Interview[] | null> => {
   const { userId, limit = 20 } = params;
 
   // Fetch recent interviews and filter in memory to avoid index requirements
@@ -130,11 +143,11 @@ export async function getLatestInterviews(
       interview.userId !== userId
     )
     .slice(0, limit) as Interview[];
-}
+});
 
-export async function getInterviewsByUserId(
+export const getInterviewsByUserId = cache(async (
   userId: string
-): Promise<Interview[] | null> {
+): Promise<Interview[] | null> => {
   const querySnapshot = await db
     .collection("interviews")
     .where("userId", "==", userId)
@@ -150,4 +163,4 @@ export async function getInterviewsByUserId(
     const bTime = b.createdAt?.toDate ? b.createdAt.toDate().getTime() : new Date(b.createdAt).getTime();
     return bTime - aTime;
   });
-}
+});

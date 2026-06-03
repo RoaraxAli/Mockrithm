@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getResumeById } from "@/lib/actions/resume.action";
 import puppeteer from "puppeteer";
+import { getCurrentUser } from "@/lib/actions/auth.action";
 
 // Function to compile HTML depending on the template selected
 function compileHtml(parsedData: any) {
@@ -405,6 +406,14 @@ export async function POST(req: NextRequest) {
 
     if (!resumeId || !userId) {
       return NextResponse.json({ error: "Missing parameters" }, { status: 400 });
+    }
+
+    const currentUser = await getCurrentUser();
+    if (!currentUser || currentUser.id !== userId) {
+      return NextResponse.json(
+        { error: "Forbidden: Tenant isolation violation." },
+        { status: 403 }
+      );
     }
 
     const resume = await getResumeById(userId, resumeId);

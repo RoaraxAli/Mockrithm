@@ -16,6 +16,8 @@ import { auth, db } from "@/firebase/client";
 import { useRouter } from "next/navigation";
 import { doc, getDoc } from "firebase/firestore";
 
+import { signOut as serverSignOut } from "@/lib/actions/auth.action";
+
 export function AdminNavbar() {
   const [adminName, setAdminName] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
@@ -53,6 +55,7 @@ export function AdminNavbar() {
   const handleLogout = async () => {
     try {
       await auth.signOut();
+      await serverSignOut();
       router.push("/sign-in");
     } catch (error) {
       console.error("Logout failed:", error);

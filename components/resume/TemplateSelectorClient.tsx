@@ -7,6 +7,7 @@ import { createResumeFromTemplate } from "@/lib/actions/resume.action";
 import { Layout, Check, Sparkles, Loader2, ArrowRight, User, Briefcase, Calendar } from "lucide-react";
 import { toast } from "sonner";
 import { Props } from "next/script";
+import AnimatedResumeCard from "./AnimatedResumeCard";
 
 // Sample data for mini-resume previews (same as before)
 const SAMPLE_PROFILES = {
@@ -134,7 +135,7 @@ function MiniResumeCard({ templateId }: { templateId: string }) {
 }
 
 function renderPreview(id: string) {
-  return <MiniResumeCard templateId={id} />;
+  return <AnimatedResumeCard templateId={id} />;
 }
 
 const TEMPLATES = [

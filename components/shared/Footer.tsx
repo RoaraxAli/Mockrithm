@@ -1,80 +1,132 @@
-import React from 'react';
-import { Bot } from 'lucide-react';
-import { Separator } from '@/components/ui/separator';
+import React from "react"
+import Link from "next/link"
+import Image from "next/image"
+import { Terminal, Cloud, Shield } from "lucide-react"
 
 interface FooterProps {
-  className?: string;
+  className?: string
 }
 
-const Footer: React.FC<FooterProps> = ({ className = '' }) => {
-  const currentYear = new Date().getFullYear();
-
-  const navigationLinks = [
-    { href: '/', label: 'Home' },
-    { href: '/about', label: 'About' },
-    { href: '/contact', label: 'Contact' },
-  ];
-
+const Footer: React.FC<FooterProps> = ({ className = "" }) => {
   return (
-    <footer className={`bg-black text-white border-t border-white/10 ${className}`}>
-      <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 lg:py-10">
-        {/* Main Footer Content */}
-        <div className="flex flex-col lg:flex-row items-center justify-between gap-6 lg:gap-8">
-          {/* Brand Section */}
-          <div className="flex items-center space-x-3 flex-shrink-0">
-            <div className="bg-white rounded-lg p-2 transition-transform duration-200 hover:scale-105">
-              <Bot className="h-5 w-5 sm:h-6 sm:w-6 text-black" />
-            </div>
-            <div className="text-center lg:text-left">
-              <h3 className="text-lg sm:text-xl font-semibold tracking-tight">Mockrithm</h3>
-              <p className="text-xs sm:text-sm text-gray-400 mt-0.5">Face the Machine</p>
-            </div>
-          </div>
-
-          {/* Navigation Links */}
-          <nav className="flex flex-col sm:flex-row items-center gap-4 sm:gap-6 lg:gap-8">
-            {navigationLinks.map((link, index) => (
-              <React.Fragment key={link.label}>
-                <a
-                  href={link.href}
-                  className="text-sm sm:text-base text-gray-300 hover:text-white transition-all duration-200 font-medium relative group px-2 py-1 rounded-md hover:bg-white/5"
-                >
-                  {link.label}
-                  <span className="absolute -bottom-1 left-1/2 transform -translate-x-1/2 w-0 h-0.5 bg-white transition-all duration-300 group-hover:w-3/4" />
-                </a>
-                {/* Separator - only show on larger screens between items */}
-                {index < navigationLinks.length - 1 && (
-                  <Separator 
-                    orientation="vertical" 
-                    className="hidden sm:block h-4 lg:h-5 bg-white/20" 
-                  />
-                )}
-              </React.Fragment>
-            ))}
-          </nav>
-        </div>
-
-        {/* Divider */}
-        <Separator className="my-6 sm:my-8 bg-white/10" />
-
-        {/* Bottom Section */}
-        <div className="flex flex-col sm:flex-row items-center justify-between gap-4 sm:gap-6">
-          {/* Copyright */}
-          <p className="text-xs sm:text-sm text-gray-400 text-center sm:text-left order-2 sm:order-1">
-            © {currentYear} AI Interview. All rights reserved.
-          </p>
+    <footer className={`w-full bg-black text-white px-4 pb-8 pt-4 z-10 relative font-mona-sans ${className}`}>
+      <div className="max-w-7xl mx-auto border border-white/10 bg-zinc-950/40 rounded-2xl p-8 sm:p-10 relative overflow-hidden backdrop-blur-md">
+        
+        {/* Ambient top glowing line */}
+        <div className="absolute top-0 left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-white/10 to-transparent" />
+        
+        {/* Main Grid structure */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-8 lg:gap-6 mb-12">
           
-          {/* Powered by indicator */}
-          <div className="flex items-center space-x-2 order-1 sm:order-2">
-            <div className="w-2 h-2 bg-white rounded-full animate-pulse" />
-            <span className="text-xs sm:text-sm text-gray-400 font-medium whitespace-nowrap">
-              Powered by AI Technology
+          {/* Column 1: Brand Info */}
+          <div className="lg:col-span-1 flex flex-col gap-4">
+            <Link href="/" className="flex items-center space-x-2.5">
+              <div className="bg-white p-1.5 rounded-lg border border-white/10 shrink-0">
+                <Image
+                  src="/logo.svg"
+                  alt="Mockrithm Logo"
+                  width={18}
+                  height={18}
+                  className="w-4.5 h-4.5"
+                />
+              </div>
+              <span className="text-[14px] font-black tracking-wider text-white uppercase">
+                Mockrithm
+              </span>
+            </Link>
+
+            <div className="flex flex-col gap-1">
+              <p className="text-[11px] text-zinc-400 font-semibold leading-relaxed">
+                The future of career intelligence.
+              </p>
+              <div className="flex items-center gap-1.5 text-[10px] text-zinc-400 font-bold mt-1">
+                <span>System Status:</span>
+                <span className="text-white bg-zinc-900 border border-zinc-800 px-2 py-0.5 rounded-md text-[9px] font-black tracking-wide uppercase">
+                  Operational
+                </span>
+              </div>
+            </div>
+
+            <span className="text-[10px] text-zinc-600 font-bold tracking-widest mt-auto">
+              V2.4.0
             </span>
           </div>
+
+          {/* Column 2: Platform */}
+          <div className="flex flex-col gap-3">
+            <h4 className="text-[10px] font-black uppercase tracking-widest text-white border-b border-white/5 pb-1">
+              Platform
+            </h4>
+            <div className="flex flex-col gap-2">
+              <Link href="/" className="text-[10.5px] text-zinc-400 hover:text-white font-medium transition-colors">
+                Home
+              </Link>
+              <Link href="/about" className="text-[10.5px] text-zinc-400 hover:text-white font-medium transition-colors">
+                About Us
+              </Link>
+              <Link href="/contact" className="text-[10.5px] text-zinc-400 hover:text-white font-medium transition-colors">
+                Contact & Support
+              </Link>
+            </div>
+          </div>
+
+          {/* Column 3: Features */}
+          <div className="flex flex-col gap-3">
+            <h4 className="text-[10px] font-black uppercase tracking-widest text-white border-b border-white/5 pb-1">
+              Features
+            </h4>
+            <div className="flex flex-col gap-2">
+              <Link href="/user/take-interview" className="text-[10.5px] text-zinc-400 hover:text-white font-medium transition-colors">
+                Mock Interviews
+              </Link>
+              <Link href="/user/resume" className="text-[10.5px] text-zinc-400 hover:text-white font-medium transition-colors">
+                Resume Builder
+              </Link>
+              <Link href="/user/resume/dashboard" className="text-[10.5px] text-zinc-400 hover:text-white font-medium transition-colors">
+                Resume Analyzer
+              </Link>
+            </div>
+          </div>
+
+          {/* Column 4: Account */}
+          <div className="flex flex-col gap-3">
+            <h4 className="text-[10px] font-black uppercase tracking-widest text-white border-b border-white/5 pb-1">
+              Account
+            </h4>
+            <div className="flex flex-col gap-2">
+              <Link href="/user/dashboard" className="text-[10.5px] text-zinc-400 hover:text-white font-medium transition-colors">
+                Dashboard
+              </Link>
+              <Link href="/user/interviews" className="text-[10.5px] text-zinc-400 hover:text-white font-medium transition-colors">
+                Activity History
+              </Link>
+              <Link href="/user/profile" className="text-[10.5px] text-zinc-400 hover:text-white font-medium transition-colors">
+                Profile Settings
+              </Link>
+              <Link href="/user/feedback" className="text-[10.5px] text-zinc-400 hover:text-white font-medium transition-colors">
+                Platform Feedback
+              </Link>
+            </div>
+          </div>
+
         </div>
+
+        {/* Bottom Row */}
+        <div className="flex flex-col sm:flex-row items-center justify-between gap-4 border-t border-white/5 pt-6 mt-6">
+          <p className="text-[10px] text-zinc-550 font-bold uppercase tracking-wider">
+            © 2024 Mockrithm Inc. Built for the ambitious.
+          </p>
+
+          <div className="flex items-center gap-4 text-zinc-400">
+            <Terminal className="w-4 h-4 hover:text-white transition-colors cursor-pointer" />
+            <Cloud className="w-4 h-4 hover:text-white transition-colors cursor-pointer" />
+            <Shield className="w-4 h-4 hover:text-white transition-colors cursor-pointer" />
+          </div>
+        </div>
+
       </div>
     </footer>
-  );
-};
+  )
+}
 
-export default Footer;
+export default Footer

@@ -6,6 +6,7 @@ import { usePathname, useRouter } from "next/navigation"
 import { cn } from "@/lib/utils"
 import { auth } from "@/firebase/client"
 import { signOut } from "firebase/auth"
+import { signOut as serverSignOut } from "@/lib/actions/auth.action"
 import { 
   LayoutDashboard, PlayCircle, FileText, MessageSquare, User, Sparkles, 
   Home, LogOut 
@@ -28,7 +29,8 @@ export function Sidebar() {
   const handleLogout = async () => {
     try {
       await signOut(auth)
-      router.push("/sign-in")
+      await serverSignOut()
+      window.location.href = "/sign-in"
     } catch (error) {
       console.error("Logout failed:", error)
     }

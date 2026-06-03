@@ -4,6 +4,7 @@ import { google } from "@ai-sdk/google";
 import { z } from "zod";
 import { db } from "@/firebase/admin";
 import { getRandomInterviewCover } from "@/lib/utils";
+import { getCurrentUser } from "@/lib/actions/auth.action";
 
 const setupSchema = z.object({
   role: z.string(),
@@ -21,6 +22,14 @@ export async function POST(request: Request) {
       return NextResponse.json(
         { error: "Conversation history and user ID are required." },
         { status: 400 }
+      );
+    }
+
+    const currentUser = await getCurrentUser();
+    if (!currentUser || currentUser.id !== userid) {
+      return NextResponse.json(
+        { error: "Forbidden: Tenant isolation violation." },
+        { status: 403 }
       );
     }
 
