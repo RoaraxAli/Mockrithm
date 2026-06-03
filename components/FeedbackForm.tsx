@@ -103,7 +103,7 @@ export default function ContactPage() {
         initial={{ opacity: 0, y: 30 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.8 }}
-        className="relative z-10 pt-24 pb-16 px-6 overflow-hidden border-b border-zinc-900 bg-zinc-950/10"
+        className="relative z-10 pt-14 pb-16 px-6 overflow-hidden border-b border-zinc-900 bg-zinc-950/10"
       >
         <div className="max-w-6xl mx-auto text-center">
           {/* Status Badge */}
@@ -238,7 +238,6 @@ export default function ContactPage() {
                           <FormControl>
                             <Input
                               {...field}
-                              readOnly
                               className="bg-zinc-950/60 border-zinc-800 text-white placeholder:text-zinc-700 h-12 rounded-lg focus:border-white/30 focus:ring-1 focus:ring-white/10 transition-all duration-200"
                             />
                           </FormControl>
@@ -258,7 +257,6 @@ export default function ContactPage() {
                           <FormControl>
                             <Input
                               {...field}
-                              readOnly
                               className="bg-zinc-950/60 border-zinc-800 text-white placeholder:text-zinc-700 h-12 rounded-lg focus:border-white/30 focus:ring-1 focus:ring-white/10 transition-all duration-200"
                             />
                           </FormControl>

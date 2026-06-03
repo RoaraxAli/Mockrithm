@@ -94,31 +94,31 @@ export default function LandingDashboard({
         setLoadingData(true);
         const userId = clientUser?.id || null;
 
+        // Fetch user feedback in a single batched query if user is logged in
+        let feedbackMap = new Map();
+        if (userId) {
+          const { getFeedbacksForUser } = await import("@/lib/actions/general.action");
+          const userFeedbacks = await getFeedbacksForUser(userId) || [];
+          feedbackMap = new Map(userFeedbacks.map((f) => [f.interviewId, f]));
+        }
+
         const fetchUserInterviewsAction = async () => {
           if (!userId) return [];
-          const { getInterviewsByUserId, getFeedbackByInterviewId } = await import("@/lib/actions/general.action");
+          const { getInterviewsByUserId } = await import("@/lib/actions/general.action");
           const rawUserInterviews = await getInterviewsByUserId(userId) || [];
-          const userInterviewsWithFeedback = await Promise.all(
-            rawUserInterviews.map(async (interview) => {
-              const feedback = await getFeedbackByInterviewId({ interviewId: interview.id, userId });
-              return { ...interview, feedback };
-            })
-          );
-          return userInterviewsWithFeedback;
+          return rawUserInterviews.map((interview) => ({
+            ...interview,
+            feedback: feedbackMap.get(interview.id) || null,
+          }));
         };
 
         const fetchLatestInterviewsAction = async () => {
-          const { getLatestInterviews, getFeedbackByInterviewId } = await import("@/lib/actions/general.action");
+          const { getLatestInterviews } = await import("@/lib/actions/general.action");
           const rawAllInterviews = await getLatestInterviews({ userId: userId || "" }) || [];
-          const allInterviewsWithFeedback = await Promise.all(
-            rawAllInterviews.map(async (interview) => {
-              const feedback = userId 
-                ? await getFeedbackByInterviewId({ interviewId: interview.id, userId })
-                : null;
-              return { ...interview, feedback };
-            })
-          );
-          return allInterviewsWithFeedback;
+          return rawAllInterviews.map((interview) => ({
+            ...interview,
+            feedback: feedbackMap.get(interview.id) || null,
+          }));
         };
 
         const [userInterviewsData, allInterviewsData] = await Promise.all([

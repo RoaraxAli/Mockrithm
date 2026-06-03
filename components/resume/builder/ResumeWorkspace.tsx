@@ -152,8 +152,8 @@ export default function ResumeWorkspace({ initialResume }: Props) {
           <div className="flex items-center gap-2 text-xs font-mono text-slate-500 bg-slate-950 px-3 py-1.5 rounded-full border border-slate-800">
             {isSaving ? (
               <>
-                <Loader2 className="size-3 animate-spin text-cyan-500" />
-                <span className="text-cyan-500">Saving...</span>
+                <Loader2 className="size-3 animate-spin text-white" />
+                <span className="text-white">Saving...</span>
               </>
             ) : (
               <>
@@ -167,16 +167,16 @@ export default function ResumeWorkspace({ initialResume }: Props) {
         <div className="flex items-center gap-3">
           <button
             onClick={() => setIsAtsOpen(true)}
-            className="flex items-center gap-1.5 text-xs font-mono font-bold text-cyan-400 uppercase tracking-wider hover:bg-cyan-950/20 border border-cyan-500/30 px-3.5 py-2 rounded-lg bg-cyan-950/10 shadow-[0_0_12px_rgba(6,182,212,0.1)] transition-all"
+            className="flex items-center gap-1.5 text-xs font-mono font-bold text-white uppercase tracking-wider hover:bg-white/10 border border-white/20 px-3.5 py-2 rounded-lg bg-white/5 shadow-sm transition-all"
           >
-            <Activity className="size-4 text-cyan-400" />
+            <Activity className="size-4 text-white" />
             {atsAnalysis?.atsScore ? `ATS Score: ${atsAnalysis.atsScore}%` : "Run ATS Scan"}
           </button>
           
           <button
             onClick={handleExportPDF}
             disabled={isExporting}
-            className="flex items-center gap-2 bg-indigo-500 hover:bg-indigo-400 disabled:opacity-50 text-white font-bold px-4 py-2 rounded-lg transition-all shadow-[0_0_15px_rgba(99,102,241,0.3)] text-sm uppercase tracking-wider"
+            className="flex items-center gap-2 bg-white hover:bg-gray-200 disabled:opacity-50 text-black font-bold px-4 py-2 rounded-lg transition-all shadow-md text-sm uppercase tracking-wider"
           >
             {isExporting ? <Loader2 className="size-4 animate-spin" /> : <Download className="size-4" />}
             Export PDF
@@ -205,7 +205,7 @@ export default function ResumeWorkspace({ initialResume }: Props) {
             {/* Header */}
             <div className="h-16 border-b border-slate-900 flex items-center justify-between px-6 shrink-0 bg-slate-900/30">
               <div className="flex items-center gap-2">
-                <Activity className="size-5 text-cyan-400" />
+                <Activity className="size-5 text-white" />
                 <h2 className="text-lg font-mono font-bold text-white uppercase tracking-wider">ATS Optimizer</h2>
               </div>
               <button 
@@ -221,7 +221,7 @@ export default function ResumeWorkspace({ initialResume }: Props) {
               
               {/* Target Job Input */}
               <div className="flex flex-col gap-3 p-4 rounded-xl bg-slate-900/40 border border-slate-850">
-                <span className="text-[9px] font-mono tracking-widest text-cyan-450 uppercase flex items-center gap-1.5">
+                <span className="text-[9px] font-mono tracking-widest text-slate-300 uppercase flex items-center gap-1.5">
                   <Sparkles className="size-3.5" /> Context Tailoring
                 </span>
                 <p className="text-xs text-slate-400 font-semibold leading-relaxed">
@@ -232,12 +232,12 @@ export default function ResumeWorkspace({ initialResume }: Props) {
                   onChange={(e) => setJobDescription(e.target.value)}
                   placeholder="Paste target job responsibilities, skills, qualifications..."
                   rows={4}
-                  className="bg-slate-950 text-slate-100 text-xs rounded border border-slate-800 p-3 outline-none focus:border-cyan-500/40 font-mono resize-none"
+                  className="bg-slate-950 text-slate-100 text-xs rounded border border-slate-800 p-3 outline-none focus:border-white/40 font-mono resize-none"
                 />
                 <button
                   onClick={handleRunAtsAnalysis}
                   disabled={isAnalyzing}
-                  className="w-full py-2.5 rounded bg-cyan-500 hover:bg-cyan-400 disabled:opacity-50 text-slate-950 font-mono font-bold text-xs uppercase tracking-wider flex items-center justify-center gap-2 transition-all shadow-[0_0_12px_rgba(6,182,212,0.2)]"
+                  className="w-full py-2.5 rounded bg-white hover:bg-gray-200 disabled:opacity-50 text-black font-mono font-bold text-xs uppercase tracking-wider flex items-center justify-center gap-2 transition-all shadow-md"
                 >
                   {isAnalyzing ? (
                     <>
@@ -259,7 +259,7 @@ export default function ResumeWorkspace({ initialResume }: Props) {
                   <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 items-center p-4 bg-slate-900/30 rounded-xl border border-slate-900">
                     <div className="flex flex-col items-center justify-center gap-2 sm:border-r border-slate-900 py-2">
                       <span className="text-[8px] font-mono text-slate-500 uppercase tracking-widest">MATCH RATING</span>
-                      <span className={`text-4xl font-black font-mono ${atsAnalysis.atsScore >= 80 ? 'text-emerald-400' : atsAnalysis.atsScore >= 60 ? 'text-cyan-400' : 'text-rose-400'}`}>
+                      <span className={`text-4xl font-black font-mono ${atsAnalysis.atsScore >= 80 ? 'text-gray-200' : atsAnalysis.atsScore >= 60 ? 'text-gray-400' : 'text-gray-500'}`}>
                         {atsAnalysis.atsScore}%
                       </span>
                     </div>
@@ -281,13 +281,13 @@ export default function ResumeWorkspace({ initialResume }: Props) {
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     
                     {/* Missing */}
-                    <div className="p-4 rounded-xl bg-rose-950/5 border border-rose-900/20 flex flex-col gap-3">
-                      <span className="text-[9px] font-mono font-bold uppercase tracking-widest text-rose-450 flex items-center gap-1.5">
+                    <div className="p-4 rounded-xl bg-slate-950/50 border border-slate-800 flex flex-col gap-3">
+                      <span className="text-[9px] font-mono font-bold uppercase tracking-widest text-slate-300 flex items-center gap-1.5">
                         <ShieldAlert className="size-4 shrink-0" /> MISSING ({atsAnalysis.missingKeywords.length})
                       </span>
                       <div className="flex flex-wrap gap-1.5">
                         {atsAnalysis.missingKeywords.map((kw, i) => (
-                          <span key={i} className="text-[10px] font-mono font-bold px-2 py-0.5 bg-slate-950 border border-rose-500/10 text-rose-400 rounded">
+                          <span key={i} className="text-[10px] font-mono font-bold px-2 py-0.5 bg-slate-900 border border-slate-700 text-slate-300 rounded">
                             {kw}
                           </span>
                         ))}
@@ -295,13 +295,13 @@ export default function ResumeWorkspace({ initialResume }: Props) {
                     </div>
 
                     {/* Exiting */}
-                    <div className="p-4 rounded-xl bg-cyan-950/5 border border-cyan-900/20 flex flex-col gap-3">
-                      <span className="text-[9px] font-mono font-bold uppercase tracking-widest text-cyan-450 flex items-center gap-1.5">
+                    <div className="p-4 rounded-xl bg-slate-950/50 border border-slate-800 flex flex-col gap-3">
+                      <span className="text-[9px] font-mono font-bold uppercase tracking-widest text-slate-300 flex items-center gap-1.5">
                         <Award className="size-4 shrink-0" /> FOUND SKILLS ({parsedData.skills.length})
                       </span>
                       <div className="flex flex-wrap gap-1.5">
                         {parsedData.skills.slice(0, 12).map((kw, i) => (
-                          <span key={i} className="text-[10px] font-mono font-bold px-2 py-0.5 bg-slate-950 border border-cyan-500/10 text-cyan-400 rounded">
+                          <span key={i} className="text-[10px] font-mono font-bold px-2 py-0.5 bg-white/10 border border-white/20 text-white rounded">
                             {kw}
                           </span>
                         ))}
@@ -318,7 +318,7 @@ export default function ResumeWorkspace({ initialResume }: Props) {
                   {/* Strengths & Weaknesses */}
                   <div className="flex flex-col gap-4">
                     <div className="flex flex-col gap-2">
-                      <span className="text-[9px] font-mono font-bold uppercase tracking-widest text-emerald-400 flex items-center gap-1.5">
+                      <span className="text-[9px] font-mono font-bold uppercase tracking-widest text-white flex items-center gap-1.5">
                         <CheckCircle2 className="size-4" /> RECOGNIZED STRENGTHS
                       </span>
                       <ul className="flex flex-col gap-1.5 text-xs text-slate-350 leading-relaxed pl-4 list-disc font-medium">
@@ -329,7 +329,7 @@ export default function ResumeWorkspace({ initialResume }: Props) {
                     </div>
 
                     <div className="flex flex-col gap-2">
-                      <span className="text-[9px] font-mono font-bold uppercase tracking-widest text-rose-450 flex items-center gap-1.5">
+                      <span className="text-[9px] font-mono font-bold uppercase tracking-widest text-slate-400 flex items-center gap-1.5">
                         <XCircle className="size-4" /> CORE WEAKNESSES
                       </span>
                       <ul className="flex flex-col gap-1.5 text-xs text-slate-350 leading-relaxed pl-4 list-disc font-medium">
@@ -342,13 +342,13 @@ export default function ResumeWorkspace({ initialResume }: Props) {
 
                   {/* Actionable Suggestions */}
                   <div className="flex flex-col gap-3">
-                    <span className="text-[9px] font-mono font-bold uppercase tracking-widest text-cyan-400 flex items-center gap-1.5">
+                    <span className="text-[9px] font-mono font-bold uppercase tracking-widest text-white flex items-center gap-1.5">
                       <Sparkles className="size-4" /> SUGGESTED REVISIONS
                     </span>
                     <div className="flex flex-col gap-2.5">
                       {atsAnalysis.improvementSuggestions.slice(0, 3).map((s, idx) => (
                         <div key={idx} className="flex gap-3 p-3 rounded-lg bg-slate-900 border border-slate-850 text-xs text-slate-300 font-medium">
-                          <span className="text-cyan-400 shrink-0 font-mono font-bold">{idx + 1}.</span>
+                          <span className="text-white shrink-0 font-mono font-bold">{idx + 1}.</span>
                           <p>{s}</p>
                         </div>
                       ))}

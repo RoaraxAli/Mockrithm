@@ -114,21 +114,21 @@ export default function ResumeUploadWizard({ userId }: { userId: string }) {
         <div className="flex flex-col gap-1">
           <span className="text-[9px] font-mono tracking-[0.2em] text-slate-500 uppercase">DOCUMENT INGESTION</span>
           <h2 className="text-xl font-bold font-mono tracking-wide text-white flex items-center gap-2">
-            <FileUp className="size-5 text-cyan-400" />
+            <FileUp className="size-5 text-white" />
             RESUME PARSER PIPELINE
           </h2>
         </div>
 
         <div className="flex items-center gap-2.5 sm:gap-6 font-mono text-[10px] sm:text-xs">
-          <div className={cn("flex items-center gap-2 transition-all duration-300", step === 1 ? "text-cyan-400 font-bold" : "text-emerald-400")}>
-            <span className={cn("size-6 rounded-full flex items-center justify-center border font-bold text-[9px] transition-all duration-300", step === 1 ? "border-cyan-500/50 bg-cyan-950/40 text-cyan-400 shadow-[0_0_12px_rgba(6,182,212,0.2)]" : "border-emerald-500/50 bg-emerald-950/30 text-emerald-400")}>
+          <div className={cn("flex items-center gap-2 transition-all duration-300", step === 1 ? "text-white font-bold" : "text-gray-400")}>
+            <span className={cn("size-6 rounded-full flex items-center justify-center border font-bold text-[9px] transition-all duration-300", step === 1 ? "border-white/50 bg-white/10 text-white" : "border-gray-500/50 bg-gray-900/30 text-gray-400")}>
               {step > 1 ? "✓" : "01"}
             </span>
             <span className="hidden sm:inline">UPLOAD</span>
           </div>
           <div className="w-6 h-[1px] bg-slate-800" />
-          <div className={cn("flex items-center gap-2 transition-all duration-300", step === 2 ? "text-cyan-400 font-bold" : "text-slate-600")}>
-            <span className={cn("size-6 rounded-full flex items-center justify-center border font-bold text-[9px] transition-all duration-300", step === 2 ? "border-cyan-500/50 bg-cyan-950/40 text-cyan-400 shadow-[0_0_12px_rgba(6,182,212,0.2)]" : "border-slate-800 text-slate-600")}>
+          <div className={cn("flex items-center gap-2 transition-all duration-300", step === 2 ? "text-white font-bold" : "text-slate-600")}>
+            <span className={cn("size-6 rounded-full flex items-center justify-center border font-bold text-[9px] transition-all duration-300", step === 2 ? "border-white/50 bg-white/10 text-white" : "border-slate-800 text-slate-600")}>
               02
             </span>
             <span className="hidden sm:inline">TARGETS</span>
@@ -163,7 +163,7 @@ export default function ResumeUploadWizard({ userId }: { userId: string }) {
           {step === 1 ? (
             <div className="flex flex-col gap-4 animate-fadeIn">
               <h3 className="text-[11px] font-mono font-bold text-slate-300 tracking-[0.2em] uppercase flex items-center gap-2">
-                <FileText className="size-4.5 text-cyan-400" />
+                <FileText className="size-4.5 text-white" />
                 DROPZONE PORTAL
               </h3>
               <p className="text-xs text-slate-400 leading-relaxed font-semibold">
@@ -174,16 +174,16 @@ export default function ResumeUploadWizard({ userId }: { userId: string }) {
                 {...getRootProps()} 
                 className={cn(
                   "border-2 border-dashed rounded-xl p-10 flex flex-col items-center justify-center text-center cursor-pointer transition-all duration-300 bg-slate-950/50",
-                  isDragActive ? "border-cyan-500 bg-cyan-950/20 shadow-[0_0_30px_rgba(6,182,212,0.15)]" : "border-slate-800 hover:border-cyan-500/50 hover:bg-slate-900/50",
-                  file ? "border-emerald-500/50 bg-emerald-950/10" : ""
+                  isDragActive ? "border-white bg-white/5" : "border-slate-800 hover:border-white/20 hover:bg-slate-900/50",
+                  file ? "border-gray-500/50 bg-gray-900/10" : ""
                 )}
               >
                 <input {...getInputProps()} />
-                <FileUp className={cn("size-10 mb-4 transition-colors", file ? "text-emerald-400" : isDragActive ? "text-cyan-400" : "text-slate-600")} />
+                <FileUp className={cn("size-10 mb-4 transition-colors", file ? "text-white" : isDragActive ? "text-white" : "text-slate-600")} />
                 
                 {file ? (
                   <div className="flex flex-col gap-2 items-center">
-                    <span className="text-sm font-bold text-emerald-400">{file.name}</span>
+                    <span className="text-sm font-bold text-white">{file.name}</span>
                     <span className="text-[10px] font-mono text-slate-500">{(file.size / 1024 / 1024).toFixed(2)} MB • READY FOR EXTRACTION</span>
                   </div>
                 ) : (
@@ -197,7 +197,7 @@ export default function ResumeUploadWizard({ userId }: { userId: string }) {
           ) : (
             <div className="flex flex-col gap-4 animate-fadeIn">
               <h3 className="text-[11px] font-mono font-bold text-slate-300 tracking-[0.2em] uppercase flex items-center gap-2">
-                <Sparkles className="size-4.5 text-cyan-400" />
+                <Sparkles className="size-4.5 text-white" />
                 TARGET JOB DESCRIPTION (OPTIONAL)
               </h3>
               <p className="text-xs text-slate-400 leading-relaxed font-semibold">
@@ -209,7 +209,7 @@ export default function ResumeUploadWizard({ userId }: { userId: string }) {
                 onChange={(e) => setJobDescription(e.target.value)}
                 placeholder="Paste the job requirements here..."
                 rows={10}
-                className="bg-slate-950/80 text-cyan-100 text-xs rounded-lg p-3.5 border border-slate-800 focus:border-cyan-500/40 focus:ring-1 focus:ring-cyan-500/10 outline-none resize-none placeholder:text-slate-700 leading-relaxed font-mono"
+                className="bg-slate-950/80 text-white text-xs rounded-lg p-3.5 border border-slate-800 focus:border-white/40 focus:ring-1 focus:ring-white/10 outline-none resize-none placeholder:text-slate-700 leading-relaxed font-mono"
               />
             </div>
           )}
@@ -217,7 +217,7 @@ export default function ResumeUploadWizard({ userId }: { userId: string }) {
 
         <div className="md:col-span-4 flex flex-col gap-4">
           <div className="p-6 backdrop-blur-xl bg-slate-950/40 border border-slate-900 rounded-2xl flex flex-col gap-4 shadow-xl">
-            <span className="text-[8px] font-mono tracking-widest text-cyan-400 uppercase">// INSTRUCTIONS</span>
+            <span className="text-[8px] font-mono tracking-widest text-white uppercase">// INSTRUCTIONS</span>
             <h4 className="text-xs font-mono font-bold text-white uppercase tracking-wider">
               {step === 1 ? "File Requirements" : "Execution Protocol"}
             </h4>
@@ -232,7 +232,7 @@ export default function ResumeUploadWizard({ userId }: { userId: string }) {
           {step === 1 ? (
             <Button
               onClick={() => { if (file) setStep(2); else setError("Please upload a file first."); }}
-              className="w-full h-12 rounded-lg bg-cyan-500 text-slate-950 hover:bg-cyan-400 hover:shadow-[0_0_20px_rgba(6,182,212,0.4)] flex items-center justify-center gap-2 font-mono font-bold text-xs uppercase tracking-wider"
+              className="w-full h-12 rounded-lg bg-white text-black hover:bg-gray-200 flex items-center justify-center gap-2 font-mono font-bold text-xs uppercase tracking-wider"
             >
               PROCEED <ArrowRight className="size-4" />
             </Button>
@@ -242,7 +242,7 @@ export default function ResumeUploadWizard({ userId }: { userId: string }) {
                 onClick={handleUploadAndAnalyze}
                 disabled={isUploading}
                 className={cn(
-                  "w-full h-12 rounded-lg bg-cyan-500 text-slate-950 hover:bg-cyan-400 hover:shadow-[0_0_20px_rgba(6,182,212,0.4)] flex items-center justify-center gap-2 font-mono font-bold text-xs uppercase tracking-wider",
+                  "w-full h-12 rounded-lg bg-white text-black hover:bg-gray-200 flex items-center justify-center gap-2 font-mono font-bold text-xs uppercase tracking-wider",
                   isUploading && "opacity-75 cursor-not-allowed"
                 )}
               >

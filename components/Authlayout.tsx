@@ -11,14 +11,17 @@ import Navbar from "@/components/Navbar";
 export default function AuthLayout({ 
   children,
   initialUserId,
-  initialUserName
+  initialUserName,
+  initialUserRole
 }: { 
   children: React.ReactNode;
   initialUserId?: string | null;
   initialUserName?: string;
+  initialUserRole?: string;
 }) {
   const [userId, setUserId] = useState<string | null>(initialUserId || null);
   const [userName, setUserName] = useState<string>(initialUserName || "");
+  const [userRole, setUserRole] = useState<string>(initialUserRole || "User");
 
   const pathname = usePathname();
 const hideNavbar =
@@ -39,7 +42,7 @@ const shouldShowNavbar = !hideNavbar;
 
 
   useEffect(() => {
-    console.log("AuthLayout mounted. Initial Props:", { initialUserId, initialUserName });
+    console.log("AuthLayout mounted. Initial Props:", { initialUserId, initialUserName, initialUserRole });
     
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
       if (user) {
@@ -53,12 +56,15 @@ const shouldShowNavbar = !hideNavbar;
           if (userDoc.exists()) {
             const userData = userDoc.data();
             setUserName(userData.name || "User");
+            setUserRole(userData.role || "User");
           } else {
             setUserName("User");
+            setUserRole("User");
           }
         } catch (error) {
           console.error("Failed to fetch user name:", error);
           setUserName("User");
+          setUserRole("User");
         }
       } else {
         console.log("Firebase client auth detected: No User");
@@ -67,6 +73,7 @@ const shouldShowNavbar = !hideNavbar;
         if (!initialUserId) {
           setUserId(null);
           setUserName("");
+          setUserRole("User");
         } else {
           console.log("Retaining server-side user session:", initialUserId);
         }
@@ -80,7 +87,7 @@ const shouldShowNavbar = !hideNavbar;
   return (
     <>
       {shouldShowNavbar && (
-        <Navbar userId={userId!} userName={userName || "User"} />
+        <Navbar userId={userId!} userName={userName || "User"} userRole={userRole} />
       )}
       {children}
     </>

@@ -4,75 +4,49 @@ export default function CyberTemplate({ data }: { data: ParsedResume }) {
   const { basics, work = [], education = [], skills = [], projects = [], certifications = [], socialLinks = [] } = data;
 
   return (
-    <div className="p-8 bg-slate-950 text-slate-300 font-mono max-w-[800px] mx-auto min-h-[1050px] shadow-sm flex flex-col gap-6 border-2 border-cyan-500/30 relative overflow-hidden">
-      {/* Grid background effect */}
-      <div className="absolute inset-0 bg-[linear-gradient(to_right,#020617_1px,transparent_1px),linear-gradient(to_bottom,#020617_1px,transparent_1px)] bg-[size:4rem_4rem] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_0%,#000_70%,transparent_100%)] opacity-30 pointer-events-none" />
-
-      {/* Decorative corners */}
-      <div className="absolute top-0 left-0 w-4 h-4 border-t-2 border-l-2 border-cyan-400" />
-      <div className="absolute top-0 right-0 w-4 h-4 border-t-2 border-r-2 border-cyan-400" />
-      <div className="absolute bottom-0 left-0 w-4 h-4 border-b-2 border-l-2 border-cyan-400" />
-      <div className="absolute bottom-0 right-0 w-4 h-4 border-b-2 border-r-2 border-cyan-400" />
-
+    <div className="p-8 bg-white text-slate-900 font-sans max-w-[800px] mx-auto min-h-[1050px] shadow-sm flex flex-col gap-6 border-t-8 border-slate-500">
       {/* Header */}
-      <div className="border-b border-cyan-500/20 pb-4 relative z-10">
-        <div className="flex justify-between items-start">
-          <div>
-            <h1 className="text-3xl font-black tracking-widest text-white uppercase text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-indigo-400">
-              {basics.name || "INTEGRATED_IDENTITY"}
-            </h1>
-            <p className="text-xs font-bold text-cyan-400 uppercase mt-1 tracking-[0.2em]">{basics.label || "TITLE_REDACTED"}</p>
+      <div className="flex flex-col gap-2">
+        <h1 className="text-4xl font-extrabold tracking-tight text-slate-900">{basics.name || "Your Name"}</h1>
+        <div className="flex justify-between items-center border-b-2 border-slate-300 pb-2">
+          <p className="text-xs font-mono font-bold text-slate-500 uppercase tracking-widest">{basics.label || "Professional Title"}</p>
+          <div className="flex flex-wrap justify-end gap-x-3 gap-y-0.5 text-[10px] text-slate-600 font-mono">
+            {basics.email && <span>{basics.email}</span>}
+            {basics.phone && <span>{basics.phone}</span>}
+            {socialLinks.map((link, idx) => (
+              <span key={idx}>{link.platform}: {link.url}</span>
+            ))}
           </div>
-          <div className="text-[10px] text-right font-bold text-slate-500 bg-slate-900 border border-slate-800 px-3 py-1.5 rounded">
-            STATUS: ACTIVE // LOGGED
-          </div>
-        </div>
-
-        <div className="flex flex-wrap gap-x-4 gap-y-1 text-[11px] text-slate-400 mt-4 font-bold">
-          {basics.email && <span className="hover:text-cyan-400 transition-colors">EMAIL: {basics.email}</span>}
-          {basics.phone && <span className="hover:text-cyan-400 transition-colors">TEL: {basics.phone}</span>}
-          {socialLinks.map((link, idx) => (
-            <span key={idx} className="hover:text-cyan-400 transition-colors">{link.platform.toUpperCase()}: {link.url}</span>
-          ))}
         </div>
       </div>
 
       {/* Summary */}
       {basics.summary && (
-        <div className="flex flex-col gap-1.5 relative z-10">
-          <h2 className="text-xs font-black uppercase tracking-widest text-cyan-400 flex items-center gap-2">
-            <span className="inline-block size-1.5 bg-cyan-400" /> EXECUTION_SUMMARY
-          </h2>
-          <p className="text-xs text-slate-400 leading-relaxed text-justify bg-slate-900/50 p-3 rounded border border-slate-900">{basics.summary}</p>
+        <div className="flex flex-col gap-1">
+          <h2 className="text-xs font-sans font-bold uppercase tracking-wider text-slate-900">Professional Summary</h2>
+          <p className="text-xs text-slate-700 leading-relaxed font-sans text-justify">{basics.summary}</p>
         </div>
       )}
 
       {/* Experience */}
       {work.length > 0 && (
-        <div className="flex flex-col gap-3 relative z-10">
-          <h2 className="text-xs font-black uppercase tracking-widest text-cyan-400 flex items-center gap-2">
-            <span className="inline-block size-1.5 bg-cyan-400" /> RECORDED_WORK_HISTORY
-          </h2>
-          <div className="flex flex-col gap-4">
+        <div className="flex flex-col gap-2">
+          <h2 className="text-xs font-sans font-bold uppercase tracking-wider text-slate-900 border-b border-slate-300 pb-0.5">Professional Experience</h2>
+          <div className="flex flex-col gap-3">
             {work.map((item, idx) => (
-              <div key={idx} className="flex flex-col gap-1 border-l border-slate-800 pl-4 relative ml-1">
-                <div className="absolute -left-[4.5px] top-1 size-2 rounded-full bg-cyan-500" />
-                <div className="flex justify-between items-start text-xs font-bold">
+              <div key={idx} className="flex flex-col gap-0.5">
+                <div className="flex justify-between items-baseline text-xs">
                   <div>
-                    <span className="text-white font-black">{item.position.toUpperCase()}</span>
-                    <span className="text-cyan-400"> @ {item.company.toUpperCase()}</span>
+                    <span className="font-extrabold font-sans text-slate-900">{item.company}</span>
+                    <span className="text-slate-500"> — </span>
+                    <span className="font-bold text-slate-800">{item.position}</span>
                   </div>
-                  <span className="text-[10px] text-slate-500 font-bold shrink-0">
-                    [{item.startDate.toUpperCase()} - {item.endDate ? item.endDate.toUpperCase() : "PRESENT"}]
-                  </span>
+                  <span className="text-[10px] font-mono text-slate-500 shrink-0">{item.startDate} – {item.endDate || "Present"}</span>
                 </div>
                 {item.highlights && item.highlights.length > 0 && (
-                  <ul className="list-none text-[11px] text-slate-400 space-y-1 mt-1">
+                  <ul className="list-disc list-outside ml-4 text-[11px] text-slate-700 space-y-0.5 font-sans">
                     {item.highlights.map((hl, hIdx) => (
-                      <li key={hIdx} className="flex gap-2">
-                        <span className="text-cyan-400 shrink-0">&gt;</span>
-                        <span>{hl}</span>
-                      </li>
+                      <li key={hIdx}>{hl}</li>
                     ))}
                   </ul>
                 )}
@@ -84,18 +58,17 @@ export default function CyberTemplate({ data }: { data: ParsedResume }) {
 
       {/* Education */}
       {education.length > 0 && (
-        <div className="flex flex-col gap-3 relative z-10">
-          <h2 className="text-xs font-black uppercase tracking-widest text-cyan-400 flex items-center gap-2">
-            <span className="inline-block size-1.5 bg-cyan-400" /> EDUCATION_CREDENTIALS
-          </h2>
-          <div className="flex flex-col gap-3">
+        <div className="flex flex-col gap-2">
+          <h2 className="text-xs font-sans font-bold uppercase tracking-wider text-slate-900 border-b border-slate-300 pb-0.5">Education</h2>
+          <div className="flex flex-col gap-2">
             {education.map((item, idx) => (
-              <div key={idx} className="flex justify-between items-start text-xs border border-slate-900 bg-slate-900/30 p-2.5 rounded">
+              <div key={idx} className="flex justify-between items-baseline text-xs">
                 <div>
-                  <span className="font-black text-white">{item.studyType.toUpperCase()} IN {item.area.toUpperCase()}</span>
-                  <div className="text-[10px] text-slate-500 mt-0.5">{item.institution.toUpperCase()}</div>
+                  <span className="font-extrabold font-sans text-slate-900">{item.institution}</span>
+                  <span className="text-slate-500"> — </span>
+                  <span className="italic text-slate-700">{item.studyType} in {item.area}</span>
                 </div>
-                <span className="text-[10px] font-bold text-cyan-400 shrink-0">[{item.endDate.toUpperCase()}]</span>
+                <span className="text-[10px] font-mono text-slate-500 shrink-0">{item.endDate}</span>
               </div>
             ))}
           </div>
@@ -104,39 +77,45 @@ export default function CyberTemplate({ data }: { data: ParsedResume }) {
 
       {/* Skills */}
       {skills.length > 0 && (
-        <div className="flex flex-col gap-3 relative z-10">
-          <h2 className="text-xs font-black uppercase tracking-widest text-cyan-400 flex items-center gap-2">
-            <span className="inline-block size-1.5 bg-cyan-400" /> SKILL_CAPABILITIES
-          </h2>
-          <div className="flex flex-wrap gap-2">
-            {skills.map((skill, idx) => (
-              <span key={idx} className="text-[10px] font-bold bg-slate-900 border border-slate-800 text-cyan-400 px-3 py-1 rounded">
-                // {skill.toUpperCase()}
-              </span>
-            ))}
-          </div>
+        <div className="flex flex-col gap-2">
+          <h2 className="text-xs font-sans font-bold uppercase tracking-wider text-slate-900 border-b border-slate-300 pb-0.5">Core Competencies</h2>
+          <p className="text-[11px] text-slate-700 font-sans leading-relaxed">{skills.join(" • ")}</p>
         </div>
       )}
 
       {/* Projects */}
       {projects.length > 0 && (
-        <div className="flex flex-col gap-3 relative z-10">
-          <h2 className="text-xs font-black uppercase tracking-widest text-cyan-400 flex items-center gap-2">
-            <span className="inline-block size-1.5 bg-cyan-400" /> REPLICATED_MODULES
-          </h2>
-          <div className="grid grid-cols-1 gap-3">
+        <div className="flex flex-col gap-2">
+          <h2 className="text-xs font-sans font-bold uppercase tracking-wider text-slate-900 border-b border-slate-300 pb-0.5">Key Projects</h2>
+          <div className="flex flex-col gap-2">
             {projects.map((proj, idx) => (
-              <div key={idx} className="border border-slate-900 bg-slate-900/20 p-3 rounded flex flex-col gap-1">
-                <div className="flex justify-between items-center text-xs font-bold">
-                  <span className="text-white">{proj.name.toUpperCase()}</span>
+              <div key={idx} className="flex flex-col gap-0.5 text-xs font-sans">
+                <div className="flex justify-between items-center">
+                  <span className="font-extrabold text-slate-900">
+                    {proj.name}
+                    {proj.link && <span className="text-[9px] text-slate-500 font-mono ml-1">({proj.link})</span>}
+                  </span>
                   {proj.technologies && proj.technologies.length > 0 && (
-                    <span className="text-[9px] text-cyan-400/80">
-                      [{proj.technologies.join(", ").toUpperCase()}]
+                    <span className="text-[9px] font-mono text-slate-500 shrink-0">[{proj.technologies.join(", ")}]
                     </span>
                   )}
                 </div>
-                <p className="text-[11px] text-slate-400 leading-relaxed mt-1">{proj.description}</p>
-                {proj.link && <span className="text-[9px] text-slate-600 mt-0.5">SRC_LINK: {proj.link}</span>}
+                <p className="text-[11px] text-slate-800 leading-relaxed">{proj.description}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Certifications */}
+      {certifications.length > 0 && (
+        <div className="flex flex-col gap-2">
+          <h2 className="text-xs font-sans font-bold uppercase tracking-wider text-slate-900 border-b border-slate-300 pb-0.5">Professional Certifications</h2>
+          <div className="flex flex-wrap gap-x-6 gap-y-1">
+            {certifications.map((cert, idx) => (
+              <div key={idx} className="text-xs font-sans">
+                <span className="font-bold text-slate-800">{cert.name}</span>
+                <span className="text-slate-500 text-[10px]"> ({cert.issuer}, {cert.date})</span>
               </div>
             ))}
           </div>

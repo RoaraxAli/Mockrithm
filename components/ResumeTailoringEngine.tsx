@@ -226,9 +226,8 @@ export default function ResumeTailoringEngine({
         <div className="absolute top-0 left-0 w-full h-[1px] bg-slate-800" />
         
         <div className="flex flex-col gap-1">
-          <span className="text-[9px] font-mono tracking-[0.2em] text-slate-500 uppercase">INTELLIGENT PIPELINE</span>
-          <h2 className="text-xl font-bold font-mono tracking-wide text-white flex items-center gap-2">
-            <Cpu className="size-5 text-cyan-400 animate-pulse" />
+          <h2 className="text-xl font-bold font-mono tracking-wide text-gray-300 flex items-center gap-2">
+            <Cpu className="size-5 text-gray-300 animate-pulse" />
             ATS CONTEXT ENGINE
           </h2>
         </div>
@@ -240,14 +239,14 @@ export default function ResumeTailoringEngine({
             onClick={() => currentStep > 1 && setCurrentStep(1)}
             className={cn(
               "flex items-center gap-2 transition-all duration-300",
-              currentStep === 1 ? "text-cyan-400 font-bold" : currentStep > 1 ? "text-emerald-400 cursor-pointer hover:text-emerald-300" : "text-slate-600"
+              currentStep === 1 ? "text-white font-bold" : currentStep > 1 ? "text-white cursor-pointer hover:text-gray-300" : "text-slate-600"
             )}
           >
             <span className={cn(
               "size-6 rounded-full flex items-center justify-center border font-bold text-[9px] transition-all duration-300",
               currentStep === 1 
-                ? "border-cyan-500/50 bg-cyan-950/40 text-cyan-400 shadow-[0_0_12px_rgba(6,182,212,0.2)]" 
-                : currentStep > 1 ? "border-emerald-500/50 bg-emerald-950/30 text-emerald-400" : "border-slate-800 text-slate-600"
+                ? "border-gray-500/50 bg-gray-950/40 text-gray-300 shadow-[0_0_12px_rgba(6,182,212,0.2)]" 
+                : currentStep > 1 ? "border-gray-500/50 bg-gray-950/30 text-gray-300" : "border-slate-800 text-slate-600"
             )}>
               {currentStep > 1 ? "✓" : "01"}
             </span>
@@ -323,7 +322,7 @@ export default function ResumeTailoringEngine({
             className="grid grid-cols-1 md:grid-cols-12 gap-8 items-start"
           >
             {/* Left Resume Entry Portal */}
-            <div className="md:col-span-8 p-6 backdrop-blur-xl bg-slate-950/70 border border-slate-800 rounded-2xl flex flex-col gap-5 shadow-[0_0_50px_rgba(0,0,0,0.8)] relative overflow-hidden group">
+            <div className="md:col-span-8 p-6 backdrop-blur-xl bg-slate-950/70 border border-slate-800 rounded-2xl flex flex-col gap-5 shadow-[0_0_50px_#000] relative overflow-hidden group">
               {/* Corner Indicators */}
               <div className="absolute top-3 left-3 w-2.5 h-2.5 border-t border-l border-slate-700" />
               <div className="absolute top-3 right-3 w-2.5 h-2.5 border-t border-r border-slate-700" />
@@ -332,7 +331,7 @@ export default function ResumeTailoringEngine({
               
               <div className="flex items-center justify-between">
                 <h3 className="text-[11px] font-mono font-bold text-slate-300 tracking-[0.2em] uppercase flex items-center gap-2">
-                  <FileText className="size-4.5 text-cyan-400" />
+                  <FileText className="size-4.5 text-gray-300" />
                   RESUME DATA SOURCE
                 </h3>
                 
@@ -342,7 +341,7 @@ export default function ResumeTailoringEngine({
                     onClick={() => handleModeChange("paste")}
                     className={cn(
                       "px-3 py-1.5 rounded cursor-pointer transition-all",
-                      resumeMode === "paste" ? "bg-cyan-500 text-slate-950 font-extrabold shadow" : "text-slate-400 hover:text-slate-200"
+                      resumeMode === "paste" ? "bg-white text-gray-600 font-extrabold shadow" : "text-slate-400 hover:text-slate-200"
                     )}
                   >
                     Quick Paste
@@ -501,18 +500,17 @@ export default function ResumeTailoringEngine({
             {/* Right Guide Panel */}
             <div className="md:col-span-4 flex flex-col gap-6">
               <div className="p-6 backdrop-blur-xl bg-slate-950/40 border border-slate-900 rounded-2xl flex flex-col gap-4 shadow-xl">
-                <span className="text-[8px] font-mono tracking-widest text-cyan-400 uppercase">// COGNITIVE_ADVISOR</span>
                 <h4 className="text-xs font-mono font-bold text-white uppercase tracking-wider">Step 1 Instructions</h4>
                 <p className="text-xs text-slate-400 leading-relaxed font-semibold">
                   Provide your professional profile details. Pasting or compiling active experience metrics allows the ATS context engine to measure keyword overlaps.
                 </p>
-                <div className="border-t border-slate-900 pt-3 flex flex-col gap-2.5 text-[11px] font-mono text-slate-500">
+                <div className="border-t border-slate-900 pt-3 flex flex-col gap-2.5 text-[11px] font-mono text-slate-500 text-gray-400">
                   <div className="flex items-center gap-2">
-                    <span className="w-1.5 h-1.5 rounded-full bg-cyan-400" />
+                    <span className="w-1.5 h-1.5 rounded-full bg-white" />
                     <span>Paste complete bullets</span>
                   </div>
                   <div className="flex items-center gap-2">
-                    <span className="w-1.5 h-1.5 rounded-full bg-cyan-400" />
+                    <span className="w-1.5 h-1.5 rounded-full bg-white" />
                     <span>Define specific level</span>
                   </div>
                 </div>
@@ -520,7 +518,7 @@ export default function ResumeTailoringEngine({
 
               <Button
                 onClick={handleGoToStep2}
-                className="w-full h-12 rounded-lg bg-cyan-500 text-slate-950 hover:bg-cyan-400 hover:shadow-[0_0_20px_rgba(6,182,212,0.4)] flex items-center justify-center gap-2 font-mono font-bold text-xs uppercase tracking-wider"
+                className="w-full h-12 rounded-lg bg-white text-slate-950 hover:bg-white/90 hover:shadow-[0_0_20px_rgba(6,182,212,0.4)] flex items-center justify-center gap-2 font-mono font-bold text-xs uppercase tracking-wider"
               >
                 PROCEED TO TARGETS <ArrowRight className="size-4" />
               </Button>

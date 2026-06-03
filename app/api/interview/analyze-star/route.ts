@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { generateObject } from "ai";
 import { google } from "@ai-sdk/google";
 import { z } from "zod";
+import { getCurrentUser } from "@/lib/actions/auth.action";
 
 const starAnalysisSchema = z.object({
   situation: z.boolean(),
@@ -14,6 +15,11 @@ const starAnalysisSchema = z.object({
 
 export async function POST(request: Request) {
   try {
+    const user = await getCurrentUser();
+    if (!user) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
     const { text } = await request.json();
 
     if (!text || text.trim().length === 0) {

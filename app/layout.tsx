@@ -34,7 +34,7 @@ export default async function RootLayout({
       >
         <Preloader />
         <Analytics />
-        <AuthLayout initialUserId={user?.id} initialUserName={user?.name}>
+        <AuthLayout initialUserId={user?.id} initialUserName={user?.name} initialUserRole={user?.role}>
           {children}
         </AuthLayout>
         <Toaster />

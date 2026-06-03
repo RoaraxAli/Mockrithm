@@ -1,7 +1,7 @@
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { PlayCircle, Terminal } from "lucide-react"
-import Link from "next/link"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { PlayCircle, Terminal, Sparkles } from "lucide-react";
+import Link from "next/link";
 
 export default function TakeInterviewPage() {
   return (
@@ -14,14 +14,14 @@ export default function TakeInterviewPage() {
       </div>
 
       <Card className="max-w-2xl border border-white/10 relative overflow-hidden group rounded-md">
-        <div className="absolute top-0 left-0 w-full h-[2px] bg-cyan-500" />
+        <div className="absolute top-0 left-0 w-full h-[2px] bg-slate-600" />
         
         {/* Glow overlay effect */}
         <div className="absolute -right-16 -top-16 w-36 h-36 bg-transparent pointer-events-none" />
 
         <CardHeader className="pb-4">
           <CardTitle className="text-xl font-bold text-white flex items-center gap-2">
-            <Terminal className="w-5 h-5 text-cyan-400" />
+            <Terminal className="w-5 h-5 text-gray-300" />
             Start New Evaluation
           </CardTitle>
           <CardDescription className="text-gray-300 text-sm leading-relaxed mt-2 font-medium">

@@ -1,5 +1,6 @@
 "use server";
 
+import { cache } from "react";
 import { db } from "@/firebase/admin";
 import { ResumeDocument, ParsedResume, AtsScoreResult } from "@/types/resume";
 
@@ -35,7 +36,7 @@ export async function saveParsedResume(params: {
   }
 }
 
-export async function getUserResumes(userId: string): Promise<ResumeDocument[]> {
+export const getUserResumes = cache(async (userId: string): Promise<ResumeDocument[]> => {
   try {
     const snapshot = await db
       .collection("users")
@@ -52,7 +53,7 @@ export async function getUserResumes(userId: string): Promise<ResumeDocument[]> 
     console.error("Error fetching user resumes:", error);
     return [];
   }
-}
+});
 
 export async function getResumeById(userId: string, resumeId: string): Promise<ResumeDocument | null> {
   try {

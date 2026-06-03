@@ -13,6 +13,7 @@ import { Trash2, UserIcon, Mail, ExternalLink } from "lucide-react"
 import { collection, getDocs, deleteDoc, doc } from "firebase/firestore"
 import { db } from "@/firebase/client"
 import { signOut } from "firebase/auth"
+import { signOut as serverSignOut } from "@/lib/actions/auth.action"
 import { useRouter } from "next/navigation"
 
 export default function ProfilePage() {
@@ -49,7 +50,8 @@ export default function ProfilePage() {
       }
       
       await signOut(auth);
-      router.push("/sign-in");
+      await serverSignOut();
+      window.location.href = "/sign-in";
     } catch (error) {
       console.error("Account deletion failed:", error);
       alert("Failed to delete account. You might need to re-authenticate (sign out and in) before deleting.");

@@ -1,5 +1,6 @@
 "use server";
 
+import { cache } from "react";
 import { db, auth } from "@/firebase/admin";
 import { cookies, headers } from "next/headers";
 
@@ -107,22 +108,32 @@ export async function signUp(params: SignUpParams) {
 }
 
 export async function signIn(params: SignInParams) {
-  const { email, idToken } = params;
+  const { email, idToken, uid: clientUid, displayName } = params;
   try {
-    const userRecord = await auth.getUserByEmail(email);
-    if (!userRecord)
-      return { success: false, message: "User does not exist. Create an account." };
+    let uid = clientUid;
+    let name = displayName || email.split("@")[0];
+
+    if (!uid) {
+      const userRecord = await auth.getUserByEmail(email);
+      if (!userRecord)
+        return { success: false, message: "User does not exist. Create an account." };
+      uid = userRecord.uid;
+      name = userRecord.displayName || name;
+    }
 
     await setSessionCookie(idToken);
 
-    // Ensure user document exists in Firestore
-    const userDocRef = db.collection("users").doc(userRecord.uid);
-    const userDoc = await userDocRef.get();
+    // Ensure user document exists in Firestore & check resumes in parallel
+    const userDocRef = db.collection("users").doc(uid);
+    const [userDoc, resumesSnapshot] = await Promise.all([
+      userDocRef.get(),
+      db.collection("users").doc(uid).collection("resumes").limit(1).get()
+    ]);
     
     if (!userDoc.exists) {
       const isAdmin = email === "ahmed@gmail.com";
       await userDocRef.set({
-        name: userRecord.displayName || email.split("@")[0],
+        name: name,
         email: email,
         role: isAdmin ? "Admin" : "User",
         createdAt: new Date(),
@@ -130,13 +141,15 @@ export async function signIn(params: SignInParams) {
       });
     }
 
-    await db.collection("sessions").add({
-      userId: userRecord.uid,
+    // Record session in the background
+    db.collection("sessions").add({
+      userId: uid,
       email,
       createdAt: new Date(),
-    });
+    }).catch(err => console.error("Session recording error:", err));
 
-    return { success: true };
+    const hasResume = !resumesSnapshot.empty;
+    return { success: true, hasResume };
   } catch (error) {
     console.error("Sign in error:", error);
     return { success: false, message: "Failed to log into account. Please try again." };
@@ -148,7 +161,7 @@ export async function signOut() {
   cookieStore.delete("session");
 }
 
-export async function getCurrentUser(): Promise<User | null> {
+export const getCurrentUser = cache(async (): Promise<User | null> => {
   const cookieStore = await cookies();
   const sessionCookie = cookieStore.get("session")?.value;
   if (!sessionCookie) return null;
@@ -175,7 +188,7 @@ export async function getCurrentUser(): Promise<User | null> {
     console.error("Session verification error:", error.message);
     return null;
   }
-}
+});
 
 
 export async function isAuthenticated() {

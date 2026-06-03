@@ -181,7 +181,7 @@ export default function ResumeFormEditor() {
           className="w-full flex items-center justify-between p-4 font-mono font-bold text-sm text-white uppercase tracking-wider hover:bg-slate-900/50 transition-all border-b border-slate-800/40"
         >
           <span className="flex items-center gap-2">
-            <User className="size-4 text-cyan-400" /> Basics Info
+            <User className="size-4 text-white" /> Basics Info
           </span>
           {activeSection === "basics" ? <ChevronUp className="size-4" /> : <ChevronDown className="size-4" />}
         </button>
@@ -203,7 +203,7 @@ export default function ResumeFormEditor() {
                       value={parsedData.basics.name || ""}
                       onChange={(e) => handleBasicsChange("name", e.target.value)}
                       placeholder="John Doe"
-                      className="bg-slate-950 border border-slate-800 text-sm text-slate-100 rounded-lg p-2.5 outline-none focus:border-cyan-500/40 font-mono"
+                      className="bg-slate-950 border border-slate-800 text-sm text-slate-100 rounded-lg p-2.5 outline-none focus:border-white/40 font-mono"
                     />
                   </div>
                   <div className="flex flex-col gap-1.5">
@@ -213,7 +213,7 @@ export default function ResumeFormEditor() {
                       value={parsedData.basics.label || ""}
                       onChange={(e) => handleBasicsChange("label", e.target.value)}
                       placeholder="Senior React Engineer"
-                      className="bg-slate-950 border border-slate-800 text-sm text-slate-100 rounded-lg p-2.5 outline-none focus:border-cyan-500/40 font-mono"
+                      className="bg-slate-950 border border-slate-800 text-sm text-slate-100 rounded-lg p-2.5 outline-none focus:border-white/40 font-mono"
                     />
                   </div>
                 </div>
@@ -226,7 +226,7 @@ export default function ResumeFormEditor() {
                       value={parsedData.basics.email || ""}
                       onChange={(e) => handleBasicsChange("email", e.target.value)}
                       placeholder="johndoe@email.com"
-                      className="bg-slate-950 border border-slate-800 text-sm text-slate-100 rounded-lg p-2.5 outline-none focus:border-cyan-500/40 font-mono"
+                      className="bg-slate-950 border border-slate-800 text-sm text-slate-100 rounded-lg p-2.5 outline-none focus:border-white/40 font-mono"
                     />
                   </div>
                   <div className="flex flex-col gap-1.5">
@@ -236,7 +236,7 @@ export default function ResumeFormEditor() {
                       value={parsedData.basics.phone || ""}
                       onChange={(e) => handleBasicsChange("phone", e.target.value)}
                       placeholder="+1 (555) 019-2834"
-                      className="bg-slate-950 border border-slate-800 text-sm text-slate-100 rounded-lg p-2.5 outline-none focus:border-cyan-500/40 font-mono"
+                      className="bg-slate-950 border border-slate-800 text-sm text-slate-100 rounded-lg p-2.5 outline-none focus:border-white/40 font-mono"
                     />
                   </div>
                 </div>
@@ -248,7 +248,7 @@ export default function ResumeFormEditor() {
                     onChange={(e) => handleBasicsChange("summary", e.target.value)}
                     placeholder="Brief professional intro..."
                     rows={4}
-                    className="bg-slate-950 border border-slate-800 text-sm text-slate-100 rounded-lg p-2.5 outline-none focus:border-cyan-500/40 resize-none font-mono"
+                    className="bg-slate-950 border border-slate-800 text-sm text-slate-100 rounded-lg p-2.5 outline-none focus:border-white/40 resize-none font-mono"
                   />
                 </div>
               </div>
@@ -264,7 +264,7 @@ export default function ResumeFormEditor() {
           className="w-full flex items-center justify-between p-4 font-mono font-bold text-sm text-white uppercase tracking-wider hover:bg-slate-900/50 transition-all border-b border-slate-800/40"
         >
           <span className="flex items-center gap-2">
-            <Briefcase className="size-4 text-cyan-400" /> Work Experience ({parsedData.work.length})
+            <Briefcase className="size-4 text-white" /> Work Experience ({parsedData.work.length})
           </span>
           {activeSection === "work" ? <ChevronUp className="size-4" /> : <ChevronDown className="size-4" />}
         </button>
@@ -295,7 +295,7 @@ export default function ResumeFormEditor() {
                           value={item.company || ""}
                           onChange={(e) => handleWorkChange(idx, "company", e.target.value)}
                           placeholder="Acme Corp"
-                          className="bg-slate-900 border border-slate-800 text-xs text-slate-100 rounded p-2 outline-none focus:border-cyan-500/40 font-mono"
+                          className="bg-slate-900 border border-slate-800 text-xs text-slate-100 rounded p-2 outline-none focus:border-white/40 font-mono"
                         />
                       </div>
                       <div className="flex flex-col gap-1.5">
@@ -305,7 +305,7 @@ export default function ResumeFormEditor() {
                           value={item.position || ""}
                           onChange={(e) => handleWorkChange(idx, "position", e.target.value)}
                           placeholder="Software Engineer"
-                          className="bg-slate-900 border border-slate-800 text-xs text-slate-100 rounded p-2 outline-none focus:border-cyan-500/40 font-mono"
+                          className="bg-slate-900 border border-slate-800 text-xs text-slate-100 rounded p-2 outline-none focus:border-white/40 font-mono"
                         />
                       </div>
                     </div>
@@ -318,7 +318,7 @@ export default function ResumeFormEditor() {
                           value={item.startDate || ""}
                           onChange={(e) => handleWorkChange(idx, "startDate", e.target.value)}
                           placeholder="Jan 2024"
-                          className="bg-slate-900 border border-slate-800 text-xs text-slate-100 rounded p-2 outline-none focus:border-cyan-500/40 font-mono"
+                          className="bg-slate-900 border border-slate-800 text-xs text-slate-100 rounded p-2 outline-none focus:border-white/40 font-mono"
                         />
                       </div>
                       <div className="flex flex-col gap-1.5">
@@ -328,7 +328,7 @@ export default function ResumeFormEditor() {
                           value={item.endDate || ""}
                           onChange={(e) => handleWorkChange(idx, "endDate", e.target.value)}
                           placeholder="Present"
-                          className="bg-slate-900 border border-slate-800 text-xs text-slate-100 rounded p-2 outline-none focus:border-cyan-500/40 font-mono"
+                          className="bg-slate-900 border border-slate-800 text-xs text-slate-100 rounded p-2 outline-none focus:border-white/40 font-mono"
                         />
                       </div>
                     </div>
@@ -339,7 +339,7 @@ export default function ResumeFormEditor() {
                         Key Responsibilities & Highlights
                         <button
                           onClick={() => addHighlight(idx)}
-                          className="flex items-center gap-1 text-[8px] bg-slate-900 border border-slate-800 text-cyan-400 px-2 py-0.5 rounded uppercase hover:bg-slate-850"
+                          className="flex items-center gap-1 text-[8px] bg-slate-900 border border-slate-800 text-white px-2 py-0.5 rounded uppercase hover:bg-slate-850"
                         >
                           <Plus className="size-3" /> Add Highlight
                         </button>
@@ -353,7 +353,7 @@ export default function ResumeFormEditor() {
                               value={hl}
                               onChange={(e) => handleHighlightChange(idx, hIdx, e.target.value)}
                               placeholder="Led standard API optimization resulting in 40% speed up..."
-                              className="flex-1 bg-slate-900 border border-slate-800 text-xs text-slate-200 rounded p-2 outline-none focus:border-cyan-500/40 font-mono"
+                              className="flex-1 bg-slate-900 border border-slate-800 text-xs text-slate-200 rounded p-2 outline-none focus:border-white/40 font-mono"
                             />
                             <button
                               onClick={() => removeHighlight(idx, hIdx)}
@@ -370,7 +370,7 @@ export default function ResumeFormEditor() {
 
                 <button
                   onClick={addWork}
-                  className="w-full py-2.5 rounded-lg border border-dashed border-slate-800 hover:border-cyan-500/40 text-xs font-mono font-bold uppercase text-cyan-400 hover:bg-cyan-500/5 transition-all flex items-center justify-center gap-2"
+                  className="w-full py-2.5 rounded-lg border border-dashed border-slate-800 hover:border-cyan-500/40 text-xs font-mono font-bold uppercase text-white hover:bg-cyan-500/5 transition-all flex items-center justify-center gap-2"
                 >
                   <Plus className="size-4" /> Add Experience Position
                 </button>
@@ -387,7 +387,7 @@ export default function ResumeFormEditor() {
           className="w-full flex items-center justify-between p-4 font-mono font-bold text-sm text-white uppercase tracking-wider hover:bg-slate-900/50 transition-all border-b border-slate-800/40"
         >
           <span className="flex items-center gap-2">
-            <GraduationCap className="size-4 text-cyan-400" /> Education ({parsedData.education.length})
+            <GraduationCap className="size-4 text-white" /> Education ({parsedData.education.length})
           </span>
           {activeSection === "education" ? <ChevronUp className="size-4" /> : <ChevronDown className="size-4" />}
         </button>
@@ -418,7 +418,7 @@ export default function ResumeFormEditor() {
                           value={item.institution || ""}
                           onChange={(e) => handleEducationChange(idx, "institution", e.target.value)}
                           placeholder="Stanford University"
-                          className="bg-slate-900 border border-slate-800 text-xs text-slate-100 rounded p-2 outline-none focus:border-cyan-500/40 font-mono"
+                          className="bg-slate-900 border border-slate-800 text-xs text-slate-100 rounded p-2 outline-none focus:border-white/40 font-mono"
                         />
                       </div>
                       <div className="flex flex-col gap-1.5">
@@ -428,7 +428,7 @@ export default function ResumeFormEditor() {
                           value={item.studyType || ""}
                           onChange={(e) => handleEducationChange(idx, "studyType", e.target.value)}
                           placeholder="Bachelor of Science"
-                          className="bg-slate-900 border border-slate-800 text-xs text-slate-100 rounded p-2 outline-none focus:border-cyan-500/40 font-mono"
+                          className="bg-slate-900 border border-slate-800 text-xs text-slate-100 rounded p-2 outline-none focus:border-white/40 font-mono"
                         />
                       </div>
                     </div>
@@ -441,7 +441,7 @@ export default function ResumeFormEditor() {
                           value={item.area || ""}
                           onChange={(e) => handleEducationChange(idx, "area", e.target.value)}
                           placeholder="Computer Science"
-                          className="bg-slate-900 border border-slate-800 text-xs text-slate-100 rounded p-2 outline-none focus:border-cyan-500/40 font-mono"
+                          className="bg-slate-900 border border-slate-800 text-xs text-slate-100 rounded p-2 outline-none focus:border-white/40 font-mono"
                         />
                       </div>
                       <div className="flex flex-col gap-1.5">
@@ -451,7 +451,7 @@ export default function ResumeFormEditor() {
                           value={item.endDate || ""}
                           onChange={(e) => handleEducationChange(idx, "endDate", e.target.value)}
                           placeholder="June 2023"
-                          className="bg-slate-900 border border-slate-800 text-xs text-slate-100 rounded p-2 outline-none focus:border-cyan-500/40 font-mono"
+                          className="bg-slate-900 border border-slate-800 text-xs text-slate-100 rounded p-2 outline-none focus:border-white/40 font-mono"
                         />
                       </div>
                     </div>
@@ -460,7 +460,7 @@ export default function ResumeFormEditor() {
 
                 <button
                   onClick={addEducation}
-                  className="w-full py-2.5 rounded-lg border border-dashed border-slate-800 hover:border-cyan-500/40 text-xs font-mono font-bold uppercase text-cyan-400 hover:bg-cyan-500/5 transition-all flex items-center justify-center gap-2"
+                  className="w-full py-2.5 rounded-lg border border-dashed border-slate-800 hover:border-cyan-500/40 text-xs font-mono font-bold uppercase text-white hover:bg-cyan-500/5 transition-all flex items-center justify-center gap-2"
                 >
                   <Plus className="size-4" /> Add Education Section
                 </button>
@@ -477,7 +477,7 @@ export default function ResumeFormEditor() {
           className="w-full flex items-center justify-between p-4 font-mono font-bold text-sm text-white uppercase tracking-wider hover:bg-slate-900/50 transition-all border-b border-slate-800/40"
         >
           <span className="flex items-center gap-2">
-            <Code className="size-4 text-cyan-400" /> Skills ({parsedData.skills.length})
+            <Code className="size-4 text-white" /> Skills ({parsedData.skills.length})
           </span>
           {activeSection === "skills" ? <ChevronUp className="size-4" /> : <ChevronDown className="size-4" />}
         </button>
@@ -497,11 +497,11 @@ export default function ResumeFormEditor() {
                     value={skillInput}
                     onChange={(e) => setSkillInput(e.target.value)}
                     placeholder="React, TypeScript, AWS, Node.js..."
-                    className="flex-1 bg-slate-950 border border-slate-800 text-xs text-slate-100 rounded-lg p-2.5 outline-none focus:border-cyan-500/40 font-mono"
+                    className="flex-1 bg-slate-950 border border-slate-800 text-xs text-slate-100 rounded-lg p-2.5 outline-none focus:border-white/40 font-mono"
                   />
                   <button
                     type="submit"
-                    className="bg-cyan-500 hover:bg-cyan-400 text-slate-950 text-xs font-mono font-bold px-4 py-2 rounded-lg transition-colors flex items-center gap-1 uppercase shrink-0"
+                    className="bg-white hover:bg-gray-200 text-black text-xs font-mono font-bold px-4 py-2 rounded-lg transition-colors flex items-center gap-1 uppercase shrink-0"
                   >
                     <Plus className="size-3.5" /> Add
                   </button>
@@ -536,7 +536,7 @@ export default function ResumeFormEditor() {
           className="w-full flex items-center justify-between p-4 font-mono font-bold text-sm text-white uppercase tracking-wider hover:bg-slate-900/50 transition-all border-b border-slate-800/40"
         >
           <span className="flex items-center gap-2">
-            <Layers className="size-4 text-cyan-400" /> Projects ({parsedData.projects.length})
+            <Layers className="size-4 text-white" /> Projects ({parsedData.projects.length})
           </span>
           {activeSection === "projects" ? <ChevronUp className="size-4" /> : <ChevronDown className="size-4" />}
         </button>
@@ -567,7 +567,7 @@ export default function ResumeFormEditor() {
                           value={proj.name || ""}
                           onChange={(e) => handleProjectChange(idx, "name", e.target.value)}
                           placeholder="Mockrithm AI Platform"
-                          className="bg-slate-900 border border-slate-800 text-xs text-slate-100 rounded p-2 outline-none focus:border-cyan-500/40 font-mono"
+                          className="bg-slate-900 border border-slate-800 text-xs text-slate-100 rounded p-2 outline-none focus:border-white/40 font-mono"
                         />
                       </div>
                       <div className="flex flex-col gap-1.5">
@@ -577,7 +577,7 @@ export default function ResumeFormEditor() {
                           value={proj.link || ""}
                           onChange={(e) => handleProjectChange(idx, "link", e.target.value)}
                           placeholder="https://github.com/..."
-                          className="bg-slate-900 border border-slate-800 text-xs text-slate-100 rounded p-2 outline-none focus:border-cyan-500/40 font-mono"
+                          className="bg-slate-900 border border-slate-800 text-xs text-slate-100 rounded p-2 outline-none focus:border-white/40 font-mono"
                         />
                       </div>
                     </div>
@@ -589,7 +589,7 @@ export default function ResumeFormEditor() {
                         value={proj.technologies ? proj.technologies.join(", ") : ""}
                         onChange={(e) => handleProjTechChange(idx, e.target.value)}
                         placeholder="Next.js, Tailwind, Firebase"
-                        className="bg-slate-900 border border-slate-800 text-xs text-slate-150 rounded p-2 outline-none focus:border-cyan-500/40 font-mono"
+                        className="bg-slate-900 border border-slate-800 text-xs text-slate-150 rounded p-2 outline-none focus:border-white/40 font-mono"
                       />
                     </div>
 
@@ -600,7 +600,7 @@ export default function ResumeFormEditor() {
                         onChange={(e) => handleProjectChange(idx, "description", e.target.value)}
                         placeholder="Brief overview of the project and impact..."
                         rows={3}
-                        className="bg-slate-900 border border-slate-800 text-xs text-slate-100 rounded p-2 outline-none focus:border-cyan-500/40 resize-none font-mono"
+                        className="bg-slate-900 border border-slate-800 text-xs text-slate-100 rounded p-2 outline-none focus:border-white/40 resize-none font-mono"
                       />
                     </div>
                   </div>
@@ -608,7 +608,7 @@ export default function ResumeFormEditor() {
 
                 <button
                   onClick={addProject}
-                  className="w-full py-2.5 rounded-lg border border-dashed border-slate-800 hover:border-cyan-500/40 text-xs font-mono font-bold uppercase text-cyan-400 hover:bg-cyan-500/5 transition-all flex items-center justify-center gap-2"
+                  className="w-full py-2.5 rounded-lg border border-dashed border-slate-800 hover:border-cyan-500/40 text-xs font-mono font-bold uppercase text-white hover:bg-cyan-500/5 transition-all flex items-center justify-center gap-2"
                 >
                   <Plus className="size-4" /> Add Project Module
                 </button>
@@ -625,7 +625,7 @@ export default function ResumeFormEditor() {
           className="w-full flex items-center justify-between p-4 font-mono font-bold text-sm text-white uppercase tracking-wider hover:bg-slate-900/50 transition-all border-b border-slate-800/40"
         >
           <span className="flex items-center gap-2">
-            <Award className="size-4 text-cyan-400" /> Certifications ({parsedData.certifications.length})
+            <Award className="size-4 text-white" /> Certifications ({parsedData.certifications.length})
           </span>
           {activeSection === "certifications" ? <ChevronUp className="size-4" /> : <ChevronDown className="size-4" />}
         </button>
@@ -656,7 +656,7 @@ export default function ResumeFormEditor() {
                           value={cert.name || ""}
                           onChange={(e) => handleCertChange(idx, "name", e.target.value)}
                           placeholder="AWS Solutions Architect"
-                          className="bg-slate-900 border border-slate-800 text-xs text-slate-100 rounded p-2 outline-none focus:border-cyan-500/40 font-mono"
+                          className="bg-slate-900 border border-slate-800 text-xs text-slate-100 rounded p-2 outline-none focus:border-white/40 font-mono"
                         />
                       </div>
                       <div className="flex flex-col gap-1.5">
@@ -666,7 +666,7 @@ export default function ResumeFormEditor() {
                           value={cert.issuer || ""}
                           onChange={(e) => handleCertChange(idx, "issuer", e.target.value)}
                           placeholder="Amazon Web Services"
-                          className="bg-slate-900 border border-slate-800 text-xs text-slate-100 rounded p-2 outline-none focus:border-cyan-500/40 font-mono"
+                          className="bg-slate-900 border border-slate-800 text-xs text-slate-100 rounded p-2 outline-none focus:border-white/40 font-mono"
                         />
                       </div>
                       <div className="flex flex-col gap-1.5">
@@ -676,7 +676,7 @@ export default function ResumeFormEditor() {
                           value={cert.date || ""}
                           onChange={(e) => handleCertChange(idx, "date", e.target.value)}
                           placeholder="Oct 2024"
-                          className="bg-slate-900 border border-slate-800 text-xs text-slate-100 rounded p-2 outline-none focus:border-cyan-500/40 font-mono"
+                          className="bg-slate-900 border border-slate-800 text-xs text-slate-100 rounded p-2 outline-none focus:border-white/40 font-mono"
                         />
                       </div>
                     </div>
@@ -685,7 +685,7 @@ export default function ResumeFormEditor() {
 
                 <button
                   onClick={addCert}
-                  className="w-full py-2.5 rounded-lg border border-dashed border-slate-800 hover:border-cyan-500/40 text-xs font-mono font-bold uppercase text-cyan-400 hover:bg-cyan-500/5 transition-all flex items-center justify-center gap-2"
+                  className="w-full py-2.5 rounded-lg border border-dashed border-slate-800 hover:border-cyan-500/40 text-xs font-mono font-bold uppercase text-white hover:bg-cyan-500/5 transition-all flex items-center justify-center gap-2"
                 >
                   <Plus className="size-4" /> Add Certification
                 </button>
@@ -702,7 +702,7 @@ export default function ResumeFormEditor() {
           className="w-full flex items-center justify-between p-4 font-mono font-bold text-sm text-white uppercase tracking-wider hover:bg-slate-900/50 transition-all border-b border-slate-800/40"
         >
           <span className="flex items-center gap-2">
-            <Globe className="size-4 text-cyan-400" /> Social Links ({parsedData.socialLinks.length})
+            <Globe className="size-4 text-white" /> Social Links ({parsedData.socialLinks.length})
           </span>
           {activeSection === "socialLinks" ? <ChevronUp className="size-4" /> : <ChevronDown className="size-4" />}
         </button>
@@ -733,7 +733,7 @@ export default function ResumeFormEditor() {
                           value={link.platform || ""}
                           onChange={(e) => handleSocialChange(idx, "platform", e.target.value)}
                           placeholder="GitHub or LinkedIn"
-                          className="bg-slate-900 border border-slate-800 text-xs text-slate-100 rounded p-2 outline-none focus:border-cyan-500/40 font-mono"
+                          className="bg-slate-900 border border-slate-800 text-xs text-slate-100 rounded p-2 outline-none focus:border-white/40 font-mono"
                         />
                       </div>
                       <div className="flex flex-col gap-1.5">
@@ -743,7 +743,7 @@ export default function ResumeFormEditor() {
                           value={link.url || ""}
                           onChange={(e) => handleSocialChange(idx, "url", e.target.value)}
                           placeholder="https://github.com/username"
-                          className="bg-slate-900 border border-slate-800 text-xs text-slate-100 rounded p-2 outline-none focus:border-cyan-500/40 font-mono"
+                          className="bg-slate-900 border border-slate-800 text-xs text-slate-100 rounded p-2 outline-none focus:border-white/40 font-mono"
                         />
                       </div>
                     </div>
@@ -752,7 +752,7 @@ export default function ResumeFormEditor() {
 
                 <button
                   onClick={addSocial}
-                  className="w-full py-2.5 rounded-lg border border-dashed border-slate-800 hover:border-cyan-500/40 text-xs font-mono font-bold uppercase text-cyan-400 hover:bg-cyan-500/5 transition-all flex items-center justify-center gap-2"
+                  className="w-full py-2.5 rounded-lg border border-dashed border-slate-800 hover:border-cyan-500/40 text-xs font-mono font-bold uppercase text-white hover:bg-cyan-500/5 transition-all flex items-center justify-center gap-2"
                 >
                   <Plus className="size-4" /> Add Social Link
                 </button>

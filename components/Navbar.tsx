@@ -13,6 +13,7 @@ import {
   collection,
   getDocs,
 } from "firebase/firestore";
+import { signOut as serverSignOut } from "@/lib/actions/auth.action";
 import { useState, useEffect } from "react";
 import {
   ChevronDown,
@@ -29,32 +30,20 @@ import {
 interface NavbarProps {
   userId: string;
   userName: string;
+  userRole?: string;
 }
 
-const Navbar = ({ userId, userName }: NavbarProps) => {
+const Navbar = ({ userId, userName, userRole }: NavbarProps) => {
   const router = useRouter();
   const pathname = usePathname();
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
-  const [isAdmin, setIsAdmin] = useState(false);
+  const [isAdmin, setIsAdmin] = useState(userRole?.toLowerCase() === "admin");
 
   useEffect(() => {
-    const fetchUserRole = async () => {
-      if (!userId) return;
-      try {
-        const userDocRef = doc(db, "users", userId);
-        const userDoc = await getDoc(userDocRef);
-        if (userDoc.exists()) {
-          const data = userDoc.data();
-          setIsAdmin(data.role?.toLowerCase() === "admin");
-        }
-      } catch (error) {
-        console.error("Failed to fetch user role:", error);
-      }
-    };
-    fetchUserRole();
-  }, [userId]);
+    setIsAdmin(userRole?.toLowerCase() === "admin");
+  }, [userRole]);
 
   useEffect(() => {
     const handleScroll = () => setIsScrolled(window.scrollY > 20);
@@ -76,7 +65,8 @@ const Navbar = ({ userId, userName }: NavbarProps) => {
   const handleLogout = async () => {
     try {
       await signOut(auth);
-      router.push("/sign-in");
+      await serverSignOut();
+      window.location.href = "/sign-in";
     } catch (error) {
       console.error("Logout failed:", error);
     }
@@ -97,7 +87,8 @@ const Navbar = ({ userId, userName }: NavbarProps) => {
       const currentUser = auth.currentUser;
       if (currentUser) await currentUser.delete();
       await signOut(auth);
-      router.push("/sign-in");
+      await serverSignOut();
+      window.location.href = "/sign-in";
     } catch (error) {
       console.error("Account deletion failed:", error);
     }
