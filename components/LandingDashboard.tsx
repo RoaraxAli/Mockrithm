@@ -55,13 +55,21 @@ export default function LandingDashboard({
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
       if (firebaseUser) {
+        if (user && firebaseUser.uid === user.id) {
+          setClientUser(user);
+          setAuthResolved(true);
+          return;
+        }
+
         try {
-          const userDocRef = doc(db, "users", firebaseUser.uid);
-          const userDoc = await getDoc(userDocRef);
-          if (userDoc.exists()) {
+          const { getUserProfile } = await import("@/lib/actions/auth.action");
+          const result = await getUserProfile(firebaseUser.uid);
+          if (result && result.success) {
             setClientUser({
               id: firebaseUser.uid,
-              ...userDoc.data()
+              name: result.name,
+              role: result.role,
+              email: result.email,
             });
           } else {
             setClientUser({
@@ -85,7 +93,7 @@ export default function LandingDashboard({
     });
 
     return () => unsubscribe();
-  }, []);
+  }, [user]);
 
   // 2. Load Dashboard Data
   useEffect(() => {

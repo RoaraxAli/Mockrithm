@@ -58,14 +58,19 @@ export default function ContactPage() {
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
       if (firebaseUser) {
-        const userRef = doc(db, "users", firebaseUser.uid);
-        const userSnap = await getDoc(userRef);
+        try {
+          const { getUserProfile } = await import("@/lib/actions/auth.action");
+          const result = await getUserProfile(firebaseUser.uid);
 
-        const nameFromDb = userSnap.exists()
-          ? userSnap.data().name
-          : "Anonymous";
+          const nameFromDb = result && result.success
+            ? result.name
+            : "Anonymous";
 
-        form.setValue("name", nameFromDb);
+          form.setValue("name", nameFromDb);
+        } catch (error) {
+          console.error("Failed to load user profile in FeedbackForm:", error);
+          form.setValue("name", "Anonymous");
+        }
         form.setValue("email", firebaseUser.email || "");
       }
     });

@@ -141,7 +141,7 @@ export default function ResumeWorkspace({ initialResume }: Props) {
       <header className="h-16 border-b border-slate-800 bg-slate-900/50 backdrop-blur-xl flex items-center justify-between px-6 shrink-0 z-10">
         <div className="flex items-center gap-4">
           <Link 
-            href="/user/dashboard/resume"
+            href="/user/resume"
             className="flex items-center gap-1.5 text-xs text-slate-400 hover:text-white font-mono uppercase tracking-wider transition-colors mr-2"
           >
             <ArrowLeft className="size-4" /> Back
@@ -181,6 +181,13 @@ export default function ResumeWorkspace({ initialResume }: Props) {
             {isExporting ? <Loader2 className="size-4 animate-spin" /> : <Download className="size-4" />}
             Export PDF
           </button>
+
+          <Link
+            href="/user/dashboard"
+            className="flex items-center gap-2 bg-emerald-600 hover:bg-emerald-500 text-white font-bold px-4 py-2 rounded-lg transition-all shadow-md text-sm uppercase tracking-wider"
+          >
+            Finish
+          </Link>
         </div>
       </header>
 

@@ -73,12 +73,12 @@ export default function InterviewFeedbackPage() {
 
             if (data.userId) {
               try {
-                const userSnap = await getDoc(docRef(db, "users", data.userId));
-                const userData = userSnap.data();
-                if (userData) {
+                const { getUserProfile } = await import("@/lib/actions/auth.action");
+                const result = await getUserProfile(data.userId);
+                if (result && result.success) {
                   userInfo = {
-                    name: userData.name || "Unknown",
-                    email: userData.email || "unknown@example.com",
+                    name: result.name || "Unknown",
+                    email: result.email || "unknown@example.com",
                   };
                 }
               } catch (err) {

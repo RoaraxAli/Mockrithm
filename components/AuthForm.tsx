@@ -140,7 +140,7 @@ const AuthForm = ({ type }: { type: FormType }) => {
         const hasResume = signInResult.hasResume;
 
         if (!hasResume) {
-          router.replace("/user/dashboard/resume");
+          router.replace("/user/resume");
         } else if (isAdmin) {
           router.replace("/admin");
         } else {

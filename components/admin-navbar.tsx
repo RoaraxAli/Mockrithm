@@ -25,22 +25,29 @@ export function AdminNavbar() {
 
   // Fetch admin name from Firestore
   useEffect(() => {
-    const fetchAdminName = async () => {
-      const user = auth.currentUser;
-      if (!user) return;
+    let unsubscribe: () => void;
+    
+    const setupListener = async () => {
+      unsubscribe = auth.onAuthStateChanged(async (user) => {
+        if (!user) return;
 
-      try {
-        const docRef = doc(db, "users", user.uid);
-        const snap = await getDoc(docRef);
-        if (snap.exists()) {
-          const data = snap.data();
-          setAdminName(data.name || "Admin");
+        try {
+          const { getUserProfile } = await import("@/lib/actions/auth.action");
+          const result = await getUserProfile(user.uid);
+          if (result && result.success) {
+            setAdminName(result.name || "Admin");
+          }
+        } catch (error) {
+          console.error("Failed to fetch admin name:", error);
         }
-      } catch (error) {
-        console.error("Failed to fetch admin name:", error);
-      }
+      });
     };
-    fetchAdminName();
+
+    setupListener();
+
+    return () => {
+      if (unsubscribe) unsubscribe();
+    };
   }, []);
 
   // GSAP animation

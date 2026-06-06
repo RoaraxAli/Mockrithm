@@ -49,14 +49,19 @@ const shouldShowNavbar = !hideNavbar;
         console.log("Firebase client auth detected user:", user.uid);
         setUserId(user.uid);
 
-        try {
-          const userDocRef = doc(db, "users", user.uid);
-          const userDoc = await getDoc(userDocRef);
+        if (user.uid === initialUserId && initialUserName) {
+          setUserName(initialUserName);
+          setUserRole(initialUserRole || "User");
+          return;
+        }
 
-          if (userDoc.exists()) {
-            const userData = userDoc.data();
-            setUserName(userData.name || "User");
-            setUserRole(userData.role || "User");
+        try {
+          const { getUserProfile } = await import("@/lib/actions/auth.action");
+          const result = await getUserProfile(user.uid);
+
+          if (result && result.success) {
+            setUserName(result.name || "User");
+            setUserRole(result.role || "User");
           } else {
             setUserName("User");
             setUserRole("User");
@@ -81,7 +86,7 @@ const shouldShowNavbar = !hideNavbar;
     });
 
     return () => unsubscribe();
-  }, [initialUserId]);
+  }, [initialUserId, initialUserName, initialUserRole]);
 
 
   return (

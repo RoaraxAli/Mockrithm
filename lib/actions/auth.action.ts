@@ -195,3 +195,23 @@ export async function isAuthenticated() {
   const user = await getCurrentUser();
   return !!user;
 }
+
+export async function getUserProfile(uid: string) {
+  try {
+    const userDoc = await db.collection("users").doc(uid).get();
+    if (userDoc.exists) {
+      const data = userDoc.data();
+      return {
+        success: true,
+        name: data?.name || "User",
+        role: data?.role || "User",
+        email: data?.email || "",
+      };
+    }
+    return { success: false, message: "User not found" };
+  } catch (error: any) {
+    console.error("Error fetching user profile:", error);
+    return { success: false, message: error.message };
+  }
+}
+
