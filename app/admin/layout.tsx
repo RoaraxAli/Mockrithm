@@ -1,70 +1,34 @@
-"use client";
+import { getCurrentUser } from "@/lib/actions/auth.action"
+import { redirect } from "next/navigation"
+import { AdminSidebar } from "@/components/admin-sidebar"
+import { AdminNavbar } from "@/components/admin-navbar"
+import { AdminTransitionWrapper } from "@/components/AdminTransitionWrapper"
 
-import { useEffect, useState } from "react";
-import { useRouter, usePathname } from "next/navigation";
-import { auth } from "@/firebase/client"; // your firebase client auth instance
-import { gsap } from "gsap";
-import { ScrollTrigger } from "gsap/ScrollTrigger";
-import { AdminSidebar } from "@/components/admin-sidebar";
-import { AdminNavbar } from "@/components/admin-navbar";
-
-if (typeof window !== "undefined") {
-  gsap.registerPlugin(ScrollTrigger);
-}
-
-export default function AdminLayout({
+export default async function AdminLayout({
   children,
 }: {
-  children: React.ReactNode;
+  children: React.ReactNode
 }) {
-  const pathname = usePathname();
-  const router = useRouter();
-  const [loading, setLoading] = useState(true);
+  const user = await getCurrentUser()
+  const allowedAdmins = ["ahmed@gmail.com"]
 
-  useEffect(() => {
-    const unsubscribe = auth.onAuthStateChanged((user) => {
-      const allowedAdmins = ["ahmed@gmail.com"];
-      if (!user) {
-        router.push("/sign-in");
-      } else if (!allowedAdmins.includes(user.email || "")) {
-        router.push("/");
-      } else {
-        setLoading(false);
-      }
-    });
-
-    return () => unsubscribe();
-  }, [router]);
-
-  useEffect(() => {
-    if (!loading) {
-      const tl = gsap.timeline();
-
-      tl.fromTo(
-        ".page-content",
-        { opacity: 0, y: 20 },
-        { opacity: 1, y: 0, duration: 0.3, ease: "power2.out" }
-      );
-
-      return () => {
-        tl.kill();
-      };
-    }
-  }, [pathname, loading]);
-
-  if (loading) {
-    return null;
+  if (!user) {
+    redirect("/sign-in")
+  } else if (!allowedAdmins.includes(user.email || "")) {
+    redirect("/")
   }
 
   return (
     <div className="min-h-screen bg-black">
       <AdminSidebar />
       <div className="lg:pl-64">
-        <AdminNavbar />
-        <main className="page-content px-4 py-6 lg:px-8">
-          <div className="mx-auto max-w-7xl">{children}</div>
-        </main>
+        <AdminNavbar adminName={user.name} />
+        <AdminTransitionWrapper>
+          <main className="page-content px-4 py-6 lg:px-8">
+            <div className="mx-auto max-w-7xl">{children}</div>
+          </main>
+        </AdminTransitionWrapper>
       </div>
     </div>
-  );
+  )
 }

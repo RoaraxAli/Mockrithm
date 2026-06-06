@@ -115,7 +115,7 @@ export const getFeedbacksForUser = cache(async (userId: string): Promise<Feedbac
     .collection("interviewsfeedback")
     .where("userId", "==", userId)
     .get();
-  return querySnapshot.docs.map((doc) => ({
+  return querySnapshot.docs.map((doc: any) => ({
     id: doc.id,
     ...doc.data(),
   })) as Feedback[];
@@ -134,7 +134,7 @@ export const getLatestInterviews = cache(async (
     .get();
 
   return interviews.docs
-    .map((doc) => ({
+    .map((doc: any) => ({
       id: doc.id,
       ...doc.data(),
     }))
@@ -153,14 +153,33 @@ export const getInterviewsByUserId = cache(async (
     .where("userId", "==", userId)
     .get();
 
-  const interviews = querySnapshot.docs.map((doc) => ({
+  const interviews = querySnapshot.docs.map((doc: any) => ({
     id: doc.id,
     ...doc.data(),
   })) as Interview[];
   
   return interviews.sort((a, b) => {
-    const aTime = a.createdAt?.toDate ? a.createdAt.toDate().getTime() : new Date(a.createdAt).getTime();
-    const bTime = b.createdAt?.toDate ? b.createdAt.toDate().getTime() : new Date(b.createdAt).getTime();
+    const aTime = (a.createdAt as any)?.toDate ? (a.createdAt as any).toDate().getTime() : new Date(a.createdAt).getTime();
+    const bTime = (b.createdAt as any)?.toDate ? (b.createdAt as any).toDate().getTime() : new Date(b.createdAt).getTime();
     return bTime - aTime;
   });
 });
+
+export async function submitSupportFeedback(values: {
+  name: string;
+  email: string;
+  type: string;
+  message: string;
+}) {
+  try {
+    const feedbackRef = await db.collection("feedback").add({
+      ...values,
+      createdAt: new Date().toISOString(),
+      status: "Open",
+    });
+    return { success: true, id: feedbackRef.id };
+  } catch (error) {
+    console.error("Error submitting support feedback:", error);
+    return { success: false, error: "Failed to submit feedback" };
+  }
+}

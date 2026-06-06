@@ -13,7 +13,6 @@ import {
   collection,
   getDocs,
 } from "firebase/firestore";
-import { signOut as serverSignOut } from "@/lib/actions/auth.action";
 import { useState, useEffect } from "react";
 import {
   ChevronDown,
@@ -64,8 +63,10 @@ const Navbar = ({ userId, userName, userRole }: NavbarProps) => {
 
   const handleLogout = async () => {
     try {
-      await signOut(auth);
-      await serverSignOut();
+      await Promise.all([
+        signOut(auth),
+        fetch("/api/auth/sign-out", { method: "POST" })
+      ]);
       window.location.href = "/sign-in";
     } catch (error) {
       console.error("Logout failed:", error);
@@ -86,8 +87,10 @@ const Navbar = ({ userId, userName, userRole }: NavbarProps) => {
       await deleteDoc(doc(db, "users", userId));
       const currentUser = auth.currentUser;
       if (currentUser) await currentUser.delete();
-      await signOut(auth);
-      await serverSignOut();
+      await Promise.all([
+        signOut(auth),
+        fetch("/api/auth/sign-out", { method: "POST" })
+      ]);
       window.location.href = "/sign-in";
     } catch (error) {
       console.error("Account deletion failed:", error);

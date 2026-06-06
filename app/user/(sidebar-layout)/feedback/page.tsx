@@ -1,61 +1,23 @@
-"use client"
-
-import { useState, useEffect } from "react"
-import { useAuthState } from "react-firebase-hooks/auth"
-import { auth } from "@/firebase/client"
-import type { Feedback } from "@/app/user/types"
+import { getCurrentUser } from "@/lib/actions/auth.action"
 import { getUserFeedback } from "@/app/user/lib/firestore"
 import { FeedbackCard } from "@/app/user/components/FeedbackCard"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Alert, AlertDescription } from "@/components/ui/alert"
-import { Skeleton } from "@/components/ui/skeleton"
+import { redirect } from "next/navigation"
 
-export default function FeedbackPage() {
-  const [user] = useAuthState(auth)
-  const [feedback, setFeedback] = useState<Feedback[]>([])
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
+export default async function FeedbackPage() {
+  const user = await getCurrentUser()
+  if (!user) {
+    redirect("/sign-in")
+  }
 
-  useEffect(() => {
-    async function fetchFeedback() {
-      if (!user) return
+  let feedback: any[] = []
+  let error: string | null = null
 
-      try {
-        setLoading(true)
-        const result = await getUserFeedback(user.uid)
-        setFeedback(result)
-      } catch (err) {
-        setError("Failed to load feedback")
-      } finally {
-        setLoading(false)
-      }
-    }
-
-    fetchFeedback()
-  }, [user])
-
-  if (loading) {
-    return (
-      <div className="space-y-8 bg-black">
-        <div>
-          <h1 className="text-3xl font-black text-white mb-1">Feedback Analytics</h1>
-          <p className="text-sm text-gray-400 font-medium">Your aggregated interview feedback and performance metrics</p>
-        </div>
-        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-          {[...Array(6)].map((_, i) => (
-            <Card key={i} className="glass-card rounded-2xl">
-              <CardHeader className="pb-2">
-                <Skeleton className="h-4 w-24 bg-zinc-800" />
-              </CardHeader>
-              <CardContent>
-                <Skeleton className="h-8 w-16 bg-zinc-800 mb-3" />
-                <Skeleton className="h-2 w-full bg-zinc-800" />
-              </CardContent>
-            </Card>
-          ))}
-        </div>
-      </div>
-    )
+  try {
+    feedback = await getUserFeedback(user.id)
+  } catch (err) {
+    error = "Failed to load feedback"
   }
 
   if (error) {
@@ -71,11 +33,11 @@ export default function FeedbackPage() {
       <div className="space-y-8">
         <div>
           <h1 className="text-3xl font-black text-white mb-1">Feedback Analytics</h1>
-          <p className="text-sm text-gray-400 font-medium font-medium">Your aggregated interview feedback and performance metrics</p>
+          <p className="text-sm text-gray-400 font-medium">Your aggregated interview feedback and performance metrics</p>
         </div>
         <div className="text-center py-16 glass-card rounded-2xl border border-white/5">
           <p className="text-gray-400 mb-2 font-medium">No feedback assessments available yet.</p>
-          <p className="text-xs text-gray-500">Complete your first mock interview to view analytics here.</p>
+          <p className="text-xs text-gray-550">Complete your first mock interview to view analytics here.</p>
         </div>
       </div>
     )
@@ -85,7 +47,7 @@ export default function FeedbackPage() {
   const aggregatedCategories = feedback.reduce(
     (acc, fb) => {
       if (fb.categoryScores) {
-        fb.categoryScores.forEach((category) => {
+        fb.categoryScores.forEach((category: any) => {
           if (!acc[category.category]) {
             acc[category.category] = { totalScore: 0, totalMax: 0, count: 0 }
           }
@@ -100,8 +62,8 @@ export default function FeedbackPage() {
   )
 
   // Aggregate strengths and areas for improvement
-  const allStrengths = feedback.flatMap((fb) => fb.strengths)
-  const allImprovements = feedback.flatMap((fb) => fb.areasForImprovement)
+  const allStrengths = feedback.flatMap((fb) => fb.strengths || [])
+  const allImprovements = feedback.flatMap((fb) => fb.areasForImprovement || [])
 
   // Get unique items with frequency
   const strengthCounts = allStrengths.reduce(
@@ -121,12 +83,12 @@ export default function FeedbackPage() {
   )
 
   const topStrengths = Object.entries(strengthCounts)
-    .sort(([, a], [, b]) => b - a)
+    .sort(([, a], [, b]) => (b as number) - (a as number))
     .slice(0, 5)
     .map(([strength]) => strength)
 
   const topImprovements = Object.entries(improvementCounts)
-    .sort(([, a], [, b]) => b - a)
+    .sort(([, a], [, b]) => (b as number) - (a as number))
     .slice(0, 5)
     .map(([improvement]) => improvement)
 
@@ -136,20 +98,23 @@ export default function FeedbackPage() {
         <h1 className="text-3xl font-black text-white mb-1">
           Feedback Analytics
         </h1>
-        <p className="text-sm text-gray-400 font-medium font-medium">
+        <p className="text-sm text-gray-400 font-medium">
           Aggregated competency analysis and metrics from {feedback.length} interview{feedback.length === 1 ? "" : "s"}
         </p>
       </div>
 
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-        {Object.entries(aggregatedCategories).map(([category, data]) => (
-          <FeedbackCard
-            key={category}
-            category={category}
-            score={Math.round(data.totalScore / data.count)}
-            maxScore={Math.round(data.totalMax / data.count)}
-          />
-        ))}
+        {Object.entries(aggregatedCategories).map(([category, data]) => {
+          const d = data as { totalScore: number; totalMax: number; count: number };
+          return (
+            <FeedbackCard
+              key={category}
+              category={category}
+              score={Math.round(d.totalScore / d.count)}
+              maxScore={Math.round(d.totalMax / d.count)}
+            />
+          );
+        })}
       </div>
 
       <div className="grid gap-6 md:grid-cols-2">

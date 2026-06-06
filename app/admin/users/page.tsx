@@ -53,24 +53,27 @@ export default function UsersPage() {
   useEffect(() => {
     const fetchUsers = async () => {
       try {
-        const snap = await getDocs(collection(db, "users")); // no orderBy
+        const res = await fetch("/api/admin/users");
+        if (!res.ok) throw new Error("Failed to fetch users");
+        const data = await res.json();
 
-        const fetchedUsers = snap.docs.map((doc) => {
-          const data = doc.data();
+        const fetchedUsers = data.map((user: any) => {
           return {
-            id: doc.id,
-            name: data.name || "",
-            email: data.email || "",
-            role: data.role || "User",
-            createdAt: data.createdAt?.toDate
-              ? data.createdAt.toDate().toLocaleDateString()
-              : "—", // fallback if missing
-            status: data.status || "Active",
+            id: user.id,
+            name: user.name || "",
+            email: user.email || "",
+            role: user.role || "User",
+            createdAt: user.createdAt?.toDate
+              ? user.createdAt.toDate().toLocaleDateString()
+              : typeof user.createdAt === "string"
+              ? new Date(user.createdAt).toLocaleDateString()
+              : "—",
+            status: user.status || "Active",
           };
         });
 
         // sort manually if createdAt exists
-        fetchedUsers.sort((a, b) => {
+        fetchedUsers.sort((a: any, b: any) => {
           const aDate = new Date(a.createdAt);
           const bDate = new Date(b.createdAt);
           return isNaN(bDate.getTime())

@@ -130,19 +130,12 @@ const AuthForm = ({ type }: { type: FormType }) => {
 
         toast.success("Signed in successfully.");
 
-        const isAdmin = email === "ahmed@gmail.com";
+        const isAdmin = signInResult.role === "Admin";
+
         if (isAdmin) {
-          localStorage.setItem("isAdmin", "true");
-        } else {
-          localStorage.removeItem("isAdmin");
-        }
-
-        const hasResume = signInResult.hasResume;
-
-        if (!hasResume) {
-          router.replace("/user/dashboard/resume");
-        } else if (isAdmin) {
           router.replace("/admin");
+        } else if (!signInResult.hasResume) {
+          router.replace("/user/dashboard/resume");
         } else {
           router.replace("/user/dashboard");
         }

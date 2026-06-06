@@ -1,70 +1,46 @@
-"use client"
-
-import { useState, useEffect } from "react"
-import { useParams } from "next/navigation"
-import type { Interview, Feedback } from "@/app/user/types"
+import { getCurrentUser } from "@/lib/actions/auth.action"
 import { getInterviewById, getInterviewFeedback } from "@/app/user/lib/firestore"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Download, Briefcase } from "lucide-react"
-import { Skeleton } from "@/components/ui/skeleton"
+import { redirect } from "next/navigation"
 
-export default function InterviewDetailPage() {
-  const params = useParams()
-  const interviewId = params.id as string
+interface PageProps {
+  params: Promise<{ id: string }>;
+}
 
-  const [interview, setInterview] = useState<Interview | null>(null)
-  const [feedback, setFeedback] = useState<Feedback | null>(null)
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
+export default async function InterviewDetailPage({ params }: PageProps) {
+  const { id: interviewId } = await params
+  const user = await getCurrentUser()
+  if (!user) {
+    redirect("/sign-in")
+  }
 
-  useEffect(() => {
-    async function fetchData() {
-      try {
-        setLoading(true)
-        const [interviewResult, feedbackResult] = await Promise.all([
-          getInterviewById(interviewId),
-          getInterviewFeedback(interviewId),
-        ])
+  let interview: any = null
+  let feedback: any = null
+  let error: string | null = null
 
-        setInterview(interviewResult)
-        setFeedback(feedbackResult)
-      } catch (err) {
-        setError("Failed to load interview details")
-      } finally {
-        setLoading(false)
-      }
-    }
+  try {
+    const [interviewResult, feedbackResult] = await Promise.all([
+      getInterviewById(interviewId),
+      getInterviewFeedback(interviewId),
+    ])
 
-    fetchData()
-  }, [interviewId])
-
-  if (loading) {
-    return (
-      <div className="space-y-6">
-        <Skeleton className="h-8 w-64 bg-gray-700" />
-        <div className="grid gap-6 md:grid-cols-2">
-          <Card className="border-gray-700 bg-gray-800">
-            <CardHeader>
-              <Skeleton className="h-6 w-32 bg-gray-700" />
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <Skeleton className="h-4 w-full bg-gray-700" />
-              <Skeleton className="h-4 w-3/4 bg-gray-700" />
-            </CardContent>
-          </Card>
-        </div>
-      </div>
-    )
+    interview = interviewResult
+    feedback = feedbackResult
+  } catch (err) {
+    error = "Failed to load interview details"
   }
 
   if (error || !interview) {
     return (
-      <Alert className="border-red-800 bg-red-900">
-        <AlertDescription className="text-red-200">{error || "Interview not found"}</AlertDescription>
-      </Alert>
+      <div className="p-8 min-h-screen bg-black">
+        <Alert className="border-red-800 bg-red-900">
+          <AlertDescription className="text-red-200">{error || "Interview not found"}</AlertDescription>
+        </Alert>
+      </div>
     )
   }
 
@@ -91,10 +67,12 @@ export default function InterviewDetailPage() {
           <Button
             variant="outline"
             className="border-white/10 text-gray-200 hover:text-white hover:bg-white/5 bg-transparent rounded-md"
-            onClick={() => window.open(interview.reportUrl, "_blank")}
+            asChild
           >
-            <Download className="mr-2 h-4 w-4" />
-            Download PDF Report
+            <a href={interview.reportUrl} target="_blank" rel="noopener noreferrer">
+              <Download className="mr-2 h-4 w-4" />
+              Download PDF Report
+            </a>
           </Button>
         )}
       </div>
@@ -163,7 +141,7 @@ export default function InterviewDetailPage() {
             <CardTitle className="text-base font-bold text-gray-200">Questions & Response Log</CardTitle>
           </CardHeader>
           <CardContent className="space-y-6">
-            {interview.questions.map((question, index) => (
+            {interview.questions.map((question: any, index: number) => (
               <div key={question.id || index} className="border-b border-white/5 pb-5 last:border-b-0 last:pb-0 flex flex-col gap-2.5">
                 <h3 className="font-bold text-white text-sm flex items-start gap-2 leading-relaxed">
                   <span className="text-cyan-400 font-extrabold shrink-0">Q{index + 1}:</span>
@@ -201,7 +179,7 @@ export default function InterviewDetailPage() {
             </CardHeader>
             <CardContent>
               <ul className="space-y-2.5">
-                {feedback.strengths.map((strength, index) => (
+                {feedback.strengths.map((strength: string, index: number) => (
                   <li key={index} className="text-gray-300 text-sm font-medium flex items-start gap-2 leading-relaxed">
                     <span className="text-emerald-400 font-black">•</span>
                     {strength}
@@ -221,7 +199,7 @@ export default function InterviewDetailPage() {
             </CardHeader>
             <CardContent>
               <ul className="space-y-2.5">
-                {feedback.areasForImprovement.map((area, index) => (
+                {feedback.areasForImprovement.map((area: string, index: number) => (
                   <li key={index} className="text-gray-300 text-sm font-medium flex items-start gap-2 leading-relaxed">
                     <span className="text-amber-400 font-black">•</span>
                     {area}
@@ -241,7 +219,7 @@ export default function InterviewDetailPage() {
           </CardHeader>
           <CardContent>
             <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-              {feedback.categoryScores.map((category, index) => (
+              {feedback.categoryScores.map((category: any, index: number) => (
                 <div key={index} className="space-y-2 bg-white/[0.01] p-4 rounded-md border border-white/5">
                   <div className="flex justify-between items-center text-xs font-bold uppercase tracking-wider">
                     <span className="text-gray-300 truncate mr-2">{category.category}</span>

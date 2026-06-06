@@ -4,9 +4,8 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import { createResumeFromTemplate } from "@/lib/actions/resume.action";
-import { Layout, Check, Sparkles, Loader2, ArrowRight, User, Briefcase, Calendar } from "lucide-react";
+import { Sparkles, Loader2, ArrowRight } from "lucide-react";
 import { toast } from "sonner";
-import { Props } from "next/script";
 import AnimatedResumeCard from "./AnimatedResumeCard";
 
 // Sample data for mini-resume previews (same as before)
@@ -79,10 +78,10 @@ const SAMPLE_PROFILES = {
       { degree: "B.Sc. Biochemistry", school: "UCLA", year: "2017" }
     ]
   }
-};
+} satisfies Record<string, { name: string; title: string; summary: string; skills: string[]; experience: { role: string; company: string; years: string }[]; education: { degree: string; school: string; year: string }[] }>;
 
 function MiniResumeCard({ templateId }: { templateId: string }) {
-  const profile = SAMPLE_PROFILES[templateId];
+  const profile = (SAMPLE_PROFILES as any)[templateId];
   if (!profile) return null;
   const { name, title, summary, skills, experience, education } = profile;
   const gradientMap: Record<string, string> = {
@@ -183,7 +182,7 @@ const TEMPLATES = [
   }
 ];
 
-export default function TemplateSelectorClient({ userId }: Props) {
+export default function TemplateSelectorClient({ userId }: { userId: string }) {
   const router = useRouter();
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -234,12 +233,6 @@ export default function TemplateSelectorClient({ userId }: Props) {
               {tpl.name}
               <ArrowRight className="size-4 text-white opacity-0 group-hover:opacity-100 group-hover:translate-x-1 transition-all duration-300" />
             </h3>
-            {/* Description */}
-            <p className="text-xs text-slate-400 leading-relaxed font-medium mb-2">
-              {tpl.description}
-            </p>
-            {/* Audience label */}
-            <p className="text-sm text-gray-300 italic mb-4">{tpl.audience}</p>
 
             {/* Mini resume preview */}
             <div className="bg-slate-950/30 backdrop-blur-xl rounded-xl p-4 border border-slate-800 mb-4">

@@ -49,6 +49,11 @@ const shouldShowNavbar = !hideNavbar;
         console.log("Firebase client auth detected user:", user.uid);
         setUserId(user.uid);
 
+        if (user.uid === initialUserId) {
+          console.log("Initial server user matches client user, skipping Firestore read");
+          return;
+        }
+
         try {
           const userDocRef = doc(db, "users", user.uid);
           const userDoc = await getDoc(userDocRef);
