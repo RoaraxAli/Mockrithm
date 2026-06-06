@@ -22,18 +22,36 @@ export default function AdminLayout({
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const unsubscribe = auth.onAuthStateChanged((user) => {
-      const allowedAdmins = ["ahmed@gmail.com"];
-      if (!user) {
-        router.push("/sign-in");
-      } else if (!allowedAdmins.includes(user.email || "")) {
-        router.push("/");
-      } else {
-        setLoading(false);
-      }
-    });
+    let unsubscribe: () => void;
 
-    return () => unsubscribe();
+    const setupListener = async () => {
+      unsubscribe = auth.onAuthStateChanged(async (user) => {
+        if (!user) {
+          router.push("/sign-in");
+          return;
+        }
+
+        try {
+          const { getUserProfile } = await import("@/lib/actions/auth.action");
+          const result = await getUserProfile(user.uid);
+          if (result && result.success && result.role.toLowerCase() === "admin") {
+            setLoading(false);
+          } else {
+            console.warn("User is not an Admin. Redirecting to home.", user.email);
+            router.push("/");
+          }
+        } catch (error) {
+          console.error("Failed to verify admin status:", error);
+          router.push("/");
+        }
+      });
+    };
+
+    setupListener();
+
+    return () => {
+      if (unsubscribe) unsubscribe();
+    };
   }, [router]);
 
   useEffect(() => {

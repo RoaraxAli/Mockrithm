@@ -2,15 +2,10 @@ import { db } from "@/firebase/admin";
 import { NextResponse } from "next/server";
 import { getCurrentUser } from "@/lib/actions/auth.action";
 
-const ADMIN_EMAILS = ["ahmed@gmail.com"];
-
 export async function GET() {
   try {
     const user = await getCurrentUser();
-    const isAdmin =
-      user &&
-      (user.role?.toLowerCase() === "admin" ||
-        ADMIN_EMAILS.includes(user.email || ""));
+    const isAdmin = user && user.role?.toLowerCase() === "admin";
 
     if (!user || !isAdmin) {
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
