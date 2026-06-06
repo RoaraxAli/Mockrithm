@@ -53,34 +53,31 @@ export default function UsersPage() {
   useEffect(() => {
     const fetchUsers = async () => {
       try {
-        const snap = await getDocs(collection(db, "users")); // no orderBy
+        const { getAdminUsers } = await import("@/lib/actions/admin.action");
+        const res = await getAdminUsers();
+        if (res.success && res.data) {
+          const fetchedUsers = res.data.map((user: any) => ({
+            ...user,
+            createdAt: user.createdAt 
+              ? new Date(user.createdAt).toLocaleDateString() 
+              : "—"
+          }));
 
-        const fetchedUsers = snap.docs.map((doc) => {
-          const data = doc.data();
-          return {
-            id: doc.id,
-            name: data.name || "",
-            email: data.email || "",
-            role: data.role || "User",
-            createdAt: data.createdAt?.toDate
-              ? data.createdAt.toDate().toLocaleDateString()
-              : "—", // fallback if missing
-            status: data.status || "Active",
-          };
-        });
+          // sort manually if createdAt exists
+          fetchedUsers.sort((a: any, b: any) => {
+            const aDate = new Date(a.createdAt);
+            const bDate = new Date(b.createdAt);
+            return isNaN(bDate.getTime())
+              ? -1
+              : isNaN(aDate.getTime())
+              ? 1
+              : bDate.getTime() - aDate.getTime();
+          });
 
-        // sort manually if createdAt exists
-        fetchedUsers.sort((a, b) => {
-          const aDate = new Date(a.createdAt);
-          const bDate = new Date(b.createdAt);
-          return isNaN(bDate.getTime())
-            ? -1
-            : isNaN(aDate.getTime())
-            ? 1
-            : bDate.getTime() - aDate.getTime();
-        });
-
-        setUsers(fetchedUsers);
+          setUsers(fetchedUsers);
+        } else {
+          console.error("Failed to fetch users:", res.error);
+        }
       } catch (err) {
         console.error("Error fetching users:", err);
       }
@@ -134,8 +131,13 @@ export default function UsersPage() {
 
   const handleDeleteUser = async (userId: string) => {
     try {
-      await deleteDoc(doc(db, "users", userId));
-      setUsers(users.filter((user) => user.id !== userId));
+      const { deleteAdminUser } = await import("@/lib/actions/admin.action");
+      const res = await deleteAdminUser(userId);
+      if (res.success) {
+        setUsers(users.filter((user) => user.id !== userId));
+      } else {
+        console.error("Failed to delete user:", res.error);
+      }
     } catch (err) {
       console.error("Failed to delete user:", err);
     }

@@ -1,6 +1,49 @@
 "use server";
 
 import { db } from "@/firebase/admin";
+import { getCurrentUser } from "./auth.action";
+
+export async function getAdminUsers() {
+  try {
+    const user = await getCurrentUser();
+    const isAdmin = user && user.role?.toLowerCase() === "admin";
+    if (!user || !isAdmin) {
+      return { success: false, error: "Forbidden" };
+    }
+
+    const querySnapshot = await db.collection("users").get();
+    const users = querySnapshot.docs.map((doc: any) => ({
+      id: doc.id,
+      name: doc.data().name || "",
+      email: doc.data().email || "",
+      role: doc.data().role || "User",
+      status: doc.data().status || "Active",
+      createdAt: doc.data().createdAt?.toDate
+        ? doc.data().createdAt.toDate().toISOString()
+        : doc.data().createdAt ?? null,
+    }));
+    return { success: true, data: users };
+  } catch (error: any) {
+    console.error("Failed to fetch users:", error);
+    return { success: false, error: error.message };
+  }
+}
+
+export async function deleteAdminUser(userId: string) {
+  try {
+    const user = await getCurrentUser();
+    const isAdmin = user && user.role?.toLowerCase() === "admin";
+    if (!user || !isAdmin) {
+      return { success: false, error: "Forbidden" };
+    }
+
+    await db.collection("users").doc(userId).delete();
+    return { success: true };
+  } catch (error: any) {
+    console.error("Failed to delete user:", error);
+    return { success: false, error: error.message };
+  }
+}
 
 export async function getAdminMetrics() {
   try {
