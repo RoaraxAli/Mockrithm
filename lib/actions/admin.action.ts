@@ -129,19 +129,32 @@ export async function getAdminMetrics() {
 export async function getRecentActivity() {
   try {
     const [usersSnap, interviewFbSnap, supportFbSnap] = await Promise.all([
-      db.collection("users").orderBy("createdAt", "desc").limit(10).get(),
-      db.collection("interviewsfeedback").orderBy("createdAt", "desc").limit(5).get(),
-      db.collection("feedback").orderBy("createdAt", "desc").limit(5).get(),
+      db.collection("users").limit(100).get(),
+      db.collection("interviewsfeedback").limit(100).get(),
+      db.collection("feedback").limit(100).get(),
     ]);
 
-    const serializeDate = (val: any) =>
-      val?.toDate ? val.toDate().toISOString() : val;
+    const serializeDate = (val: any) => {
+      if (!val) return null;
+      if (val.toDate) return val.toDate().toISOString();
+      if (val instanceof Date) return val.toISOString();
+      if (typeof val === "string") return val;
+      if (val._seconds) return new Date(val._seconds * 1000).toISOString();
+      return null;
+    };
 
-    const recentUsers = usersSnap.docs.map((doc: any) => ({
-      id: doc.id,
-      ...doc.data(),
-      createdAt: serializeDate(doc.data().createdAt),
-    }));
+    const recentUsers = usersSnap.docs
+      .map((doc: any) => ({
+        id: doc.id,
+        ...doc.data(),
+        createdAt: serializeDate(doc.data().createdAt),
+      }))
+      .sort((a, b) => {
+        const aTime = a.createdAt ? new Date(a.createdAt).getTime() : 0;
+        const bTime = b.createdAt ? new Date(b.createdAt).getTime() : 0;
+        return bTime - aTime;
+      })
+      .slice(0, 10);
 
     // Merge both feedback collections for Recent Activity feed
     const recentFeedbacks = [
