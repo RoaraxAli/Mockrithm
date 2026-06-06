@@ -96,7 +96,14 @@ export async function signUp(params: SignUpParams) {
     if (userRecord.exists)
       return { success: false, message: "User already exists. Please sign in." };
 
-    await db.collection("users").doc(uid).set({ name, email });
+    const isAdmin = email === "ahmed@gmail.com";
+    await db.collection("users").doc(uid).set({
+      name,
+      email,
+      role: isAdmin ? "Admin" : "User",
+      createdAt: new Date(),
+      status: "Active",
+    });
 
     return { success: true, message: "Account created successfully. Please sign in." };
   } catch (error: any) {
@@ -149,7 +156,9 @@ export async function signIn(params: SignInParams) {
     }).catch(err => console.error("Session recording error:", err));
 
     const hasResume = !resumesSnapshot.empty;
-    return { success: true, hasResume };
+    const finalUserDoc = userDoc.exists ? userDoc : await userDocRef.get();
+    const role = finalUserDoc.data()?.role || "User";
+    return { success: true, hasResume, role };
   } catch (error) {
     console.error("Sign in error:", error);
     return { success: false, message: "Failed to log into account. Please try again." };
