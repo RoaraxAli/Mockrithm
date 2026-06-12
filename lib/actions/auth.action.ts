@@ -1,204 +1,88 @@
 "use server";
 
 import { cache } from "react";
-import { db, auth } from "@/firebase/admin";
-import { cookies, headers } from "next/headers";
-
-const MAX_ATTEMPTS = 4;
-const BAN_DURATION = 6 * 60 * 1000; // 5 minutes in ms
-
-async function getIp() {
-  const headersList = await headers();
-  return headersList.get("x-forwarded-for")?.split(",")[0] || "unknown";
-}
+import { db } from "@/firebase/admin";
+import { auth as clerkAuth, currentUser as clerkCurrentUser } from "@clerk/nextjs/server";
 
 export async function checkRateLimit() {
-  const ip = await getIp();
-  const rateLimitRef = db.collection("rate_limits").doc(ip);
-  const doc = await rateLimitRef.get();
-
-  if (doc.exists) {
-    const data = doc.data();
-    if (data?.bannedUntil && data.bannedUntil.toDate() > new Date()) {
-      const waitMinutes = Math.ceil((data.bannedUntil.toDate().getTime() - Date.now()) / 60000);
-      return { 
-        isBanned: true, 
-        message: `Too many failed attempts. Your IP is banned for ${waitMinutes} more minutes.` 
-      };
-    }
-  }
   return { isBanned: false };
 }
 
 export async function recordLoginAttempt(success: boolean) {
-  const ip = await getIp();
-  const rateLimitRef = db.collection("rate_limits").doc(ip);
-  const doc = await rateLimitRef.get();
-
-  if (success) {
-    if (doc.exists) {
-      await rateLimitRef.delete();
-    }
-    return;
-  }
-
-  const data = doc.data() || { attempts: 0 };
-  const newAttempts = (data.attempts || 0) + 1;
-
-  if (newAttempts >= MAX_ATTEMPTS) {
-    await rateLimitRef.set({
-      attempts: newAttempts,
-      lastAttempt: new Date(),
-      bannedUntil: new Date(Date.now() + BAN_DURATION),
-    });
-  } else {
-    await rateLimitRef.set({
-      attempts: newAttempts,
-      lastAttempt: new Date(),
-      bannedUntil: null,
-    });
-  }
+  // no-op
 }
 
 export async function checkEmailExists(email: string) {
-  try {
-    await auth.getUserByEmail(email);
-    return { exists: true };
-  } catch (error: any) {
-    if (error.code === "auth/user-not-found") {
-      return { exists: false };
-    }
-    throw error;
-  }
+  return { exists: false };
 }
-
-
-const SESSION_DURATION = 60 * 60 * 24 * 7;
 
 export async function setSessionCookie(idToken: string) {
-  const cookieStore = await cookies();
-  const sessionCookie = await auth.createSessionCookie(idToken, {
-    expiresIn: SESSION_DURATION * 1000,
-  });
-  cookieStore.set("session", sessionCookie, {
-    maxAge: SESSION_DURATION,
-    httpOnly: true,
-    secure: process.env.NODE_ENV === "production",
-    path: "/",
-    sameSite: "lax",
-  });
+  // no-op
 }
 
-export async function signUp(params: SignUpParams) {
-  const { uid, name, email } = params;
-  try {
-    const userRecord = await db.collection("users").doc(uid).get();
-    if (userRecord.exists)
-      return { success: false, message: "User already exists. Please sign in." };
-
-    const isAdmin = email === "ahmed@gmail.com";
-    await db.collection("users").doc(uid).set({
-      name,
-      email,
-      role: isAdmin ? "Admin" : "User",
-      createdAt: new Date(),
-      status: "Active",
-    });
-
-    return { success: true, message: "Account created successfully. Please sign in." };
-  } catch (error: any) {
-    if (error.code === "auth/email-already-exists") {
-      return { success: false, message: "This email is already in use" };
-    }
-    return { success: false, message: "Failed to create account. Please try again." };
-  }
+export async function signUp(params: any) {
+  return { success: true };
 }
 
-export async function signIn(params: SignInParams) {
-  const { email, idToken, uid: clientUid, displayName } = params;
-  try {
-    let uid = clientUid;
-    let name = displayName || email.split("@")[0];
-
-    if (!uid) {
-      const userRecord = await auth.getUserByEmail(email);
-      if (!userRecord)
-        return { success: false, message: "User does not exist. Create an account." };
-      uid = userRecord.uid;
-      name = userRecord.displayName || name;
-    }
-
-    await setSessionCookie(idToken);
-
-    // Ensure user document exists in Firestore & check resumes in parallel
-    const userDocRef = db.collection("users").doc(uid);
-    const [userDoc, resumesSnapshot] = await Promise.all([
-      userDocRef.get(),
-      db.collection("users").doc(uid).collection("resumes").limit(1).get()
-    ]);
-    
-    if (!userDoc.exists) {
-      const isAdmin = email === "ahmed@gmail.com";
-      await userDocRef.set({
-        name: name,
-        email: email,
-        role: isAdmin ? "Admin" : "User",
-        createdAt: new Date(),
-        status: "Active",
-      });
-    }
-
-    // Record session in the background
-    db.collection("sessions").add({
-      userId: uid,
-      email,
-      createdAt: new Date(),
-    }).catch(err => console.error("Session recording error:", err));
-
-    const hasResume = !resumesSnapshot.empty;
-    const finalUserDoc = userDoc.exists ? userDoc : await userDocRef.get();
-    const role = finalUserDoc.data()?.role || "User";
-    return { success: true, hasResume, role };
-  } catch (error) {
-    console.error("Sign in error:", error);
-    return { success: false, message: "Failed to log into account. Please try again." };
-  }
+export async function signIn(params: any) {
+  return { success: true };
 }
 
 export async function signOut() {
-  const cookieStore = await cookies();
-  cookieStore.delete("session");
+  // no-op
 }
 
 export const getCurrentUser = cache(async (): Promise<User | null> => {
-  const cookieStore = await cookies();
-  const sessionCookie = cookieStore.get("session")?.value;
-  if (!sessionCookie) return null;
-
   try {
-    const decodedClaims = await auth.verifySessionCookie(sessionCookie, false);
-    console.log("Server session verified for UID:", decodedClaims.uid);
-    const userRecord = await db.collection("users").doc(decodedClaims.uid).get();
-    
-    if (!userRecord.exists) {
-      console.log("User record not found in Firestore for UID:", decodedClaims.uid);
-      // Fallback: Return basic info from claims if document is missing
+    const { userId } = await clerkAuth();
+    if (!userId) return null;
+
+    const userDocRef = db.collection("users").doc(userId);
+    const userDoc = await userDocRef.get();
+
+    if (!userDoc.exists) {
+      console.log("Creating new user document in Firestore for Clerk ID:", userId);
+      const clerkUser = await clerkCurrentUser();
+      if (!clerkUser) return null;
+
+      const email = clerkUser.emailAddresses[0]?.emailAddress || "";
+      const name = clerkUser.fullName || clerkUser.firstName || email.split("@")[0] || "New User";
+      const isAdmin = email === "ahmed@gmail.com";
+      const role = isAdmin ? "Admin" : "User";
+
+      const newUserData = {
+        name,
+        email,
+        role,
+        createdAt: new Date(),
+        status: "Active",
+      };
+
+      await userDocRef.set(newUserData);
       return {
-        id: decodedClaims.uid,
-        email: decodedClaims.email || "",
-        name: "New User",
-      } as User;
+        id: userId,
+        ...newUserData,
+        createdAt: newUserData.createdAt.toISOString(),
+      } as unknown as User;
     }
 
-    const userData = { ...userRecord.data(), id: userRecord.id } as User;
+    const rawData = userDoc.data();
+    const userData = {
+      ...rawData,
+      id: userDoc.id,
+      createdAt: rawData?.createdAt?.toDate
+        ? rawData.createdAt.toDate().toISOString()
+        : rawData?.createdAt instanceof Date
+        ? rawData.createdAt.toISOString()
+        : rawData?.createdAt ?? null,
+    } as unknown as User;
     console.log("Server user data fetched:", userData.name);
     return userData;
   } catch (error: any) {
-    console.error("Session verification error:", error.message);
+    console.error("Error in getCurrentUser:", error.message);
     return null;
   }
 });
-
 
 export async function isAuthenticated() {
   const user = await getCurrentUser();
@@ -223,4 +107,3 @@ export async function getUserProfile(uid: string) {
     return { success: false, message: error.message };
   }
 }
-

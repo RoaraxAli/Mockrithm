@@ -1,11 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { onAuthStateChanged } from "firebase/auth";
-import { doc, getDoc } from "firebase/firestore";
+import { useUser } from "@clerk/nextjs";
 import { usePathname } from "next/navigation";
-
-import { auth, db } from "@/firebase/client";
 import Navbar from "@/components/Navbar";
 
 export default function AuthLayout({ 
@@ -19,75 +16,60 @@ export default function AuthLayout({
   initialUserName?: string;
   initialUserRole?: string;
 }) {
+  const { isLoaded, isSignedIn, user } = useUser();
   const [userId, setUserId] = useState<string | null>(initialUserId || null);
   const [userName, setUserName] = useState<string>(initialUserName || "");
   const [userRole, setUserRole] = useState<string>(initialUserRole || "User");
 
   const pathname = usePathname();
-const hideNavbar =
-  (pathname.startsWith("/interview/") && pathname !== "/interview") ||
-  pathname.startsWith("/user") ||
-  pathname.startsWith("/admin") ||
-  [
-    "/sign-in",
-    "/sign-up",
-    "/forgot-password",
-    "/verify-code",
-    "/reset-password",
-  ].includes(pathname);
+  const hideNavbar =
+    (pathname.startsWith("/interview/") && pathname !== "/interview") ||
+    pathname.startsWith("/user") ||
+    pathname.startsWith("/admin") ||
+    [
+      "/sign-in",
+      "/sign-up",
+      "/forgot-password",
+      "/verify-code",
+      "/reset-password",
+    ].includes(pathname);
 
-// If we have an initialUserId (from server) or a userId (from client), use it.
-// Even if we are guests, we might want to show the Navbar on some pages.
-const shouldShowNavbar = !hideNavbar;
-
+  const shouldShowNavbar = !hideNavbar;
 
   useEffect(() => {
-    console.log("AuthLayout mounted. Initial Props:", { initialUserId, initialUserName, initialUserRole });
-    
-    const unsubscribe = onAuthStateChanged(auth, async (user) => {
-      if (user) {
-        console.log("Firebase client auth detected user:", user.uid);
-        setUserId(user.uid);
+    if (!isLoaded) return;
 
-        if (user.uid === initialUserId && initialUserName) {
-          setUserName(initialUserName);
-          setUserRole(initialUserRole || "User");
-          return;
-        }
-
+    if (isSignedIn && user) {
+      setUserId(user.id);
+      
+      const fetchProfile = async () => {
         try {
           const { getUserProfile } = await import("@/lib/actions/auth.action");
-          const result = await getUserProfile(user.uid);
+          const result = await getUserProfile(user.id);
 
           if (result && result.success) {
-            setUserName(result.name || "User");
+            setUserName(result.name || user.fullName || user.firstName || "User");
             setUserRole(result.role || "User");
           } else {
-            setUserName("User");
+            setUserName(user.fullName || user.firstName || "User");
             setUserRole("User");
           }
         } catch (error) {
-          console.error("Failed to fetch user name:", error);
-          setUserName("User");
+          console.error("Failed to fetch user profile:", error);
+          setUserName(user.fullName || user.firstName || "User");
           setUserRole("User");
         }
-      } else {
-        console.log("Firebase client auth detected: No User");
-        // Only clear if we don't have an initial server user.
-        // This prevents the flickering Navbar issue on refresh.
-        if (!initialUserId) {
-          setUserId(null);
-          setUserName("");
-          setUserRole("User");
-        } else {
-          console.log("Retaining server-side user session:", initialUserId);
-        }
+      };
+
+      fetchProfile();
+    } else {
+      if (!initialUserId) {
+        setUserId(null);
+        setUserName("");
+        setUserRole("User");
       }
-    });
-
-    return () => unsubscribe();
-  }, [initialUserId, initialUserName, initialUserRole]);
-
+    }
+  }, [isLoaded, isSignedIn, user, initialUserId]);
 
   return (
     <>
@@ -98,4 +80,3 @@ const shouldShowNavbar = !hideNavbar;
     </>
   );
 }
-

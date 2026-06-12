@@ -1,8 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { useAuthState } from "react-firebase-hooks/auth"
-import { auth } from "@/firebase/client"
+import { useUser, useClerk } from "@clerk/nextjs"
 import type { User } from "@/app/user/types"
 import { getUserData } from "@/app/user/lib/firestore"
 import { ProfileForm } from "@/app/user/components/ProfileForm"
@@ -12,13 +11,12 @@ import { ProfileSkeleton } from "@/app/user/components/Skeletons"
 import { Trash2, UserIcon, Mail, ExternalLink } from "lucide-react"
 import { collection, getDocs, deleteDoc, doc } from "firebase/firestore"
 import { db } from "@/firebase/client"
-import { signOut } from "firebase/auth"
-import { signOut as serverSignOut } from "@/lib/actions/auth.action"
 import { useRouter } from "next/navigation"
 
 export default function ProfilePage() {
   const router = useRouter()
-  const [user] = useAuthState(auth)
+  const { isLoaded, isSignedIn, user } = useUser()
+  const { signOut: clerkSignOut } = useClerk()
   const [userData, setUserData] = useState<User | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -36,25 +34,18 @@ export default function ProfilePage() {
     try {
       setLoading(true);
       // Delete interviews
-      const interviewsRef = collection(db, "users", user.uid, "interviews");
+      const interviewsRef = collection(db, "users", user.id, "interviews");
       const interviewDocs = await getDocs(interviewsRef);
       await Promise.all(interviewDocs.docs.map((d) => deleteDoc(d.ref)));
       
       // Delete user doc
-      await deleteDoc(doc(db, "users", user.uid));
+      await deleteDoc(doc(db, "users", user.id));
       
-      // Delete Firebase Auth user
-      const currentUser = auth.currentUser;
-      if (currentUser) {
-        await currentUser.delete();
-      }
-      
-      await signOut(auth);
-      await serverSignOut();
+      await clerkSignOut();
       window.location.href = "/sign-in";
     } catch (error) {
       console.error("Account deletion failed:", error);
-      alert("Failed to delete account. You might need to re-authenticate (sign out and in) before deleting.");
+      alert("Failed to delete account. Please try again.");
     } finally {
       setLoading(false);
     }
@@ -62,11 +53,11 @@ export default function ProfilePage() {
 
   useEffect(() => {
     async function fetchUserData() {
-      if (!user) return
+      if (!isLoaded || !user) return
 
       try {
         setLoading(true)
-        const result = await getUserData(user.uid)
+        const result = await getUserData(user.id)
         setUserData(result)
       } catch (err) {
         setError("Failed to load profile data")
@@ -76,7 +67,7 @@ export default function ProfilePage() {
     }
 
     fetchUserData()
-  }, [user])
+  }, [isLoaded, user])
 
   const handleUserUpdate = (updatedUser: User) => {
     setUserData(updatedUser)

@@ -5,10 +5,10 @@ import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { addDoc, collection, getDoc, doc } from "firebase/firestore";
-import { onAuthStateChanged } from "firebase/auth";
+import { useUser } from "@clerk/nextjs";
 import { toast } from "sonner";
 import { motion } from "framer-motion";
-import { auth, db } from "@/firebase/client";
+import { db } from "@/firebase/client";
 import { Button } from "@/components/ui/button";
 import {
   Form,
@@ -43,6 +43,7 @@ const formSchema = z.object({
 });
 
 export default function ContactPage() {
+  const { isLoaded, isSignedIn, user } = useUser();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -54,29 +55,15 @@ export default function ContactPage() {
     },
   });
 
-  // Load Firebase user
+  // Load Clerk user info
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
-      if (firebaseUser) {
-        try {
-          const { getUserProfile } = await import("@/lib/actions/auth.action");
-          const result = await getUserProfile(firebaseUser.uid);
-
-          const nameFromDb = result && result.success
-            ? result.name
-            : "Anonymous";
-
-          form.setValue("name", nameFromDb);
-        } catch (error) {
-          console.error("Failed to load user profile in FeedbackForm:", error);
-          form.setValue("name", "Anonymous");
-        }
-        form.setValue("email", firebaseUser.email || "");
-      }
-    });
-
-    return () => unsubscribe();
-  }, [form]);
+    if (!isLoaded) return;
+    if (isSignedIn && user) {
+      const name = user.fullName || user.firstName || "User";
+      form.setValue("name", name);
+      form.setValue("email", user.primaryEmailAddress?.emailAddress || "");
+    }
+  }, [isLoaded, isSignedIn, user, form]);
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     setIsSubmitting(true);

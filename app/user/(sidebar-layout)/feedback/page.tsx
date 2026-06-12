@@ -1,8 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { useAuthState } from "react-firebase-hooks/auth"
-import { auth } from "@/firebase/client"
+import { useUser } from "@clerk/nextjs"
 import type { Feedback } from "@/app/user/types"
 import { getUserFeedback } from "@/app/user/lib/firestore"
 import { FeedbackCard } from "@/app/user/components/FeedbackCard"
@@ -11,18 +10,18 @@ import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Skeleton } from "@/components/ui/skeleton"
 
 export default function FeedbackPage() {
-  const [user] = useAuthState(auth)
+  const { isLoaded, isSignedIn, user } = useUser()
   const [feedback, setFeedback] = useState<Feedback[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
     async function fetchFeedback() {
-      if (!user) return
+      if (!isLoaded || !user) return
 
       try {
         setLoading(true)
-        const result = await getUserFeedback(user.uid)
+        const result = await getUserFeedback(user.id)
         setFeedback(result)
       } catch (err) {
         setError("Failed to load feedback")
@@ -32,9 +31,9 @@ export default function FeedbackPage() {
     }
 
     fetchFeedback()
-  }, [user])
+  }, [isLoaded, user])
 
-  if (loading) {
+  if (!isLoaded || loading) {
     return (
       <div className="space-y-8 bg-black">
         <div>
@@ -220,7 +219,7 @@ export default function FeedbackPage() {
                       month: "short",
                       day: "numeric",
                       year: "numeric",
-                    }).format(fb.createdAt)}
+                    }).format(new Date(fb.createdAt))}
                   </span>
                 </div>
                 <p className="text-gray-400 text-xs leading-relaxed font-medium">{fb.finalAssessment}</p>

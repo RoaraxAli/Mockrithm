@@ -1,8 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { useAuthState } from "react-firebase-hooks/auth"
-import { auth } from "@/firebase/client"
+import { useUser } from "@clerk/nextjs"
 import type { User, Interview, Feedback } from "@/app/user/types"
 import { getUserData, getUserInterviews, getUserFeedback } from "@/app/user/lib/firestore"
 import { DashboardCard } from "@/app/user/components/DashboardCard"
@@ -10,7 +9,7 @@ import { DashboardSkeleton } from "@/app/user/components/Skeletons"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 
 export default function DashboardPage() {
-  const [user] = useAuthState(auth)
+  const { isLoaded, isSignedIn, user } = useUser()
   const [userData, setUserData] = useState<User | null>(null)
   const [interviews, setInterviews] = useState<Interview[]>([])
   const [feedback, setFeedback] = useState<Feedback[]>([])
@@ -19,14 +18,14 @@ export default function DashboardPage() {
 
   useEffect(() => {
     async function fetchData() {
-      if (!user) return
+      if (!isLoaded || !user) return
 
       try {
         setLoading(true)
         const [userDataResult, interviewsResult, feedbackResult] = await Promise.all([
-          getUserData(user.uid),
-          getUserInterviews(user.uid),
-          getUserFeedback(user.uid),
+          getUserData(user.id),
+          getUserInterviews(user.id),
+          getUserFeedback(user.id),
         ])
 
         setUserData(userDataResult)
@@ -41,9 +40,9 @@ export default function DashboardPage() {
     }
 
     fetchData()
-  }, [user])
+  }, [isLoaded, user])
 
-  if (loading) {
+  if (!isLoaded || loading) {
     return (
       <div className="space-y-6 bg-black p-8 min-h-screen">
         <div>

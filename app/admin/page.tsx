@@ -31,8 +31,6 @@ import {
   Activity,
   TrendingUp,
 } from "lucide-react";
-import { auth } from "@/firebase/client";
-import { onAuthStateChanged } from "firebase/auth";
 import { getAdminMetrics, getRecentActivity, resetSessions } from "@/lib/actions/admin.action";
 import { toast } from "sonner";
 

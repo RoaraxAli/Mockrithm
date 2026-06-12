@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { gsap } from "gsap";
-import { auth } from "@/firebase/client";
+import { useClerk } from "@clerk/nextjs";
 import {
   LayoutDashboard,
   Users,
@@ -54,6 +54,7 @@ const navigation = [
 export function AdminSidebar() {
   const pathname = usePathname();
   const router = useRouter();
+  const { signOut } = useClerk();
   const [adminName, setAdminName] = useState("");
   const [adminImage, setAdminImage] = useState("");
   const [maintenance, setMaintenance] = useState(false);
@@ -123,7 +124,7 @@ export function AdminSidebar() {
 const handleLogout = async () => {
   try {
     await Promise.all([
-      auth.signOut(),
+      signOut(),
       fetch("/api/auth/sign-out", { method: "POST" })
     ]);
     router.push("/sign-in");

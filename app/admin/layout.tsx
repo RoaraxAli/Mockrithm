@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useRouter, usePathname } from "next/navigation";
-import { auth } from "@/firebase/client"; // your firebase client auth instance
+import { useUser } from "@clerk/nextjs";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { AdminSidebar } from "@/components/admin-sidebar";
@@ -19,40 +19,35 @@ export default function AdminLayout({
 }) {
   const pathname = usePathname();
   const router = useRouter();
+  const { isLoaded, isSignedIn, user } = useUser();
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    let unsubscribe: () => void;
+    if (!isLoaded) return;
 
-    const setupListener = async () => {
-      unsubscribe = auth.onAuthStateChanged(async (user) => {
-        if (!user) {
-          router.push("/sign-in");
-          return;
-        }
+    if (!isSignedIn || !user) {
+      router.push("/sign-in");
+      return;
+    }
 
-        try {
-          const { getUserProfile } = await import("@/lib/actions/auth.action");
-          const result = await getUserProfile(user.uid);
-          if (result && result.success && result.role.toLowerCase() === "admin") {
-            setLoading(false);
-          } else {
-            console.warn("User is not an Admin. Redirecting to home.", user.email);
-            router.push("/");
-          }
-        } catch (error) {
-          console.error("Failed to verify admin status:", error);
+    const checkAdmin = async () => {
+      try {
+        const { getUserProfile } = await import("@/lib/actions/auth.action");
+        const result = await getUserProfile(user.id);
+        if (result && result.success && result.role.toLowerCase() === "admin") {
+          setLoading(false);
+        } else {
+          console.warn("User is not an Admin. Redirecting to home.", user.primaryEmailAddress?.emailAddress);
           router.push("/");
         }
-      });
+      } catch (error) {
+        console.error("Failed to verify admin status:", error);
+        router.push("/");
+      }
     };
 
-    setupListener();
-
-    return () => {
-      if (unsubscribe) unsubscribe();
-    };
-  }, [router]);
+    checkAdmin();
+  }, [isLoaded, isSignedIn, user, router]);
 
   useEffect(() => {
     if (!loading) {

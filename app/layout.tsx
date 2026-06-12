@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Mona_Sans } from "next/font/google";
 import { Toaster } from "sonner";
+import { ClerkProvider } from "@clerk/nextjs";
 
 import AuthLayout from "@/components/Authlayout";
 import Preloader from "@/components/shared/Preloader";
@@ -28,17 +29,20 @@ export default async function RootLayout({
   const user = await getCurrentUser();
 
   return (
-    <html lang="en" className="dark">
+    <html lang="en" className="dark" suppressHydrationWarning>
       <body
         className={`${monaSans.className} bg-black text-white antialiased pattern`}
+        suppressHydrationWarning
       >
-        <Preloader />
-        <Analytics />
-        <AuthLayout initialUserId={user?.id} initialUserName={user?.name} initialUserRole={user?.role}>
-          {children}
-        </AuthLayout>
-        <Toaster />
-        <FooterWrapper />
+        <ClerkProvider>
+          <Preloader />
+          <Analytics />
+          <AuthLayout initialUserId={user?.id} initialUserName={user?.name} initialUserRole={user?.role}>
+            {children}
+          </AuthLayout>
+          <Toaster />
+          <FooterWrapper />
+        </ClerkProvider>
       </body>
     </html>
   );

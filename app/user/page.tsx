@@ -2,26 +2,24 @@
 
 import { useEffect } from "react"
 import { useRouter } from "next/navigation"
-import { useAuthState } from "react-firebase-hooks/auth"
-import { auth } from "@/firebase/client"
+import { useUser } from "@clerk/nextjs"
 import { Skeleton } from "@/components/ui/skeleton"
 
 export default function UserPage() {
-  const [user, loading] = useAuthState(auth)
+  const { isLoaded, isSignedIn } = useUser()
   const router = useRouter()
 
   useEffect(() => {
-    if (!loading) {
-      if (user) {
+    if (isLoaded) {
+      if (isSignedIn) {
         router.push("/user/dashboard")
       } else {
-        // Redirect to login page or show login form
         router.push("/sign-in")
       }
     }
-  }, [user, loading, router])
+  }, [isLoaded, isSignedIn, router])
 
-  if (loading) {
+  if (!isLoaded) {
     return (
       <div className="flex items-center justify-center h-full">
         <div className="space-y-4">

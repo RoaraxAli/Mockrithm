@@ -8,10 +8,8 @@ import { Sparkles, Terminal, Play, ShieldAlert, Cpu, Activity, User, BookOpen } 
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import InterviewCard from "./InterviewCard";
-import { auth, db } from "@/firebase/client";
-import { onAuthStateChanged } from "firebase/auth";
-import { doc, getDoc } from "firebase/firestore";
 import SessionTracker from "@/components/SessionTracker";
+import { useUser } from "@clerk/nextjs";
 
 interface LandingDashboardProps {
   user?: any;
@@ -48,52 +46,26 @@ export default function LandingDashboard({
   const [userInterviews, setUserInterviews] = useState<any[]>(initialUserInterviews);
   const [allInterviews, setAllInterviews] = useState<any[]>(initialAllInterviews);
   const [loadingData, setLoadingData] = useState(true);
+  const { isLoaded, isSignedIn, user: clerkUser } = useUser();
   const [clientUser, setClientUser] = useState<any>(user || null);
   const [authResolved, setAuthResolved] = useState(false);
 
   // 1. Subscribe to Client Auth State
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
-      if (firebaseUser) {
-        if (user && firebaseUser.uid === user.id) {
-          setClientUser(user);
-          setAuthResolved(true);
-          return;
-        }
+    if (!isLoaded) return;
 
-        try {
-          const { getUserProfile } = await import("@/lib/actions/auth.action");
-          const result = await getUserProfile(firebaseUser.uid);
-          if (result && result.success) {
-            setClientUser({
-              id: firebaseUser.uid,
-              name: result.name,
-              role: result.role,
-              email: result.email,
-            });
-          } else {
-            setClientUser({
-              id: firebaseUser.uid,
-              email: firebaseUser.email || "",
-              name: firebaseUser.displayName || "User"
-            });
-          }
-        } catch (error) {
-          console.error("Failed to fetch user doc in LandingDashboard:", error);
-          setClientUser({
-            id: firebaseUser.uid,
-            email: firebaseUser.email || "",
-            name: firebaseUser.displayName || "User"
-          });
-        }
-      } else {
-        setClientUser(null);
-      }
-      setAuthResolved(true);
-    });
-
-    return () => unsubscribe();
-  }, [user]);
+    if (isSignedIn && clerkUser) {
+      setClientUser({
+        id: clerkUser.id,
+        name: clerkUser.fullName || clerkUser.firstName || "User",
+        email: clerkUser.primaryEmailAddress?.emailAddress || "",
+        role: user?.role || "User",
+      });
+    } else {
+      setClientUser(null);
+    }
+    setAuthResolved(true);
+  }, [isLoaded, isSignedIn, clerkUser, user]);
 
   // 2. Load Dashboard Data
   useEffect(() => {

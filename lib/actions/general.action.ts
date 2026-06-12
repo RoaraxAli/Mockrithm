@@ -106,7 +106,16 @@ export const getFeedbackByInterviewId = cache(async (
   if (querySnapshot.empty) return null;
 
   const feedbackDoc = querySnapshot.docs[0];
-  return { id: feedbackDoc.id, ...feedbackDoc.data() } as Feedback;
+  const data = feedbackDoc.data();
+  return {
+    id: feedbackDoc.id,
+    ...data,
+    createdAt: data.createdAt?.toDate
+      ? data.createdAt.toDate().toISOString()
+      : data.createdAt instanceof Date
+      ? data.createdAt.toISOString()
+      : data.createdAt ?? null,
+  } as unknown as Feedback;
 });
 
 export const getFeedbacksForUser = cache(async (userId: string): Promise<Feedback[]> => {
@@ -115,10 +124,18 @@ export const getFeedbacksForUser = cache(async (userId: string): Promise<Feedbac
     .collection("interviewsfeedback")
     .where("userId", "==", userId)
     .get();
-  return querySnapshot.docs.map((doc) => ({
-    id: doc.id,
-    ...doc.data(),
-  })) as Feedback[];
+  return querySnapshot.docs.map((doc) => {
+    const data = doc.data();
+    return {
+      id: doc.id,
+      ...data,
+      createdAt: data.createdAt?.toDate
+        ? data.createdAt.toDate().toISOString()
+        : data.createdAt instanceof Date
+        ? data.createdAt.toISOString()
+        : data.createdAt ?? null,
+    };
+  }) as unknown as Feedback[];
 });
 
 export const getLatestInterviews = cache(async (
@@ -134,15 +151,23 @@ export const getLatestInterviews = cache(async (
     .get();
 
   return interviews.docs
-    .map((doc) => ({
-      id: doc.id,
-      ...doc.data(),
-    }))
+    .map((doc) => {
+      const data = doc.data();
+      return {
+        id: doc.id,
+        ...data,
+        createdAt: data.createdAt?.toDate
+          ? data.createdAt.toDate().toISOString()
+          : data.createdAt instanceof Date
+          ? data.createdAt.toISOString()
+          : data.createdAt ?? null,
+      };
+    })
     .filter((interview: any) => 
       interview.finalized === true && 
       interview.userId !== userId
     )
-    .slice(0, limit) as Interview[];
+    .slice(0, limit) as unknown as Interview[];
 });
 
 export const getInterviewsByUserId = cache(async (
@@ -153,14 +178,22 @@ export const getInterviewsByUserId = cache(async (
     .where("userId", "==", userId)
     .get();
 
-  const interviews = querySnapshot.docs.map((doc) => ({
-    id: doc.id,
-    ...doc.data(),
-  })) as Interview[];
+  const interviews = querySnapshot.docs.map((doc) => {
+    const data = doc.data();
+    return {
+      id: doc.id,
+      ...data,
+      createdAt: data.createdAt?.toDate
+        ? data.createdAt.toDate().toISOString()
+        : data.createdAt instanceof Date
+        ? data.createdAt.toISOString()
+        : data.createdAt ?? null,
+    };
+  }) as unknown as Interview[];
   
   return interviews.sort((a, b) => {
-    const aTime = a.createdAt?.toDate ? a.createdAt.toDate().getTime() : new Date(a.createdAt).getTime();
-    const bTime = b.createdAt?.toDate ? b.createdAt.toDate().getTime() : new Date(b.createdAt).getTime();
+    const aTime = a.createdAt ? new Date(a.createdAt).getTime() : 0;
+    const bTime = b.createdAt ? new Date(b.createdAt).getTime() : 0;
     return bTime - aTime;
   });
 });

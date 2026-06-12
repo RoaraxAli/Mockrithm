@@ -1,8 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { useAuthState } from "react-firebase-hooks/auth"
-import { auth } from "@/firebase/client"
+import { useUser } from "@clerk/nextjs"
 import type { Interview} from "@/app/user/types"
 import { getUserInterviews } from "@/app/user/lib/firestore"
 import { InterviewTable } from "@/app/user/components/InterviewTable"
@@ -10,18 +9,18 @@ import { TableSkeleton } from "@/app/user/components/Skeletons"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 
 export default function InterviewsPage() {
-  const [user] = useAuthState(auth)
+  const { isLoaded, isSignedIn, user } = useUser()
   const [interviews, setInterviews] = useState<Interview[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
     async function fetchInterviews() {
-      if (!user) return
+      if (!isLoaded || !user) return
 
       try {
         setLoading(true)
-        const result = await getUserInterviews(user.uid)
+        const result = await getUserInterviews(user.id)
         setInterviews(result)
       } catch (err) {
         setError("Failed to load interviews")
@@ -31,9 +30,9 @@ export default function InterviewsPage() {
     }
 
     fetchInterviews()
-  }, [user])
+  }, [isLoaded, user])
 
-  if (loading) {
+  if (!isLoaded || loading) {
     return (
       <div className="space-y-6">
         <div>

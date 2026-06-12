@@ -2,19 +2,17 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { auth, db } from "@/firebase/client";
+import { db } from "@/firebase/client";
 import { usePathname } from "next/navigation";
-import { signOut } from "firebase/auth";
 import Image from "next/image";
 import {
   doc,
-  getDoc,
   deleteDoc,
   collection,
   getDocs,
 } from "firebase/firestore";
-import { signOut as serverSignOut } from "@/lib/actions/auth.action";
 import { useState, useEffect } from "react";
+import { Show, useClerk } from "@clerk/nextjs";
 import {
   ChevronDown,
   Menu,
@@ -36,6 +34,7 @@ interface NavbarProps {
 const Navbar = ({ userId, userName, userRole }: NavbarProps) => {
   const router = useRouter();
   const pathname = usePathname();
+  const { signOut: clerkSignOut } = useClerk();
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
@@ -64,8 +63,7 @@ const Navbar = ({ userId, userName, userRole }: NavbarProps) => {
 
   const handleLogout = async () => {
     try {
-      await signOut(auth);
-      await serverSignOut();
+      await clerkSignOut();
       window.location.href = "/sign-in";
     } catch (error) {
       console.error("Logout failed:", error);
@@ -84,10 +82,7 @@ const Navbar = ({ userId, userName, userRole }: NavbarProps) => {
       const interviewDocs = await getDocs(interviewsRef);
       await Promise.all(interviewDocs.docs.map((doc) => deleteDoc(doc.ref)));
       await deleteDoc(doc(db, "users", userId));
-      const currentUser = auth.currentUser;
-      if (currentUser) await currentUser.delete();
-      await signOut(auth);
-      await serverSignOut();
+      await clerkSignOut();
       window.location.href = "/sign-in";
     } catch (error) {
       console.error("Account deletion failed:", error);
@@ -178,14 +173,15 @@ const Navbar = ({ userId, userName, userRole }: NavbarProps) => {
 
             {/* Desktop User Dropdown / Login */}
             <div className="hidden md:flex items-center ml-auto">
-              {!userId ? (
+              <Show when="signed-out">
                 <Link
                   href="/sign-in"
                   className="px-6 py-2 rounded-md bg-white text-black text-sm font-bold hover:bg-zinc-200 hover:shadow-[0_0_15px_rgba(255,255,255,0.15)] transition-all duration-300 border border-white"
                 >
                   Sign In
                 </Link>
-              ) : (
+              </Show>
+              <Show when="signed-in">
                 <div className="relative dropdown-container">
                   <button
                     onClick={() => setIsDropdownOpen(!isDropdownOpen)}
@@ -252,7 +248,7 @@ const Navbar = ({ userId, userName, userRole }: NavbarProps) => {
                     </div>
                   )}
                 </div>
-              )}
+              </Show>
             </div>
 
 
@@ -299,7 +295,7 @@ const Navbar = ({ userId, userName, userRole }: NavbarProps) => {
               })}
 
               <div className="border-t border-white/20 pt-4 mt-4 space-y-2">
-                {!userId ? (
+                <Show when="signed-out">
                   <Link
                     href="/sign-in"
                     className="group flex items-center space-x-3 w-full px-4 py-3 rounded-lg text-white bg-white/10 hover:bg-white/20 transition-all duration-300"
@@ -308,53 +304,56 @@ const Navbar = ({ userId, userName, userRole }: NavbarProps) => {
                     <User className="w-5 h-5" />
                     <span className="font-medium">Sign In</span>
                   </Link>
-                ) : isAdmin ? (
-                  // Admin only → Admin Panel
-                  <Link
-                    href="/admin"
-                    className="group flex items-center space-x-3 w-full px-4 py-3 text-sm text-gray-300 hover:text-white hover:bg-white/10 transition-all duration-200"
-                    onClick={() => setIsMobileMenuOpen(false)}
-                  >
-                    <Home className="w-5 h-5 group-hover:scale-110 transition-transform duration-300" />
-                    <span className="font-medium">Admin Panel</span>
-                  </Link>
-                ) : (
-                  <>
-                    {/* User Panel */}
+                </Show>
+                <Show when="signed-in">
+                  {isAdmin ? (
+                    // Admin only → Admin Panel
                     <Link
-                      href="/user"
+                      href="/admin"
                       className="group flex items-center space-x-3 w-full px-4 py-3 text-sm text-gray-300 hover:text-white hover:bg-white/10 transition-all duration-200"
                       onClick={() => setIsMobileMenuOpen(false)}
                     >
-                      <User className="w-5 h-5 group-hover:scale-110 transition-transform duration-300" />
-                      <span className="font-medium">User Panel</span>
+                      <Home className="w-5 h-5 group-hover:scale-110 transition-transform duration-300" />
+                      <span className="font-medium">Admin Panel</span>
                     </Link>
+                  ) : (
+                    <>
+                      {/* User Panel */}
+                      <Link
+                        href="/user"
+                        className="group flex items-center space-x-3 w-full px-4 py-3 text-sm text-gray-300 hover:text-white hover:bg-white/10 transition-all duration-200"
+                        onClick={() => setIsMobileMenuOpen(false)}
+                      >
+                        <User className="w-5 h-5 group-hover:scale-110 transition-transform duration-300" />
+                        <span className="font-medium">User Panel</span>
+                      </Link>
 
-                    {/* Sign Out */}
-                    <button
-                      onClick={() => {
-                        handleLogout();
-                        setIsMobileMenuOpen(false);
-                      }}
-                      className="group flex items-center space-x-3 w-full px-4 py-3 text-sm text-gray-300 hover:text-white hover:bg-white/10 transition-all duration-300"
-                    >
-                      <LogOut className="w-5 h-5 group-hover:scale-110 transition-transform duration-300" />
-                      <span className="font-medium">Sign Out</span>
-                    </button>
+                      {/* Sign Out */}
+                      <button
+                        onClick={() => {
+                          handleLogout();
+                          setIsMobileMenuOpen(false);
+                        }}
+                        className="group flex items-center space-x-3 w-full px-4 py-3 text-sm text-gray-300 hover:text-white hover:bg-white/10 transition-all duration-300"
+                      >
+                        <LogOut className="w-5 h-5 group-hover:scale-110 transition-transform duration-300" />
+                        <span className="font-medium">Sign Out</span>
+                      </button>
 
-                    {/* Delete Account */}
-                    <button
-                      onClick={() => {
-                        handleDeleteAccount();
-                        setIsMobileMenuOpen(false);
-                      }}
-                      className="group flex items-center space-x-3 w-full px-4 py-3 text-sm text-white hover:text-red-300 hover:bg-red-500/10 transition-all duration-300"
-                    >
-                      <Trash2 className="w-5 h-5 group-hover:scale-110 transition-transform duration-300 text-white group-hover:text-red-300" />
-                      <span className="font-medium">Delete Account</span>
-                    </button>
-                  </>
-                )}
+                      {/* Delete Account */}
+                      <button
+                        onClick={() => {
+                          handleDeleteAccount();
+                          setIsMobileMenuOpen(false);
+                        }}
+                        className="group flex items-center space-x-3 w-full px-4 py-3 text-sm text-white hover:text-red-300 hover:bg-red-500/10 transition-all duration-300"
+                      >
+                        <Trash2 className="w-5 h-5 group-hover:scale-110 transition-transform duration-300 text-white group-hover:text-red-300" />
+                        <span className="font-medium">Delete Account</span>
+                      </button>
+                    </>
+                  )}
+                </Show>
               </div>
 
             </div>
