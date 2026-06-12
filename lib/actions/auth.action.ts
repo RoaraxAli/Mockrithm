@@ -75,6 +75,11 @@ export const getCurrentUser = cache(async (): Promise<User | null> => {
         : rawData?.createdAt instanceof Date
         ? rawData.createdAt.toISOString()
         : rawData?.createdAt ?? null,
+      premiumUpdatedAt: rawData?.premiumUpdatedAt?.toDate
+        ? rawData.premiumUpdatedAt.toDate().toISOString()
+        : rawData?.premiumUpdatedAt instanceof Date
+        ? rawData.premiumUpdatedAt.toISOString()
+        : rawData?.premiumUpdatedAt ?? null,
     } as unknown as User;
     console.log("Server user data fetched:", userData.name);
     return userData;
@@ -99,11 +104,22 @@ export async function getUserProfile(uid: string) {
         name: data?.name || "User",
         role: data?.role || "User",
         email: data?.email || "",
+        tier: data?.tier || null,
       };
     }
     return { success: false, message: "User not found" };
   } catch (error: any) {
     console.error("Error fetching user profile:", error);
+    return { success: false, message: error.message };
+  }
+}
+
+export async function updateUserTier(userId: string, tier: "freemium" | "premium") {
+  try {
+    await db.collection("users").doc(userId).set({ tier }, { merge: true });
+    return { success: true };
+  } catch (error: any) {
+    console.error("Error updating user tier:", error);
     return { success: false, message: error.message };
   }
 }

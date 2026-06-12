@@ -54,6 +54,7 @@ interface User {
   role?: string;
   resumeLink?: string;
   profileURL?: string;
+  tier?: "freemium" | "premium";
 }
 
 interface InterviewCardProps {

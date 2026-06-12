@@ -8,7 +8,21 @@ export async function getUserData(userId: string): Promise<User | null> {
   try {
     const userDoc = await db.collection("users").doc(userId).get()
     if (userDoc.exists) {
-      return { id: userDoc.id, ...userDoc.data() } as User
+      const data = userDoc.data()!
+      return {
+        ...data,
+        id: userDoc.id,
+        createdAt: data.createdAt?.toDate
+          ? data.createdAt.toDate().toISOString()
+          : data.createdAt instanceof Date
+          ? data.createdAt.toISOString()
+          : data.createdAt ?? null,
+        premiumUpdatedAt: data.premiumUpdatedAt?.toDate
+          ? data.premiumUpdatedAt.toDate().toISOString()
+          : data.premiumUpdatedAt instanceof Date
+          ? data.premiumUpdatedAt.toISOString()
+          : data.premiumUpdatedAt ?? null,
+      } as unknown as User
     }
     return null
   } catch (error) {
