@@ -109,6 +109,27 @@ const Footer: React.FC<FooterProps> = ({ className = "" }) => {
             </div>
           </div>
 
+          {/* Column 5: Legal */}
+          <div className="flex flex-col gap-3">
+            <h4 className="text-[10px] font-black uppercase tracking-widest text-white border-b border-white/5 pb-1">
+              Legal
+            </h4>
+            <div className="flex flex-col gap-2">
+              <Link href="/privacy-policy" className="text-[10.5px] text-zinc-400 hover:text-white font-medium transition-colors">
+                Privacy Policy
+              </Link>
+              <Link href="/terms" className="text-[10.5px] text-zinc-400 hover:text-white font-medium transition-colors">
+                Terms & Conditions
+              </Link>
+              <Link href="/refund-policy" className="text-[10.5px] text-zinc-400 hover:text-white font-medium transition-colors">
+                Refund Policy
+              </Link>
+              <Link href="/ownership-statement" className="text-[10.5px] text-zinc-400 hover:text-white font-medium transition-colors">
+                Ownership Statement
+              </Link>
+            </div>
+          </div>
+
         </div>
 
         {/* Bottom Row */}
