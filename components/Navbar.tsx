@@ -104,10 +104,10 @@ const Navbar = ({ userId, userName, userRole }: NavbarProps) => {
         { href: "/contact", label: "Contact", icon: Mail },
       ]
     : [
-        { href: "/", label: "Intro", icon: Home },
-        { href: "/features", label: "Features", icon: Info },
-        { href: "/pricing", label: "Pricing", icon: CreditCard },
-        { href: "/resources", label: "Resources", icon: Mail },
+        { href: "/#intro", label: "Intro", icon: Home },
+        { href: "/#features", label: "Features", icon: Info },
+        { href: "/#resources", label: "Resources", icon: Mail },
+        { href: "/#pricing", label: "Pricing", icon: CreditCard },
         { href: "/documentation", label: "Documentation", icon: Info },
       ];
 
@@ -123,58 +123,58 @@ const Navbar = ({ userId, userName, userRole }: NavbarProps) => {
       )}
 
       <nav
-        className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 font-mona-sans ${
+        className={`fixed z-50 transition-all duration-300 font-mona-sans ${
           isScrolled
-            ? "bg-zinc-950/75 backdrop-blur-xl shadow-2xl border-b border-white/10"
-            : "bg-black/50 backdrop-blur-md border-b border-white/5"
+            ? "top-4 left-[5%] right-[5%] rounded-full bg-zinc-950/85 backdrop-blur-xl shadow-2xl border border-white/10 px-4 py-0"
+            : "top-0 left-0 right-0 bg-black/50 backdrop-blur-md border-b border-white/5 py-1"
         }`}
       >
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 z-10">
-          <div className="relative flex items-center h-16 justify-between">
+          <div className={`relative flex items-center justify-between transition-all duration-300 ${isScrolled ? "h-12" : "h-16"}`}>
             {/* Logo */}
             <Link
               href="/"
-              className="group flex items-center space-x-3 transition-all duration-300 hover:scale-105"
+              className={`group flex items-center transition-all duration-300 hover:scale-105 ${isScrolled ? "space-x-2" : "space-x-3"}`}
               aria-label="Mockrithm Home"
             >
               <div className="relative">
                 <div className="absolute inset-0 bg-white rounded-lg blur opacity-10 group-hover:opacity-30 transition-opacity duration-300" />
-                <div className="relative bg-white/5 p-2 rounded-lg border border-white/10 group-hover:border-white/30 transition-colors duration-300 backdrop-blur-sm">
+                <div className={`relative bg-white/5 rounded-lg border border-white/10 group-hover:border-white/30 transition-all duration-300 backdrop-blur-sm ${isScrolled ? "p-1.5" : "p-2"}`}>
                   <Image
                     src="/logo.svg"
                     alt="Mockrithm Logo"
                     width={28}
                     height={28}
                     priority
-                    className="w-7 h-7"
+                    className={`transition-all duration-300 ${isScrolled ? "w-5 h-5" : "w-7 h-7"}`}
                   />
                 </div>
               </div>
               <div className="flex flex-col leading-tight">
-                <span className="text-[16px] font-black tracking-wider text-white group-hover:text-gray-200 transition-colors duration-300">
+                <span className={`font-black tracking-wider text-white group-hover:text-gray-200 transition-all duration-300 ${isScrolled ? "text-[13px]" : "text-[16px]"}`}>
                   MOCKRITHM
                 </span>
-                <span className="text-[10px] font-bold tracking-widest text-zinc-500 group-hover:text-zinc-400 transition-colors duration-300 uppercase">
+                <span className={`font-bold tracking-widest text-zinc-555 group-hover:text-zinc-400 transition-all duration-300 uppercase ${isScrolled ? "text-[8px]" : "text-[10px]"}`}>
                   Face the Machine
                 </span>
               </div>
             </Link>
 
             {/* Desktop Nav Links */}
-            <div className="hidden md:flex items-center space-x-2 absolute left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2">
+            <div className="hidden md:flex items-center space-x-1 absolute left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2">
               {navLinks.map((link) => {
-                const isActive = pathname === link.href;
+                const isActive = pathname === link.href || (pathname === "/" && link.href === "/#intro");
                 return (
                   <Link
                     key={link.href}
                     href={link.href}
-                    className={`group relative px-4 py-2 rounded-xl transition-all duration-300 ${
+                    className={`group relative rounded-xl transition-all duration-300 ${
                       isActive
                         ? "text-white bg-white/5 border border-white/10 shadow-[0_0_15px_rgba(255,255,255,0.05)]"
                         : "text-gray-300 hover:text-white hover:bg-white/5"
-                    }`}
+                    } ${isScrolled ? "px-3 py-1.5" : "px-4 py-2"}`}
                   >
-                    <span className="text-sm font-semibold tracking-wide">{link.label}</span>
+                    <span className={`transition-all duration-300 font-semibold tracking-wide ${isScrolled ? "text-xs" : "text-sm"}`}>{link.label}</span>
                     <span
                       className={`absolute left-1/2 -translate-x-1/2 bottom-0 h-[2px] w-1/2 bg-white transition-transform duration-300 origin-center ${
                         isActive
@@ -190,18 +190,18 @@ const Navbar = ({ userId, userName, userRole }: NavbarProps) => {
             {/* Desktop User Dropdown / Login */}
             <div className="hidden md:flex items-center ml-auto">
               <Show when="signed-out">
-                <div className="flex items-center space-x-3">
+                <div className="flex items-center space-x-2">
                   <Link
                     href={getAuthRedirectUrl("sign-in")}
-                    className="px-4 py-2 rounded-xl text-gray-300 hover:text-white text-sm font-semibold transition-all duration-300"
+                    className={`transition-all duration-300 text-zinc-300 hover:text-white font-semibold ${isScrolled ? "text-xs px-3 py-1.5" : "text-sm px-4 py-2"}`}
                   >
                     Sign In
                   </Link>
                   <Link
                     href={getAuthRedirectUrl("sign-up")}
-                    className="px-5 py-2 rounded-xl bg-white text-black text-sm font-bold hover:bg-zinc-200 hover:shadow-[0_0_15px_rgba(255,255,255,0.15)] transition-all duration-300 border border-white"
+                    className={`bg-white text-black font-bold hover:bg-zinc-200 hover:shadow-[0_0_15px_rgba(255,255,255,0.15)] transition-all duration-300 border border-white rounded-xl ${isScrolled ? "text-xs px-4 py-1.5" : "text-sm px-5 py-2"}`}
                   >
-                    Sign Up
+                    Start Prep
                   </Link>
                 </div>
               </Show>
@@ -392,7 +392,7 @@ const Navbar = ({ userId, userName, userRole }: NavbarProps) => {
                       onClick={() => setIsMobileMenuOpen(false)}
                     >
                       <User className="w-5 h-5" />
-                      <span className="font-medium">Sign In</span>
+                      <span className="font-medium">Access Portal</span>
                     </Link>
                     <Link
                       href={getAuthRedirectUrl("sign-up")}
@@ -400,7 +400,7 @@ const Navbar = ({ userId, userName, userRole }: NavbarProps) => {
                       onClick={() => setIsMobileMenuOpen(false)}
                     >
                       <User className="w-5 h-5" />
-                      <span className="font-medium">Sign Up</span>
+                      <span className="font-medium">Start Prep</span>
                     </Link>
                   </div>
                 </Show>

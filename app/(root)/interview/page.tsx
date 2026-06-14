@@ -7,7 +7,7 @@ const Page = async () => {
   if (!user) redirect("/sign-in");
 
   return (
-    <>
+    <div className="root-layout">
       <h3>Interview generation</h3>
 
       <Agent
@@ -16,7 +16,7 @@ const Page = async () => {
         profileImage={user.imageUrl || ""}
         type="generate"
       />
-    </>
+    </div>
   );
 };
 

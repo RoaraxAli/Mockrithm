@@ -14,6 +14,14 @@ export default clerkMiddleware(async (auth, req) => {
     return NextResponse.redirect(url)
   }
 
+  const host = req.headers.get("host") || "";
+
+  // 🔐 Redirect auth routes on apex domain to the accounts subdomain
+  if (isAuthRoute(req) && (host === "mockrithm.me" || host === "www.mockrithm.me")) {
+    const redirectUrl = `https://accounts.mockrithm.me${req.nextUrl.pathname}${req.nextUrl.search}`;
+    return NextResponse.redirect(redirectUrl);
+  }
+
   const { userId } = await auth()
 
   if (isAuthRoute(req) && userId) {
