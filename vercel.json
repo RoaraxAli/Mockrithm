@@ -1,0 +1,37 @@
+{
+  "redirects": [
+    {
+      "source": "/documentation",
+      "has": [
+        {
+          "type": "host",
+          "value": "mockrithm.me"
+        }
+      ],
+      "destination": "https://docs.mockrithm.me",
+      "permanent": false
+    }
+  ],
+  "rewrites": [
+    {
+      "source": "/",
+      "has": [
+        {
+          "type": "host",
+          "value": "docs.mockrithm.me"
+        }
+      ],
+      "destination": "/documentation"
+    },
+    {
+      "source": "/:path*",
+      "has": [
+        {
+          "type": "host",
+          "value": "docs.mockrithm.me"
+        }
+      ],
+      "destination": "/documentation/:path*"
+    }
+  ]
+}

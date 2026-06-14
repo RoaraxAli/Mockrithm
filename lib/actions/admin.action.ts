@@ -263,3 +263,153 @@ export async function updateSupportFeedbackStatus(id: string, newStatus: string)
     return { success: false, error: "Failed to update feedback status" };
   }
 }
+
+export async function getBlogs() {
+  try {
+    const querySnapshot = await db.collection("blogs").get();
+    let blogs = querySnapshot.docs.map((doc: any) => ({
+      id: doc.id,
+      title: doc.data().title || "",
+      category: doc.data().category || "",
+      excerpt: doc.data().excerpt || "",
+      content: doc.data().content || "",
+      date: doc.data().date || "",
+      readTime: doc.data().readTime || "",
+      author: doc.data().author || "",
+      createdAt: doc.data().createdAt ?? null,
+    }));
+
+    if (blogs.length === 0) {
+      const seedBlogs = [
+        {
+          title: "How to Bypass Modern ATS Screeners",
+          category: "Resume Strategy",
+          excerpt: "An in-depth look at how corporate parsing engines analyze PDF and Docx files. Learn why complex grids and visual styling could get your application auto-rejected.",
+          content: "Corporate screening engines utilize automated parsers to match credentials. Multi-column grids or dynamic diagrams frequently trigger parser failures. To maximize your success rate, design clean single-column templates, prioritize clear sections like experience and education, and use standardized system fonts.",
+          date: "June 12, 2026",
+          readTime: "5 min read",
+          author: "Ahmed Hussain",
+          createdAt: new Date(Date.now() - 1000 * 60 * 60).toISOString(),
+        },
+        {
+          title: "Top 5 Vocal Filler Words to Avoid",
+          category: "Speech Articulation",
+          excerpt: "Scientific research on speech pacing shows vocal filler counts directly affect an interviewer's perception of your confidence. Learn simple breathing methods to sound clean.",
+          content: "Verbal fillers like 'um', 'like', and 'ah' interrupt communication cycles. Training with real-time pace guides teaches speakers to pause silently instead of vocalizing pauses, projecting confidence and command of topics.",
+          date: "May 28, 2026",
+          readTime: "4 min read",
+          author: "Speech Team",
+          createdAt: new Date(Date.now() - 1000 * 60 * 60 * 24).toISOString(),
+        },
+        {
+          title: "Mastering the AI Mock Interview",
+          category: "Interview Prep",
+          excerpt: "A comprehensive developer guide on explaining system design concepts and algorithmic answers cleanly to interactive voice models using the STAR method.",
+          content: "Conversing with AI interviewers requires clarity and structure. Use the STAR (Situation, Task, Action, Result) format to organize answers. Explain your technical choices step-by-step to demonstrate structural systems design experience.",
+          date: "May 15, 2026",
+          readTime: "6 min read",
+          author: "AI Labs",
+          createdAt: new Date(Date.now() - 1000 * 60 * 60 * 24 * 2).toISOString(),
+        },
+        {
+          title: "Design Patterns in System Architecture",
+          category: "System Design",
+          excerpt: "A cheat sheet of the most commonly asked systems architecture design patterns in big-tech companies, including load balancing, cache layers, and databases shards.",
+          content: "Scale requires patterns. Study rate limiting models, sharded schemas, caching architectures, and load balancing configurations to handle massive concurrent traffic profiles securely and reliably.",
+          date: "April 29, 2026",
+          readTime: "8 min read",
+          author: "Arch Team",
+          createdAt: new Date(Date.now() - 1000 * 60 * 60 * 24 * 3).toISOString(),
+        }
+      ];
+
+      for (const sb of seedBlogs) {
+        await db.collection("blogs").add(sb);
+      }
+      
+      const reSnapshot = await db.collection("blogs").get();
+      blogs = reSnapshot.docs.map((doc: any) => ({
+        id: doc.id,
+        title: doc.data().title || "",
+        category: doc.data().category || "",
+        excerpt: doc.data().excerpt || "",
+        content: doc.data().content || "",
+        date: doc.data().date || "",
+        readTime: doc.data().readTime || "",
+        author: doc.data().author || "",
+        createdAt: doc.data().createdAt ?? null,
+      }));
+    }
+
+    // Sort descending by createdAt
+    blogs.sort((a: any, b: any) => {
+      const aTime = a.createdAt ? new Date(a.createdAt).getTime() : 0;
+      const bTime = b.createdAt ? new Date(b.createdAt).getTime() : 0;
+      return bTime - aTime;
+    });
+
+    return { success: true, data: blogs };
+  } catch (error: any) {
+    console.error("Failed to fetch blogs:", error);
+    return { success: false, error: error.message };
+  }
+}
+
+export async function createBlog(blogData: any) {
+  try {
+    const user = await getCurrentUser();
+    const isAdmin = user && user.role?.toLowerCase() === "admin";
+    if (!user || !isAdmin) {
+      return { success: false, error: "Forbidden" };
+    }
+
+    const payload = {
+      ...blogData,
+      createdAt: new Date().toISOString(),
+      date: new Date().toLocaleDateString("en-US", {
+        year: "numeric",
+        month: "long",
+        day: "numeric",
+      }),
+    };
+
+    const docRef = await db.collection("blogs").add(payload);
+    return { success: true, id: docRef.id };
+  } catch (error: any) {
+    console.error("Failed to create blog:", error);
+    return { success: false, error: error.message };
+  }
+}
+
+export async function updateBlog(id: string, blogData: any) {
+  try {
+    const user = await getCurrentUser();
+    const isAdmin = user && user.role?.toLowerCase() === "admin";
+    if (!user || !isAdmin) {
+      return { success: false, error: "Forbidden" };
+    }
+
+    await db.collection("blogs").doc(id).update(blogData);
+    return { success: true };
+  } catch (error: any) {
+    console.error("Failed to update blog:", error);
+    return { success: false, error: error.message };
+  }
+}
+
+export async function deleteBlog(id: string) {
+  try {
+    const user = await getCurrentUser();
+    const isAdmin = user && user.role?.toLowerCase() === "admin";
+    if (!user || !isAdmin) {
+      return { success: false, error: "Forbidden" };
+    }
+
+    await db.collection("blogs").doc(id).delete();
+    return { success: true };
+  } catch (error: any) {
+    console.error("Failed to delete blog:", error);
+    return { success: false, error: error.message };
+  }
+}
+

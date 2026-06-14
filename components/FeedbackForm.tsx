@@ -27,7 +27,8 @@ import {
 } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Send, User, Mail, MessageSquare, Phone, Clock, Github } from "lucide-react";
+import Link from "next/link";
+import { Send, User, Mail, MessageSquare, Phone, Clock, Github, ArrowLeft } from "lucide-react";
 
 // Schema
 const formSchema = z.object({
@@ -83,7 +84,7 @@ export default function ContactPage() {
   };
 
   return (
-    <div className="min-h-screen bg-black text-white relative overflow-hidden font-mona-sans">
+    <div className="min-h-screen bg-black text-white relative overflow-hidden font-mona-sans pt-16">
       {/* Background Pattern */}
       <div className="absolute inset-0 opacity-20 pointer-events-none z-0">
         <div className="absolute inset-0 premium-grid-dot" />

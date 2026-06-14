@@ -8,7 +8,7 @@ import { toast } from "sonner";
 
 interface PlanSelectionModalProps {
   userId: string;
-  userTier?: "freemium" | "premium" | null;
+  userTier?: "freemium" | "premium" | "pro" | null;
   onCompleted: () => void;
 }
 
@@ -18,7 +18,7 @@ export default function PlanSelectionModal({
   onCompleted,
 }: PlanSelectionModalProps) {
   const [step, setStep] = useState<"choose" | "already_premium">(
-    userTier === "premium" ? "already_premium" : "choose"
+    (userTier === "premium" || userTier === "pro") ? "already_premium" : "choose"
   );
   const [loading, setLoading] = useState(false);
 
@@ -195,8 +195,8 @@ export default function PlanSelectionModal({
               <Crown className="size-7 fill-white text-white" />
             </div>
 
-            <h2 className="text-xl md:text-2xl font-black text-white tracking-tight">
-              Premium Tier Confirmed
+            <h2 className="text-xl md:text-2xl font-black text-white tracking-tight capitalize">
+              {userTier} Access Confirmed
             </h2>
             <p className="text-xs text-zinc-400 mt-2 leading-relaxed">
               Your premium membership is active. Enjoy unlimited access, premium ATS templates, and real-time interview practice.

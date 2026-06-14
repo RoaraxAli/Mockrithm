@@ -16,7 +16,6 @@ const navigation = [
   { name: "Resume Builder", href: "/user/resume", icon: Sparkles },
   { name: "Your Interviews", href: "/user/interviews", icon: FileText },
   { name: "Feedback", href: "/user/feedback", icon: MessageSquare },
-  { name: "Profile", href: "/user/profile", icon: User },
 ]
 
 export function Sidebar() {

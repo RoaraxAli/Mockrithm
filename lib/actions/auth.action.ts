@@ -47,12 +47,14 @@ export const getCurrentUser = cache(async (): Promise<User | null> => {
 
       const email = clerkUser.emailAddresses[0]?.emailAddress || "";
       const name = clerkUser.fullName || clerkUser.firstName || email.split("@")[0] || "New User";
+      const imageUrl = clerkUser.imageUrl || "";
       const isAdmin = email === "ahmed@gmail.com";
       const role = isAdmin ? "Admin" : "User";
 
       const newUserData = {
         name,
         email,
+        imageUrl,
         role,
         createdAt: new Date(),
         status: "Active",
@@ -66,7 +68,39 @@ export const getCurrentUser = cache(async (): Promise<User | null> => {
       } as unknown as User;
     }
 
-    const rawData = userDoc.data();
+    let rawData = userDoc.data();
+    
+    // Sync updates from Clerk if they changed
+    try {
+      const clerkUser = await clerkCurrentUser();
+      if (clerkUser) {
+        const email = clerkUser.emailAddresses[0]?.emailAddress || "";
+        const name = clerkUser.fullName || clerkUser.firstName || email.split("@")[0] || "New User";
+        const imageUrl = clerkUser.imageUrl || "";
+        
+        if (
+          rawData?.name !== name ||
+          rawData?.email !== email ||
+          rawData?.imageUrl !== imageUrl
+        ) {
+          console.log("Syncing Clerk user details to Firestore for ID:", userId);
+          const updates = {
+            name,
+            email,
+            imageUrl,
+            updatedAt: new Date(),
+          };
+          await userDocRef.set(updates, { merge: true });
+          rawData = {
+            ...rawData,
+            ...updates,
+          };
+        }
+      }
+    } catch (e: any) {
+      console.error("Failed to sync Clerk data inside getCurrentUser:", e.message);
+    }
+
     const userData = {
       ...rawData,
       id: userDoc.id,
@@ -80,6 +114,11 @@ export const getCurrentUser = cache(async (): Promise<User | null> => {
         : rawData?.premiumUpdatedAt instanceof Date
         ? rawData.premiumUpdatedAt.toISOString()
         : rawData?.premiumUpdatedAt ?? null,
+      updatedAt: rawData?.updatedAt?.toDate
+        ? rawData.updatedAt.toDate().toISOString()
+        : rawData?.updatedAt instanceof Date
+        ? rawData.updatedAt.toISOString()
+        : rawData?.updatedAt ?? null,
     } as unknown as User;
     console.log("Server user data fetched:", userData.name);
     return userData;
@@ -114,7 +153,7 @@ export async function getUserProfile(uid: string) {
   }
 }
 
-export async function updateUserTier(userId: string, tier: "freemium" | "premium") {
+export async function updateUserTier(userId: string, tier: "freemium" | "premium" | "pro") {
   try {
     await db.collection("users").doc(userId).set({ tier }, { merge: true });
     return { success: true };

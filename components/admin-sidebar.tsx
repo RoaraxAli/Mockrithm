@@ -16,6 +16,7 @@ import {
   LogOut,
   Globe,
   User,
+  BookOpen,
 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -49,6 +50,7 @@ const navigation = [
     icon: ClipboardList,
   },
   { name: "Feedback", href: "/admin/feedback", icon: MessageSquare },
+  { name: "Blogs", href: "/admin/blogs", icon: BookOpen },
 ];
 
 export function AdminSidebar() {

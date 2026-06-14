@@ -54,7 +54,9 @@ interface User {
   role?: string;
   resumeLink?: string;
   profileURL?: string;
-  tier?: "freemium" | "premium";
+  imageUrl?: string;
+  tier?: "freemium" | "premium" | "pro";
+  billingInterval?: "monthly" | "annual" | "lifetime";
 }
 
 interface InterviewCardProps {

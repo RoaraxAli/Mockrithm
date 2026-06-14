@@ -6,7 +6,10 @@
     "dev": "next dev --turbopack",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "docs:dev": "npm --prefix mockrithm-docs run dev",
+    "docs:build": "npm --prefix mockrithm-docs run build",
+    "docs:start": "npm --prefix mockrithm-docs run start"
   },
   "dependencies": {
     "@ai-sdk/google": "^1.2.22",

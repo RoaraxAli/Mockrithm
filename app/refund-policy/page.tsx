@@ -1,15 +1,17 @@
 import React from "react";
+import Link from "next/link";
+import { ArrowLeft } from "lucide-react";
 
 export default function RefundPolicyPage() {
   return (
-    <div className="min-h-screen bg-black text-white relative overflow-hidden font-mona-sans py-24 px-6">
+    <div className="min-h-screen bg-black text-white relative overflow-hidden font-mona-sans pt-32 pb-20 px-6">
       {/* Background Pattern */}
       <div className="absolute inset-0 opacity-20 pointer-events-none z-0">
         <div className="absolute inset-0 premium-grid-dot" />
         <div className="absolute top-1/4 left-1/4 w-80 h-80 bg-white/[0.01] rounded-full blur-[100px]" />
       </div>
 
-      <div className="max-w-4xl mx-auto relative z-10 space-y-10">
+      <div className="max-w-4xl mx-auto relative z-10 space-y-8">
         {/* Header */}
         <div className="border-b border-zinc-900 pb-8">
           <h1 className="text-4xl font-black tracking-tight mb-2">Cancellation & Refund Policy</h1>

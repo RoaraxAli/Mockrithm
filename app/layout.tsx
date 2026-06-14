@@ -34,7 +34,19 @@ export default async function RootLayout({
         className={`${monaSans.className} bg-black text-white antialiased pattern`}
         suppressHydrationWarning
       >
-        <ClerkProvider>
+        <ClerkProvider
+          appearance={{
+            variables: {
+              colorPrimary: "#ffffff",
+              colorBackground: "#09090b", // zinc-950
+              colorText: "#ffffff",
+              colorTextSecondary: "#a1a1aa", // zinc-400
+              colorBorder: "#27272a", // zinc-800
+              colorInputBackground: "#09090b",
+              colorInputText: "#ffffff",
+            }
+          }}
+        >
           <Preloader />
           <Analytics />
           <AuthLayout initialUserId={user?.id} initialUserName={user?.name} initialUserRole={user?.role}>

@@ -12,7 +12,9 @@ import {
   getDocs,
 } from "firebase/firestore";
 import { useState, useEffect } from "react";
-import { Show, useClerk } from "@clerk/nextjs";
+import { Show, useClerk, UserButton } from "@clerk/nextjs";
+import { getAuthRedirectUrl } from "@/lib/utils/auth";
+import { BillingOptions } from "@/app/user/components/BillingOptions";
 import {
   ChevronDown,
   Menu,
@@ -23,6 +25,12 @@ import {
   Home,
   Info,
   Mail,
+  LayoutDashboard,
+  PlayCircle,
+  Sparkles,
+  FileText,
+  MessageSquare,
+  CreditCard,
 } from "lucide-react";
 
 interface NavbarProps {
@@ -89,11 +97,19 @@ const Navbar = ({ userId, userName, userRole }: NavbarProps) => {
     }
   };
 
-  const navLinks = [
-    { href: "/", label: "Home", icon: Home },
-    { href: "/about", label: "About", icon: Info },
-    { href: "/contact", label: "Contact", icon: Mail },
-  ];
+  const navLinks = userId
+    ? [
+        { href: "/", label: "Home", icon: Home },
+        { href: "/about", label: "About", icon: Info },
+        { href: "/contact", label: "Contact", icon: Mail },
+      ]
+    : [
+        { href: "/", label: "Intro", icon: Home },
+        { href: "/features", label: "Features", icon: Info },
+        { href: "/pricing", label: "Pricing", icon: CreditCard },
+        { href: "/resources", label: "Resources", icon: Mail },
+        { href: "/documentation", label: "Documentation", icon: Info },
+      ];
 
   if (pathname.startsWith("/admin")) return null;
 
@@ -174,83 +190,156 @@ const Navbar = ({ userId, userName, userRole }: NavbarProps) => {
             {/* Desktop User Dropdown / Login */}
             <div className="hidden md:flex items-center ml-auto">
               <Show when="signed-out">
-                <Link
-                  href="/sign-in"
-                  className="px-6 py-2 rounded-md bg-white text-black text-sm font-bold hover:bg-zinc-200 hover:shadow-[0_0_15px_rgba(255,255,255,0.15)] transition-all duration-300 border border-white"
-                >
-                  Sign In
-                </Link>
+                <div className="flex items-center space-x-3">
+                  <Link
+                    href={getAuthRedirectUrl("sign-in")}
+                    className="px-4 py-2 rounded-xl text-gray-300 hover:text-white text-sm font-semibold transition-all duration-300"
+                  >
+                    Sign In
+                  </Link>
+                  <Link
+                    href={getAuthRedirectUrl("sign-up")}
+                    className="px-5 py-2 rounded-xl bg-white text-black text-sm font-bold hover:bg-zinc-200 hover:shadow-[0_0_15px_rgba(255,255,255,0.15)] transition-all duration-300 border border-white"
+                  >
+                    Sign Up
+                  </Link>
+                </div>
               </Show>
               <Show when="signed-in">
-                <div className="relative dropdown-container">
-                  <button
-                    onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-                    className="group flex items-center space-x-2 px-4 py-2 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 hover:border-white/30 text-gray-300 hover:text-white transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-white/20 backdrop-blur-sm cursor-pointer"
-                  >
-                    <div className="flex items-center space-x-2">
-                      <div className="w-6 h-6 bg-zinc-800 rounded-md flex items-center justify-center border border-zinc-700">
-                        <User className="w-3.5 h-3.5 text-white" />
-                      </div>
-                      <span className="text-sm font-semibold max-w-24 truncate">
-                        {userName}
-                      </span>
-                    </div>
-                    <ChevronDown
-                      className={`w-4 h-4 transition-transform duration-300 text-zinc-400 group-hover:text-white ${
-                        isDropdownOpen ? "rotate-180" : "rotate-0"
-                      }`}
-                    />
-                  </button>
-
-                  {isDropdownOpen && (
-                    <div className="absolute right-0 mt-2 w-56 bg-zinc-950/90 backdrop-blur-xl rounded-2xl shadow-2xl border border-white/10 py-2.5 z-10 animate-in fade-in slide-in-from-top-2 duration-200">
-                      {/* User Info */}
-                      <div className="px-4 py-3 border-b border-white/5">
-                        <p className="text-sm font-bold text-white">
-                          {userName}
-                        </p>
-                        <p className="text-xs text-zinc-400 truncate">{userId}</p>
-                      </div>
-
-                      {isAdmin ? (
-                        // Admin only → Admin Panel
-                        <Link
-                          href="/admin"
-                          className="group flex items-center space-x-3 w-full px-4 py-3 text-sm text-gray-300 hover:text-white hover:bg-white/5 transition-all duration-200"
-                        >
-                          <Home className="w-4 h-4 text-zinc-400 group-hover:scale-110 transition-transform duration-200" />
-                          <span className="font-medium">Admin Panel</span>
-                        </Link>
-                      ) : (
-                        <>
-                          {/* User Panel */}
-                          <Link
-                            href="/user"
-                            className="group flex items-center space-x-3 w-full px-4 py-3 text-sm text-gray-300 hover:text-white hover:bg-white/5 transition-all duration-200"
-                          >
-                            <User className="w-4 h-4 text-zinc-400 group-hover:scale-110 transition-transform duration-200" />
-                            <span className="font-medium">User Panel</span>
-                          </Link>
-
-                          {/* Sign Out */}
-                          <button
-                            onClick={() => {
-                              handleLogout();
-                              setIsDropdownOpen(false);
-                            }}
-                            className="group flex items-center space-x-3 w-full px-4 py-3 text-sm text-gray-300 hover:text-white hover:bg-white/5 transition-all duration-200 cursor-pointer"
-                          >
-                            <LogOut className="w-4 h-4 text-rose-500 group-hover:scale-110 transition-transform duration-200" />
-                            <span className="font-medium">Sign Out</span>
-                          </button>
-                        </>
-                      )}
-                    </div>
+                <div className="flex items-center space-x-4">
+                  {isAdmin && (
+                    <Link
+                      href="/admin"
+                      className="text-xs font-bold uppercase tracking-wider px-3.5 py-1.5 rounded-lg border border-red-500/20 bg-red-500/5 text-red-400 hover:bg-red-500/10 hover:text-red-300 transition-all mr-2"
+                    >
+                      Admin
+                    </Link>
                   )}
+                  <UserButton
+                    appearance={{
+                      variables: {
+                        colorPrimary: "#ffffff",
+                        colorBackground: "#09090b", // zinc-950
+                        colorText: "#ffffff",
+                        colorTextSecondary: "#a1a1aa", // zinc-400
+                        colorBorder: "#27272a", // zinc-800
+                        colorInputBackground: "#09090b",
+                        colorInputText: "#ffffff",
+                        fontFamily: "var(--font-mona-sans), sans-serif",
+                      } as any,
+                      elements: {
+                        userButtonAvatarBox: "w-8 h-8 rounded-lg border border-white/10 hover:border-white/30 transition-colors",
+                        card: "border border-white/10 shadow-2xl rounded-2xl bg-zinc-950/20 backdrop-blur-3xl",
+                        navbar: "border-r border-white/5 bg-transparent",
+                        navbarButton: "text-zinc-400 hover:text-white hover:bg-white/5 rounded-lg text-xs font-semibold uppercase tracking-wider transition-all",
+                        navbarButtonActive: "text-white bg-white/5 font-black border-l-2 border-white",
+                        pageScrollable: "bg-transparent p-6 sm:p-8",
+                        headerTitle: "text-xl font-black text-white",
+                        headerSubtitle: "text-xs text-zinc-450",
+                        profileSectionTitleText: "text-xs font-bold text-zinc-500 uppercase tracking-wider",
+                        formButtonPrimary: "bg-white hover:bg-zinc-200 text-black text-xs font-bold py-2 rounded-lg transition-all border border-white cursor-pointer",
+                        formButtonReset: "border border-zinc-800 hover:bg-zinc-900 text-zinc-300 text-xs font-bold py-2 rounded-lg transition-all cursor-pointer",
+                        scrollBox: "bg-transparent",
+                        userBox: "bg-zinc-950 text-white",
+                        userBoxTitle: "text-white font-bold",
+                        userBoxSubtitle: "text-zinc-400 font-medium",
+                        userBoxText: "text-white",
+                        userBoxTextContainer: "text-white",
+                        userBoxLabel: "text-white",
+                        userButtonPopoverCard: "bg-zinc-950 border border-white/10 text-white",
+                        userButtonPopoverActions: "bg-transparent",
+                        userButtonPopoverActionButton: "text-zinc-200! hover:text-white! hover:bg-white/5",
+                        userButtonPopoverActionButtonText: "text-zinc-200! !text-zinc-200 hover:text-white! !hover:text-white font-medium",
+                        userButtonPopoverActionButtonIcon: "text-zinc-400",
+                        userButtonPopoverCustomMenuItemButton: "text-zinc-200! hover:text-white! hover:bg-white/5",
+                        userButtonPopoverCustomMenuItemText: "text-zinc-200! !text-zinc-200 hover:text-white! !hover:text-white font-medium",
+                        userButtonPopoverFooter: "border-t border-white/5 bg-zinc-950",
+                        userButtonPopoverFooterText: "text-zinc-500",
+                      }
+                    }}
+                  >
+                    <UserButton.MenuItems>
+                      <UserButton.Link
+                        label="Dashboard"
+                        href="/user/dashboard"
+                        labelIcon={<LayoutDashboard className="size-4 text-zinc-400" />}
+                      />
+                    </UserButton.MenuItems>
+                    <UserButton.UserProfilePage
+                      label="Billing & Subscription"
+                      url="billing"
+                      labelIcon={<CreditCard className="size-4" />}
+                    >
+                      <BillingOptions />
+                    </UserButton.UserProfilePage>
+                  </UserButton>
                 </div>
               </Show>
             </div>
 
+            {/* Mobile User Button */}
+            <Show when="signed-in">
+              <div className="md:hidden flex items-center mr-2">
+                <UserButton
+                  appearance={{
+                    variables: {
+                      colorPrimary: "#ffffff",
+                      colorBackground: "#09090b", // zinc-950
+                      colorText: "#ffffff",
+                      colorTextSecondary: "#a1a1aa", // zinc-400
+                      colorBorder: "#27272a", // zinc-800
+                      colorInputBackground: "#09090b",
+                      colorInputText: "#ffffff",
+                      fontFamily: "var(--font-mona-sans), sans-serif",
+                    } as any,
+                    elements: {
+                      userButtonAvatarBox: "w-8 h-8 rounded-lg border border-white/10",
+                      card: "border border-white/10 shadow-2xl rounded-2xl bg-zinc-950/20 backdrop-blur-3xl",
+                      navbar: "border-r border-white/5 bg-transparent",
+                      navbarButton: "text-zinc-400 hover:text-white hover:bg-white/5 rounded-lg text-xs font-semibold uppercase tracking-wider transition-all",
+                      navbarButtonActive: "text-white bg-white/5 font-black border-l-2 border-white",
+                      pageScrollable: "bg-transparent p-6 sm:p-8",
+                      headerTitle: "text-xl font-black text-white",
+                      headerSubtitle: "text-xs text-zinc-450",
+                      profileSectionTitleText: "text-xs font-bold text-zinc-500 uppercase tracking-wider",
+                      formButtonPrimary: "bg-white hover:bg-zinc-200 text-black text-xs font-bold py-2 rounded-lg transition-all border border-white cursor-pointer",
+                      formButtonReset: "border border-zinc-800 hover:bg-zinc-900 text-zinc-300 text-xs font-bold py-2 rounded-lg transition-all cursor-pointer",
+                      scrollBox: "bg-transparent",
+                      userBox: "bg-zinc-950 text-white",
+                      userBoxTitle: "text-white font-bold",
+                      userBoxSubtitle: "text-zinc-400 font-medium",
+                      userBoxText: "text-white",
+                      userBoxTextContainer: "text-white",
+                      userBoxLabel: "text-white",
+                      userButtonPopoverCard: "bg-zinc-950 border border-white/10 text-white",
+                      userButtonPopoverActions: "bg-transparent",
+                      userButtonPopoverActionButton: "text-zinc-200! hover:text-white! hover:bg-white/5",
+                      userButtonPopoverActionButtonText: "text-zinc-200! !text-zinc-200 hover:text-white! !hover:text-white font-medium",
+                      userButtonPopoverActionButtonIcon: "text-zinc-400",
+                      userButtonPopoverCustomMenuItemButton: "text-zinc-200! hover:text-white! hover:bg-white/5",
+                      userButtonPopoverCustomMenuItemText: "text-zinc-200! !text-zinc-200 hover:text-white! !hover:text-white font-medium",
+                      userButtonPopoverFooter: "border-t border-white/5 bg-zinc-950",
+                      userButtonPopoverFooterText: "text-zinc-500",
+                    }
+                  }}
+                >
+                  <UserButton.MenuItems>
+                    <UserButton.Link
+                      label="Dashboard"
+                      href="/user/dashboard"
+                      labelIcon={<LayoutDashboard className="size-4 text-zinc-450" />}
+                    />
+                  </UserButton.MenuItems>
+                  <UserButton.UserProfilePage
+                    label="Billing & Subscription"
+                    url="billing"
+                    labelIcon={<CreditCard className="size-4" />}
+                  >
+                    <BillingOptions />
+                  </UserButton.UserProfilePage>
+                </UserButton>
+              </div>
+            </Show>
 
             {/* Mobile Menu Toggle */}
             <button
@@ -296,14 +385,24 @@ const Navbar = ({ userId, userName, userRole }: NavbarProps) => {
 
               <div className="border-t border-white/20 pt-4 mt-4 space-y-2">
                 <Show when="signed-out">
-                  <Link
-                    href="/sign-in"
-                    className="group flex items-center space-x-3 w-full px-4 py-3 rounded-lg text-white bg-white/10 hover:bg-white/20 transition-all duration-300"
-                    onClick={() => setIsMobileMenuOpen(false)}
-                  >
-                    <User className="w-5 h-5" />
-                    <span className="font-medium">Sign In</span>
-                  </Link>
+                  <div className="flex flex-col gap-2">
+                    <Link
+                      href={getAuthRedirectUrl("sign-in")}
+                      className="group flex items-center space-x-3 w-full px-4 py-3 rounded-lg text-gray-300 hover:text-white hover:bg-white/10 transition-all duration-300"
+                      onClick={() => setIsMobileMenuOpen(false)}
+                    >
+                      <User className="w-5 h-5" />
+                      <span className="font-medium">Sign In</span>
+                    </Link>
+                    <Link
+                      href={getAuthRedirectUrl("sign-up")}
+                      className="group flex items-center space-x-3 w-full px-4 py-3 rounded-lg text-white bg-white/10 hover:bg-white/20 transition-all duration-300"
+                      onClick={() => setIsMobileMenuOpen(false)}
+                    >
+                      <User className="w-5 h-5" />
+                      <span className="font-medium">Sign Up</span>
+                    </Link>
+                  </div>
                 </Show>
                 <Show when="signed-in">
                   {isAdmin ? (
@@ -318,15 +417,48 @@ const Navbar = ({ userId, userName, userRole }: NavbarProps) => {
                     </Link>
                   ) : (
                     <>
-                      {/* User Panel */}
+                      {/* User Panel Pages */}
                       <Link
-                        href="/user"
+                        href="/user/dashboard"
                         className="group flex items-center space-x-3 w-full px-4 py-3 text-sm text-gray-300 hover:text-white hover:bg-white/10 transition-all duration-200"
                         onClick={() => setIsMobileMenuOpen(false)}
                       >
-                        <User className="w-5 h-5 group-hover:scale-110 transition-transform duration-300" />
-                        <span className="font-medium">User Panel</span>
+                        <LayoutDashboard className="w-5 h-5 text-zinc-500 group-hover:text-white transition-colors" />
+                        <span className="font-medium">Dashboard</span>
                       </Link>
+                      <Link
+                        href="/user/take-interview"
+                        className="group flex items-center space-x-3 w-full px-4 py-3 text-sm text-gray-300 hover:text-white hover:bg-white/10 transition-all duration-200"
+                        onClick={() => setIsMobileMenuOpen(false)}
+                      >
+                        <PlayCircle className="w-5 h-5 text-zinc-500 group-hover:text-white transition-colors" />
+                        <span className="font-medium">Take Interview</span>
+                      </Link>
+                      <Link
+                        href="/user/resume"
+                        className="group flex items-center space-x-3 w-full px-4 py-3 text-sm text-gray-300 hover:text-white hover:bg-white/10 transition-all duration-200"
+                        onClick={() => setIsMobileMenuOpen(false)}
+                      >
+                        <Sparkles className="w-5 h-5 text-zinc-500 group-hover:text-white transition-colors" />
+                        <span className="font-medium">Resume Builder</span>
+                      </Link>
+                      <Link
+                        href="/user/interviews"
+                        className="group flex items-center space-x-3 w-full px-4 py-3 text-sm text-gray-300 hover:text-white hover:bg-white/10 transition-all duration-200"
+                        onClick={() => setIsMobileMenuOpen(false)}
+                      >
+                        <FileText className="w-5 h-5 text-zinc-500 group-hover:text-white transition-colors" />
+                        <span className="font-medium">Your Interviews</span>
+                      </Link>
+                      <Link
+                        href="/user/feedback"
+                        className="group flex items-center space-x-3 w-full px-4 py-3 text-sm text-gray-300 hover:text-white hover:bg-white/10 transition-all duration-200"
+                        onClick={() => setIsMobileMenuOpen(false)}
+                      >
+                        <MessageSquare className="w-5 h-5 text-zinc-500 group-hover:text-white transition-colors" />
+                        <span className="font-medium">Feedback</span>
+                      </Link>
+
 
                       {/* Sign Out */}
                       <button
@@ -334,9 +466,9 @@ const Navbar = ({ userId, userName, userRole }: NavbarProps) => {
                           handleLogout();
                           setIsMobileMenuOpen(false);
                         }}
-                        className="group flex items-center space-x-3 w-full px-4 py-3 text-sm text-gray-300 hover:text-white hover:bg-white/10 transition-all duration-300"
+                        className="group flex items-center space-x-3 w-full px-4 py-3 text-sm text-gray-300 hover:text-white hover:bg-white/10 transition-all duration-300 cursor-pointer"
                       >
-                        <LogOut className="w-5 h-5 group-hover:scale-110 transition-transform duration-300" />
+                        <LogOut className="w-5 h-5 text-zinc-500 group-hover:text-rose-450 transition-colors" />
                         <span className="font-medium">Sign Out</span>
                       </button>
 
@@ -346,9 +478,9 @@ const Navbar = ({ userId, userName, userRole }: NavbarProps) => {
                           handleDeleteAccount();
                           setIsMobileMenuOpen(false);
                         }}
-                        className="group flex items-center space-x-3 w-full px-4 py-3 text-sm text-white hover:text-red-300 hover:bg-red-500/10 transition-all duration-300"
+                        className="group flex items-center space-x-3 w-full px-4 py-3 text-sm text-white hover:text-red-300 hover:bg-red-500/10 transition-all duration-300 cursor-pointer"
                       >
-                        <Trash2 className="w-5 h-5 group-hover:scale-110 transition-transform duration-300 text-white group-hover:text-red-300" />
+                        <Trash2 className="w-5 h-5 text-white group-hover:text-red-300" />
                         <span className="font-medium">Delete Account</span>
                       </button>
                     </>

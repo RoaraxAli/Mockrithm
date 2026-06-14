@@ -100,9 +100,6 @@ const Footer: React.FC<FooterProps> = ({ className = "" }) => {
               <Link href="/user/interviews" className="text-[10.5px] text-zinc-400 hover:text-white font-medium transition-colors">
                 Activity History
               </Link>
-              <Link href="/user/profile" className="text-[10.5px] text-zinc-400 hover:text-white font-medium transition-colors">
-                Profile Settings
-              </Link>
               <Link href="/user/feedback" className="text-[10.5px] text-zinc-400 hover:text-white font-medium transition-colors">
                 Platform Feedback
               </Link>

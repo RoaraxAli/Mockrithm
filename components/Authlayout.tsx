@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useUser } from "@clerk/nextjs";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import Navbar from "@/components/Navbar";
 import PlanSelectionModal from "@/components/PlanSelectionModal";
 
@@ -24,7 +24,10 @@ export default function AuthLayout({
   const [userTier, setUserTier] = useState<"freemium" | "premium" | null>(null);
   const [showPrompt, setShowPrompt] = useState<boolean>(false);
 
+  const [isDocsSubdomain, setIsDocsSubdomain] = useState(false);
+
   const pathname = usePathname();
+  const router = useRouter();
   const hideNavbar =
     (pathname.startsWith("/interview/") && pathname !== "/interview") ||
     pathname.startsWith("/user") ||
@@ -37,7 +40,15 @@ export default function AuthLayout({
       "/reset-password",
     ].includes(pathname);
 
-  const shouldShowNavbar = !hideNavbar;
+  const shouldShowNavbar = !hideNavbar && !isDocsSubdomain;
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      if (window.location.hostname.startsWith("docs.")) {
+        setIsDocsSubdomain(true);
+      }
+    }
+  }, []);
 
   useEffect(() => {
     if (!isLoaded) return;
