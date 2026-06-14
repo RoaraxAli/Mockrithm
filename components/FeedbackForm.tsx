@@ -369,7 +369,7 @@ export default function ContactPage() {
 
                 <Button asChild className="bg-white hover:bg-zinc-200 text-black font-bold text-xs px-6 py-2.5 rounded-full cursor-pointer h-10 transition-all duration-300">
                   <a
-                    href="https://github.com/AHAPRX/interviewer"
+                    href="https://github.com/RoaraxAli/Mockrithm"
                     target="_blank"
                     rel="noopener noreferrer"
                   >
