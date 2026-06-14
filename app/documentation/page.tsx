@@ -707,7 +707,7 @@ STRIPE_WEBHOOK_SECRET=whsec_...`}
       )}
 
       {/* Sidebar Navigation */}
-      <aside className="w-64 border-r border-zinc-900 bg-zinc-950/40 backdrop-blur-md flex flex-col justify-between shrink-0 z-10 pt-24 pb-6 hidden md:flex">
+      <aside className="w-64 border-r border-zinc-900 bg-zinc-950/40 backdrop-blur-md flex flex-col justify-between shrink-0 z-10 pt-8 pb-6 hidden md:flex">
         <div className="px-4 space-y-6">
           
           {/* Mode Switcher */}
@@ -738,7 +738,7 @@ STRIPE_WEBHOOK_SECRET=whsec_...`}
             />
           </div>
           
-          <div className="space-y-6 overflow-y-auto max-h-[calc(100vh-320px)] scrollbar-thin">
+          <div className="space-y-6 overflow-y-auto max-h-[calc(100vh-200px)] scrollbar-thin">
             {categories.map((cat) => {
               const catSections = filteredSections.filter((s) => s.category === cat);
               if (catSections.length === 0) return null;
@@ -777,7 +777,7 @@ STRIPE_WEBHOOK_SECRET=whsec_...`}
       </aside>
 
       {/* Main Panel Content */}
-      <main className="flex-1 overflow-y-auto z-10 pt-24 pb-16 px-6 sm:px-12 max-w-4xl">
+      <main className="flex-1 overflow-y-auto z-10 pt-8 pb-16 px-6 sm:px-12 max-w-4xl">
         <div className="space-y-8">
           
           {/* Mobile Search & Navigation */}
@@ -870,7 +870,7 @@ STRIPE_WEBHOOK_SECRET=whsec_...`}
       </main>
 
       {/* Right Table of Contents (On this page) */}
-      <aside className="w-56 border-l border-zinc-900 bg-zinc-950/20 pt-24 pb-6 px-6 shrink-0 hidden lg:block z-10 text-xs">
+      <aside className="w-56 border-l border-zinc-900 bg-zinc-950/20 pt-8 pb-6 px-6 shrink-0 hidden lg:block z-10 text-xs">
         <div className="space-y-4 font-medium">
           <span className="text-[9px] font-bold text-zinc-550 uppercase tracking-widest block">On This Page</span>
           <div className="space-y-2">
