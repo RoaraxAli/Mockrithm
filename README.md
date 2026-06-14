@@ -2,7 +2,7 @@
 
 Mockrithm is a modern web platform for interactive learning and assessment through realistic mock tests and quizzes. It offers a sleek, premium UI, customizable content, and robust admin controls, empowering both learners and administrators with a seamless experience.
 
-Live: [mockrithm.vercel.app](https://mockrithm.vercel.app)
+Live: [mockrithm.vercel.app](https://mockrithm.me)
 
 ---
 
@@ -43,7 +43,7 @@ Live: [mockrithm.vercel.app](https://mockrithm.vercel.app)
 
 ## 🌐 Live Demo
 
-[https://mockrithm.vercel.app](https://mockrithm.vercel.app)
+[https://mockrithm.vercel.app](https://mockrithm.me)
 
 ---
 
