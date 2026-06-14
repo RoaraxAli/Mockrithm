@@ -137,19 +137,14 @@ const Navbar = ({ userId, userName, userRole }: NavbarProps) => {
               className={`group flex items-center transition-all duration-300 hover:scale-105 ${isScrolled ? "space-x-2" : "space-x-3"}`}
               aria-label="Mockrithm Home"
             >
-              <div className="relative">
-                <div className="absolute inset-0 bg-white rounded-lg blur opacity-10 group-hover:opacity-30 transition-opacity duration-300" />
-                <div className={`relative bg-white/5 rounded-lg border border-white/10 group-hover:border-white/30 transition-all duration-300 backdrop-blur-sm ${isScrolled ? "p-1.5" : "p-2"}`}>
-                  <Image
-                    src="/logo.svg"
-                    alt="Mockrithm Logo"
-                    width={28}
-                    height={28}
-                    priority
-                    className={`transition-all duration-300 ${isScrolled ? "w-5 h-5" : "w-7 h-7"}`}
-                  />
-                </div>
-              </div>
+              <Image
+                src="/logo.svg"
+                alt="Mockrithm Logo"
+                width={32}
+                height={32}
+                priority
+                className={`transition-all duration-300 brightness-0 invert opacity-80 group-hover:opacity-100 ${isScrolled ? "w-7 h-7" : "w-8 h-8"}`}
+              />
               <div className="flex flex-col leading-tight">
                 <span className={`font-black tracking-wider text-white group-hover:text-gray-200 transition-all duration-300 ${isScrolled ? "text-[13px]" : "text-[16px]"}`}>
                   MOCKRITHM
