@@ -22,15 +22,13 @@ const Footer: React.FC<FooterProps> = ({ className = "", isSignedIn = false }) =
           {/* Column 1: Brand Info */}
           <div className="lg:col-span-1 flex flex-col gap-4">
             <Link href="/" className="flex items-center space-x-2.5">
-              <div className="bg-white p-1.5 rounded-lg border border-white/10 shrink-0">
-                <Image
-                  src="/logo.svg"
-                  alt="Mockrithm Logo"
-                  width={18}
-                  height={18}
-                  className="w-4.5 h-4.5"
-                />
-              </div>
+              <Image
+                src="/logo.svg"
+                alt="Mockrithm Logo"
+                width={22}
+                height={22}
+                className="w-5.5 h-5.5 brightness-0 invert opacity-80 shrink-0"
+              />
               <span className="text-[14px] font-black tracking-wider text-white uppercase">
                 Mockrithm
               </span>
