@@ -2,11 +2,13 @@
 
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
+import { useUser } from "@clerk/nextjs";
 import Footer from "./Footer";
 
 const FooterWrapper = () => {
   const pathname = usePathname();
   const [isDocsSubdomain, setIsDocsSubdomain] = useState(false);
+  const { isSignedIn } = useUser();
 
   useEffect(() => {
     if (typeof window !== "undefined") {
@@ -16,9 +18,27 @@ const FooterWrapper = () => {
     }
   }, []);
 
-  if (isDocsSubdomain || pathname !== "/") return null;
+  if (isDocsSubdomain) return null;
+  if (!pathname) return null;
 
-  return <Footer />;
+  // Hide on auth, admin, and active interview pages
+  const hideOnPaths = [
+    "/sign-in",
+    "/sign-up",
+    "/forgot-password",
+    "/reset-password",
+    "/verify-code",
+  ];
+  
+  if (hideOnPaths.some((path) => pathname.startsWith(path))) {
+    return null;
+  }
+  
+  if (pathname.startsWith("/interview") || pathname.startsWith("/admin")) {
+    return null;
+  }
+
+  return <Footer isSignedIn={!!isSignedIn} />;
 };
 
 export default FooterWrapper;

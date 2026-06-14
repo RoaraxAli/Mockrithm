@@ -5,9 +5,10 @@ import { Terminal, Cloud, Shield } from "lucide-react"
 
 interface FooterProps {
   className?: string
+  isSignedIn?: boolean
 }
 
-const Footer: React.FC<FooterProps> = ({ className = "" }) => {
+const Footer: React.FC<FooterProps> = ({ className = "", isSignedIn = false }) => {
   return (
     <footer className={`w-full bg-black text-white px-4 pb-8 pt-4 z-10 relative font-mona-sans ${className}`}>
       <div className="max-w-7xl mx-auto border border-white/10 bg-zinc-950/40 rounded-2xl p-8 sm:p-10 relative overflow-hidden backdrop-blur-md">
@@ -52,80 +53,146 @@ const Footer: React.FC<FooterProps> = ({ className = "" }) => {
             </span>
           </div>
 
-          {/* Column 2: Platform */}
-          <div className="flex flex-col gap-3">
-            <h4 className="text-[10px] font-black uppercase tracking-widest text-white border-b border-white/5 pb-1">
-              Platform
-            </h4>
-            <div className="flex flex-col gap-2">
-              <Link href="/" className="text-[10.5px] text-zinc-400 hover:text-white font-medium transition-colors">
-                Home
-              </Link>
-              <Link href="/about" className="text-[10.5px] text-zinc-400 hover:text-white font-medium transition-colors">
-                About Us
-              </Link>
-              <Link href="/contact" className="text-[10.5px] text-zinc-400 hover:text-white font-medium transition-colors">
-                Contact & Support
-              </Link>
-            </div>
-          </div>
+          {!isSignedIn ? (
+            <>
+              {/* Pre-login Column 2: Platform */}
+              <div className="flex flex-col gap-3">
+                <h4 className="text-[10px] font-black uppercase tracking-widest text-white border-b border-white/5 pb-1">
+                  Platform
+                </h4>
+                <div className="flex flex-col gap-2">
+                  <Link href="/" className="text-[10.5px] text-zinc-400 hover:text-white font-medium transition-colors">
+                    Home
+                  </Link>
+                  <Link href="/about" className="text-[10.5px] text-zinc-400 hover:text-white font-medium transition-colors">
+                    About Us
+                  </Link>
+                  <Link href="/contact" className="text-[10.5px] text-zinc-400 hover:text-white font-medium transition-colors">
+                    Contact & Support
+                  </Link>
+                  <Link href="#" className="text-[10.5px] text-zinc-400 hover:text-white font-medium transition-colors">
+                    Resources
+                  </Link>
+                </div>
+              </div>
 
-          {/* Column 3: Features */}
-          <div className="flex flex-col gap-3">
-            <h4 className="text-[10px] font-black uppercase tracking-widest text-white border-b border-white/5 pb-1">
-              Features
-            </h4>
-            <div className="flex flex-col gap-2">
-              <Link href="/user/take-interview" className="text-[10.5px] text-zinc-400 hover:text-white font-medium transition-colors">
-                Mock Interviews
-              </Link>
-              <Link href="/user/resume" className="text-[10.5px] text-zinc-400 hover:text-white font-medium transition-colors">
-                Resume Builder
-              </Link>
-              <Link href="/user/resume" className="text-[10.5px] text-zinc-400 hover:text-white font-medium transition-colors">
-                Resume Analyzer
-              </Link>
-            </div>
-          </div>
+              {/* Pre-login Column 3: Product */}
+              <div className="flex flex-col gap-3">
+                <h4 className="text-[10px] font-black uppercase tracking-widest text-white border-b border-white/5 pb-1">
+                  Product
+                </h4>
+                <div className="flex flex-col gap-2">
+                  <Link href="/#features" className="text-[10.5px] text-zinc-400 hover:text-white font-medium transition-colors">
+                    Features
+                  </Link>
+                  <Link href="/#pricing" className="text-[10.5px] text-zinc-400 hover:text-white font-medium transition-colors">
+                    Pricing
+                  </Link>
+                  <Link href="https://docs.mockrithm.me" className="text-[10.5px] text-zinc-400 hover:text-white font-medium transition-colors">
+                    Documentation
+                  </Link>
+                </div>
+              </div>
 
-          {/* Column 4: Account */}
-          <div className="flex flex-col gap-3">
-            <h4 className="text-[10px] font-black uppercase tracking-widest text-white border-b border-white/5 pb-1">
-              Account
-            </h4>
-            <div className="flex flex-col gap-2">
-              <Link href="/user/dashboard" className="text-[10.5px] text-zinc-400 hover:text-white font-medium transition-colors">
-                Dashboard
-              </Link>
-              <Link href="/user/interviews" className="text-[10.5px] text-zinc-400 hover:text-white font-medium transition-colors">
-                Activity History
-              </Link>
-              <Link href="/user/feedback" className="text-[10.5px] text-zinc-400 hover:text-white font-medium transition-colors">
-                Platform Feedback
-              </Link>
-            </div>
-          </div>
+              {/* Pre-login Column 4: Legal */}
+              <div className="flex flex-col gap-3 md:col-span-2 lg:col-span-2">
+                <h4 className="text-[10px] font-black uppercase tracking-widest text-white border-b border-white/5 pb-1">
+                  Legal
+                </h4>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                  <Link href="/privacy-policy" className="text-[10.5px] text-zinc-400 hover:text-white font-medium transition-colors">
+                    Privacy Policy
+                  </Link>
+                  <Link href="/terms" className="text-[10.5px] text-zinc-400 hover:text-white font-medium transition-colors">
+                    Terms & Conditions
+                  </Link>
+                  <Link href="/refund-policy" className="text-[10.5px] text-zinc-400 hover:text-white font-medium transition-colors">
+                    Refund Policy
+                  </Link>
+                  <Link href="/ownership-statement" className="text-[10.5px] text-zinc-400 hover:text-white font-medium transition-colors">
+                    Ownership Statement
+                  </Link>
+                </div>
+              </div>
+            </>
+          ) : (
+            <>
+              {/* Post-login Column 2: Platform */}
+              <div className="flex flex-col gap-3">
+                <h4 className="text-[10px] font-black uppercase tracking-widest text-white border-b border-white/5 pb-1">
+                  Platform
+                </h4>
+                <div className="flex flex-col gap-2">
+                  <Link href="/" className="text-[10.5px] text-zinc-400 hover:text-white font-medium transition-colors">
+                    Home
+                  </Link>
+                  <Link href="/about" className="text-[10.5px] text-zinc-400 hover:text-white font-medium transition-colors">
+                    About Us
+                  </Link>
+                  <Link href="/contact" className="text-[10.5px] text-zinc-400 hover:text-white font-medium transition-colors">
+                    Contact & Support
+                  </Link>
+                </div>
+              </div>
 
-          {/* Column 5: Legal */}
-          <div className="flex flex-col gap-3">
-            <h4 className="text-[10px] font-black uppercase tracking-widest text-white border-b border-white/5 pb-1">
-              Legal
-            </h4>
-            <div className="flex flex-col gap-2">
-              <Link href="/privacy-policy" className="text-[10.5px] text-zinc-400 hover:text-white font-medium transition-colors">
-                Privacy Policy
-              </Link>
-              <Link href="/terms" className="text-[10.5px] text-zinc-400 hover:text-white font-medium transition-colors">
-                Terms & Conditions
-              </Link>
-              <Link href="/refund-policy" className="text-[10.5px] text-zinc-400 hover:text-white font-medium transition-colors">
-                Refund Policy
-              </Link>
-              <Link href="/ownership-statement" className="text-[10.5px] text-zinc-400 hover:text-white font-medium transition-colors">
-                Ownership Statement
-              </Link>
-            </div>
-          </div>
+              {/* Post-login Column 3: Features */}
+              <div className="flex flex-col gap-3">
+                <h4 className="text-[10px] font-black uppercase tracking-widest text-white border-b border-white/5 pb-1">
+                  Features
+                </h4>
+                <div className="flex flex-col gap-2">
+                  <Link href="/user/take-interview" className="text-[10.5px] text-zinc-400 hover:text-white font-medium transition-colors">
+                    Mock Interviews
+                  </Link>
+                  <Link href="/user/resume" className="text-[10.5px] text-zinc-400 hover:text-white font-medium transition-colors">
+                    Resume Builder
+                  </Link>
+                  <Link href="/user/resume" className="text-[10.5px] text-zinc-400 hover:text-white font-medium transition-colors">
+                    Resume Analyzer
+                  </Link>
+                </div>
+              </div>
+
+              {/* Post-login Column 4: Account */}
+              <div className="flex flex-col gap-3">
+                <h4 className="text-[10px] font-black uppercase tracking-widest text-white border-b border-white/5 pb-1">
+                  Account
+                </h4>
+                <div className="flex flex-col gap-2">
+                  <Link href="/user/dashboard" className="text-[10.5px] text-zinc-400 hover:text-white font-medium transition-colors">
+                    Dashboard
+                  </Link>
+                  <Link href="/user/interviews" className="text-[10.5px] text-zinc-400 hover:text-white font-medium transition-colors">
+                    Activity History
+                  </Link>
+                  <Link href="/user/feedback" className="text-[10.5px] text-zinc-400 hover:text-white font-medium transition-colors">
+                    Platform Feedback
+                  </Link>
+                </div>
+              </div>
+
+              {/* Post-login Column 5: Legal */}
+              <div className="flex flex-col gap-3">
+                <h4 className="text-[10px] font-black uppercase tracking-widest text-white border-b border-white/5 pb-1">
+                  Legal
+                </h4>
+                <div className="flex flex-col gap-2">
+                  <Link href="/privacy-policy" className="text-[10.5px] text-zinc-400 hover:text-white font-medium transition-colors">
+                    Privacy Policy
+                  </Link>
+                  <Link href="/terms" className="text-[10.5px] text-zinc-400 hover:text-white font-medium transition-colors">
+                    Terms & Conditions
+                  </Link>
+                  <Link href="/refund-policy" className="text-[10.5px] text-zinc-400 hover:text-white font-medium transition-colors">
+                    Refund Policy
+                  </Link>
+                  <Link href="/ownership-statement" className="text-[10.5px] text-zinc-400 hover:text-white font-medium transition-colors">
+                    Ownership Statement
+                  </Link>
+                </div>
+              </div>
+            </>
+          )}
 
         </div>
 
