@@ -2,44 +2,39 @@
 
 import { useEffect, useState } from "react";
 import { gsap } from "gsap";
-import { Bell, Search, LogOut, Globe } from "lucide-react";
+import { Bell, Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { auth, db } from "@/firebase/client";
+import { useUser, useClerk } from "@clerk/nextjs";
 import { useRouter } from "next/navigation";
-import { doc, getDoc } from "firebase/firestore";
 
 export function AdminNavbar() {
+  const { isLoaded, isSignedIn, user } = useUser();
+  const { signOut: clerkSignOut } = useClerk();
   const [adminName, setAdminName] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
   const router = useRouter();
 
   // Fetch admin name from Firestore
   useEffect(() => {
-    const fetchAdminName = async () => {
-      const user = auth.currentUser;
-      if (!user) return;
-
-      try {
-        const docRef = doc(db, "users", user.uid);
-        const snap = await getDoc(docRef);
-        if (snap.exists()) {
-          const data = snap.data();
-          setAdminName(data.name || "Admin");
+    if (isLoaded && isSignedIn && user) {
+      const setupListener = async () => {
+        try {
+          const { getUserProfile } = await import("@/lib/actions/auth.action");
+          const result = await getUserProfile(user.id);
+          if (result && result.success) {
+            setAdminName(result.name || "Admin");
+          } else {
+            setAdminName(user.fullName || user.firstName || "Admin");
+          }
+        } catch (error) {
+          console.error("Failed to fetch admin name:", error);
+          setAdminName(user.fullName || user.firstName || "Admin");
         }
-      } catch (error) {
-        console.error("Failed to fetch admin name:", error);
-      }
-    };
-    fetchAdminName();
-  }, []);
+      };
+      setupListener();
+    }
+  }, [isLoaded, isSignedIn, user]);
 
   // GSAP animation
   useEffect(() => {
@@ -52,7 +47,7 @@ export function AdminNavbar() {
 
   const handleLogout = async () => {
     try {
-      await auth.signOut();
+      await clerkSignOut();
       router.push("/sign-in");
     } catch (error) {
       console.error("Logout failed:", error);

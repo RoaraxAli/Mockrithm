@@ -6,6 +6,9 @@ export interface User {
   email: string
   role: string
   resumeLink?: string
+  tier?: "freemium" | "premium" | "pro" | null
+  billingInterval?: "monthly" | "annual" | "lifetime" | null
+  imageUrl?: string
 }
 
 export interface Interview {
@@ -15,7 +18,7 @@ export interface Interview {
   level: string
   type: string
   finalized: boolean
-  createdAt: Date
+  createdAt: Date | string
   questions?: {
     id?: string
     question: string
@@ -38,5 +41,5 @@ export interface Feedback {
     maxScore: number
   }[]
   finalAssessment?: string
-  createdAt: Date
+  createdAt: Date | string
 }

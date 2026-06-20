@@ -51,8 +51,12 @@ interface User {
   name: string;
   email: string;
   id: string;
+  role?: string;
   resumeLink?: string;
   profileURL?: string;
+  imageUrl?: string;
+  tier?: "freemium" | "premium" | "pro";
+  billingInterval?: "monthly" | "annual" | "lifetime";
 }
 
 interface InterviewCardProps {
@@ -99,6 +103,8 @@ interface GetLatestInterviewsParams {
 interface SignInParams {
   email: string;
   idToken: string;
+  uid?: string;
+  displayName?: string;
 }
 
 interface SignUpParams {

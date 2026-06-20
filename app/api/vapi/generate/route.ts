@@ -3,9 +3,18 @@ import { google } from "@ai-sdk/google";
 
 import { db } from "@/firebase/admin";
 import { getRandomInterviewCover } from "@/lib/utils";
+import { getCurrentUser } from "@/lib/actions/auth.action";
 
 export async function POST(request: Request) {
   const { type, role, level, techstack, amount, userid } = await request.json();
+
+  const currentUser = await getCurrentUser();
+  if (!currentUser || currentUser.id !== userid) {
+    return Response.json(
+      { success: false, error: "Forbidden: Tenant isolation violation." },
+      { status: 403 }
+    );
+  }
 
   try {
     const { text: questions } = await generateText({

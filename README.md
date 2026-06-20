@@ -1,40 +1,49 @@
 # Mockrithm
 
-Mockrithm is a dynamic web platform designed for interactive learning and assessment through realistic mock tests and quizzes. With a sleek, modern UI, customizable content, and robust admin controls, Mockrithm empowers both learners and administrators with a seamless experience.
+Mockrithm is a modern web platform for interactive learning and assessment through realistic mock tests and quizzes. It offers a sleek, premium UI, customizable content, and robust admin controls, empowering both learners and administrators with a seamless experience.
 
-Live: [mockrithm.vercel.app](https://mockrithm.vercel.app)
+Live: [mockrithm.vercel.app](https://mockrithm.me)
 
 ---
 
 ## 🚀 Features
 
-- 🔐 **Google Authentication** – Secure sign-in/signup using Google accounts for fast and safe access.
-- 🧑‍💼 **Admin Panel** – Powerful dashboard for admins to manage users, create/edit quizzes, and view analytics.
-- 👤 **User Panel** – Personalized dashboard for users to attempt quizzes, track progress, and view results.
-- 📊 **Real-Time Analytics** – Get instant feedback and performance stats.
-- 🌙 **Dark/Light Theme** – Switch between beautiful themes for your comfort.
-- 📱 **Responsive Design** – Optimized for all devices, from desktop to mobile.
-- ⚡ **Instant Feedback** – Immediate results after each quiz attempt.
-- 🛡️ **Role-Based Access Control** – Admin and user privileges are clearly separated.
-- ...and much more!
+- **Google Authentication** – Secure sign‑in/signup using Google accounts.
+- **Admin Panel** – Dashboard for admins to manage users, create/edit quizzes, and view analytics.
+- **User Panel** – Personalized dashboard for users to attempt quizzes, track progress, and view results.
+- **Real‑Time Analytics** – Instant feedback and performance stats.
+- **Dark/Light Theme** – Beautiful, animated theme switcher.
+- **Responsive Design** – Optimized for desktop, tablet, and mobile.
+- **Instant Feedback** – Immediate results after each quiz attempt.
+- **Role‑Based Access Control** – Separate admin and user privileges.
+- **AI‑Powered Quiz Generation** – Uses Google Generative AI to auto‑generate quiz questions (powered by `@ai-sdk/google`).
+- **Email Notifications** – Automated emails via Nodemailer and Resend integration.
+- **Animations & Motion** – Smooth UI with Framer Motion and GSAP.
+- **Radix UI Components** – Accessible UI primitives for dialogs, menus, dropdowns, etc.
 
 ---
 
 ## 🛠️ Tech Stack
 
-- **Frontend:** TypeScript, React (or Next.js)
-- **Authentication:** Google OAuth (Firebase Auth or NextAuth.js)
-- **State Management:** Redux / Context API (customize as needed)
-- **Styling:** Tailwind CSS / Styled Components / CSS Modules
-- **Backend/API:** Node.js, Express, Firebase (if used)
-- **Database:** Firestore / MongoDB / SQL (specify which)
-- **Deployment:** Vercel
+- **Framework**: Next.js 16 (React 19) with TypeScript
+- **State Management**: React Hook Form + Zod for validation, Context API for global state
+- **Styling**: Tailwind CSS 4 + Tailwind‑merge + Tailwindcss‑animate
+- **UI Primitives**: Radix UI (avatar, dialog, dropdown‑menu, label, progress, scroll‑area, select, separator, slot, tabs, tooltip)
+- **Animations**: Framer Motion, GSAP
+- **Authentication**: Firebase Auth (Google provider)
+- **Database**: Firestore (via Firebase Admin SDK)
+- **Backend**: Node.js (v18+) serverless functions in Next.js, Firebase Admin for privileged operations
+- **Email**: Nodemailer + Resend
+- **AI Integration**: `@ai-sdk/google` (Google Generative AI) for dynamic content generation
+- **Analytics**: Vercel Analytics & custom real‑time stats
+- **Deployment**: Vercel (auto‑deployment from GitHub)
+- **Testing / Linting**: ESLint, TypeScript strict mode, Prettier
 
 ---
 
 ## 🌐 Live Demo
 
-[https://mockrithm.vercel.app](https://mockrithm.vercel.app)
+[https://mockrithm.vercel.app](https://mockrithm.me)
 
 ---
 
@@ -43,7 +52,7 @@ Live: [mockrithm.vercel.app](https://mockrithm.vercel.app)
 ### Prerequisites
 
 - Node.js (v18+)
-- npm or yarn
+- npm (or yarn)
 
 ### Installation
 
@@ -60,18 +69,29 @@ Then open [http://localhost:3000](http://localhost:3000) in your browser.
 
 ## 🔧 Configuration
 
-- Set up your Google OAuth credentials (Client ID & Secret) and add them to your environment variables:
-  ```
-  NEXT_PUBLIC_GOOGLE_CLIENT_ID=your_google_client_id
-  NEXT_PUBLIC_GOOGLE_CLIENT_SECRET=your_google_client_secret
-  ```
-- Configure your Firebase/Database if used.
+Create a `.env` file (or copy `.env.example` if present) and set the following variables:
+
+```env
+NEXT_PUBLIC_GOOGLE_CLIENT_ID=your_google_client_id
+NEXT_PUBLIC_GOOGLE_CLIENT_SECRET=your_google_client_secret
+FIREBASE_PROJECT_ID=your_firebase_project_id
+FIREBASE_PRIVATE_KEY="-----BEGIN PRIVATE KEY-----...-----END PRIVATE KEY-----"
+FIREBASE_CLIENT_EMAIL=your_service_account_email
+GROQ_API_KEY=your_groq_api_key
+GROQ_LLM_MODEL=llama-3.3-70b-versatile
+SMTP_EMAIL=your_smtp_email
+SMTP_PASSWORD="your_smtp_password"
+NEXT_PUBLIC_VAPI_WEB_TOKEN=your_vapi_token
+NEXT_PUBLIC_VAPI_WORKFLOW_ID=your_vapi_workflow_id
+NEXT_PUBLIC_MAINTENANCE=false
+```
+These variables enable Google OAuth, Firebase admin access, AI content generation, and email notifications.
 
 ---
 
 ## 🤝 Contributing
 
-Contributions are welcome! Fork this repository and submit a pull request with your proposed changes.
+Contributions are welcome! Fork the repository, create a feature branch, and submit a pull request with a clear description of your changes.
 
 ---
 

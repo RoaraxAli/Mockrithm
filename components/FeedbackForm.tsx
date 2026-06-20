@@ -5,10 +5,10 @@ import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { addDoc, collection, getDoc, doc } from "firebase/firestore";
-import { onAuthStateChanged } from "firebase/auth";
+import { useUser } from "@clerk/nextjs";
 import { toast } from "sonner";
 import { motion } from "framer-motion";
-import { auth, db } from "@/firebase/client";
+import { db } from "@/firebase/client";
 import { Button } from "@/components/ui/button";
 import {
   Form,
@@ -27,7 +27,8 @@ import {
 } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Send, User, Mail, MessageSquare, Phone, Clock, Github } from "lucide-react";
+import Link from "next/link";
+import { Send, User, Mail, MessageSquare, Phone, Clock, Github, ArrowLeft } from "lucide-react";
 
 // Schema
 const formSchema = z.object({
@@ -43,6 +44,7 @@ const formSchema = z.object({
 });
 
 export default function ContactPage() {
+  const { isLoaded, isSignedIn, user } = useUser();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -54,24 +56,15 @@ export default function ContactPage() {
     },
   });
 
-  // Load Firebase user
+  // Load Clerk user info
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
-      if (firebaseUser) {
-        const userRef = doc(db, "users", firebaseUser.uid);
-        const userSnap = await getDoc(userRef);
-
-        const nameFromDb = userSnap.exists()
-          ? userSnap.data().name
-          : "Anonymous";
-
-        form.setValue("name", nameFromDb);
-        form.setValue("email", firebaseUser.email || "");
-      }
-    });
-
-    return () => unsubscribe();
-  }, [form]);
+    if (!isLoaded) return;
+    if (isSignedIn && user) {
+      const name = user.fullName || user.firstName || "User";
+      form.setValue("name", name);
+      form.setValue("email", user.primaryEmailAddress?.emailAddress || "");
+    }
+  }, [isLoaded, isSignedIn, user, form]);
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     setIsSubmitting(true);
@@ -91,7 +84,7 @@ export default function ContactPage() {
   };
 
   return (
-    <div className="min-h-screen bg-black text-white relative overflow-hidden font-mona-sans">
+    <div className="min-h-screen bg-black text-white relative overflow-hidden font-mona-sans pt-16">
       {/* Background Pattern */}
       <div className="absolute inset-0 opacity-20 pointer-events-none z-0">
         <div className="absolute inset-0 premium-grid-dot" />
@@ -103,7 +96,7 @@ export default function ContactPage() {
         initial={{ opacity: 0, y: 30 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.8 }}
-        className="relative z-10 pt-24 pb-16 px-6 overflow-hidden border-b border-zinc-900 bg-zinc-950/10"
+        className="relative z-10 pt-14 pb-16 px-6 overflow-hidden border-b border-zinc-900 bg-zinc-950/10"
       >
         <div className="max-w-6xl mx-auto text-center">
           {/* Status Badge */}
@@ -238,7 +231,6 @@ export default function ContactPage() {
                           <FormControl>
                             <Input
                               {...field}
-                              readOnly
                               className="bg-zinc-950/60 border-zinc-800 text-white placeholder:text-zinc-700 h-12 rounded-lg focus:border-white/30 focus:ring-1 focus:ring-white/10 transition-all duration-200"
                             />
                           </FormControl>
@@ -258,7 +250,6 @@ export default function ContactPage() {
                           <FormControl>
                             <Input
                               {...field}
-                              readOnly
                               className="bg-zinc-950/60 border-zinc-800 text-white placeholder:text-zinc-700 h-12 rounded-lg focus:border-white/30 focus:ring-1 focus:ring-white/10 transition-all duration-200"
                             />
                           </FormControl>
@@ -378,7 +369,7 @@ export default function ContactPage() {
 
                 <Button asChild className="bg-white hover:bg-zinc-200 text-black font-bold text-xs px-6 py-2.5 rounded-full cursor-pointer h-10 transition-all duration-300">
                   <a
-                    href="https://github.com/AHAPRX/interviewer"
+                    href="https://github.com/RoaraxAli/Mockrithm"
                     target="_blank"
                     rel="noopener noreferrer"
                   >

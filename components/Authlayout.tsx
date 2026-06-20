@@ -1,89 +1,120 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { onAuthStateChanged } from "firebase/auth";
-import { doc, getDoc } from "firebase/firestore";
-import { usePathname } from "next/navigation";
-
-import { auth, db } from "@/firebase/client";
+import { useUser } from "@clerk/nextjs";
+import { usePathname, useRouter } from "next/navigation";
 import Navbar from "@/components/Navbar";
+import PlanSelectionModal from "@/components/PlanSelectionModal";
 
 export default function AuthLayout({ 
   children,
   initialUserId,
-  initialUserName
+  initialUserName,
+  initialUserRole
 }: { 
   children: React.ReactNode;
   initialUserId?: string | null;
   initialUserName?: string;
+  initialUserRole?: string;
 }) {
+  const { isLoaded, isSignedIn, user } = useUser();
   const [userId, setUserId] = useState<string | null>(initialUserId || null);
   const [userName, setUserName] = useState<string>(initialUserName || "");
+  const [userRole, setUserRole] = useState<string>(initialUserRole || "User");
+  const [userTier, setUserTier] = useState<"freemium" | "premium" | null>(null);
+  const [showPrompt, setShowPrompt] = useState<boolean>(false);
+
+  const [isDocsSubdomain, setIsDocsSubdomain] = useState(false);
 
   const pathname = usePathname();
-const hideNavbar =
-  (pathname.startsWith("/interview/") && pathname !== "/interview") ||
-  pathname.startsWith("/user") ||
-  pathname.startsWith("/admin") ||
-  [
-    "/sign-in",
-    "/sign-up",
-    "/forgot-password",
-    "/verify-code",
-    "/reset-password",
-  ].includes(pathname);
+  const router = useRouter();
+  const hideNavbar =
+    (pathname.startsWith("/interview/") && pathname !== "/interview") ||
+    pathname.startsWith("/user") ||
+    pathname.startsWith("/admin") ||
+    [
+      "/sign-in",
+      "/sign-up",
+      "/forgot-password",
+      "/verify-code",
+      "/reset-password",
+    ].includes(pathname);
 
-// If we have an initialUserId (from server) or a userId (from client), use it.
-// Even if we are guests, we might want to show the Navbar on some pages.
-const shouldShowNavbar = !hideNavbar;
-
+  const shouldShowNavbar = !hideNavbar && !isDocsSubdomain;
 
   useEffect(() => {
-    console.log("AuthLayout mounted. Initial Props:", { initialUserId, initialUserName });
-    
-    const unsubscribe = onAuthStateChanged(auth, async (user) => {
-      if (user) {
-        console.log("Firebase client auth detected user:", user.uid);
-        setUserId(user.uid);
+    if (typeof window !== "undefined") {
+      if (window.location.hostname.startsWith("docs.")) {
+        setIsDocsSubdomain(true);
+      }
+    }
+  }, []);
 
+  useEffect(() => {
+    if (!isLoaded) return;
+
+    if (isSignedIn && user) {
+      setUserId(user.id);
+      
+      const fetchProfile = async () => {
         try {
-          const userDocRef = doc(db, "users", user.uid);
-          const userDoc = await getDoc(userDocRef);
+          const { getUserProfile } = await import("@/lib/actions/auth.action");
+          const result = await getUserProfile(user.id);
 
-          if (userDoc.exists()) {
-            const userData = userDoc.data();
-            setUserName(userData.name || "User");
+          if (result && result.success) {
+            setUserName(result.name || user.fullName || user.firstName || "User");
+            setUserRole(result.role || "User");
+            setUserTier(result.tier as any);
+            
+            // Check if user has been prompted in the current session
+            const sessionPrompt = sessionStorage.getItem(`plan_prompt_completed_${user.id}`);
+            const isPaymentPage = 
+              pathname.startsWith("/payment/success") || 
+              pathname.startsWith("/payment/cancel") || 
+              pathname.startsWith("/api/payment");
+
+            if (sessionPrompt !== "true" && !isPaymentPage) {
+              setShowPrompt(true);
+            }
           } else {
-            setUserName("User");
+            setUserName(user.fullName || user.firstName || "User");
+            setUserRole("User");
           }
         } catch (error) {
-          console.error("Failed to fetch user name:", error);
-          setUserName("User");
+          console.error("Failed to fetch user profile:", error);
+          setUserName(user.fullName || user.firstName || "User");
+          setUserRole("User");
         }
-      } else {
-        console.log("Firebase client auth detected: No User");
-        // Only clear if we don't have an initial server user.
-        // This prevents the flickering Navbar issue on refresh.
-        if (!initialUserId) {
-          setUserId(null);
-          setUserName("");
-        } else {
-          console.log("Retaining server-side user session:", initialUserId);
-        }
+      };
+
+      fetchProfile();
+    } else {
+      if (!initialUserId) {
+        setUserId(null);
+        setUserName("");
+        setUserRole("User");
+        setUserTier(null);
+        setShowPrompt(false);
       }
-    });
-
-    return () => unsubscribe();
-  }, [initialUserId]);
-
+    }
+  }, [isLoaded, isSignedIn, user, initialUserId, pathname]);
 
   return (
     <>
       {shouldShowNavbar && (
-        <Navbar userId={userId!} userName={userName || "User"} />
+        <Navbar userId={userId!} userName={userName || "User"} userRole={userRole} />
       )}
       {children}
+      {showPrompt && userId && (
+        <PlanSelectionModal
+          userId={userId}
+          userTier={userTier}
+          onCompleted={() => {
+            sessionStorage.setItem(`plan_prompt_completed_${userId}`, "true");
+            setShowPrompt(false);
+          }}
+        />
+      )}
     </>
   );
 }
-

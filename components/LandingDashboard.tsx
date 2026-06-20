@@ -8,10 +8,8 @@ import { Sparkles, Terminal, Play, ShieldAlert, Cpu, Activity, User, BookOpen } 
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import InterviewCard from "./InterviewCard";
-import { auth, db } from "@/firebase/client";
-import { onAuthStateChanged } from "firebase/auth";
-import { doc, getDoc } from "firebase/firestore";
 import SessionTracker from "@/components/SessionTracker";
+import { useUser } from "@clerk/nextjs";
 
 interface LandingDashboardProps {
   user?: any;
@@ -48,44 +46,26 @@ export default function LandingDashboard({
   const [userInterviews, setUserInterviews] = useState<any[]>(initialUserInterviews);
   const [allInterviews, setAllInterviews] = useState<any[]>(initialAllInterviews);
   const [loadingData, setLoadingData] = useState(true);
+  const { isLoaded, isSignedIn, user: clerkUser } = useUser();
   const [clientUser, setClientUser] = useState<any>(user || null);
   const [authResolved, setAuthResolved] = useState(false);
 
   // 1. Subscribe to Client Auth State
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
-      if (firebaseUser) {
-        try {
-          const userDocRef = doc(db, "users", firebaseUser.uid);
-          const userDoc = await getDoc(userDocRef);
-          if (userDoc.exists()) {
-            setClientUser({
-              id: firebaseUser.uid,
-              ...userDoc.data()
-            });
-          } else {
-            setClientUser({
-              id: firebaseUser.uid,
-              email: firebaseUser.email || "",
-              name: firebaseUser.displayName || "User"
-            });
-          }
-        } catch (error) {
-          console.error("Failed to fetch user doc in LandingDashboard:", error);
-          setClientUser({
-            id: firebaseUser.uid,
-            email: firebaseUser.email || "",
-            name: firebaseUser.displayName || "User"
-          });
-        }
-      } else {
-        setClientUser(null);
-      }
-      setAuthResolved(true);
-    });
+    if (!isLoaded) return;
 
-    return () => unsubscribe();
-  }, []);
+    if (isSignedIn && clerkUser) {
+      setClientUser({
+        id: clerkUser.id,
+        name: clerkUser.fullName || clerkUser.firstName || "User",
+        email: clerkUser.primaryEmailAddress?.emailAddress || "",
+        role: user?.role || "User",
+      });
+    } else {
+      setClientUser(null);
+    }
+    setAuthResolved(true);
+  }, [isLoaded, isSignedIn, clerkUser, user]);
 
   // 2. Load Dashboard Data
   useEffect(() => {
@@ -94,31 +74,31 @@ export default function LandingDashboard({
         setLoadingData(true);
         const userId = clientUser?.id || null;
 
+        // Fetch user feedback in a single batched query if user is logged in
+        let feedbackMap = new Map();
+        if (userId) {
+          const { getFeedbacksForUser } = await import("@/lib/actions/general.action");
+          const userFeedbacks = await getFeedbacksForUser(userId) || [];
+          feedbackMap = new Map(userFeedbacks.map((f) => [f.interviewId, f]));
+        }
+
         const fetchUserInterviewsAction = async () => {
           if (!userId) return [];
-          const { getInterviewsByUserId, getFeedbackByInterviewId } = await import("@/lib/actions/general.action");
+          const { getInterviewsByUserId } = await import("@/lib/actions/general.action");
           const rawUserInterviews = await getInterviewsByUserId(userId) || [];
-          const userInterviewsWithFeedback = await Promise.all(
-            rawUserInterviews.map(async (interview) => {
-              const feedback = await getFeedbackByInterviewId({ interviewId: interview.id, userId });
-              return { ...interview, feedback };
-            })
-          );
-          return userInterviewsWithFeedback;
+          return rawUserInterviews.map((interview) => ({
+            ...interview,
+            feedback: feedbackMap.get(interview.id) || null,
+          }));
         };
 
         const fetchLatestInterviewsAction = async () => {
-          const { getLatestInterviews, getFeedbackByInterviewId } = await import("@/lib/actions/general.action");
+          const { getLatestInterviews } = await import("@/lib/actions/general.action");
           const rawAllInterviews = await getLatestInterviews({ userId: userId || "" }) || [];
-          const allInterviewsWithFeedback = await Promise.all(
-            rawAllInterviews.map(async (interview) => {
-              const feedback = userId 
-                ? await getFeedbackByInterviewId({ interviewId: interview.id, userId })
-                : null;
-              return { ...interview, feedback };
-            })
-          );
-          return allInterviewsWithFeedback;
+          return rawAllInterviews.map((interview) => ({
+            ...interview,
+            feedback: feedbackMap.get(interview.id) || null,
+          }));
         };
 
         const [userInterviewsData, allInterviewsData] = await Promise.all([

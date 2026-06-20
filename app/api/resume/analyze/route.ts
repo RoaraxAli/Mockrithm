@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { generateObject } from "ai";
 import { google } from "@ai-sdk/google";
 import { z } from "zod";
+import { getCurrentUser } from "@/lib/actions/auth.action";
 
 const analysisSchema = z.object({
   atsScore: z.number().min(0).max(100),
@@ -18,6 +19,11 @@ const analysisSchema = z.object({
 
 export async function POST(request: Request) {
   try {
+    const user = await getCurrentUser();
+    if (!user) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
     const { resumeText, jobDescription } = await request.json();
 
     if (!resumeText || !jobDescription) {

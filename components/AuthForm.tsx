@@ -19,6 +19,7 @@ import { Button } from "@/components/ui/button";
 import { Eye, EyeOff, Loader2 } from "lucide-react";
 
 import { signIn, signUp, checkRateLimit, recordLoginAttempt, checkEmailExists } from "@/lib/actions/auth.action";
+import { hasUploadedResume } from "@/lib/actions/resume.action";
 import FormField from "./FormField";
 
 const authFormSchema = (type: FormType) => {
@@ -68,6 +69,9 @@ const AuthForm = ({ type }: { type: FormType }) => {
           password
         );
 
+        // Sign out immediately so they have to manually log in
+        await auth.signOut();
+
         const result = await signUp({
           uid: userCredential.user.uid,
           name: name!,
@@ -112,22 +116,33 @@ const AuthForm = ({ type }: { type: FormType }) => {
           return;
         }
 
-        await signIn({
+        const signInResult = await signIn({
           email,
           idToken,
+          uid: userCredential.user.uid,
+          displayName: userCredential.user.displayName || undefined,
         });
+
+        if (!signInResult || !signInResult.success) {
+          toast.error(signInResult?.message || "Failed to establish a secure session. Please try again.");
+          return;
+        }
 
         toast.success("Signed in successfully.");
 
-        if (email === "ahmed@gmail.com") {
+        const isAdmin = signInResult.role === "Admin";
+        if (isAdmin) {
           localStorage.setItem("isAdmin", "true");
-          router.push("/admin");
+          router.replace("/admin");
         } else {
           localStorage.removeItem("isAdmin");
-          router.push("/");
+          const hasResume = signInResult.hasResume;
+          if (!hasResume) {
+            router.replace("/user/resume");
+          } else {
+            router.replace("/user/dashboard");
+          }
         }
-
-        router.refresh();
       }
     } catch (error) {
       console.error(error);
@@ -139,22 +154,23 @@ const AuthForm = ({ type }: { type: FormType }) => {
   const isSignIn = type === "sign-in";
 
   return (
-    <div className="border border-white/10 p-0.5 rounded-md lg:min-w-[500px] shadow-2xl relative overflow-hidden bg-white/[0.015] backdrop-blur-xl">
-      <div className="absolute top-0 left-0 w-full h-[2px] bg-cyan-500" />
-      <div className="flex flex-col gap-6 py-10 px-10 bg-transparent">
+    <div className="border-b border-gray-600 p-0.5 rounded-md w-full max-w-sm sm:max-w-md md:max-w-lg lg:min-w-[500px] lg:max-h-[550px] mx-auto shadow-2xl relative overflow-hidden bg-white/[0.015] backdrop-blur-xl">
+      <div className="absolute top-0 left-0 w-full h-[2px] bg-gray-600" />
+      <div className="absolute bottom-0 left-0 w-full h-[2px] bg-gray-600 z-20" />
+      <div className="flex flex-col gap-6 py-4 px-6 sm:px-8 md:px-10 bg-transparent">
         <div className="flex flex-col items-center gap-3">
           <div className="bg-white/5 p-2.5 rounded-md border border-white/10 shadow-lg">
-            <Image src="/logo.svg" alt="logo" height={36} width={36} />
+            <Image src="/logo.svg" alt="logo" width={36} height={36} className="h-7 w-7" />
           </div>
           <h2 className="text-2xl font-black text-white tracking-wide uppercase">Mockrithm</h2>
         </div>
 
-        <h3 className="text-center text-sm font-semibold text-gray-400">Practice job interviews with conversational AI</h3>
+        <h3 className="text-center text-sm font-semibold text-gray-300">Practice job interviews with conversational AI</h3>
 
         <Form {...form}>
           <form
             onSubmit={form.handleSubmit(onSubmit)}
-            className="w-full space-y-6 mt-4 form"
+            className="w-full space-y-4 form"
           >
             {!isSignIn && (
               <FormField
@@ -200,7 +216,7 @@ const AuthForm = ({ type }: { type: FormType }) => {
               <div className="text-sm text-right">
                 <Link
                   href="/forgot-password"
-                  className="text-violet-400 hover:text-violet-300 font-bold transition-colors"
+                  className="text-gray-400 hover:text-gray-600 font-bold transition-colors"
                 >
                   Forgot Password?
                 </Link>
@@ -219,15 +235,15 @@ const AuthForm = ({ type }: { type: FormType }) => {
           </form>
         </Form>
 
-        <p className="text-center text-sm text-gray-400">
-          {isSignIn ? "No account yet?" : "Have an account already?"}
-          <Link
-            href={!isSignIn ? "/sign-in" : "/sign-up"}
-            className="text-violet-400 hover:text-violet-300 font-bold ml-1 transition-colors"
-          >
-            {!isSignIn ? "Sign In" : "Sign Up"}
-          </Link>
-        </p>
+<p className="text-center text-sm text-gray-200">
+  {isSignIn ? "No account yet?" : "Have an account already?"}
+  <Link
+    href={!isSignIn ? "/sign-in" : "/sign-up"}
+    className="text-gray-100 hover:text-white font-bold ml-1 transition-colors"
+  >
+    {!isSignIn ? "Sign In" : "Sign Up"}
+  </Link>
+</p>
       </div>
     </div>
   );

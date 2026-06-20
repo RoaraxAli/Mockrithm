@@ -30,19 +30,19 @@
 /* Force dark theme variables on root by default to avoid light-mode text blending issues */
 :root {
   --radius: 0.375rem; /* Flat sharp corners */
-  --background: oklch(0.12 0.02 250); /* Deep space dark slate */
+  --background: oklch(0.09 0 0); /* Pure black/zinc */
   --foreground: oklch(0.98 0 0); /* Crisp clean white */
-  --card: oklch(0.15 0.02 250);
+  --card: oklch(0.12 0 0);
   --card-foreground: oklch(0.98 0 0);
-  --popover: oklch(0.15 0.02 250);
+  --popover: oklch(0.12 0 0);
   --popover-foreground: oklch(0.98 0 0);
   --primary: oklch(0.99 0 0); /* Crisp Monochrome White */
   --primary-foreground: oklch(0.1 0 0); /* Black */
-  --secondary: oklch(0.2 0.02 250);
+  --secondary: oklch(0.18 0 0);
   --secondary-foreground: oklch(0.98 0 0);
-  --muted: oklch(0.2 0.02 250);
-  --muted-foreground: oklch(0.7 0.02 250);
-  --accent: oklch(0.2 0.02 250);
+  --muted: oklch(0.18 0 0);
+  --muted-foreground: oklch(0.7 0 0);
+  --accent: oklch(0.18 0 0);
   --accent-foreground: oklch(0.98 0 0);
   --destructive: oklch(0.6 0.18 20);
   --border: oklch(1 0 0 / 8%);
@@ -53,11 +53,11 @@
   --chart-3: oklch(0.5 0 0);
   --chart-4: oklch(0.3 0 0);
   --chart-5: oklch(0.1 0 0);
-  --sidebar: oklch(0.15 0.02 250);
+  --sidebar: oklch(0.12 0 0);
   --sidebar-foreground: oklch(0.98 0 0);
   --sidebar-primary: oklch(0.99 0 0);
   --sidebar-primary-foreground: oklch(0.1 0 0);
-  --sidebar-accent: oklch(0.2 0.02 250);
+  --sidebar-accent: oklch(0.18 0 0);
   --sidebar-accent-foreground: oklch(0.98 0 0);
   --sidebar-border: oklch(1 0 0 / 8%);
   --sidebar-ring: oklch(0.99 0 0 / 10%);
@@ -65,7 +65,7 @@
 
 .dark {
   /* Aligned exactly with root dark config */
-  --background: oklch(0.12 0.02 250);
+  --background: oklch(0.09 0 0);
   --foreground: oklch(0.98 0 0);
 }
 
@@ -113,7 +113,7 @@
   }
   body {
     @apply bg-background text-foreground;
-    background-color: #08090d;
+    background-color: #09090b;
     min-height: 100vh;
   }
   p {
@@ -358,7 +358,7 @@
 }
 
 @utility dark-gradient {
-  background: #0a0b10;
+  background: #09090b;
 }
 
 @utility border-gradient {
@@ -366,11 +366,11 @@
 }
 
 @utility pattern {
-  background-color: #08090d;
+  background-color: #09090b;
 }
 
 @utility blue-gradient-dark {
-  background: #08090d;
+  background: #09090b;
 }
 
 @utility blue-gradient {
@@ -408,3 +408,253 @@
     transform: translateY(0);
   }
 }
+
+/* Force Clerk Popover text to be readable */
+.cl-userButtonPopoverCard,
+.cl-userButtonPopoverCard * {
+  color: #e4e4e7 !important;
+}
+
+.cl-userButtonPopoverCard a:hover *,
+.cl-userButtonPopoverCard button:hover * {
+  color: #ffffff !important;
+}
+
+/* Force ALL Clerk modals / profile pages to dark theme with white text */
+.cl-modalContent,
+.cl-modalContent *:not(button):not(button *):not(.btn):not(.btn *):not(input):not(select):not(textarea):not(.text-black):not(.text-black *),
+.cl-userProfile-root,
+.cl-userProfile-root *:not(button):not(button *):not(.btn):not(.btn *):not(input):not(select):not(textarea):not(.text-black):not(.text-black *),
+.cl-card,
+.cl-card *:not(button):not(button *):not(.btn):not(.btn *):not(input):not(select):not(textarea):not(.text-black):not(.text-black *),
+.cl-profilePage,
+.cl-profilePage *:not(button):not(button *):not(.btn):not(.btn *):not(input):not(select):not(textarea):not(.text-black):not(.text-black *),
+.cl-page,
+.cl-page *:not(button):not(button *):not(.btn):not(.btn *):not(input):not(select):not(textarea):not(.text-black):not(.text-black *) {
+  color: #e4e4e7 !important;
+}
+
+/* Clerk modal backgrounds */
+.cl-modalContent,
+.cl-card,
+.cl-userProfile-root,
+.cl-profilePage,
+.cl-page {
+  background-color: #09090b !important;
+  border-color: #27272a !important;
+}
+
+/* Clerk modal backdrop */
+.cl-modalBackdrop {
+  background-color: rgba(0, 0, 0, 0.75) !important;
+  backdrop-filter: blur(8px) !important;
+}
+
+/* Clerk navbar / sidebar in modals */
+.cl-navbar,
+.cl-navbarButtons {
+  background-color: transparent !important;
+  border-color: rgba(255, 255, 255, 0.05) !important;
+}
+
+.cl-navbarButton {
+  color: #a1a1aa !important;
+}
+
+.cl-navbarButton:hover,
+.cl-navbarButton[data-active="true"] {
+  color: #ffffff !important;
+  background-color: rgba(255, 255, 255, 0.05) !important;
+}
+
+/* Clerk headings & titles */
+.cl-headerTitle,
+.cl-headerSubtitle,
+.cl-profileSectionTitle,
+.cl-profileSectionTitleText,
+.cl-formHeaderTitle,
+.cl-formHeaderSubtitle,
+.cl-breadcrumbs,
+.cl-breadcrumbsItem,
+.cl-breadcrumbsItemDivider {
+  color: #ffffff !important;
+}
+
+.cl-headerSubtitle,
+.cl-formHeaderSubtitle {
+  color: #a1a1aa !important;
+}
+
+/* Clerk form fields */
+.cl-formFieldLabel,
+.cl-formFieldLabelRow,
+.cl-formFieldHintText,
+.cl-formFieldInfoText,
+.cl-formFieldSuccessText,
+.cl-formFieldWarningText {
+  color: #d4d4d8 !important;
+}
+
+.cl-formFieldInput,
+.cl-input {
+  background-color: #18181b !important;
+  border-color: #27272a !important;
+  color: #ffffff !important;
+}
+
+.cl-formFieldInput::placeholder,
+.cl-input::placeholder {
+  color: #52525b !important;
+}
+
+/* Clerk profile section content */
+.cl-profileSectionContent,
+.cl-profileSectionItem,
+.cl-profileSectionItemList {
+  border-color: #27272a !important;
+}
+
+.cl-profileSectionPrimaryButton,
+.cl-formButtonPrimary {
+  background-color: #ffffff !important;
+  color: #000000 !important;
+  border-color: #ffffff !important;
+}
+
+.cl-profileSectionPrimaryButton *,
+.cl-formButtonPrimary * {
+  color: #000000 !important;
+}
+
+.cl-profileSectionPrimaryButton:hover,
+.cl-formButtonPrimary:hover {
+  background-color: #e4e4e7 !important;
+  border-color: #e4e4e7 !important;
+}
+
+.cl-profileSectionPrimaryButton:hover *,
+.cl-formButtonPrimary:hover * {
+  color: #000000 !important;
+}
+
+.cl-formButtonReset,
+.cl-formButtonCancel {
+  background-color: transparent !important;
+  color: #d4d4d8 !important;
+  border-color: #3f3f46 !important;
+}
+
+/* Clerk avatars & badges */
+.cl-avatarBox,
+.cl-badge,
+.cl-tag {
+  border-color: #3f3f46 !important;
+}
+
+.cl-badge,
+.cl-tag {
+  background-color: #27272a !important;
+  color: #e4e4e7 !important;
+}
+
+/* Clerk internal links */
+.cl-footerActionLink,
+.cl-footerActionText {
+  color: #a1a1aa !important;
+}
+
+.cl-footerActionLink:hover {
+  color: #ffffff !important;
+}
+
+/* Clerk accordion / details sections */
+.cl-accordionTriggerButton,
+.cl-accordionContent {
+  color: #e4e4e7 !important;
+  border-color: #27272a !important;
+}
+
+/* Clerk menu items inside modals */
+.cl-menuButton,
+.cl-menuItem,
+.cl-menuList {
+  background-color: #09090b !important;
+  color: #e4e4e7 !important;
+  border-color: #27272a !important;
+}
+
+.cl-menuButton:hover,
+.cl-menuItem:hover {
+  background-color: rgba(255, 255, 255, 0.05) !important;
+  color: #ffffff !important;
+}
+
+/* Clerk scrollbox and internal panels */
+.cl-scrollBox,
+.cl-pageScrollBox,
+.cl-main {
+  background-color: transparent !important;
+}
+
+/* Clerk alert / notification boxes */
+.cl-alert {
+  background-color: #18181b !important;
+  border-color: #3f3f46 !important;
+  color: #e4e4e7 !important;
+}
+
+/* Clerk internal table-like items */
+.cl-profileSectionItemList__activeDevices .cl-profileSectionItem,
+.cl-profileSectionItemList__connectedAccounts .cl-profileSectionItem {
+  border-color: #27272a !important;
+}
+
+/* Clerk danger zone / destructive actions */
+.cl-profileSectionPrimaryButton__danger {
+  background-color: #dc2626 !important;
+  color: #ffffff !important;
+  border-color: #dc2626 !important;
+}
+
+/* Infinite Sliding Text Marquee */
+@keyframes marquee {
+  0% { transform: translateX(0%); }
+  100% { transform: translateX(-50%); }
+}
+
+.animate-marquee {
+  display: flex;
+  width: max-content;
+  animation: marquee 35s linear infinite;
+  will-change: transform;
+}
+
+@keyframes float-slow-1 {
+  0%, 100% { transform: translateY(0px) rotate(0deg); }
+  50% { transform: translateY(-20px) rotate(1deg); }
+}
+@keyframes float-slow-2 {
+  0%, 100% { transform: translateY(0px) rotate(0deg); }
+  50% { transform: translateY(25px) rotate(-1deg); }
+}
+@keyframes float-slow-3 {
+  0%, 100% { transform: translateY(0px) scale(1); }
+  50% { transform: translateY(-15px) scale(1.03); }
+}
+
+.animate-float-slow-1 {
+  animation: float-slow-1 12s ease-in-out infinite;
+  transform-origin: center;
+  will-change: transform;
+}
+.animate-float-slow-2 {
+  animation: float-slow-2 16s ease-in-out infinite;
+  transform-origin: center;
+  will-change: transform;
+}
+.animate-float-slow-3 {
+  animation: float-slow-3 20s ease-in-out infinite;
+  transform-origin: center;
+  will-change: transform;
+}
+

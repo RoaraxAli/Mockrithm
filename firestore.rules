@@ -1,0 +1,53 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Helper function to check if the user is an Admin
+    function isAdmin() {
+      return request.auth != null && 
+        exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'Admin';
+    }
+
+    // Rules for the users collection
+    match /users/{userId} {
+      allow read, update, delete: if request.auth != null && (request.auth.uid == userId || isAdmin());
+      allow create: if request.auth != null; // Allow creation during sign-up
+      
+      // Subcollection for user interviews
+      match /interviews/{interviewId} {
+        allow read, write: if request.auth != null && (request.auth.uid == userId || isAdmin());
+      }
+    }
+
+    // Rules for listing all users (Admin only)
+    match /users {
+      allow list: if isAdmin();
+      allow create: if request.auth != null;
+    }
+
+    // Rules for the feedback collection
+    match /feedback/{feedbackId} {
+      allow create: if true; // Anyone can submit feedback
+      allow read, update, delete: if isAdmin();
+    }
+    match /feedback {
+      allow list: if isAdmin();
+    }
+
+    // Rules for the interviews collection
+    match /interviews/{interviewId} {
+      allow read, write: if isAdmin();
+    }
+    match /interviews {
+      allow list: if isAdmin();
+    }
+
+    // Rules for the interviewsfeedback collection
+    match /interviewsfeedback/{feedbackId} {
+      allow read, write: if isAdmin();
+    }
+    match /interviewsfeedback {
+      allow list: if isAdmin();
+    }
+  }
+}

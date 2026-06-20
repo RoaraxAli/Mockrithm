@@ -1,22 +1,22 @@
 import type { NextConfig } from "next";
 
-const nextConfig = {
-  /* config options here */
-  // images: {
-  //   remotePatterns: [
-  //     {
-  //       protocol: "https",
-  //       hostname: "ik.imagekit.io",
-  //       port: "",
-  //     },
-  //   ],
-  // },
-  eslint: {
-    ignoreDuringBuilds: true,
-  },
+const nextConfig: NextConfig = {
   typescript: {
     ignoreBuildErrors: true,
   },
-} as any;
+  serverExternalPackages: ["pdf-parse"],
+  images: {
+    remotePatterns: [
+      {
+        protocol: "https",
+        hostname: "img.clerk.com",
+      },
+      {
+        protocol: "https",
+        hostname: "images.clerk.dev",
+      },
+    ],
+  },
+};
 
 export default nextConfig;

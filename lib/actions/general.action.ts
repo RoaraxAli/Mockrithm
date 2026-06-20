@@ -1,5 +1,6 @@
 "use server";
 
+import { cache } from "react";
 import { generateObject } from "ai";
 import { google } from "@ai-sdk/google";
 
@@ -91,9 +92,9 @@ export async function getInterviewById(id: string): Promise<Interview | null> {
   return interview.data() as Interview | null;
 }
 
-export async function getFeedbackByInterviewId(
+export const getFeedbackByInterviewId = cache(async (
   params: GetFeedbackByInterviewIdParams
-): Promise<Feedback | null> {
+): Promise<Feedback | null> => {
   const { interviewId, userId } = params;
 
   const querySnapshot = await db
@@ -105,12 +106,41 @@ export async function getFeedbackByInterviewId(
   if (querySnapshot.empty) return null;
 
   const feedbackDoc = querySnapshot.docs[0];
-  return { id: feedbackDoc.id, ...feedbackDoc.data() } as Feedback;
-}
+  const data = feedbackDoc.data();
+  return {
+    id: feedbackDoc.id,
+    ...data,
+    createdAt: data.createdAt?.toDate
+      ? data.createdAt.toDate().toISOString()
+      : data.createdAt instanceof Date
+      ? data.createdAt.toISOString()
+      : data.createdAt ?? null,
+  } as unknown as Feedback;
+});
 
-export async function getLatestInterviews(
+export const getFeedbacksForUser = cache(async (userId: string): Promise<Feedback[]> => {
+  if (!userId) return [];
+  const querySnapshot = await db
+    .collection("interviewsfeedback")
+    .where("userId", "==", userId)
+    .get();
+  return querySnapshot.docs.map((doc) => {
+    const data = doc.data();
+    return {
+      id: doc.id,
+      ...data,
+      createdAt: data.createdAt?.toDate
+        ? data.createdAt.toDate().toISOString()
+        : data.createdAt instanceof Date
+        ? data.createdAt.toISOString()
+        : data.createdAt ?? null,
+    };
+  }) as unknown as Feedback[];
+});
+
+export const getLatestInterviews = cache(async (
   params: GetLatestInterviewsParams
-): Promise<Interview[] | null> {
+): Promise<Interview[] | null> => {
   const { userId, limit = 20 } = params;
 
   // Fetch recent interviews and filter in memory to avoid index requirements
@@ -121,28 +151,49 @@ export async function getLatestInterviews(
     .get();
 
   return interviews.docs
-    .map((doc) => ({
-      id: doc.id,
-      ...doc.data(),
-    }))
+    .map((doc) => {
+      const data = doc.data();
+      return {
+        id: doc.id,
+        ...data,
+        createdAt: data.createdAt?.toDate
+          ? data.createdAt.toDate().toISOString()
+          : data.createdAt instanceof Date
+          ? data.createdAt.toISOString()
+          : data.createdAt ?? null,
+      };
+    })
     .filter((interview: any) => 
       interview.finalized === true && 
       interview.userId !== userId
     )
-    .slice(0, limit) as Interview[];
-}
+    .slice(0, limit) as unknown as Interview[];
+});
 
-export async function getInterviewsByUserId(
+export const getInterviewsByUserId = cache(async (
   userId: string
-): Promise<Interview[] | null> {
-  const interviews = await db
+): Promise<Interview[] | null> => {
+  const querySnapshot = await db
     .collection("interviews")
     .where("userId", "==", userId)
-    .orderBy("createdAt", "desc")
     .get();
 
-  return interviews.docs.map((doc) => ({
-    id: doc.id,
-    ...doc.data(),
-  })) as Interview[];
-}
+  const interviews = querySnapshot.docs.map((doc) => {
+    const data = doc.data();
+    return {
+      id: doc.id,
+      ...data,
+      createdAt: data.createdAt?.toDate
+        ? data.createdAt.toDate().toISOString()
+        : data.createdAt instanceof Date
+        ? data.createdAt.toISOString()
+        : data.createdAt ?? null,
+    };
+  }) as unknown as Interview[];
+  
+  return interviews.sort((a, b) => {
+    const aTime = a.createdAt ? new Date(a.createdAt).getTime() : 0;
+    const bTime = b.createdAt ? new Date(b.createdAt).getTime() : 0;
+    return bTime - aTime;
+  });
+});

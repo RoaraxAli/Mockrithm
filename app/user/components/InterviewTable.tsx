@@ -19,7 +19,8 @@ interface InterviewTableProps {
 export function InterviewTable({ interviews }: InterviewTableProps) {
   const router = useRouter();
 
-  const formatDate = (date: Date) => {
+  const formatDate = (dateVal: Date | string) => {
+    const date = typeof dateVal === "string" ? new Date(dateVal) : dateVal;
     return new Intl.DateTimeFormat("en-US", {
       year: "numeric",
       month: "short",

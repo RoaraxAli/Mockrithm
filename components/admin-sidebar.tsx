@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { gsap } from "gsap";
-import { auth } from "@/firebase/client";
+import { useClerk } from "@clerk/nextjs";
 import {
   LayoutDashboard,
   Users,
@@ -16,6 +16,7 @@ import {
   LogOut,
   Globe,
   User,
+  BookOpen,
 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -49,11 +50,13 @@ const navigation = [
     icon: ClipboardList,
   },
   { name: "Feedback", href: "/admin/feedback", icon: MessageSquare },
+  { name: "Blogs", href: "/admin/blogs", icon: BookOpen },
 ];
 
 export function AdminSidebar() {
   const pathname = usePathname();
   const router = useRouter();
+  const { signOut } = useClerk();
   const [adminName, setAdminName] = useState("");
   const [adminImage, setAdminImage] = useState("");
   const [maintenance, setMaintenance] = useState(false);
@@ -119,10 +122,14 @@ export function AdminSidebar() {
     }
   };
 
+
 const handleLogout = async () => {
   try {
-    await auth.signOut();        // Log out properly
-    router.push("/sign-in");     // Then navigate to sign-in
+    await Promise.all([
+      signOut(),
+      fetch("/api/auth/sign-out", { method: "POST" })
+    ]);
+    router.push("/sign-in");
   } catch (error) {
     console.error("Logout failed:", error);
   }
@@ -160,7 +167,8 @@ const handleLogout = async () => {
               const isActive = pathname === item.href;
               return (
                 <div key={item.name}>
-                  <div
+                  <Link
+                    href={item.href}
                     className={cn(
                       "sidebar-item flex items-center rounded-lg px-3 py-2 text-sm font-medium transition-all duration-200 cursor-pointer hover:bg-white/10",
                       isActive
@@ -170,27 +178,16 @@ const handleLogout = async () => {
                     )}
                     title={isCollapsed ? item.name : undefined}
                   >
-                    <div
-                      className={cn(
-                        "flex items-center",
-                        isCollapsed && "justify-center"
-                      )}
-                    >
-                      {item.icon && (
-                        <item.icon
-                          className={cn(
-                            "h-5 w-5 flex-shrink-0",
-                            !isCollapsed && "mr-3"
-                          )}
-                        />
-                      )}
-                      {!isCollapsed && (
-                        <Link href={item.href} className="w-full">
-                          {item.name}
-                        </Link>
-                      )}
-                    </div>
-                  </div>
+                    {item.icon && (
+                      <item.icon
+                        className={cn(
+                          "h-5 w-5 flex-shrink-0",
+                          !isCollapsed && "mr-3"
+                        )}
+                      />
+                    )}
+                    {!isCollapsed && item.name}
+                  </Link>
                 </div>
               );
             })}

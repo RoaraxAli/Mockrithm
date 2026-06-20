@@ -1,6 +1,12 @@
 import { NextResponse } from "next/server";
+import { getCurrentUser } from "@/lib/actions/auth.action";
 
 export async function GET() {
+  const user = await getCurrentUser();
+  if (!user) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
   const apiKey = process.env.GROQ_API_KEY;
   if (!apiKey) {
     return NextResponse.json({ status: "offline", error: "Missing GROQ_API_KEY in environment variables." });

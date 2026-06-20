@@ -4,8 +4,7 @@ import Link from "next/link"
 import Image from "next/image"
 import { usePathname, useRouter } from "next/navigation"
 import { cn } from "@/lib/utils"
-import { auth } from "@/firebase/client"
-import { signOut } from "firebase/auth"
+import { useClerk } from "@clerk/nextjs"
 import { 
   LayoutDashboard, PlayCircle, FileText, MessageSquare, User, Sparkles, 
   Home, LogOut 
@@ -17,17 +16,17 @@ const navigation = [
   { name: "Resume Builder", href: "/user/resume", icon: Sparkles },
   { name: "Your Interviews", href: "/user/interviews", icon: FileText },
   { name: "Feedback", href: "/user/feedback", icon: MessageSquare },
-  { name: "Profile", href: "/user/profile", icon: User },
 ]
 
 export function Sidebar() {
   const pathname = usePathname()
   const router = useRouter()
+  const { signOut: clerkSignOut } = useClerk()
 
   const handleLogout = async () => {
     try {
-      await signOut(auth)
-      router.push("/sign-in")
+      await clerkSignOut()
+      window.location.href = "/sign-in"
     } catch (error) {
       console.error("Logout failed:", error)
     }

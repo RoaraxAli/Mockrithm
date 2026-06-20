@@ -13,32 +13,15 @@ const normalizeTechName = (tech: string) => {
   return mappings[key as keyof typeof mappings];
 };
 
-const checkIconExists = async (url: string) => {
-  try {
-    const response = await fetch(url, { method: "HEAD" });
-    return response.ok; // Returns true if the icon exists
-  } catch {
-    return false;
-  }
-};
-
-export const getTechLogos = async (techArray: string[]) => {
-  const logoURLs = techArray.map((tech) => {
+export const getTechLogos = (techArray: string[]) => {
+  if (!techArray) return [];
+  return techArray.map((tech) => {
     const normalized = normalizeTechName(tech);
-    return {
-      tech,
-      url: `${techIconBaseURL}/${normalized}/${normalized}-original.svg`,
-    };
+    const url = normalized
+      ? `${techIconBaseURL}/${normalized}/${normalized}-original.svg`
+      : "/tech.svg";
+    return { tech, url };
   });
-
-  const results = await Promise.all(
-    logoURLs.map(async ({ tech, url }) => ({
-      tech,
-      url: (await checkIconExists(url)) ? url : "/tech.svg",
-    }))
-  );
-
-  return results;
 };
 
 export const getRandomInterviewCover = () => {

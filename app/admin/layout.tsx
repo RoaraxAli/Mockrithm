@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useRouter, usePathname } from "next/navigation";
-import { auth } from "@/firebase/client"; // your firebase client auth instance
+import { useUser } from "@clerk/nextjs";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { AdminSidebar } from "@/components/admin-sidebar";
@@ -19,22 +19,35 @@ export default function AdminLayout({
 }) {
   const pathname = usePathname();
   const router = useRouter();
+  const { isLoaded, isSignedIn, user } = useUser();
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const unsubscribe = auth.onAuthStateChanged((user) => {
-      const allowedAdmins = ["ahmed@gmail.com"];
-      if (!user) {
-        router.push("/sign-in");
-      } else if (!allowedAdmins.includes(user.email || "")) {
-        router.push("/");
-      } else {
-        setLoading(false);
-      }
-    });
+    if (!isLoaded) return;
 
-    return () => unsubscribe();
-  }, [router]);
+    if (!isSignedIn || !user) {
+      router.push("/sign-in");
+      return;
+    }
+
+    const checkAdmin = async () => {
+      try {
+        const { getUserProfile } = await import("@/lib/actions/auth.action");
+        const result = await getUserProfile(user.id);
+        if (result && result.success && result.role.toLowerCase() === "admin") {
+          setLoading(false);
+        } else {
+          console.warn("User is not an Admin. Redirecting to home.", user.primaryEmailAddress?.emailAddress);
+          router.push("/");
+        }
+      } catch (error) {
+        console.error("Failed to verify admin status:", error);
+        router.push("/");
+      }
+    };
+
+    checkAdmin();
+  }, [isLoaded, isSignedIn, user, router]);
 
   useEffect(() => {
     if (!loading) {
