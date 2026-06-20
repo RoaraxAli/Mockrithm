@@ -10,7 +10,7 @@ export async function GET() {
     }
 
     const querySnapshot = await db.collection("interviewsfeedback").get();
-    const feedbacks = querySnapshot.docs.map((doc) => ({
+    const feedbacks = querySnapshot.docs.map((doc: any) => ({
       id: doc.id,
       ...doc.data(),
     }));

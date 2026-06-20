@@ -1,18 +1,24 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 
-export function middleware(req: NextRequest) {
+export function proxy(req: NextRequest) {
   const isMaintenance = process.env.NEXT_PUBLIC_MAINTENANCE === "true";
   const url = req.nextUrl.clone();
+  const pathname = req.nextUrl.pathname;
 
   // 🚧 Maintenance mode redirect
-  if (isMaintenance && !req.nextUrl.pathname.startsWith("/maintenance")) {
+  if (isMaintenance && !pathname.startsWith("/maintenance")) {
     url.pathname = "/maintenance";
     return NextResponse.redirect(url);
   }
 
+  // 🏠 Redirect /home to root /
+  if (pathname === "/home" || pathname === "/home/") {
+    url.pathname = "/";
+    return NextResponse.redirect(url);
+  }
+
   const sessionCookie = req.cookies.get("session")?.value;
-  const pathname = req.nextUrl.pathname;
 
   const isProtectedRoute = pathname.startsWith("/user") || pathname.startsWith("/admin");
   const isAuthRoute = ["/sign-in", "/sign-up", "/forgot-password", "/reset-password"].some((route) =>

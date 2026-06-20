@@ -47,14 +47,23 @@ export default function LandingDashboard({
   const [filter, setFilter] = useState<"all" | "past" | "available">("all");
   const [userInterviews, setUserInterviews] = useState<any[]>(initialUserInterviews);
   const [allInterviews, setAllInterviews] = useState<any[]>(initialAllInterviews);
-  const [loadingData, setLoadingData] = useState(true);
+  const [loadingData, setLoadingData] = useState(
+    initialAllInterviews.length > 0 || (user && initialUserInterviews.length > 0) ? false : true
+  );
   const [clientUser, setClientUser] = useState<any>(user || null);
-  const [authResolved, setAuthResolved] = useState(false);
+  const [authResolved, setAuthResolved] = useState(!!user);
 
   // 1. Subscribe to Client Auth State
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
       if (firebaseUser) {
+        if (user && firebaseUser.uid === user.id) {
+          console.log("LandingDashboard client auth matches server user, skipping Firestore read");
+          setClientUser(user);
+          setAuthResolved(true);
+          return;
+        }
+
         try {
           const userDocRef = doc(db, "users", firebaseUser.uid);
           const userDoc = await getDoc(userDocRef);
@@ -85,10 +94,16 @@ export default function LandingDashboard({
     });
 
     return () => unsubscribe();
-  }, []);
+  }, [user]);
 
   // 2. Load Dashboard Data
   useEffect(() => {
+    if (initialAllInterviews.length > 0 && clientUser?.id === user?.id) {
+      console.log("LandingDashboard skipping client-side data fetch (using server preloaded data)");
+      setLoadingData(false);
+      return;
+    }
+
     async function loadDashboardData() {
       try {
         setLoadingData(true);
@@ -138,7 +153,7 @@ export default function LandingDashboard({
     if (authResolved) {
       loadDashboardData();
     }
-  }, [clientUser?.id, authResolved]);
+  }, [clientUser?.id, authResolved, initialAllInterviews.length, user]);
 
   const containerVariants: any = {
     hidden: { opacity: 1 },

@@ -1,48 +1,22 @@
-"use client"
-
-import { useState, useEffect } from "react"
-import { useAuthState } from "react-firebase-hooks/auth"
-import { auth } from "@/firebase/client"
-import type { Interview} from "@/app/user/types"
+import { getCurrentUser } from "@/lib/actions/auth.action"
 import { getUserInterviews } from "@/app/user/lib/firestore"
 import { InterviewTable } from "@/app/user/components/InterviewTable"
-import { TableSkeleton } from "@/app/user/components/Skeletons"
 import { Alert, AlertDescription } from "@/components/ui/alert"
+import { redirect } from "next/navigation"
 
-export default function InterviewsPage() {
-  const [user] = useAuthState(auth)
-  const [interviews, setInterviews] = useState<Interview[]>([])
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
+export default async function InterviewsPage() {
+  const user = await getCurrentUser()
+  if (!user) {
+    redirect("/sign-in")
+  }
 
-  useEffect(() => {
-    async function fetchInterviews() {
-      if (!user) return
+  let interviews: any[] = []
+  let error: string | null = null
 
-      try {
-        setLoading(true)
-        const result = await getUserInterviews(user.uid)
-        setInterviews(result)
-      } catch (err) {
-        setError("Failed to load interviews")
-      } finally {
-        setLoading(false)
-      }
-    }
-
-    fetchInterviews()
-  }, [user])
-
-  if (loading) {
-    return (
-      <div className="space-y-6">
-        <div>
-          <h1 className="text-2xl font-bold text-white mb-2">Your Interviews</h1>
-          <p className="text-gray-200">View all your completed and in-progress interviews</p>
-        </div>
-        <TableSkeleton />
-      </div>
-    )
+  try {
+    interviews = await getUserInterviews(user.id)
+  } catch (err) {
+    error = "Failed to load interviews"
   }
 
   if (error) {
@@ -54,7 +28,7 @@ export default function InterviewsPage() {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 animate-fadeIn">
       <div>
         <h1 className="text-2xl font-bold text-white mb-2">Your Interviews</h1>
         <p className="text-gray-200">

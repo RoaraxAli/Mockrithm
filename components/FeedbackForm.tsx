@@ -29,6 +29,8 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Send, User, Mail, MessageSquare, Phone, Clock, Github } from "lucide-react";
 
+import { submitSupportFeedback } from "@/lib/actions/general.action";
+
 // Schema
 const formSchema = z.object({
   name: z.string().min(2, { message: "Name must be at least 2 characters." }),
@@ -42,44 +44,54 @@ const formSchema = z.object({
     .max(1000),
 });
 
-export default function ContactPage() {
+interface FeedbackFormProps {
+  initialUser?: { name: string; email: string } | null;
+}
+
+export default function ContactPage({ initialUser }: FeedbackFormProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      name: "",
-      email: "",
+      name: initialUser?.name || "",
+      email: initialUser?.email || "",
       type: undefined,
       message: "",
     },
   });
 
-  // Load Firebase user
+  // Load Firebase user if initialUser is not provided
   useEffect(() => {
+    if (initialUser) return;
+
     const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
       if (firebaseUser) {
-        const userRef = doc(db, "users", firebaseUser.uid);
-        const userSnap = await getDoc(userRef);
+        try {
+          const userRef = doc(db, "users", firebaseUser.uid);
+          const userSnap = await getDoc(userRef);
 
-        const nameFromDb = userSnap.exists()
-          ? userSnap.data().name
-          : "Anonymous";
+          const nameFromDb = userSnap.exists()
+            ? userSnap.data().name
+            : "Anonymous";
 
-        form.setValue("name", nameFromDb);
-        form.setValue("email", firebaseUser.email || "");
+          form.setValue("name", nameFromDb);
+          form.setValue("email", firebaseUser.email || "");
+        } catch (error) {
+          console.error("Failed to fetch user in FeedbackForm:", error);
+        }
       }
     });
 
     return () => unsubscribe();
-  }, [form]);
+  }, [form, initialUser]);
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     setIsSubmitting(true);
     try {
-      await addDoc(collection(db, "feedback"), {
-        ...values,
-        createdAt: new Date(),
-      });
+      const res = await submitSupportFeedback(values);
+      if (!res.success) {
+        throw new Error(res.error || "Failed to submit feedback");
+      }
       toast.success("Thanks for your feedback!");
       form.reset({ ...values, message: "" });
     } catch (error) {
@@ -232,13 +244,14 @@ export default function ContactPage() {
                       name="name"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel className="text-zinc-500 flex items-center gap-2 text-xs font-black uppercase tracking-widest">
+                          <FormLabel className="text-zinc-500 flex items-center gap-2 text-xs font-black uppercase tracking-widest read-only:cursor-not-allowed">
                             <User className="w-3.5 h-3.5" /> Name
                           </FormLabel>
                           <FormControl>
                             <Input
                               {...field}
-                              className="bg-zinc-950/60 border-zinc-800 text-white placeholder:text-zinc-700 h-12 rounded-lg focus:border-white/30 focus:ring-1 focus:ring-white/10 transition-all duration-200"
+                              readOnly
+                              className="bg-zinc-950/60 border-zinc-800 text-gray-500 placeholder:text-zinc-700 h-12 rounded-lg focus:border-white/30 focus:ring-1 focus:ring-white/10 transition-all duration-200 read-only:cursor-not-allowed"
                             />
                           </FormControl>
                           <FormMessage />
@@ -251,13 +264,14 @@ export default function ContactPage() {
                       name="email"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel className="text-zinc-500 flex items-center gap-2 text-xs font-black uppercase tracking-widest">
+                          <FormLabel className="text-zinc-500 flex items-center gap-2 text-xs font-black uppercase tracking-widest read-only:cursor-not-allowed">
                             <Mail className="w-3.5 h-3.5" /> Email
                           </FormLabel>
                           <FormControl>
                             <Input
                               {...field}
-                              className="bg-zinc-950/60 border-zinc-800 text-white placeholder:text-zinc-700 h-12 rounded-lg focus:border-white/30 focus:ring-1 focus:ring-white/10 transition-all duration-200"
+                              readOnly
+                              className="bg-zinc-950/60 border-zinc-800 text-gray-500 placeholder:text-zinc-700 h-12 rounded-lg focus:border-white/30 focus:ring-1 focus:ring-white/10 transition-all duration-200 read-only:cursor-not-allowed"
                             />
                           </FormControl>
                           <FormMessage />

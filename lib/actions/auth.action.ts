@@ -130,15 +130,19 @@ export async function signIn(params: SignInParams) {
       db.collection("users").doc(uid).collection("resumes").limit(1).get()
     ]);
     
+    let userRole = "User";
     if (!userDoc.exists) {
       const isAdmin = email === "ahmed@gmail.com";
+      userRole = isAdmin ? "Admin" : "User";
       await userDocRef.set({
         name: name,
         email: email,
-        role: isAdmin ? "Admin" : "User",
+        role: userRole,
         createdAt: new Date(),
         status: "Active",
       });
+    } else {
+      userRole = userDoc.data()?.role || "User";
     }
 
     // Record session in the background
@@ -146,10 +150,10 @@ export async function signIn(params: SignInParams) {
       userId: uid,
       email,
       createdAt: new Date(),
-    }).catch(err => console.error("Session recording error:", err));
+    }).catch((err: unknown) => console.error("Session recording error:", err));
 
     const hasResume = !resumesSnapshot.empty;
-    return { success: true, hasResume };
+    return { success: true, hasResume, role: userRole };
   } catch (error) {
     console.error("Sign in error:", error);
     return { success: false, message: "Failed to log into account. Please try again." };
@@ -192,6 +196,14 @@ export const getCurrentUser = cache(async (): Promise<User | null> => {
 
 
 export async function isAuthenticated() {
-  const user = await getCurrentUser();
-  return !!user;
+  const cookieStore = await cookies();
+  const sessionCookie = cookieStore.get("session")?.value;
+  if (!sessionCookie) return false;
+
+  try {
+    await auth.verifySessionCookie(sessionCookie, false);
+    return true;
+  } catch {
+    return false;
+  }
 }

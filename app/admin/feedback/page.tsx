@@ -41,14 +41,11 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { db } from "@/firebase/client";
 import {
-  collection,
-  getDocs,
-  deleteDoc,
-  doc,
-  updateDoc,
-} from "firebase/firestore";
+  getSupportFeedback,
+  deleteSupportFeedback,
+  updateSupportFeedbackStatus,
+} from "@/lib/actions/admin.action";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -72,23 +69,12 @@ export default function FeedbackPage() {
   useEffect(() => {
     const fetchFeedback = async () => {
       try {
-        const snapshot = await getDocs(collection(db, "feedback"));
-        const feedbackData = snapshot.docs.map((doc) => {
-          const data = doc.data();
-          return {
-            id: doc.id,
-            name: data.name || "",
-            email: data.email || "",
-            type: data.type || "General",
-            message: data.message || "",
-            date:
-              typeof data.createdAt?.toDate === "function"
-                ? data.createdAt.toDate().toLocaleDateString()
-                : "N/A",
-            status: data.status || "Open",
-          };
-        });
-        setFeedback(feedbackData);
+        const res = await getSupportFeedback();
+        if (res.success && res.data) {
+          setFeedback(res.data);
+        } else {
+          throw new Error(res.error || "Failed to load feedback");
+        }
       } catch (error) {
         console.error("Error fetching feedback:", error);
       } finally {
@@ -134,7 +120,8 @@ export default function FeedbackPage() {
 
   const handleDeleteFeedback = async (id: string) => {
     try {
-      await deleteDoc(doc(db, "feedback", id));
+      const res = await deleteSupportFeedback(id);
+      if (!res.success) throw new Error(res.error);
       setFeedback((prev) => prev.filter((item) => item.id !== id));
     } catch (error) {
       console.error("Failed to delete feedback:", error);
@@ -143,7 +130,8 @@ export default function FeedbackPage() {
 
   const handleStatusChange = async (id: string, newStatus: string) => {
     try {
-      await updateDoc(doc(db, "feedback", id), { status: newStatus });
+      const res = await updateSupportFeedbackStatus(id, newStatus);
+      if (!res.success) throw new Error(res.error);
       setFeedback((prev) =>
         prev.map((item) =>
           item.id === id ? { ...item, status: newStatus } : item

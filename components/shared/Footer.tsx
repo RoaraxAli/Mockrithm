@@ -82,7 +82,7 @@ const Footer: React.FC<FooterProps> = ({ className = "" }) => {
               <Link href="/user/resume" className="text-[10.5px] text-zinc-400 hover:text-white font-medium transition-colors">
                 Resume Builder
               </Link>
-              <Link href="/user/resume/dashboard" className="text-[10.5px] text-zinc-400 hover:text-white font-medium transition-colors">
+              <Link href="/user/dashboard/resume" className="text-[10.5px] text-zinc-400 hover:text-white font-medium transition-colors">
                 Resume Analyzer
               </Link>
             </div>

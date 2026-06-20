@@ -6,7 +6,6 @@ import { usePathname, useRouter } from "next/navigation"
 import { cn } from "@/lib/utils"
 import { auth } from "@/firebase/client"
 import { signOut } from "firebase/auth"
-import { signOut as serverSignOut } from "@/lib/actions/auth.action"
 import { 
   LayoutDashboard, PlayCircle, FileText, MessageSquare, User, Sparkles, 
   Home, LogOut 
@@ -15,7 +14,7 @@ import {
 const navigation = [
   { name: "Dashboard", href: "/user/dashboard", icon: LayoutDashboard },
   { name: "Take Interview", href: "/user/take-interview", icon: PlayCircle },
-  { name: "Resume Dashboard", href: "/user/resume/dashboard", icon: LayoutDashboard },
+  { name: "Resume Dashboard", href: "/user/dashboard/resume", icon: LayoutDashboard },
   { name: "Resume Builder", href: "/user/resume", icon: Sparkles },
   { name: "Your Interviews", href: "/user/interviews", icon: FileText },
   { name: "Feedback", href: "/user/feedback", icon: MessageSquare },
@@ -28,13 +27,15 @@ export function Sidebar() {
 
   const handleLogout = async () => {
     try {
-      await signOut(auth)
-      await serverSignOut()
-      window.location.href = "/sign-in"
+      await Promise.all([
+        signOut(auth),
+        fetch("/api/auth/sign-out", { method: "POST" })
+      ]);
+      window.location.href = "/sign-in";
     } catch (error) {
-      console.error("Logout failed:", error)
+      console.error("Logout failed:", error);
     }
-  }
+  };
 
   return (
     <div className="flex h-full w-64 flex-col border-r border-white/5 bg-zinc-950/20 backdrop-blur-3xl font-mona-sans relative overflow-hidden shrink-0">

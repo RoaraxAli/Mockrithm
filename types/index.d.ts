@@ -51,8 +51,11 @@ interface User {
   name: string;
   email: string;
   id: string;
+  role?: string;
+  status?: string;
   resumeLink?: string;
   profileURL?: string;
+  createdAt?: any;
 }
 
 interface InterviewCardProps {

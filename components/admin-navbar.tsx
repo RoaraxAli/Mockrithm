@@ -16,15 +16,19 @@ import { auth, db } from "@/firebase/client";
 import { useRouter } from "next/navigation";
 import { doc, getDoc } from "firebase/firestore";
 
-import { signOut as serverSignOut } from "@/lib/actions/auth.action";
+interface AdminNavbarProps {
+  adminName?: string;
+}
 
-export function AdminNavbar() {
-  const [adminName, setAdminName] = useState("");
+export function AdminNavbar({ adminName: initialAdminName }: AdminNavbarProps) {
+  const [adminName, setAdminName] = useState(initialAdminName || "");
   const [searchQuery, setSearchQuery] = useState("");
   const router = useRouter();
 
   // Fetch admin name from Firestore
   useEffect(() => {
+    if (initialAdminName) return;
+
     const fetchAdminName = async () => {
       const user = auth.currentUser;
       if (!user) return;
@@ -41,7 +45,7 @@ export function AdminNavbar() {
       }
     };
     fetchAdminName();
-  }, []);
+  }, [initialAdminName]);
 
   // GSAP animation
   useEffect(() => {
@@ -54,8 +58,10 @@ export function AdminNavbar() {
 
   const handleLogout = async () => {
     try {
-      await auth.signOut();
-      await serverSignOut();
+      await Promise.all([
+        auth.signOut(),
+        fetch("/api/auth/sign-out", { method: "POST" })
+      ]);
       router.push("/sign-in");
     } catch (error) {
       console.error("Logout failed:", error);

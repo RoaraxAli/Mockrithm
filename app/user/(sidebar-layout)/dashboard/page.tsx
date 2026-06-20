@@ -1,58 +1,31 @@
-"use client"
-
-import { useState, useEffect } from "react"
-import { useAuthState } from "react-firebase-hooks/auth"
-import { auth } from "@/firebase/client"
-import type { User, Interview, Feedback } from "@/app/user/types"
+import { getCurrentUser } from "@/lib/actions/auth.action"
 import { getUserData, getUserInterviews, getUserFeedback } from "@/app/user/lib/firestore"
-import { DashboardCard } from "@/app/user/components/DashboardCard"
-import { DashboardSkeleton } from "@/app/user/components/Skeletons"
 import { Alert, AlertDescription } from "@/components/ui/alert"
+import { redirect } from "next/navigation"
 
-export default function DashboardPage() {
-  const [user] = useAuthState(auth)
-  const [userData, setUserData] = useState<User | null>(null)
-  const [interviews, setInterviews] = useState<Interview[]>([])
-  const [feedback, setFeedback] = useState<Feedback[]>([])
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
+export default async function DashboardPage() {
+  const user = await getCurrentUser()
+  if (!user) {
+    redirect("/sign-in")
+  }
 
-  useEffect(() => {
-    async function fetchData() {
-      if (!user) return
+  let userData = null
+  let interviews: any[] = []
+  let feedback: any[] = []
+  let error: string | null = null
 
-      try {
-        setLoading(true)
-        const [userDataResult, interviewsResult, feedbackResult] = await Promise.all([
-          getUserData(user.uid),
-          getUserInterviews(user.uid),
-          getUserFeedback(user.uid),
-        ])
-
-        setUserData(userDataResult)
-        setInterviews(interviewsResult)
-        setFeedback(feedbackResult)
-      } catch (err: any) {
-        console.error("Dashboard fetch error:", err)
-        setError(`Failed to load dashboard data: ${err.message || err}`)
-      } finally {
-        setLoading(false)
-      }
-    }
-
-    fetchData()
-  }, [user])
-
-  if (loading) {
-    return (
-      <div className="space-y-6 bg-black p-8 min-h-screen">
-        <div>
-          <h1 className="text-2xl font-bold text-white mb-2">Dashboard</h1>
-          <p className="text-gray-400">Welcome back to your interview panel</p>
-        </div>
-        <DashboardSkeleton />
-      </div>
-    )
+  try {
+    const [userDataResult, interviewsResult, feedbackResult] = await Promise.all([
+      getUserData(user.id),
+      getUserInterviews(user.id),
+      getUserFeedback(user.id),
+    ])
+    userData = userDataResult
+    interviews = interviewsResult
+    feedback = feedbackResult
+  } catch (err: any) {
+    console.error("Dashboard fetch error:", err)
+    error = `Failed to load dashboard data: ${err.message || err}`
   }
 
   if (error) {
