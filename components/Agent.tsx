@@ -812,6 +812,15 @@ RULES:
         lowercaseMsg.includes("it was a pleasure") ||
         lowercaseMsg.includes("it was great chatting") ||
         lowercaseMsg.includes("nice chatting with you") ||
+        (type === "generate" && (
+          lowercaseMsg.includes("[end_call]") ||
+          lowercaseMsg.includes("chosen") ||
+          lowercaseMsg.includes("selected") ||
+          lowercaseMsg.includes("set up") ||
+          lowercaseMsg.includes("setting up") ||
+          lowercaseMsg.includes("starting") ||
+          lowercaseMsg.includes("confirmed")
+        )) ||
         (lowercaseMsg.includes("thank you") && lowercaseMsg.includes("time") && lowercaseMsg.includes("today") && messagesRef.current.length > (questions?.length || 5) * 1.5);
 
       if (isGoodbye) {
