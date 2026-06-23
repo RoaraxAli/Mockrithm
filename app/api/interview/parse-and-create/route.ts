@@ -16,7 +16,7 @@ const setupSchema = z.object({
 
 export async function POST(request: Request) {
   try {
-    const { messages, userid } = await request.json();
+    const { messages, userid, userResumeData } = await request.json();
 
     if (!messages || !userid) {
       return NextResponse.json(
@@ -48,16 +48,20 @@ export async function POST(request: Request) {
       model: google("gemini-2.5-flash"),
       schema: setupSchema,
       prompt: `
-        Analyze the following conversation transcript between a candidate and an interview setup assistant.
-        Extract the configured job interview parameters:
-        1. Job Role (e.g. "React Developer", "Data Analyst")
-        2. Experience Level (Junior, Mid-level, Senior, Lead)
-        3. Tech Stack (Array of technologies, e.g. ["React", "TypeScript", "Node.js"])
-        4. Focus/Type of interview (Technical, Behavioral, or Mixed)
-        5. Amount of questions (default to 5 if not specified)
+        Analyze the following conversation transcript between a candidate and an interview setup assistant, as well as the candidate's resume/profile data.
+        
+        Candidate Resume/Profile Data:
+        ${JSON.stringify(userResumeData || {})}
         
         Transcript:
         ${transcriptText}
+        
+        Extract or infer the configured job interview parameters:
+        1. Job Role (e.g. "React Developer", "Data Analyst" - use the targetRole or resume data if not mentioned in the transcript)
+        2. Experience Level (Junior, Mid-level, Senior, Lead - infer from profile experience if not mentioned in the transcript)
+        3. Tech Stack (Array of technologies, e.g. ["React", "TypeScript", "Node.js"] - use key skills from resume if not mentioned in the transcript)
+        4. Focus/Type of interview (Technical, Behavioral, or Mixed - extracted from the transcript choice)
+        5. Amount of questions (default to 5 if not specified)
       `,
     });
 

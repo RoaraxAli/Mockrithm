@@ -226,6 +226,7 @@ const Agent = ({
           body: JSON.stringify({
             messages: messages.map((m) => ({ role: m.role, content: m.content })),
             userid: userId,
+            userResumeData: userResumeData,
           }),
         });
         const data = await res.json();
@@ -813,6 +814,7 @@ RULES:
         body: JSON.stringify({
           messages: messagesRef.current.map((m) => ({ role: m.role, content: m.content })),
           userid: userId,
+          userResumeData: userResumeData,
         }),
       });
       const data = await res.json();
