@@ -72,16 +72,21 @@ export async function POST(request: Request) {
     const setupPrompt = `
       Analyze the following conversation transcript between a candidate and an interview setup assistant, as well as the candidate's resume/profile data.
       
-      Candidate Resume/Profile Data:
+      Candidate Resume/Profile Data (STRICT SOURCE OF TRUTH FOR ROLE & SKILLS):
       ${JSON.stringify(userResumeData || {})}
       
       Transcript:
       ${transcriptText}
       
       Extract or infer the configured job interview parameters.
+      
+      CRITICAL INSTRUCTIONS:
+      - The candidate's targetRole (from Resume/Profile Data) MUST be used as the "role". Do NOT invent or infer a different role unless explicitly requested by the candidate in the transcript.
+      - The candidate's techstack/skills list (from Resume/Profile Data) MUST be used as the "techstack". DO NOT invent, assume, or add technologies (like React, Node, etc.) if they are not explicitly mentioned in their resume or profile skills. Ask ONLY about technologies they actually know and have listed.
+      
       You must return ONLY a JSON object conforming exactly to this schema:
       {
-        "role": "extracted/inferred job role, e.g. React Developer",
+        "role": "extracted/inferred job role",
         "level": "extracted/inferred experience level: Junior, Mid-level, Senior, or Lead",
         "techstack": ["technology1", "technology2", ...],
         "type": "Technical", "Behavioral", or "Mixed",
@@ -108,10 +113,11 @@ export async function POST(request: Request) {
     const questionsPrompt = `
       Prepare exactly ${setup.amount || 5} interview questions for a job interview.
       The job role is ${setup.role} (${setup.level} level).
-      The tech stack is: ${(setup.techstack || []).join(", ")}.
+      The tech stack to ask about is: ${(setup.techstack || []).join(", ")}.
       The focus between behavioral and technical questions should lean towards: ${setup.type}.
       
-      Requirements:
+      CRITICAL REQUIREMENTS:
+      - Questions MUST be strictly relevant to the listed tech stack: ${(setup.techstack || []).join(", ")}. Do NOT ask questions about other tools, languages, or frameworks not explicitly listed in their tech stack.
       - Return ONLY a JSON object with a single "questions" key containing the array of questions. Example:
       {
         "questions": ["Question 1", "Question 2", "Question 3"]

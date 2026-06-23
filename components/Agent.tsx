@@ -661,7 +661,12 @@ const Agent = ({
 
   const handleSpeechCompleted = async (text: string) => {
     if (isProcessingRef.current) return;
+    if (submittedTextRef.current === text) {
+      console.log("[Agent.tsx] Duplicate speech submission blocked.");
+      return;
+    }
     isProcessingRef.current = true;
+    submittedTextRef.current = text;
 
     // Verbal Pacing & Analytics Calculation
     if (turnStartRef.current) {
@@ -1028,7 +1033,10 @@ RULES:
     }
 
     // Dynamic Custom Welcome Greeting seeding
-    const welcomeMsg = firstMessage || interviewer.firstMessage || "Hello! Thank you for taking the time to speak with me today.";
+    let welcomeMsg = firstMessage || interviewer.firstMessage || "Hello! Thank you for taking the time to speak with me today.";
+    if (type === "generate") {
+      welcomeMsg = `Hello ${userName}! Thank you for taking the time to speak with me today. To configure your session, which type of interview would you prefer? 1. Technical, 2. Behavioral, or 3. Live Coding Sandbox.`;
+    }
     setLastMessage(welcomeMsg);
     setMessages([{ role: "assistant", content: welcomeMsg }]);
 
@@ -1173,7 +1181,7 @@ RULES:
               <span className="text-zinc-600 mr-1.5">Type:</span>
               <span className="text-zinc-300 uppercase">{type}</span>
             </div>
-            {timerSecondsLeft !== null && (
+             {timerSecondsLeft !== null && (
               <div className={cn(
                 "flex items-center gap-1.5 font-mono font-black px-3 py-1 rounded-full border transition-all duration-500",
                 timerSecondsLeft <= 60
@@ -1182,7 +1190,6 @@ RULES:
                   ? "text-amber-400 border-amber-500/30 bg-amber-500/10"
                   : "text-emerald-400 border-emerald-500/30 bg-emerald-500/10"
               )}>
-                <span className="text-[10px] text-zinc-500 font-semibold mr-0.5 font-sans">⏱</span>
                 {String(Math.floor(timerSecondsLeft / 60)).padStart(2, "0")}:{String(timerSecondsLeft % 60).padStart(2, "0")}
               </div>
             )}

@@ -28,32 +28,29 @@ export async function createFeedback(params: CreateFeedbackParams) {
         You are an AI interviewer evaluating a candidate's mock interview performance.
 
         Strict Rules:
-        - Always evaluate across the 5 categories: Communication Skills, Technical Knowledge, Problem Solving, Cultural Fit, Confidence and Clarity.
+        - Always evaluate across the 5 categories in this exact order:
+          1. "Communication Skills"
+          2. "Technical Knowledge"
+          3. "Problem Solving"
+          4. "Cultural Fit"
+          5. "Confidence and Clarity"
+        - For each category object, you must output exactly:
+          - "name": (the exact literal string name of the category as listed above)
+          - "score": (numeric score 0 to 100)
+          - "comment": (short justification comment for the score, explaining why they got the score and how they can improve)
         - Scores must be from 0 to 100.
-        - If candidate does not answer, says "I don’t know", or microphone is not connected (no audio detected), assign a score of 0 for the affected category and explicitly explain why (e.g., "No audio detected due to microphone issue").
+        - If candidate does not answer, says "I don’t know", or microphone is not connected (no audio detected/purposely bad answers), assign a score of 0 (or very low score) for the affected category and explain it in the comment (e.g., "No audio detected or answer was missing"). Do not crash.
         - Do not invent or assume answers not present in the transcript.
         - Be professional, direct, and constructive in feedback.
 
-        Evaluation Categories:
-        1. Communication Skills
-        2. Technical Knowledge
-        3. Problem Solving
-        4. Cultural Fit
-        5. Confidence and Clarity
-
         Interview Transcript:
         ${formattedTranscript}
-
-        Your Task:
-        For each category:
-        - Provide a numeric score (0–100).
-        - Provide a short but clear justification for the score, including what went wrong and how the candidate can improve.
       `;
 
     try {
       const result = await generateObject({
         model: google("gemini-2.0-flash-001", {
-          structuredOutputs: false,
+          structuredOutputs: true,
         }),
         schema: feedbackSchema,
         prompt: promptText,
@@ -63,7 +60,7 @@ export async function createFeedback(params: CreateFeedbackParams) {
       console.warn("Primary feedback model gemini-2.0-flash-001 failed, trying gemini-2.5-flash...", err.message);
       const result = await generateObject({
         model: google("gemini-2.5-flash", {
-          structuredOutputs: false,
+          structuredOutputs: true,
         }),
         schema: feedbackSchema,
         prompt: promptText,
