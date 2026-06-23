@@ -119,7 +119,7 @@ export default function AwwwardsKineticTypography() {
           {word1.map((char, index) => (
             <span
               key={index}
-              className={`text-[12vw] font-black inline-block text-white ${
+              className={`text-[8.5vw] md:text-[7.5vw] font-black inline-block text-white ${
                 index % 2 === 0 ? "letter-odd" : "letter-even"
               }`}
               style={{ willChange: "transform" }}
@@ -139,7 +139,7 @@ export default function AwwwardsKineticTypography() {
           {word2.map((char, index) => (
             <span
               key={index}
-              className={`text-[12vw] font-black inline-block ${
+              className={`text-[8.5vw] md:text-[7.5vw] font-black inline-block ${
                 index % 2 === 0 ? "letter-even text-zinc-700/80" : "letter-odd text-white"
               }`}
               style={{ willChange: "transform" }}
