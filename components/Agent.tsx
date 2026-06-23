@@ -201,7 +201,7 @@ const Agent = ({
 
     const handleSaveConversationSetup = async (messages: SavedMessage[]) => {
       try {
-        await fetch("/api/interview/parse-and-create", {
+        const res = await fetch("/api/interview/parse-and-create", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
@@ -209,11 +209,15 @@ const Agent = ({
             userid: userId,
           }),
         });
+        const data = await res.json();
+        if (data.success && data.interviewId) {
+          router.push(`/interview/${data.interviewId}`);
+          return;
+        }
       } catch (err) {
         console.error("Failed to parse and create interview:", err);
-      } finally {
-        router.push("/");
       }
+      router.push("/");
     };
 
     if (callStatus === CallStatus.FINISHED) {
