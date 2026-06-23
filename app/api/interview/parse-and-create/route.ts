@@ -156,7 +156,13 @@ export async function POST(request: Request) {
 
     const docRef = await db.collection("interviews").add(interviewData);
 
-    return NextResponse.json({ success: true, interviewId: docRef.id }, { status: 200 });
+    return NextResponse.json({
+      success: true,
+      interviewId: docRef.id,
+      questions: questionsList,
+      codingProblem: codingProblem,
+      firstMessage: interviewData.firstMessage,
+    }, { status: 200 });
   } catch (error: any) {
     console.error("Error parsing and generating interview:", error);
     return NextResponse.json(

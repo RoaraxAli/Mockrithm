@@ -38,16 +38,30 @@ interface StarChecklist {
 const Agent = ({
   userName,
   userId,
-  interviewId,
-  feedbackId,
-  type,
-  questions,
+  interviewId: propInterviewId,
+  feedbackId: propFeedbackId,
+  type: propType,
+  questions: propQuestions,
   profileImage,
   firstMessage,
-  codingProblem,
+  codingProblem: propCodingProblem,
   userResumeData,
 }: AgentProps) => {
   const router = useRouter();
+
+  // Dynamic interview state hooks allowing live transition
+  const [activeType, setActiveType] = useState<"generate" | "interview">(propType);
+  const [activeQuestions, setActiveQuestions] = useState<string[]>(propQuestions || []);
+  const [activeCodingProblem, setActiveCodingProblem] = useState<any>(propCodingProblem || null);
+  const [activeInterviewId, setActiveInterviewId] = useState<string | null>(propInterviewId || null);
+  const [activeFeedbackId, setActiveFeedbackId] = useState<string | null>(propFeedbackId || null);
+
+  const type = activeType;
+  const questions = activeQuestions;
+  const codingProblem = activeCodingProblem;
+  const interviewId = activeInterviewId;
+  const feedbackId = activeFeedbackId;
+
   const [callStatus, setCallStatus] = useState<CallStatus>(CallStatus.INACTIVE);
   const [messages, _setMessages] = useState<SavedMessage[]>([]);
   const [isSpeaking, setIsSpeaking] = useState(false);
@@ -67,6 +81,11 @@ const Agent = ({
 
   // Live Coding States
   const [code, setCode] = useState(codingProblem?.templateCode || "");
+  useEffect(() => {
+    if (codingProblem?.templateCode) {
+      setCode(codingProblem.templateCode);
+    }
+  }, [codingProblem]);
   const [isCodingStuck, setIsCodingStuck] = useState(false);
   const lastCodeTypedRef = useRef<number>(Date.now());
 
@@ -782,6 +801,57 @@ RULES:
     handleSpeechCompleted("I am stuck on this coding problem. Can you give me a Socratic hint about my current code?");
   };
 
+  const transitionToInterview = async () => {
+    isProcessingRef.current = true;
+    setIsSpeaking(true);
+    setLastMessage("Configuring your interview questions. Please hold on...");
+
+    try {
+      const res = await fetch("/api/interview/parse-and-create", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          messages: messagesRef.current.map((m) => ({ role: m.role, content: m.content })),
+          userid: userId,
+        }),
+      });
+      const data = await res.json();
+      if (data.success && data.interviewId) {
+        setActiveQuestions(data.questions || []);
+        setActiveCodingProblem(data.codingProblem || null);
+        setActiveInterviewId(data.interviewId);
+        setActiveType("interview");
+        setActiveFeedbackId(null);
+
+        const welcome = data.firstMessage || "Okay, let's start the interview.";
+        setLastMessage(welcome);
+
+        // Reset the message history to start the interview cleanly
+        setMessages([{ role: "assistant", content: welcome }]);
+
+        // Speak the welcome greeting
+        await speakSentence(welcome);
+
+        if (isCallActiveRef.current) {
+          setIsSpeaking(false);
+          submittedTextRef.current = "";
+          setLastMessage("Listening... Speak now");
+          startSpeechRecognition();
+        }
+      } else {
+        throw new Error("Failed to parse and create interview");
+      }
+    } catch (err) {
+      console.error("Transition failed:", err);
+      setLastMessage("Failed to start interview. Ending call.");
+      setTimeout(() => {
+        handleDisconnect();
+      }, 3000);
+    } finally {
+      isProcessingRef.current = false;
+    }
+  };
+
   const resumeListeningAfterSpeech = () => {
     isProcessingRef.current = false;
     setIsSpeaking(false);
@@ -828,14 +898,18 @@ RULES:
         (lowercaseMsg.includes("thank you") && lowercaseMsg.includes("time") && lowercaseMsg.includes("today") && messagesRef.current.length > (questions?.length || 5) * 1.5);
 
       if (isGoodbye) {
-        // Stop timer if running
-        if (timerIntervalRef.current) {
-          clearInterval(timerIntervalRef.current);
-          timerIntervalRef.current = null;
+        if (type === "generate") {
+          transitionToInterview();
+        } else {
+          // Stop timer if running
+          if (timerIntervalRef.current) {
+            clearInterval(timerIntervalRef.current);
+            timerIntervalRef.current = null;
+          }
+          setTimeout(() => {
+            handleDisconnect();
+          }, 1500);
         }
-        setTimeout(() => {
-          handleDisconnect();
-        }, 1500);
       } else {
         submittedTextRef.current = ""; // reset so next answer isn't blocked
         setLastMessage("Listening... Speak now");
