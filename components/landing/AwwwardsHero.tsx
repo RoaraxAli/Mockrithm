@@ -107,65 +107,71 @@ export default function AwwwardsHero() {
       </div>
 
       {/* Description paragraph - placed asymmetrically bottom right */}
-      <motion.div
-        initial={{ opacity: 0, y: 40 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ ...transition, delay: 0.5 }}
-        className="hero-fade-target absolute right-[12%] bottom-[20%] max-w-xs sm:max-w-sm text-right z-30 max-sm:bottom-[32%] max-sm:left-6 max-sm:right-6 max-sm:text-left"
-      >
-        <p className="text-[11px] sm:text-xs font-bold uppercase tracking-[0.2em] text-zinc-450 leading-relaxed">
-          Conduct dynamic, voice-driven mock interviews tailored specifically to your resume. Eliminate vocal fillers, perfect your pacing, and pass corporate screeners with automated real-time analytics.
-        </p>
-      </motion.div>
+      <div className="hero-fade-target absolute right-[12%] bottom-[20%] z-30 max-sm:bottom-[32%] max-sm:left-6 max-sm:right-6">
+        <motion.div
+          initial={{ opacity: 0, y: 40 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ ...transition, delay: 0.5 }}
+          className="max-w-xs sm:max-w-sm text-right max-sm:text-left"
+        >
+          <p className="text-[11px] sm:text-xs font-bold uppercase tracking-[0.2em] text-zinc-450 leading-relaxed">
+            Conduct dynamic, voice-driven mock interviews tailored specifically to your resume. Eliminate vocal fillers, perfect your pacing, and pass corporate screeners with automated real-time analytics.
+          </p>
+        </motion.div>
+      </div>
 
       {/* CTAs - placed asymmetrically bottom left */}
-      <motion.div
-        initial={{ opacity: 0, y: 50 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ ...transition, delay: 0.65 }}
-        className="hero-fade-target absolute left-[12%] bottom-[16%] flex flex-col gap-4 items-start z-35 pointer-events-auto max-sm:bottom-[8%] max-sm:left-6 max-sm:right-6 max-sm:w-full"
-      >
-        <div className="flex gap-4 items-center max-sm:flex-col max-sm:w-full">
-          <Button
-            asChild
-            className="bg-white hover:bg-zinc-200 text-black font-extrabold text-[10px] uppercase tracking-widest px-8 py-3 rounded-none border border-white hover:shadow-[0_0_25px_rgba(255,255,255,0.4)] flex items-center justify-center gap-2 hover:scale-[1.03] active:scale-[0.97] transition-all duration-300 h-11 w-44 max-sm:w-full"
-            data-magnetic
-          >
-            <Link
-              href={getAuthRedirectUrl("sign-up")}
-              className="flex items-center justify-center gap-2"
+      <div className="hero-fade-target absolute left-[12%] bottom-[16%] z-35 pointer-events-auto max-sm:bottom-[8%] max-sm:left-6 max-sm:right-6 max-sm:w-full">
+        <motion.div
+          initial={{ opacity: 0, y: 50 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ ...transition, delay: 0.65 }}
+          className="flex flex-col gap-4 items-start max-sm:w-full"
+        >
+          <div className="flex gap-4 items-center max-sm:flex-col max-sm:w-full">
+            <Button
+              asChild
+              className="bg-white hover:bg-zinc-200 text-black font-extrabold text-[10px] uppercase tracking-widest px-8 py-3 rounded-none border border-white hover:shadow-[0_0_25px_rgba(255,255,255,0.4)] flex items-center justify-center gap-2 hover:scale-[1.03] active:scale-[0.97] transition-all duration-300 h-11 w-44 max-sm:w-full"
+              data-magnetic
             >
-              Start Prep <ArrowRight className="size-3.5" />
-            </Link>
-          </Button>
+              <Link
+                href={getAuthRedirectUrl("sign-up")}
+                className="flex items-center justify-center gap-2"
+              >
+                Start Prep <ArrowRight className="size-3.5" />
+              </Link>
+            </Button>
 
-          <Button
-            asChild
-            variant="outline"
-            className="border-white/20 hover:border-white/50 bg-black/40 backdrop-blur-md text-zinc-350 hover:text-white font-extrabold text-[10px] uppercase tracking-widest px-8 py-3 rounded-none hover:shadow-[0_0_20px_rgba(255,255,255,0.1)] hover:scale-[1.03] active:scale-[0.97] transition-all duration-300 h-11 w-44 max-sm:w-full"
-            data-magnetic
-          >
-            <Link href={getAuthRedirectUrl("sign-in")}>Access Portal</Link>
-          </Button>
-        </div>
-      </motion.div>
+            <Button
+              asChild
+              variant="outline"
+              className="border-white/20 hover:border-white/50 bg-black/40 backdrop-blur-md text-zinc-350 hover:text-white font-extrabold text-[10px] uppercase tracking-widest px-8 py-3 rounded-none hover:shadow-[0_0_20px_rgba(255,255,255,0.1)] hover:scale-[1.03] active:scale-[0.97] transition-all duration-300 h-11 w-44 max-sm:w-full"
+              data-magnetic
+            >
+              <Link href={getAuthRedirectUrl("sign-in")}>Access Portal</Link>
+            </Button>
+          </div>
+        </motion.div>
+      </div>
 
       {/* Scroll indicator - center bottom */}
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 0.5 }}
-        transition={{ delay: 1, duration: 1 }}
-        className="hero-fade-target absolute bottom-6 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 z-40"
-      >
-        <span className="text-[7px] font-black uppercase tracking-[0.3em] text-zinc-500">SCROLL DOWN TO FLY</span>
-        <div className="w-[1px] h-10 bg-gradient-to-b from-white via-zinc-800 to-transparent relative overflow-hidden">
-          <motion.div 
-            animate={{ y: ["-100%", "100%"] }}
-            transition={{ repeat: Infinity, duration: 1.5, ease: "easeInOut" }}
-            className="absolute left-0 top-0 w-full h-1/2 bg-white"
-          />
-        </div>
-      </motion.div>
+      <div className="hero-fade-target absolute bottom-6 left-1/2 -translate-x-1/2 z-40">
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 0.5 }}
+          transition={{ delay: 1, duration: 1 }}
+          className="flex flex-col items-center gap-2"
+        >
+          <span className="text-[7px] font-black uppercase tracking-[0.3em] text-zinc-500">SCROLL DOWN TO FLY</span>
+          <div className="w-[1px] h-10 bg-gradient-to-b from-white via-zinc-800 to-transparent relative overflow-hidden">
+            <motion.div 
+              animate={{ y: ["-100%", "100%"] }}
+              transition={{ repeat: Infinity, duration: 1.5, ease: "easeInOut" }}
+              className="absolute left-0 top-0 w-full h-1/2 bg-white"
+            />
+          </div>
+        </motion.div>
+      </div>
     </section>
   );
 }
