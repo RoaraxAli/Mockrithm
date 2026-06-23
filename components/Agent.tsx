@@ -56,6 +56,22 @@ const Agent = ({
   const [activeInterviewId, setActiveInterviewId] = useState<string | null>(propInterviewId || null);
   const [activeFeedbackId, setActiveFeedbackId] = useState<string | null>(propFeedbackId || null);
 
+  const typeRef = useRef(activeType);
+  const questionsRef = useRef(activeQuestions);
+  const codingProblemRef = useRef(activeCodingProblem);
+
+  useEffect(() => {
+    typeRef.current = activeType;
+  }, [activeType]);
+
+  useEffect(() => {
+    questionsRef.current = activeQuestions;
+  }, [activeQuestions]);
+
+  useEffect(() => {
+    codingProblemRef.current = activeCodingProblem;
+  }, [activeCodingProblem]);
+
   const type = activeType;
   const questions = activeQuestions;
   const codingProblem = activeCodingProblem;
@@ -361,17 +377,21 @@ const Agent = ({
   const speakSentence = (text: string): Promise<void> => {
     return new Promise((resolve) => {
       const cleanText = text.replace(/\[END_CALL\]/gi, "").replace(/[*#_`~[\]]/g, "").trim();
+      console.log(`[Agent.tsx] speakSentence called. Raw: "${text}", Cleaned: "${cleanText}"`);
       if (!cleanText) {
+        console.log("[Agent.tsx] Empty text, resolving speakSentence immediately.");
         resolve();
         return;
       }
 
       if (selectedVoice === "local") {
+        console.log("[Agent.tsx] Selected voice is local. Using speakSentenceFallback.");
         speakSentenceFallback(cleanText).then(resolve);
         return;
       }
 
       const voiceName = selectedVoice.startsWith("groq-") ? selectedVoice.substring(5) : "troy";
+      console.log(`[Agent.tsx] Requesting TTS generation via API for voice: ${voiceName}...`);
 
       fetch("/api/meow/tts", {
         method: "POST",
@@ -385,12 +405,15 @@ const Agent = ({
       })
         .then(async (response) => {
           if (!response.ok) {
+            console.error(`[Agent.tsx] TTS API response error. Status: ${response.status}`);
             throw new Error(`TTS API error: ${response.status}`);
           }
+          console.log("[Agent.tsx] TTS audio blob retrieved successfully.");
           return response.blob();
         })
         .then((blob) => {
           if (!isCallActiveRef.current) {
+            console.log("[Agent.tsx] Call is inactive, discarding audio playback.");
             resolve();
             return;
           }
@@ -399,14 +422,17 @@ const Agent = ({
           audioRef.current = audio;
 
           audio.addEventListener("ended", () => {
+            console.log("[Agent.tsx] TTS audio playback ended naturally.");
             URL.revokeObjectURL(audioUrl);
             audioRef.current = null;
             resolve();
           });
 
-          audio.addEventListener("error", () => {
+          audio.addEventListener("error", (e) => {
+            console.error("[Agent.tsx] Audio element failed to play audio stream:", e);
             URL.revokeObjectURL(audioUrl);
             audioRef.current = null;
+            console.log("[Agent.tsx] Falling back to local browser synthesis due to audio error.");
             speakSentenceFallback(cleanText).then(resolve);
           });
 
@@ -414,14 +440,16 @@ const Agent = ({
             setIsSpeaking(true);
           });
 
+          console.log("[Agent.tsx] Starting playback of TTS audio stream...");
           audio.play().catch((playErr) => {
-            console.warn("Autoplay blocked, falling back", playErr);
+            console.warn("[Agent.tsx] Autoplay policy blocked audio stream, falling back to local speech synth:", playErr);
             URL.revokeObjectURL(audioUrl);
             speakSentenceFallback(cleanText).then(resolve);
           });
         })
         .catch((err) => {
-          console.warn("TTS failed, using local browser synthesis", err);
+          console.error("[Agent.tsx] TTS workflow failed:", err);
+          console.log("[Agent.tsx] Falling back to local browser synthesis...");
           speakSentenceFallback(cleanText).then(resolve);
         });
     });
@@ -497,14 +525,21 @@ const Agent = ({
 
   // Speech Recognition (STT) Setup
   const startSpeechRecognition = () => {
-    if (!SpeechRecognition) return;
+    if (!SpeechRecognition) {
+      console.error("[Agent.tsx] SpeechRecognition API is not supported in this browser.");
+      return;
+    }
 
     try {
       if (recognitionRef.current) {
+        console.log("[Agent.tsx] Aborting previous SpeechRecognition instance...");
         recognitionRef.current.abort();
       }
-    } catch (e) {}
+    } catch (e) {
+      console.warn("[Agent.tsx] Error aborting previous SpeechRecognition:", e);
+    }
 
+    console.log("[Agent.tsx] Initializing new SpeechRecognition instance...");
     const rec = new SpeechRecognition();
     rec.continuous = false;    // Browser detects end-of-speech — reliable, no custom timers needed
     rec.interimResults = true; // Show real-time transcription while speaking
@@ -516,14 +551,16 @@ const Agent = ({
     let sessionInterim = "";
 
     rec.onstart = () => {
+      console.log("[Agent.tsx] SpeechRecognition session started. Listening for user input...");
       sessionFinal = "";
       sessionInterim = "";
       turnStartRef.current = Date.now();
     };
 
     rec.onerror = (event: any) => {
-      console.error("Speech recognition error:", event.error);
+      console.error("[Agent.tsx] SpeechRecognition error event captured:", event.error);
       if (event.error === "not-allowed") {
+        console.error("[Agent.tsx] Microphone access blocked or not allowed.");
         handleDisconnect();
         return;
       }
@@ -534,6 +571,7 @@ const Agent = ({
         !isProcessingRef.current &&
         !isSpeakingActiveRef.current
       ) {
+        console.log("[Agent.tsx] Transient SpeechRecognition error. Restarting in 300ms...");
         setTimeout(() => {
           if (isCallActiveRef.current && !isProcessingRef.current && !isSpeakingActiveRef.current) {
             startSpeechRecognition();
@@ -543,7 +581,10 @@ const Agent = ({
     };
 
     rec.onresult = (event: any) => {
-      if (!isCallActiveRef.current || isProcessingRef.current) return;
+      if (!isCallActiveRef.current || isProcessingRef.current) {
+        console.log("[Agent.tsx] Result discarded: call inactive or process busy.");
+        return;
+      }
 
       for (let i = event.resultIndex; i < event.results.length; ++i) {
         if (event.results[i].isFinal) {
@@ -555,21 +596,28 @@ const Agent = ({
       }
 
       const displayText = (sessionFinal + sessionInterim).trim();
+      console.log(`[Agent.tsx] STT interim transcript: "${displayText}"`);
       if (displayText.length > 0) {
         setLastMessage(displayText);
       }
     };
 
     rec.onend = () => {
-      if (!isCallActiveRef.current || isProcessingRef.current || isSpeakingActiveRef.current) return;
+      console.log("[Agent.tsx] SpeechRecognition session ended.");
+      if (!isCallActiveRef.current || isProcessingRef.current || isSpeakingActiveRef.current) {
+        console.log("[Agent.tsx] Discarding STT completion: state is active speaking or processing.");
+        return;
+      }
 
       const capturedText = (sessionFinal + sessionInterim).trim();
+      console.log(`[Agent.tsx] STT session final captured text: "${capturedText}"`);
 
       if (capturedText.length > 2) {
         // User said something — submit it to the AI
         handleSpeechCompleted(capturedText);
       } else {
         // Nothing useful captured, restart listening
+        console.log("[Agent.tsx] Captured text is too short. Restarting SpeechRecognition in 150ms...");
         setTimeout(() => {
           if (isCallActiveRef.current && !isProcessingRef.current && !isSpeakingActiveRef.current) {
             startSpeechRecognition();
@@ -582,7 +630,7 @@ const Agent = ({
     try {
       rec.start();
     } catch (e) {
-      console.error("Failed to start SpeechRecognition:", e);
+      console.error("[Agent.tsx] Exception starting SpeechRecognition:", e);
     }
   };
 
@@ -651,8 +699,8 @@ const Agent = ({
 
     try {
       let systemPrompt = "";
-      if (type === "interview" && questions) {
-        const formattedQuestions = questions.map((q: string) => `- ${q}`).join("\n");
+      if (typeRef.current === "interview" && questionsRef.current) {
+        const formattedQuestions = questionsRef.current.map((q: string) => `- ${q}`).join("\n");
         systemPrompt = `You are Alex, a professional job interviewer conducting a real-time voice interview with a candidate. Your goal is to assess their qualifications, motivation, and fit for the role.
 
 Interview Guidelines:
@@ -670,12 +718,12 @@ CRITICAL RULES - CONVERSATIONAL FLOW & CONCISENESS:
 - When all questions are done OR when you receive a [SYSTEM: Time is up...] message, conclude the interview warmly. Thank the candidate, wish them luck, say goodbye, and ALWAYS append "[END_CALL]" at the very end so the system knows to close the session. Example: "Thanks so much for your time today — it was great chatting with you. Best of luck! [END_CALL]"
 
 ${
-  codingProblem
+  codingProblemRef.current
     ? `Coding Sandbox Info:
-- The candidate is working on the coding problem: "${codingProblem.title}".
-- Description: ${codingProblem.description}
+- The candidate is working on the coding problem: "${codingProblemRef.current.title}".
+- Description: ${codingProblemRef.current.description}
 - Candidate's current code is:
-\`\`\`${codingProblem.language}
+\`\`\`${codingProblemRef.current.language}
 ${code}
 \`\`\`
 - If the candidate gets stuck (e.g., they say they don't know what to do, or they ask for a hint, or they don't make progress for a while), provide a Socratic hint to help them think in the right direction. Do NOT give them the full solution.`
@@ -788,7 +836,9 @@ RULES:
         queueSpeechChunk(accumulatedTextRef.current.trim());
       }
     } catch (e: any) {
-      console.error("LLM streaming failed:", e);
+      console.error("[Agent.tsx] LLM streaming failed with error:", e);
+      console.error("[Agent.tsx] Error message:", e.message);
+      console.error("[Agent.tsx] Error stack:", e.stack);
       setLastMessage(`Error: ${e.message}`);
       setTimeout(() => {
         resumeListeningAfterSpeech();
@@ -803,22 +853,37 @@ RULES:
   };
 
   const transitionToInterview = async () => {
+    console.log("[Agent.tsx] transitionToInterview triggered.");
     isProcessingRef.current = true;
     setIsSpeaking(true);
     setLastMessage("Configuring your interview questions. Please hold on...");
 
     try {
+      const payload = {
+        messages: messagesRef.current.map((m) => ({ role: m.role, content: m.content })),
+        userid: userId,
+        userResumeData: userResumeData,
+      };
+      console.log("[Agent.tsx] POST payload to /api/interview/parse-and-create:", payload);
+
       const res = await fetch("/api/interview/parse-and-create", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          messages: messagesRef.current.map((m) => ({ role: m.role, content: m.content })),
-          userid: userId,
-          userResumeData: userResumeData,
-        }),
+        body: JSON.stringify(payload),
       });
+
+      console.log(`[Agent.tsx] Received response status: ${res.status}`);
+      if (!res.ok) {
+        const errorText = await res.text();
+        console.error(`[Agent.tsx] API parse-and-create returned non-OK status. Body: ${errorText}`);
+        throw new Error(`Server returned status ${res.status}: ${errorText}`);
+      }
+
       const data = await res.json();
+      console.log("[Agent.tsx] Response payload parsed:", data);
+
       if (data.success && data.interviewId) {
+        console.log(`[Agent.tsx] Transition success. Active Interview ID: ${data.interviewId}`);
         setActiveQuestions(data.questions || []);
         setActiveCodingProblem(data.codingProblem || null);
         setActiveInterviewId(data.interviewId);
@@ -841,10 +906,12 @@ RULES:
           startSpeechRecognition();
         }
       } else {
+        console.error("[Agent.tsx] API success is false or missing interviewId:", data);
         throw new Error("Failed to parse and create interview");
       }
-    } catch (err) {
-      console.error("Transition failed:", err);
+    } catch (err: any) {
+      console.error("[Agent.tsx] Exception caught during transitionToInterview:", err);
+      console.error("[Agent.tsx] Error stack trace:", err.stack);
       setLastMessage("Failed to start interview. Ending call.");
       setTimeout(() => {
         handleDisconnect();
@@ -869,38 +936,10 @@ RULES:
 
       // Check if the assistant message signals the end of the interview
       const lowercaseMsg = fullMessageText.toLowerCase();
-      const isGoodbye =
-        lowercaseMsg.includes("[end_call]") ||
-        lowercaseMsg.includes("goodbye") ||
-        lowercaseMsg.includes("good bye") ||
-        lowercaseMsg.includes("have a great day") ||
-        lowercaseMsg.includes("have a good day") ||
-        lowercaseMsg.includes("best of luck") ||
-        lowercaseMsg.includes("best wishes") ||
-        lowercaseMsg.includes("take care") ||
-        lowercaseMsg.includes("all the best") ||
-        lowercaseMsg.includes("good luck with") ||
-        lowercaseMsg.includes("pick up where we left off") ||
-        lowercaseMsg.includes("wrap up the interview") ||
-        lowercaseMsg.includes("wrap up our session") ||
-        lowercaseMsg.includes("conclude the interview") ||
-        lowercaseMsg.includes("come back anytime") ||
-        lowercaseMsg.includes("it was a pleasure") ||
-        lowercaseMsg.includes("it was great chatting") ||
-        lowercaseMsg.includes("nice chatting with you") ||
-        (type === "generate" && (
-          lowercaseMsg.includes("[end_call]") ||
-          lowercaseMsg.includes("chosen") ||
-          lowercaseMsg.includes("selected") ||
-          lowercaseMsg.includes("set up") ||
-          lowercaseMsg.includes("setting up") ||
-          lowercaseMsg.includes("starting") ||
-          lowercaseMsg.includes("confirmed")
-        )) ||
-        (lowercaseMsg.includes("thank you") && lowercaseMsg.includes("time") && lowercaseMsg.includes("today") && messagesRef.current.length > (questions?.length || 5) * 1.5);
+      const isGoodbye = lowercaseMsg.includes("[end_call]");
 
       if (isGoodbye) {
-        if (type === "generate") {
+        if (typeRef.current === "generate") {
           transitionToInterview();
         } else {
           // Stop timer if running
