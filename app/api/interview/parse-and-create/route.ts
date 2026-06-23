@@ -45,7 +45,7 @@ export async function POST(request: Request) {
       .join("\n");
 
     const { object: setup } = await generateObject({
-      model: groq("llama-3.3-70b-versatile"),
+      model: groq("llama-3.1-8b-instant"),
       schema: setupSchema,
       prompt: `
         Analyze the following conversation transcript between a candidate and an interview setup assistant, as well as the candidate's resume/profile data.
@@ -78,7 +78,7 @@ export async function POST(request: Request) {
     `;
 
     const { text: questionsResponse } = await generateText({
-      model: groq("llama-3.3-70b-versatile"),
+      model: groq("llama-3.1-8b-instant"),
       prompt: questionsPrompt,
     });
 
@@ -103,7 +103,7 @@ export async function POST(request: Request) {
     if (isTechnical) {
       try {
         const { object } = await generateObject({
-          model: groq("llama-3.3-70b-versatile"),
+          model: groq("llama-3.1-8b-instant"),
           schema: z.object({
             title: z.string(),
             description: z.string(),
@@ -139,7 +139,7 @@ export async function POST(request: Request) {
     `;
 
     const { text: firstMessage } = await generateText({
-      model: groq("llama-3.3-70b-versatile"),
+      model: groq("llama-3.1-8b-instant"),
       prompt: welcomePrompt,
     });
 

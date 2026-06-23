@@ -69,7 +69,7 @@ const Agent = ({
 
   // Meow Engine Configuration States
   const [selectedVoice, setSelectedVoice] = useState<string>("groq-autumn");
-  const [selectedModel, setSelectedModel] = useState<string>("llama-3.3-70b-versatile");
+  const [selectedModel, setSelectedModel] = useState<string>("llama-3.1-8b-instant");
   const [showSettings, setShowSettings] = useState(false);
 
   // Interview Duration Selection
@@ -1172,8 +1172,8 @@ RULES:
                     onChange={(e) => setSelectedModel(e.target.value)}
                     className="bg-zinc-950 text-zinc-100 text-xs rounded-xl p-3 border border-zinc-900 focus:border-zinc-700 focus:ring-1 focus:ring-zinc-800 outline-none cursor-pointer hover:bg-zinc-900 transition-all font-semibold"
                   >
-                    <option value="llama-3.3-70b-versatile">Llama 3.3 70B (Recommended)</option>
-                    <option value="llama-3.1-8b-instant">Llama 3.1 8B (Fast)</option>
+                    <option value="llama-3.1-8b-instant">Llama 3.1 8B (Fast & Recommended)</option>
+                    <option value="llama-3.3-70b-versatile">Llama 3.3 70B (High Quality)</option>
                   </select>
                 </div>
 
