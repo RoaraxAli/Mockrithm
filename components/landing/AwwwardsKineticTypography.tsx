@@ -19,8 +19,8 @@ export default function AwwwardsKineticTypography() {
 
     oddLetters.forEach((letter: any) => {
       gsap.to(letter, {
-        y: -100,
-        skewX: 10,
+        y: -30,
+        skewX: 5,
         ease: "none",
         scrollTrigger: {
           trigger: containerRef.current,
@@ -33,8 +33,8 @@ export default function AwwwardsKineticTypography() {
 
     evenLetters.forEach((letter: any) => {
       gsap.to(letter, {
-        y: 120,
-        skewX: -10,
+        y: 30,
+        skewX: -5,
         ease: "none",
         scrollTrigger: {
           trigger: containerRef.current,
