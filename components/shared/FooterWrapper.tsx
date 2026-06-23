@@ -34,7 +34,7 @@ const FooterWrapper = () => {
     return null;
   }
   
-  if (pathname.startsWith("/interview") || pathname.startsWith("/admin")) {
+  if (pathname.startsWith("/interview") || pathname.startsWith("/admin") || pathname.startsWith("/onboarding")) {
     return null;
   }
 

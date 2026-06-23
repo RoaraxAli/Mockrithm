@@ -32,6 +32,7 @@ export default function AuthLayout({
     (pathname.startsWith("/interview/") && pathname !== "/interview") ||
     pathname.startsWith("/user") ||
     pathname.startsWith("/admin") ||
+    pathname.startsWith("/onboarding") ||
     [
       "/sign-in",
       "/sign-up",

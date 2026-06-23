@@ -11,11 +11,8 @@ import {
 } from "lucide-react"
 
 const navigation = [
-  { name: "Dashboard", href: "/user/dashboard", icon: LayoutDashboard },
-  { name: "Take Interview", href: "/user/take-interview", icon: PlayCircle },
-  { name: "Resume Builder", href: "/user/resume", icon: Sparkles },
-  { name: "Your Interviews", href: "/user/interviews", icon: FileText },
-  { name: "Feedback", href: "/user/feedback", icon: MessageSquare },
+  { name: "Home Dashboard", href: "/", icon: LayoutDashboard },
+  { name: "Take Interview", href: "/interview", icon: PlayCircle },
 ]
 
 export function Sidebar() {

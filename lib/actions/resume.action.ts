@@ -10,9 +10,10 @@ export async function saveParsedResume(params: {
   rawText: string;
   parsedData: ParsedResume;
   atsAnalysis?: AtsScoreResult;
+  country?: string;
 }): Promise<{ success: boolean; resumeId?: string; error?: string }> {
   try {
-    const { userId, fileName, rawText, parsedData, atsAnalysis } = params;
+    const { userId, fileName, rawText, parsedData, atsAnalysis, country } = params;
 
     const resumeData: ResumeDocument = {
       userId,
@@ -28,6 +29,10 @@ export async function saveParsedResume(params: {
       .doc(userId)
       .collection("resumes")
       .add(resumeData);
+
+    if (country) {
+      await db.collection("users").doc(userId).set({ country }, { merge: true });
+    }
 
     return { success: true, resumeId: docRef.id };
   } catch (error: any) {

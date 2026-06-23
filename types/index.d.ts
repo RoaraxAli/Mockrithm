@@ -57,6 +57,10 @@ interface User {
   imageUrl?: string;
   tier?: "freemium" | "premium" | "pro";
   billingInterval?: "monthly" | "annual" | "lifetime";
+  onboarded?: boolean;
+  resumeData?: any;
+  country?: string;
+  targetRole?: string;
 }
 
 interface InterviewCardProps {
@@ -83,6 +87,8 @@ interface AgentProps {
     templateCode: string;
     language: string;
   } | null;
+  userResumeData?: any;
+  userCountry?: string;
 }
 
 interface RouteParams {

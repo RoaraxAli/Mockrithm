@@ -3,6 +3,7 @@
 import { cache } from "react";
 import { generateObject } from "ai";
 import { google } from "@ai-sdk/google";
+import { z } from "zod";
 
 import { db } from "@/firebase/admin";
 import { feedbackSchema } from "@/constants";
@@ -22,12 +23,8 @@ export async function createFeedback(params: CreateFeedbackParams) {
       )
       .join("");
 
-    const { object } = await generateObject({
-      model: google("gemini-2.0-flash-001", {
-        structuredOutputs: false,
-      }),
-      schema: feedbackSchema, // Define schema with fixed categories + score + explanation
-      prompt: `
+    let object;
+    const promptText = `
         You are an AI interviewer evaluating a candidate's mock interview performance.
 
         Strict Rules:
@@ -51,8 +48,28 @@ export async function createFeedback(params: CreateFeedbackParams) {
         For each category:
         - Provide a numeric score (0–100).
         - Provide a short but clear justification for the score, including what went wrong and how the candidate can improve.
-      `,
-    });
+      `;
+
+    try {
+      const result = await generateObject({
+        model: google("gemini-2.0-flash-001", {
+          structuredOutputs: false,
+        }),
+        schema: feedbackSchema,
+        prompt: promptText,
+      });
+      object = result.object;
+    } catch (err: any) {
+      console.warn("Primary feedback model gemini-2.0-flash-001 failed, trying gemini-2.5-flash...", err.message);
+      const result = await generateObject({
+        model: google("gemini-2.5-flash", {
+          structuredOutputs: false,
+        }),
+        schema: feedbackSchema,
+        prompt: promptText,
+      });
+      object = result.object;
+    }
 
     const feedback = {
       interviewId,
@@ -78,6 +95,11 @@ export async function createFeedback(params: CreateFeedbackParams) {
     }
 
     await feedbackRef.set(feedback);
+
+    // Trigger self-improving profile refinement algorithm asynchronously
+    optimizeUserProfileWithFeedback(userId, feedback).catch((err) => {
+      console.error("Profile auto-optimization failed:", err);
+    });
 
     return { success: true, feedbackId: feedbackRef.id };
   } catch (error) {
@@ -197,3 +219,109 @@ export const getInterviewsByUserId = cache(async (
     return bTime - aTime;
   });
 });
+
+export async function optimizeUserProfileWithFeedback(userId: string, feedback: any) {
+  try {
+    const userDocRef = db.collection("users").doc(userId);
+    const userDoc = await userDocRef.get();
+    if (!userDoc.exists) return;
+
+    const userData = userDoc.data();
+    if (!userData || !userData.onboarded || !userData.resumeData) return;
+
+    const currentResumeData = userData.resumeData;
+    const currentParsedData = currentResumeData.fixedParsedData || currentResumeData.parsedData || {};
+
+    const workList = (currentParsedData.work || []).map((w: any) => ({
+      company: w.company,
+      position: w.position,
+      highlights: w.highlights
+    }));
+
+    let object;
+    const optimizationSchema = z.object({
+      summary: z.string().describe("Polished professional summary incorporating candidate strengths demonstrated in mock interviews"),
+      skills: z.array(z.string()).describe("Polished list of skills incorporating newly demonstrated competencies and removing/adjusting weak ones"),
+      work: z.array(
+        z.object({
+          company: z.string(),
+          position: z.string(),
+          highlights: z.array(z.string()).describe("Polished and perfected work highlights for this position using the STAR framework, integrating achievements")
+        })
+      ).describe("Polished work experience highlights")
+    });
+
+    const optPrompt = `
+        You are an elite Career Coach, Technical Recruiter, and Resume Writer.
+        Your task is to analyze a candidate's current resume details along with their latest mock interview feedback, and output an optimized, refined, and perfected set of professional details.
+        
+        Mock Interview Feedback:
+        - Score: ${feedback.totalScore}%
+        - Demonstrated Strengths: ${JSON.stringify(feedback.strengths)}
+        - Areas for Improvement: ${JSON.stringify(feedback.areasForImprovement)}
+        - Assessment Summary: ${feedback.finalAssessment}
+        
+        Current Resume Profile Details:
+        - Summary: ${currentParsedData.basics?.summary || ""}
+        - Skills: ${JSON.stringify(currentParsedData.skills || [])}
+        - Work Experience: ${JSON.stringify(workList)}
+        
+        Refinement Guidelines:
+        1. Professional Summary: Perfect the summary. Incorporate key technical strengths demonstrated in the interview, while maintaining a professional and crisp tone. Keep it under 4 sentences.
+        2. Skills: Refine the skills list. Retain valid technical skills, add skills they demonstrated competence in during the interview, and ensure the list is clean and highly relevant.
+        3. Work Experience Highlights: Refine the bullet points (highlights) for each job. Apply the STAR framework. If the interview feedback highlighted positive technical depth or specific project achievements, subtly weave that context into the bullet points. Ensure they start with strong action verbs and feel extremely premium. Do not change the company name or position.
+      `;
+
+    try {
+      const result = await generateObject({
+        model: google("gemini-2.5-flash", {
+          structuredOutputs: false,
+        }),
+        schema: optimizationSchema,
+        prompt: optPrompt,
+      });
+      object = result.object;
+    } catch (err: any) {
+      console.warn("Primary optimization model gemini-2.5-flash failed, trying gemini-2.0-flash...", err.message);
+      const result = await generateObject({
+        model: google("gemini-2.0-flash", {
+          structuredOutputs: false,
+        }),
+        schema: optimizationSchema,
+        prompt: optPrompt,
+      });
+      object = result.object;
+    }
+
+    // Merge the optimized details back into Firestore under fixedParsedData
+    const updatedParsedData = {
+      ...currentParsedData,
+      basics: {
+        ...(currentParsedData.basics || {}),
+        summary: object.summary
+      },
+      skills: object.skills,
+      work: (currentParsedData.work || []).map((w: any) => {
+        const matchingFix = object.work.find(
+          (fw: any) => fw.company.toLowerCase().includes(w.company.toLowerCase()) || w.company.toLowerCase().includes(fw.company.toLowerCase())
+        );
+        return {
+          ...w,
+          highlights: matchingFix ? matchingFix.highlights : w.highlights
+        };
+      })
+    };
+
+    const optimizationLog = `Optimized after mock interview for role '\${userData.targetRole || "Unknown"}'. Rating: \${feedback.totalScore}%. Refined summary and highlights based on demonstrated competencies.`;
+
+    await userDocRef.update({
+      "resumeData.fixedParsedData": updatedParsedData,
+      "resumeData.summary": optimizationLog,
+      "resumeData.updatedAt": new Date().toISOString()
+    });
+
+    console.log("User profile optimized successfully for user ID:", userId);
+  } catch (error) {
+    console.error("Failed to run profile optimization algorithm:", error);
+  }
+}

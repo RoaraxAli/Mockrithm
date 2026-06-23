@@ -45,6 +45,7 @@ const Agent = ({
   profileImage,
   firstMessage,
   codingProblem,
+  userResumeData,
 }: AgentProps) => {
   const router = useRouter();
   const [callStatus, setCallStatus] = useState<CallStatus>(CallStatus.INACTIVE);
@@ -56,6 +57,13 @@ const Agent = ({
   const [selectedVoice, setSelectedVoice] = useState<string>("groq-autumn");
   const [selectedModel, setSelectedModel] = useState<string>("llama-3.3-70b-versatile");
   const [showSettings, setShowSettings] = useState(false);
+
+  // Interview Duration Selection
+  const [showDurationModal, setShowDurationModal] = useState(false);
+  const [selectedDuration, setSelectedDuration] = useState<"brief" | "medium" | "lengthy" | null>(null);
+  const [timerSecondsLeft, setTimerSecondsLeft] = useState<number | null>(null);
+  const timerIntervalRef = useRef<NodeJS.Timeout | null>(null);
+  const isTimerEndingRef = useRef(false);
 
   // Live Coding States
   const [code, setCode] = useState(codingProblem?.templateCode || "");
@@ -102,6 +110,7 @@ const Agent = ({
   const isProcessingRef = useRef<boolean>(false);
   const isCallActiveRef = useRef<boolean>(false);
   const messagesRef = useRef<SavedMessage[]>([]);
+  const submittedTextRef = useRef<string>(""); // track last submitted text to prevent duplicate processing
 
   // Helper to sync state and ref
   const setMessages = (updater: SavedMessage[] | ((prev: SavedMessage[]) => SavedMessage[])) => {
@@ -139,6 +148,9 @@ const Agent = ({
       isCallActiveRef.current = false;
       if (silenceTimerRef.current) {
         clearTimeout(silenceTimerRef.current);
+      }
+      if (timerIntervalRef.current) {
+        clearInterval(timerIntervalRef.current);
       }
       stopTTSPlayback();
       try {
@@ -457,12 +469,18 @@ const Agent = ({
     } catch (e) {}
 
     const rec = new SpeechRecognition();
-    rec.continuous = true;
-    rec.interimResults = true;
+    rec.continuous = false;    // Browser detects end-of-speech — reliable, no custom timers needed
+    rec.interimResults = true; // Show real-time transcription while speaking
     rec.lang = "en-US";
+    rec.maxAlternatives = 1;
+
+    // Per-session accumulators (local vars, not refs)
+    let sessionFinal = "";
+    let sessionInterim = "";
 
     rec.onstart = () => {
-      console.log("Speech recognition started");
+      sessionFinal = "";
+      sessionInterim = "";
       turnStartRef.current = Date.now();
     };
 
@@ -470,46 +488,56 @@ const Agent = ({
       console.error("Speech recognition error:", event.error);
       if (event.error === "not-allowed") {
         handleDisconnect();
+        return;
       }
-    };
-
-    rec.onend = () => {
-      if (isCallActiveRef.current && !isProcessingRef.current && !isSpeakingActiveRef.current) {
+      // On no-speech or other transient errors, just restart
+      if (
+        event.error !== "aborted" &&
+        isCallActiveRef.current &&
+        !isProcessingRef.current &&
+        !isSpeakingActiveRef.current
+      ) {
         setTimeout(() => {
           if (isCallActiveRef.current && !isProcessingRef.current && !isSpeakingActiveRef.current) {
-            try {
-              rec.start();
-            } catch (e) {}
+            startSpeechRecognition();
           }
-        }, 150);
+        }, 300);
       }
     };
 
     rec.onresult = (event: any) => {
       if (!isCallActiveRef.current || isProcessingRef.current) return;
 
-      let interimTranscript = "";
-      let finalTranscript = "";
-
       for (let i = event.resultIndex; i < event.results.length; ++i) {
         if (event.results[i].isFinal) {
-          finalTranscript += event.results[i][0].transcript;
+          sessionFinal += event.results[i][0].transcript;
+          sessionInterim = "";
         } else {
-          interimTranscript += event.results[i][0].transcript;
+          sessionInterim = event.results[i][0].transcript;
         }
       }
 
-      const combinedText = (finalTranscript + interimTranscript).trim();
-      if (combinedText.length > 0) {
-        setLastMessage(combinedText);
+      const displayText = (sessionFinal + sessionInterim).trim();
+      if (displayText.length > 0) {
+        setLastMessage(displayText);
+      }
+    };
 
-        if (silenceTimerRef.current) {
-          clearTimeout(silenceTimerRef.current);
-        }
+    rec.onend = () => {
+      if (!isCallActiveRef.current || isProcessingRef.current || isSpeakingActiveRef.current) return;
 
-        silenceTimerRef.current = setTimeout(() => {
-          handleSpeechCompleted(combinedText);
-        }, 1700);
+      const capturedText = (sessionFinal + sessionInterim).trim();
+
+      if (capturedText.length > 2) {
+        // User said something — submit it to the AI
+        handleSpeechCompleted(capturedText);
+      } else {
+        // Nothing useful captured, restart listening
+        setTimeout(() => {
+          if (isCallActiveRef.current && !isProcessingRef.current && !isSpeakingActiveRef.current) {
+            startSpeechRecognition();
+          }
+        }, 150);
       }
     };
 
@@ -520,6 +548,7 @@ const Agent = ({
       console.error("Failed to start SpeechRecognition:", e);
     }
   };
+
 
   const handleSpeechCompleted = async (text: string) => {
     if (isProcessingRef.current) return;
@@ -601,7 +630,7 @@ CRITICAL RULES - CONVERSATIONAL FLOW & CONCISENESS:
 - Never use emojis.
 - If you ask a behavioral question and the candidate's response misses a concrete, measurable Result or outcome (e.g., they don't give numbers, metrics, or saved time), ask a follow-up question specifically seeking to uncover that quantitative metric.
 - Conclude the interview properly when all questions are asked and answered.
-- Thank the candidate for their time, say goodbye, and append the tag "[END_CALL]" at the end of your response to signal the system to close the session. Example: "Thank you for your time. Goodbye! [END_CALL]"
+- When all questions are done OR when you receive a [SYSTEM: Time is up...] message, conclude the interview warmly. Thank the candidate, wish them luck, say goodbye, and ALWAYS append "[END_CALL]" at the very end so the system knows to close the session. Example: "Thanks so much for your time today — it was great chatting with you. Best of luck! [END_CALL]"
 
 ${
   codingProblem
@@ -616,7 +645,30 @@ ${code}
     : ""
 }`;
       } else {
-        systemPrompt = `You are a professional assistant helping the user configure and generate their interview. Help them choose their job role, experience level, and tech stack. Keep responses short and conversational. Write only plain, clean text without any markdown or symbols.`;
+        // Build context from the user's existing profile data
+        const profileRole = userResumeData?.targetRole || "";
+        const profileSummary = userResumeData?.resumeData?.parsedData?.basics?.summary || userResumeData?.resumeData?.summary || "";
+        const profileSkills = userResumeData?.resumeData?.parsedData?.skills || userResumeData?.resumeData?.fixedParsedData?.skills || [];
+        const skillsList = Array.isArray(profileSkills) ? profileSkills.slice(0, 6).join(", ") : "";
+
+        systemPrompt = `You are a professional interview assistant helping ${userName} configure their mock interview session.
+
+CANDIDATE PROFILE (already collected, do NOT ask about these again):
+- Name: ${userName}
+- Target Role: ${profileRole || "Software Engineer"}
+- Key Skills: ${skillsList || "JavaScript, React, Node.js"}
+- Profile Summary: ${profileSummary ? profileSummary.slice(0, 200) : "Experienced software professional"}
+
+YOUR ONLY JOB: Ask them ONE question only - which type of interview do they want:
+1. Technical (concepts, architecture, system design)
+2. Behavioral (STAR framework, past experiences)
+3. Live Coding Sandbox (solve a coding problem live)
+
+RULES:
+- Do NOT ask about job role, experience level, or tech stack - you already have that data.
+- Keep every reply under 20 words.
+- Write only plain clean text. No markdown, no emojis, no symbols.
+- Once they choose, confirm their choice in one short sentence and end your response. The system will create the interview automatically.`;
       }
 
       const history = [
@@ -728,15 +780,38 @@ ${code}
 
       // Check if the assistant message signals the end of the interview
       const lowercaseMsg = fullMessageText.toLowerCase();
-      const isGoodbye = lowercaseMsg.includes("[end_call]") || 
-                        lowercaseMsg.includes("goodbye") || 
-                        (lowercaseMsg.includes("thank you") && lowercaseMsg.includes("time") && lowercaseMsg.includes("today") && messagesRef.current.length > (questions?.length || 5) * 1.5);
+      const isGoodbye =
+        lowercaseMsg.includes("[end_call]") ||
+        lowercaseMsg.includes("goodbye") ||
+        lowercaseMsg.includes("good bye") ||
+        lowercaseMsg.includes("have a great day") ||
+        lowercaseMsg.includes("have a good day") ||
+        lowercaseMsg.includes("best of luck") ||
+        lowercaseMsg.includes("best wishes") ||
+        lowercaseMsg.includes("take care") ||
+        lowercaseMsg.includes("all the best") ||
+        lowercaseMsg.includes("good luck with") ||
+        lowercaseMsg.includes("pick up where we left off") ||
+        lowercaseMsg.includes("wrap up the interview") ||
+        lowercaseMsg.includes("wrap up our session") ||
+        lowercaseMsg.includes("conclude the interview") ||
+        lowercaseMsg.includes("come back anytime") ||
+        lowercaseMsg.includes("it was a pleasure") ||
+        lowercaseMsg.includes("it was great chatting") ||
+        lowercaseMsg.includes("nice chatting with you") ||
+        (lowercaseMsg.includes("thank you") && lowercaseMsg.includes("time") && lowercaseMsg.includes("today") && messagesRef.current.length > (questions?.length || 5) * 1.5);
 
       if (isGoodbye) {
+        // Stop timer if running
+        if (timerIntervalRef.current) {
+          clearInterval(timerIntervalRef.current);
+          timerIntervalRef.current = null;
+        }
         setTimeout(() => {
           handleDisconnect();
         }, 1500);
       } else {
+        submittedTextRef.current = ""; // reset so next answer isn't blocked
         setLastMessage("Listening... Speak now");
         startSpeechRecognition();
       }
@@ -744,9 +819,15 @@ ${code}
   };
 
   // Connect & Disconnect Call Lifecycles
-  const handleCall = async () => {
-    setCallStatus(CallStatus.CONNECTING);
+  const startCallWithDuration = async (duration: "brief" | "medium" | "lengthy") => {
+    setSelectedDuration(duration);
+    setShowDurationModal(false);
+    isTimerEndingRef.current = false;
 
+    // Compute seconds for timer (brief=5min, medium=10min, lengthy=no timer)
+    const durationSeconds = duration === "brief" ? 5 * 60 : duration === "medium" ? 10 * 60 : null;
+
+    setCallStatus(CallStatus.CONNECTING);
     isCallActiveRef.current = true;
     isProcessingRef.current = false;
     accumulatedTextRef.current = "";
@@ -756,6 +837,30 @@ ${code}
     setMessages([]);
     setCallStatus(CallStatus.ACTIVE);
     setIsSpeaking(true);
+
+    // Start countdown timer if applicable
+    if (durationSeconds !== null) {
+      setTimerSecondsLeft(durationSeconds);
+      timerIntervalRef.current = setInterval(() => {
+        setTimerSecondsLeft((prev) => {
+          if (prev === null || prev <= 1) {
+            clearInterval(timerIntervalRef.current!);
+            timerIntervalRef.current = null;
+            // Trigger wrap-up — let the AI generate its own farewell naturally
+            if (!isTimerEndingRef.current && isCallActiveRef.current) {
+              isTimerEndingRef.current = true;
+              // Inject a hidden system cue; AI will produce a unique goodbye
+              // which the isGoodbye detection will catch and end the call
+              handleSpeechCompleted("[SYSTEM: Time is up. Please conclude the interview warmly and say goodbye to the candidate.]");
+            }
+            return 0;
+          }
+          return prev - 1;
+        });
+      }, 1000);
+    } else {
+      setTimerSecondsLeft(null);
+    }
 
     // Dynamic Custom Welcome Greeting seeding
     const welcomeMsg = firstMessage || interviewer.firstMessage || "Hello! Thank you for taking the time to speak with me today.";
@@ -768,9 +873,15 @@ ${code}
     // Start listening once welcome message finishes speaking
     if (isCallActiveRef.current) {
       setIsSpeaking(false);
+      submittedTextRef.current = ""; // reset for fresh session
       setLastMessage("Listening... Speak now");
       startSpeechRecognition();
     }
+  };
+
+  const handleCall = () => {
+    // Show duration picker modal instead of starting immediately
+    setShowDurationModal(true);
   };
 
   const handleDisconnect = () => {
@@ -781,6 +892,12 @@ ${code}
       clearTimeout(silenceTimerRef.current);
       silenceTimerRef.current = null;
     }
+
+    if (timerIntervalRef.current) {
+      clearInterval(timerIntervalRef.current);
+      timerIntervalRef.current = null;
+    }
+    setTimerSecondsLeft(null);
 
     stopTTSPlayback();
 
@@ -803,6 +920,67 @@ ${code}
 
   return (
     <div className="w-full flex flex-col gap-6 font-mona-sans text-zinc-100 selection:bg-violet-500/30 selection:text-white">
+      {/* Duration Selection Modal */}
+      <AnimatePresence>
+        {showDurationModal && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 flex items-center justify-center bg-zinc-950/80 backdrop-blur-md"
+          >
+            <motion.div
+              initial={{ scale: 0.9, opacity: 0, y: 20 }}
+              animate={{ scale: 1, opacity: 1, y: 0 }}
+              exit={{ scale: 0.9, opacity: 0 }}
+              transition={{ type: "spring", damping: 20 }}
+              className="relative w-full max-w-sm mx-4 bg-zinc-950 border border-zinc-800 rounded-2xl p-7 shadow-2xl"
+            >
+              <button
+                onClick={() => setShowDurationModal(false)}
+                className="absolute top-4 right-4 text-zinc-600 hover:text-zinc-300 transition-colors text-xs font-bold"
+              >
+                ✕
+              </button>
+              <h2 className="text-sm font-bold text-white uppercase tracking-widest mb-1">Interview Length</h2>
+              <p className="text-[11px] text-zinc-500 mb-6">How long would you like this session to be?</p>
+              <div className="flex flex-col gap-3">
+                <button
+                  onClick={() => startCallWithDuration("brief")}
+                  className="group w-full flex items-center justify-between px-5 py-4 rounded-xl border border-zinc-800 bg-zinc-900/60 hover:border-emerald-500/40 hover:bg-emerald-950/20 transition-all duration-300 cursor-pointer"
+                >
+                  <div className="text-left">
+                    <div className="text-xs font-bold text-white uppercase tracking-wider group-hover:text-emerald-300 transition-colors">Brief</div>
+                    <div className="text-[10px] text-zinc-500 mt-0.5">~5 minutes · Quick practice round</div>
+                  </div>
+                  <span className="text-[10px] font-bold text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-2.5 py-1 rounded-full">5 min</span>
+                </button>
+                <button
+                  onClick={() => startCallWithDuration("medium")}
+                  className="group w-full flex items-center justify-between px-5 py-4 rounded-xl border border-zinc-800 bg-zinc-900/60 hover:border-amber-500/40 hover:bg-amber-950/20 transition-all duration-300 cursor-pointer"
+                >
+                  <div className="text-left">
+                    <div className="text-xs font-bold text-white uppercase tracking-wider group-hover:text-amber-300 transition-colors">Medium</div>
+                    <div className="text-[10px] text-zinc-500 mt-0.5">~10 minutes · Balanced session</div>
+                  </div>
+                  <span className="text-[10px] font-bold text-amber-400 bg-amber-500/10 border border-amber-500/20 px-2.5 py-1 rounded-full">10 min</span>
+                </button>
+                <button
+                  onClick={() => startCallWithDuration("lengthy")}
+                  className="group w-full flex items-center justify-between px-5 py-4 rounded-xl border border-zinc-800 bg-zinc-900/60 hover:border-violet-500/40 hover:bg-violet-950/20 transition-all duration-300 cursor-pointer"
+                >
+                  <div className="text-left">
+                    <div className="text-xs font-bold text-white uppercase tracking-wider group-hover:text-violet-300 transition-colors">Lengthy</div>
+                    <div className="text-[10px] text-zinc-500 mt-0.5">20+ minutes · Full interview experience</div>
+                  </div>
+                  <span className="text-[10px] font-bold text-violet-400 bg-violet-500/10 border border-violet-500/20 px-2.5 py-1 rounded-full">No limit</span>
+                </button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       {/* Sleek Modern Session Status Bar */}
       {callStatus !== CallStatus.INACTIVE && (
         <motion.div
@@ -830,6 +1008,19 @@ ${code}
               <span className="text-zinc-600 mr-1.5">Type:</span>
               <span className="text-zinc-300 uppercase">{type}</span>
             </div>
+            {timerSecondsLeft !== null && (
+              <div className={cn(
+                "flex items-center gap-1.5 font-mono font-black px-3 py-1 rounded-full border transition-all duration-500",
+                timerSecondsLeft <= 60
+                  ? "text-rose-400 border-rose-500/30 bg-rose-500/10 animate-pulse"
+                  : timerSecondsLeft <= 120
+                  ? "text-amber-400 border-amber-500/30 bg-amber-500/10"
+                  : "text-emerald-400 border-emerald-500/30 bg-emerald-500/10"
+              )}>
+                <span className="text-[10px] text-zinc-500 font-semibold mr-0.5 font-sans">⏱</span>
+                {String(Math.floor(timerSecondsLeft / 60)).padStart(2, "0")}:{String(timerSecondsLeft % 60).padStart(2, "0")}
+              </div>
+            )}
             <div>
               <span className="text-zinc-600 mr-1.5">Connection:</span>
               <span className="text-emerald-400 font-bold">Stable</span>

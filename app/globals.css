@@ -111,6 +111,10 @@
   * {
     @apply border-border outline-ring/50;
   }
+  .custom-cursor-active,
+  .custom-cursor-active * {
+    cursor: none !important;
+  }
   body {
     @apply bg-background text-foreground;
     background-color: #09090b;

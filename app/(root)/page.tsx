@@ -2,6 +2,7 @@ import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import DocumentationPage from "../documentation/page";
 import MarketingLanding from "@/components/MarketingLanding";
+import LandingDashboard from "@/components/LandingDashboard";
 import { getCurrentUser } from "@/lib/actions/auth.action";
 
 export default async function Home() {
@@ -15,7 +16,16 @@ export default async function Home() {
   const user = await getCurrentUser();
 
   if (user) {
-    redirect("/dashboard");
+    if (!user.onboarded) {
+      redirect("/onboarding");
+    }
+    return (
+      <LandingDashboard
+        user={user}
+        userInterviews={[]}
+        allInterviews={[]}
+      />
+    );
   }
 
   return <MarketingLanding />;
