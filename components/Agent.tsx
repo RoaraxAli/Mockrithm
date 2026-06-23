@@ -541,7 +541,7 @@ const Agent = ({
 
     console.log("[Agent.tsx] Initializing new SpeechRecognition instance...");
     const rec = new SpeechRecognition();
-    rec.continuous = false;    // Browser detects end-of-speech — reliable, no custom timers needed
+    rec.continuous = true;     // Continuous listening to allow pause/think/context correction
     rec.interimResults = true; // Show real-time transcription while speaking
     rec.lang = "en-US";
     rec.maxAlternatives = 1;
@@ -586,31 +586,55 @@ const Agent = ({
         return;
       }
 
-      for (let i = event.resultIndex; i < event.results.length; ++i) {
+      // Rebuild the final and interim text across continuous updates
+      let interimText = "";
+      let finalParts = "";
+      for (let i = 0; i < event.results.length; ++i) {
         if (event.results[i].isFinal) {
-          sessionFinal += event.results[i][0].transcript;
-          sessionInterim = "";
+          finalParts += event.results[i][0].transcript;
         } else {
-          sessionInterim = event.results[i][0].transcript;
+          interimText += event.results[i][0].transcript;
         }
       }
+      sessionFinal = finalParts;
+      sessionInterim = interimText;
 
       const displayText = (sessionFinal + sessionInterim).trim();
       console.log(`[Agent.tsx] STT interim transcript: "${displayText}"`);
       if (displayText.length > 0) {
         setLastMessage(displayText);
+
+        // Reset/start silence detection timer to submit speech when user pauses for 1.6s
+        if (silenceTimerRef.current) {
+          clearTimeout(silenceTimerRef.current);
+        }
+        silenceTimerRef.current = setTimeout(() => {
+          console.log("[Agent.tsx] Silence detected (1.6s). Submitting speech to AI...");
+          if (isCallActiveRef.current && !isProcessingRef.current && !isSpeakingActiveRef.current) {
+            // Stop recognition to submit
+            try {
+              rec.stop();
+            } catch (e) {}
+            handleSpeechCompleted(displayText);
+          }
+        }, 1600);
       }
     };
 
     rec.onend = () => {
       console.log("[Agent.tsx] SpeechRecognition session ended.");
+      if (silenceTimerRef.current) {
+        clearTimeout(silenceTimerRef.current);
+        silenceTimerRef.current = null;
+      }
+
       if (!isCallActiveRef.current || isProcessingRef.current || isSpeakingActiveRef.current) {
         console.log("[Agent.tsx] Discarding STT completion: state is active speaking or processing.");
         return;
       }
 
       const capturedText = (sessionFinal + sessionInterim).trim();
-      console.log(`[Agent.tsx] STT session final captured text: "${capturedText}"`);
+      console.log(`[Agent.tsx] STT session final captured text on end: "${capturedText}"`);
 
       if (capturedText.length > 2) {
         // User said something — submit it to the AI

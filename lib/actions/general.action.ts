@@ -96,6 +96,13 @@ export async function createFeedback(params: CreateFeedbackParams) {
 
     await feedbackRef.set(feedback);
 
+    // Mark the interview document as finalized in Firestore
+    try {
+      await db.collection("interviews").doc(interviewId).update({ finalized: true });
+    } catch (e) {
+      console.error("Failed to mark interview as finalized:", e);
+    }
+
     // Trigger self-improving profile refinement algorithm asynchronously
     optimizeUserProfileWithFeedback(userId, feedback).catch((err) => {
       console.error("Profile auto-optimization failed:", err);
