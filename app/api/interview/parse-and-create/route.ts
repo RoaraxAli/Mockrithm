@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { generateText, generateObject } from "ai";
-import { google } from "@ai-sdk/google";
+import { groq } from "@ai-sdk/groq";
 import { z } from "zod";
 import { db } from "@/firebase/admin";
 import { getRandomInterviewCover } from "@/lib/utils";
@@ -45,7 +45,7 @@ export async function POST(request: Request) {
       .join("\n");
 
     const { object: setup } = await generateObject({
-      model: google("gemini-2.5-flash"),
+      model: groq("llama-3.3-70b-versatile"),
       schema: setupSchema,
       prompt: `
         Analyze the following conversation transcript between a candidate and an interview setup assistant, as well as the candidate's resume/profile data.
@@ -78,7 +78,7 @@ export async function POST(request: Request) {
     `;
 
     const { text: questionsResponse } = await generateText({
-      model: google("gemini-2.5-flash"),
+      model: groq("llama-3.3-70b-versatile"),
       prompt: questionsPrompt,
     });
 
@@ -103,7 +103,7 @@ export async function POST(request: Request) {
     if (isTechnical) {
       try {
         const { object } = await generateObject({
-          model: google("gemini-2.5-flash"),
+          model: groq("llama-3.3-70b-versatile"),
           schema: z.object({
             title: z.string(),
             description: z.string(),
@@ -139,7 +139,7 @@ export async function POST(request: Request) {
     `;
 
     const { text: firstMessage } = await generateText({
-      model: google("gemini-2.5-flash"),
+      model: groq("llama-3.3-70b-versatile"),
       prompt: welcomePrompt,
     });
 
