@@ -428,7 +428,20 @@ const Agent = ({
 
   const queueSpeechChunk = (text: string) => {
     const cleanText = text.replace(/\[END_CALL\]/gi, "").replace(/[*#_`~[\]]/g, "").trim();
-    if (!cleanText) return;
+    if (!cleanText) {
+      if (selectedVoice === "local") {
+        if (streamCompletedRef.current && localSpeechFinishedCountRef.current === localSpeechQueueCountRef.current) {
+          localSpeechQueueCountRef.current = 0;
+          localSpeechFinishedCountRef.current = 0;
+          resumeListeningAfterSpeech();
+        }
+      } else {
+        if (streamCompletedRef.current && speechQueueRef.current.length === 0 && !isSpeakingActiveRef.current) {
+          resumeListeningAfterSpeech();
+        }
+      }
+      return;
+    }
 
     if (selectedVoice === "local") {
       playLocalSpeechChunk(cleanText);
@@ -668,7 +681,7 @@ RULES:
 - Do NOT ask about job role, experience level, or tech stack - you already have that data.
 - Keep every reply under 20 words.
 - Write only plain clean text. No markdown, no emojis, no symbols.
-- Once they choose, confirm their choice in one short sentence and end your response. The system will create the interview automatically.`;
+- Once they choose, confirm their choice in one short sentence, append "[END_CALL]" at the very end of your response, and end your response. The system will create the interview automatically.`;
       }
 
       const history = [
