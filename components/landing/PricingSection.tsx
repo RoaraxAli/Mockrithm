@@ -74,7 +74,7 @@ export default function PricingSection() {
             whileInView={{ opacity: 1, y: 0, scale: 1 }}
             viewport={{ once: true, margin: "-100px" }}
             transition={{ type: "spring", stiffness: 80, damping: 18 }}
-            className="flex md:-translate-y-6 w-full"
+            className="flex md:-translate-y-6 md:flex-1 w-full"
           >
             <div
               className="border border-white/5 bg-zinc-950/20 backdrop-blur-md rounded-2xl p-8 flex flex-col justify-between hover:border-zinc-750 transition-all duration-300 relative pricing-card shadow-2xl w-full"
@@ -115,7 +115,7 @@ export default function PricingSection() {
             whileInView={{ opacity: 1, y: 0, scale: 1 }}
             viewport={{ once: true, margin: "-100px" }}
             transition={{ type: "spring", stiffness: 80, damping: 18, delay: 0.08 }}
-            className="flex w-full"
+            className="flex md:flex-1 w-full"
           >
             <div
               className="border border-white/10 bg-white/[0.015] backdrop-blur-md rounded-2xl p-8 flex flex-col justify-between hover:border-white/20 transition-all duration-300 relative overflow-hidden pricing-card shadow-2xl w-full"
@@ -171,7 +171,7 @@ export default function PricingSection() {
             whileInView={{ opacity: 1, y: 0, scale: 1 }}
             viewport={{ once: true, margin: "-100px" }}
             transition={{ type: "spring", stiffness: 80, damping: 18, delay: 0.16 }}
-            className="flex md:translate-y-6 w-full"
+            className="flex md:translate-y-6 md:flex-1 w-full"
           >
             <div
               className="border border-white/5 bg-zinc-950/20 backdrop-blur-md rounded-2xl p-8 flex flex-col justify-between hover:border-zinc-750 transition-all duration-300 relative pricing-card shadow-2xl w-full"
