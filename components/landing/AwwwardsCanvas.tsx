@@ -2,15 +2,16 @@
 
 import { useEffect, useRef } from "react";
 import * as THREE from "three";
+import { EffectComposer } from "three/examples/jsm/postprocessing/EffectComposer.js";
+import { RenderPass } from "three/examples/jsm/postprocessing/RenderPass.js";
+import { UnrealBloomPass } from "three/examples/jsm/postprocessing/UnrealBloomPass.js";
+import { OutputPass } from "three/examples/jsm/postprocessing/OutputPass.js";
 
 // Custom vertex shader for morphing noise deformation + scroll-linked explosion displacement
 const vertexShader = `
   uniform float uTime;
   uniform float uScrollProgress;
   uniform float uExplosionForce;
-  vec3 uMouse = vec3(-999.0, -999.0, -999.0);
-  float uMouseRadius = 2.2;
-  float uMouseStrength = 0.0;
 
   varying vec3 vNormal;
   varying vec3 vViewPosition;
@@ -98,6 +99,7 @@ const vertexShader = `
       vec4 mvPosition = modelViewMatrix * vec4(displacedPos, 1.0);
       vViewPosition = -mvPosition.xyz;
       gl_Position = projectionMatrix * mvPosition;
+      gl_PointSize = 4.0;
   }
 `;
 
@@ -122,15 +124,15 @@ const fragmentShader = `
       vec3 edgeColor = vec3(1.0, 1.0, 1.0); // Pure White edges
       vec3 baseColor = vec3(0.03, 0.03, 0.03); // Near black core
 
-      vec3 finalColor = mix(baseColor, edgeColor, fresnel * 1.5 + 0.05);
+      vec3 finalColor = mix(baseColor, edgeColor, fresnel * 1.1 + 0.02);
 
       // Highlight peaks using noise values
       if (vNoise > 0.3) {
-          finalColor += vec3(0.15) * (vNoise - 0.3);
+          finalColor += vec3(0.08) * (vNoise - 0.3);
       }
 
       // Fade out centerpiece completely during transition
-      float alpha = clamp(1.0 - uScrollProgress * 5.0, 0.0, 1.0);
+      float alpha = clamp(1.0 - uScrollProgress, 0.0, 1.0);
 
       gl_FragColor = vec4(finalColor, alpha * 0.85);
   }
@@ -143,13 +145,15 @@ export default function AwwwardsCanvas() {
   useEffect(() => {
     if (typeof window === "undefined" || !canvasRef.current || !containerRef.current) return;
 
+    const isMobile = window.matchMedia("(max-width: 768px)").matches;
+
     const container = containerRef.current;
     const canvas = canvasRef.current;
 
     // 1. THREE.JS SCENE SETUP
     const renderer = new THREE.WebGLRenderer({
       canvas,
-      antialias: true,
+      antialias: !isMobile,
       alpha: true,
       powerPreference: "high-performance",
     });
@@ -157,16 +161,12 @@ export default function AwwwardsCanvas() {
     const startH = typeof window !== "undefined" ? window.innerHeight : 600;
 
     renderer.setSize(startW, startH);
+    // Cap pixel ratio at 2 for performance
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
 
     const scene = new THREE.Scene();
 
-    const camera = new THREE.PerspectiveCamera(
-      45,
-      startW / startH,
-      0.1,
-      120
-    );
+    const camera = new THREE.PerspectiveCamera(45, startW / startH, 0.1, 120);
     camera.position.z = 7;
 
     // 2. HERO morphing centerpiece
@@ -181,15 +181,31 @@ export default function AwwwardsCanvas() {
       },
       transparent: true,
       depthWrite: true,
-      blending: THREE.AdditiveBlending,
+      blending: THREE.NormalBlending,
       wireframe: true,
     });
 
     const centerpieceMesh = new THREE.Mesh(centerpieceGeometry, centerpieceMaterial);
     scene.add(centerpieceMesh);
 
+    // Add particle representation of centerpiece that shatters
+    const centerpiecePoints = new THREE.Points(centerpieceGeometry, centerpieceMaterial);
+    scene.add(centerpiecePoints);
+
+    // 2b. ORBITING ICOSAHEDRON (smaller satellite)
+    const icoGeometry = new THREE.IcosahedronGeometry(0.45, 0);
+    const icoMaterial = new THREE.MeshBasicMaterial({
+      color: 0xffffff,
+      wireframe: true,
+      transparent: true,
+      opacity: 0.5,
+    });
+    const icoMesh = new THREE.Mesh(icoGeometry, icoMaterial);
+    scene.add(icoMesh);
+
     // 3. BACKGROUND ORBITING PARTICLES
-    const particleCount = 18000;
+    // Reduce particle count by 60% on mobile
+    const particleCount = isMobile ? 7200 : 18000;
     const particlePositions = new Float32Array(particleCount * 3);
     const particleSpeeds = new Float32Array(particleCount);
     const particleAngles = new Float32Array(particleCount * 3); // theta, phi, radius
@@ -210,10 +226,12 @@ export default function AwwwardsCanvas() {
     }
 
     const particleGeometry = new THREE.BufferGeometry();
-    particleGeometry.setAttribute(
-      "position",
-      new THREE.BufferAttribute(particlePositions, 3)
-    );
+    particleGeometry.setAttribute("position", new THREE.BufferAttribute(particlePositions, 3));
+
+    // Line segment geometry (velocity stretch): pairs of points
+    const lineGeometry = new THREE.BufferGeometry();
+    const linePositions = new Float32Array(particleCount * 2 * 3); // 2 verts per particle
+    lineGeometry.setAttribute("position", new THREE.BufferAttribute(linePositions, 3));
 
     const createParticleTexture = () => {
       const pCanvas = document.createElement("canvas");
@@ -240,22 +258,52 @@ export default function AwwwardsCanvas() {
       opacity: 0.5,
     });
 
+    const lineMaterial = new THREE.LineBasicMaterial({
+      color: 0xffffff,
+      transparent: true,
+      opacity: 0.35,
+      blending: THREE.AdditiveBlending,
+      depthWrite: false,
+    });
+
     const particles = new THREE.Points(particleGeometry, particleMaterial);
     scene.add(particles);
 
+    const particleLines = new THREE.LineSegments(lineGeometry, lineMaterial);
+    particleLines.visible = false;
+    scene.add(particleLines);
 
-
-    // 5. MOUSE POSITION INTERACTION WITH SPRING physics
+    // 4. MOUSE POSITION INTERACTION WITH SPRING physics + force field
     let mouse = { x: 0, y: 0, targetX: 0, targetY: 0 };
+    let mouseWorld = new THREE.Vector3(-999, -999, -999);
 
     const handleMouseMove = (e: MouseEvent) => {
       const mx = (e.clientX / window.innerWidth) * 2 - 1;
       const my = -(e.clientY / window.innerHeight) * 2 + 1;
       mouse.targetX = mx * 2.0;
       mouse.targetY = my * 1.5;
+      mouseWorld.set(mx * 5, my * 4, 2);
     };
 
     window.addEventListener("mousemove", handleMouseMove);
+
+    // 5. POST-PROCESSING (bloom) — desktop only
+    let composer: EffectComposer | null = null;
+    let bloomPass: UnrealBloomPass | null = null;
+    if (!isMobile) {
+      composer = new EffectComposer(renderer);
+      composer.addPass(new RenderPass(scene, camera));
+      bloomPass = new UnrealBloomPass(
+        new THREE.Vector2(startW, startH),
+        0.45, // strength
+        0.4, // radius
+        0.35 // threshold
+      );
+      composer.addPass(bloomPass);
+      composer.addPass(new OutputPass());
+      composer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+      composer.setSize(startW, startH);
+    }
 
     // 6. ANIMATION TICK LOOP
     const clock = new THREE.Clock();
@@ -271,8 +319,11 @@ export default function AwwwardsCanvas() {
     };
     window.addEventListener("scroll", handleScroll);
 
+    const scratchVec = new THREE.Vector3();
+    const scratchVec2 = new THREE.Vector3();
+
     const tick = () => {
-      const delta = Math.min(clock.getDelta(), 0.1);
+      clock.getDelta();
       const elapsedTime = clock.getElapsedTime();
 
       // 1. Calculate overall scroll progress of the page
@@ -293,60 +344,153 @@ export default function AwwwardsCanvas() {
       // Sync scroll velocity damping (momentum feel)
       scrollVelocity += (targetScrollVelocity - scrollVelocity) * 0.08;
       targetScrollVelocity *= 0.92; // Decay over time
+      const normalizedVelocity = Math.min(Math.abs(scrollVelocity) / 40, 1);
+
+      // Calculate hero scroll progress (0 to 1 across the full hero section viewport)
+      const heroScrollProgress = Math.max(0, Math.min(1, window.scrollY / window.innerHeight));
+
+      // Calculate feature 01 scroll progress (showcaseProgress 0.0 to 0.2 represents Feature 01)
+      const featureOneProgress = Math.max(0, Math.min(1, showcaseProgress / 0.2));
+
+      // Combined progress: Hero section covers 0 to 0.5, Feature 01 covers 0.5 to 1.0
+      let explosionProgress = 0;
+      if (showcaseProgress > 0) {
+        explosionProgress = 0.5 + featureOneProgress * 0.5;
+      } else {
+        explosionProgress = heroScrollProgress * 0.5;
+      }
 
       // Update centerpiece uniforms
       centerpieceMaterial.uniforms.uTime.value = elapsedTime;
-      centerpieceMaterial.uniforms.uScrollProgress.value = scrollProgress;
+      centerpieceMaterial.uniforms.uScrollProgress.value = explosionProgress;
 
-      // Scroll-linked explosion force (starts melting starting at 5% scroll)
+      // Explode centerpiece rapidly based on explosion progress (breaking animation)
       let explosionForce = 0;
-      if (scrollProgress > 0.05) {
-        explosionForce = (scrollProgress - 0.05) * 3.5;
+      if (explosionProgress > 0.0) {
+        explosionForce = explosionProgress * 30.0; // Extra violent explosion force to break it completely
       }
       centerpieceMaterial.uniforms.uExplosionForce.value = explosionForce;
 
       // Rotate centerpiece autonomously
       centerpieceMesh.rotation.y = elapsedTime * 0.08;
       centerpieceMesh.rotation.z = elapsedTime * 0.04;
+      if (centerpiecePoints) {
+        centerpiecePoints.rotation.y = centerpieceMesh.rotation.y;
+        centerpiecePoints.rotation.z = centerpieceMesh.rotation.z;
+      }
 
       // Parallax mouse follow for centerpiece
       mouse.x += (mouse.targetX - mouse.x) * 0.035;
       mouse.y += (mouse.targetY - mouse.y) * 0.035;
       centerpieceMesh.position.x = mouse.x * 0.35;
       centerpieceMesh.position.y = mouse.y * 0.35;
+      if (centerpiecePoints) {
+        centerpiecePoints.position.x = centerpieceMesh.position.x;
+        centerpiecePoints.position.y = centerpieceMesh.position.y;
+      }
+
+      // Orbiting icosahedron around the centerpiece
+      const orbitRadius = 2.4;
+      icoMesh.position.x = centerpieceMesh.position.x + Math.cos(elapsedTime * 0.6) * orbitRadius;
+      icoMesh.position.y = centerpieceMesh.position.y + Math.sin(elapsedTime * 0.6) * orbitRadius * 0.7;
+      icoMesh.position.z = Math.sin(elapsedTime * 0.4) * 0.8;
+      icoMesh.rotation.x = elapsedTime * 0.5;
+      icoMesh.rotation.y = elapsedTime * 0.7;
+      
+      // Fade out satellite
+      icoMaterial.opacity = Math.max(0, 0.5 * (1 - explosionProgress * 1.5));
 
       // 3. Move camera Z along gallery line based on showcaseProgress
       const targetCameraZ = 7 - showcaseProgress * 52;
       camera.position.z += (targetCameraZ - camera.position.z) * 0.08;
-      
+
       // Camera subtle parallax on mouse move
       camera.position.x = mouse.x * 0.15;
       camera.position.y = mouse.y * 0.15;
 
-      // Orbiting particles positions calculation
+      // Orbiting particles positions calculation + mouse force field
       const positionsAttr = particleGeometry.getAttribute("position") as THREE.BufferAttribute;
       const positions = positionsAttr.array as Float32Array;
+      const linePositionsAttr = lineGeometry.getAttribute("position") as THREE.BufferAttribute;
+      const linePositions = linePositionsAttr.array as Float32Array;
+
+      const forceRadius = 2.6;
+      const forceStrength = 1.4;
 
       for (let i = 0; i < particleCount; i++) {
         const theta = particleAngles[i * 3] + elapsedTime * particleSpeeds[i] * 0.1;
         const phi = particleAngles[i * 3 + 1];
-        
-        // Explode particles on scroll progress
-        const radius = particleAngles[i * 3 + 2] * (1.0 + scrollProgress * 1.5);
 
-        positions[i * 3] = Math.sin(phi) * Math.cos(theta) * radius + mouse.x * 0.15;
-        positions[i * 3 + 1] = Math.sin(phi) * Math.sin(theta) * radius + mouse.y * 0.15;
-        positions[i * 3 + 2] = Math.cos(phi) * radius;
+        // Explode particles on scroll progress
+        const radius = particleAngles[i * 3 + 2] * (1.0 + explosionProgress * 3.5);
+
+        let px = Math.sin(phi) * Math.cos(theta) * radius + mouse.x * 0.15;
+        let py = Math.sin(phi) * Math.sin(theta) * radius + mouse.y * 0.15;
+        let pz = Math.cos(phi) * radius;
+
+        // Mouse force field: push particles away from cursor within radius
+        scratchVec.set(px, py, pz);
+        const distToMouse = scratchVec.distanceTo(mouseWorld);
+        if (distToMouse < forceRadius) {
+          const force = (1 - distToMouse / forceRadius) * forceStrength;
+          scratchVec2.copy(scratchVec).sub(mouseWorld).normalize().multiplyScalar(force);
+          px += scratchVec2.x;
+          py += scratchVec2.y;
+          pz += scratchVec2.z;
+        }
+
+        positions[i * 3] = px;
+        positions[i * 3 + 1] = py;
+        positions[i * 3 + 2] = pz;
+
+        // Build line segments for velocity stretch
+        const stretchLen = 0.04 + normalizedVelocity * 0.6;
+        linePositions[i * 6] = px;
+        linePositions[i * 6 + 1] = py;
+        linePositions[i * 6 + 2] = pz;
+        linePositions[i * 6 + 3] = px;
+        linePositions[i * 6 + 4] = py + stretchLen;
+        linePositions[i * 6 + 5] = pz;
       }
       positionsAttr.needsUpdate = true;
+      linePositionsAttr.needsUpdate = true;
+
+      // Toggle points vs lines based on scroll velocity
+      const useLines = normalizedVelocity > 0.25;
+      particles.visible = !useLines;
+      particleLines.visible = useLines;
+
+      // Fade out background particles
+      const particleAlpha = Math.max(0, Math.min(0.5, 0.5 * (1 - explosionProgress)));
+      particleMaterial.opacity = particleAlpha;
+      lineMaterial.opacity = particleAlpha * 0.7;
+
+      // Scale centerpiece and satellites down
+      const heroScale = 1 - explosionProgress;
+      icoMesh.scale.set(heroScale, heroScale, heroScale);
+
+      // Visibility controls
+      const isModelVisible = explosionProgress < 0.99;
+      centerpieceMesh.visible = isModelVisible;
+      if (centerpiecePoints) centerpiecePoints.visible = isModelVisible;
+      icoMesh.visible = isModelVisible;
+      if (!isModelVisible) {
+        particles.visible = false;
+        particleLines.visible = false;
+      }
 
       // Particle orbit rotations
       particles.rotation.y = elapsedTime * 0.01;
       particles.rotation.z = elapsedTime * 0.003;
+      particleLines.rotation.y = particles.rotation.y;
+      particleLines.rotation.z = particles.rotation.z;
 
-
-
-      renderer.render(scene, camera);
+      // Render via composer (bloom) on desktop, plain render on mobile
+      if (composer) {
+        composer.render();
+      } else {
+        renderer.render(scene, camera);
+      }
       animationFrameId = requestAnimationFrame(tick);
     };
 
@@ -359,6 +503,10 @@ export default function AwwwardsCanvas() {
       camera.aspect = w / h;
       camera.updateProjectionMatrix();
       renderer.setSize(w, h);
+      if (composer) {
+        composer.setSize(w, h);
+        if (bloomPass) bloomPass.setSize(w, h);
+      }
     };
 
     window.addEventListener("resize", handleResize);
@@ -369,12 +517,16 @@ export default function AwwwardsCanvas() {
       window.removeEventListener("mousemove", handleMouseMove);
       window.removeEventListener("scroll", handleScroll);
       window.removeEventListener("resize", handleResize);
+      if (composer) composer.dispose();
       renderer.dispose();
       centerpieceGeometry.dispose();
       centerpieceMaterial.dispose();
+      icoGeometry.dispose();
+      icoMaterial.dispose();
       particleGeometry.dispose();
       particleMaterial.dispose();
-
+      lineGeometry.dispose();
+      lineMaterial.dispose();
     };
   }, []);
 
@@ -386,7 +538,7 @@ export default function AwwwardsCanvas() {
     >
       <canvas
         ref={canvasRef}
-        className="w-full h-full opacity-80"
+        className="w-full h-full opacity-35"
         style={{ width: "100%", height: "100%" }}
       />
     </div>

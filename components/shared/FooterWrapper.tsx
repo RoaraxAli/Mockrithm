@@ -28,13 +28,14 @@ const FooterWrapper = () => {
     "/forgot-password",
     "/reset-password",
     "/verify-code",
+    "/blogs",
   ];
   
   if (hideOnPaths.some((path) => pathname.startsWith(path))) {
     return null;
   }
   
-  if (pathname.startsWith("/interview") || pathname.startsWith("/admin") || pathname.startsWith("/onboarding")) {
+  if (pathname.startsWith("/interview") || pathname.startsWith("/admin") || pathname.startsWith("/onboarding") || pathname.startsWith("/documentation")) {
     return null;
   }
 

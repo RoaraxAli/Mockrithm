@@ -136,20 +136,27 @@
     @apply text-slate-400;
   }
 
-  /* Custom modern thin scrollbar */
+  /* Premium thin custom scrollbar */
   ::-webkit-scrollbar {
-    width: 6px;
-    height: 6px;
+    width: 4px;
+    height: 4px;
   }
   ::-webkit-scrollbar-track {
     background: transparent;
   }
   ::-webkit-scrollbar-thumb {
-    background: rgba(255, 255, 255, 0.08);
+    background: linear-gradient(180deg, rgba(255, 255, 255, 1) 0%, rgba(255, 255, 255, 0.2) 100%);
     border-radius: 9999px;
+    transition: box-shadow 0.25s ease;
   }
   ::-webkit-scrollbar-thumb:hover {
-    background: rgba(255, 255, 255, 0.2);
+    background: linear-gradient(180deg, rgba(255, 255, 255, 1) 0%, rgba(255, 255, 255, 0.4) 100%);
+    box-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+  }
+  /* Firefox */
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: rgba(255, 255, 255, 0.35) transparent;
   }
 
   /* Shadcn card glassmorphic global override - flat premium */
@@ -359,6 +366,12 @@
 @utility premium-grid-dot {
   background-image: radial-gradient(rgba(255, 255, 255, 0.05) 1px, transparent 1px);
   background-size: 24px 24px;
+}
+
+/* Circular clip-path reveal helper (driven by GSAP) */
+@utility clip-reveal {
+  clip-path: circle(0% at 50% 50%);
+  will-change: clip-path;
 }
 
 @utility dark-gradient {
@@ -673,5 +686,15 @@
   animation: float-slow-3 20s ease-in-out infinite;
   transform-origin: center;
   will-change: transform;
+}
+
+/* Slow ping ring for the AI-engine mic visual */
+@keyframes ping-slow {
+  0% { transform: scale(0.9); opacity: 0.6; }
+  70%, 100% { transform: scale(1.6); opacity: 0; }
+}
+.animate-ping-slow {
+  animation: ping-slow 2.4s cubic-bezier(0, 0, 0.2, 1) infinite;
+  will-change: transform, opacity;
 }
 

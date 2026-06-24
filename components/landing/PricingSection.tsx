@@ -1,8 +1,10 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { motion } from "framer-motion";
+import { gsap } from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { Check, Crown, Zap, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { getAuthRedirectUrl } from "@/lib/utils/auth";
@@ -10,6 +12,45 @@ import { getAuthRedirectUrl } from "@/lib/utils/auth";
 export default function PricingSection() {
   const [isAnnual, setIsAnnual] = useState(false);
   const springTransition = { type: "spring", stiffness: 90, damping: 18 };
+  const headingRef = useRef<HTMLHeadingElement>(null);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    gsap.registerPlugin(ScrollTrigger);
+
+    const ctx = gsap.context(() => {
+      const chars = gsap.utils.toArray<HTMLElement>(".pricing-reveal-char");
+      if (chars.length === 0) return;
+
+      const tween = gsap.from(chars, {
+        yPercent: 110,
+        opacity: 0,
+        duration: 0.9,
+        ease: "power4.out",
+        stagger: 0.03,
+        scrollTrigger: {
+          trigger: headingRef.current,
+          start: "top 85%",
+          toggleActions: "play none none reverse",
+        },
+      });
+
+      return () => {
+        tween.scrollTrigger?.kill();
+        tween.kill();
+      };
+    }, headingRef);
+
+    return () => ctx.revert();
+  }, []);
+
+  const headingWords = [
+    { text: "Pricing", tone: "text-white" },
+    { text: "built", tone: "text-white" },
+    { text: "for", tone: "text-zinc-500" },
+    { text: "serious", tone: "text-zinc-500" },
+    { text: "applicants.", tone: "text-zinc-500" },
+  ];
 
   const pricingDetails = {
     premium: isAnnual ? { monthly: 8, total: 96 } : { monthly: 10, total: 10 },
@@ -35,7 +76,26 @@ export default function PricingSection() {
       <div className="absolute bottom-1/4 right-1/3 w-[600px] h-[600px] bg-[radial-gradient(circle,rgba(255,255,255,0.015)_0%,rgba(0,0,0,0)_70%)] pointer-events-none z-0" />
 
       <div className="max-w-6xl mx-auto px-6 relative z-10">
-        
+
+        {/* Heading with split-text reveal */}
+        <div className="text-center mb-12 pt-8">
+          <span className="text-xs font-black tracking-[0.2em] text-zinc-400 uppercase">Flexible Access Tiers</span>
+          <h2
+            ref={headingRef}
+            className="mt-4 text-3xl sm:text-5xl lg:text-6xl font-black tracking-tight leading-none flex flex-wrap justify-center gap-x-4"
+          >
+            {headingWords.map((word, wi) => (
+              <span key={wi} className="inline-flex overflow-hidden">
+                {word.text.split("").map((char, ci) => (
+                  <span key={ci} className={`pricing-reveal-char inline-block ${word.tone}`}>
+                    {char}
+                  </span>
+                ))}
+              </span>
+            ))}
+          </h2>
+        </div>
+
         {/* Centered Billing Toggle Switch */}
         <div className="flex flex-col items-center mb-10">
           <div className="inline-flex items-center gap-3 bg-zinc-950/60 p-1.5 rounded-full border border-white/5 shadow-2xl backdrop-blur-md">

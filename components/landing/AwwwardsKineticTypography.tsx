@@ -129,11 +129,6 @@ export default function AwwwardsKineticTypography() {
           ))}
         </div>
 
-        {/* Row Telemetry Sub-line */}
-        <div className="text-[9px] font-black uppercase tracking-[0.3em] text-zinc-550 my-2">
-          INTELLIGENCE INTERACTION MATRIX CORE // ONLINE
-        </div>
-
         {/* ROW 2 */}
         <div className="flex justify-center overflow-hidden select-none uppercase tracking-tighter">
           {word2.map((char, index) => (

@@ -106,7 +106,6 @@ const Navbar = ({ userId, userName, userRole }: NavbarProps) => {
     : [
         { href: "/#intro", label: "Intro", icon: Home },
         { href: "/#features", label: "Features", icon: Info },
-        { href: "/#resources", label: "Resources", icon: Mail },
         { href: "/#pricing", label: "Pricing", icon: CreditCard },
         { href: "/documentation", label: "Documentation", icon: Info },
       ];

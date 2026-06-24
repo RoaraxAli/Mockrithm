@@ -33,6 +33,8 @@ export default function AuthLayout({
     pathname.startsWith("/user") ||
     pathname.startsWith("/admin") ||
     pathname.startsWith("/onboarding") ||
+    pathname.startsWith("/blogs") ||
+    pathname.startsWith("/documentation") ||
     [
       "/sign-in",
       "/sign-up",

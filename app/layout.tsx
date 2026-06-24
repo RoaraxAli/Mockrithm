@@ -6,6 +6,7 @@ import { ClerkProvider } from "@clerk/nextjs";
 import AuthLayout from "@/components/Authlayout";
 import Preloader from "@/components/shared/Preloader";
 import FooterWrapper from "@/components/shared/FooterWrapper";
+import MagneticCursor from "@/components/landing/MagneticCursor";
 import { getCurrentUser } from "@/lib/actions/auth.action";
 import { Analytics } from "@vercel/analytics/react";
 
@@ -49,6 +50,7 @@ export default async function RootLayout({
         >
           <Preloader />
           <Analytics />
+          <MagneticCursor />
           <AuthLayout initialUserId={user?.id} initialUserName={user?.name} initialUserRole={user?.role}>
             {children}
           </AuthLayout>

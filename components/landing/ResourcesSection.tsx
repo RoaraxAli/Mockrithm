@@ -1,6 +1,9 @@
 "use client";
 
+import { useEffect, useRef } from "react";
 import { motion } from "framer-motion";
+import { gsap } from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { Clock, Calendar, User, BookOpen, Loader2 } from "lucide-react";
 
 interface Article {
@@ -21,6 +24,45 @@ interface ResourcesSectionProps {
 
 export default function ResourcesSection({ articles, loadingBlogs }: ResourcesSectionProps) {
   const springTransition = { type: "spring", stiffness: 85, damping: 18 };
+  const headingRef = useRef<HTMLHeadingElement>(null);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    gsap.registerPlugin(ScrollTrigger);
+
+    const ctx = gsap.context(() => {
+      const chars = gsap.utils.toArray<HTMLElement>(".reveal-char");
+      if (chars.length === 0) return;
+
+      const tween = gsap.from(chars, {
+        yPercent: 110,
+        opacity: 0,
+        duration: 0.9,
+        ease: "power4.out",
+        stagger: 0.03,
+        scrollTrigger: {
+          trigger: headingRef.current,
+          start: "top 85%",
+          toggleActions: "play none none reverse",
+        },
+      });
+
+      return () => {
+        tween.scrollTrigger?.kill();
+        tween.kill();
+      };
+    }, headingRef);
+
+    return () => ctx.revert();
+  }, []);
+
+  const headingWords = [
+    { text: "Expert", tone: "text-white" },
+    { text: "articles,", tone: "text-white" },
+    { text: "proven", tone: "text-zinc-500" },
+    { text: "preparation", tone: "text-zinc-500" },
+    { text: "logs.", tone: "text-zinc-500" },
+  ];
 
   return (
     <section id="resources" className="py-28 relative scroll-mt-16 z-10 text-white bg-transparent">
@@ -36,9 +78,19 @@ export default function ResourcesSection({ articles, loadingBlogs }: ResourcesSe
           className="text-center space-y-4 mb-20"
         >
           <span className="text-xs font-black tracking-[0.2em] text-zinc-400 uppercase">Guides & Resources</span>
-          <h2 className="text-3xl sm:text-5xl lg:text-6xl font-black text-white tracking-tight leading-none drop-shadow-[0_0_30px_rgba(255,255,255,0.03)]">
-            Expert articles, <br />
-            <span className="text-zinc-550 bg-gradient-to-r from-zinc-500 to-zinc-350 bg-clip-text text-transparent">proven preparation logs.</span>
+          <h2
+            ref={headingRef}
+            className="text-3xl sm:text-5xl lg:text-6xl font-black tracking-tight leading-none drop-shadow-[0_0_30px_rgba(255,255,255,0.03)] flex flex-wrap justify-center gap-x-4"
+          >
+            {headingWords.map((word, wi) => (
+              <span key={wi} className="inline-flex overflow-hidden">
+                {word.text.split("").map((char, ci) => (
+                  <span key={ci} className={`reveal-char inline-block ${word.tone}`}>
+                    {char}
+                  </span>
+                ))}
+              </span>
+            ))}
           </h2>
           <p className="text-xs sm:text-sm text-zinc-400 max-w-xl mx-auto leading-relaxed font-semibold">
             Read preparation feedback, vocal studies, and technical interview layouts compiled by senior developers.

@@ -43,22 +43,13 @@ export default function AwwwardsHero() {
       className="relative w-full h-screen bg-transparent select-none overflow-hidden"
     >
       {/* Top telemetry bar */}
-      <div className="hero-fade-target absolute top-8 left-10 right-10 flex items-center justify-between text-[9px] font-black tracking-[0.2em] text-zinc-450 uppercase z-40 max-sm:hidden">
-        <motion.div
-          initial={{ opacity: 0, x: -20 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ ...transition, delay: 0.1 }}
-          className="flex items-center gap-2"
-        >
-          <span className="size-1.5 rounded-full bg-white animate-pulse" />
-          <span>FWA // Agency Core v2.4.0</span>
-        </motion.div>
+      <div className="hero-fade-target absolute top-8 left-10 right-10 flex items-center justify-end text-[9px] font-black tracking-[0.2em] text-zinc-450 uppercase z-40 max-sm:hidden">
         <motion.div
           initial={{ opacity: 0, x: 20 }}
           animate={{ opacity: 1, x: 0 }}
           transition={{ ...transition, delay: 0.15 }}
         >
-          <span>Face the Machine • Master the Interview</span>
+          <span>Face the Machine</span>
         </motion.div>
       </div>
 
@@ -93,16 +84,6 @@ export default function AwwwardsHero() {
           className="absolute right-[8%] top-[34%] text-[10vw] max-sm:text-[15vw] font-extrabold leading-none uppercase tracking-tight text-white/95"
         >
           machine.
-        </motion.h1>
-
-        {/* Word 4: MASTER. - lower middle right */}
-        <motion.h1
-          initial={{ opacity: 0, y: 60 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ ...transition, delay: 0.4 }}
-          className="absolute right-[22%] top-[52%] text-[4vw] max-sm:text-[6vw] font-black leading-none uppercase tracking-[0.25em] text-zinc-700/80"
-        >
-          Master.
         </motion.h1>
       </div>
 
