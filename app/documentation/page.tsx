@@ -177,8 +177,11 @@ export default function DocumentationPage() {
       * {
         cursor: auto !important;
       }
-      a, button, [role="button"], select, input, textarea, [data-magnetic] {
+      a, button, [role="button"], select, [data-magnetic] {
         cursor: pointer !important;
+      }
+      input, textarea {
+        cursor: text !important;
       }
     `;
     document.head.appendChild(styleEl);
