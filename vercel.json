@@ -10,6 +10,17 @@
       ],
       "destination": "https://docs.mockrithm.me",
       "permanent": false
+    },
+    {
+      "source": "/blogs",
+      "has": [
+        {
+          "type": "host",
+          "value": "mockrithm.me"
+        }
+      ],
+      "destination": "http://blog.mockrithm.me",
+      "permanent": false
     }
   ],
   "rewrites": [
@@ -32,6 +43,26 @@
         }
       ],
       "destination": "/documentation/:path*"
+    },
+    {
+      "source": "/",
+      "has": [
+        {
+          "type": "host",
+          "value": "blog.mockrithm.me"
+        }
+      ],
+      "destination": "/blogs"
+    },
+    {
+      "source": "/:path*",
+      "has": [
+        {
+          "type": "host",
+          "value": "blog.mockrithm.me"
+        }
+      ],
+      "destination": "/blogs/:path*"
     }
   ]
 }
