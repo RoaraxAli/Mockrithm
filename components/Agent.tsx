@@ -730,8 +730,28 @@ const Agent = ({
     isSpeakingActiveRef.current = false;
     streamCompletedRef.current = false;
 
+    // STT Corrections
+    let cleanedText = text;
+    const sttCorrections: Record<string, string> = {
+      "yo yo exercise": "UI UX design",
+      "yo-yo exercise": "UI UX design",
+      "yo yo design": "UI UX design",
+      "yo-yo design": "UI UX design",
+      "yo yo": "UI/UX",
+      "yo-yo": "UI/UX",
+    };
+    for (const [misheard, correction] of Object.entries(sttCorrections)) {
+      const regex = new RegExp(`\\b${misheard}\\b`, "gi");
+      cleanedText = cleanedText.replace(regex, correction);
+    }
+
+    // Append timer ending cue
+    if (isTimerEndingRef.current && typeRef.current === "interview") {
+      cleanedText += "\n[SYSTEM: Time is up. Acknowledge the candidate's response, state that time is up, conclude the interview warmly, say goodbye, and ALWAYS append '[END_CALL]' at the very end.]";
+    }
+
     // Append user message to history
-    const userMsg: SavedMessage = { role: "user", content: text };
+    const userMsg: SavedMessage = { role: "user", content: cleanedText };
     setMessages((prev) => [...prev, userMsg]);
     setIsSpeaking(false);
 
@@ -739,7 +759,7 @@ const Agent = ({
     fetch("/api/interview/analyze-star", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ text, role: roleRef.current, type: sessionTypeRef.current }),
+      body: JSON.stringify({ text: cleanedText, role: roleRef.current, type: sessionTypeRef.current }),
     })
       .then((res) => res.json())
       .then((data) => {
@@ -799,23 +819,28 @@ ${code}
         const profileSkills = userResumeData?.resumeData?.parsedData?.skills || userResumeData?.resumeData?.fixedParsedData?.skills || [];
         const skillsList = Array.isArray(profileSkills) ? profileSkills.slice(0, 6).join(", ") : "";
 
-        systemPrompt = `You are a professional interview assistant helping ${userName} configure their mock interview session.
+        systemPrompt = `You are a professional interview assistant helping ${userName} configure their mock session.
 
-CANDIDATE PROFILE (already collected, do NOT ask about these again):
+CANDIDATE PROFILE (already collected, do NOT ask about these again unless changing):
 - Name: ${userName}
-- Target Role: ${profileRole || "Software Engineer"}
+- Default Target Role: ${profileRole || "Software Engineer"}
 - Key Skills: ${skillsList || "JavaScript, React, Node.js"}
-- Profile Summary: ${profileSummary ? profileSummary.slice(0, 200) : "Experienced software professional"}
+- Profile Summary: ${profileSummary ? profileSummary.slice(0, 200) : "Experienced professional"}
 
-YOUR ONLY JOB: Help them choose an option for their mock session.
-Based on their target role ("${profileRole || "Software Engineer"}"), dynamically suggest 2 to 4 distinct options (like Technical, Behavioral, and Live Coding for developers; or Public Address, Crisis Management, and Policy Drafting for President of Pakistan; or Stand-up Set, Crowd Work, and Joke Writing for Joker).
-Present these options to them and ask them to pick one.
+YOUR CONVERSATION FLOW:
+1. First, ask them if they want to practice their listed target role ("${profileRole || "Software Engineer"}") or something else.
+2. If they say they want to practice their target role:
+   - Suggest 2 to 4 custom session options/modes suited specifically to "${profileRole || "Software Engineer"}" (e.g. Technical, Behavioral, Live Coding Sandbox; or for President: Public Address, Crisis Management, Policy Memo Drafting; or for UI/UX Design: Portfolio Review, Design Challenge, Interaction Prototyping).
+   - Ask them to pick one.
+3. If they say they want to practice a different role (or name a different role):
+   - Ask what role they want to practice (if not already specified).
+   - Once they specify the new role, suggest 2 to 4 custom session options/modes suited to this new role.
+   - Ask them to pick one.
 
 RULES:
-- Do NOT ask about job role, experience level, or tech stack - you already have that data.
 - Keep every reply under 30 words.
 - Write only plain clean text. No markdown, no emojis, no symbols.
-- Once they choose/specify their choice, confirm their choice in one short sentence, append "[END_CALL]" at the very end of your response, and end your response. The system will create the interview automatically.`;
+- Once they choose/specify their choice and the role, confirm their choice and the chosen role in one short sentence, append "[END_CALL]" at the very end of your response, and end your response. The system will create the interview automatically.`;
       }
 
       const history = [
@@ -1050,13 +1075,7 @@ RULES:
           if (prev === null || prev <= 1) {
             clearInterval(timerIntervalRef.current!);
             timerIntervalRef.current = null;
-            // Trigger wrap-up — let the AI generate its own farewell naturally
-            if (!isTimerEndingRef.current && isCallActiveRef.current) {
-              isTimerEndingRef.current = true;
-              // Inject a hidden system cue; AI will produce a unique goodbye
-              // which the isGoodbye detection will catch and end the call
-              handleSpeechCompleted("[SYSTEM: Time is up. Please conclude the interview warmly and say goodbye to the candidate.]");
-            }
+            isTimerEndingRef.current = true;
             return 0;
           }
           return prev - 1;
@@ -1069,36 +1088,8 @@ RULES:
     // Dynamic Custom Welcome Greeting seeding
     let welcomeMsg = firstMessage || interviewer.firstMessage || "Hello! Thank you for taking the time to speak with me today.";
     if (type === "generate") {
-      try {
-        const profileRole = userResumeData?.targetRole || "Software Engineer";
-        const response = await fetch("/api/meow/chat", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            model: selectedModel,
-            stream: false,
-            messages: [
-              {
-                role: "system",
-                content: `You are a helpful interview configuration assistant. Generate a short 1-2 sentence welcome message for the candidate ${userName} who is preparing for the role: "${profileRole}".
-You must present them with 3 tailored types/modes of practice sessions suited to this specific role, labeled 1, 2, and 3.
-Examples:
-- For Software Engineer: 1. Technical, 2. Behavioral, or 3. Live Coding Sandbox.
-- For President of Pakistan: 1. Public Address & Rhetoric, 2. Crisis & Foreign Policy, or 3. Policy Memo Drafting.
-- For Joker: 1. Stand-up Set, 2. Crowd Work, or 3. Joke Writing.
-
-Output ONLY the final welcome message. Do not include any other text, markdown, or greetings before/after.`
-              }
-            ]
-          })
-        });
-        if (response.ok) {
-          const data = await response.json();
-          welcomeMsg = data.choices?.[0]?.message?.content || welcomeMsg;
-        }
-      } catch (err) {
-        console.error("Failed to generate dynamic welcome message:", err);
-      }
+      const profileRole = userResumeData?.targetRole || "Software Engineer";
+      welcomeMsg = `Hello ${userName}! I see your target role is listed as "${profileRole}". Would you like to practice for this role, or would you like to prepare for a different role today?`;
     }
 
     setMessages([]);
