@@ -72,7 +72,7 @@ export async function POST(request: Request) {
     const setupPrompt = `
       Analyze the following conversation transcript between a candidate and an interview setup assistant, as well as the candidate's resume/profile data.
       
-      Candidate Resume/Profile Data (STRICT SOURCE OF TRUTH FOR ROLE & SKILLS):
+      Candidate Resume/Profile Data:
       ${JSON.stringify(userResumeData || {})}
       
       Transcript:
@@ -81,8 +81,9 @@ export async function POST(request: Request) {
       Extract or infer the configured job interview parameters.
       
       CRITICAL INSTRUCTIONS:
-      - The candidate's targetRole (from Resume/Profile Data) MUST be used as the "role". Do NOT invent or infer a different role unless explicitly requested by the candidate in the transcript.
-      - The candidate's techstack/skills list (from Resume/Profile Data) MUST be used as the "techstack". If the role is non-technical, list their key competencies/subjects (like "rhetoric", "policy", "humor", "improvisation") as the techstack.
+      - Scan the Transcript first. If the candidate explicitly chose to practice a role DIFFERENT from their default targetRole (e.g. "Prime Minister of Pakistan", "Joker", etc.), you MUST override the role and use this new requested role.
+      - If the role is changed/overridden from the default targetRole, DO NOT use the techstack/skills or resume details from the Resume/Profile Data (e.g. do not use JavaScript, React, Node.js for a Prime Minister or Joker). Instead, generate relevant competencies/skills for the new chosen role (e.g. for Prime Minister: "crisis leadership", "governance", "public policy", "foreign affairs"; for Joker: "stand-up comedy", "timing", "joke delivery", "crowd interaction").
+      - Only set "requiresSandbox" to true if the chosen option/mode explicitly involves a coding task or a written drafting task (e.g. policy memo drafting, speech writing, script writing). If the chosen option is a verbal interview, Q&A session, verbal debate, or oral defense, "requiresSandbox" MUST be false.
       
       You must return ONLY a JSON object conforming exactly to this schema:
       {
@@ -91,7 +92,7 @@ export async function POST(request: Request) {
         "techstack": ["technology1", "technology2", ... or key competencies],
         "type": "the selected option/mode (e.g. Public Address, Stand-up Set, Technical, Behavioral, Live Coding Sandbox, etc.)",
         "amount": number of questions (default to 5 if not specified),
-        "requiresSandbox": true/false (true if the chosen mode involves a written task, speech/policy drafting, coding, writing stand-up scripts, or any written/drafting exercise),
+        "requiresSandbox": true/false,
         "sandboxTitle": "a suitable title for the written challenge (if requiresSandbox is true)",
         "sandboxDescription": "instructions for the written/coding challenge (if requiresSandbox is true)",
         "sandboxTemplate": "initial text/code structure to edit (if requiresSandbox is true)",
