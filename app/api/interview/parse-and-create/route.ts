@@ -82,15 +82,20 @@ export async function POST(request: Request) {
       
       CRITICAL INSTRUCTIONS:
       - The candidate's targetRole (from Resume/Profile Data) MUST be used as the "role". Do NOT invent or infer a different role unless explicitly requested by the candidate in the transcript.
-      - The candidate's techstack/skills list (from Resume/Profile Data) MUST be used as the "techstack". DO NOT invent, assume, or add technologies (like React, Node, etc.) if they are not explicitly mentioned in their resume or profile skills. Ask ONLY about technologies they actually know and have listed.
+      - The candidate's techstack/skills list (from Resume/Profile Data) MUST be used as the "techstack". If the role is non-technical, list their key competencies/subjects (like "rhetoric", "policy", "humor", "improvisation") as the techstack.
       
       You must return ONLY a JSON object conforming exactly to this schema:
       {
         "role": "extracted/inferred job role",
         "level": "extracted/inferred experience level: Junior, Mid-level, Senior, or Lead",
-        "techstack": ["technology1", "technology2", ...],
-        "type": "Technical", "Behavioral", or "Mixed",
-        "amount": number of questions (default to 5 if not specified)
+        "techstack": ["technology1", "technology2", ... or key competencies],
+        "type": "the selected option/mode (e.g. Public Address, Stand-up Set, Technical, Behavioral, Live Coding Sandbox, etc.)",
+        "amount": number of questions (default to 5 if not specified),
+        "requiresSandbox": true/false (true if the chosen mode involves a written task, speech/policy drafting, coding, writing stand-up scripts, or any written/drafting exercise),
+        "sandboxTitle": "a suitable title for the written challenge (if requiresSandbox is true)",
+        "sandboxDescription": "instructions for the written/coding challenge (if requiresSandbox is true)",
+        "sandboxTemplate": "initial text/code structure to edit (if requiresSandbox is true)",
+        "sandboxLanguage": "syntax highlighting language (e.g. javascript, python, markdown, text - default is 'text')"
       }
     `;
 
@@ -117,7 +122,7 @@ export async function POST(request: Request) {
       The focus between behavioral and technical questions should lean towards: ${setup.type}.
       
       CRITICAL REQUIREMENTS:
-      - Questions MUST be strictly relevant to the listed tech stack: ${(setup.techstack || []).join(", ")}. Do NOT ask questions about other tools, languages, or frameworks not explicitly listed in their tech stack.
+      - Questions MUST be strictly relevant to the listed tech stack or core competencies: ${(setup.techstack || []).join(", ")}. Do NOT ask questions about other tools, languages, or frameworks not explicitly listed.
       - Return ONLY a JSON object with a single "questions" key containing the array of questions. Example:
       {
         "questions": ["Question 1", "Question 2", "Question 3"]
@@ -141,38 +146,37 @@ export async function POST(request: Request) {
       throw e;
     }
 
-    // 4. Generate custom coding problem if technical/mixed
+    // 4. Generate custom challenge if sandbox is required
     let codingProblem = null;
-    const isTechnical = String(setup.type || "").toLowerCase() === "technical" || String(setup.type || "").toLowerCase() === "mixed";
-    if (isTechnical) {
-      console.log("[DEBUG] Focus is Technical/Mixed. Generating coding challenge...");
+    if (setup.requiresSandbox) {
+      console.log("[DEBUG] Sandbox/Workspace is required. Generating custom task...");
       try {
         const codingPrompt = `
-          Generate a coding challenge suitable for a ${setup.level}-level ${setup.role}.
-          Primary Tech/Language: ${(setup.techstack || [])[0] || "JavaScript/TypeScript"}.
+          Generate a written or coding challenge suitable for a ${setup.level}-level ${setup.role} for the session mode "${setup.type}".
+          Key topics/skills: ${(setup.techstack || []).join(", ") || "General"}.
           
           You must return ONLY a JSON object conforming to this schema:
           {
-            "title": "challenge title",
-            "description": "challenge description",
-            "templateCode": "starter template code",
-            "language": "language name in lowercase"
+            "title": "challenge/drafting title",
+            "description": "challenge/drafting description and instructions for the candidate",
+            "templateCode": "starter text or code template for the candidate to build upon",
+            "language": "language name in lowercase (e.g. javascript, python, markdown, text, etc. default 'text')"
           }
         `;
         const codingResponseText = await groqChatCompletion([
-          { role: "system", content: "You only output a valid JSON coding challenge." },
+          { role: "system", content: "You only output a valid JSON coding or drafting challenge." },
           { role: "user", content: codingPrompt }
         ], true);
-        console.log(`[DEBUG] Raw coding challenge response from Groq: ${codingResponseText}`);
+        console.log(`[DEBUG] Raw challenge response from Groq: ${codingResponseText}`);
         codingProblem = JSON.parse(codingResponseText);
-        console.log("[DEBUG] Generated coding problem:", codingProblem);
+        console.log("[DEBUG] Generated custom problem/task:", codingProblem);
       } catch (err: any) {
-        console.error("[ERROR] Failed to generate/parse custom coding challenge. Falling back to default Two Sum challenge.", err);
+        console.error("[ERROR] Failed to generate/parse custom challenge. Falling back to default.", err);
         codingProblem = {
-          title: "Two Sum",
-          description: "Given an array of integers nums and an integer target, return indices of the two numbers such that they add up to target.",
-          templateCode: "function twoSum(nums, target) {\n  // Write code\n}",
-          language: "javascript",
+          title: setup.sandboxTitle || "Practice Task",
+          description: setup.sandboxDescription || "Complete the practice exercise in the workspace editor.",
+          templateCode: setup.sandboxTemplate || "",
+          language: setup.sandboxLanguage || "text",
         };
       }
     }

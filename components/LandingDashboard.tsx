@@ -246,44 +246,13 @@ export default function LandingDashboard({
         </section>
       )}
 
-      {/* 2. Compact Dashboard Content Section */}
-      <div id="dashboard-section" className="max-w-7xl mx-auto w-full flex flex-col gap-6 py-8 px-4 sm:px-6 relative scroll-mt-20 z-10">
+      {/* 2. Compact Dashboard Content Section */}      <div id="dashboard-section" className="max-w-7xl mx-auto w-full flex flex-col gap-6 py-8 px-4 sm:px-6 relative scroll-mt-20 z-10">
         
-        {/* Interactive Navigation Segment Filter */}
+        {/* Interactive Navigation Header */}
         <div className="flex items-center justify-between border-b border-zinc-900 pb-3 max-sm:flex-col max-sm:gap-3 max-sm:items-start relative">
           <div className="flex items-center gap-3">
             <div className="h-4 w-1 bg-white rounded-md" />
-            <h2 className="text-xs font-bold uppercase tracking-widest text-zinc-350">Practice Dashboard</h2>
-          </div>
-
-          <div className="flex bg-zinc-950/60 p-0.5 rounded-xl border border-zinc-900 text-[9px] font-bold uppercase tracking-wider font-mono">
-            <button
-              onClick={() => setFilter("all")}
-              className={cn(
-                "px-3.5 py-1.5 rounded-lg cursor-pointer transition-all",
-                filter === "all" ? "bg-white text-black font-bold shadow-md" : "text-zinc-500 hover:text-zinc-300"
-              )}
-            >
-              All Roles
-            </button>
-            <button
-              onClick={() => setFilter("past")}
-              className={cn(
-                "px-3.5 py-1.5 rounded-lg cursor-pointer transition-all",
-                filter === "past" ? "bg-white text-black font-bold shadow-md" : "text-zinc-500 hover:text-zinc-300"
-              )}
-            >
-              Timeline History
-            </button>
-            <button
-              onClick={() => setFilter("available")}
-              className={cn(
-                "px-3.5 py-1.5 rounded-lg cursor-pointer transition-all",
-                filter === "available" ? "bg-white text-black font-bold shadow-md" : "text-zinc-500 hover:text-zinc-300"
-              )}
-            >
-              Curated Practice
-            </button>
+            <h2 className="text-xs font-bold uppercase tracking-widest text-zinc-350">Your Evaluation History</h2>
           </div>
         </div>
 
@@ -297,107 +266,64 @@ export default function LandingDashboard({
         >
         
         {/* Past Sessions Timeline */}
-        {(filter === "all" || filter === "past") && (
-          <motion.div variants={itemVariants} className="flex flex-col gap-4">
-            <h3 className="text-[10px] font-bold uppercase tracking-widest text-zinc-550 flex items-center gap-2 font-mono">
-              <User className="size-3.5 text-zinc-400" /> Dynamic Timeline of Past Evaluations
-            </h3>
-            
-            {loadingData ? (
-              <div className="interviews-section">
-                {[...Array(3)].map((_, i) => (
-                  <SkeletonCard key={i} />
-                ))}
-              </div>
-            ) : userInterviews.length > 0 ? (
-              <div className="relative border-l border-zinc-900 pl-6 ml-4 space-y-8 py-4">
-                {userInterviews.map((interview, index) => {
-                  const score = interview.feedback?.totalScore || 0;
-                  const date = new Date(interview.createdAt).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
-                  return (
-                    <motion.div 
-                      key={interview.id} 
-                      className="relative group/item"
-                      initial={{ opacity: 0, x: -10 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      transition={{ delay: index * 0.05 }}
-                    >
-                      {/* Timeline dot */}
-                      <span className={cn(
-                        "absolute -left-[31px] top-1.5 size-2.5 rounded-full border border-zinc-950 flex items-center justify-center transition-all",
-                        score >= 80 ? "bg-white" : "bg-zinc-800"
-                      )} />
-                      
-                      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 p-5 bg-zinc-950/20 hover:bg-zinc-950/50 border border-zinc-900 hover:border-zinc-800 rounded-2xl transition-all duration-300">
-                        <div className="flex flex-col gap-1">
-                          <span className="text-[9px] font-mono text-zinc-500 font-bold uppercase">{date}</span>
-                          <h4 className="text-sm font-bold text-white uppercase tracking-wider">{interview.role} Interview</h4>
-                          <span className="text-[10px] text-zinc-400 font-medium">Type: {interview.type}</span>
-                        </div>
-
-                        <div className="flex items-center gap-6">
-                          <div className="flex flex-col items-end gap-1">
-                            <span className="text-[8px] font-mono text-zinc-550 uppercase tracking-widest">Match score</span>
-                            <span className="text-lg font-mono font-black text-white">{score}%</span>
-                          </div>
-                          
-                          <Link 
-                            href={`/interview/${interview.id}/feedback`}
-                            className="h-9 px-4 rounded-lg bg-zinc-900 border border-zinc-850 text-zinc-300 hover:text-white hover:bg-zinc-800 text-[10px] font-mono font-bold uppercase tracking-wider flex items-center justify-center transition-all"
-                          >
-                            Details
-                          </Link>
-                        </div>
+        <motion.div variants={itemVariants} className="flex flex-col gap-4">
+          {loadingData ? (
+            <div className="interviews-section">
+              {[...Array(3)].map((_, i) => (
+                <SkeletonCard key={i} />
+              ))}
+            </div>
+          ) : userInterviews.length > 0 ? (
+            <div className="relative border-l border-zinc-900 pl-6 ml-4 space-y-8 py-4">
+              {userInterviews.map((interview, index) => {
+                const score = interview.feedback?.totalScore || 0;
+                const date = new Date(interview.createdAt).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
+                return (
+                  <motion.div 
+                    key={interview.id} 
+                    className="relative group/item"
+                    initial={{ opacity: 0, x: -10 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: index * 0.05 }}
+                  >
+                    {/* Timeline dot */}
+                    <span className={cn(
+                      "absolute -left-[31px] top-1.5 size-2.5 rounded-full border border-zinc-950 flex items-center justify-center transition-all",
+                      score >= 80 ? "bg-white" : "bg-zinc-800"
+                    )} />
+                    
+                    <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 p-5 bg-zinc-950/20 hover:bg-zinc-950/50 border border-zinc-900 hover:border-zinc-800 rounded-2xl transition-all duration-300">
+                      <div className="flex flex-col gap-1">
+                        <span className="text-[9px] font-mono text-zinc-500 font-bold uppercase">{date}</span>
+                        <h4 className="text-sm font-bold text-white uppercase tracking-wider">{interview.role} Interview</h4>
+                        <span className="text-[10px] text-zinc-400 font-medium">Type: {interview.type}</span>
                       </div>
-                    </motion.div>
-                  );
-                })}
-              </div>
-            ) : (
-              <div className="py-10 px-4 rounded-xl border border-zinc-900 bg-zinc-950/20 backdrop-blur-md flex flex-col items-center text-center shadow-lg gap-2">
-                <p className="text-zinc-500 text-[10px] font-bold uppercase tracking-wider">No completed trials found in database</p>
-                <Link href="/interview" className="text-white text-[10px] hover:underline font-bold tracking-widest uppercase flex items-center gap-1 transition-all">Launch first evaluation now {"→"}</Link>
-              </div>
-            )}
-          </motion.div>
-        )}
 
-        {/* Curated Available Practice Roles */}
-        {(filter === "all" || filter === "available") && (
-          <motion.div variants={itemVariants} className="flex flex-col gap-4">
-            <h3 className="text-[10px] font-bold uppercase tracking-widest text-zinc-550 flex items-center gap-2 font-mono">
-              <BookOpen className="size-3.5 text-zinc-400" /> Curated Practice Categories
-            </h3>
-            
-            {loadingData ? (
-              <div className="interviews-section">
-                {[...Array(3)].map((_, i) => (
-                  <SkeletonCard key={i} />
-                ))}
-              </div>
-            ) : allInterviews.length > 0 ? (
-              <div className="interviews-section">
-                {allInterviews.map((interview) => (
-                  <motion.div key={interview.id} whileHover={{ y: -2 }} className="h-full">
-                    <InterviewCard
-                      userId={clientUser?.id}
-                      interviewId={interview.id}
-                      role={interview.role}
-                      type={interview.type}
-                      techstack={interview.techstack}
-                      createdAt={interview.createdAt}
-                      feedback={interview.feedback}
-                    />
+                      <div className="flex items-center gap-6">
+                        <div className="flex flex-col items-end gap-1">
+                          <span className="text-[8px] font-mono text-zinc-550 uppercase tracking-widest">Match score</span>
+                          <span className="text-lg font-mono font-black text-white">{score}%</span>
+                        </div>
+                        
+                        <Link 
+                          href={`/interview/${interview.id}/feedback`}
+                          className="h-9 px-4 rounded-lg bg-zinc-900 border border-zinc-850 text-zinc-300 hover:text-white hover:bg-zinc-800 text-[10px] font-mono font-bold uppercase tracking-wider flex items-center justify-center transition-all"
+                        >
+                          Details
+                        </Link>
+                      </div>
+                    </div>
                   </motion.div>
-                ))}
-              </div>
-            ) : (
-              <div className="py-10 px-4 rounded-xl border border-zinc-900 bg-zinc-950/20 backdrop-blur-md flex flex-col items-center text-center shadow-lg">
-                <p className="text-zinc-500 text-[10px] font-bold uppercase tracking-wider">No curated trial configurations online</p>
-              </div>
-            )}
-          </motion.div>
-        )}
+                );
+              })}
+            </div>
+          ) : (
+            <div className="py-10 px-4 rounded-xl border border-zinc-900 bg-zinc-950/20 backdrop-blur-md flex flex-col items-center text-center shadow-lg gap-2">
+              <p className="text-zinc-500 text-[10px] font-bold uppercase tracking-wider">No completed trials found in database</p>
+              <Link href="/interview" className="text-white text-[10px] hover:underline font-bold tracking-widest uppercase flex items-center gap-1 transition-all">Launch first evaluation now {"→"}</Link>
+            </div>
+          )}
+        </motion.div>
 
       </motion.div>
       </div>

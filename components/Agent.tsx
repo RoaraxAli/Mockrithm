@@ -33,6 +33,13 @@ interface StarChecklist {
   result: boolean;
   hasMetrics: boolean;
   feedback: string;
+  labels?: {
+    situation: string;
+    task: string;
+    action: string;
+    result: string;
+    hasMetrics: string;
+  };
 }
 
 const Agent = ({
@@ -46,6 +53,8 @@ const Agent = ({
   firstMessage,
   codingProblem: propCodingProblem,
   userResumeData,
+  role: propRole,
+  sessionType: propSessionType,
 }: AgentProps) => {
   const router = useRouter();
 
@@ -55,10 +64,14 @@ const Agent = ({
   const [activeCodingProblem, setActiveCodingProblem] = useState<any>(propCodingProblem || null);
   const [activeInterviewId, setActiveInterviewId] = useState<string | null>(propInterviewId || null);
   const [activeFeedbackId, setActiveFeedbackId] = useState<string | null>(propFeedbackId || null);
+  const [activeRole, setActiveRole] = useState<string>(propRole || "");
+  const [activeSessionType, setActiveSessionType] = useState<string>(propSessionType || "");
 
   const typeRef = useRef(activeType);
   const questionsRef = useRef(activeQuestions);
   const codingProblemRef = useRef(activeCodingProblem);
+  const roleRef = useRef(activeRole);
+  const sessionTypeRef = useRef(activeSessionType);
 
   useEffect(() => {
     typeRef.current = activeType;
@@ -72,11 +85,21 @@ const Agent = ({
     codingProblemRef.current = activeCodingProblem;
   }, [activeCodingProblem]);
 
+  useEffect(() => {
+    roleRef.current = activeRole;
+  }, [activeRole]);
+
+  useEffect(() => {
+    sessionTypeRef.current = activeSessionType;
+  }, [activeSessionType]);
+
   const type = activeType;
   const questions = activeQuestions;
   const codingProblem = activeCodingProblem;
   const interviewId = activeInterviewId;
   const feedbackId = activeFeedbackId;
+  const role = activeRole;
+  const sessionType = activeSessionType;
 
   const [callStatus, setCallStatus] = useState<CallStatus>(CallStatus.INACTIVE);
   const [messages, _setMessages] = useState<SavedMessage[]>([]);
@@ -716,7 +739,7 @@ const Agent = ({
     fetch("/api/interview/analyze-star", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ text }),
+      body: JSON.stringify({ text, role: roleRef.current, type: sessionTypeRef.current }),
     })
       .then((res) => res.json())
       .then((data) => {
@@ -730,7 +753,19 @@ const Agent = ({
       let systemPrompt = "";
       if (typeRef.current === "interview" && questionsRef.current) {
         const formattedQuestions = questionsRef.current.map((q: string) => `- ${q}`).join("\n");
-        systemPrompt = `You are Alex, a professional job interviewer conducting a real-time voice interview with a candidate. Your goal is to assess their qualifications, motivation, and fit for the role.
+        const candidateRoleName = roleRef.current || userResumeData?.targetRole || "Software Engineer";
+        const candidateSessionType = sessionTypeRef.current || "Interview";
+        const personaText = candidateRoleName.toLowerCase().includes("president")
+          ? "Your persona: A senior political debate moderator or veteran political journalist. Keep your tone formal, sharp, and demanding."
+          : candidateRoleName.toLowerCase().includes("joker") || candidateRoleName.toLowerCase().includes("comedian")
+          ? "Your persona: A comedy club owner, talent scout, or talk show host. Keep your tone conversational, witty, and responsive to humor."
+          : "Your persona: A professional interviewer conducting a real-time voice interview to assess their qualifications, motivation, and fit for the role.";
+
+        systemPrompt = `You are Alex, conducting a real-time voice evaluation or interview with a candidate.
+Role: ${candidateRoleName}
+Session Mode/Type: ${candidateSessionType}
+
+${personaText}
 
 Interview Guidelines:
 Follow this structured question flow:
@@ -738,24 +773,23 @@ ${formattedQuestions}
 
 CRITICAL RULES - CONVERSATIONAL FLOW & CONCISENESS:
 - DO NOT LECTURE ON CORRECT ANSWERS: If the candidate answers correctly or reasonably, do not explain the concept, define terms, or repeat the textbook answer back to them. Simply acknowledge briefly (e.g. "Got it.", "Makes sense.", "Solid explanation.") and transition immediately to the next question.
-- GENTLY CORRECT BIG BLUNDERS: If the candidate makes a major blunder or says something completely incorrect (e.g. saying React is a fruit color), gently correct them and guide them in the right direction in one short, polite sentence (e.g. "Actually, React is a frontend JavaScript library for building user interfaces. Let's move on to...") before transitioning.
+- GENTLY CORRECT BIG BLUNDERS: If the candidate makes a major blunder or says something completely incorrect, gently correct them and guide them in the right direction in one short, polite sentence before transitioning.
 - KEEP RESPONSES VERY SHORT: Keep your replies under 25 words maximum. No yapping or long paragraphs. Keep the pacing fast and conversational.
 - Write only plain, clean text. Do not use markdown like bold (**), italics (*), lists, or hashtags.
 - Never use emojis.
-- If you ask a behavioral question and the candidate's response misses a concrete, measurable Result or outcome (e.g., they don't give numbers, metrics, or saved time), ask a follow-up question specifically seeking to uncover that quantitative metric.
 - Conclude the interview properly when all questions are asked and answered.
 - When all questions are done OR when you receive a [SYSTEM: Time is up...] message, conclude the interview warmly. Thank the candidate, wish them luck, say goodbye, and ALWAYS append "[END_CALL]" at the very end so the system knows to close the session. Example: "Thanks so much for your time today — it was great chatting with you. Best of luck! [END_CALL]"
 
 ${
   codingProblemRef.current
-    ? `Coding Sandbox Info:
-- The candidate is working on the coding problem: "${codingProblemRef.current.title}".
+    ? `Sandbox/Workspace Info:
+- The candidate is working on the task/problem: "${codingProblemRef.current.title}".
 - Description: ${codingProblemRef.current.description}
-- Candidate's current code is:
+- Candidate's current draft/code is:
 \`\`\`${codingProblemRef.current.language}
 ${code}
 \`\`\`
-- If the candidate gets stuck (e.g., they say they don't know what to do, or they ask for a hint, or they don't make progress for a while), provide a Socratic hint to help them think in the right direction. Do NOT give them the full solution.`
+- If the candidate gets stuck, provide a Socratic hint to help them think in the right direction. Do NOT give them the full solution.`
     : ""
 }`;
       } else {
@@ -773,16 +807,15 @@ CANDIDATE PROFILE (already collected, do NOT ask about these again):
 - Key Skills: ${skillsList || "JavaScript, React, Node.js"}
 - Profile Summary: ${profileSummary ? profileSummary.slice(0, 200) : "Experienced software professional"}
 
-YOUR ONLY JOB: Ask them ONE question only - which type of interview do they want:
-1. Technical (concepts, architecture, system design)
-2. Behavioral (STAR framework, past experiences)
-3. Live Coding Sandbox (solve a coding problem live)
+YOUR ONLY JOB: Help them choose an option for their mock session.
+Based on their target role ("${profileRole || "Software Engineer"}"), dynamically suggest 2 to 4 distinct options (like Technical, Behavioral, and Live Coding for developers; or Public Address, Crisis Management, and Policy Drafting for President of Pakistan; or Stand-up Set, Crowd Work, and Joke Writing for Joker).
+Present these options to them and ask them to pick one.
 
 RULES:
 - Do NOT ask about job role, experience level, or tech stack - you already have that data.
-- Keep every reply under 20 words.
+- Keep every reply under 30 words.
 - Write only plain clean text. No markdown, no emojis, no symbols.
-- Once they choose, confirm their choice in one short sentence, append "[END_CALL]" at the very end of your response, and end your response. The system will create the interview automatically.`;
+- Once they choose/specify their choice, confirm their choice in one short sentence, append "[END_CALL]" at the very end of your response, and end your response. The system will create the interview automatically.`;
       }
 
       const history = [
@@ -878,7 +911,10 @@ RULES:
   const requestSocraticHint = () => {
     if (callStatus !== CallStatus.ACTIVE || isProcessingRef.current) return;
     setIsCodingStuck(false);
-    handleSpeechCompleted("I am stuck on this coding problem. Can you give me a Socratic hint about my current code?");
+    const isWritten = codingProblemRef.current?.language === "text" || codingProblemRef.current?.language === "markdown";
+    handleSpeechCompleted(isWritten 
+      ? "I am stuck on this draft. Can you give me a Socratic hint about my current text?" 
+      : "I am stuck on this coding problem. Can you give me a Socratic hint about my current code?");
   };
 
   const transitionToInterview = async () => {
@@ -918,6 +954,8 @@ RULES:
         setActiveInterviewId(data.interviewId);
         setActiveType("interview");
         setActiveFeedbackId(null);
+        setActiveRole(data.role || "");
+        setActiveSessionType(data.type || "");
 
         const welcome = data.firstMessage || "Okay, let's start the interview.";
         setLastMessage(welcome);
@@ -1004,10 +1042,6 @@ RULES:
     sentenceBufferRef.current = "";
     speechQueueRef.current = [];
 
-    setMessages([]);
-    setCallStatus(CallStatus.ACTIVE);
-    setIsSpeaking(true);
-
     // Start countdown timer if applicable
     if (durationSeconds !== null) {
       setTimerSecondsLeft(durationSeconds);
@@ -1035,8 +1069,42 @@ RULES:
     // Dynamic Custom Welcome Greeting seeding
     let welcomeMsg = firstMessage || interviewer.firstMessage || "Hello! Thank you for taking the time to speak with me today.";
     if (type === "generate") {
-      welcomeMsg = `Hello ${userName}! Thank you for taking the time to speak with me today. To configure your session, which type of interview would you prefer? 1. Technical, 2. Behavioral, or 3. Live Coding Sandbox.`;
+      try {
+        const profileRole = userResumeData?.targetRole || "Software Engineer";
+        const response = await fetch("/api/meow/chat", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            model: selectedModel,
+            stream: false,
+            messages: [
+              {
+                role: "system",
+                content: `You are a helpful interview configuration assistant. Generate a short 1-2 sentence welcome message for the candidate ${userName} who is preparing for the role: "${profileRole}".
+You must present them with 3 tailored types/modes of practice sessions suited to this specific role, labeled 1, 2, and 3.
+Examples:
+- For Software Engineer: 1. Technical, 2. Behavioral, or 3. Live Coding Sandbox.
+- For President of Pakistan: 1. Public Address & Rhetoric, 2. Crisis & Foreign Policy, or 3. Policy Memo Drafting.
+- For Joker: 1. Stand-up Set, 2. Crowd Work, or 3. Joke Writing.
+
+Output ONLY the final welcome message. Do not include any other text, markdown, or greetings before/after.`
+              }
+            ]
+          })
+        });
+        if (response.ok) {
+          const data = await response.json();
+          welcomeMsg = data.choices?.[0]?.message?.content || welcomeMsg;
+        }
+      } catch (err) {
+        console.error("Failed to generate dynamic welcome message:", err);
+      }
     }
+
+    setMessages([]);
+    setCallStatus(CallStatus.ACTIVE);
+    setIsSpeaking(true);
+
     setLastMessage(welcomeMsg);
     setMessages([{ role: "assistant", content: welcomeMsg }]);
 
@@ -1436,7 +1504,7 @@ RULES:
               <div className="flex items-center justify-between border-b border-zinc-900 pb-2">
                 <h4 className="text-[10px] font-bold uppercase text-zinc-400 tracking-wider flex items-center gap-2">
                   <Sparkles className="size-3.5 text-violet-400" />
-                  STAR Response Analyzer
+                  {activeSessionType ? `${activeSessionType} Evaluation` : "Response Analyzer"}
                 </h4>
                 <span className="text-[8px] bg-violet-500/10 text-violet-400 font-bold px-2 py-0.5 rounded-full border border-violet-500/25 uppercase tracking-wider">
                   Live Insights
@@ -1452,7 +1520,7 @@ RULES:
                     : "bg-zinc-900/10 border-zinc-900 text-zinc-650 hover:border-zinc-800"
                 )}>
                   <CheckCircle2 className={cn("size-3.5 transition-colors duration-500", starChecklist.situation ? "text-emerald-400" : "text-zinc-800")} />
-                  <span className="text-[9px] font-bold uppercase tracking-wider">Situation</span>
+                  <span className="text-[9px] font-bold uppercase tracking-wider truncate max-w-full">{starChecklist.labels?.situation || "Situation"}</span>
                 </div>
                 
                 {/* Task */}
@@ -1463,7 +1531,7 @@ RULES:
                     : "bg-zinc-900/10 border-zinc-900 text-zinc-650 hover:border-zinc-800"
                 )}>
                   <CheckCircle2 className={cn("size-3.5 transition-colors duration-500", starChecklist.task ? "text-emerald-400" : "text-zinc-800")} />
-                  <span className="text-[9px] font-bold uppercase tracking-wider">Task</span>
+                  <span className="text-[9px] font-bold uppercase tracking-wider truncate max-w-full">{starChecklist.labels?.task || "Task"}</span>
                 </div>
                 
                 {/* Action */}
@@ -1474,7 +1542,7 @@ RULES:
                     : "bg-zinc-900/10 border-zinc-900 text-zinc-650 hover:border-zinc-800"
                 )}>
                   <CheckCircle2 className={cn("size-3.5 transition-colors duration-500", starChecklist.action ? "text-emerald-400" : "text-zinc-800")} />
-                  <span className="text-[9px] font-bold uppercase tracking-wider">Action</span>
+                  <span className="text-[9px] font-bold uppercase tracking-wider truncate max-w-full">{starChecklist.labels?.action || "Action"}</span>
                 </div>
                 
                 {/* Result */}
@@ -1485,10 +1553,10 @@ RULES:
                     : "bg-zinc-900/10 border-zinc-900 text-zinc-650 hover:border-zinc-800"
                 )}>
                   <CheckCircle2 className={cn("size-3.5 transition-colors duration-500", starChecklist.result ? "text-emerald-400" : "text-zinc-800")} />
-                  <span className="text-[9px] font-bold uppercase tracking-wider">Result</span>
+                  <span className="text-[9px] font-bold uppercase tracking-wider truncate max-w-full">{starChecklist.labels?.result || "Result"}</span>
                 </div>
               </div>
-
+ 
               {/* Warnings and Dynamic Feedback */}
               <AnimatePresence>
                 {starChecklist.result && !starChecklist.hasMetrics && (
@@ -1500,7 +1568,7 @@ RULES:
                   >
                     <AlertTriangle className="size-3.5 shrink-0 mt-0.5 text-amber-400" />
                     <span>
-                      <strong className="text-amber-300 font-bold uppercase">Missing Quantifiable Data:</strong> You outlined a result, but did not support it with metrics.
+                      <strong className="text-amber-300 font-bold uppercase">Missing {starChecklist.labels?.hasMetrics || "Evidence"}:</strong> You outlined a response, but did not support it with specific {starChecklist.labels?.hasMetrics?.toLowerCase() || "details or metrics"}.
                     </span>
                   </motion.div>
                 )}
@@ -1553,7 +1621,7 @@ RULES:
             <div className="flex items-center justify-between border-b border-zinc-900 pb-2.5">
               <h3 className="text-[10px] font-bold text-zinc-400 tracking-wider uppercase flex items-center gap-2">
                 <Code className="size-4.5 text-violet-400" />
-                Coding Sandbox
+                {codingProblem.language === "text" || codingProblem.language === "markdown" ? "Workspace Sandbox" : "Coding Sandbox"}
               </h3>
               <span className="bg-zinc-900 border border-zinc-850 text-zinc-300 font-mono text-[9px] px-3 py-1 rounded-full font-bold uppercase tracking-wider shadow-inner">
                 {codingProblem.language.toUpperCase()}
@@ -1579,7 +1647,11 @@ RULES:
                   <span className="w-2 h-2 rounded-full bg-rose-500/40" />
                   <span className="w-2 h-2 rounded-full bg-amber-500/40" />
                   <span className="w-2 h-2 rounded-full bg-emerald-500/40" />
-                  <span className="ml-2 text-zinc-400 font-bold">solution.{codingProblem.language === "python" ? "py" : "ts"}</span>
+                  <span className="ml-2 text-zinc-400 font-bold">
+                    {codingProblem.language === "python" ? "solution.py" : 
+                     codingProblem.language === "javascript" || codingProblem.language === "typescript" ? "solution.ts" :
+                     codingProblem.language === "markdown" ? "draft.md" : "draft.txt"}
+                  </span>
                 </div>
                 <span className="text-[8px] uppercase font-bold tracking-widest text-violet-400 bg-violet-500/10 px-2.5 py-0.5 rounded-full border border-violet-500/20">
                   Ready
@@ -1598,7 +1670,9 @@ RULES:
                 <textarea
                   value={code}
                   onChange={(e) => handleCodeChange(e.target.value)}
-                  placeholder="// Implement your algorithm here... Alex will observe your code logic."
+                  placeholder={codingProblem.language === "text" || codingProblem.language === "markdown" 
+                    ? "Draft your response here... Alex will observe your inputs." 
+                    : "// Implement your algorithm here... Alex will observe your code logic."}
                   className="font-mono bg-transparent text-zinc-205 text-xs py-3.5 px-4 w-full h-[190px] outline-none focus:ring-0 resize-none leading-relaxed"
                   disabled={callStatus !== CallStatus.ACTIVE}
                 />
@@ -1617,7 +1691,11 @@ RULES:
                       <div className="p-1.5 bg-violet-500/10 rounded-lg border border-violet-500/20 animate-pulse">
                         <Lightbulb className="size-4 text-violet-400" />
                       </div>
-                      <span className="font-semibold text-zinc-300">Need a hint with your code?</span>
+                      <span className="font-semibold text-zinc-300">
+                        {codingProblem.language === "text" || codingProblem.language === "markdown" 
+                          ? "Need a hint with your draft?" 
+                          : "Need a hint with your code?"}
+                      </span>
                     </div>
                     <Button
                       onClick={requestSocraticHint}

@@ -103,6 +103,50 @@ export default function DashboardPage() {
           <p className="text-[10px] text-gray-400 font-bold uppercase tracking-wider mt-3">Aggregated score across all trials</p>
         </div>
       </div>
+
+      {/* Feedback & Evaluation History */}
+      <div className="space-y-4 border-t border-zinc-900 pt-8">
+        <h2 className="text-lg font-bold text-white uppercase tracking-wider">Feedback & Assessment History</h2>
+        
+        {feedback.length > 0 ? (
+          <div className="grid gap-6">
+            {feedback.map((fb, index) => (
+              <div key={fb.id} className="relative p-6 backdrop-blur-2xl bg-zinc-950/40 rounded-xl border border-zinc-900 shadow-2xl flex flex-col sm:flex-row sm:items-center justify-between gap-6 hover:border-zinc-800 transition-all duration-300">
+                <div className="flex-1 space-y-2">
+                  <div className="flex items-center gap-3 flex-wrap">
+                    <span className="text-[10px] bg-white/5 text-zinc-400 border border-white/10 px-2 py-0.5 rounded font-mono font-bold uppercase">
+                      Session #{feedback.length - index}
+                    </span>
+                    <span className="text-xs text-zinc-500 font-medium">
+                      {new Date(fb.createdAt).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}
+                    </span>
+                  </div>
+                  <p className="text-xs text-zinc-300 leading-relaxed font-medium line-clamp-2">
+                    {fb.finalAssessment}
+                  </p>
+                </div>
+                
+                <div className="flex items-center gap-6 shrink-0 justify-between sm:justify-end">
+                  <div className="flex flex-col items-end gap-0.5">
+                    <span className="text-[9px] font-mono text-zinc-550 uppercase tracking-widest">Match Score</span>
+                    <span className="text-xl font-mono font-black text-white">{fb.totalScore}%</span>
+                  </div>
+                  <a 
+                    href={`/interview/${fb.interviewId}/feedback`}
+                    className="px-4 py-2 bg-white text-black font-bold text-xs rounded-xl hover:bg-zinc-200 transition-all text-center"
+                  >
+                    View Details
+                  </a>
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <div className="text-center py-12 bg-zinc-950/20 border border-zinc-900 rounded-xl">
+            <p className="text-sm text-zinc-405 font-semibold uppercase tracking-wider">No feedback records found yet</p>
+          </div>
+        )}
+      </div>
     </div>
   )
 }

@@ -89,6 +89,8 @@ interface AgentProps {
   } | null;
   userResumeData?: any;
   userCountry?: string;
+  role?: string;
+  sessionType?: string;
 }
 
 interface RouteParams {
