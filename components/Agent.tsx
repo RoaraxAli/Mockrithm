@@ -634,7 +634,8 @@ const Agent = ({
         silenceTimerRef.current = setTimeout(() => {
           console.log("[Agent.tsx] Silence detected (1.6s). Submitting speech to AI...");
           if (isCallActiveRef.current && !isProcessingRef.current && !isSpeakingActiveRef.current) {
-            // Stop recognition to submit
+            // Set processing flag immediately to lock state before stopping recognition
+            isProcessingRef.current = true;
             try {
               rec.stop();
             } catch (e) {}
@@ -660,7 +661,8 @@ const Agent = ({
       console.log(`[Agent.tsx] STT session final captured text on end: "${capturedText}"`);
 
       if (capturedText.length > 2) {
-        // User said something — submit it to the AI
+        // Set processing flag immediately to lock state
+        isProcessingRef.current = true;
         handleSpeechCompleted(capturedText);
       } else {
         // Nothing useful captured, restart listening
@@ -683,9 +685,9 @@ const Agent = ({
 
 
   const handleSpeechCompleted = async (text: string) => {
-    if (isProcessingRef.current) return;
     if (submittedTextRef.current === text) {
       console.log("[Agent.tsx] Duplicate speech submission blocked.");
+      isProcessingRef.current = false;
       return;
     }
     isProcessingRef.current = true;
@@ -739,6 +741,13 @@ const Agent = ({
       "yo-yo design": "UI UX design",
       "yo yo": "UI/UX",
       "yo-yo": "UI/UX",
+      "una": "Q&A",
+      "you and a": "Q&A",
+      "you and are": "Q&A",
+      "you and R": "Q&A",
+      "q and a": "Q&A",
+      "q & a": "Q&A",
+      "qna": "Q&A",
     };
     for (const [misheard, correction] of Object.entries(sttCorrections)) {
       const regex = new RegExp(`\\b${misheard}\\b`, "gi");
