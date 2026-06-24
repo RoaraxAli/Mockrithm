@@ -149,6 +149,8 @@ export default function MagneticCursor() {
       attachedElements.push({ el, cleanup });
     };
 
+    const boundHoverElements: Array<{ el: HTMLElement; enter: () => void; leave: () => void }> = [];
+
     // Attach magnetic hover triggers to ALL interactive elements AND text elements
     const setupMagneticElements = () => {
       const targets = document.querySelectorAll(
@@ -166,6 +168,7 @@ export default function MagneticCursor() {
           el.dataset.cursorBound = "true";
           el.addEventListener("mouseenter", handleEnter);
           el.addEventListener("mouseleave", handleLeave);
+          boundHoverElements.push({ el, enter: handleEnter, leave: handleLeave });
         }
 
         // Magnetic pull — only for explicitly magnetic elements
@@ -188,6 +191,15 @@ export default function MagneticCursor() {
       cancelAnimationFrame(requestFrameId);
       clearInterval(intervalId);
       attachedElements.forEach(({ cleanup }) => cleanup());
+      
+      // Clean up grow hover listeners
+      boundHoverElements.forEach(({ el, enter, leave }) => {
+        el.removeEventListener("mouseenter", enter);
+        el.removeEventListener("mouseleave", leave);
+        if (el.dataset) {
+          delete el.dataset.cursorBound;
+        }
+      });
 
       // Clean up injected style tag
       const existingStyle = document.getElementById("force-hide-default-cursor");

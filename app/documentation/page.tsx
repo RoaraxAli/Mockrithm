@@ -187,6 +187,27 @@ export default function DocumentationPage() {
     };
   }, []);
 
+  const [headings, setHeadings] = useState<{ id: string; text: string }[]>([]);
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const mainElement = mainContentRef.current;
+    if (!mainElement) return;
+    const timer = setTimeout(() => {
+      const hTags = mainElement.querySelectorAll("h3");
+      const extracted = [];
+      hTags.forEach((h, index) => {
+        let id = h.id;
+        if (!id) {
+          id = "heading-" + index;
+          h.id = id;
+        }
+        extracted.push({ id, text: h.textContent || "" });
+      });
+      setHeadings(extracted);
+    }, 150);
+    return () => clearTimeout(timer);
+  }, [activeSection]);
+
   // Initialize mode from sessionStorage
   useEffect(() => {
     const savedMode = sessionStorage.getItem("mockrithm_docs_mode") as DocMode | null;
@@ -1807,7 +1828,7 @@ STRIPE_WEBHOOK_SECRET=whsec_...`}
 
       {/* Bespoke Grayscale Sticky Sidebar */}
       <aside 
-        className={`sticky top-0 h-screen border-r flex flex-col justify-between shrink-0 z-20 pt-8 pb-6 hidden md:flex transition-all duration-300 ${
+        className={`fixed left-0 top-0 h-screen border-r flex flex-col justify-between shrink-0 z-20 pt-8 pb-6 hidden md:flex transition-all duration-300 ${
           theme === "dark" 
             ? "bg-zinc-950 border-zinc-900 text-zinc-300" 
             : "bg-[#FAFAFA] border-neutral-200/85 text-neutral-600"
@@ -1949,12 +1970,12 @@ STRIPE_WEBHOOK_SECRET=whsec_...`}
         <div className={`px-2 text-[9px] font-extrabold uppercase tracking-widest font-mono shrink-0 ${
           sidebarLocked || isSidebarHovered ? "text-neutral-450 text-left px-6" : "text-neutral-500 text-center"
         }`}>
-          {sidebarLocked || isSidebarHovered ? "Mockrithm Docs v2.5" : "v2.5"}
+          {sidebarLocked || isSidebarHovered ? "Mockrithm Portal" : ""}
         </div>
       </aside>
 
       {/* Main Panel Content Container */}
-      <div className="flex-1 flex flex-col min-w-0">
+      <div className={`flex-1 flex flex-col min-w-0 transition-all duration-300 lg:pr-56 ${sidebarLocked || isSidebarHovered ? "md:pl-64" : "md:pl-16"}`}>
         <main className="flex-1 overflow-y-auto z-10 pt-8 pb-16 px-6 sm:px-12 max-w-4xl w-full mx-auto" ref={mainContentRef}>
           <div className="space-y-8">
             
@@ -2082,28 +2103,31 @@ STRIPE_WEBHOOK_SECRET=whsec_...`}
       </div>
 
       {/* Right Side Table of Contents (On this page) - Sticky */}
-      <aside className={`w-56 sticky top-0 h-screen border-l pt-8 pb-6 px-6 shrink-0 hidden lg:block z-10 text-xs ${
+      <aside className={`w-56 fixed right-0 top-0 h-screen border-l pt-8 pb-6 px-6 shrink-0 hidden lg:block z-10 text-xs ${
         theme === "dark" ? "bg-zinc-950/20 border-zinc-900" : "bg-[#FAFAFA]/50 border-neutral-200/80"
       }`}>
         <div className="space-y-6 font-medium">
           <span className="text-[9px] font-extrabold uppercase tracking-widest block font-mono text-neutral-450">On This Page</span>
           <div className="space-y-2">
-            {filteredSections.map((sec) => {
-              const isActive = activeSection === sec.id;
-              return (
-                <button
-                  key={sec.id}
-                  onClick={() => setActiveSection(sec.id)}
-                  className={`w-full text-left block truncate transition-all duration-200 cursor-pointer ${
-                    isActive 
-                      ? theme === "dark" ? "text-white font-extrabold border-l border-white pl-2" : "text-black font-extrabold border-l border-black pl-2" 
-                      : "text-neutral-400 pl-2 hover:text-black dark:hover:text-white"
-                  }`}
-                >
-                  {sec.title}
-                </button>
-              );
-            })}
+            {headings.map((heading) => (
+              <a
+                key={heading.id}
+                href={"#" + heading.id}
+                className="w-full text-left block truncate transition-all duration-200 cursor-pointer text-neutral-450 hover:text-black dark:hover:text-white pl-2 border-l border-transparent hover:border-neutral-400"
+                onClick={(e) => {
+                  e.preventDefault();
+                  const el = document.getElementById(heading.id);
+                  if (el) {
+                    el.scrollIntoView({ behavior: "smooth" });
+                  }
+                }}
+              >
+                {heading.text}
+              </a>
+            ))}
+            {headings.length === 0 && (
+              <span className="text-[10px] text-neutral-400 italic">No sub-sections found</span>
+            )}
           </div>
 
           <div className={`pt-6 border-t space-y-3 ${theme === "dark" ? "border-zinc-900" : "border-neutral-205"}`}>
