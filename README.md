@@ -103,7 +103,8 @@ This project is open source. See the [LICENSE](LICENSE) file for details.
 
 ## 👤 Author
 
-- [Ahmed Hussain](https://github.com/AhmedHussainCodes)
+- [Ahmed Hussain](https://github.com/Ahapraxahmed)
+- [Muhammad Ali](https://github.com/RoaraxAli)
 
 ---
 
