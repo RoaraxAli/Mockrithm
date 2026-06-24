@@ -42,6 +42,7 @@ export default function PlanSelectionModal({
 
   const handleConfirmPremium = () => {
     toast.success("Premium access confirmed!");
+    localStorage.setItem(`seen_premium_modal_${userId}`, "true");
     onCompleted();
   };
 

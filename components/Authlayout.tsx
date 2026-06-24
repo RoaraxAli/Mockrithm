@@ -67,17 +67,35 @@ export default function AuthLayout({
           if (result && result.success) {
             setUserName(result.name || user.fullName || user.firstName || "User");
             setUserRole(result.role || "User");
-            setUserTier(result.tier as any);
+            const tier = result.tier;
+            setUserTier(tier as any);
             
-            // Check if user has been prompted in the current session
-            const sessionPrompt = sessionStorage.getItem(`plan_prompt_completed_${user.id}`);
             const isPaymentPage = 
               pathname.startsWith("/payment/success") || 
               pathname.startsWith("/payment/cancel") || 
               pathname.startsWith("/api/payment");
 
-            if (sessionPrompt !== "true" && !isPaymentPage) {
-              setShowPrompt(true);
+            if (!isPaymentPage) {
+              const isPremiumUser = tier === "premium" || tier === "pro";
+              if (isPremiumUser) {
+                // "Already Premium" modal should only appear once total
+                const hasSeenPremiumModal = localStorage.getItem(`seen_premium_modal_${user.id}`) === "true";
+                if (!hasSeenPremiumModal) {
+                  setShowPrompt(true);
+                }
+              } else {
+                // Choose plan prompt should appear once per month (30 days)
+                const lastPromptTimeStr = localStorage.getItem(`plan_prompt_time_${user.id}`);
+                if (!lastPromptTimeStr) {
+                  setShowPrompt(true);
+                } else {
+                  const lastPromptTime = parseInt(lastPromptTimeStr, 10);
+                  const thirtyDaysInMs = 30 * 24 * 60 * 60 * 1000;
+                  if (Date.now() - lastPromptTime > thirtyDaysInMs) {
+                    setShowPrompt(true);
+                  }
+                }
+              }
             }
           } else {
             setUserName(user.fullName || user.firstName || "User");
@@ -113,7 +131,10 @@ export default function AuthLayout({
           userId={userId}
           userTier={userTier}
           onCompleted={() => {
-            sessionStorage.setItem(`plan_prompt_completed_${userId}`, "true");
+            localStorage.setItem(`plan_prompt_time_${userId}`, Date.now().toString());
+            if (userTier === "premium" || userTier === "pro") {
+              localStorage.setItem(`seen_premium_modal_${userId}`, "true");
+            }
             setShowPrompt(false);
           }}
         />
