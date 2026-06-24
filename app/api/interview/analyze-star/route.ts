@@ -20,6 +20,44 @@ const starAnalysisSchema = z.object({
   }).optional(),
 });
 
+async function groqGenerateObject(prompt: string) {
+  const apiKey = process.env.GROQ_API_KEY;
+  if (!apiKey) {
+    throw new Error("GROQ_API_KEY is not configured.");
+  }
+  const response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${apiKey}`,
+    },
+    body: JSON.stringify({
+      model: process.env.GROQ_LLM_MODEL || "llama-3.3-70b-versatile",
+      messages: [
+        {
+          role: "system",
+          content: "You are an AI assistant. Return your response ONLY as a valid JSON object matching the requested schema. Do not output any markdown formatting, thoughts, or markdown codeblocks outside the JSON.",
+        },
+        {
+          role: "user",
+          content: prompt,
+        },
+      ],
+      temperature: 0.1,
+      response_format: { type: "json_object" },
+    }),
+  });
+
+  if (!response.ok) {
+    const errText = await response.text();
+    throw new Error(`Groq API returned status ${response.status}: ${errText}`);
+  }
+
+  const data = await response.json();
+  const text = data.choices[0]?.message?.content || "";
+  return JSON.parse(text);
+}
+
 export async function POST(request: Request) {
   try {
     const user = await getCurrentUser();
@@ -47,10 +85,7 @@ export async function POST(request: Request) {
       });
     }
 
-    const { object } = await generateObject({
-      model: google("gemini-2.5-flash"),
-      schema: starAnalysisSchema,
-      prompt: `
+    const promptText = `
         Analyze the following candidate's response to a question during a practice session.
         Candidate's Target Role: "${role || "General"}"
         Session Mode/Type: "${type || "Behavioral"}"
@@ -70,8 +105,36 @@ export async function POST(request: Request) {
         Provide the human-readable names for these competencies in the "labels" field so we can display them to the user.
         
         Provide a concise, constructive feedback comment (feedback) advising the candidate on any missing components or how they can improve.
-      `,
-    });
+      `;
+
+    let object;
+    try {
+      console.log("[DEBUG] Calling primary Groq model for STAR analysis...");
+      const groqJson = await groqGenerateObject(promptText + `\n\nSchema format:\n{\n  "situation": boolean,\n  "task": boolean,\n  "action": boolean,\n  "result": boolean,\n  "hasMetrics": boolean,\n  "feedback": "string",\n  "labels": {\n    "situation": "string",\n    "task": "string",\n    "action": "string",\n    "result": "string",\n    "hasMetrics": "string"\n  }\n}`);
+      object = {
+        situation: !!groqJson.situation,
+        task: !!groqJson.task,
+        action: !!groqJson.action,
+        result: !!groqJson.result,
+        hasMetrics: !!groqJson.hasMetrics,
+        feedback: groqJson.feedback || "",
+        labels: groqJson.labels || {
+          situation: "Competency 1",
+          task: "Competency 2",
+          action: "Competency 3",
+          result: "Competency 4",
+          hasMetrics: "Supporting Evidence"
+        }
+      };
+    } catch (err: any) {
+      console.warn("Groq STAR analysis failed, trying Gemini fallback...", err.message);
+      const result = await generateObject({
+        model: google("gemini-2.5-flash"),
+        schema: starAnalysisSchema,
+        prompt: promptText,
+      });
+      object = result.object;
+    }
 
     return NextResponse.json(object, { status: 200 });
   } catch (error: any) {

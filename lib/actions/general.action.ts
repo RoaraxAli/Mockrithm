@@ -8,6 +8,44 @@ import { z } from "zod";
 import { db } from "@/firebase/admin";
 import { feedbackSchema } from "@/constants";
 
+async function groqGenerateObject(prompt: string) {
+  const apiKey = process.env.GROQ_API_KEY;
+  if (!apiKey) {
+    throw new Error("GROQ_API_KEY is not configured.");
+  }
+  const response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${apiKey}`,
+    },
+    body: JSON.stringify({
+      model: process.env.GROQ_LLM_MODEL || "llama-3.3-70b-versatile",
+      messages: [
+        {
+          role: "system",
+          content: "You are an AI assistant. Return your response ONLY as a valid JSON object matching the requested schema. Do not output any markdown formatting, thoughts, or markdown codeblocks outside the JSON.",
+        },
+        {
+          role: "user",
+          content: prompt,
+        },
+      ],
+      temperature: 0.1,
+      response_format: { type: "json_object" },
+    }),
+  });
+
+  if (!response.ok) {
+    const errText = await response.text();
+    throw new Error(`Groq API returned status ${response.status}: ${errText}`);
+  }
+
+  const data = await response.json();
+  const text = data.choices[0]?.message?.content || "";
+  return JSON.parse(text);
+}
+
 export async function createFeedback(params: CreateFeedbackParams) {
   const { interviewId, userId, transcript, feedbackId, averageWpm, topFillerWords } = params;
   const userSnap = await db.collection("users").doc(userId).get();
@@ -48,24 +86,54 @@ export async function createFeedback(params: CreateFeedbackParams) {
       `;
 
     try {
-      const result = await generateObject({
-        model: google("gemini-2.0-flash-001", {
-          structuredOutputs: true,
-        }),
-        schema: feedbackSchema,
-        prompt: promptText,
+      console.log("[DEBUG] Calling primary Groq model for final feedback generation...");
+      const groqJson = await groqGenerateObject(promptText + `\n\nSchema format:\n{\n  "totalScore": number,\n  "categoryScores": [\n    { "name": "Communication Skills", "score": number, "comment": "string" },\n    { "name": "Technical Knowledge", "score": number, "comment": "string" },\n    { "name": "Problem Solving", "score": number, "comment": "string" },\n    { "name": "Cultural Fit", "score": number, "comment": "string" },\n    { "name": "Confidence and Clarity", "score": number, "comment": "string" }\n  ],\n  "strengths": ["string"],\n  "areasForImprovement": ["string"],\n  "finalAssessment": "string"\n}`);
+      
+      const categories = [
+        "Communication Skills",
+        "Technical Knowledge",
+        "Problem Solving",
+        "Cultural Fit",
+        "Confidence and Clarity"
+      ];
+      const categoryScores = categories.map((catName) => {
+        const found = groqJson.categoryScores?.find((c: any) => c.name === catName) || {};
+        return {
+          name: catName,
+          score: typeof found.score === "number" ? found.score : 70,
+          comment: found.comment || "No comment provided."
+        };
       });
-      object = result.object;
+
+      object = {
+        totalScore: typeof groqJson.totalScore === "number" ? groqJson.totalScore : 70,
+        categoryScores: categoryScores,
+        strengths: Array.isArray(groqJson.strengths) ? groqJson.strengths : ["Good effort"],
+        areasForImprovement: Array.isArray(groqJson.areasForImprovement) ? groqJson.areasForImprovement : ["Structure responses better"],
+        finalAssessment: groqJson.finalAssessment || "Keep practicing."
+      };
     } catch (err: any) {
-      console.warn("Primary feedback model gemini-2.0-flash-001 failed, trying gemini-2.5-flash...", err.message);
-      const result = await generateObject({
-        model: google("gemini-2.5-flash", {
-          structuredOutputs: true,
-        }),
-        schema: feedbackSchema,
-        prompt: promptText,
-      });
-      object = result.object;
+      console.warn("Primary feedback model Groq failed, trying Gemini-2.0-flash-001...", err.message);
+      try {
+        const result = await generateObject({
+          model: google("gemini-2.0-flash-001", {
+            structuredOutputs: true,
+          }),
+          schema: feedbackSchema,
+          prompt: promptText,
+        });
+        object = result.object;
+      } catch (geminiErr: any) {
+        console.warn("Primary feedback model gemini-2.0-flash-001 failed, trying gemini-2.5-flash...", geminiErr.message);
+        const result = await generateObject({
+          model: google("gemini-2.5-flash", {
+            structuredOutputs: true,
+          }),
+          schema: feedbackSchema,
+          prompt: promptText,
+        });
+        object = result.object;
+      }
     }
 
     const feedback = {
