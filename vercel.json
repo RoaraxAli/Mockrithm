@@ -46,6 +46,16 @@
       "destination": "/documentation"
     },
     {
+      "source": "/documentation/:path*",
+      "has": [
+        {
+          "type": "host",
+          "value": "docs.mockrithm.me"
+        }
+      ],
+      "destination": "/documentation/:path*"
+    },
+    {
       "source": "/:path*",
       "has": [
         {
