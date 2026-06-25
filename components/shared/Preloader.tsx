@@ -75,7 +75,7 @@ export default function Preloader() {
               transition={{ delay: 0.5, duration: 0.5 }}
               className="text-[10px] text-zinc-400 font-bold uppercase tracking-widest mt-4"
             >
-              Face the Machine
+              Own the Interview
             </motion.p>
           </div>
 

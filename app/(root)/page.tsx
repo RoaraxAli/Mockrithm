@@ -1,6 +1,7 @@
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import DocumentationPage from "../documentation/page";
+import BlogsPage from "../blog/page";
 import MarketingLanding from "@/components/MarketingLanding";
 import LandingDashboard from "@/components/LandingDashboard";
 import { getCurrentUser } from "@/lib/actions/auth.action";
@@ -11,6 +12,10 @@ export default async function Home() {
 
   if (host.startsWith("docs.")) {
     return <DocumentationPage />;
+  }
+
+  if (host.startsWith("blog.")) {
+    return <BlogsPage />;
   }
 
   const user = await getCurrentUser();

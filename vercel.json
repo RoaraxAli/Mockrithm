@@ -19,7 +19,18 @@
           "value": "mockrithm.me"
         }
       ],
-      "destination": "http://blog.mockrithm.me",
+      "destination": "https://blog.mockrithm.me",
+      "permanent": false
+    },
+    {
+      "source": "/blog",
+      "has": [
+        {
+          "type": "host",
+          "value": "mockrithm.me"
+        }
+      ],
+      "destination": "https://blog.mockrithm.me",
       "permanent": false
     }
   ],

@@ -59,7 +59,7 @@ export function Sidebar({
               MOCKRITHM
             </span>
             <span className="text-[8px] font-bold tracking-widest text-zinc-400 group-hover:text-zinc-300 transition-colors duration-300 uppercase">
-              Face the Machine
+              Own the Interview
             </span>
           </div>
         </Link>

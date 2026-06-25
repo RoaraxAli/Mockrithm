@@ -49,21 +49,21 @@ export default function AwwwardsHero() {
           animate={{ opacity: 1, x: 0 }}
           transition={{ ...transition, delay: 0.15 }}
         >
-          <span>Face the Machine</span>
+          <span>Own the Interview</span>
         </motion.div>
       </div>
 
       {/* ASYMMETRICAL TYPOGRAPHY COLLISION (Floating coordinates) */}
-      <div className="hero-fade-target absolute inset-0 z-20 pointer-events-none">
-        
-        {/* Word 1: FACE - top left */}
+      {/* Desktop asymmetrical typography */}
+      <div className="hidden sm:block hero-fade-target absolute inset-0 z-20 pointer-events-none">
+        {/* Word 1: OWN - top left */}
         <motion.h1
           initial={{ opacity: 0, x: -100, y: -30 }}
           animate={{ opacity: 1, x: 0, y: 0 }}
           transition={{ ...transition, delay: 0.1 }}
-          className="absolute left-[10%] top-[25%] text-[9vw] max-sm:text-[14vw] font-black leading-none uppercase tracking-tighter text-white"
+          className="absolute left-[10%] top-[25%] text-[9vw] font-black leading-none uppercase tracking-tighter text-white"
         >
-          Face
+          Own
         </motion.h1>
 
         {/* Word 2: THE - middle left */}
@@ -71,19 +71,33 @@ export default function AwwwardsHero() {
           initial={{ opacity: 0, x: -80, y: 10 }}
           animate={{ opacity: 1, x: 0, y: 0 }}
           transition={{ ...transition, delay: 0.2 }}
-          className="absolute left-[20%] top-[40%] text-[9vw] max-sm:text-[14vw] font-black leading-none uppercase tracking-tighter text-zinc-600/90"
+          className="absolute left-[20%] top-[40%] text-[9vw] font-black leading-none uppercase tracking-tighter text-zinc-600/90"
         >
           the
         </motion.h1>
 
-        {/* Word 3: MACHINE - middle right (will overlap with Centerpiece Mesh) */}
+        {/* Word 3: INTERVIEW - middle right (will overlap with Centerpiece Mesh) */}
         <motion.h1
           initial={{ opacity: 0, x: 120, y: 20 }}
           animate={{ opacity: 1, x: 0, y: 0 }}
           transition={{ ...transition, delay: 0.3 }}
-          className="absolute right-[8%] top-[34%] text-[10vw] max-sm:text-[15vw] font-extrabold leading-none uppercase tracking-tight text-white/95"
+          className="absolute right-[8%] top-[34%] text-[10vw] font-extrabold leading-none uppercase tracking-tight text-white/95"
         >
-          machine.
+          interview.
+        </motion.h1>
+      </div>
+
+      {/* Mobile sequential typography */}
+      <div className="block sm:hidden hero-fade-target absolute left-6 right-6 top-[25%] text-left pointer-events-none z-20">
+        <motion.h1
+          initial={{ opacity: 0, y: 30 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ ...transition, delay: 0.1 }}
+          className="text-[12vw] font-black leading-none uppercase tracking-tighter text-white"
+        >
+          Own <br />
+          <span className="text-zinc-600">the</span> <br />
+          interview.
         </motion.h1>
       </div>
 
