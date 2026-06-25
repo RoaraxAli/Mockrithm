@@ -10,6 +10,11 @@ export default function Preloader() {
 
   useEffect(() => {
     setMounted(true);
+    if (typeof window !== "undefined") {
+      if (window.location.hostname.startsWith("blog.") || window.location.pathname.includes("/blog")) {
+        return;
+      }
+    }
     // Check sessionStorage to show only on first launch of the session
     const hasVisited = sessionStorage.getItem("mockrithm_visited");
     if (hasVisited) {
