@@ -18,6 +18,10 @@ export default async function Home() {
     return <BlogsPage />;
   }
 
+  if (host.startsWith("accounts.")) {
+    redirect("/sign-in");
+  }
+
   const user = await getCurrentUser();
 
   if (user) {

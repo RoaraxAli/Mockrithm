@@ -341,17 +341,37 @@ const Navbar = ({ userId, userName, userRole }: NavbarProps) => {
               </div>
             </Show>
 
-            {/* Mobile Menu Toggle */}
-            <button
-              className="md:hidden relative p-2 rounded-lg bg-white/10 hover:bg-white/20 border border-white/20 hover:border-white/40 text-gray-300 hover:text-white transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-white/50 backdrop-blur-sm"
-              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-            >
-              {isMobileMenuOpen ? (
-                <X className="w-5 h-5" />
-              ) : (
-                <Menu className="w-5 h-5" />
-              )}
-            </button>
+            {/* Mobile Actions Container */}
+            <div className="flex items-center space-x-2 md:hidden">
+              <Show when="signed-out">
+                <Link
+                  href={getAuthRedirectUrl("sign-up")}
+                  className="bg-white text-black font-extrabold hover:bg-zinc-200 transition-all border border-white rounded-xl text-[9px] uppercase tracking-wider px-3.5 py-1.5"
+                >
+                  Start Prep
+                </Link>
+              </Show>
+              <Show when="signed-in">
+                <Link
+                  href="/interview"
+                  className="bg-white text-black font-extrabold hover:bg-zinc-200 transition-all border border-white rounded-xl text-[9px] uppercase tracking-wider px-3.5 py-1.5"
+                >
+                  Start Prep
+                </Link>
+              </Show>
+
+              {/* Mobile Menu Toggle */}
+              <button
+                className="relative p-2 rounded-lg bg-white/10 hover:bg-white/20 border border-white/20 hover:border-white/40 text-gray-300 hover:text-white transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-white/50 backdrop-blur-sm"
+                onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+              >
+                {isMobileMenuOpen ? (
+                  <X className="w-5 h-5" />
+                ) : (
+                  <Menu className="w-5 h-5" />
+                )}
+              </button>
+            </div>
           </div>
         </div>
 
