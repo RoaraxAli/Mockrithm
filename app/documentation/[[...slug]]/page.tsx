@@ -1,12 +1,17 @@
 import { source } from '@/lib/source';
 import { DocsPage, DocsBody } from 'fumadocs-ui/page';
-import { notFound } from 'next/navigation';
+import { notFound, redirect } from 'next/navigation';
 import defaultMdxComponents from 'fumadocs-ui/mdx';
 
 export default async function Page(props: {
   params: Promise<{ slug?: string[] }>;
 }) {
   const params = await props.params;
+  
+  if (!params.slug || params.slug.length === 0) {
+    redirect('/documentation/user');
+  }
+
   const page = source.getPage(params.slug);
   if (!page) notFound();
 

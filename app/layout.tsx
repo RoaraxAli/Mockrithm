@@ -10,6 +10,8 @@ import MagneticCursor from "@/components/landing/MagneticCursor";
 import { getCurrentUser } from "@/lib/actions/auth.action";
 import { Analytics } from "@vercel/analytics/react";
 
+import { RootProvider } from "fumadocs-ui/provider/next";
+import "fumadocs-ui/style.css";
 import "./globals.css";
 
 const monaSans = Mona_Sans({
@@ -51,9 +53,11 @@ export default async function RootLayout({
           <Preloader />
           <Analytics />
           <MagneticCursor />
-          <AuthLayout initialUserId={user?.id} initialUserName={user?.name} initialUserRole={user?.role}>
-            {children}
-          </AuthLayout>
+          <RootProvider>
+            <AuthLayout initialUserId={user?.id} initialUserName={user?.name} initialUserRole={user?.role}>
+              {children}
+            </AuthLayout>
+          </RootProvider>
           <Toaster />
           <FooterWrapper />
         </ClerkProvider>

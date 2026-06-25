@@ -1,6 +1,5 @@
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
-import DocumentationPage from "../documentation/page";
 import BlogsPage from "../blog/page";
 import MarketingLanding from "@/components/MarketingLanding";
 import LandingDashboard from "@/components/LandingDashboard";
@@ -11,7 +10,7 @@ export default async function Home() {
   const host = headerList.get("host") || "";
 
   if (host.startsWith("docs.")) {
-    return <DocumentationPage />;
+    redirect("/documentation");
   }
 
   if (host.startsWith("blog.")) {
