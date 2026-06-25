@@ -2,6 +2,21 @@
   "root": true,
   "title": "User Manual",
   "pages": [
-    "index"
+    "index",
+    "audio",
+    "wpm",
+    "fillers",
+    "star",
+    "reports",
+    "resume-templates",
+    "skills",
+    "projects",
+    "resume-preview",
+    "billing-plans",
+    "payment-methods",
+    "annual-billing",
+    "support",
+    "settings",
+    "privacy"
   ]
 }

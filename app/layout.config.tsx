@@ -4,6 +4,7 @@ export const baseOptions: BaseLayoutProps = {
   nav: {
     title: 'Mockrithm Docs',
   },
+  githubUrl: 'https://github.com/RoaraxAli/Mockrithm',
   links: [
     {
       text: 'Website',

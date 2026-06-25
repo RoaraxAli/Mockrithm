@@ -67,6 +67,26 @@
   /* Aligned exactly with root dark config */
   --background: oklch(0.09 0 0);
   --foreground: oklch(0.98 0 0);
+
+  /* Fumadocs Premium Monochrome Dark overrides */
+  --fd-background: #09090b;
+  --fd-foreground: #f4f4f5;
+  --fd-muted: #18181b;
+  --fd-muted-foreground: #a1a1aa;
+  --fd-popover: #09090b;
+  --fd-popover-foreground: #fafafa;
+  --fd-card: #09090b;
+  --fd-card-foreground: #fafafa;
+  --fd-border: rgba(255, 255, 255, 0.08);
+  --fd-primary: #ffffff;
+  --fd-primary-foreground: #000000;
+  --fd-accent: #18181b;
+  --fd-accent-foreground: #ffffff;
+  --fd-sidebar: #050507;
+  --fd-sidebar-foreground: #a1a1aa;
+  --fd-sidebar-border: rgba(255, 255, 255, 0.05);
+  --fd-sidebar-active: #18181b;
+  --fd-sidebar-active-foreground: #ffffff;
 }
 
 @theme inline {

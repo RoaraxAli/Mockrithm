@@ -2,6 +2,24 @@
   "root": true,
   "title": "Developer Docs",
   "pages": [
-    "index"
+    "index",
+    "middleware",
+    "groq",
+    "gemini",
+    "elevenlabs",
+    "vapi",
+    "stripe-webhooks",
+    "clerk-webhooks",
+    "design-system",
+    "three-bloom",
+    "three-shaders",
+    "gsap-pinning",
+    "lenis",
+    "star-grading",
+    "ats-pdf",
+    "deploy",
+    "intro",
+    "websockets",
+    "ats-rules"
   ]
 }
