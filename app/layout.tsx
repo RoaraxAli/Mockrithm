@@ -32,9 +32,9 @@ export default async function RootLayout({
   const user = await getCurrentUser();
 
   return (
-    <html lang="en" className="dark" suppressHydrationWarning>
+    <html lang="en" suppressHydrationWarning>
       <body
-        className={`${monaSans.className} bg-black text-white antialiased pattern`}
+        className={`${monaSans.className} bg-zinc-950 text-white antialiased pattern`}
         suppressHydrationWarning
       >
         <ClerkProvider

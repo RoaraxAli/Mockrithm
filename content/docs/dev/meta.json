@@ -1,4 +1,5 @@
 {
+  "root": true,
   "title": "Developer Docs",
   "pages": [
     "index"
