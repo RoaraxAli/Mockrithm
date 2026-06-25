@@ -3,10 +3,11 @@ title: Introduction
 description: Documentation for Introduction
 ---
 
-Overview
+<div className="space-y-3">
+            <div className="text-[10px] font-black text-neutral-400 uppercase tracking-widest font-mono">Overview</div>
 
 ## Introduction
-          
+          </div>
           
           
             Welcome to the official documentation for **Mockrithm**, an advanced AI-powered career training framework. Mockrithm utilizes a dual-layer architecture, combining static marketing features with protected dashboard widgets.
@@ -14,13 +15,14 @@ Overview
 
 
 
-          
+          <div className="grid sm:grid-cols-2 gap-6 my-6">
             <motion.div 
               whileHover={{ y: -2 }}
               className="p-6 rounded-lg border border-neutral-200/80 bg-neutral-50/50 space-y-4 hover:border-black transition-all duration-200"
             >
-              
+              <div className="size-8 rounded bg-black flex items-center justify-center text-white">
                 <Layers className="size-4" />
+              </div>
 
 ### Layer 1: Public Base
               
@@ -34,8 +36,9 @@ Overview
               whileHover={{ y: -2 }}
               className="p-6 rounded-lg border border-neutral-200/80 bg-neutral-50/50 space-y-4 hover:border-black transition-all duration-200"
             >
-              
+              <div className="size-8 rounded bg-black flex items-center justify-center text-white">
                 <Zap className="size-4" />
+              </div>
 
 ### Layer 2: Private Dashboard
               
@@ -44,8 +47,11 @@ Overview
 
 
             </motion.div>
-          
+          </div>
 
-          > [!NOTE]
-> 
+          <div className="p-4 rounded-lg border border-neutral-200/80 bg-neutral-50/50 flex gap-4 items-start">
+            <Info className="size-5 text-black shrink-0 mt-0.5" />
+            <div className="space-y-1 text-xs leading-relaxed text-neutral-600">
               **API Core URL:** Sandbox actions point to `sandbox.api.mockrithm.me`. Production releases leverage sharded cloud nodes.
+            </div>
+          </div>

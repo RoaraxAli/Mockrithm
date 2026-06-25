@@ -3,10 +3,11 @@ title: Audio WebSockets Stream
 description: Documentation for Audio WebSockets Stream
 ---
 
-WebSocket Handshakes
+<div className="space-y-3">
+            <div className="text-[10px] font-black text-neutral-400 uppercase tracking-widest font-mono">WebSocket Handshakes</div>
 
 ## Audio WebSockets Stream
-          
+          </div>
 
           
             Streaming uses full-duplex WebSockets. Read the client implementation patterns below:
@@ -14,10 +15,17 @@ WebSocket Handshakes
 
 
 
-          
-            
-              
-                );
+          ```javascript
+// WebSocket audio stream
+const socket = new WebSocket("wss://api.mockrithm.me/v1/voice/stream");
+
+socket.onopen = () => {
+  socket.send(JSON.stringify({
+    event: "start",
+    streamSid: "session_abc123",
+    voiceId: "eleven_rachel",
+    pacingLimit: { min: 110, max: 165 }
+  }));
 };
 
 socket.onmessage = (event) => {

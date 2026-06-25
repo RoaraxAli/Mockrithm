@@ -3,10 +3,11 @@ title: Feedback & Telemetry
 description: Documentation for Feedback & Telemetry
 ---
 
-Metrics Guide
+<div className="space-y-3">
+            <div className="text-[10px] font-black text-neutral-400 uppercase tracking-widest font-mono">Metrics Guide</div>
 
 ## Feedback & Telemetry
-          
+          </div>
 
           
             After each session, you will receive score metrics. Below is an explanation of what the telemetry parameters track:
@@ -14,10 +15,31 @@ Metrics Guide
 
 
 
-          
-            
-| Metric | Optimal range | Evaluation Goal |
-| :--- | :--- | :--- |
-| Pacing Speed (WPM) | 120 - 150 WPM | Ensures you speak at a clear, professional speed. |
-| Vocal Filler Words | < 3 per answer | Tracks vocal halts (like 'um', 'like', 'ah') to clean up communication. |
-| STAR Method Score | > 85% Match | Evaluates if your answer covers Situation, Task, Action, and Result. |
+          <div className="border border-neutral-200/80 rounded-lg overflow-hidden mt-4 bg-white">
+            <table className="w-full text-left border-collapse text-xs">
+              <thead>
+                <tr className="border-b border-neutral-200 bg-neutral-50/50 text-neutral-500 font-extrabold uppercase tracking-wider text-[10px]">
+                  <th className="p-4">Metric</th>
+                  <th className="p-4">Optimal range</th>
+                  <th className="p-4">Evaluation Goal</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-neutral-100">
+                <tr className="hover:bg-neutral-50/30 transition-colors">
+                  <td className="p-4 text-black font-extrabold">Pacing Speed (WPM)</td>
+                  <td className="p-4 text-neutral-800 font-mono font-bold">120 - 150 WPM</td>
+                  <td className="p-4 text-neutral-500 font-normal">Ensures you speak at a clear, professional speed.</td>
+                </tr>
+                <tr className="hover:bg-neutral-50/30 transition-colors">
+                  <td className="p-4 text-black font-extrabold">Vocal Filler Words</td>
+                  <td className="p-4 text-neutral-800 font-mono font-bold">&lt; 3 per answer</td>
+                  <td className="p-4 text-neutral-500 font-normal">Tracks vocal halts (like 'um', 'like', 'ah') to clean up communication.</td>
+                </tr>
+                <tr className="hover:bg-neutral-50/30 transition-colors">
+                  <td className="p-4 text-black font-extrabold">STAR Method Score</td>
+                  <td className="p-4 text-neutral-800 font-mono font-bold">&gt; 85% Match</td>
+                  <td className="p-4 text-neutral-500 font-normal">Evaluates if your answer covers Situation, Task, Action, and Result.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>

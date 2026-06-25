@@ -3,10 +3,11 @@ title: Billing & Plans
 description: Documentation for Billing & Plans
 ---
 
-Billing Cycles
+<div className="space-y-3">
+            <div className="text-[10px] font-black text-neutral-400 uppercase tracking-widest font-mono">Billing Cycles</div>
 
 ## Billing & Plans
-          
+          </div>
 
           
             Mockrithm supports three tiers. You can choose to bill monthly or select annual billing to save 20%.
@@ -14,30 +15,37 @@ Billing Cycles
 
 
 
-          
-- **Freemium (Tier 1)**: 1 AI Voice session, standard pacing feedback.
-- **Premium (Tier 2 - Popular)**: $10/mo. Unlimited voices, 6 templates, fillers tracking.
-- **Pro (Tier 3)**: $25/mo. System designer, custom templates, API access.
+          <div className="grid sm:grid-cols-3 gap-4 my-6">
+            <div className="p-5 rounded-lg border border-neutral-200/80 bg-[#FFFFFF] space-y-2">
+              <span className="text-[9px] font-bold text-neutral-400 uppercase tracking-wider font-mono">Tier 1</span>
 
-            
-              Popular
-              Tier 2
+### Freemium
+              1 AI Voice session, standard pacing feedback.
+
+
+            </div>
+            <div className="p-5 rounded-lg border border-black bg-[#FFFFFF] space-y-2 relative overflow-hidden">
+              <div className="absolute top-0 right-0 bg-black text-white text-[8px] font-bold uppercase tracking-widest px-2 py-0.5">Popular</div>
+              <span className="text-[9px] font-bold text-neutral-455 uppercase tracking-wider font-mono">Tier 2</span>
 
 ### Premium
               $10/mo. Unlimited voices, 6 templates, fillers.
 
 
-            
-            
-              Tier 3
+            </div>
+            <div className="p-5 rounded-lg border border-neutral-200/80 bg-[#FFFFFF] space-y-2">
+              <span className="text-[9px] font-bold text-neutral-400 uppercase tracking-wider font-mono">Tier 3</span>
 
 ### Pro
               $25/mo. System designer, custom templates, API.
 
 
-            
-          
+            </div>
+          </div>
 
-          > [!NOTE]
-> 
+          <div className="p-4 rounded-lg border border-neutral-200/80 bg-neutral-50/50 flex gap-4 items-start">
+            <Info className="size-5 text-black shrink-0 mt-0.5" />
+            <div className="space-y-1 text-xs leading-relaxed text-neutral-600">
               **Managing Subscription:** Upgrade or cancel subscription parameters inside your Account Settings panel under "Billing & Subscription".
+            </div>
+          </div>

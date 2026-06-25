@@ -3,13 +3,20 @@ title: Firestore Database Architecture
 description: Documentation for Firestore Database Architecture
 ---
 
-Data Modeling
+<div className="space-y-3">
+            <div className="text-[10px] font-black text-neutral-400 uppercase tracking-widest font-mono">Data Modeling</div>
 
 ## Firestore Database Architecture
-          
+          </div>
 
           
             Mockrithm leverages Google Cloud Firestore as its primary serverless document store. Below is the comprehensive schema guide for the key collections used in the platform:
+          
+
+
+
+          <div className="space-y-6">
+            <div className="p-5 rounded-lg border border-neutral-200 bg-neutral-50/30 space-y-3">
 
 ### 1. Users Collection (`/users`)
               
@@ -29,6 +36,9 @@ Data Modeling
   "updatedAt": Timestamp
 }
 ```
+            </div>
+
+            <div className="p-5 rounded-lg border border-neutral-200 bg-neutral-50/30 space-y-3">
 
 ### 2. Resumes Subcollection (`/users/{userId}/resumes`)
               
@@ -57,6 +67,9 @@ Data Modeling
   }
 }
 ```
+            </div>
+
+            <div className="p-5 rounded-lg border border-neutral-200 bg-neutral-50/30 space-y-3">
 
 ### 3. Interviews Collection (`/interviews`)
               
@@ -79,6 +92,9 @@ Data Modeling
   "createdAt": Timestamp
 }
 ```
+            </div>
+
+            <div className="p-5 rounded-lg border border-neutral-200 bg-neutral-50/30 space-y-3">
 
 ### 4. Interview Feedback Collection (`/interviewsfeedback`)
               
@@ -105,3 +121,5 @@ Data Modeling
   "createdAt": Timestamp
 }
 ```
+            </div>
+          </div>
