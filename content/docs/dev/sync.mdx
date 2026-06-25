@@ -1,0 +1,58 @@
+---
+title: Clerk & Firebase Sync
+description: Documentation for Clerk & Firebase Sync
+---
+
+Database Integration
+
+## Clerk & Firebase Sync
+          
+
+          
+            Mockrithm syncs profile sessions between Clerk auth rules and the Firestore database structure.
+          
+
+
+
+          
+            
+              
+                {(["javascript", "python", "curl"] as CodeLang[]).map((lang) => (
+                  <button
+                    key={lang}
+                    onClick={() => setActiveTab(lang)}
+                    className=px-3 py-1.5 text-[10px] font-bold uppercase tracking-wider rounded transition-all cursor-pointer ${
+                      activeTab === lang 
+                        ? "bg-black text-white" 
+                        : "text-neutral-500 hover:text-black hover:bg-neutral-100"
+                    }
+                  >
+                    {lang === "javascript" ? "Next.js" : lang === "python" ? "Python SDK" : "cURL"}
+                  </button>
+                ))}
+              
+            
+            
+              ```javascript
+// Syncing auth...
+// Next.js:
+// app/api/auth/sync/route.ts
+import { db } from "@/firebase/admin";
+import { currentUser } from "@clerk/nextjs/server";
+import { NextResponse } from "next/server";
+
+export async function POST() {
+  const user = await currentUser();
+  if (!user) return new NextResponse("Unauthorized", { status: 401 });
+
+  const userRef = db.collection("users").doc(user.id);
+  await userRef.set({
+    email: user.emailAddresses[0].emailAddress,
+    name: `${user.firstName || ""} ${user.lastName || ""}`.trim(),
+    avatarUrl: user.imageUrl,
+    updatedAt: new Date().toISOString()
+  }, { merge: true });
+
+  return NextResponse.json({ success: true });
+}
+```

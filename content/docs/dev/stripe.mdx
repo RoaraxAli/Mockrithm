@@ -1,0 +1,19 @@
+---
+title: Stripe & Webhooks
+description: Documentation for Stripe & Webhooks
+---
+
+Payment Routing
+
+## Stripe & Webhooks
+          
+
+          
+            Transactions redirect customers to Stripe. Once complete, Stripe redirects verification calls back to the application.
+          
+
+
+
+          > [!WARNING]
+> 
+              **Security Tip:** Verify signatures inside checkout webhook callbacks (`checkout.session.completed`) before upgrading databases.

@@ -17,6 +17,12 @@
     "annual-billing",
     "support",
     "settings",
-    "privacy"
+    "privacy",
+    "interviews",
+    "scores",
+    "resumes",
+    "billing",
+    "onboarding",
+    "resume-export"
   ]
 }

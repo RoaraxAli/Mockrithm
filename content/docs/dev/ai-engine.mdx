@@ -1,0 +1,25 @@
+---
+title: AI Feedback & LLM Engine
+description: Documentation for AI Feedback & LLM Engine
+---
+
+Engine Core
+
+## AI Feedback & LLM Engine
+          
+
+          
+            The candidate assessment engine operates as a hybrid pipeline using Groq and Gemini models.
+
+### Execution Pipeline Steps
+            
+              - 
+                **Primary Model Target:** The engine formats full transcript dialogues and makes a high-speed inference call to Groq using the `llama-3.3-70b-versatile` model.
+              
+
+              - 
+                **Zod Schema fallback:** If Groq times out, experiences rate limits, or fails JSON verification, the system falls back to Google's `gemini-2.0-flash-001` model using structured schema formatting from the `ai` SDK.
+              
+
+              - 
+                **Profile Customization Loop:** On successful scoring, the engine launches an asynchronous auto-optimization process to update the candidate's profile metrics inside Firestore.

@@ -20,4 +20,36 @@ WebSocket Handshakes
                 {(["javascript", "python", "curl"] as CodeLang[]).map((lang) => (
                   <button
                     key={lang}
-                    onClick={() => setActiveTab(lang
+                    onClick={() => setActiveTab(lang)}
+                    className=px-3 py-1.5 text-[10px] font-bold uppercase tracking-wider rounded transition-all cursor-pointer ${
+                      activeTab === lang 
+                        ? "bg-black text-white" 
+                        : "text-neutral-500 hover:text-black hover:bg-neutral-100"
+                    }
+                  >
+                    {lang === "javascript" ? "Web Client" : lang === "python" ? "Python Client" : "cURL CLI"}
+                  </button>
+                ))}
+              
+            
+            
+              ```javascript
+// WebSocket audio stream
+const socket = new WebSocket("wss://api.mockrithm.me/v1/voice/stream");
+
+socket.onopen = () => {
+  socket.send(JSON.stringify({
+    event: "start",
+    streamSid: "session_abc123",
+    voiceId: "eleven_rachel",
+    pacingLimit: { min: 110, max: 165 }
+  }));
+};
+
+socket.onmessage = (event) => {
+  const message = JSON.parse(event.data);
+  if (message.event === "transcript") {
+    console.log("Real-time transcript:", message.text);
+  }
+};
+```

@@ -19,7 +19,13 @@
     "ats-pdf",
     "deploy",
     "intro",
+    "quickstart",
+    "sync",
     "websockets",
-    "ats-rules"
+    "ats-rules",
+    "stripe",
+    "admin",
+    "db-schema",
+    "ai-engine"
   ]
 }

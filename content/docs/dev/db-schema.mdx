@@ -1,0 +1,107 @@
+---
+title: Firestore Database Architecture
+description: Documentation for Firestore Database Architecture
+---
+
+Data Modeling
+
+## Firestore Database Architecture
+          
+
+          
+            Mockrithm leverages Google Cloud Firestore as its primary serverless document store. Below is the comprehensive schema guide for the key collections used in the platform:
+
+### 1. Users Collection (`/users`)
+              
+                Stores root-level user metadata and configuration. User IDs match Clerk authenticated IDs exactly.
+              
+
+
+              ```Schema
+{
+  "id": "user_clerkId...", // Match Clerk Auth ID
+  "name": "Muhammad Ali",
+  "email": "ali@example.com",
+  "role": "Admin" | "User",
+  "status": "Active" | "Suspended",
+  "country": "US",
+  "createdAt": Timestamp,
+  "updatedAt": Timestamp
+}
+```
+
+### 2. Resumes Subcollection (`/users/{userId}/resumes`)
+              
+                Contains the parsed and template-based resume documents for each individual candidate.
+              
+
+
+              ```Schema
+{
+  "userId": "user_clerkId...",
+  "fileName": "Software_Engineer_CV.pdf",
+  "rawText": "Extracted text content...",
+  "createdAt": "2026-06-24T22:37:51.000Z",
+  "parsedData": {
+    "basics": { "name": "...", "label": "...", "email": "...", "phone": "...", "summary": "..." },
+    "work": [{ "company": "...", "role": "...", "startDate": "...", "endDate": "...", "highlights": ["..."] }],
+    "education": [{ "institution": "...", "studyType": "...", "area": "...", "score": "..." }],
+    "skills": ["TypeScript", "Next.js", "Python"],
+    "projects": [{ "name": "...", "description": "...", "url": "..." }],
+    "templateId": "ATS-Template-V1"
+  },
+  "atsAnalysis": {
+    "score": 85,
+    "parsingSuccess": true,
+    "issues": ["Missing GitHub link", "Summary too short"]
+  }
+}
+```
+
+### 3. Interviews Collection (`/interviews`)
+              
+                Logs voice assessment sessions, their current parameters, and live status.
+              
+
+
+              ```Schema
+{
+  "id": "interview_session_id...",
+  "userId": "user_clerkId...",
+  "role": "Frontend Engineer",
+  "experience": "Senior",
+  "questions": ["Explain React Server Components", "Design a custom hook..."],
+  "transcript": [
+    { "role": "interviewer", "content": "Welcome! Tell me about React Server Components." },
+    { "role": "candidate", "content": "RSCs run on the server side..." }
+  ],
+  "finalized": true,
+  "createdAt": Timestamp
+}
+```
+
+### 4. Interview Feedback Collection (`/interviewsfeedback`)
+              
+                Stores parsed LLM response metrics, comment suggestions, pacing metrics, and vocal filler count structures.
+              
+
+
+              ```Schema
+{
+  "interviewId": "interview_id...",
+  "userId": "user_clerkId...",
+  "candidateName": "Ali",
+  "email": "ali@example.com",
+  "totalScore": 88,
+  "categoryScores": [
+    { "name": "Communication Skills", "score": 90, "comment": "Clear speech pattern." },
+    { "name": "Technical Knowledge", "score": 85, "comment": "Good grasp of hydration..." }
+  ],
+  "strengths": ["Clear articulation", "Structured STAR methodology"],
+  "areasForImprovement": ["Slowing down pacing during complex system explanations"],
+  "finalAssessment": "Strong candidate. Focus on polishing system design details.",
+  "averageWpm": 132,
+  "topFillerWords": ["like", "um"],
+  "createdAt": Timestamp
+}
+```
