@@ -1,7 +1,6 @@
 {
   "title": "Overview & Setup",
   "pages": [
-    "index",
     "intro",
     "quickstart",
     "deploy"
