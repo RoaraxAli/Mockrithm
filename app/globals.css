@@ -2,7 +2,7 @@
 
 @plugin "tailwindcss-animate";
 
-@custom-variant dark (&:is(.dark *));
+@variant dark (&:where(.dark, .dark *));
 
 @theme {
   --color-success-100: #10b981;
@@ -27,17 +27,70 @@
   --bg-pattern: url("/pattern.png");
 }
 
-/* Force dark theme variables on root by default to avoid light-mode text blending issues */
 :root {
-  --radius: 0.375rem; /* Flat sharp corners */
+  --radius: 0.375rem;
+  --background: oklch(0.99 0 0); /* White/zinc-50 */
+  --foreground: oklch(0.09 0 0); /* Zinc-950 */
+  --card: oklch(1 0 0);
+  --card-foreground: oklch(0.09 0 0);
+  --popover: oklch(1 0 0);
+  --popover-foreground: oklch(0.09 0 0);
+  --primary: oklch(0.09 0 0); /* Black */
+  --primary-foreground: oklch(0.99 0 0); /* White */
+  --secondary: oklch(0.96 0 0); /* Zinc-100 */
+  --secondary-foreground: oklch(0.09 0 0);
+  --muted: oklch(0.96 0 0); /* Zinc-100 */
+  --muted-foreground: oklch(0.4 0 0); /* Zinc-500 */
+  --accent: oklch(0.96 0 0);
+  --accent-foreground: oklch(0.09 0 0);
+  --destructive: oklch(0.6 0.18 20);
+  --border: oklch(0.09 0 0 / 8%);
+  --input: oklch(0.09 0 0 / 10%);
+  --ring: oklch(0.09 0 0 / 15%);
+  --chart-1: oklch(0.09 0 0);
+  --chart-2: oklch(0.4 0 0);
+  --chart-3: oklch(0.6 0 0);
+  --chart-4: oklch(0.8 0 0);
+  --chart-5: oklch(0.95 0 0);
+  --sidebar: oklch(0.98 0 0);
+  --sidebar-foreground: oklch(0.09 0 0);
+  --sidebar-primary: oklch(0.09 0 0);
+  --sidebar-primary-foreground: oklch(0.98 0 0);
+  --sidebar-accent: oklch(0.96 0 0);
+  --sidebar-accent-foreground: oklch(0.09 0 0);
+  --sidebar-border: oklch(0.09 0 0 / 8%);
+  --sidebar-ring: oklch(0.09 0 0 / 10%);
+  
+  /* Fumadocs Premium Monochrome Light overrides */
+  --fd-background: #ffffff;
+  --fd-foreground: #09090b;
+  --fd-muted: #f4f4f5;
+  --fd-muted-foreground: #71717a;
+  --fd-popover: #ffffff;
+  --fd-popover-foreground: #09090b;
+  --fd-card: #ffffff;
+  --fd-card-foreground: #09090b;
+  --fd-border: rgba(9, 9, 11, 0.08);
+  --fd-primary: #09090b;
+  --fd-primary-foreground: #ffffff;
+  --fd-accent: #f4f4f5;
+  --fd-accent-foreground: #09090b;
+  --fd-sidebar: #fafafa;
+  --fd-sidebar-foreground: #71717a;
+  --fd-sidebar-border: rgba(9, 9, 11, 0.05);
+  --fd-sidebar-active: #f4f4f5;
+  --fd-sidebar-active-foreground: #09090b;
+}
+
+.dark {
   --background: oklch(0.09 0 0); /* Pure black/zinc */
   --foreground: oklch(0.98 0 0); /* Crisp clean white */
   --card: oklch(0.12 0 0);
   --card-foreground: oklch(0.98 0 0);
   --popover: oklch(0.12 0 0);
   --popover-foreground: oklch(0.98 0 0);
-  --primary: oklch(0.99 0 0); /* Crisp Monochrome White */
-  --primary-foreground: oklch(0.1 0 0); /* Black */
+  --primary: oklch(0.99 0 0);
+  --primary-foreground: oklch(0.1 0 0);
   --secondary: oklch(0.18 0 0);
   --secondary-foreground: oklch(0.98 0 0);
   --muted: oklch(0.18 0 0);
@@ -61,12 +114,6 @@
   --sidebar-accent-foreground: oklch(0.98 0 0);
   --sidebar-border: oklch(1 0 0 / 8%);
   --sidebar-ring: oklch(0.99 0 0 / 10%);
-}
-
-.dark {
-  /* Aligned exactly with root dark config */
-  --background: oklch(0.09 0 0);
-  --foreground: oklch(0.98 0 0);
 
   /* Fumadocs Premium Monochrome Dark overrides */
   --fd-background: #09090b;
@@ -137,17 +184,16 @@
   }
   body {
     @apply bg-background text-foreground;
-    background-color: #09090b;
     min-height: 100vh;
   }
   p {
-    @apply text-slate-400;
+    @apply text-muted-foreground;
   }
   h2 {
-    @apply text-3xl font-bold text-white;
+    @apply text-3xl font-bold text-foreground;
   }
   h3 {
-    @apply text-2xl font-bold text-white;
+    @apply text-2xl font-bold text-foreground;
   }
   ul {
     @apply list-disc list-inside;

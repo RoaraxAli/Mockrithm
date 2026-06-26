@@ -1,11 +1,93 @@
 ---
 title: Tailwind CSS Design System
-description: Documentation for Tailwind CSS Design System
+description: Comprehensive catalog of monochromatic styles, glassmorphic layout tokens, custom web typography, and component states.
 ---
 
-Styles
+This page documents the design system, colors, and layout guidelines that define Mockrithm's visual identity.
 
-## Design System Configuration
-          
-          
-            Contains color configuration schemas, layouts, typography styling configurations, and spacing tokens in global css rules.
+---
+
+## 1. Aesthetic Philosophy
+
+Mockrithm enforces a high-end, premium design language:
+* **Monochrome Palette:** Relies on deep zinc and gray values contrasted with pure white accents and neon glow highlights.
+* **Sharp, Flat Geometry:** Features minimal border radius curves (`0.375rem` / `6px`) to project a precise, technical feel.
+* **Glassmorphic UI Elements:** Blends floating workspace blocks into background layers using translucent backdrops.
+
+---
+
+## 2. Design Token System
+
+Here is a summary of the CSS variables mapped inside the design system:
+
+| CSS Variable Key | Light Mode Hex Value | Dark Mode Hex Value | Purpose / Usage |
+| :--- | :--- | :--- | :--- |
+| `--background` | `#fafafa` (Zinc-50) | `#09090b` (Zinc-950) | Page background |
+| `--foreground` | `#09090b` (Zinc-950) | `#fafafa` (Zinc-50) | Primary text content |
+| `--primary` | `#09090b` (Black) | `#ffffff` (White) | Primary buttons & core borders |
+| `--muted` | `#f4f4f5` (Zinc-100) | `#18181b` (Zinc-900) | Secondary panels & placeholder backgrounds |
+| `--muted-foreground` | `#71717a` (Zinc-500) | `#a1a1aa` (Zinc-400) | Sub-headings and helper text |
+| `--border` | `rgba(9, 9, 11, 0.08)` | `rgba(255, 255, 255, 0.08)` | Global block borders |
+
+---
+
+## 3. Core Component Layouts
+
+### Glassmorphism Panels
+
+ транslucent card styles are applied to dashboard modules to provide a modern, tiered interface. Configure your Tailwind classes as follows:
+
+```html
+<div className="backdrop-blur-[20px] bg-zinc-950/70 border border-white/8 shadow-[0_8px_32px_0_rgba(0,0,0,0.6)] rounded-[6px] transition-all hover:border-white/20">
+  <!-- Interactive module content -->
+</div>
+```
+
+---
+
+## 4. Typography Hierarchy
+
+We leverage **Mona Sans** as our primary typeface, configured with sans-serif fallbacks inside Next.js and Tailwind layers.
+
+<Accordions>
+  <Accordion title="Typography Classes Reference">
+    - **Page Main Title (`h1`):** `text-4xl font-extrabold tracking-tight text-foreground`
+    - **Section Headings (`h2`):** `text-3xl font-bold tracking-tight text-foreground`
+    - **Sub-headings (`h3`):** `text-xl font-semibold tracking-wide text-foreground`
+    - **Paragraph Body (`p`):** `text-base leading-relaxed text-muted-foreground`
+    - **Console Code Snippets (`code`):** `font-mono text-sm bg-muted text-primary rounded px-1`
+  </Accordion>
+</Accordions>
+
+---
+
+## 5. Accent Interactive Elements
+
+We use neon and monochrome button variants to establish clear action hierarchies:
+
+<Tabs items={['Primary Button', 'Outline Button', 'Destructive Action']}>
+  <Tab value="Primary Button">
+    ```html
+    <button className="bg-primary text-primary-foreground hover:bg-primary/90 px-4 py-2 rounded-[6px] font-semibold transition-colors duration-200">
+      Launch Session
+    </button>
+    ```
+    *Use for primary actions like initializing interviews or final submissions.*
+  </Tab>
+  <Tab value="Outline Button">
+    ```html
+    <button className="border border-border bg-transparent text-foreground hover:bg-muted px-4 py-2 rounded-[6px] transition-colors duration-200">
+      Configure Settings
+    </button>
+    ```
+    *Use for secondary paths like template settings or download operations.*
+  </Tab>
+  <Tab value="Destructive Action">
+    ```html
+    <button className="bg-red-950/40 border border-red-800 text-red-400 hover:bg-red-900/60 px-4 py-2 rounded-[6px] transition-colors duration-200">
+      Purge Sandbox
+    </button>
+    ```
+    *Use for permanent changes like deleting active resume drafts.*
+  </Tab>
+</Tabs>

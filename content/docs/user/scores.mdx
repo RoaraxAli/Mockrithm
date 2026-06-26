@@ -1,43 +1,55 @@
 ---
-title: Feedback & Telemetry
-description: Documentation for Feedback & Telemetry
+title: Score Metrics & Telemetry Parameters
+description: Guide explaining interview performance scorecards, vocal parameters, and ATS resume grading scales.
 ---
 
-Metrics Guide
+This page explains how Mockrithm calculates your scores for mock interviews and resume reviews.
 
-## Feedback & Telemetry
-          
+---
 
-          
-            After each session, you will receive score metrics. Below is an explanation of what the telemetry parameters track:
-          
+## 1. Interview Evaluation Criteria
 
+Your overall mock interview score (out of 100) is calculated across three main communication metrics:
 
+| Metric | Target / Optimal Range | Evaluation Goal | Weight |
+| :--- | :--- | :--- | :--- |
+| **Vocal Pacing** | `110 - 150 WPM` | Tracks your speaking speed. | 25% |
+| **Vocal Fillers** | `< 3 occurrences/min` | Flags placeholder words (like *um*, *ah*, *like*). | 25% |
+| **STAR Structuring** | `> 85% Match` | Confirms your response covers Situation, Task, Action, and Result. | 50% |
 
-          
-            <table className="w-full text-left border-collapse text-xs">
-              <thead>
-                <tr className="border-b border-neutral-200 bg-neutral-50/50 text-neutral-500 font-extrabold uppercase tracking-wider text-[10px]">
-                  <th className="p-4">Metric</th>
-                  <th className="p-4">Optimal range</th>
-                  <th className="p-4">Evaluation Goal</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-neutral-100">
-                <tr className="hover:bg-neutral-50/30 transition-colors">
-                  <td className="p-4 text-black font-extrabold">Pacing Speed (WPM)</td>
-                  <td className="p-4 text-neutral-800 font-mono font-bold">120 - 150 WPM</td>
-                  <td className="p-4 text-neutral-500 font-normal">Ensures you speak at a clear, professional speed.</td>
-                </tr>
-                <tr className="hover:bg-neutral-50/30 transition-colors">
-                  <td className="p-4 text-black font-extrabold">Vocal Filler Words</td>
-                  <td className="p-4 text-neutral-800 font-mono font-bold">&lt; 3 per answer</td>
-                  <td className="p-4 text-neutral-500 font-normal">Tracks vocal halts (like 'um', 'like', 'ah') to clean up communication.</td>
-                </tr>
-                <tr className="hover:bg-neutral-50/30 transition-colors">
-                  <td className="p-4 text-black font-extrabold">STAR Method Score</td>
-                  <td className="p-4 text-neutral-800 font-mono font-bold">&gt; 85% Match</td>
-                  <td className="p-4 text-neutral-500 font-normal">Evaluates if your answer covers Situation, Task, Action, and Result.</td>
-                </tr>
-              </tbody>
-            </table>
+---
+
+## 2. Dynamic Performance Scorecard
+
+Once you finalize a session, the dashboard displays your results in a structured scorecard:
+
+```mermaid
+graph TD
+    RawSession[Finalized Session Transcript] --> CalcWpm[Compute WPM Pacing]
+    RawSession --> CalcFiller[Compute Filler Density]
+    RawSession --> CalcStar[Evaluate STAR structure]
+    
+    CalcWpm & CalcFiller & CalcStar --> CombineScore[Generate Overall Score]
+    CombineScore --> Dashboard[Display Performance Scorecard]
+```
+
+---
+
+## 3. Resume Grading Scales (ATS Score)
+
+Mockrithm also scores uploaded resumes to check their compatibility with Applicant Tracking Systems (ATS):
+
+<Accordions>
+  <Accordion title="ATS Score Grading Criteria">
+    - **Formatting Checks (30%):** Scans for double-column layouts, complex tables, or custom graphics that can cause parser errors.
+    - **Keyword Matching (40%):** Scans the skills and work experience sections for keywords that match target job descriptions.
+    - **Content Depth (30%):** Verifies that bullet points focus on achievements and use active verbs.
+  </Accordion>
+</Accordions>
+
+---
+
+## 4. Tips for Improving Scores
+
+- **Review Previous Scorecards:** Compare your scores over time on the user dashboard to track progress.
+- **Listen to Your Recordings:** Use the audio player on completed feedback reports to review your pacing and filler word usage.

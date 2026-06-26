@@ -34,7 +34,7 @@ export default async function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body
-        className={`${monaSans.className} bg-zinc-950 text-white antialiased pattern`}
+        className={`${monaSans.className} bg-background text-foreground antialiased pattern`}
         suppressHydrationWarning
       >
         <ClerkProvider

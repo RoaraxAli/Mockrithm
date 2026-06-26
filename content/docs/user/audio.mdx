@@ -1,11 +1,54 @@
 ---
-title: Audio Connection & Troubleshoot
-description: Documentation for Audio Connection & Troubleshoot
+title: Audio Calibration & Microphone Troubleshooting
+description: Step-by-step setup guides to troubleshoot browser microphone blocks, resolve latency issues, and minimize room echo.
 ---
 
-Troubleshoot
+This page provides troubleshooting steps to resolve microphone connection issues, browser permission blocks, and high latency during mock interviews.
 
-## Audio Troubleshooting
-          
-          
-            Resolve microphone block settings, set noise suppression values, and test latency variables before launching voice sessions.
+---
+
+## 1. Microphone Settings Checklist
+
+Before beginning an interview, verify that your browser environment is configured correctly:
+
+| Requirement | Target Setting | Purpose |
+| :--- | :--- | :--- |
+| **Browser Compatibility** | Chrome, Safari, Edge | Full support for WebSocket audio streaming APIs. |
+| **Permissions** | Allow audio access | Allows the browser to record microphone inputs. |
+| **Sample Rate** | 16000Hz (downsampled) | Optimizes audio quality for speech-to-text transcribers. |
+| **Echo Cancellation** | Enabled (default) | Prevents the microphone from recording the speaker output. |
+
+---
+
+## 2. Troubleshooting Permission Blocks
+
+If the application displays a `"Microphone access denied"` alert, follow these steps to reset your permissions:
+
+<Steps>
+  <Step>
+    ### Locate Permission Indicators
+    In your browser address bar, click the **Lock icon** located to the left of the URL.
+  </Step>
+  <Step>
+    ### Reset Permission Dropdown
+    Find the **Microphone** setting in the permissions menu and toggle it to **Allow**.
+  </Step>
+  <Step>
+    ### Refresh the Page
+    Reload the page (`F5` or `Cmd+R`) to apply the changes and initialize the microphone client.
+  </Step>
+</Steps>
+
+---
+
+## 3. Optimizing Latency & Network Quality
+
+<Callout type="warn" title="WebSocket Disconnects">
+If you are using a VPN or proxy, you may experience connection timeouts. If the voice streaming stops unexpectedly, try disabling your VPN before launching a session.
+</Callout>
+
+### Easing Audio Latency
+
+- **Target latency:** Keep socket latency under `350ms` for natural-sounding conversations.
+- **Hardware Acceleration:** Ensure your browser has **Hardware Acceleration** enabled in settings to support smooth web audio processing.
+- **Buffer Adjustments:** If you hear crackling or gaps in the voice stream, close other browser windows to free up CPU resources.

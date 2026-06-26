@@ -1,47 +1,65 @@
 ---
-title: Billing & Plans
-description: Documentation for Billing & Plans
+title: Billing & Subscription Tiers
+description: Pricing plans comparison, subscriber capabilities, billing cycles, and subscription updates.
 ---
 
-Billing Cycles
+This page provides an overview of Mockrithm's subscription plans and billing settings.
 
-## Billing & Plans
-          
+---
 
-          
-            Mockrithm supports three tiers. You can choose to bill monthly or select annual billing to save 20%.
-          
+## 1. Subscription Tiers Comparison
 
+Mockrithm offers three plans to fit your interview prep needs:
 
+| Plan Tier | Price (Monthly) | Optimal For | Key Capabilities Unlocked |
+| :--- | :--- | :--- | :--- |
+| **Freemium** | `$0/mo` | Basic test usage | 1 AI voice session, basic pacing analysis. |
+| **Premium** | `$10/mo` | Standard prep | Unlimited voice sessions, filler word audits, and ATS checker reports. |
+| **Pro** | `$25/mo` | Advanced prep | Custom resume templates, resume exports, and API keys. |
 
-          
-            
-              Tier 1
+---
 
-### Freemium
-              1 AI Voice session, standard pacing feedback.
+## 2. Dynamic Plan Capabilities Details
 
+Each tier unlocks specific platform resources:
 
-            
-            
-              Popular
-              Tier 2
+<Tabs items={['Freemium Features', 'Premium Features', 'Pro Features']}>
+  <Tab value="Freemium Features">
+    ### Freemium (Tier 1)
+    - **Session Limit:** 1 AI voice session per month.
+    - **Resume Builders:** Standard single-column templates.
+    - **Analytics:** Basic words-per-minute (WPM) check report.
+  </Tab>
+  <Tab value="Premium Features">
+    ### Premium (Tier 2)
+    - **Session Limit:** Unlimited mock interview sessions.
+    - **Voice Audits:** Full vocal filler scans (*um*, *ah*, *like*).
+    - **STAR checklists:** Real-time STAR method matching.
+    - **ATS Checker:** Scan resume text against target job descriptions.
+  </Tab>
+  <Tab value="Pro Features">
+    ### Pro (Tier 3)
+    - **API Keys:** Export transcripts and metrics to third-party endpoints.
+    - **Templates Workspace:** Full access to standard resume layouts.
+    - **Priority Inference:** Priority routing to the primary Groq engine.
+  </Tab>
+</Tabs>
 
-### Premium
-              $10/mo. Unlimited voices, 6 templates, fillers.
+---
 
+## 3. Subscription Management Workflow
 
-            
-            
-              Tier 3
+You can upgrade, downgrade, or cancel your subscription plan at any time through the billing dashboard:
 
-### Pro
-              $25/mo. System designer, custom templates, API.
+```mermaid
+graph TD
+    Dashboard[User Settings: Billing Panel] --> ClickManage[Click Manage Subscription]
+    ClickManage --> StripePortal[Redirect to Stripe Customer Portal]
+    StripePortal -->|Update Plan / Payment| Process[Stripe Processes Transaction]
+    Process --> UpdateDB[Stripe Webhook Syncs Tier inside Firestore]
+    UpdateDB --> RedirectBack[Redirect back to Settings]
+```
 
-
-            
-          
-
-          > [!NOTE]
-> 
-              **Managing Subscription:** Upgrade or cancel subscription parameters inside your Account Settings panel under "Billing & Subscription".
+<Callout type="info" title="Annual Billing Discounts">
+Choose annual billing options to save **20%** compared to monthly subscription renewals.
+</Callout>

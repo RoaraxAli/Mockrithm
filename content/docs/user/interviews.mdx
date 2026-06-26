@@ -1,24 +1,77 @@
 ---
 title: Voice Practice Guide
-description: Documentation for Voice Practice Guide
+description: Step-by-step instructions to configure, launch, and complete voice-driven AI mock interviews.
 ---
 
-How it Works
+This page guides you through setting up and running a voice-based mock interview on Mockrithm.
 
-## Voice Practice Guide
-          
+---
 
-          
-            Mockrithm's audio core conducts dynamic, conversational mock interviews using your microphone. Learn how to launch your session:
+## 1. Interview Workflow Overview
 
-### Step 1: Check Microphone Permissions
-              
-                When starting an interview, click "Allow" on the browser audio pop-up. The framework uses a sample rate of 16kHz for clean audio transmission.
+Mockrithm's mock interviews simulate a live conversation with an engineering manager or interviewer. The AI asks questions, listens to your answers, and updates progress indicators as you speak.
 
-### Step 2: Respond naturally
-              
-                Our AI agent listens for brief pauses. Keep your speech smooth. If you stop speaking, the agent will analyze your input and reply.
+```mermaid
+graph TD
+    Start[Click Start Session] --> Config[Set Role & Seniority Options]
+    Config --> Calibrate[Calibrate mic & ping check]
+    Calibrate --> Begin[System asks first question]
+    Begin --> Answer[Candidate speaks response]
+    Answer --> Transcribe[Real-time speech transcription & checks]
+    Transcribe --> QuestionCheck{Are there more questions?}
+    
+    QuestionCheck -- Yes --> NextQuestion[Interviewer asks next question]
+    NextQuestion --> Answer
+    
+    QuestionCheck -- No --> Finalize[Generate feedback report]
+```
 
-### Step 3: Complete & Review
-              
-                Once the assessment ends, click "Finalize Interview" to generate your detailed feedback scores.
+---
+
+## 2. Dynamic Setup Setup
+
+Before starting, configure your interview settings to match your current prep goals:
+
+<Accordions>
+  <Accordion title="Interviewer Persona Configuration">
+    - **Rachel (Standard):** Focuses on technical breadth and clean communication pacing. Useful for standard coding or system design preps.
+    - **Dom (Strict):** Interrupts with clarifying questions and technical follow-ups. Useful for preparing for stress-interviews or senior loops.
+    - **Clyde (Behavioral):** Evaluates culture alignment, project management, and leadership scenarios.
+  </Accordion>
+</Accordions>
+
+---
+
+## 3. Step-by-Step Session Walkthrough
+
+Follow these steps to complete a voice interview session:
+
+<Steps>
+  <Step>
+    ### Start Calibration
+    Open the interview panel and click **Calibrate Microphone**. Speak a few test sentences to check input volumes and network latency.
+  </Step>
+  <Step>
+    ### Allow Microphone Access
+    When prompted by your browser, select **Allow** to give the platform access to your microphone.
+    
+    <Callout type="info" title="Browser Settings">
+      If you decline the permissions prompt by mistake, click the lock icon in your browser address bar to reset permission settings.
+    </Callout>
+  </Step>
+  <Step>
+    ### Answer Questions
+    Speak clearly at a natural pace. Avoid long pauses, as the voice engine detects silence to determine when you have finished your response.
+  </Step>
+  <Step>
+    ### Complete and Review Feedback
+    When the interviewer finishes asking all questions, click **Finalize Session**. The system will process the transcript and redirect you to the performance scorecard.
+  </Step>
+</Steps>
+
+---
+
+## 4. Tips for High Accuracy
+
+- **Avoid Speaking Over the AI:** Wait for the AI interviewer to finish speaking completely before beginning your answer.
+- **Minimize Background Noise:** Close open tabs, silence mobile phones, and use a headset to reduce room echo.
