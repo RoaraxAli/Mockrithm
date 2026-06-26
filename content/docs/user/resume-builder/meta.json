@@ -1,0 +1,9 @@
+{
+  "title": "ATS Resume Builder",
+  "pages": [
+    "resumes",
+    "resume-templates",
+    "resume-preview",
+    "resume-export"
+  ]
+}
