@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Mona_Sans } from "next/font/google";
+import { Mona_Sans, Inter } from "next/font/google";
 import { Toaster } from "sonner";
 import { ClerkProvider } from "@clerk/nextjs";
 
@@ -19,6 +19,11 @@ const monaSans = Mona_Sans({
   subsets: ["latin"],
 });
 
+const inter = Inter({
+  variable: "--font-inter",
+  subsets: ["latin"],
+});
+
 export const metadata: Metadata = {
   title: "Mockrithm",
   description: "An AI-powered platform for mock interviews and admin control",
@@ -34,7 +39,7 @@ export default async function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body
-        className={`${monaSans.className} bg-background text-foreground antialiased pattern`}
+        className={`${monaSans.className} ${inter.variable} bg-background text-foreground antialiased pattern`}
         suppressHydrationWarning
       >
         <ClerkProvider

@@ -23,6 +23,7 @@
   --color-dark-300: #1e293b;
 
   --font-mona-sans: "Mona Sans", sans-serif;
+  --font-inter: var(--font-inter), sans-serif;
 
   --bg-pattern: url("/pattern.png");
 }

@@ -7,12 +7,13 @@ import { cn } from "@/lib/utils"
 import { useClerk } from "@clerk/nextjs"
 import { 
   LayoutDashboard, PlayCircle, FileText, MessageSquare, User, Sparkles, 
-  Home, LogOut, X 
+  Home, LogOut, X, Mic 
 } from "lucide-react"
 
 const navigation = [
   { name: "Home Dashboard", href: "/", icon: LayoutDashboard },
   { name: "Take Interview", href: "/interview", icon: PlayCircle },
+  { name: "Mic Check", href: "/user/mic-check", icon: Mic },
 ]
 
 export function Sidebar({ 

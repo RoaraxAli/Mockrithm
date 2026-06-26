@@ -192,16 +192,7 @@ export default function AwwwardsCanvas() {
     const centerpiecePoints = new THREE.Points(centerpieceGeometry, centerpieceMaterial);
     scene.add(centerpiecePoints);
 
-    // 2b. ORBITING ICOSAHEDRON (smaller satellite)
-    const icoGeometry = new THREE.IcosahedronGeometry(0.45, 0);
-    const icoMaterial = new THREE.MeshBasicMaterial({
-      color: 0xffffff,
-      wireframe: true,
-      transparent: true,
-      opacity: 0.5,
-    });
-    const icoMesh = new THREE.Mesh(icoGeometry, icoMaterial);
-    scene.add(icoMesh);
+
 
     // 3. BACKGROUND ORBITING PARTICLES
     // Reduce particle count by 60% on mobile
@@ -389,16 +380,7 @@ export default function AwwwardsCanvas() {
         centerpiecePoints.position.y = centerpieceMesh.position.y;
       }
 
-      // Orbiting icosahedron around the centerpiece
-      const orbitRadius = 2.4;
-      icoMesh.position.x = centerpieceMesh.position.x + Math.cos(elapsedTime * 0.6) * orbitRadius;
-      icoMesh.position.y = centerpieceMesh.position.y + Math.sin(elapsedTime * 0.6) * orbitRadius * 0.7;
-      icoMesh.position.z = Math.sin(elapsedTime * 0.4) * 0.8;
-      icoMesh.rotation.x = elapsedTime * 0.5;
-      icoMesh.rotation.y = elapsedTime * 0.7;
-      
-      // Fade out satellite
-      icoMaterial.opacity = Math.max(0, 0.5 * (1 - explosionProgress * 1.5));
+
 
       // 3. Move camera Z along gallery line based on showcaseProgress
       const targetCameraZ = 7 - showcaseProgress * 52;
@@ -467,13 +449,13 @@ export default function AwwwardsCanvas() {
 
       // Scale centerpiece and satellites down
       const heroScale = 1 - explosionProgress;
-      icoMesh.scale.set(heroScale, heroScale, heroScale);
+
 
       // Visibility controls
       const isModelVisible = explosionProgress < 0.99;
       centerpieceMesh.visible = isModelVisible;
       if (centerpiecePoints) centerpiecePoints.visible = isModelVisible;
-      icoMesh.visible = isModelVisible;
+
       if (!isModelVisible) {
         particles.visible = false;
         particleLines.visible = false;
@@ -521,8 +503,7 @@ export default function AwwwardsCanvas() {
       renderer.dispose();
       centerpieceGeometry.dispose();
       centerpieceMaterial.dispose();
-      icoGeometry.dispose();
-      icoMaterial.dispose();
+
       particleGeometry.dispose();
       particleMaterial.dispose();
       lineGeometry.dispose();
