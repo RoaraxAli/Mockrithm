@@ -74,14 +74,7 @@ export default function Preloader() {
                 MOCKRITHM.
               </motion.h1>
             </div>
-            <motion.p
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 0.5 }}
-              transition={{ delay: 0.5, duration: 0.5 }}
-              className="text-[10px] text-zinc-400 font-bold uppercase tracking-widest mt-4"
-            >
-              Own the Interview
-            </motion.p>
+
           </div>
 
           {/* Bottom Loading Telemetry */}

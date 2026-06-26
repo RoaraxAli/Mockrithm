@@ -42,26 +42,7 @@ export default function AwwwardsHero() {
       id="awwwards-hero"
       className="relative w-full min-h-screen flex flex-col justify-between items-center px-6 py-12 md:py-20 select-none overflow-hidden bg-transparent z-20"
     >
-      {/* Top telemetry bar */}
-      <div className="hero-fade-target w-full flex items-center justify-between text-[9px] font-mono font-black tracking-[0.25em] text-zinc-550 uppercase z-40 max-w-7xl mx-auto">
-        <motion.div
-          initial={{ opacity: 0, x: -10 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ ...transition, delay: 0.15 }}
-          className="flex items-center gap-1.5"
-        >
-          <span className="size-1.5 rounded-full bg-zinc-500 animate-pulse" />
-          <span>System status // Active</span>
-        </motion.div>
-        
-        <motion.div
-          initial={{ opacity: 0, x: 10 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ ...transition, delay: 0.15 }}
-        >
-          <span>Own the Interview</span>
-        </motion.div>
-      </div>
+
 
       {/* Centered Main Content Area */}
       <div className="hero-fade-target flex-1 flex flex-col items-center justify-center text-center gap-8 max-w-4xl mx-auto z-30 my-auto py-12">

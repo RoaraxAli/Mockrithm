@@ -11,8 +11,11 @@ import {
 } from "lucide-react"
 
 const navigation = [
-  { name: "Home Dashboard", href: "/", icon: LayoutDashboard },
-  { name: "Take Interview", href: "/interview", icon: PlayCircle },
+  { name: "Dashboard", href: "/user/dashboard", icon: LayoutDashboard },
+  { name: "Take Interview", href: "/user/take-interview", icon: PlayCircle },
+  { name: "Resume Builder", href: "/user/resume", icon: Sparkles },
+  { name: "Your Interviews", href: "/user/interviews", icon: FileText },
+  { name: "Feedback", href: "/user/feedback", icon: MessageSquare },
   { name: "Mic Check", href: "/user/mic-check", icon: Mic },
 ]
 
@@ -58,9 +61,6 @@ export function Sidebar({
           <div className="flex flex-col leading-tight">
             <span className="text-[13px] font-black tracking-wider text-white group-hover:text-gray-200 transition-colors duration-300">
               MOCKRITHM
-            </span>
-            <span className="text-[8px] font-bold tracking-widest text-zinc-400 group-hover:text-zinc-300 transition-colors duration-300 uppercase">
-              Own the Interview
             </span>
           </div>
         </Link>

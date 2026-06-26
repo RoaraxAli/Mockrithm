@@ -148,9 +148,6 @@ const Navbar = ({ userId, userName, userRole }: NavbarProps) => {
                 <span className={`font-black tracking-wider text-white group-hover:text-gray-200 transition-all duration-300 ${isScrolled ? "text-[13px]" : "text-[16px]"}`}>
                   MOCKRITHM
                 </span>
-                <span className={`font-bold tracking-widest text-zinc-555 group-hover:text-zinc-400 transition-all duration-300 uppercase ${isScrolled ? "text-[8px]" : "text-[10px]"}`}>
-                  Own the Interview
-                </span>
               </div>
             </Link>
 
@@ -209,12 +206,7 @@ const Navbar = ({ userId, userName, userRole }: NavbarProps) => {
                       Admin
                     </Link>
                   )}
-                  <Link
-                    href="/interview"
-                    className={`bg-white text-black font-bold hover:bg-zinc-200 hover:shadow-[0_0_15px_rgba(255,255,255,0.15)] transition-all duration-300 border border-white rounded-xl ${isScrolled ? "text-xs px-4 py-1.5" : "text-sm px-5 py-2"}`}
-                  >
-                    Start Prep
-                  </Link>
+
                   <UserButton
                     appearance={{
                       variables: {
@@ -351,14 +343,7 @@ const Navbar = ({ userId, userName, userRole }: NavbarProps) => {
                   Start Prep
                 </Link>
               </Show>
-              <Show when="signed-in">
-                <Link
-                  href="/interview"
-                  className="bg-white text-black font-extrabold hover:bg-zinc-200 transition-all border border-white rounded-xl text-[9px] uppercase tracking-wider px-3.5 py-1.5"
-                >
-                  Start Prep
-                </Link>
-              </Show>
+
 
               {/* Mobile Menu Toggle */}
               <button
