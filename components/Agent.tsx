@@ -127,6 +127,7 @@ const Agent = ({
   }, [codingProblem]);
   const [isCodingStuck, setIsCodingStuck] = useState(false);
   const lastCodeTypedRef = useRef<number>(Date.now());
+  const [showSandbox, setShowSandbox] = useState(false);
 
   // Behavioral STAR Framework States
   const [starChecklist, setStarChecklist] = useState<StarChecklist>({
@@ -186,19 +187,25 @@ const Agent = ({
     setIsCodingStuck(false);
   };
 
-  // Check coding activity stuck status (2-minute check)
+  // Check coding activity stuck status (10-second check)
   useEffect(() => {
-    if (callStatus !== CallStatus.ACTIVE || !codingProblem) return;
+    if (callStatus !== CallStatus.ACTIVE || !codingProblem || !showSandbox) return;
+
+    // Reset reference time when sandbox becomes visible
+    lastCodeTypedRef.current = Date.now();
+    setIsCodingStuck(false);
 
     const interval = setInterval(() => {
       const msSinceLastType = Date.now() - lastCodeTypedRef.current;
-      if (msSinceLastType > 120000) {
+      if (msSinceLastType > 10000) { // 10 seconds of inactivity
         setIsCodingStuck(true);
+        // Proactively help the user
+        triggerAutomaticHint();
       }
-    }, 10000);
+    }, 2000);
 
     return () => clearInterval(interval);
-  }, [callStatus, codingProblem]);
+  }, [callStatus, codingProblem, showSandbox]);
 
   // Clean resources on unmount
   useEffect(() => {
@@ -243,8 +250,10 @@ const Agent = ({
       const { success, feedbackId: id } = await createFeedback({
         interviewId: interviewId!,
         userId: userId!,
-        transcript: messages.map((m) => ({ role: m.role, content: m.content })),
-        feedbackId,
+        transcript: messages
+          .filter((m) => !m.content.startsWith("[SYSTEM:"))
+          .map((m) => ({ role: m.role, content: m.content })),
+        feedbackId: feedbackId || undefined,
         averageWpm,
         topFillerWords,
       });
@@ -263,7 +272,9 @@ const Agent = ({
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
-            messages: messages.map((m) => ({ role: m.role, content: m.content })),
+            messages: messages
+              .filter((m) => !m.content.startsWith("[SYSTEM:"))
+              .map((m) => ({ role: m.role, content: m.content })),
             userid: userId,
             userResumeData: userResumeData,
           }),
@@ -399,7 +410,7 @@ const Agent = ({
 
   const speakSentence = (text: string): Promise<void> => {
     return new Promise((resolve) => {
-      const cleanText = text.replace(/\[END_CALL\]/gi, "").replace(/[*#_`~[\]]/g, "").trim();
+      const cleanText = text.replace(/\[END_CALL\]/gi, "").replace(/\[SHOW_SANDBOX\]/gi, "").replace(/[*#_`~[\]]/g, "").trim();
       console.log(`[Agent.tsx] speakSentence called. Raw: "${text}", Cleaned: "${cleanText}"`);
       if (!cleanText) {
         console.log("[Agent.tsx] Empty text, resolving speakSentence immediately.");
@@ -502,7 +513,7 @@ const Agent = ({
   };
 
   const queueSpeechChunk = (text: string) => {
-    const cleanText = text.replace(/\[END_CALL\]/gi, "").replace(/[*#_`~[\]]/g, "").trim();
+    const cleanText = text.replace(/\[END_CALL\]/gi, "").replace(/\[SHOW_SANDBOX\]/gi, "").replace(/[*#_`~[\]]/g, "").trim();
     if (!cleanText) {
       if (selectedVoice === "local") {
         if (streamCompletedRef.current && localSpeechFinishedCountRef.current === localSpeechQueueCountRef.current) {
@@ -528,7 +539,16 @@ const Agent = ({
 
   const handleNewStreamToken = (token: string) => {
     accumulatedTextRef.current += token;
-    setLastMessage(accumulatedTextRef.current);
+
+    if (/\[SHOW_SANDBOX\]/i.test(accumulatedTextRef.current)) {
+      setShowSandbox(true);
+    }
+
+    const displayClean = accumulatedTextRef.current
+      .replace(/\[SHOW_SANDBOX\]/gi, "")
+      .replace(/\[END_CALL\]/gi, "")
+      .trim();
+    setLastMessage(displayClean);
 
     if (selectedVoice === "local") {
       sentenceBufferRef.current += token;
@@ -540,7 +560,11 @@ const Agent = ({
         const chunkText = sentenceBufferRef.current.substring(0, puncIndex + 1).trim();
         if (chunkText.length > 0) {
           sentenceBufferRef.current = sentenceBufferRef.current.substring(puncIndex + 1);
-          queueSpeechChunk(chunkText);
+          const cleanChunk = chunkText
+            .replace(/\[SHOW_SANDBOX\]/gi, "")
+            .replace(/\[END_CALL\]/gi, "")
+            .trim();
+          queueSpeechChunk(cleanChunk);
         }
       }
     }
@@ -818,7 +842,8 @@ ${
 \`\`\`${codingProblemRef.current.language}
 ${code}
 \`\`\`
-- If the candidate gets stuck, provide a Socratic hint to help them think in the right direction. Do NOT give them the full solution.`
+- If the candidate gets stuck, provide a Socratic hint to help them think in the right direction. Do NOT give them the full solution.
+- CRITICAL: The sandbox is hidden from the candidate initially. When you are ready for them to write/code/solve the challenge, you MUST output the exact tag '[SHOW_SANDBOX]' in your response. Do not output this tag before you introduce the problem.`
     : ""
 }`;
       } else {
@@ -950,6 +975,164 @@ RULES:
       ? "I am stuck on this draft. Can you give me a Socratic hint about my current text?" 
       : "I am stuck on this coding problem. Can you give me a Socratic hint about my current code?");
   };
+
+  async function triggerAutomaticHint() {
+    if (callStatus !== CallStatus.ACTIVE || isProcessingRef.current) return;
+    
+    setIsCodingStuck(false);
+    lastCodeTypedRef.current = Date.now();
+    isProcessingRef.current = true;
+    
+    stopTTSPlayback();
+    accumulatedTextRef.current = "";
+    sentenceBufferRef.current = "";
+    speechQueueRef.current = [];
+    isSpeakingActiveRef.current = false;
+    streamCompletedRef.current = false;
+
+    try {
+      if (recognitionRef.current) {
+        recognitionRef.current.stop();
+      }
+    } catch (e) {}
+
+    const isWritten = codingProblemRef.current?.language === "text" || codingProblemRef.current?.language === "markdown";
+    const hintPrompt = isWritten
+      ? `[SYSTEM: The candidate has been inactive/stuck on the writing sandbox for 10 seconds. Proactively help them with a brief, warm Socratic hint or suggestion based on their current text: "${code}". Keep it under 25 words.]`
+      : `[SYSTEM: The candidate has been inactive/stuck on the coding sandbox for 10 seconds. Proactively help them with a brief, warm Socratic hint based on their current code: "${code}". Keep it under 25 words.]`;
+
+    const systemCue: SavedMessage = { role: "user", content: hintPrompt };
+    setMessages((prev) => [...prev, systemCue]);
+    setIsSpeaking(false);
+    setLastMessage("AI is thinking...");
+    setIsSpeaking(true);
+
+    try {
+      const candidateRoleName = roleRef.current || userResumeData?.targetRole || "Software Engineer";
+      const candidateSessionType = sessionTypeRef.current || "Interview";
+      const personaText = candidateRoleName.toLowerCase().includes("president")
+        ? "Your persona: A senior political debate moderator or veteran political journalist. Keep your tone formal, sharp, and demanding."
+        : candidateRoleName.toLowerCase().includes("joker") || candidateRoleName.toLowerCase().includes("comedian")
+        ? "Your persona: A comedy club owner, talent scout, or talk show host. Keep your tone conversational, witty, and responsive to humor."
+        : "Your persona: A professional interviewer conducting a real-time voice interview to assess their qualifications, motivation, and fit for the role.";
+
+      const formattedQuestions = questionsRef.current.map((q: string) => `- ${q}`).join("\n");
+      
+      const systemPrompt = `You are Alex, conducting a real-time voice evaluation or interview with a candidate.
+Role: ${candidateRoleName}
+Session Mode/Type: ${candidateSessionType}
+
+${personaText}
+
+Interview Guidelines:
+Follow this structured question flow:
+${formattedQuestions}
+
+CRITICAL RULES - CONVERSATIONAL FLOW & CONCISENESS:
+- DO NOT LECTURE ON CORRECT ANSWERS: If the candidate answers correctly or reasonably, do not explain the concept, define terms, or repeat the textbook answer back to them. Simply acknowledge briefly (e.g. "Got it.", "Makes sense.", "Solid explanation.") and transition immediately to the next question.
+- GENTLY CORRECT BIG BLUNDERS: If the candidate makes a major blunder or says something completely incorrect, gently correct them and guide them in the right direction in one short, polite sentence before transitioning.
+- KEEP RESPONSES VERY SHORT: Keep your replies under 25 words maximum. No yapping or long paragraphs. Keep the pacing fast and conversational.
+- Write only plain, clean text. Do not use markdown like bold (**), italics (*), lists, or hashtags.
+- Never use emojis.
+- Conclude the interview properly when all questions are asked and answered.
+- When all questions are done OR when you receive a [SYSTEM: Time is up...] message, conclude the interview warmly. Thank the candidate, wish them luck, say goodbye, and ALWAYS append "[END_CALL]" at the very end so the system knows to close the session.
+
+${
+  codingProblemRef.current
+    ? `Sandbox/Workspace Info:
+- The candidate is working on the task/problem: "${codingProblemRef.current.title}".
+- Description: ${codingProblemRef.current.description}
+- Candidate's current draft/code is:
+\`\`\`${codingProblemRef.current.language}
+${code}
+\`\`\`
+- If the candidate gets stuck, provide a Socratic hint to help them think in the right direction. Do NOT give them the full solution.
+- CRITICAL: The sandbox is hidden from the candidate initially. When you are ready for them to write/code/solve the challenge, you MUST output the exact tag '[SHOW_SANDBOX]' in your response. Do not output this tag before you introduce the problem.`
+    : ""
+}`;
+
+      const history = [
+        { role: "system", content: systemPrompt },
+        ...messagesRef.current,
+      ];
+
+      const response = await fetch("/api/meow/chat", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          model: selectedModel,
+          messages: history,
+          stream: true,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error(`Chat API error: ${response.status}`);
+      }
+
+      const reader = response.body?.getReader();
+      if (!reader) throw new Error("Failed to get reader");
+
+      const decoder = new TextDecoder();
+      let buffer = "";
+
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+
+        buffer += decoder.decode(value, { stream: true });
+        let boundary = buffer.indexOf("\n");
+        while (boundary !== -1) {
+          const line = buffer.substring(0, boundary).trim();
+          buffer = buffer.substring(boundary + 1);
+
+          if (line.startsWith("data: ")) {
+            const dataStr = line.substring(6).trim();
+            if (dataStr === "[DONE]") {
+              break;
+            }
+            try {
+              const parsed = JSON.parse(dataStr);
+              const token = parsed.choices?.[0]?.delta?.content || "";
+              if (token) {
+                handleNewStreamToken(token);
+              }
+            } catch (e) {}
+          }
+          boundary = buffer.indexOf("\n");
+        }
+      }
+
+      streamCompletedRef.current = true;
+
+      if (selectedVoice === "local") {
+        if (sentenceBufferRef.current.trim().length > 0) {
+          const chunk = sentenceBufferRef.current.trim();
+          sentenceBufferRef.current = "";
+          queueSpeechChunk(chunk);
+        } else {
+          if (
+            localSpeechQueueCountRef.current === 0 ||
+            localSpeechFinishedCountRef.current === localSpeechQueueCountRef.current
+          ) {
+            localSpeechQueueCountRef.current = 0;
+            localSpeechFinishedCountRef.current = 0;
+            resumeListeningAfterSpeech();
+          }
+        }
+      } else {
+        queueSpeechChunk(accumulatedTextRef.current.trim());
+      }
+    } catch (e: any) {
+      console.error("[Agent.tsx] LLM streaming failed during auto-hint:", e);
+      setLastMessage("Error: " + e.message);
+      setTimeout(() => {
+        resumeListeningAfterSpeech();
+      }, 3000);
+    }
+  }
 
   const transitionToInterview = async () => {
     console.log("[Agent.tsx] transitionToInterview triggered.");
@@ -1342,13 +1525,13 @@ RULES:
       {/* Main Split Grid for Practice & Editor */}
       <div className={cn(
         "grid grid-cols-1 gap-5 items-start w-full",
-        codingProblem ? "lg:grid-cols-12" : "max-w-4xl mx-auto"
+        (codingProblem && showSandbox) ? "lg:grid-cols-12" : "max-w-4xl mx-auto"
       )}>
         
         {/* Left Side: Voice Card, Transcript, STAR Tracker */}
         <div className={cn(
           "flex flex-col gap-4 w-full",
-          codingProblem ? "lg:col-span-6" : "col-span-1"
+          (codingProblem && showSandbox) ? "lg:col-span-6" : "col-span-1"
         )}>
           
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 w-full items-stretch">
@@ -1611,7 +1794,7 @@ RULES:
         </div>
 
         {/* Right Side: Technical Coding Sandbox Redesigned as Premium IDE */}
-        {codingProblem && (
+        {codingProblem && showSandbox && (
           <motion.div 
             initial={{ opacity: 0, x: 20 }}
             animate={{ opacity: 1, x: 0 }}

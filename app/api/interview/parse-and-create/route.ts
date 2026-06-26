@@ -83,7 +83,7 @@ export async function POST(request: Request) {
       CRITICAL INSTRUCTIONS:
       - Scan the Transcript first. If the candidate explicitly chose to practice a role DIFFERENT from their default targetRole (e.g. "Prime Minister of Pakistan", "Joker", etc.), you MUST override the role and use this new requested role.
       - If the role is changed/overridden from the default targetRole, DO NOT use the techstack/skills or resume details from the Resume/Profile Data (e.g. do not use JavaScript, React, Node.js for a Prime Minister or Joker). Instead, generate relevant competencies/skills for the new chosen role (e.g. for Prime Minister: "crisis leadership", "governance", "public policy", "foreign affairs"; for Joker: "stand-up comedy", "timing", "joke delivery", "crowd interaction").
-      - Only set "requiresSandbox" to true if the chosen option/mode explicitly involves a coding task or a written drafting task (e.g. policy memo drafting, speech writing, script writing). If the chosen option is a verbal interview, Q&A session, verbal debate, or oral defense, "requiresSandbox" MUST be false.
+      - Only set "requiresSandbox" to true if the chosen option/mode explicitly involves a coding task, a mathematics problem-solving task, an essay-writing task, or a written drafting task (e.g. policy memo drafting, speech writing, script writing, solving math equations). If the chosen option is a verbal interview, Q&A session, verbal debate, or oral defense, "requiresSandbox" MUST be false.
       
       You must return ONLY a JSON object conforming exactly to this schema:
       {
@@ -153,15 +153,15 @@ export async function POST(request: Request) {
       console.log("[DEBUG] Sandbox/Workspace is required. Generating custom task...");
       try {
         const codingPrompt = `
-          Generate a written or coding challenge suitable for a ${setup.level}-level ${setup.role} for the session mode "${setup.type}".
+          Generate a written, coding, or mathematical challenge suitable for a ${setup.level}-level ${setup.role} for the session mode "${setup.type}".
           Key topics/skills: ${(setup.techstack || []).join(", ") || "General"}.
           
           You must return ONLY a JSON object conforming to this schema:
           {
-            "title": "challenge/drafting title",
-            "description": "challenge/drafting description and instructions for the candidate",
-            "templateCode": "starter text or code template for the candidate to build upon",
-            "language": "language name in lowercase (e.g. javascript, python, markdown, text, etc. default 'text')"
+            "title": "challenge/drafting/solving title",
+            "description": "challenge description and instructions for the candidate",
+            "templateCode": "starter text, equations, or code template for the candidate to build upon",
+            "language": "language name in lowercase (e.g. javascript, python, markdown, text, latex - default is 'text')"
           }
         `;
         const codingResponseText = await groqChatCompletion([
