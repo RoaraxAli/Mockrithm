@@ -8,7 +8,12 @@ import { Callout } from 'fumadocs-ui/components/callout';
 import { Card, Cards } from 'fumadocs-ui/components/card';
 import { Steps, Step } from 'fumadocs-ui/components/steps';
 import { Tab, Tabs } from 'fumadocs-ui/components/tabs';
-import { FileTree } from 'fumadocs-ui/components/file-tree';
+import { Files, Folder, File } from 'fumadocs-ui/components/files';
+
+const FileTree = Object.assign(Files, {
+  Folder,
+  File,
+});
 
 export default async function Page(props: {
   params: Promise<{ slug?: string[] }>;
