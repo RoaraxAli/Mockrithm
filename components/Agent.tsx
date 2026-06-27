@@ -633,14 +633,23 @@ const Agent = ({
         return;
       }
 
-      // Rebuild the final and interim text across continuous updates
+      // Rebuild the final and interim text across continuous updates, preventing consecutive duplicates
       let interimText = "";
       let finalParts = "";
+      let lastFinal = "";
+      let lastInterim = "";
       for (let i = 0; i < event.results.length; ++i) {
+        const transcript = event.results[i][0].transcript.trim();
         if (event.results[i].isFinal) {
-          finalParts += event.results[i][0].transcript;
+          if (transcript && transcript !== lastFinal) {
+            finalParts += (finalParts ? " " : "") + transcript;
+            lastFinal = transcript;
+          }
         } else {
-          interimText += event.results[i][0].transcript;
+          if (transcript && transcript !== lastInterim) {
+            interimText += (interimText ? " " : "") + transcript;
+            lastInterim = transcript;
+          }
         }
       }
       sessionFinal = finalParts;
