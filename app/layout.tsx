@@ -43,6 +43,11 @@ export default async function RootLayout({
         suppressHydrationWarning
       >
         <ClerkProvider
+          localization={{
+            userButton: {
+              action__manageAccount: "Settings",
+            }
+          }}
           appearance={{
             variables: {
               colorPrimary: "#ffffff",
