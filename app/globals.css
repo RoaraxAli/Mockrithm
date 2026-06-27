@@ -573,13 +573,37 @@
 .cl-formHeaderSubtitle,
 .cl-breadcrumbs,
 .cl-breadcrumbsItem,
-.cl-breadcrumbsItemDivider {
+.cl-breadcrumbsItemDivider,
+.cl-navbarHeaderTitle,
+.cl-navbarHeaderSubtitle {
   color: #ffffff !important;
 }
 
 .cl-headerSubtitle,
-.cl-formHeaderSubtitle {
+.cl-formHeaderSubtitle,
+.cl-navbarHeaderSubtitle {
   color: #a1a1aa !important;
+}
+
+/* Fix Clerk Back Button, Close Button and SVG Icon Glitches in Dark Mode */
+.cl-profilePage__backButton,
+.cl-profilePage__backButton:hover,
+.cl-navbarCloseButton,
+.cl-navbarCloseButton:hover,
+.cl-navbarBackButton,
+.cl-navbarBackButton:hover,
+.cl-userProfile-navbarCloseButton,
+.cl-userProfile-navbarBackButton,
+.cl-profilePage__backButtonIcon,
+.cl-navbarCloseButtonIcon {
+  color: #ffffff !important;
+}
+
+.cl-userProfile-root svg:not(.cl-formButtonPrimary svg),
+.cl-modalContent svg:not(.cl-formButtonPrimary svg),
+.cl-card svg:not(.cl-formButtonPrimary svg) {
+  color: #ffffff !important;
+  stroke: currentColor !important;
 }
 
 /* Clerk form fields */

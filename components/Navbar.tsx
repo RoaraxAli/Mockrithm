@@ -16,6 +16,11 @@ import { Show, useClerk, UserButton } from "@clerk/nextjs";
 import { getAuthRedirectUrl } from "@/lib/utils/auth";
 import { BillingOptions } from "@/app/user/components/BillingOptions";
 import { UserProfileDashboard } from "@/app/user/components/UserProfileDashboard";
+import { UserResumePanel } from "@/app/user/components/UserResumePanel";
+import TakeInterviewPage from "@/app/user/(sidebar-layout)/take-interview/page";
+import InterviewsPage from "@/app/user/(sidebar-layout)/interviews/page";
+import FeedbackPage from "@/app/user/(sidebar-layout)/feedback/page";
+import MicCheckPage from "@/app/user/(sidebar-layout)/mic-check/page";
 import {
   ChevronDown,
   Menu,
@@ -32,6 +37,7 @@ import {
   FileText,
   MessageSquare,
   CreditCard,
+  Mic,
 } from "lucide-react";
 
 interface NavbarProps {
@@ -259,6 +265,41 @@ const Navbar = ({ userId, userName, userRole }: NavbarProps) => {
                       <UserProfileDashboard />
                     </UserButton.UserProfilePage>
                     <UserButton.UserProfilePage
+                      label="Take Interview"
+                      url="take-interview"
+                      labelIcon={<PlayCircle className="size-4" />}
+                    >
+                      <TakeInterviewPage />
+                    </UserButton.UserProfilePage>
+                    <UserButton.UserProfilePage
+                      label="Resume Builder"
+                      url="resume"
+                      labelIcon={<Sparkles className="size-4" />}
+                    >
+                      <UserResumePanel />
+                    </UserButton.UserProfilePage>
+                    <UserButton.UserProfilePage
+                      label="Your Interviews"
+                      url="interviews"
+                      labelIcon={<FileText className="size-4" />}
+                    >
+                      <InterviewsPage />
+                    </UserButton.UserProfilePage>
+                    <UserButton.UserProfilePage
+                      label="Feedback"
+                      url="feedback"
+                      labelIcon={<MessageSquare className="size-4" />}
+                    >
+                      <FeedbackPage />
+                    </UserButton.UserProfilePage>
+                    <UserButton.UserProfilePage
+                      label="Mic Check"
+                      url="mic-check"
+                      labelIcon={<Mic className="size-4" />}
+                    >
+                      <MicCheckPage />
+                    </UserButton.UserProfilePage>
+                    <UserButton.UserProfilePage
                       label="Billing & Subscription"
                       url="billing"
                       labelIcon={<CreditCard className="size-4" />}
@@ -322,6 +363,41 @@ const Navbar = ({ userId, userName, userRole }: NavbarProps) => {
                     labelIcon={<LayoutDashboard className="size-4" />}
                   >
                     <UserProfileDashboard />
+                  </UserButton.UserProfilePage>
+                  <UserButton.UserProfilePage
+                    label="Take Interview"
+                    url="take-interview"
+                    labelIcon={<PlayCircle className="size-4" />}
+                  >
+                    <TakeInterviewPage />
+                  </UserButton.UserProfilePage>
+                  <UserButton.UserProfilePage
+                    label="Resume Builder"
+                    url="resume"
+                    labelIcon={<Sparkles className="size-4" />}
+                  >
+                    <UserResumePanel />
+                  </UserButton.UserProfilePage>
+                  <UserButton.UserProfilePage
+                    label="Your Interviews"
+                    url="interviews"
+                    labelIcon={<FileText className="size-4" />}
+                  >
+                    <InterviewsPage />
+                  </UserButton.UserProfilePage>
+                  <UserButton.UserProfilePage
+                    label="Feedback"
+                    url="feedback"
+                    labelIcon={<MessageSquare className="size-4" />}
+                  >
+                    <FeedbackPage />
+                  </UserButton.UserProfilePage>
+                  <UserButton.UserProfilePage
+                    label="Mic Check"
+                    url="mic-check"
+                    labelIcon={<Mic className="size-4" />}
+                  >
+                    <MicCheckPage />
                   </UserButton.UserProfilePage>
                   <UserButton.UserProfilePage
                     label="Billing & Subscription"
