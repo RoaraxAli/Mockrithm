@@ -548,10 +548,31 @@
 }
 
 /* Clerk navbar / sidebar in modals */
-.cl-navbar,
+.cl-userProfile-root {
+  display: flex !important;
+  align-items: stretch !important;
+}
+
+.cl-navbar {
+  background-color: transparent !important;
+  border-right: 1px solid rgba(255, 255, 255, 0.05) !important;
+  height: 100% !important;
+  min-height: 100% !important;
+  align-self: stretch !important;
+}
+
 .cl-navbarButtons {
   background-color: transparent !important;
   border-color: rgba(255, 255, 255, 0.05) !important;
+}
+
+.cl-scrollBox,
+.cl-pageScrollBox,
+.cl-profilePage,
+.cl-page {
+  height: 100% !important;
+  min-height: 100% !important;
+  align-self: stretch !important;
 }
 
 .cl-navbarButton {
