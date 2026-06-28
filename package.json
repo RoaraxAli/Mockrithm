@@ -86,5 +86,8 @@
     "fumadocs-core": {
       "zod": "$zod"
     }
+  },
+  "optionalDependencies": {
+    "@next/swc-win32-x64-msvc": "^16.1.6"
   }
 }

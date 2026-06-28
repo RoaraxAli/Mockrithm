@@ -1003,39 +1003,7 @@ export default function GamesPage() {
         )}
       </AnimatePresence>
 
-      {/* === CALL OVERLAY === */}
-      <AnimatePresence>
-        {activeCallFriend && (
-          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-            className="absolute inset-0 bg-black/95 z-50 flex flex-col justify-center items-center gap-8 backdrop-blur">
-            <div className="relative flex justify-center items-center size-36">
-              <span className={`absolute inset-0 rounded-full bg-emerald-500/10 border border-emerald-500/25 ${callStatus !== "ended" ? "animate-ping" : ""}`} />
-              <span className="absolute inset-4 rounded-full bg-zinc-900 border border-zinc-800 flex items-center justify-center text-4xl shadow-xl">🎙️</span>
-            </div>
-            <div className="text-center space-y-2">
-              <h3 className="text-xl font-black uppercase font-mono tracking-wider">{activeCallFriend}</h3>
-              <p className="text-xs font-mono text-zinc-500 uppercase tracking-widest">
-                {callStatus === "calling" ? "Connecting..." : `Connected • ${formatCallTime(callTimer)}`}
-              </p>
-            </div>
-            {callStatus === "connected" && (
-              <div className="flex gap-1.5 h-8 items-end">
-                {[1,2,3,4,5,6].map(i => <span key={i} className="w-1 bg-emerald-500 rounded-full animate-bounce" style={{ height: `${30 + (i * 17 % 60)}%`, animationDelay: `${i * 0.15}s` }} />)}
-              </div>
-            )}
-            <div className="flex gap-4">
-              <button onClick={() => setCallAudioMuted(!callAudioMuted)}
-                className={`p-4 rounded-full border cursor-pointer transition-all ${callAudioMuted ? "bg-zinc-800 border-zinc-700 text-red-400" : "bg-zinc-900 border-zinc-800 text-zinc-400 hover:text-white"}`}>
-                {callAudioMuted ? <MicOff className="size-5" /> : <Mic className="size-5" />}
-              </button>
-              <button onClick={terminateVoiceCall}
-                className="p-4 rounded-full bg-red-600 hover:bg-red-500 border border-red-700 text-white transition-all cursor-pointer">
-                <PhoneOff className="size-5" />
-              </button>
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+
 
       {/* === LEFT SIDEBAR === */}
       <div className="w-64 border-r border-zinc-900 bg-zinc-950 flex flex-col justify-between h-full relative z-20">
