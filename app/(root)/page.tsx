@@ -1,13 +1,9 @@
-import dynamic from "next/dynamic";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import BlogsPage from "../blog/page";
 import LandingDashboard from "@/components/LandingDashboard";
 import { getCurrentUser } from "@/lib/actions/auth.action";
-
-const MarketingLanding = dynamic(() => import("@/components/MarketingLanding"), {
-  ssr: false,
-});
+import MarketingLandingWrapper from "@/components/MarketingLandingWrapper";
 
 export default async function Home() {
   const headerList = await headers();
@@ -43,6 +39,6 @@ export default async function Home() {
     );
   }
 
-  return <MarketingLanding />;
+  return <MarketingLandingWrapper />;
 }
 
