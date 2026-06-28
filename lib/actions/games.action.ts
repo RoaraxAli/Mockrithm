@@ -1,6 +1,7 @@
 "use server";
 
 import { db } from "@/firebase/admin";
+import { currentUser as clerkCurrentUser } from "@clerk/nextjs/server";
 
 export interface GameProgress {
   completedLevel: number;
@@ -18,6 +19,7 @@ export interface UserGamesProgress {
 
 /**
  * Fetch the game progress and total XP for a user from Firestore
+ * Auto-creates document with Clerk details if it doesn't exist
  */
 export async function getUserGamesProgress(userId: string): Promise<UserGamesProgress> {
   try {
@@ -25,10 +27,32 @@ export async function getUserGamesProgress(userId: string): Promise<UserGamesPro
       return { progress: {}, totalXp: 0, country: "United States", city: "San Francisco", claimedAchievements: [], gamesFriends: [] };
     }
     const userDocRef = db.collection("users").doc(userId);
-    const userDoc = await userDocRef.get();
+    let userDoc = await userDocRef.get();
     
     if (!userDoc.exists) {
-      return { progress: {}, totalXp: 0, country: "United States", city: "San Francisco", claimedAchievements: [], gamesFriends: [] };
+      console.log("Auto-creating user document in games module for ID:", userId);
+      const clerkUser = await clerkCurrentUser();
+      const email = clerkUser?.emailAddresses[0]?.emailAddress || "";
+      const name = clerkUser?.fullName || clerkUser?.firstName || email.split("@")[0] || "New User";
+      const imageUrl = clerkUser?.imageUrl || "";
+
+      const newUserData = {
+        name,
+        email,
+        imageUrl,
+        role: "User",
+        createdAt: new Date(),
+        status: "Active",
+        gamesProgress: {},
+        gamesXp: 0,
+        country: "United States",
+        city: "San Francisco",
+        claimedAchievements: [],
+        gamesFriends: []
+      };
+
+      await userDocRef.set(newUserData);
+      userDoc = await userDocRef.get();
     }
 
     const data = userDoc.data();
@@ -37,7 +61,7 @@ export async function getUserGamesProgress(userId: string): Promise<UserGamesPro
     const country = data?.country || "United States";
     const city = data?.city || "San Francisco";
     const claimedAchievements = data?.claimedAchievements || [];
-    const gamesFriends = data?.gamesFriends || ["ZeroCool", "NeoCoder", "AlgorithmKnight"]; // Default starter buddies
+    const gamesFriends = data?.gamesFriends || []; // Empty by default!
 
     return { progress, totalXp, country, city, claimedAchievements, gamesFriends };
   } catch (error: any) {
@@ -64,16 +88,35 @@ export async function updateUserGamesProgress(
     
     await db.runTransaction(async (transaction: any) => {
       const doc = await transaction.get(userDocRef);
-      if (!doc.exists) {
-        throw new Error("User document does not exist");
+      let data: any = {};
+      
+      if (doc.exists) {
+        data = doc.data();
+      } else {
+        const clerkUser = await clerkCurrentUser();
+        const email = clerkUser?.emailAddresses[0]?.emailAddress || "";
+        const name = clerkUser?.fullName || clerkUser?.firstName || email.split("@")[0] || "New User";
+        const imageUrl = clerkUser?.imageUrl || "";
+        data = {
+          name,
+          email,
+          imageUrl,
+          role: "User",
+          createdAt: new Date(),
+          status: "Active",
+          gamesProgress: {},
+          gamesXp: 0,
+          country: "United States",
+          city: "San Francisco",
+          claimedAchievements: [],
+          gamesFriends: []
+        };
       }
 
-      const data = doc.data() || {};
       const currentProgress = data.gamesProgress || {};
       const currentTotalXp = data.gamesXp || 0;
 
       const gameData = currentProgress[gameId] || { completedLevel: 0, xp: 0 };
-      
       const newCompletedLevel = Math.max(gameData.completedLevel, level);
       
       let newXp = gameData.xp;
@@ -92,11 +135,20 @@ export async function updateUserGamesProgress(
         }
       };
 
-      transaction.update(userDocRef, {
-        gamesProgress: updatedProgress,
-        gamesXp: newTotalXp,
-        updatedAt: new Date()
-      });
+      if (doc.exists) {
+        transaction.update(userDocRef, {
+          gamesProgress: updatedProgress,
+          gamesXp: newTotalXp,
+          updatedAt: new Date()
+        });
+      } else {
+        transaction.set(userDocRef, {
+          ...data,
+          gamesProgress: updatedProgress,
+          gamesXp: newTotalXp,
+          updatedAt: new Date()
+        });
+      }
     });
 
     return { success: true };
@@ -138,7 +190,7 @@ export async function claimAchievementPersistent(userId: string, achievementId: 
       const currentXp = data.gamesXp || 0;
 
       if (claimed.includes(achievementId)) {
-        return; // Already claimed
+        return;
       }
 
       transaction.update(userDocRef, {
@@ -166,7 +218,7 @@ export async function addFriendPersistent(userId: string, friendName: string) {
     if (!doc.exists) return { success: false, error: "User not found" };
 
     const data = doc.data() || {};
-    const friends = data.gamesFriends || ["ZeroCool", "NeoCoder", "AlgorithmKnight"];
+    const friends = data.gamesFriends || [];
 
     if (friends.includes(friendName)) {
       return { success: false, error: "Friend already added" };
@@ -175,7 +227,6 @@ export async function addFriendPersistent(userId: string, friendName: string) {
     // Verify if the hacker exists in the users database
     const friendQuery = await db.collection("users").where("name", "==", friendName).get();
     if (friendQuery.empty) {
-      // Allow adding anyway but warn or check
       return { success: false, error: "Hacker not found in Mockrithm database" };
     }
 
