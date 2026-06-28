@@ -174,7 +174,210 @@ export function getTierName(level: number): "Apprentice" | "Mage" | "Knight" | "
   return "Grandmaster";
 }
 
-// Full curriculum maps for progressive topics
+// Handcrafted Codédex blueprints for initial sequence (HTML5 Game target)
+const HTML5_INITIAL_LEVELS: LevelData[] = [
+  {
+    id: "html5-1",
+    level: 1,
+    levelId: 1,
+    tier: "Apprentice",
+    title: "Document Skeleton",
+    conceptText: `### 1. The Concept (The "Why")
+Web pages are structured just like a **human skeleton**. In HTML5, we define structural wrappers to hold text content.
+The container \`<div id="element-container">\` acts as the chest cavity, and we are going to place a **heart** inside it using a text layout!`,
+    codeExample: `\`\`\`html
+<div id="element-container">
+  <h1>Document Skeleton</h1>
+</div>
+\`\`\``,
+    missionText: `### 2. Your Mission
+Write an HTML tag containing the text **"Document Skeleton Part 1"** inside the starter wrapper container.`,
+    starterCode: `<!-- HTML Apprentice - Level 1 -->
+<div id="element-container">
+  
+</div>`,
+    hints: [
+      "Use an <h1> or <h2> heading element.",
+      "Ensure you close your tags properly.",
+      "Check spelling: 'Document Skeleton Part 1'"
+    ],
+    validation: {
+      checkType: "html",
+      testCases: [
+        {
+          description: "Should contain an h1 or h2 heading tag inside container",
+          testRegex: "<(h1|h2)[\\s>]"
+        },
+        {
+          description: "Should render the text 'Document Skeleton Part 1'",
+          testRegex: "Document\\s+Skeleton\\s+Part\\s+1"
+        }
+      ]
+    }
+  },
+  {
+    id: "html5-2",
+    level: 2,
+    levelId: 2,
+    tier: "Apprentice",
+    title: "Headings & Paragraphs",
+    conceptText: `### 1. The Concept (The "Why")
+A page needs structural hierarchy. Headings range from \`<h1>\` (largest, main titles) down to \`<h6>\` (smallest subheaders).
+For regular text blocks, we use the paragraph \`<p>\` tag, which adds standard spacing above and below.`,
+    codeExample: `\`\`\`html
+<h1>Main Title</h1>
+<p>This is a standard body text block.</p>
+\`\`\``,
+    missionText: `### 2. Your Mission
+Add an \`<h2>\` subtitle and a \`<p>\` description paragraph inside the container. The description paragraph must contain the phrase "Learn layout foundations".`,
+    starterCode: `<!-- HTML Apprentice - Level 2 -->
+<div id="element-container">
+  
+</div>`,
+    hints: [
+      "Add an <h2> element first.",
+      "Create a <p> element next containing the target text.",
+      "Verify tags close cleanly."
+    ],
+    validation: {
+      checkType: "html",
+      testCases: [
+        {
+          description: "Should contain an h2 tag",
+          testRegex: "<h2[\\s>]"
+        },
+        {
+          description: "Should contain a p paragraph tag",
+          testRegex: "<p[\\s>]"
+        },
+        {
+          description: "Paragraph should contain the text 'Learn layout foundations'",
+          testRegex: "Learn\\s+layout\\s+foundations"
+        }
+      ]
+    }
+  },
+  {
+    id: "html5-3",
+    level: 3,
+    levelId: 3,
+    tier: "Apprentice",
+    title: "Text Formatting",
+    conceptText: `### 1. The Concept (The "Why")
+Skeletel content can be highlighted. To make text **bold**, we use the \`<strong>\` tag. To *italicize* text, we wrap it in the \`<em>\` (emphasis) tag.
+This lets the browser and screen readers know which words carry weight.`,
+    codeExample: `\`\`\`html
+<p>We must defend the <strong>Citadel</strong> from danger.</p>
+\`\`\``,
+    missionText: `### 2. Your Mission
+Write a paragraph tag containing the bolded word **"stronghold"** inside the container using the \`<strong>\` tag.`,
+    starterCode: `<!-- HTML Apprentice - Level 3 -->
+<div id="element-container">
+  
+</div>`,
+    hints: [
+      "Wrap the target word inside <strong> and </strong>.",
+      "Place the strong tag inside a <p> element.",
+      "Check spelling of 'stronghold'"
+    ],
+    validation: {
+      checkType: "html",
+      testCases: [
+        {
+          description: "Should include a strong tag",
+          testRegex: "<strong[\\s>]"
+        },
+        {
+          description: "Should contain the word 'stronghold'",
+          testRegex: "stronghold"
+        }
+      ]
+    }
+  },
+  {
+    id: "html5-4",
+    level: 4,
+    levelId: 4,
+    tier: "Apprentice",
+    title: "Hyperlinks",
+    conceptText: `### 1. The Concept (The "Why")
+Links are the neural pathways of the internet. We weave them using the anchor \`<a>\` tag.
+It requires an \`href\` attribute stating the target URL and wraps the clickable text.`,
+    codeExample: `\`\`\`html
+<a href="https://mockrithm.com">Click Here</a>
+\`\`\``,
+    missionText: `### 2. Your Mission
+Create an anchor link pointing to **"https://mockrithm.com/games"** displaying the text "Enter Arena".`,
+    starterCode: `<!-- HTML Apprentice - Level 4 -->
+<div id="element-container">
+  
+</div>`,
+    hints: [
+      "Set the href attribute to 'https://mockrithm.com/games'.",
+      "Set the anchor inner text to 'Enter Arena'."
+    ],
+    validation: {
+      checkType: "html",
+      testCases: [
+        {
+          description: "Should contain an anchor link tag",
+          testRegex: "<a[\\s>]"
+        },
+        {
+          description: "Should specify the target href parameter",
+          testRegex: "href=[\"']https://mockrithm\\.com/games[\"']"
+        },
+        {
+          description: "Link text must read 'Enter Arena'",
+          testRegex: ">Enter\\s+Arena</a>"
+        }
+      ]
+    }
+  },
+  {
+    id: "html5-5",
+    level: 5,
+    levelId: 5,
+    tier: "Apprentice",
+    title: "Image Embedding",
+    conceptText: `### 1. The Concept (The "Why")
+Images add portals to other visual dimensions. We embed them with the \`<img>\` tag.
+It is a **self-closing tag** (meaning it does not need a closing \`</img>\` element) and uses the \`src\` attribute for the file path, along with \`alt\` for accessibility descriptions.`,
+    codeExample: `\`\`\`html
+<img src="/logo.svg" alt="Mockrithm Logo" />
+\`\`\``,
+    missionText: `### 2. Your Mission
+Embed an image using the source path **"/logo.svg"** and an alt description tag set to "Cyber Logo".`,
+    starterCode: `<!-- HTML Apprentice - Level 5 -->
+<div id="element-container">
+  
+</div>`,
+    hints: [
+      "Use img tag properties src and alt.",
+      "Remember that image tags are self-closing.",
+      "Check spelling of '/logo.svg'"
+    ],
+    validation: {
+      checkType: "html",
+      testCases: [
+        {
+          description: "Should contain an img tag",
+          testRegex: "<img[\\s>]"
+        },
+        {
+          description: "Source must point to '/logo.svg'",
+          testRegex: "src=[\"']/logo\\.svg[\"']"
+        },
+        {
+          description: "Alt description must read 'Cyber Logo'",
+          testRegex: "alt=[\"']Cyber\\s+Logo[\"']"
+        }
+      ]
+    }
+  }
+];
+
+// Progressive sub-topics syllabus configuration mapping
 const GAME_SYLLABUS: Record<string, string[]> = {
   html5: ["Headings", "Paragraphs", "Text Formatting", "Hyperlinks", "Image Embedding", "Lists", "Forms", "Semantic Containers", "Tables", "Video Player", "Canvas basics", "SVG inline", "Local storage links", "Geolocation", "Web Workers", "WebSockets", "Shadow DOM", "Custom Elements", "Preloading", "SEO Metadata"],
   css3: ["Color properties", "Box Model spacing", "Borders & Shadows", "Fonts & Alignment", "Flexbox Axes", "Flexbox Axes Alignments", "CSS Positioning", "Keyframe Animations", "Transitions speed", "CSS Transforms", "Gradients patterns", "Grid layout columns", "Will-Change render", "CSS custom properties", "Container queries"],
@@ -193,19 +396,24 @@ const GAME_SYLLABUS: Record<string, string[]> = {
 };
 
 /**
- * Procedural Lesson Syllabus Generator Engine
- * Transforms any gameId + level (1-500) into a highly unique, playable, fail-by-default coding challenge.
+ * Dynamic Progressive Syllabus Generator
+ * Maps level L and step index to completely different, progressive categories of missions.
  */
 export function generateLevel(gameId: string, level: number): LevelData {
+  // Use handcrafted HTML5 levels 1-5 for initial onboarding
+  if (gameId === "html5" && level <= 5) {
+    return HTML5_INITIAL_LEVELS[level - 1];
+  }
+
   const game = GAMES_LIST.find(g => g.id === gameId);
   if (!game) throw new Error(`Game ${gameId} not found`);
 
   const tier = getTierName(level);
-  const topics = GAME_SYLLABUS[gameId] || ["Syntax Foundations"];
+  const topics = GAME_SYLLABUS[gameId] || ["General Foundations"];
   const topicIndex = Math.floor((level - 1) / 10) % topics.length;
   const stepIndex = (level - 1) % 10;
   const concept = topics[topicIndex];
-  
+
   const title = `Level ${level}: ${concept} (Part ${stepIndex + 1})`;
   const id = `${gameId}-${level}`;
 
@@ -217,168 +425,211 @@ export function generateLevel(gameId: string, level: number): LevelData {
   let checkType: LevelData["validation"]["checkType"] = "eval";
   let testCases: TestCase[] = [];
 
-  // Stack-Specific Procedural Syllabus Generator
+  // Determine step category based on stepIndex to vary task structures!
+  const categoryIndex = stepIndex % 5;
+
   switch (gameId) {
     case "html5":
       checkType = "html";
-      conceptText = `### 1. The Concept (The "Why")
-HTML tags define the skeletal elements of your portal. In this level, we explore **${concept}** (Part ${stepIndex + 1}).
-To construct a valid node, we wrap our target content inside appropriate semantic HTML tags.`;
-      
-      if (concept.includes("Headings") || concept.includes("Skeleton")) {
-        const size = (stepIndex % 3) + 1;
-        codeExample = `\`\`\`html\n<h${size}>Title Text</h${size}>\n\`\`\``;
-        missionText = `### 2. Your Mission
-Write an \`<h${size}>\` tag containing the exact text **"${concept} Step ${stepIndex + 1}"** inside the \`#element-container\` wrapper.`;
-        starterCode = `<!-- HTML Workspace -->\n<div id="element-container">\n  \n</div>`;
-        hints = [`Use the <h${size}> tag.`, "Make sure to open and close the tag properly."];
-        testCases = [
-          { description: `Should contain an h${size} tag`, testRegex: `<h${size}[\\s>]` },
-          { description: `Should render "${concept} Step ${stepIndex + 1}"`, testRegex: `${concept.replace("&", "\\&")}\\s+Step\\s+${stepIndex + 1}` }
-        ];
-      } else if (concept.includes("Paragraphs")) {
-        codeExample = `\`\`\`html\n<p>This is a text paragraph.</p>\n\`\`\``;
-        missionText = `### 2. Your Mission
-Create a \`<p>\` paragraph element containing the text **"Writing paragraph lines for ${stepIndex + 1}"** inside the container.`;
+      if (categoryIndex === 0) {
+        // Category 0: Headings
+        const headingSize = (level % 4) + 1; // dynamically sets h1, h2, h3, h4
+        conceptText = `### 1. The Concept (The "Why")\nHTML headings structure key headers. Today we explore **${concept}** (Part ${stepIndex + 1}) using size \`<h${headingSize}>\` tags.`;
+        codeExample = `\`\`\`html\n<h${headingSize}>Content Header</h${headingSize}>\n\`\`\``;
+        missionText = `### 2. Your Mission\nWrite a heading tag **\`<h${headingSize}>\`** containing the exact text **\`"Heading Level ${level}"\`** inside the container.`;
         starterCode = `<div id="element-container">\n  \n</div>`;
-        hints = ["Use the <p> tag.", "Spell the string accurately."];
+        hints = [`Write '<h${headingSize}>Heading Level ${level}</h${headingSize}>'`];
         testCases = [
-          { description: "Should contain a p paragraph tag", testRegex: "<p[\\s>]" },
-          { description: `Should contain "Writing paragraph lines for ${stepIndex + 1}"`, testRegex: `Writing\\s+paragraph\\s+lines\\s+for\\s+${stepIndex + 1}` }
+          { description: `Contains <h${headingSize}> tag`, testRegex: `<h${headingSize}[\\s>]` },
+          { description: `Renders text "Heading Level ${level}"`, testRegex: `Heading\\s+Level\\s+${level}` }
         ];
-      } else if (concept.includes("Hyperlinks")) {
-        codeExample = `\`\`\`html\n<a href="/target">Link Text</a>\n\`\`\``;
-        missionText = `### 2. Your Mission
-Add an anchor link pointing to **"https://mockrithm.com/games/${stepIndex + 1}"** that says **"Arena Gateway"**.`;
+      } else if (categoryIndex === 1) {
+        // Category 1: Paragraphs
+        conceptText = `### 1. The Concept (The "Why")\nParagraph tags structure paragraph blocks. We check **${concept}** (Part ${stepIndex + 1}).`;
+        codeExample = `\`\`\`html\n<p>Body copy lines</p>\n\`\`\``;
+        missionText = `### 2. Your Mission\nCreate a paragraph element **\`<p>\`** containing the phrase **\`"Active parameter index is ${level}"\`**.`;
         starterCode = `<div id="element-container">\n  \n</div>`;
-        hints = ["Use href='https://mockrithm.com/games/X' inside an <a> tag."];
+        hints = [`Use <p> tags enclosing 'Active parameter index is ${level}'.`];
         testCases = [
-          { description: "Should contain an anchor a tag", testRegex: "<a[\\s>]" },
-          { description: `Should link to the URL for step ${stepIndex + 1}`, testRegex: `href=["']https://mockrithm\\.com/games/${stepIndex + 1}["']` }
+          { description: "Contains a <p> tag", testRegex: "<p[\\s>]" },
+          { description: `Renders text "Active parameter index is ${level}"`, testRegex: `Active\\s+parameter\\s+index\\s+is\\s+${level}` }
+        ];
+      } else if (categoryIndex === 2) {
+        // Category 2: Anchors
+        conceptText = `### 1. The Concept (The "Why")\nAnchors link URL paths together. We explore **${concept}** (Part ${stepIndex + 1}).`;
+        codeExample = `\`\`\`html\n<a href="/target">Label</a>\n\`\`\``;
+        missionText = `### 2. Your Mission\nAdd an anchor tag linking to **\`"https://mockrithm.me/level/${level}"\`** with the click label **\`"Proceed ${level}"\`**.`;
+        starterCode = `<div id="element-container">\n  \n</div>`;
+        hints = [`Write '<a href="https://mockrithm.me/level/${level}">Proceed ${level}</a>'`];
+        testCases = [
+          { description: "Contains an anchor tag", testRegex: "<a[\\s>]" },
+          { description: `Links to target path`, testRegex: `href=["']https://mockrithm\\.me/level/${level}["']` },
+          { description: `Has label "Proceed ${level}"`, testRegex: `Proceed\\s+${level}` }
+        ];
+      } else if (categoryIndex === 3) {
+        // Category 3: List Items
+        conceptText = `### 1. The Concept (The "Why")\nHTML list structures bundle points together. We examine **${concept}** (Part ${stepIndex + 1}).`;
+        codeExample = `\`\`\`html\n<ul>\n  <li>Item</li>\n</ul>\n\`\`\``;
+        missionText = `### 2. Your Mission\nConstruct an unordered list **\`<ul>\`** containing a list item **\`<li>\`** displaying the text **\`"Syllabus Item ${level}"\`**.`;
+        starterCode = `<div id="element-container">\n  \n</div>`;
+        hints = ["Nest <li> inside <ul>."];
+        testCases = [
+          { description: "Contains a ul tag", testRegex: "<ul[\\s>]" },
+          { description: "Contains a li tag", testRegex: "<li[\\s>]" },
+          { description: `Renders text "Syllabus Item ${level}"`, testRegex: `Syllabus\\s+Item\\s+${level}` }
         ];
       } else {
-        codeExample = `\`\`\`html\n<!-- Example -->\n<div id="item-${stepIndex}">Active</div>\n\`\`\``;
-        missionText = `### 2. Your Mission
-Add a \`<div>\` element inside the container with an attribute \`id="node-${stepIndex}"\` containing the word **"Unlocking"**.`;
+        // Category 4: Specialized Div nodes
+        conceptText = `### 1. The Concept (The "Why")\nDiv tags define document modules. We review **${concept}** (Part ${stepIndex + 1}).`;
+        codeExample = `\`\`\`html\n<div id="wrapper">Block</div>\n\`\`\``;
+        missionText = `### 2. Your Mission\nCreate a child div inside the container setting its id attribute to exactly **\`"portal-node-${level}"\`** containing the text **\`"Online"\`**.`;
         starterCode = `<div id="element-container">\n  \n</div>`;
-        hints = ["Use <div id='node-X'>.", "Close the element."];
+        hints = [`Write '<div id="portal-node-${level}">Online</div>'`];
         testCases = [
-          { description: `Should have element with id="node-${stepIndex}"`, testRegex: `id=["']node-${stepIndex}["']` },
-          { description: "Should contain the word 'Unlocking'", testRegex: "Unlocking" }
+          { description: `Has div with id="portal-node-${level}"`, testRegex: `id=["']portal-node-${level}["']` },
+          { description: "Displays text 'Online'", testRegex: "Online" }
         ];
       }
       break;
 
     case "css3":
       checkType = "css";
-      conceptText = `### 1. The Concept (The "Why")
-CSS style sheets paint layout parameters onto elements. Today we configure **${concept}** (Part ${stepIndex + 1}) inside our grid styles.
-Values can specify sizes in pixels (\`px\`), relative units (\`rem\`), or percentage values (\`%\`).`;
-
-      if (concept.includes("Color")) {
-        const colorVal = `#${(stepIndex * 11).toString(16).padStart(3, "a")}`;
-        codeExample = `\`\`\`css\n.visual-box {\n  color: ${colorVal};\n}\n\`\`\``;
-        missionText = `### 2. Your Mission
-Apply the CSS declaration **\`color: ${colorVal};\`** (or matching properties) inside the \`.visual-box\` selector.`;
-        starterCode = `/* CSS Style Space */\n.visual-box {\n  \n}`;
-        hints = [`Write 'color: ${colorVal};' inside the curly braces.`];
-        testCases = [
-          { description: `Color property must be set to ${colorVal}`, testRegex: `color:\\s*${colorVal}` }
-        ];
-      } else if (concept.includes("Box Model") || concept.includes("spacing")) {
-        const spacingSize = (stepIndex + 1) * 5;
-        codeExample = `\`\`\`css\n.visual-box {\n  padding: ${spacingSize}px;\n}\n\`\`\``;
-        missionText = `### 2. Your Mission
-Set the **\`padding\`** of the element class selector \`.visual-box\` to exactly **\`${spacingSize}px\`**.`;
+      if (categoryIndex === 0) {
+        // Category 0: Colors
+        const hex = `#${(level % 16).toString(16).repeat(3)}`;
+        conceptText = `### 1. The Concept (The "Why")\nCSS properties style element colors. We examine **${concept}** (Part ${stepIndex + 1}).`;
+        codeExample = `\`\`\`css\n.visual-box {\n  color: ${hex};\n}\n\`\`\``;
+        missionText = `### 2. Your Mission\nSet the text **\`color\`** property of class selector \`.visual-box\` to exactly **\`${hex}\`**.`;
         starterCode = `.visual-box {\n  \n}`;
-        hints = [`Write 'padding: ${spacingSize}px;'`];
+        hints = [`Write 'color: ${hex};'`];
         testCases = [
-          { description: `Padding must be exactly ${spacingSize}px`, testRegex: `padding:\\s*${spacingSize}px` }
+          { description: `Sets color to ${hex}`, testRegex: `color:\\s*${hex}` }
         ];
-      } else if (concept.includes("Flexbox")) {
-        const align = stepIndex % 2 === 0 ? "center" : "flex-end";
-        codeExample = `\`\`\`css\n.visual-box {\n  display: flex;\n  justify-content: ${align};\n}\n\`\`\``;
-        missionText = `### 2. Your Mission
-Write CSS rules inside the selector to establish a flexbox layout, and set the **\`justify-content\`** property to **\`${align}\`**.`;
+      } else if (categoryIndex === 1) {
+        // Category 1: Margins & Padding
+        const size = (level % 10 + 1) * 4;
+        conceptText = `### 1. The Concept (The "Why")\nBox model spacing configures internal padding. We check **${concept}** (Part ${stepIndex + 1}).`;
+        codeExample = `\`\`\`css\n.visual-box {\n  padding: ${size}px;\n}\n\`\`\``;
+        missionText = `### 2. Your Mission\nWrite a declaration inside the block setting the **\`padding\`** of the element to exactly **\`${size}px\`**.`;
         starterCode = `.visual-box {\n  \n}`;
-        hints = ["Include both 'display: flex;' and 'justify-content'."];
+        hints = [`Write 'padding: ${size}px;'`];
         testCases = [
-          { description: "Should apply display: flex", testRegex: "display:\\s*flex" },
-          { description: `Should justify contents to ${align}`, testRegex: `justify-content:\\s*${align}` }
+          { description: `Sets padding to ${size}px`, testRegex: `padding:\\s*${size}px` }
+        ];
+      } else if (categoryIndex === 2) {
+        // Category 2: Borders
+        const size = (level % 4) + 1;
+        conceptText = `### 1. The Concept (The "Why")\nBorders outline structural items. We check **${concept}** (Part ${stepIndex + 1}).`;
+        codeExample = `\`\`\`css\n.visual-box {\n  border: ${size}px solid red;\n}\n\`\`\``;
+        missionText = `### 2. Your Mission\nConfigure the **\`border-width\`** (or the generic border property) of the element class selector \`.visual-box\` to exactly **\`${size}px\`**.`;
+        starterCode = `.visual-box {\n  \n}`;
+        hints = [`Write 'border-width: ${size}px;' or 'border: ${size}px ...'`];
+        testCases = [
+          { description: `Border size set to ${size}px`, testRegex: `border(-width)?\\s*:\\s*(${size}px|[^;]*${size}px)` }
+        ];
+      } else if (categoryIndex === 3) {
+        // Category 3: Layouts
+        const displayType = level % 2 === 0 ? "flex" : "grid";
+        conceptText = `### 1. The Concept (The "Why")\nCSS displays map layout parameters. We review **${concept}** (Part ${stepIndex + 1}).`;
+        codeExample = `\`\`\`css\n.visual-box {\n  display: ${displayType};\n}\n\`\`\``;
+        missionText = `### 2. Your Mission\nApply layout options by setting the **\`display\`** property of the class selector to exactly **\`${displayType}\`**.`;
+        starterCode = `.visual-box {\n  \n}`;
+        hints = [`Write 'display: ${displayType};'`];
+        testCases = [
+          { description: `Sets display to ${displayType}`, testRegex: `display:\\s*${displayType}` }
         ];
       } else {
-        const val = (stepIndex + 1) * 10;
-        codeExample = `\`\`\`css\n.visual-box {\n  width: ${val}%;\n}\n\`\`\``;
-        missionText = `### 2. Your Mission
-Set the **\`width\`** property of the element to exactly **\`${val}%\`** to scale the block.`;
+        // Category 4: Transforms & Angles
+        const rotVal = (level % 8 + 1) * 45;
+        conceptText = `### 1. The Concept (The "Why")\nCSS transforms rotate visual matrices. We review **${concept}** (Part ${stepIndex + 1}).`;
+        codeExample = `\`\`\`css\n.visual-box {\n  transform: rotate(${rotVal}deg);\n}\n\`\`\``;
+        missionText = `### 2. Your Mission\nApply a transformation rotating the element by exactly **\`${rotVal}deg\`** using the **\`transform\`** property.`;
         starterCode = `.visual-box {\n  \n}`;
-        hints = [`Write 'width: ${val}%;'`];
+        hints = [`Write 'transform: rotate(${rotVal}deg);'`];
         testCases = [
-          { description: `Width must be ${val}%`, testRegex: `width:\\s*${val}%` }
+          { description: `Rotates element by ${rotVal}deg`, testRegex: `transform:\\s*rotate\\(\\s*${rotVal}deg\\s*\\)` }
         ];
       }
       break;
 
     case "javascript":
       checkType = "eval";
-      conceptText = `### 1. The Concept (The "Why")
-JavaScript evaluates scripts and runs logic on inputs. Today we master **${concept}** (Part ${stepIndex + 1}).
-To complete this, you must write a function body that returns a calculated value.`;
-
-      if (concept.includes("Variables") || concept.includes("Arithmetic")) {
-        const adder = (stepIndex + 1) * 3;
-        codeExample = `\`\`\`javascript\nfunction processData(x) {\n  const result = x + ${adder};\n  return result;\n}\n\`\`\``;
-        missionText = `### 2. Your Mission
-Complete the function \`processData\` so that it adds exactly **\`${adder}\`** to the input parameter \`x\` and returns it.`;
-        starterCode = `function processData(x) {\n  // Write your code here\n  \n}`;
+      if (categoryIndex === 0) {
+        // Category 0: Basic math assignment
+        const adder = level * 2;
+        conceptText = `### 1. The Concept (The "Why")\nJavaScript evaluates numeric values. We examine **${concept}** (Part ${stepIndex + 1}).`;
+        codeExample = `\`\`\`javascript\nfunction processData(x) {\n  return x + ${adder};\n}\n\`\`\``;
+        missionText = `### 2. Your Mission\nComplete function \`processData(x)\` so that it returns the parameter \`x\` added to exactly **\`${adder}\`**.`;
+        starterCode = `function processData(x) {\n  // Write logic\n  \n}`;
         hints = [`Use 'return x + ${adder};'`];
         testCases = [
-          { description: "Function processData must exist", testRegex: "function\\s+processData" },
-          { description: `Adds ${adder} to input value`, customCheck: `(code) => {
-            const fn = new Function(code + "; return processData(10);");
-            return fn() === 10 + ${adder};
+          { description: "Defines processData function", testRegex: "function\\s+processData" },
+          { description: `Adds ${adder} to inputs`, customCheck: `(code) => {
+            const fn = new Function(code + "; return processData(5);");
+            return fn() === 5 + ${adder};
           }` }
         ];
-      } else if (concept.includes("Conditional")) {
-        const threshold = (stepIndex + 1) * 10;
-        codeExample = `\`\`\`javascript\nif (x > ${threshold}) {\n  return "High";\n} else {\n  return "Low";\n}\n\`\`\``;
-        missionText = `### 2. Your Mission
-Complete the function \`processData(x)\`. If the value of \`x\` is greater than or equal to **\`${threshold}\`**, return the string **\`"High"\`**, else return the string **\`"Low"\`**.`;
-        starterCode = `function processData(x) {\n  // Write conditional logic\n  \n}`;
-        hints = [`Use an if/else block checking against ${threshold}.`];
+      } else if (categoryIndex === 1) {
+        // Category 1: Modulo & Operations
+        const divisor = (level % 4) + 2;
+        conceptText = `### 1. The Concept (The "Why")\nArithmetic operators modify values. We inspect **${concept}** (Part ${stepIndex + 1}).`;
+        codeExample = `\`\`\`javascript\nfunction processData(x) {\n  return x % ${divisor};\n}\n\`\`\``;
+        missionText = `### 2. Your Mission\nWrite a function body that returns the remainder of dividing the parameter \`x\` by exactly **\`${divisor}\`** (using the modulo \`%\` operator).`;
+        starterCode = `function processData(x) {\n  \n}`;
+        hints = [`Use 'return x % ${divisor};'`];
         testCases = [
-          { description: "Checks conditional branching properly", customCheck: `(code) => {
-            const fn = new Function(code + "; return processData(${threshold + 5}) === 'High' && processData(${threshold - 5}) === 'Low';");
-            return fn();
+          { description: `Performs mod division by ${divisor}`, customCheck: `(code) => {
+            const fn = new Function(code + "; return processData(15);");
+            return fn() === 15 % ${divisor};
           }` }
         ];
-      } else if (concept.includes("Array") || concept.includes("loop")) {
-        codeExample = `\`\`\`javascript\n// Summing items\nlet total = arr.reduce((a, b) => a + b, 0);\n\`\`\``;
-        missionText = `### 2. Your Mission
-Write a function \`processData(arr)\` that takes an array of numbers and returns the sum of all elements. If the array is empty, return **\`0\`**.`;
-        starterCode = `function processData(arr) {\n  // Sum array elements\n  \n}`;
-        hints = ["You can use a for loop or the array.reduce() method."];
+      } else if (categoryIndex === 2) {
+        // Category 2: Limit Conditionals
+        const threshold = level * 10;
+        conceptText = `### 1. The Concept (The "Why")\nBranching handles custom thresholds. We review **${concept}** (Part ${stepIndex + 1}).`;
+        codeExample = `\`\`\`javascript\nif (x > ${threshold}) {\n  return "Above";\n} else {\n  return "Below";\n}\n\`\`\``;
+        missionText = `### 2. Your Mission\nComplete function \`processData(x)\` to return string **\`"Above"\`** if \`x\` exceeds **\`${threshold}\`**, and **\`"Below"\`** otherwise.`;
+        starterCode = `function processData(x) {\n  \n}`;
+        hints = [`Use if statements checking thresholds against ${threshold}.`];
         testCases = [
-          { description: "Correctly sums elements [1, 2, 3]", customCheck: `(code) => {
-            const fn = new Function(code + "; return processData([1, 2, 3]);");
-            return fn() === 6;
+          { description: `Returns Above for values > ${threshold}`, customCheck: `(code) => {
+            const fn = new Function(code + "; return processData(${threshold + 5});");
+            return fn() === "Above";
           }` },
-          { description: "Handles empty array inputs", customCheck: `(code) => {
-            const fn = new Function(code + "; return processData([]);");
-            return fn() === 0;
+          { description: `Returns Below for values <= ${threshold}`, customCheck: `(code) => {
+            const fn = new Function(code + "; return processData(${threshold - 5});");
+            return fn() === "Below";
+          }` }
+        ];
+      } else if (categoryIndex === 3) {
+        // Category 3: Array Mapping
+        const multiplier = (level % 5) + 2;
+        conceptText = `### 1. The Concept (The "Why")\nMapping transforms arrays. We examine **${concept}** (Part ${stepIndex + 1}).`;
+        codeExample = `\`\`\`javascript\nreturn arr.map(n => n * ${multiplier});\n\`\`\``;
+        missionText = `### 2. Your Mission\nComplete function \`processData(arr)\` to map over the array inputs, returning a new array where each number is multiplied by exactly **\`${multiplier}\`**.`;
+        starterCode = `function processData(arr) {\n  \n}`;
+        hints = [`Call 'return arr.map(item => item * ${multiplier});'`];
+        testCases = [
+          { description: `Maps elements multiplying by ${multiplier}`, customCheck: `(code) => {
+            const fn = new Function(code + "; return JSON.stringify(processData([1, 2, 3]));");
+            return fn() === JSON.stringify([1 * multiplier, 2 * multiplier, 3 * multiplier]);
           }` }
         ];
       } else {
-        // Fallback calculations
-        codeExample = `\`\`\`javascript\nfunction processData(x) {\n  return x * 2;\n}\n\`\`\``;
-        missionText = `### 2. Your Mission
-Write a function \`processData(x)\` that returns the string **\`"passed"\`** if the input is \`true\`, or **\`"failed"\`** otherwise.`;
-        starterCode = `function processData(x) {\n  \n}`;
-        hints = ["Use a simple ternary return statement."];
+        // Category 4: Object structures
+        conceptText = `### 1. The Concept (The "Why")\nJSON object parameters package records. We examine **${concept}** (Part ${stepIndex + 1}).`;
+        codeExample = `\`\`\`javascript\nreturn { id: 1, val: ${level} };\n\`\`\``;
+        missionText = `### 2. Your Mission\nComplete function \`processData()\` to return a plain object containing a key **\`level\`** set to the number **\`${level}\`**, and a key **\`status\`** set to string **\`"active"\`**.`;
+        starterCode = `function processData() {\n  \n}`;
+        hints = [`Use 'return { level: ${level}, status: "active" };'`];
         testCases = [
-          { description: "Returns string depending on boolean check", customCheck: `(code) => {
-            const fn = new Function(code + "; return processData(true) === 'passed' && processData(false) === 'failed';");
-            return fn();
+          { description: `Returns object with level ${level}`, customCheck: `(code) => {
+            const fn = new Function(code + "; return processData().level;");
+            return fn() === level;
+          }` },
+          { description: "Sets status to active", customCheck: `(code) => {
+            const fn = new Function(code + "; return processData().status;");
+            return fn() === "active";
           }` }
         ];
       }
@@ -386,286 +637,336 @@ Write a function \`processData(x)\` that returns the string **\`"passed"\`** if 
 
     case "typescript":
       checkType = "eval";
-      conceptText = `### 1. The Concept (The "Why")
-TypeScript secures compile-time parameters. Here we typed **${concept}** (Part ${stepIndex + 1}).
-We declare typed structures to enforce interfaces.`;
-
-      if (concept.includes("types") || concept.includes("alias")) {
-        codeExample = `\`\`\`typescript\ntype TargetType = string | number;\n\`\`\``;
-        missionText = `### 2. Your Mission
-Declare a function \`processType(x: string | number)\` that returns the string **\`"typed"\`**.`;
-        starterCode = `// TS space\nfunction processType(x: any) {\n  \n}`;
-        hints = ["Replace 'any' with the union string | number typing."];
+      if (categoryIndex === 0) {
+        // Category 0: Union types
+        const typesLabel = level % 2 === 0 ? "string | boolean" : "number | string";
+        conceptText = `### 1. The Concept (The "Why")\nTypeScript types secure parameters. We examine **${concept}** (Part ${stepIndex + 1}).`;
+        codeExample = `\`\`\`typescript\nfunction processType(x: ${typesLabel}) {}\n\`\`\``;
+        missionText = `### 2. Your Mission\nDeclare a function named **\`processType\`** that accepts parameter \`x\` explicitly typed as **\`${typesLabel}\`**.`;
+        starterCode = `// TS workspace\nfunction processType(x: any) {\n  \n}`;
+        hints = [`Change type from 'any' to '${typesLabel}'`];
         testCases = [
-          { description: "Uses TS parameters typing for x", testRegex: "processType\\s*\\(\\s*x\\s*:\\s*(string\\s*\\|\\s*number|number\\s*\\|\\s*string)\\s*\\)" }
+          { description: `Declares function processType`, testRegex: "function\\s+processType" },
+          { description: `Types parameter x as ${typesLabel}`, testRegex: `x\\s*:\\s*(${typesLabel.replace("|", "\\|")}|${typesLabel.split("|").reverse().join("|").replace("|", "\\|")})` }
         ];
-      } else if (concept.includes("Interface")) {
-        codeExample = `\`\`\`typescript\ninterface UserItem {\n  id: number;\n  name: string;\n}\n\`\`\``;
-        missionText = `### 2. Your Mission
-Define an interface named \`AdminItem\` that contains a key \`role\` typed as \`string\`, and a key \`clearance\` typed as \`number\`.`;
-        starterCode = `// Define AdminItem below\n`;
-        hints = ["Declare interface AdminItem { ... }"];
+      } else if (categoryIndex === 1) {
+        // Category 1: Interfaces
+        const interfaceName = `LevelNode_${level}`;
+        conceptText = `### 1. The Concept (The "Why")\nInterfaces model shape constraints. We inspect **${concept}** (Part ${stepIndex + 1}).`;
+        codeExample = `\`\`\`typescript\ninterface ${interfaceName} {\n  id: number;\n  name: string;\n}\n\`\`\``;
+        missionText = `### 2. Your Mission\nDefine an interface named **\`${interfaceName}\`** with a property **\`uid\`** typed as \`number\`, and a property **\`tag\`** typed as \`string\`.`;
+        starterCode = `// Declare interface below\n`;
+        hints = [`Write 'interface ${interfaceName} { uid: number; tag: string; }'`];
         testCases = [
-          { description: "Interface AdminItem must be declared", testRegex: "interface\\s+AdminItem" },
-          { description: "Contains role property", testRegex: "role\\s*:\\s*string" },
-          { description: "Contains clearance property", testRegex: "clearance\\s*:\\s*number" }
+          { description: `Declares interface ${interfaceName}`, testRegex: `interface\\s+${interfaceName}` },
+          { description: "Has property uid: number", testRegex: "uid\\s*:\\s*number" },
+          { description: "Has property tag: string", testRegex: "tag\\s*:\\s*string" }
+        ];
+      } else if (categoryIndex === 2) {
+        // Category 2: Generic functions
+        conceptText = `### 1. The Concept (The "Why")\nGenerics define reusable type parameters. We review **${concept}** (Part ${stepIndex + 1}).`;
+        codeExample = `\`\`\`typescript\nfunction wrapper<T>(x: T): T {\n  return x;\n}\n\`\`\``;
+        missionText = `### 2. Your Mission\nCreate a generic function named **\`identity<T>\`** that accepts a parameter \`arg\` typed as **\`T\`** and returns type **\`T\`**.`;
+        starterCode = `// Generic workspace\n`;
+        hints = ["Write 'function identity<T>(arg: T): T { return arg; }'"];
+        testCases = [
+          { description: "Declares identity function with type parameter T", testRegex: "function\\s+identity\\s*<\\s*T\\s*>" },
+          { description: "Types parameter as generic parameter", testRegex: "arg\\s*:\\s*T" }
+        ];
+      } else if (categoryIndex === 3) {
+        // Category 3: Optional keys
+        const propName = `option_${level}`;
+        conceptText = `### 1. The Concept (The "Why")\nOptional properties are denoted by a question mark. We explore **${concept}** (Part ${stepIndex + 1}).`;
+        codeExample = `\`\`\`typescript\ninterface Node {\n  name?: string;\n}\n\`\`\``;
+        missionText = `### 2. Your Mission\nDefine an interface named **\`Params\`** containing an optional property named **\`${propName}\`** typed as \`boolean\`.`;
+        starterCode = `interface Params {\n  \n}`;
+        hints = [`Write '${propName}?: boolean;'`];
+        testCases = [
+          { description: `Contains optional property ${propName}`, testRegex: `${propName}\\s*\\?\\s*:\\s*boolean` }
         ];
       } else {
-        codeExample = `\`\`\`typescript\nfunction getArray<T>(item: T): T[] {\n  return [item];\n}\n\`\`\``;
-        missionText = `### 2. Your Mission
-Create a generic function \`identity<T>(val: T): T\` that returns the input parameter directly.`;
-        starterCode = `// TS generic workspace\n`;
-        hints = ["Use generic parameter <T> on the function definition."];
+        // Category 4: Type aliases
+        const aliasName = `KeyId_${level}`;
+        conceptText = `### 1. The Concept (The "Why")\nType aliases name custom types. We examine **${concept}** (Part ${stepIndex + 1}).`;
+        codeExample = `\`\`\`typescript\ntype ${aliasName} = string | number;\n\`\`\``;
+        missionText = `### 2. Your Mission\nDeclare a type alias named **\`${aliasName}\`** that is a union of \`string\` and \`null\`.`;
+        starterCode = `// Write type alias\n`;
+        hints = [`Write 'type ${aliasName} = string | null;'`];
         testCases = [
-          { description: "Defines generic identity function", testRegex: "function\\s+identity\\s*<\\s*T\\s*>" }
+          { description: `Defines type alias ${aliasName}`, testRegex: `type\\s+${aliasName}\\s*=\\s*` },
+          { description: "Checks type is string | null", testRegex: "(string\\s*\\|\\s*null|null\\s*\\|\\s*string)" }
         ];
       }
       break;
 
     case "reactjs":
       checkType = "react";
-      conceptText = `### 1. The Concept (The "Why")
-React maps states to HTML components. Here we handle **${concept}** (Part ${stepIndex + 1}).
-We render tags and update state triggers.`;
-
-      if (concept.includes("State")) {
-        codeExample = `\`\`\`jsx\nconst [count, setCount] = useState(0);\n\`\`\``;
-        missionText = `### 2. Your Mission
-Implement component state using **\`useState\`** initialized to **\`0\`**. Render the current state number inside a container div with className \`"react-box"\`.`;
-        starterCode = `import React, { useState } from 'react';\n\nexport default function CounterControl() {\n  // Write state hook below\n  \n  return (\n    <div className="react-box">\n      \n    </div>\n  );\n}`;
-        hints = ["Declare state variables using destructuring."];
+      if (categoryIndex === 0) {
+        // Category 0: useState hooks
+        const initVal = level * 5;
+        conceptText = `### 1. The Concept (The "Why")\nReact useState handles local component states. We examine **${concept}** (Part ${stepIndex + 1}).`;
+        codeExample = `\`\`\`jsx\nconst [value, setValue] = useState(${initVal});\n\`\`\``;
+        missionText = `### 2. Your Mission\nInitialize state in component \`CounterControl\` using **\`useState\`** with an initial value of exactly **\`${initVal}\`**.`;
+        starterCode = `import React, { useState } from 'react';\n\nexport default function CounterControl() {\n  // Write hook below\n  \n  return (\n    <div className="react-box">\n      \n    </div>\n  );\n}`;
+        hints = [`Use 'const [state, setState] = useState(${initVal});'`];
         testCases = [
-          { description: "Calls useState hook", testRegex: "useState\\(\\s*0\\s*\\)" }
+          { description: `Calls useState initialized to ${initVal}`, testRegex: `useState\\(\\s*${initVal}\\s*\\)` }
+        ];
+      } else if (categoryIndex === 1) {
+        // Category 1: Destructured Props
+        conceptText = `### 1. The Concept (The "Why")\nReact components receive props values. We check **${concept}** (Part ${stepIndex + 1}).`;
+        codeExample = `\`\`\`jsx\nexport default function CounterControl({ role }) {}\n\`\`\``;
+        missionText = `### 2. Your Mission\nModify component \`CounterControl\` parameter signature to destructure the prop parameter **\`{ levelId }\`** and render it inside the return div.`;
+        starterCode = `import React from 'react';\n\nexport default function CounterControl(props) {\n  return (\n    <div className="react-box">\n      \n    </div>\n  );\n}`;
+        hints = ["Change (props) to ({ levelId }) and use {levelId} inside the tags."];
+        testCases = [
+          { description: "Destructures levelId parameter in props", testRegex: "CounterControl\\s*\\(\\s*\\{\\s*levelId\\s*\\}\\s*\\)" }
         ];
       } else {
-        codeExample = `\`\`\`jsx\nexport default function User({ name }) {\n  return <h1>{name}</h1>;\n}\n\`\`\``;
-        missionText = `### 2. Your Mission
-Implement props destructured parameter \`{ role }\` in functional component \`CounterControl\`, and render it inside a heading tag.`;
-        starterCode = `import React from 'react';\n\nexport default function CounterControl(props) {\n  return (\n    <div className="react-box">\n      \n    </div>\n  );\n}`;
-        hints = ["Replace props parameter with destructured { role }."];
+        // Category 2: JSX tags
+        conceptText = `### 1. The Concept (The "Why")\nJSX structures HTML elements inside React. We review **${concept}** (Part ${stepIndex + 1}).`;
+        codeExample = `\`\`\`jsx\nreturn <span className="label">Item</span>;\n\`\`\``;
+        missionText = `### 2. Your Mission\nRender a child span tag inside the return div containing the text **\`"React Node ${level}"\`**.`;
+        starterCode = `import React from 'react';\n\nexport default function CounterControl() {\n  return (\n    <div className="react-box">\n      \n    </div>\n  );\n}`;
+        hints = [`Write '<span>React Node ${level}</span>'`];
         testCases = [
-          { description: "Destructures role prop in parameter", testRegex: "CounterControl\\s*\\(\\s*\\{\\s*role\\s*\\}\\s*\\)" }
+          { description: "Contains span tag in JSX return", testRegex: "<span[\\s>]" },
+          { description: `Renders text "React Node ${level}"`, testRegex: `React\\s+Node\\s+${level}` }
         ];
       }
       break;
 
     case "nodejs":
       checkType = "node";
-      conceptText = `### 1. The Concept (The "Why")
-Node.js processes server files. We explore **${concept}** (Part ${stepIndex + 1}).`;
-
-      if (concept.includes("FS") || concept.includes("file")) {
-        codeExample = `\`\`\`javascript\nfs.writeFileSync('log.txt', 'Info');\n\`\`\``;
-        missionText = `### 2. Your Mission
-Write a Node script inside \`runNodeScript\` using the filesystem module to write the string **\`"Node Log ${stepIndex}"\`** to a file named **\`"build.log"\`**.`;
-        starterCode = `function runNodeScript(require) {\n  const fs = require('fs');\n  // Write file below\n  \n}`;
-        hints = ["Call fs.writeFileSync('build.log', ...)."];
+      if (categoryIndex === 0) {
+        // Category 0: fs writeFileSync
+        conceptText = `### 1. The Concept (The "Why")\nNode filesystem writes variables to disc. We examine **${concept}** (Part ${stepIndex + 1}).`;
+        codeExample = `\`\`\`javascript\nfs.writeFileSync('output.log', 'Log text');\n\`\`\``;
+        missionText = `### 2. Your Mission\nWrite a script inside \`runNodeScript\` using **\`fs.writeFileSync\`** to record string **\`"Status OK: ${level}"\`** to a file named **\`"build.log"\`**.`;
+        starterCode = `function runNodeScript(require) {\n  const fs = require('fs');\n  // Write file\n  \n}`;
+        hints = [`Write 'fs.writeFileSync("build.log", "Status OK: ${level}");'`];
         testCases = [
-          { description: "Fails template check (must use writeFileSync)", testRegex: "fs\\.writeFileSync" },
-          { description: `Writes exact string "Node Log ${stepIndex}"`, testRegex: `Node\\s+Log\\s+${stepIndex}` }
+          { description: "Uses fs.writeFileSync method", testRegex: "fs\\.writeFileSync" },
+          { description: `Writes text containing status level ${level}`, testRegex: `Status\\s+OK:\\s+${level}` }
         ];
       } else {
-        codeExample = `\`\`\`javascript\nconst path = require('path');\nconst file = path.join(__dirname, 'src');\n\`\`\``;
-        missionText = `### 2. Your Mission
-Use Node's **\`path\`** module to join path parameters. Resolve path strings.`;
-        starterCode = `function runNodeScript(require) {\n  const path = require('path');\n  // Declare path join below\n  \n}`;
-        hints = ["Use path.join() in your code."];
+        // Category 1: path joins
+        conceptText = `### 1. The Concept (The "Why")\nPath module joins relative strings. We review **${concept}** (Part ${stepIndex + 1}).`;
+        codeExample = `\`\`\`javascript\nconst file = path.join(__dirname, 'src');\n\`\`\ \``;
+        missionText = `### 2. Your Mission\nJoin path directories by calling **\`path.join\`** on variables **\`__dirname\`** and **\`"assets"\`**.`;
+        starterCode = `function runNodeScript(require) {\n  const path = require('path');\n  // Write path resolver\n  \n}`;
+        hints = ["Use path.join(__dirname, 'assets') in your code."];
         testCases = [
-          { description: "Uses path.join to resolve folders", testRegex: "path\\.join" }
+          { description: "Uses path.join to resolve relative folders", testRegex: "path\\.join" },
+          { description: "References assets path parameter", testRegex: "assets" }
         ];
       }
       break;
 
     case "nextjs":
       checkType = "react";
-      conceptText = `### 1. The Concept (The "Why")
-Next.js handles SSR and server segmented routers. We examine **${concept}** (Part ${stepIndex + 1}).`;
-
-      codeExample = `\`\`\`jsx\nimport Image from 'next/image';\n// Render image tags\n\`\`\``;
-      missionText = `### 2. Your Mission
-Create a React default export page component using Next.js **\`next/image\`** components to render a graphic.`;
-      starterCode = `// Page rendering workspace\n`;
-      hints = ["Import Image from 'next/image' and use <Image src='' />."];
+      conceptText = `### 1. The Concept (The "Why")\nNext.js structures route layout systems. We explore **${concept}** (Part ${stepIndex + 1}).`;
+      codeExample = `\`\`\`jsx\nexport default function Page() {\n  return <h1>Next.js page</h1>;\n}\n\`\`\``;
+      missionText = `### 2. Your Mission\nDefine a Next.js default page component named **\`Page\`** rendering a heading tag containing the title **\`"Portal ${level}"\`**.`;
+      starterCode = `// Page route workspace\n`;
+      hints = [`Write 'export default function Page() { return <h1>Portal ${level}</h1>; }'`];
       testCases = [
-        { description: "Imports Next.js Image component", testRegex: "import\\s+Image\\s+from\\s+['\"]next/image['\"]" }
+        { description: "Exports default Page component", testRegex: "export\\s+default\\s+function\\s+Page" },
+        { description: `Renders text "Portal ${level}"`, testRegex: `Portal\\s+${level}` }
       ];
       break;
 
     case "python":
       checkType = "eval";
-      conceptText = `### 1. The Concept (The "Why")
-Python structures code variables using indentations. Here we check **${concept}** (Part ${stepIndex + 1}).`;
-
-      if (concept.includes("def") || concept.includes("function")) {
-        const numVal = (stepIndex + 1) * 7;
-        codeExample = `\`\`\`python\ndef solve_logic(x):\n    return x + ${numVal}\n\`\`\``;
-        missionText = `### 2. Your Mission
-Write a Python function named **\`solve_logic(x)\`** that returns the input value multiplied by exactly **\`${numVal}\`**.`;
-        starterCode = `# Python space\ndef solve_logic(x):\n    pass`;
-        hints = ["Multiply x by the multiplier value.", "Replace pass with the return statement."];
+      if (categoryIndex === 0) {
+        // Category 0: Variables
+        const varName = `py_val_${level}`;
+        const val = level * 15;
+        conceptText = `### 1. The Concept (The "Why")\nIn Python, variable assignment binds a label to data. We examine **${concept}** (Part ${stepIndex + 1}).`;
+        codeExample = `\`\`\`python\n${varName} = ${val}\n\`\`\``;
+        missionText = `### 2. Your Mission\nDeclare a Python variable named **\`${varName}\`** and assign it the numeric value of exactly **\`${val}\`**.`;
+        starterCode = `# Python variables space\n`;
+        hints = [`Write '${varName} = ${val}'`];
         testCases = [
-          { description: "solve_logic function declared", testRegex: "def\\s+solve_logic" },
-          { description: `Multiplies input by ${numVal}`, testRegex: `\\*\\s*${numVal}` }
+          { description: `Declares ${varName} equal to ${val}`, testRegex: `${varName}\\s*=\\s*${val}` }
+        ];
+      } else if (categoryIndex === 1) {
+        // Category 1: Functions
+        const fnName = `calc_level_${level}`;
+        const multiplier = (level % 5) + 2;
+        conceptText = `### 1. The Concept (The "Why")\nPython functions are declared with 'def'. We review **${concept}** (Part ${stepIndex + 1}).`;
+        codeExample = `\`\`\`python\ndef ${fnName}(n):\n    return n * ${multiplier}\n\`\`\``;
+        missionText = `### 2. Your Mission\nWrite a Python function named **\`${fnName}(n)\`** that takes a number and returns it multiplied by exactly **\`${multiplier}\`**.`;
+        starterCode = `# Python functions workspace\ndef ${fnName}(n):\n    pass`;
+        hints = [`Use 'return n * ${multiplier}'`];
+        testCases = [
+          { description: `Defines function ${fnName}`, testRegex: `def\\s+${fnName}` },
+          { description: `Multiplies variable by ${multiplier}`, testRegex: `return\\s+n\\s*\\*\\s*${multiplier}` }
+        ];
+      } else if (categoryIndex === 2) {
+        // Category 2: Conditionals
+        const fnName = `check_bounds_${level}`;
+        const cap = level * 5;
+        conceptText = `### 1. The Concept (The "Why")\nConditionals branch script pathways. We check **${concept}** (Part ${stepIndex + 1}).`;
+        codeExample = `\`\`\`python\nif x >= ${cap}:\n    return True\nelse:\n    return False\n\`\`\``;
+        missionText = `### 2. Your Mission\nComplete the function **\`${fnName}(x)\`** to return **\`True\`** if \`x\` is greater than or equal to **\`${cap}\`**, and **\`False\`** otherwise.`;
+        starterCode = `# Python conditionals\ndef ${fnName}(x):\n    # Write logic\n    pass`;
+        hints = [`Check parameter x against ${cap}.`];
+        testCases = [
+          { description: `Defines function ${fnName}`, testRegex: `def\\s+${fnName}` },
+          { description: `Returns True when x >= ${cap}`, testRegex: `if\\s+x\\s*>=\\s*${cap}` }
+        ];
+      } else if (categoryIndex === 3) {
+        // Category 3: List creation
+        const listName = `items_level_${level}`;
+        const size = (level % 5) + 3;
+        conceptText = `### 1. The Concept (The "Why")\nPython lists store linear sequences. We inspect **${concept}** (Part ${stepIndex + 1}).`;
+        codeExample = `\`\`\`python\n${listName} = [1, 2, 3]\n\`\`\``;
+        missionText = `### 2. Your Mission\nDeclare a list variable named **\`${listName}\`** containing exactly **\`${size}\`** comma-separated numbers inside square brackets.`;
+        starterCode = `# Python collections\n`;
+        hints = [`Write '${listName} = [1, 2, ... up to ${size}]'`];
+        testCases = [
+          { description: `Declares list ${listName}`, testRegex: `${listName}\\s*=\\s*\\[` },
+          { description: `Contains ${size} items`, testRegex: `\\[\\s*(\\d+\\s*,\\s*){${size - 1}}\\d+\\s*\\]` }
         ];
       } else {
-        codeExample = `\`\`\`python\nmy_list = [i for i in range(10)]\n\`\`\``;
-        missionText = `### 2. Your Mission
-Define a Python list named **\`items\`** containing numbers. Use list comprehension configurations.`;
-        starterCode = `# Python items list\n`;
-        hints = ["Create list: items = [x for x in ...]"];
+        // Category 4: List comprehensions
+        const varName = `powers_${level}`;
+        conceptText = `### 1. The Concept (The "Why")\nList comprehensions compile sequences inline. We examine **${concept}** (Part ${stepIndex + 1}).`;
+        codeExample = `\`\`\`python\n${varName} = [x * 2 for x in range(10)]\n\`\`\``;
+        missionText = `### 2. Your Mission\nWrite a list comprehension storing values in a variable named **\`${varName}\`**.`;
+        starterCode = `# Python loops\n`;
+        hints = [`Write '${varName} = [x * 2 for x in range(5)]'`];
         testCases = [
-          { description: "Declares list items", testRegex: "items\\s*=\\s*" }
+          { description: `Uses list comprehension`, testRegex: `${varName}\\s*=\\s*\\[\\s*.*for\\s+.*in\\s+.*\\]` }
         ];
       }
       break;
 
     case "sql":
       checkType = "sql";
-      conceptText = `### 1. The Concept (The "Why")
-SQL filters relational records. In this lesson, we examine **${concept}** (Part ${stepIndex + 1}).`;
-
-      if (concept.includes("Where") || concept.includes("Select")) {
-        const lvlCap = (stepIndex + 1) * 3;
-        codeExample = `\`\`\`sql\nSELECT name FROM dungeon_users\nWHERE level > ${lvlCap};\n\`\`\``;
-        missionText = `### 2. Your Mission
-Formulate a query selecting all fields from table \`dungeon_users\` where column **\`level\`** is greater than exactly **\`${lvlCap}\`**.`;
-        starterCode = `-- SQL workspace\n`;
-        hints = [`Write 'WHERE level > ${lvlCap}' in the query.`];
+      if (categoryIndex === 0) {
+        // Category 0: SELECT columns
+        const limit = level * 4;
+        conceptText = `### 1. The Concept (The "Why")\nSQL SELECT filters records. We examine **${concept}** (Part ${stepIndex + 1}).`;
+        codeExample = `\`\`\`sql\nSELECT * FROM dungeon_users\nWHERE level > ${limit};\n\`\`\``;
+        missionText = `### 2. Your Mission\nWrite an SQL query to select all columns from table \`dungeon_users\` where column **\`level\`** is greater than exactly **\`${limit}\`**.`;
+        starterCode = `-- SQL query\n`;
+        hints = [`Include 'WHERE level > ${limit}' in the select statement.`];
         testCases = [
-          { description: "Uses SELECT statements", testRegex: "SELECT\\s+(\\*|[a-zA-Z0-9_,\\s]+)\\s+FROM" },
-          { description: "References correct table", testRegex: "FROM\\s+dungeon_users" },
-          { description: `Filters levels higher than ${lvlCap}`, testRegex: `level\\s*>\\s*${lvlCap}` }
+          { description: "Uses SELECT statements", testRegex: "SELECT" },
+          { description: "References dungeon_users", testRegex: "dungeon_users" },
+          { description: `Filters levels higher than ${limit}`, testRegex: `level\\s*>\\s*${limit}` }
         ];
       } else {
-        codeExample = `\`\`\`sql\nSELECT class, COUNT(*) FROM dungeon_users\nGROUP BY class;\n\`\`\``;
-        missionText = `### 2. Your Mission
-Write an SQL aggregate statement grouping table records by **\`class\`** columns.`;
+        // Category 1: ORDER BY
+        conceptText = `### 1. The Concept (The "Why")\nSQL sorting sorts rows. We inspect **${concept}** (Part ${stepIndex + 1}).`;
+        codeExample = `\`\`\`sql\nSELECT * FROM dungeon_users\nORDER BY level DESC;\n\`\`\``;
+        missionText = `### 2. Your Mission\nFormulate a query selecting all rows from table \`dungeon_users\` sorted by **\`id\`** in descending order (\`DESC\`).`;
         starterCode = `-- SQL query\n`;
-        hints = ["Use GROUP BY class in your query statement."];
+        hints = ["Use ORDER BY id DESC in your query statement."];
         testCases = [
-          { description: "Groups by class column", testRegex: "GROUP\\s+BY\\s+class" }
+          { description: "Includes ORDER BY command", testRegex: "ORDER\\s+BY" },
+          { description: "Sorts by id in descending order", testRegex: "id\\s+DESC" }
         ];
       }
       break;
 
     case "django":
       checkType = "eval";
-      conceptText = `### 1. The Concept (The "Why")
-Django ORM and FastAPI controllers bind model objects. We check **${concept}** (Part ${stepIndex + 1}).`;
-
-      codeExample = `\`\`\`python\nclass Item(BaseModel):\n    id: int\n\`\`\``;
-      missionText = `### 2. Your Mission
-Declare a Pydantic model named **\`PayloadSchema\`** that contains an attribute **\`id\`** typed as \`int\`.`;
-      starterCode = `# Model workspace\nfrom pydantic import BaseModel\n`;
-      hints = ["Declare class PayloadSchema(BaseModel) and set type."];
+      conceptText = `### 1. The Concept (The "Why")\nAPI schemas bind route payloads. We cover **${concept}** (Part ${stepIndex + 1}).`;
+      codeExample = `\`\`\`python\nclass Data(BaseModel):\n    uid: int\n\`\`\``;
+      missionText = `### 2. Your Mission\nDeclare a FastAPI Pydantic schema class named **\`Params_${level}\`** inheriting from \`BaseModel\` containing a variable **\`uid\`** typed as \`int\`.`;
+      starterCode = `from pydantic import BaseModel\n# Write model class\n`;
+      hints = [`Write 'class Params_${level}(BaseModel): uid: int'`];
       testCases = [
-        { description: "Declares PayloadSchema class", testRegex: "class\\s+PayloadSchema" },
-        { description: "Uses Pydantic BaseModel", testRegex: "PayloadSchema\\s*\\(\\s*BaseModel\\s*\\)" }
+        { description: `Declares Params_${level} schema class`, testRegex: `class\\s+Params_${level}` },
+        { description: "Inherits from BaseModel", testRegex: `Params_${level}\\s*\\(\\s*BaseModel\\s*\\)` }
       ];
       break;
 
     case "git":
       checkType = "git";
-      conceptText = `### 1. The Concept (The "Why")
-Git handles branch merges and timeline commits. We review **${concept}** (Part ${stepIndex + 1}).`;
-
-      if (concept.includes("branch") || concept.includes("checkout")) {
-        codeExample = `\`\`\`bash\ngit branch feature-profile\ngit checkout feature-profile\n\`\`\``;
-        missionText = `### 2. Your Mission
-Initialize a new git branch named **\`timeline-patch-${stepIndex}\`** and switch to it. Write the git CLI commands inside the terminal interface.`;
+      if (categoryIndex === 0) {
+        // Category 0: Branch creation
+        conceptText = `### 1. The Concept (The "Why")\nGit structures timeline logs. We check **${concept}** (Part ${stepIndex + 1}).`;
+        codeExample = `\`\`\`bash\ngit branch feature-node\ngit checkout feature-node\n\`\`\``;
+        missionText = `### 2. Your Mission\nWrite git commands to initialize a repository and create a branch named **\`branch-patch-${level}\`**.`;
         starterCode = `git init\n`;
-        hints = [`Use 'git checkout -b timeline-patch-${stepIndex}' or write it as separate branch/checkout statements.`];
+        hints = [`Add command 'git branch branch-patch-${level}'`];
         testCases = [
-          { description: `Initializes git repository`, testRegex: "git init" },
-          { description: `Switches to branch timeline-patch-${stepIndex}`, testRegex: `git\\s+(checkout\\s+-b\\s+|branch\\s+)timeline-patch-${stepIndex}` }
+          { description: "Initializes git repository", testRegex: "git init" },
+          { description: `Creates branch branch-patch-${level}`, testRegex: `git\\s+branch\\s+branch-patch-${level}` }
         ];
       } else {
-        codeExample = `\`\`\`bash\ngit commit -m "timeline patch"\n\`\`\``;
-        missionText = `### 2. Your Mission
-Stage all files and execute a git commit with the message **\`"version patch ${stepIndex}"\`**.`;
+        // Category 1: Commits
+        conceptText = `### 1. The Concept (The "Why")\nCommits record staged updates. We examine **${concept}** (Part ${stepIndex + 1}).`;
+        codeExample = `\`\`\`bash\ngit commit -m "timeline update"\n\`\`\``;
+        missionText = `### 2. Your Mission\nInitialize a repo, stage changes, and create a git commit with the exact message **\`"commit update ${level}"\`**.`;
         starterCode = `git init\n`;
-        hints = ["Use git add . and git commit -m 'msg'."];
+        hints = [`Use 'git commit -m "commit update ${level}"'`];
         testCases = [
           { description: "Stages workspace changes", testRegex: "git\\s+add" },
-          { description: `Commits message 'version patch ${stepIndex}'`, testRegex: `git\\s+commit\\s+-m\\s+['"]version\\s+patch\\s+${stepIndex}['"]` }
+          { description: `Commits message 'commit update ${level}'`, testRegex: `git\\s+commit\\s+-m\\s+['"]commit\\s+update\\s+${level}['"]` }
         ];
       }
       break;
 
     case "docker":
       checkType = "docker";
-      conceptText = `### 1. The Concept (The "Why")
-Docker isolates microservice runtimes. Today we build **${concept}** (Part ${stepIndex + 1}) Dockerfiles.`;
-
-      codeExample = `\`\`\`dockerfile\nFROM alpine:3.18\nWORKDIR /app\n\`\`\``;
-      missionText = `### 2. Your Mission
-Create a Dockerfile using **\`alpine:latest\`** as the base image, and configure the working directory to **\`"/citadel"\`**.`;
+      conceptText = `### 1. The Concept (The "Why")\nDockerfiles configure container workspaces. We review **${concept}** (Part ${stepIndex + 1}).`;
+      codeExample = `\`\`\`dockerfile\nFROM node:18-alpine\nWORKDIR /citadel\n\`\`\``;
+      missionText = `### 2. Your Mission\nWrite a Dockerfile using **\`node:alpine\`** as the base image and setting the working directory to **\`"/app-${level}"\`**.`;
       starterCode = `# Dockerfile workspace\n`;
-      hints = ["Use FROM alpine:latest and WORKDIR /citadel."];
+      hints = [`Use 'FROM node:alpine' and 'WORKDIR /app-${level}'`];
       testCases = [
-        { description: "Specifies alpine:latest base", testRegex: "FROM\\s+alpine:latest" },
-        { description: "Sets working directory to /citadel", testRegex: "WORKDIR\\s+/citadel" }
+        { description: "Specifies base image node:alpine", testRegex: "FROM\\s+node:alpine" },
+        { description: `Sets working folder /app-${level}`, testRegex: `WORKDIR\\s+/app-${level}` }
       ];
       break;
 
     case "tailwind":
       checkType = "html";
-      conceptText = `### 1. The Concept (The "Why")
-Tailwind CSS provides responsive layout classes. Today we inspect **${concept}** (Part ${stepIndex + 1}).`;
-
-      if (concept.includes("sizing") || concept.includes("padding") || concept.includes("Margin")) {
-        const padVal = (stepIndex % 4) + 2;
-        codeExample = `\`\`\`html\n<div class="p-${padVal}">Content</div>\n\`\`\``;
-        missionText = `### 2. Your Mission
-Write an HTML tag containing Tailwind CSS padding classes set to exactly **\`p-${padVal}\`** inside the wrapper container.`;
+      if (categoryIndex === 0) {
+        // Category 0: Padding utilities
+        const pad = (level % 6) + 1;
+        conceptText = `### 1. The Concept (The "Why")\nTailwind layout utilities style margins. We examine **${concept}** (Part ${stepIndex + 1}).`;
+        codeExample = `\`\`\`html\n<div class="p-${pad}">Card</div>\n\`\`\``;
+        missionText = `### 2. Your Mission\nWrite a div container applying Tailwind padding class **\`p-${pad}\`** around the text "Card".`;
         starterCode = `<div id="element-container">\n  \n</div>`;
-        hints = [`Include class="p-${padVal}" inside the container.`];
+        hints = [`Write '<div class="p-${pad}">Card</div>'`];
         testCases = [
-          { description: `Applies padding class p-${padVal}`, testRegex: `class=["'][^"']*p-${padVal}[^"']*["']` }
+          { description: `Applies padding class p-${pad}`, testRegex: `class=["'][^"']*p-${pad}[^"']*["']` }
         ];
       } else {
-        codeExample = `\`\`\`html\n<div class="flex items-center">Content</div>\n\`\`\``;
-        missionText = `### 2. Your Mission
-Create a responsive div structure applying the **\`flex\`** and **\`items-center\`** class utilities.`;
+        // Category 1: Width utilities
+        conceptText = `### 1. The Concept (The "Why")\nTailwind widths configure element scaling. We check **${concept}** (Part ${stepIndex + 1}).`;
+        codeExample = `\`\`\`html\n<div class="w-full">Width scale</div>\n\`\`\``;
+        missionText = `### 2. Your Mission\nApply class utility **\`w-1/2\`** (half width) to a div container inside the wrapper.`;
         starterCode = `<div id="element-container">\n  \n</div>`;
-        hints = ["Use class='flex items-center'."];
+        hints = ["Use class='w-1/2' inside the tags."];
         testCases = [
-          { description: "Applies flex classes", testRegex: "class=[\"'][^\"]*flex[^\"]*[\"']" },
-          { description: "Applies items-center class", testRegex: "class=[\"'][^\"]*items-center[^\"]*[\"']" }
+          { description: "Applies width class w-1/2", testRegex: "class=[\"'][^\"]*w-1/2[^\"]*[\"']" }
         ];
       }
       break;
 
     case "cybersecurity":
       checkType = "security";
-      conceptText = `### 1. The Concept (The "Why")
-Cyber Security audits code weaknesses. Today we analyze **${concept}** (Part ${stepIndex + 1}).`;
-
-      if (concept.includes("Injection") || concept.includes("SQL")) {
-        codeExample = `\`\`\`sql\n' OR '1'='1\n\`\`\``;
-        missionText = `### 2. Your Mission
-Submit an SQL Injection payload key that forces conditional verification checks. Set payload to **\`"' OR '1'='1"\`**.`;
-        starterCode = `# Exploit Payload workspace\npayload = ""`;
-        hints = ["Assign the exploit string to the payload variable."];
-        testCases = [
-          { description: "Inputs SQL injection bypass payload", testRegex: "payload\\s*=\\s*['\"]'\\s*OR\\s*['\"]1['\"]\\s*=\\s*['\"]1['\"]" }
-        ];
-      } else {
-        codeExample = `\`\`\`html\n<script>alert(1)</script>\n\`\`\``;
-        missionText = `### 2. Your Mission
-Formulate a basic Cross-Site Scripting (XSS) exploit string script tag containing an alert call. Set payload to **\`"<script>alert(1)</script>"\`**.`;
-        starterCode = `# Payload input\npayload = ""`;
-        hints = ["Write the alert script inside the payload quotes."];
-        testCases = [
-          { description: "Inputs XSS payload tags", testRegex: "payload\\s*=\\s*['\"]<script>alert\\(1\\)</script>['\"]" }
-        ];
-      }
+      conceptText = `### 1. The Concept (The "Why")\nPenetration audits check payload values. We examine **${concept}** (Part ${stepIndex + 1}).`;
+      codeExample = `\`\`\`python\npayload = "' OR '1'='1"\n\`\`\``;
+      missionText = `### 2. Your Mission\nSubmit the SQL Injection bypass payload key by declaring a variable **\`payload\`** equal to exactly **\`"auth-bypass-level-${level}"\`**.`;
+      starterCode = `# Exploit payload workspace\npayload = ""`;
+      hints = [`Set payload = "auth-bypass-level-${level}"`];
+      testCases = [
+        { description: `Declares payload equal to auth-bypass-level-${level}`, testRegex: `payload\\s*=\\s*['"]auth-bypass-level-${level}['"]` }
+      ];
       break;
 
     default:
-      starterCode = `// Coding workspace`;
-      hints = ["Implement target logic."];
-      testCases = [{ description: "Completes instructions", testRegex: ".+" }];
+      starterCode = `// Workspace`;
+      hints = ["Write target code."];
+      testCases = [{ description: "Completes parameters", testRegex: ".+" }];
   }
 
   return {
