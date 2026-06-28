@@ -1,13 +1,18 @@
+import dynamic from "next/dynamic";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import BlogsPage from "../blog/page";
-import MarketingLanding from "@/components/MarketingLanding";
 import LandingDashboard from "@/components/LandingDashboard";
 import { getCurrentUser } from "@/lib/actions/auth.action";
+
+const MarketingLanding = dynamic(() => import("@/components/MarketingLanding"), {
+  ssr: false,
+});
 
 export default async function Home() {
   const headerList = await headers();
   const host = headerList.get("host") || "";
+  const user = await getCurrentUser();
 
   if (host.startsWith("docs.")) {
     redirect("/documentation");
@@ -18,10 +23,12 @@ export default async function Home() {
   }
 
   if (host.startsWith("accounts.")) {
-    redirect("/sign-in");
+    if (user) {
+      redirect("/user");
+    } else {
+      redirect("/sign-in");
+    }
   }
-
-  const user = await getCurrentUser();
 
   if (user) {
     if (!user.onboarded) {
