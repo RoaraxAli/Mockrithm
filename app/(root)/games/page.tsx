@@ -125,6 +125,16 @@ function renderCodeExample(codeBlock: string) {
   );
 }
 
+interface Quest {
+  id: string;
+  title: string;
+  description: string;
+  xpReward: number;
+  progressText: string;
+  pct: number;
+  completed: boolean;
+}
+
 export default function GamesPage() {
   const { isLoaded, isSignedIn, user: clerkUser } = useUser();
 
@@ -239,6 +249,86 @@ export default function GamesPage() {
       const prereqProg = progress[prereqId];
       return prereqProg && prereqProg.completedLevel > 0;
     });
+  };
+
+  // Calculate Quest Achievements
+  const getGlobalQuests = (): Quest[] => {
+    const playList = Object.keys(progress);
+    
+    const anyPlayed = playList.some(k => progress[k].completedLevel > 0);
+    const polyglotCount = playList.filter(k => progress[k].completedLevel >= 5).length;
+    
+    const htmlLvl = progress["html5"]?.completedLevel || 0;
+    const cssLvl = progress["css3"]?.completedLevel || 0;
+    const tailwindLvl = progress["tailwind"]?.completedLevel || 0;
+    const frontendCount = [htmlLvl, cssLvl, tailwindLvl].filter(l => l >= 10).length;
+
+    const jsLvl = progress["javascript"]?.completedLevel || 0;
+    const reactLvl = progress["reactjs"]?.completedLevel || 0;
+    const fsCount = [jsLvl, reactLvl].filter(l => l >= 10).length;
+
+    const gitLvl = progress["git"]?.completedLevel || 0;
+    const dockerLvl = progress["docker"]?.completedLevel || 0;
+    const devopsCount = [gitLvl, dockerLvl].filter(l => l >= 5).length;
+
+    const cyberLvl = progress["cybersecurity"]?.completedLevel || 0;
+
+    return [
+      {
+        id: "genesis",
+        title: "Genesis Sandbox",
+        description: "Embark on your journey. Clear Level 1 on any game.",
+        xpReward: 50,
+        progressText: anyPlayed ? "1/1" : "0/1",
+        pct: anyPlayed ? 100 : 0,
+        completed: anyPlayed
+      },
+      {
+        id: "polyglot",
+        title: "Polyglot Apprentice",
+        description: "Harness multiple energies. Reach Level 5 on 3 different stacks.",
+        xpReward: 150,
+        progressText: `${Math.min(polyglotCount, 3)}/3 stacks`,
+        pct: Math.round((Math.min(polyglotCount, 3) / 3) * 100),
+        completed: polyglotCount >= 3
+      },
+      {
+        id: "frontend",
+        title: "Frontend Sorcerer",
+        description: "Weave style matrices. Reach Level 10 on HTML5, CSS3, and Tailwind CSS.",
+        xpReward: 250,
+        progressText: `${frontendCount}/3 completed`,
+        pct: Math.round((frontendCount / 3) * 100),
+        completed: frontendCount >= 3
+      },
+      {
+        id: "fullstack",
+        title: "Fullstack Alchemist",
+        description: "Master DOM state portals. Reach Level 10 on JavaScript and ReactJS.",
+        xpReward: 200,
+        progressText: `${fsCount}/2 completed`,
+        pct: Math.round((fsCount / 2) * 100),
+        completed: fsCount >= 2
+      },
+      {
+        id: "devops",
+        title: "DevOps Helmsman",
+        description: "Deploy ships to registries. Reach Level 5 on Git and Docker.",
+        xpReward: 150,
+        progressText: `${devopsCount}/2 completed`,
+        pct: Math.round((devopsCount / 2) * 100),
+        completed: devopsCount >= 2
+      },
+      {
+        id: "cyber",
+        title: "Security Sentinel",
+        description: "Fortify node perimeters. Reach Level 5 on Cyber Security.",
+        xpReward: 150,
+        progressText: cyberLvl >= 5 ? "1/1" : "0/1",
+        pct: cyberLvl >= 5 ? 100 : Math.round((cyberLvl / 5) * 100),
+        completed: cyberLvl >= 5
+      }
+    ];
   };
 
   // Sound effects controller
@@ -754,6 +844,57 @@ export default function GamesPage() {
               </div>
             </div>
 
+            {/* Global Achievements & Quests Board */}
+            <div className="mb-12">
+              <div className="flex items-center gap-2 mb-6">
+                <Award className="size-5 text-zinc-400" />
+                <h2 className="text-sm font-bold uppercase tracking-widest text-zinc-300 font-mono">Campaign Quests & Achievements</h2>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {getGlobalQuests().map((quest) => (
+                  <div 
+                    key={quest.id}
+                    className={`relative rounded-2xl border p-5 bg-zinc-955/40 flex flex-col justify-between h-36 transition-all duration-300 ${
+                      quest.completed 
+                        ? "border-emerald-500/20 bg-emerald-500/[0.01] shadow-[0_0_15px_rgba(16,185,129,0.02)]" 
+                        : "border-zinc-900 hover:border-zinc-800"
+                    }`}
+                  >
+                    <div>
+                      <div className="flex justify-between items-start">
+                        <h4 className="text-xs font-bold uppercase tracking-wider text-white font-mono">{quest.title}</h4>
+                        {quest.completed ? (
+                          <span className="flex items-center gap-1 text-[8.5px] font-mono font-bold text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-2 py-0.5 rounded-full uppercase leading-none">
+                            <CheckCircle className="size-3" /> CLAIMED
+                          </span>
+                        ) : (
+                          <span className="text-[8.5px] font-mono font-bold text-zinc-500 bg-zinc-900 border border-zinc-800 px-2 py-0.5 rounded-full uppercase leading-none">
+                            {quest.progressText}
+                          </span>
+                        )}
+                      </div>
+                      <p className="text-[10.5px] text-zinc-450 mt-2 leading-relaxed">{quest.description}</p>
+                    </div>
+
+                    <div className="mt-4 flex items-center justify-between gap-4">
+                      <div className="flex-1">
+                        <div className="w-full h-1 bg-zinc-900 rounded-full overflow-hidden">
+                          <div 
+                            className={`h-full transition-all duration-500 ${quest.completed ? "bg-emerald-500" : "bg-zinc-700"}`}
+                            style={{ width: `${quest.pct}%` }}
+                          />
+                        </div>
+                      </div>
+                      <span className={`text-[9px] font-mono font-black ${quest.completed ? "text-emerald-400" : "text-zinc-500"}`}>
+                        +{quest.xpReward} XP
+                      </span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
             {/* List of Game Cards */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {GAMES_LIST.map((game) => {
@@ -767,7 +908,7 @@ export default function GamesPage() {
                     whileHover={unlocked ? { y: -5 } : {}}
                     className={`relative rounded-2xl border bg-zinc-950/50 p-6 flex flex-col justify-between h-64 overflow-hidden group/card transition-all duration-300 ${
                       unlocked 
-                        ? "border-zinc-900 hover:border-zinc-750 hover:shadow-2xl" 
+                        ? "border-zinc-900 hover:border-zinc-755 hover:shadow-2xl" 
                         : "border-zinc-950 opacity-50 select-none"
                     }`}
                   >
@@ -777,7 +918,7 @@ export default function GamesPage() {
                     <div>
                       {/* Header */}
                       <div className="flex justify-between items-start mb-4">
-                        <div className={`p-3 rounded-xl bg-gradient-to-br ${unlocked ? game.gradient : "from-zinc-900 to-zinc-950"} border border-white/5 shadow-md`}>
+                        <div className={`p-3 rounded-xl bg-gradient-to-br ${unlocked ? game.gradient : "from-zinc-900 to-zinc-955"} border border-white/5 shadow-md`}>
                           {unlocked ? (
                             <TechIcon name={game.iconName} className="size-5 text-white" />
                           ) : (
@@ -828,8 +969,8 @@ export default function GamesPage() {
                           </button>
                         </div>
                       ) : (
-                        <div className="text-[9px] font-mono font-bold text-zinc-650 flex items-center gap-1 uppercase">
-                          <AlertCircle className="size-3.5 text-zinc-650" /> Prerequisites: {game.prerequisites.join(", ").toUpperCase()}
+                        <div className="text-[9px] font-mono font-bold text-zinc-655 flex items-center gap-1 uppercase">
+                          <AlertCircle className="size-3.5 text-zinc-655" /> Prerequisites: {game.prerequisites.join(", ").toUpperCase()}
                         </div>
                       )}
                     </div>
@@ -989,6 +1130,55 @@ export default function GamesPage() {
                   </div>
                 </div>
 
+                {/* Local Badges & Ranks Progress Card */}
+                <div className="bg-zinc-950/40 border border-zinc-900 rounded-2xl p-6 flex flex-col gap-4">
+                  <div className="flex items-center justify-between">
+                    <h4 className="text-[10px] font-mono font-bold text-zinc-450 uppercase tracking-widest">
+                      Arena Ranks & Badges
+                    </h4>
+                    <span className="text-[9px] font-mono text-zinc-550 uppercase font-black">PROGRESSIVE TITLES</span>
+                  </div>
+
+                  <div className="grid grid-cols-5 gap-2">
+                    {[
+                      { tier: "Apprentice", minLvl: 1, color: "from-amber-700 to-orange-500", desc: "Lv. 1-100" },
+                      { tier: "Mage", minLvl: 101, color: "from-cyan-600 to-teal-500", desc: "Lv. 101-200" },
+                      { tier: "Knight", minLvl: 201, color: "from-yellow-500 to-amber-600", desc: "Lv. 201-300" },
+                      { tier: "Warlord", minLvl: 301, color: "from-purple-600 to-fuchsia-500", desc: "Lv. 301-400" },
+                      { tier: "Grandmaster", minLvl: 401, color: "from-red-600 to-rose-700", desc: "Lv. 401-500" }
+                    ].map((badge) => {
+                      const isUnlocked = currentLevelNum >= badge.minLvl;
+                      const isActive = getTierName(currentLevelNum) === badge.tier;
+                      return (
+                        <div 
+                          key={badge.tier}
+                          className={`p-2 rounded-xl border flex flex-col items-center justify-between text-center relative overflow-hidden transition-all duration-300 h-24 ${
+                            isActive 
+                              ? "bg-zinc-900 border-white/20 shadow-[0_0_15px_rgba(255,255,255,0.05)] scale-105" 
+                              : isUnlocked
+                              ? "bg-zinc-900/60 border-zinc-800"
+                              : "bg-zinc-950/20 border-zinc-950 opacity-30"
+                          }`}
+                        >
+                          {/* Top Glow on Active Badge */}
+                          {isActive && (
+                            <span className={`absolute top-0 inset-x-0 h-[2px] bg-gradient-to-r ${badge.color}`} />
+                          )}
+                          <div className={`p-1.5 rounded-lg bg-gradient-to-br ${isUnlocked ? badge.color : "from-zinc-900 to-zinc-950"} border border-white/5`}>
+                            {isUnlocked ? (
+                              <Award className="size-3.5 text-white" />
+                            ) : (
+                              <Lock className="size-3.5 text-zinc-650" />
+                            )}
+                          </div>
+                          <span className="text-[7.5px] font-bold uppercase tracking-wider text-zinc-300 truncate w-full mt-2 leading-none">{badge.tier}</span>
+                          <span className="text-[7px] font-mono text-zinc-550 leading-none mt-1">{badge.desc}</span>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+
                 {/* Live Sandbox Interactive Previews */}
                 <div className="bg-zinc-950/40 border border-zinc-900 rounded-2xl p-6 flex flex-col gap-4">
                   <div className="flex items-center justify-between">
@@ -1077,7 +1267,7 @@ export default function GamesPage() {
                      activeLevelData?.validation.checkType !== "git" && (
                       <div className="flex flex-col items-center gap-2">
                         <Code2 className="size-8 text-zinc-650 animate-pulse" />
-                        <span className="text-[10px] font-mono text-zinc-500 uppercase tracking-widest font-bold">Standard Console</span>
+                        <span className="text-[10px] font-mono text-zinc-550 uppercase tracking-widest font-bold">Standard Console</span>
                         <p className="text-[10px] text-zinc-550 max-w-[200px] leading-relaxed">
                           Your script evaluations will execute inside sandboxed unit test assertions. Output will print below.
                         </p>
