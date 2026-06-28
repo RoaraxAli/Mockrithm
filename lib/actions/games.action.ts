@@ -1,11 +1,11 @@
 "use server";
 
 import { db } from "@/firebase/admin";
-import { currentUser as clerkCurrentUser } from "@clerk/nextjs/server";
 
 export interface GameProgress {
   completedLevel: number;
   xp: number;
+  updatedAt?: string | null;
 }
 
 export interface UserGamesProgress {
@@ -19,9 +19,14 @@ export interface UserGamesProgress {
 
 /**
  * Fetch the game progress and total XP for a user from Firestore
- * Auto-creates document with Clerk details if it doesn't exist
+ * Auto-creates document with passed Clerk metadata if it doesn't exist
  */
-export async function getUserGamesProgress(userId: string): Promise<UserGamesProgress> {
+export async function getUserGamesProgress(
+  userId: string,
+  clientName?: string,
+  clientEmail?: string,
+  clientImageUrl?: string
+): Promise<UserGamesProgress> {
   try {
     if (!userId) {
       return { progress: {}, totalXp: 0, country: "United States", city: "San Francisco", claimedAchievements: [], gamesFriends: [] };
@@ -31,10 +36,9 @@ export async function getUserGamesProgress(userId: string): Promise<UserGamesPro
     
     if (!userDoc.exists) {
       console.log("Auto-creating user document in games module for ID:", userId);
-      const clerkUser = await clerkCurrentUser();
-      const email = clerkUser?.emailAddresses[0]?.emailAddress || "";
-      const name = clerkUser?.fullName || clerkUser?.firstName || email.split("@")[0] || "New User";
-      const imageUrl = clerkUser?.imageUrl || "";
+      const email = clientEmail || "";
+      const name = clientName || email.split("@")[0] || "New User";
+      const imageUrl = clientImageUrl || "";
 
       const newUserData = {
         name,
@@ -61,9 +65,29 @@ export async function getUserGamesProgress(userId: string): Promise<UserGamesPro
     const country = data?.country || "United States";
     const city = data?.city || "San Francisco";
     const claimedAchievements = data?.claimedAchievements || [];
-    const gamesFriends = data?.gamesFriends || []; // Empty by default!
+    const gamesFriends = data?.gamesFriends || [];
 
-    return { progress, totalXp, country, city, claimedAchievements, gamesFriends };
+    // Safely serialize nested gamesProgress updatedAt timestamps
+    const serializedProgress: Record<string, GameProgress> = {};
+    for (const gameId in progress) {
+      const gData = progress[gameId];
+      if (gData) {
+        const dateVal = gData.updatedAt;
+        serializedProgress[gameId] = {
+          completedLevel: gData.completedLevel || 0,
+          xp: gData.xp || 0,
+          updatedAt: dateVal?.toDate
+            ? dateVal.toDate().toISOString()
+            : dateVal instanceof Date
+            ? dateVal.toISOString()
+            : typeof dateVal === "string"
+            ? dateVal
+            : null
+        };
+      }
+    }
+
+    return { progress: serializedProgress, totalXp, country, city, claimedAchievements, gamesFriends };
   } catch (error: any) {
     console.error("Error fetching user games progress:", error);
     return { progress: {}, totalXp: 0, country: "United States", city: "San Francisco", claimedAchievements: [], gamesFriends: [] };
@@ -77,7 +101,10 @@ export async function updateUserGamesProgress(
   userId: string,
   gameId: string,
   level: number,
-  xpToAdd: number
+  xpToAdd: number,
+  clientName?: string,
+  clientEmail?: string,
+  clientImageUrl?: string
 ): Promise<{ success: boolean; error?: string }> {
   try {
     if (!userId) {
@@ -93,10 +120,9 @@ export async function updateUserGamesProgress(
       if (doc.exists) {
         data = doc.data();
       } else {
-        const clerkUser = await clerkCurrentUser();
-        const email = clerkUser?.emailAddresses[0]?.emailAddress || "";
-        const name = clerkUser?.fullName || clerkUser?.firstName || email.split("@")[0] || "New User";
-        const imageUrl = clerkUser?.imageUrl || "";
+        const email = clientEmail || "";
+        const name = clientName || email.split("@")[0] || "New User";
+        const imageUrl = clientImageUrl || "";
         data = {
           name,
           email,
@@ -224,7 +250,6 @@ export async function addFriendPersistent(userId: string, friendName: string) {
       return { success: false, error: "Friend already added" };
     }
 
-    // Verify if the hacker exists in the users database
     const friendQuery = await db.collection("users").where("name", "==", friendName).get();
     if (friendQuery.empty) {
       return { success: false, error: "Hacker not found in Mockrithm database" };

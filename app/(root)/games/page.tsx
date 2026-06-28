@@ -236,7 +236,12 @@ export default function GamesPage() {
         let fetchedCity = "San Francisco";
 
         if (isSignedIn && clerkUser) {
-          const data = await getUserGamesProgress(clerkUser.id);
+          const data = await getUserGamesProgress(
+            clerkUser.id,
+            clerkUser.fullName || clerkUser.firstName || "",
+            clerkUser.primaryEmailAddress?.emailAddress || "",
+            clerkUser.imageUrl || ""
+          );
           setProgress(data.progress || {});
           setTotalXp(data.totalXp || 0);
           setClaimedAchievements(data.claimedAchievements || []);
@@ -713,7 +718,15 @@ export default function GamesPage() {
 
     if (isSignedIn && clerkUser) {
       try {
-        await updateUserGamesProgress(clerkUser.id, gameId, completedLvl, xpReward);
+        await updateUserGamesProgress(
+          clerkUser.id,
+          gameId,
+          completedLvl,
+          xpReward,
+          clerkUser.fullName || clerkUser.firstName || "",
+          clerkUser.primaryEmailAddress?.emailAddress || "",
+          clerkUser.imageUrl || ""
+        );
       } catch (err) {
         console.error("Failed syncing progress to cloud database:", err);
       }
