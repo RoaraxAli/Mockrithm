@@ -203,6 +203,8 @@ export default function AuthLayout({
             return prev;
           });
         }
+      }, (err) => {
+        console.error("Caller listener error:", err);
       });
 
       // Listen for incoming calls placed to me
@@ -223,6 +225,8 @@ export default function AuthLayout({
             return prev;
           });
         }
+      }, (err) => {
+        console.error("Receiver listener error:", err);
       });
     };
 
@@ -340,6 +344,8 @@ export default function AuthLayout({
               if (data?.answer && !peerConnection.currentRemoteDescription) {
                 await peerConnection.setRemoteDescription(new RTCSessionDescription(data.answer));
               }
+            }, (err) => {
+              console.error("WebRTC call doc listener error:", err);
             });
 
             const candCol = collection(db, "calls", activeCallDoc.id, "receiverCandidates");
@@ -351,6 +357,8 @@ export default function AuthLayout({
                   } catch (e) { console.error(e); }
                 }
               });
+            }, (err) => {
+              console.error("WebRTC receiver candidate listener error:", err);
             });
           } else {
             unsubCall = onSnapshot(callDocRef, async (snap) => {
@@ -361,6 +369,8 @@ export default function AuthLayout({
                 await peerConnection.setLocalDescription(answer);
                 await updateDoc(callDocRef, { answer: { sdp: answer.sdp, type: answer.type } });
               }
+            }, (err) => {
+              console.error("WebRTC call doc listener error:", err);
             });
 
             const candCol = collection(db, "calls", activeCallDoc.id, "callerCandidates");
@@ -372,6 +382,8 @@ export default function AuthLayout({
                   } catch (e) { console.error(e); }
                 }
               });
+            }, (err) => {
+              console.error("WebRTC caller candidate listener error:", err);
             });
           }
 

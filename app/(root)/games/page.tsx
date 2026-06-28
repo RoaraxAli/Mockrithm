@@ -260,6 +260,8 @@ export default function GamesPage() {
             return prev;
           });
         }
+      }, (err) => {
+        console.error("Friends list listener error:", err);
       });
     };
 
@@ -270,7 +272,7 @@ export default function GamesPage() {
 
   // --- Real-time Friends Presence Sync ---
   useEffect(() => {
-    if (friendsList.length === 0) {
+    if (!isSignedIn || friendsList.length === 0) {
       setFriendsPresence({});
       return;
     }
@@ -279,7 +281,7 @@ export default function GamesPage() {
       const { collection, query, where, onSnapshot } = await import("firebase/firestore");
       const { db } = await import("@/firebase/client");
 
-      const q = query(collection(db, "users"), where("name", "in", friendsList));
+      const q = query(collection(db, "users"), where("name", "in", friendsList.slice(0, 30)));
       return onSnapshot(q, (snapshot) => {
         const presence: Record<string, { status: string; lastActive: any }> = {};
         snapshot.docs.forEach(doc => {
@@ -290,17 +292,19 @@ export default function GamesPage() {
           };
         });
         setFriendsPresence(presence);
+      }, (err) => {
+        console.error("Friends presence listener error:", err);
       });
     };
 
     let unsub: any;
     listenPresence().then(u => unsub = u);
     return () => { if (unsub) unsub(); };
-  }, [friendsList]);
+  }, [friendsList, isSignedIn]);
 
   // --- Real-time Friend Requests Sync ---
   useEffect(() => {
-    if (!userNameDisplay) return;
+    if (!isSignedIn || !userNameDisplay) return;
 
     const listenRequests = async () => {
       const { collection, query, where, onSnapshot } = await import("firebase/firestore");
@@ -313,6 +317,8 @@ export default function GamesPage() {
       );
       const unsubRec = onSnapshot(qRec, (snapshot) => {
         setReceivedRequests(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })));
+      }, (err) => {
+        console.error("Received requests listener error:", err);
       });
 
       const qSent = query(
@@ -322,6 +328,8 @@ export default function GamesPage() {
       );
       const unsubSent = onSnapshot(qSent, (snapshot) => {
         setSentRequests(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })));
+      }, (err) => {
+        console.error("Sent requests listener error:", err);
       });
 
       return () => {
@@ -333,11 +341,11 @@ export default function GamesPage() {
     let unsub: any;
     listenRequests().then(u => unsub = u);
     return () => { if (unsub) unsub(); };
-  }, [userNameDisplay]);
+  }, [userNameDisplay, isSignedIn]);
 
   // --- Real-time Chat Messages Sync ---
   useEffect(() => {
-    if (!selectedFriend || !userNameDisplay) return;
+    if (!isSignedIn || !selectedFriend || !userNameDisplay) return;
 
     const listenMessages = async () => {
       const { collection, query, where, orderBy, onSnapshot } = await import("firebase/firestore");
@@ -387,13 +395,15 @@ export default function GamesPage() {
             });
           }
         }
+      }, (err) => {
+        console.error("Chat messages listener error:", err);
       });
     };
 
     let unsub: any;
     listenMessages().then(u => unsub = u);
     return () => { if (unsub) unsub(); };
-  }, [selectedFriend, userNameDisplay]);
+  }, [selectedFriend, userNameDisplay, isSignedIn]);
 
   const getStatusIndicator = (friendName: string) => {
     const presence = friendsPresence[friendName];
