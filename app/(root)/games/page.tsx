@@ -2,7 +2,8 @@
 
 import React, { useState, useEffect, useRef } from "react";
 import { useUser } from "@clerk/nextjs";
-import Editor from "@monaco-editor/react";
+import dynamic from "next/dynamic";
+const Editor = dynamic(() => import("@monaco-editor/react"), { ssr: false });
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
 import {
@@ -558,8 +559,11 @@ export default function GamesPage() {
   // Sound effects controller
   const playSound = (type: "success" | "click" | "fail") => {
     if (!soundEnabled) return;
+    if (typeof window === "undefined") return;
     try {
-      const audioCtx = new (window.AudioContext || (window as any).webkitAudioContext)();
+      const AudioContextClass = window.AudioContext || (window as any).webkitAudioContext;
+      if (!AudioContextClass) return;
+      const audioCtx = new AudioContextClass();
       const osc = audioCtx.createOscillator();
       const gain = audioCtx.createGain();
       osc.connect(gain);
