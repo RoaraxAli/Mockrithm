@@ -142,7 +142,7 @@ export const getCurrentUser = cache(async (): Promise<User | null> => {
         : rawData?.updatedAt ?? null,
     } as unknown as User;
     console.log("Server user data fetched:", userData.name);
-    return userData;
+    return JSON.parse(JSON.stringify(userData));
   } catch (error: any) {
     console.error("Error in getCurrentUser:", error.message);
     return null;
