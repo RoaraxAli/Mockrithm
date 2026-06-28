@@ -1291,8 +1291,27 @@ export default function GamesPage() {
                     {userNameDisplay[0]?.toUpperCase()}
                   </div>
                 )}
-                <span className="absolute -bottom-2 -right-2 p-2 rounded-xl bg-emerald-500 text-black border border-black">
-                  <Activity className="size-4" />
+                <span className="absolute -bottom-2 -right-2 size-9 rounded-xl border border-black flex items-center justify-center text-lg shadow-lg"
+                  style={{ background: (() => {
+                    const allLvls = Object.values(progress).map(p => p?.completedLevel || 0);
+                    const max = Math.max(...allLvls, 0);
+                    if (max >= 401) return "linear-gradient(135deg,#dc2626,#be123c)";
+                    if (max >= 301) return "linear-gradient(135deg,#9333ea,#d946ef)";
+                    if (max >= 201) return "linear-gradient(135deg,#eab308,#f59e0b)";
+                    if (max >= 101) return "linear-gradient(135deg,#0891b2,#14b8a6)";
+                    if (max >= 1) return "linear-gradient(135deg,#92400e,#f97316)";
+                    return "#18181b";
+                  })() }}>
+                  {(() => {
+                    const allLvls = Object.values(progress).map(p => p?.completedLevel || 0);
+                    const max = Math.max(...allLvls, 0);
+                    if (max >= 401) return "🔴";
+                    if (max >= 301) return "💜";
+                    if (max >= 201) return "⚡";
+                    if (max >= 101) return "🔵";
+                    if (max >= 1) return "⚔️";
+                    return "🔒";
+                  })()}
                 </span>
               </div>
               <div className="flex-1 text-center md:text-left space-y-4">
@@ -1323,27 +1342,60 @@ export default function GamesPage() {
               </div>
             </div>
 
-            {/* Badges in profile */}
-            <div className="bg-zinc-950/40 border border-zinc-900 rounded-3xl p-6 flex flex-col gap-4">
-              <h3 className="text-xs font-black uppercase tracking-widest text-zinc-400 font-mono">My Badges</h3>
-              <div className="flex flex-wrap gap-3">
-                {GAMES_LIST.map(game => {
-                  const gp = progress[game.id] || { completedLevel: 0, xp: 0 };
-                  const isUnlocked = gp.completedLevel > 0;
-                  return (
-                    <div key={game.id} className={`flex items-center gap-2.5 px-3 py-2 rounded-xl border text-xs transition-all ${isUnlocked ? "bg-zinc-900/60 border-zinc-800 text-white" : "bg-zinc-950/20 border-zinc-950 text-zinc-600 opacity-30"}`}>
-                      <div className={`p-1.5 rounded-lg bg-gradient-to-br ${isUnlocked ? game.gradient : "from-zinc-900 to-zinc-950"} border border-white/5`}>
-                        <TechIcon name={game.iconName} className="size-3.5" />
+            {/* Rank breakdown in profile — only show ranks the user has earned */}
+            {(() => {
+              const RANK_CONFIG = [
+                { tier: "Grandmaster", minLvl: 401, emoji: "🔴", label: "Grandmaster", gradient: "from-red-700 to-rose-900", border: "border-red-800/40", bg: "bg-red-950/20" },
+                { tier: "Warlord",     minLvl: 301, emoji: "💜", label: "Warlord",     gradient: "from-purple-700 to-fuchsia-800", border: "border-purple-800/40", bg: "bg-purple-950/20" },
+                { tier: "Knight",      minLvl: 201, emoji: "⚡", label: "Knight",      gradient: "from-yellow-600 to-amber-700", border: "border-yellow-800/40", bg: "bg-yellow-950/20" },
+                { tier: "Mage",        minLvl: 101, emoji: "🔵", label: "Mage",        gradient: "from-cyan-700 to-teal-700",   border: "border-cyan-800/40",   bg: "bg-cyan-950/20" },
+                { tier: "Apprentice",  minLvl: 1,   emoji: "⚔️", label: "Apprentice",  gradient: "from-amber-800 to-orange-700", border: "border-amber-800/40", bg: "bg-amber-950/20" },
+              ];
+
+              // For each rank tier, count how many games the user has reached that tier (but not a higher one)
+              const rankCounts = RANK_CONFIG.map((rank, idx) => {
+                const nextTierMinLvl = RANK_CONFIG[idx - 1]?.minLvl ?? Infinity;
+                const count = GAMES_LIST.filter(game => {
+                  const lvl = progress[game.id]?.completedLevel || 0;
+                  return lvl >= rank.minLvl && lvl < nextTierMinLvl;
+                }).length;
+                return { ...rank, count };
+              }).filter(r => r.count > 0);
+
+              if (rankCounts.length === 0) {
+                return (
+                  <div className="bg-zinc-950/40 border border-zinc-900 rounded-3xl p-6 flex flex-col gap-2">
+                    <h3 className="text-xs font-black uppercase tracking-widest text-zinc-400 font-mono">Ranks</h3>
+                    <p className="text-[11px] text-zinc-600 font-mono italic">Complete levels in any game to earn your first rank.</p>
+                  </div>
+                );
+              }
+
+              return (
+                <div className="bg-zinc-950/40 border border-zinc-900 rounded-3xl p-6 flex flex-col gap-4">
+                  <h3 className="text-xs font-black uppercase tracking-widest text-zinc-400 font-mono">Ranks</h3>
+                  <div className="flex flex-wrap gap-3">
+                    {rankCounts.map(rank => (
+                      <div key={rank.tier}
+                        className={`flex items-center gap-3 px-4 py-3 rounded-2xl border ${rank.border} ${rank.bg} transition-all`}>
+                        <span className="text-2xl leading-none">{rank.emoji}</span>
+                        <div>
+                          <div className="text-xs font-black text-white uppercase font-mono tracking-wide">{rank.label}</div>
+                          <div className="text-[9px] font-mono text-zinc-400 mt-0.5">
+                            {rank.count} {rank.count === 1 ? "game" : "games"}
+                          </div>
+                        </div>
+                        <div className="ml-2 min-w-[2rem] text-center">
+                          <span className={`text-xl font-black font-mono bg-gradient-to-br ${rank.gradient} bg-clip-text text-transparent`}>
+                            ×{rank.count}
+                          </span>
+                        </div>
                       </div>
-                      <div>
-                        <div className="font-bold font-mono text-[10px]">{game.name}</div>
-                        <div className="text-[8px] text-zinc-500 font-mono">{isUnlocked ? `${getTierName(gp.completedLevel)} (Lv ${gp.completedLevel})` : "Locked"}</div>
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
+                    ))}
+                  </div>
+                </div>
+              );
+            })()}
 
             {/* Language Progress */}
             <div className="space-y-4">
