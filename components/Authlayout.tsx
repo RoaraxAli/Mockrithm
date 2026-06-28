@@ -286,118 +286,122 @@ export default function AuthLayout({
 
       if (!webrtcCleanupRef.current) {
         const initWebRTC = async () => {
-          const { doc, updateDoc, onSnapshot, collection, addDoc } = await import("firebase/firestore");
-          const { db } = await import("@/firebase/client");
-
-          const configuration = {
-            iceServers: [
-              { urls: "stun:stun.l.google.com:19302" },
-              { urls: "stun:stun1.l.google.com:19302" }
-            ]
-          };
-
-          const peerConnection = new RTCPeerConnection(configuration);
-          peerConnectionRef.current = peerConnection;
-
-          peerConnection.onconnectionstatechange = () => {
-            if (peerConnection.connectionState === "connected") {
-              setWebRtcConnected(true);
-            }
-          };
-
-          // Mic acquisition
           try {
-            const localStream = await navigator.mediaDevices.getUserMedia({ audio: true });
-            localStreamRef.current = localStream;
-            localStream.getTracks().forEach(t => peerConnection.addTrack(t, localStream));
-          } catch (e) {
-            console.error("Microphone acquire error:", e);
-            toast.error("Could not access microphone.");
-          }
+            const { doc, updateDoc, onSnapshot, collection, addDoc } = await import("firebase/firestore");
+            const { db } = await import("@/firebase/client");
 
-          // Handle remote track playing
-          peerConnection.ontrack = (event) => {
-            if (event.streams && event.streams[0] && remoteAudioRef.current) {
-              remoteAudioRef.current.srcObject = event.streams[0];
-            }
-          };
+            const configuration = {
+              iceServers: [
+                { urls: "stun:stun.l.google.com:19302" },
+                { urls: "stun:stun1.l.google.com:19302" }
+              ]
+            };
 
-          // Exchange candidates
-          peerConnection.onicecandidate = (event) => {
-            if (event.candidate) {
-              const candCol = collection(db, "calls", activeCallDoc.id, isCaller ? "callerCandidates" : "receiverCandidates");
-              addDoc(candCol, event.candidate.toJSON());
-            }
-          };
+            const peerConnection = new RTCPeerConnection(configuration);
+            peerConnectionRef.current = peerConnection;
 
-          const callDocRef = doc(db, "calls", activeCallDoc.id);
-          let unsubCall: any;
-          let unsubCandidates: any;
-
-          if (isCaller) {
-            const offer = await peerConnection.createOffer();
-            await peerConnection.setLocalDescription(offer);
-            await updateDoc(callDocRef, { offer: { sdp: offer.sdp, type: offer.type } });
-
-            unsubCall = onSnapshot(callDocRef, async (snap) => {
-              const data = snap.data();
-              if (data?.answer && !peerConnection.currentRemoteDescription) {
-                await peerConnection.setRemoteDescription(new RTCSessionDescription(data.answer));
+            peerConnection.onconnectionstatechange = () => {
+              if (peerConnection.connectionState === "connected") {
+                setWebRtcConnected(true);
               }
-            }, (err) => {
-              console.error("WebRTC call doc listener error:", err);
-            });
+            };
 
-            const candCol = collection(db, "calls", activeCallDoc.id, "receiverCandidates");
-            unsubCandidates = onSnapshot(candCol, (snap) => {
-              snap.docChanges().forEach(async (change) => {
-                if (change.type === "added") {
-                  try {
-                    await peerConnection.addIceCandidate(new RTCIceCandidate(change.doc.data()));
-                  } catch (e) { console.error(e); }
+            // Mic acquisition
+            try {
+              const localStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+              localStreamRef.current = localStream;
+              localStream.getTracks().forEach(t => peerConnection.addTrack(t, localStream));
+            } catch (e) {
+              console.error("Microphone acquire error:", e);
+              toast.error("Could not access microphone.");
+            }
+
+            // Handle remote track playing
+            peerConnection.ontrack = (event) => {
+              if (event.streams && event.streams[0] && remoteAudioRef.current) {
+                remoteAudioRef.current.srcObject = event.streams[0];
+              }
+            };
+
+            // Exchange candidates
+            peerConnection.onicecandidate = (event) => {
+              if (event.candidate) {
+                const candCol = collection(db, "calls", activeCallDoc.id, isCaller ? "callerCandidates" : "receiverCandidates");
+                addDoc(candCol, event.candidate.toJSON());
+              }
+            };
+
+            const callDocRef = doc(db, "calls", activeCallDoc.id);
+            let unsubCall: any;
+            let unsubCandidates: any;
+
+            if (isCaller) {
+              const offer = await peerConnection.createOffer();
+              await peerConnection.setLocalDescription(offer);
+              await updateDoc(callDocRef, { offer: { sdp: offer.sdp, type: offer.type } });
+
+              unsubCall = onSnapshot(callDocRef, async (snap) => {
+                const data = snap.data();
+                if (data?.answer && !peerConnection.currentRemoteDescription) {
+                  await peerConnection.setRemoteDescription(new RTCSessionDescription(data.answer));
                 }
+              }, (err) => {
+                console.error("WebRTC call doc listener error:", err);
               });
-            }, (err) => {
-              console.error("WebRTC receiver candidate listener error:", err);
-            });
-          } else {
-            unsubCall = onSnapshot(callDocRef, async (snap) => {
-              const data = snap.data();
-              if (data?.offer && !peerConnection.currentRemoteDescription) {
-                await peerConnection.setRemoteDescription(new RTCSessionDescription(data.offer));
-                const answer = await peerConnection.createAnswer();
-                await peerConnection.setLocalDescription(answer);
-                await updateDoc(callDocRef, { answer: { sdp: answer.sdp, type: answer.type } });
-              }
-            }, (err) => {
-              console.error("WebRTC call doc listener error:", err);
-            });
 
-            const candCol = collection(db, "calls", activeCallDoc.id, "callerCandidates");
-            unsubCandidates = onSnapshot(candCol, (snap) => {
-              snap.docChanges().forEach(async (change) => {
-                if (change.type === "added") {
-                  try {
-                    await peerConnection.addIceCandidate(new RTCIceCandidate(change.doc.data()));
-                  } catch (e) { console.error(e); }
+              const candCol = collection(db, "calls", activeCallDoc.id, "receiverCandidates");
+              unsubCandidates = onSnapshot(candCol, (snap) => {
+                snap.docChanges().forEach(async (change) => {
+                  if (change.type === "added") {
+                    try {
+                      await peerConnection.addIceCandidate(new RTCIceCandidate(change.doc.data()));
+                    } catch (e) { console.error(e); }
+                  }
+                });
+              }, (err) => {
+                console.error("WebRTC receiver candidate listener error:", err);
+              });
+            } else {
+              unsubCall = onSnapshot(callDocRef, async (snap) => {
+                const data = snap.data();
+                if (data?.offer && !peerConnection.currentRemoteDescription) {
+                  await peerConnection.setRemoteDescription(new RTCSessionDescription(data.offer));
+                  const answer = await peerConnection.createAnswer();
+                  await peerConnection.setLocalDescription(answer);
+                  await updateDoc(callDocRef, { answer: { sdp: answer.sdp, type: answer.type } });
                 }
+              }, (err) => {
+                console.error("WebRTC call doc listener error:", err);
               });
-            }, (err) => {
-              console.error("WebRTC caller candidate listener error:", err);
-            });
-          }
 
-          webrtcCleanupRef.current = {
-            close: () => {
-              if (unsubCall) unsubCall();
-              if (unsubCandidates) unsubCandidates();
-              peerConnection.close();
-              if (localStreamRef.current) {
-                localStreamRef.current.getTracks().forEach(t => t.stop());
-                localStreamRef.current = null;
-              }
+              const candCol = collection(db, "calls", activeCallDoc.id, "callerCandidates");
+              unsubCandidates = onSnapshot(candCol, (snap) => {
+                snap.docChanges().forEach(async (change) => {
+                  if (change.type === "added") {
+                    try {
+                      await peerConnection.addIceCandidate(new RTCIceCandidate(change.doc.data()));
+                    } catch (e) { console.error(e); }
+                  }
+                });
+              }, (err) => {
+                console.error("WebRTC caller candidate listener error:", err);
+              });
             }
-          };
+
+            webrtcCleanupRef.current = {
+              close: () => {
+                if (unsubCall) unsubCall();
+                if (unsubCandidates) unsubCandidates();
+                peerConnection.close();
+                if (localStreamRef.current) {
+                  localStreamRef.current.getTracks().forEach(t => t.stop());
+                  localStreamRef.current = null;
+                }
+              }
+            };
+          } catch (err) {
+            console.error("Failed to initialize WebRTC calling:", err);
+          }
         };
 
         initWebRTC();

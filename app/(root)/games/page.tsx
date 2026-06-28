@@ -577,12 +577,12 @@ export default function GamesPage() {
   const getAchievements = (): Achievement[] => {
     const list: Achievement[] = [];
     const playList = Object.keys(progress);
-    const anyPlayed = playList.some(k => progress[k].completedLevel > 0);
-    const anyTen = playList.some(k => progress[k].completedLevel >= 10);
-    const anyCent = playList.some(k => progress[k].completedLevel >= 100);
-    const anyHalf = playList.some(k => progress[k].completedLevel >= 250);
-    const anyApex = playList.some(k => progress[k].completedLevel >= 500);
-    const unlockedBadges = playList.filter(k => progress[k].completedLevel > 0).length;
+    const anyPlayed = playList.some(k => progress[k]?.completedLevel > 0);
+    const anyTen = playList.some(k => progress[k]?.completedLevel >= 10);
+    const anyCent = playList.some(k => progress[k]?.completedLevel >= 100);
+    const anyHalf = playList.some(k => progress[k]?.completedLevel >= 250);
+    const anyApex = playList.some(k => progress[k]?.completedLevel >= 500);
+    const unlockedBadges = playList.filter(k => progress[k]?.completedLevel > 0).length;
 
     list.push({ id: "first_syntax", title: "First Syntax", desc: "Clear Level 1 on any game.", target: "Level 1", current: anyPlayed ? 1 : 0, max: 1, completed: anyPlayed, xp: 50 });
     list.push({ id: "first_rank", title: "First Rank Up", desc: "Reach Level 10 on any game.", target: "Level 10", current: anyTen ? 10 : 0, max: 10, completed: anyTen, xp: 100 });
@@ -1896,7 +1896,7 @@ export default function GamesPage() {
                             <div className="flex items-center gap-3">
                               <div className="relative">
                                 <div className="size-8 rounded-full bg-zinc-900 border border-zinc-800 flex items-center justify-center text-xs font-bold text-zinc-300 font-mono">
-                                  {friend[0]?.toUpperCase()}
+                                  {(friend || "")[0]?.toUpperCase()}
                                 </div>
                                 <span className={`absolute bottom-0 right-0 size-2.5 rounded-full border border-black ${statusInfo.color}`} />
                               </div>
@@ -2016,7 +2016,7 @@ export default function GamesPage() {
                       <button key={friend} onClick={() => { playSound("click"); setSelectedFriend(friend); }}
                         className={`w-full flex items-center justify-between p-2.5 rounded-xl transition-all text-xs ${selectedFriend === friend ? "bg-zinc-900 text-white font-bold" : "text-zinc-400 hover:bg-zinc-900/40 hover:text-white"}`}>
                         <div className="flex items-center gap-2 truncate">
-                          <div className="size-5 rounded-full bg-zinc-900 border border-zinc-800 flex items-center justify-center text-[8px] font-bold">{friend[0]?.toUpperCase()}</div>
+                          <div className="size-5 rounded-full bg-zinc-900 border border-zinc-800 flex items-center justify-center text-[8px] font-bold">{(friend || "")[0]?.toUpperCase()}</div>
                           <span className="truncate max-w-[100px]">{friend}</span>
                         </div>
                         <span className={`size-1.5 rounded-full shrink-0 ${statusInfo.color}`} />
