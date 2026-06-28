@@ -21,7 +21,7 @@ export default function AuthLayout({
   const [userId, setUserId] = useState<string | null>(initialUserId || null);
   const [userName, setUserName] = useState<string>(initialUserName || "");
   const [userRole, setUserRole] = useState<string>(initialUserRole || "User");
-  const [userTier, setUserTier] = useState<"freemium" | "premium" | null>(null);
+  const [userTier, setUserTier] = useState<"freemium" | "premium" | "pro" | null>(null);
   const [showPrompt, setShowPrompt] = useState<boolean>(false);
 
   const [isDocsSubdomain, setIsDocsSubdomain] = useState(false);
