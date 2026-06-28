@@ -698,13 +698,6 @@ export default function GamesPage() {
                   className="w-full py-3 bg-white text-black hover:bg-zinc-200 rounded-xl font-bold text-sm uppercase tracking-wider transition-all disabled:opacity-50 cursor-pointer">
                   {locationSaving ? "Saving..." : "Confirm Location"}
                 </button>
-
-                {isSignedIn && (
-                  <button type="button" onClick={() => setShowLocationModal(false)}
-                    className="w-full py-2.5 text-zinc-600 hover:text-zinc-400 text-xs font-mono uppercase tracking-wider transition-all cursor-pointer">
-                    Skip for now
-                  </button>
-                )}
               </form>
             </motion.div>
           </motion.div>
@@ -764,7 +757,7 @@ export default function GamesPage() {
               { id: "achievements", label: "Achievements", icon: Trophy, badge: unclaimedCount },
               { id: "leaderboard", label: "Leaderboards", icon: Layers },
               { id: "friends", label: "Friends", icon: Users },
-              { id: "social", label: "Chat", icon: MessageSquare, disabled: friendsList.length === 0 }
+              { id: "social", label: "Chat", icon: MessageSquare }
             ].map(item => {
               const Icon = item.icon;
               const isActive = activeTab === item.id;
@@ -953,11 +946,11 @@ export default function GamesPage() {
 
                       {/* About */}
                       <div className="bg-zinc-950/40 border border-zinc-900 rounded-2xl p-6 flex flex-col gap-3">
-                        <h3 className="text-xs font-black uppercase tracking-widest text-zinc-400 font-mono">About This Course</h3>
-                        <p className="text-[11px] text-zinc-400 leading-relaxed">{activeGame.description}</p>
-                        <div className="flex gap-2 mt-1 flex-wrap">
+                        <h3 className="text-xs font-black uppercase tracking-widest text-zinc-400 font-mono">About This Game</h3>
+                        <p className="text-xs text-zinc-400 leading-relaxed">{activeGame.description}</p>
+                        <div className="flex gap-2 mt-2 flex-wrap">
                           {["500 Levels", "Dynamic Challenges", "XP Rewards", "Badge on completion"].map(tag => (
-                            <span key={tag} className="text-[8px] font-mono font-bold text-zinc-500 bg-zinc-900 border border-zinc-800 px-2 py-0.5 rounded-full uppercase">{tag}</span>
+                            <span key={tag} className="text-[9px] font-mono font-bold text-zinc-500 bg-zinc-900 border border-zinc-800 px-2.5 py-1 rounded-full uppercase">{tag}</span>
                           ))}
                         </div>
                       </div>
@@ -969,20 +962,18 @@ export default function GamesPage() {
                       <div className="bg-zinc-950/40 border border-zinc-900 rounded-2xl p-6 flex flex-col gap-4">
                         <h3 className="text-xs font-black uppercase tracking-widest text-zinc-400 font-mono">Ranks</h3>
                         <div className="grid grid-cols-5 gap-3">
-                          {tierData.map(t => {
+                          {[{ ...tierData[0], emoji: "⚔️" }, { ...tierData[1], emoji: "🔵" }, { ...tierData[2], emoji: "⚡" }, { ...tierData[3], emoji: "💜" }, { ...tierData[4], emoji: "🔴" }].map(t => {
                             const isActive = tier === t.tier;
                             const isUnlocked = (() => {
                               const min = { Apprentice: 1, Mage: 101, Knight: 201, Warlord: 301, Grandmaster: 401 }[t.tier] || 1;
                               return gameProg.completedLevel >= min;
                             })();
                             return (
-                              <div key={t.tier} className={`p-3 rounded-xl border flex flex-col items-center gap-2 text-center transition-all ${isActive ? "bg-zinc-900 border-white/20 scale-105" : isUnlocked ? "bg-zinc-900/60 border-zinc-800" : "bg-zinc-950/20 border-zinc-950 opacity-30"}`}>
+                              <div key={t.tier} className={`p-4 rounded-xl border flex flex-col items-center gap-2.5 text-center transition-all relative overflow-hidden ${isActive ? "bg-zinc-900 border-white/20 scale-105" : isUnlocked ? "bg-zinc-900/60 border-zinc-800" : "bg-zinc-950/20 border-zinc-950 opacity-30"}`}>
                                 {isActive && <span className={`absolute top-0 inset-x-0 h-[2px] bg-gradient-to-r ${t.color}`} />}
-                                <div className={`p-1.5 rounded-lg bg-gradient-to-br ${isUnlocked ? t.color : "from-zinc-900 to-zinc-950"} border border-white/5`}>
-                                  {isUnlocked ? <Award className="size-3.5 text-white" /> : <Lock className="size-3.5 text-zinc-600" />}
-                                </div>
-                                <span className="text-[8px] font-bold uppercase text-zinc-300 leading-none">{t.tier}</span>
-                                <span className="text-[7px] font-mono text-zinc-500">Lv.{t.range}</span>
+                                <span className="text-2xl leading-none">{isUnlocked ? t.emoji : "🔒"}</span>
+                                <span className="text-[10px] font-bold uppercase text-zinc-200 leading-none">{t.tier}</span>
+                                <span className="text-[9px] font-mono text-zinc-400">Level {t.range}</span>
                               </div>
                             );
                           })}
@@ -1077,7 +1068,7 @@ export default function GamesPage() {
                           <span className="text-[10px] font-mono font-black uppercase tracking-wider">Recommended First</span>
                         </div>
                         <p className="text-[10.5px] text-zinc-400 leading-relaxed">
-                          Complete <strong className="text-white">{GAMES_LIST.filter(g => activeGame.prerequisites.includes(g.id) && !(progress[g.id]?.completedLevel > 0)).map(g => g.name).join(", ")}</strong> before this course for the best experience.
+                          Complete <strong className="text-white">{GAMES_LIST.filter(g => activeGame.prerequisites.includes(g.id) && !(progress[g.id]?.completedLevel > 0)).map(g => g.name).join(", ")}</strong> before this game for the best experience.
                         </p>
                       </div>
                     )}
@@ -1223,7 +1214,7 @@ export default function GamesPage() {
                 <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 border-b border-zinc-900 pb-8 mb-4">
                   <div className="space-y-2">
                     <span className="text-[10px] font-mono tracking-widest text-zinc-500 uppercase">Games Dashboard</span>
-                    <h1 className="text-4xl font-black tracking-tight leading-none uppercase font-mono">Pick a Course</h1>
+                    <h1 className="text-4xl font-black tracking-tight leading-none uppercase font-mono">Pick a Game</h1>
                     <p className="text-xs text-zinc-400 max-w-xl">Choose a language to start learning. Complete levels to earn XP and unlock badges.</p>
                   </div>
                 </div>
@@ -1640,14 +1631,22 @@ export default function GamesPage() {
           <div className="w-full max-w-5xl mx-auto flex flex-col gap-6 h-[80vh]">
             <div className="border-b border-zinc-900 pb-6 shrink-0">
               <h2 className="text-3xl font-black uppercase font-mono tracking-tight">Chat</h2>
-              <p className="text-xs text-zinc-500 mt-1 font-mono">Direct messages with your friends.</p>
+              <p className="text-xs text-zinc-500 mt-1 font-mono">Message friends directly or talk to everyone in global chat.</p>
             </div>
             <div className="flex-1 flex gap-6 min-h-0">
+              {/* Contact sidebar */}
               <div className="w-56 border border-zinc-900 rounded-2xl bg-zinc-950/40 p-4 flex flex-col gap-3 shrink-0">
-                <h3 className="text-[10px] font-mono font-bold text-zinc-400 uppercase tracking-widest">Contacts</h3>
+                <h3 className="text-[10px] font-mono font-bold text-zinc-400 uppercase tracking-widest">Channels</h3>
+                {/* Global chat channel */}
+                <button onClick={() => { playSound("click"); setSelectedFriend("__global__"); }}
+                  className={`w-full flex items-center gap-2 p-2.5 rounded-xl transition-all text-xs font-bold ${selectedFriend === "__global__" ? "bg-white text-black" : "text-zinc-400 hover:bg-zinc-900/40 hover:text-white"}`}>
+                  <span className="text-sm">🌍</span> Global Chat
+                </button>
+                <div className="h-px bg-zinc-900 my-1" />
+                <h3 className="text-[10px] font-mono font-bold text-zinc-400 uppercase tracking-widest">Friends</h3>
                 <div className="flex flex-col gap-1.5 overflow-y-auto pr-1">
                   {friendsList.length === 0 ? (
-                    <p className="text-[10px] text-zinc-600 italic font-mono">Add friends first.</p>
+                    <p className="text-[10px] text-zinc-600 italic font-mono">No friends added yet.</p>
                   ) : friendsList.map(friend => (
                     <button key={friend} onClick={() => { playSound("click"); setSelectedFriend(friend); }}
                       className={`w-full flex items-center gap-2 p-2.5 rounded-xl transition-all text-xs ${selectedFriend === friend ? "bg-zinc-900 text-white font-bold" : "text-zinc-400 hover:bg-zinc-900/40 hover:text-white"}`}>
@@ -1657,9 +1656,14 @@ export default function GamesPage() {
                   ))}
                 </div>
               </div>
+
+              {/* Chat panel */}
               <div className="flex-1 border border-zinc-900 rounded-2xl bg-zinc-950/40 flex flex-col justify-between overflow-hidden">
                 <div className="px-5 py-4 bg-zinc-950 border-b border-zinc-900 flex items-center justify-between">
-                  <h3 className="text-xs font-black uppercase font-mono text-white">{selectedFriend ? `Chat with ${selectedFriend}` : "Select a contact"}</h3>
+                  <h3 className="text-xs font-black uppercase font-mono text-white">
+                    {selectedFriend === "__global__" ? "🌍 Global Chat" : selectedFriend ? `Chat with ${selectedFriend}` : "Select a channel"}
+                  </h3>
+                  {selectedFriend === "__global__" && <span className="text-[9px] font-mono text-zinc-500 uppercase">Everyone can see messages here</span>}
                 </div>
                 <div className="flex-1 p-5 overflow-y-auto flex flex-col gap-3 min-h-0">
                   {selectedFriend && (messages[selectedFriend] || []).length > 0 ? (
@@ -1667,23 +1671,23 @@ export default function GamesPage() {
                       const isUser = msg.sender === "user";
                       return (
                         <div key={idx} className={`flex flex-col max-w-[70%] ${isUser ? "self-end items-end" : "self-start items-start"}`}>
-                          <div className={`p-3 rounded-2xl text-[11.5px] leading-relaxed font-medium ${isUser ? "bg-white text-black rounded-tr-none" : "bg-zinc-900 text-zinc-300 rounded-tl-none border border-zinc-850"}`}>
+                          <div className={`p-3 rounded-2xl text-xs leading-relaxed font-medium ${isUser ? "bg-white text-black rounded-tr-none" : "bg-zinc-900 text-zinc-300 rounded-tl-none border border-zinc-800"}`}>
                             {msg.text}
                           </div>
-                          <span className="text-[7.5px] font-mono text-zinc-600 mt-1">{msg.time}</span>
+                          <span className="text-[8px] font-mono text-zinc-600 mt-1">{msg.time}</span>
                         </div>
                       );
                     })
                   ) : (
-                    <div className="flex-1 flex items-center justify-center text-zinc-600 italic text-[10px] font-mono">
-                      {selectedFriend ? "Say hello!" : "Select a contact to start chatting."}
+                    <div className="flex-1 flex items-center justify-center text-zinc-600 italic text-xs font-mono">
+                      {selectedFriend ? (selectedFriend === "__global__" ? "Be the first to say something!" : "Say hello!") : "Pick a channel or friend to start chatting."}
                     </div>
                   )}
                 </div>
                 <form onSubmit={handleSendChatMessage} className="p-4 bg-zinc-950 border-t border-zinc-900 flex gap-2 shrink-0">
                   <input type="text" disabled={!selectedFriend} value={chatInput} onChange={e => setChatInput(e.target.value)}
-                    placeholder={selectedFriend ? `Message ${selectedFriend}...` : "Select a contact first..."}
-                    className="flex-1 bg-zinc-900 border border-zinc-850 rounded-xl px-4 py-2.5 focus:outline-none focus:border-zinc-600 text-xs text-white disabled:opacity-50" />
+                    placeholder={selectedFriend === "__global__" ? "Message everyone..." : selectedFriend ? `Message ${selectedFriend}...` : "Select a channel first..."}
+                    className="flex-1 bg-zinc-900 border border-zinc-800 rounded-xl px-4 py-2.5 focus:outline-none focus:border-zinc-600 text-xs text-white disabled:opacity-50" />
                   <button type="submit" disabled={!selectedFriend}
                     className="px-4 bg-white text-black hover:bg-zinc-200 rounded-xl transition-all cursor-pointer flex items-center justify-center gap-1.5 text-xs font-bold uppercase tracking-wider border border-white disabled:opacity-50">
                     <Send className="size-3.5 fill-current" /> Send
