@@ -545,6 +545,275 @@ export default function GamesPage() {
     return filtered.map((row, idx) => ({ ...row, rank: idx + 1 }));
   };
 
+  const canGoNext = currentLevelNum < maxUnlockedLevel || evaluationSuccess === true;
+
+  const handleNextLevel = () => {
+    if (!canGoNext) {
+      toast.error("You must compile and pass the current level's tests before progressing!");
+      return;
+    }
+    playSound("click");
+    if (currentLevelNum < 500) {
+      setCurrentLevelNum(prev => prev + 1);
+    } else {
+      toast.info("Congratulations! You completed all 500 levels of this game!");
+      setActiveGame(null);
+    }
+  };
+
+  const handlePrevLevel = () => {
+    playSound("click");
+    if (currentLevelNum > 1) {
+      setCurrentLevelNum(prev => prev - 1);
+    }
+  };
+
+  const handleSelectLevel = (num: number) => {
+    if (isNaN(num) || num < 1) return;
+    if (num > maxUnlockedLevel) {
+      toast.error(`Level ${num} is locked! Clear preceding levels first.`);
+      return;
+    }
+    playSound("click");
+    setCurrentLevelNum(num);
+  };
+
+  const handleLevelCompletion = async () => {
+    if (!activeGame || !activeLevelData) return;
+
+    const gameId = activeGame.id;
+    const completedLvl = currentLevelNum;
+    const xpReward = 100;
+
+    const currentProgress = progress[gameId] || { completedLevel: 0, xp: 0 };
+    const nextCompletedLevel = Math.max(currentProgress.completedLevel, completedLvl);
+    let nextXp = currentProgress.xp;
+    let nextTotalXp = totalXp;
+
+    if (completedLvl > currentProgress.completedLevel) {
+      nextXp += xpReward;
+      nextTotalXp += xpReward;
+    }
+
+    const nextProgress = {
+      ...progress,
+      [gameId]: {
+        completedLevel: nextCompletedLevel,
+        xp: nextXp
+      }
+    };
+
+    setProgress(nextProgress);
+    setTotalXp(nextTotalXp);
+
+    localStorage.setItem("mockrithm_games_progress", JSON.stringify(nextProgress));
+    localStorage.setItem("mockrithm_games_xp", nextTotalXp.toString());
+
+    if (isSignedIn && clerkUser) {
+      try {
+        await updateUserGamesProgress(clerkUser.id, gameId, completedLvl, xpReward);
+      } catch (err) {
+        console.error("Failed syncing progress to cloud database:", err);
+      }
+    }
+  };
+
+  const evaluateCode = () => {
+    if (!activeLevelData) return;
+
+    playSound("click");
+    setEvalLogs(["Spinning up sandbox engine...", "Executing validation assertions..."]);
+    
+    const { checkType, testCases } = activeLevelData.validation;
+    let allPassed = true;
+    const testResults: string[] = [];
+
+    try {
+      testCases.forEach((tc, idx) => {
+        const descriptionText = tc.description || tc.name || `Test Case ${idx + 1}`;
+        
+        if (tc.testRegex) {
+          try {
+            const rx = new RegExp(tc.testRegex, "i");
+            const result = rx.test(editorCode);
+            if (result) {
+              testResults.push(`✔️ Passed: ${descriptionText}`);
+            } else {
+              testResults.push(`❌ Failed: ${descriptionText}`);
+              allPassed = false;
+            }
+          } catch (e: any) {
+            testResults.push(`❌ Regex Error: ${descriptionText} (${e.message})`);
+            allPassed = false;
+          }
+        } else if (tc.customCheck) {
+          try {
+            const checkFn = eval(tc.customCheck);
+            const result = checkFn(editorCode);
+            if (result === tc.expected) {
+              testResults.push(`✔️ Passed: ${descriptionText}`);
+            } else {
+              testResults.push(`❌ Failed: ${descriptionText}`);
+              allPassed = false;
+            }
+          } catch (e: any) {
+            testResults.push(`❌ Custom check error: ${descriptionText} (${e.message})`);
+            allPassed = false;
+          }
+        } else {
+          try {
+            const cleanCode = editorCode.replace(/export\s+default\s+/g, "");
+            const inputArgs = tc.input ? tc.input.map(x => JSON.stringify(x)).join(", ") : "";
+            const runStr = `${cleanCode}\nreturn processData(${inputArgs});`;
+            const runner = new Function(runStr);
+            const result = runner();
+            if (result === tc.expected) {
+              testResults.push(`✔️ Passed: Input: [${inputArgs}] -> Output: ${result}`);
+            } else {
+              testResults.push(`❌ Failed: Input: [${inputArgs}] -> Expected ${tc.expected}, got ${result}`);
+              allPassed = false;
+            }
+          } catch (e: any) {
+            testResults.push(`❌ Exception: ${e.message}`);
+            allPassed = false;
+          }
+        }
+      });
+
+      if (allPassed) {
+        if (checkType === "sql" && editorCode.toLowerCase().includes("where")) {
+          const whereMatch = editorCode.match(/level\s*(>|<|=)\s*(\d+)/i);
+          if (whereMatch) {
+            const op = whereMatch[1];
+            const val = parseInt(whereMatch[2], 10);
+            setSqlTableData(prev => prev.filter(row => {
+              if (op === ">") return row.level > val;
+              if (op === "<") return row.level < val;
+              return row.level === val;
+            }));
+          }
+        }
+      }
+    } catch (err: any) {
+      testResults.push(`❌ Core Evaluation Crash: ${err.message}`);
+      allPassed = false;
+    }
+
+    setEvalLogs(prev => [...prev, ...testResults]);
+    setEvaluationSuccess(allPassed);
+
+    if (allPassed) {
+      playSound("success");
+      toast.success("Level Complete! Great job.");
+      handleLevelCompletion();
+    } else {
+      playSound("fail");
+      toast.error("Evaluation Failed. Please check the console output and try again.");
+    }
+  };
+
+  const handleGitCommandLineSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    const line = gitCommandInput.trim();
+    if (!line) return;
+
+    playSound("click");
+    setGitTerminalLogs(prev => [...prev, `$ ${line}`]);
+    setGitCommandInput("");
+
+    const parts = line.split(/\s+/);
+    const command = parts[0];
+
+    if (command !== "git" && command !== "help" && command !== "clear") {
+      setGitTerminalLogs(prev => [...prev, `command not found: ${command}`]);
+      return;
+    }
+
+    if (command === "clear") {
+      setGitTerminalLogs([]);
+      return;
+    }
+
+    if (command === "help") {
+      setGitTerminalLogs(prev => [
+        ...prev,
+        "Available commands:",
+        "  git init             - Initialize repository",
+        "  git status           - Check branch status",
+        "  git add <file>       - Stage files (use 'git add .' to stage all)",
+        "  git commit -m 'msg'  - Record timeline updates",
+        "  git log              - View commit timeline records"
+      ]);
+      return;
+    }
+
+    const subCommand = parts[1];
+    if (!subCommand) {
+      setGitTerminalLogs(prev => [...prev, "Usage: git <command> [options]"]);
+      return;
+    }
+
+    if (subCommand === "init") {
+      setGitState(prev => ({ ...prev, initialized: true }));
+      setGitTerminalLogs(prev => [
+        ...prev,
+        "Initialized empty Git repository in /dungeon/project/.git/",
+        "Created staging zone. Ready to record files."
+      ]);
+    } else if (!gitState.initialized) {
+      setGitTerminalLogs(prev => [...prev, "fatal: not a git repository (or any of the parent directories): .git"]);
+    } else if (subCommand === "status") {
+      const trackingStatus = gitState.staged.length > 0 
+        ? `Changes to be committed:\n  (use "git restore --staged <file>..." to unstage)\n\tmodified:   src/app.js`
+        : `nothing to commit, working tree clean`;
+      setGitTerminalLogs(prev => [
+        ...prev,
+        `On branch main`,
+        `Your branch is up to date with 'origin/main'.`,
+        trackingStatus
+      ]);
+    } else if (subCommand === "add") {
+      const target = parts[2];
+      if (!target) {
+        setGitTerminalLogs(prev => [...prev, "Nothing specified, nothing added."]);
+      } else {
+        setGitState(prev => ({ ...prev, staged: ["src/app.js"] }));
+        setGitTerminalLogs(prev => [...prev, "staged file: src/app.js"]);
+      }
+    } else if (subCommand === "commit") {
+      const flag = parts[2];
+      let msg = parts.slice(3).join(" ").replace(/['"]/g, "");
+      if (flag !== "-m" || !msg) {
+        setGitTerminalLogs(prev => [...prev, "error: switch `m' requires a value"]);
+      } else if (gitState.staged.length === 0) {
+        setGitTerminalLogs(prev => [...prev, "On branch main\nnothing to commit, working tree clean"]);
+      } else {
+        const commitId = Math.random().toString(16).substring(2, 9);
+        const newCommit = { id: commitId, message: msg };
+        setGitState(prev => ({
+          ...prev,
+          committed: [...prev.committed, ...prev.staged],
+          staged: [],
+          commits: [...prev.commits, newCommit]
+        }));
+        setGitTerminalLogs(prev => [
+          ...prev,
+          `[main ${commitId}] ${msg}`,
+          " 1 file changed, 25 insertions(+)"
+        ]);
+      }
+    } else if (subCommand === "log") {
+      if (gitState.commits.length === 0) {
+        setGitTerminalLogs(prev => [...prev, "fatal: your current branch 'main' does not have any commits yet"]);
+      } else {
+        const logLines = gitState.commits.map(c => `commit ${c.id}\nAuthor: Hacker <hack@mockrithm.com>\nDate:   Sun Jun 28\n\n    ${c.message}`).reverse();
+        setGitTerminalLogs(prev => [...prev, ...logLines]);
+      }
+    } else {
+      setGitTerminalLogs(prev => [...prev, `git sub-command not supported: ${subCommand}`]);
+    }
+  };
+
   const unclaimedCount = getUnclaimedAchievementsCount();
 
   return (
