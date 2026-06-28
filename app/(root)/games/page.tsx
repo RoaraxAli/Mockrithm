@@ -36,7 +36,9 @@ import {
   Users,
   Trophy,
   Plus,
-  Send
+  Send,
+  User as UserIcon,
+  Activity
 } from "lucide-react";
 import { toast } from "sonner";
 import {
@@ -106,7 +108,7 @@ function renderMarkdown(text: string) {
 
     if (line.startsWith("- ")) {
       return (
-        <li key={idx} className="text-[11px] text-zinc-400 list-disc ml-4 mt-1 font-medium">
+        <li key={idx} className="text-[11px] text-zinc-400 list-disc ml-4 mt-1 font-medium font-mono">
           {formattedLine}
         </li>
       );
@@ -142,29 +144,35 @@ interface Achievement {
   xp: number;
 }
 
-// Mock Leaderboard Data with filtering attributes
-const MOCK_LEADERBOARD = [
-  { rank: 1, name: "CyberKing", country: "United States", city: "San Francisco", xp: 12500, badges: 15, achievements: 12, avatar: "👑" },
-  { rank: 2, name: "CodeWitch", country: "Canada", city: "Toronto", xp: 11200, badges: 14, achievements: 10, avatar: "🧙‍♀️" },
-  { rank: 3, name: "NodeNinja", country: "Japan", city: "Tokyo", xp: 9800, badges: 11, achievements: 9, avatar: "🥷" },
-  { rank: 4, name: "AlchemistJS", country: "Germany", city: "Berlin", xp: 8500, badges: 9, achievements: 8, avatar: "🧪" },
-  { rank: 5, name: "RustGuardian", country: "United States", city: "San Francisco", xp: 7200, badges: 8, achievements: 7, avatar: "🛡️" },
-  { rank: 6, name: "Pythonista", country: "Canada", city: "Toronto", xp: 6400, badges: 7, achievements: 6, avatar: "🐍" },
-  { rank: 7, name: "DockerMaster", country: "United Kingdom", city: "London", xp: 5900, badges: 6, achievements: 5, avatar: "🐳" },
-  { rank: 8, name: "GitWeaver", country: "Germany", city: "Berlin", xp: 5100, badges: 5, achievements: 4, avatar: "🕸️" },
-  { rank: 9, name: "TailwindGenius", country: "United States", city: "New York", xp: 4200, badges: 4, achievements: 3, avatar: "🎨" }
+// Mock Leaderboard Base Data
+const BASE_LEADERBOARD = [
+  { name: "CyberKing", country: "United States", city: "San Francisco", xp: 12500, badges: 15, achievements: 12, avatar: "👑" },
+  { name: "CodeWitch", country: "Canada", city: "Toronto", xp: 11200, badges: 14, achievements: 10, avatar: "🧙‍♀️" },
+  { name: "NodeNinja", country: "Japan", city: "Tokyo", xp: 9800, badges: 11, achievements: 9, avatar: "🥷" },
+  { name: "AlchemistJS", country: "Germany", city: "Berlin", xp: 8500, badges: 9, achievements: 8, avatar: "🧪" },
+  { name: "RustGuardian", country: "United States", city: "San Francisco", xp: 7200, badges: 8, achievements: 7, avatar: "🛡️" },
+  { name: "Pythonista", country: "Canada", city: "Toronto", xp: 6400, badges: 7, achievements: 6, avatar: "🐍" },
+  { name: "DockerMaster", country: "United Kingdom", city: "London", xp: 5900, badges: 6, achievements: 5, avatar: "🐳" },
+  { name: "GitWeaver", country: "Germany", city: "Berlin", xp: 5100, badges: 5, achievements: 4, avatar: "🕸️" },
+  { name: "TailwindGenius", country: "United States", city: "New York", xp: 4200, badges: 4, achievements: 3, avatar: "🎨" }
 ];
 
 export default function GamesPage() {
   const { isLoaded, isSignedIn, user: clerkUser } = useUser();
 
-  // Sidebar Tab States: 'dashboard' | 'achievements' | 'leaderboard' | 'social'
-  const [activeTab, setActiveTab] = useState<"dashboard" | "achievements" | "leaderboard" | "social">("dashboard");
+  // Sidebar Tab States: 'dashboard' | 'achievements' | 'leaderboard' | 'social' | 'profile'
+  const [activeTab, setActiveTab] = useState<"dashboard" | "achievements" | "leaderboard" | "social" | "profile">("dashboard");
 
   // Progress State
   const [progress, setProgress] = useState<Record<string, GameProgress>>({});
   const [totalXp, setTotalXp] = useState(0);
   const [loading, setLoading] = useState(true);
+
+  // User location states (determined dynamically from IP)
+  const [userLocation, setUserLocation] = useState({
+    country: "United States",
+    city: "San Francisco"
+  });
 
   // Gamification Claimed Achievements (local persistence)
   const [claimedAchievements, setClaimedAchievements] = useState<string[]>([]);
@@ -222,6 +230,30 @@ export default function GamesPage() {
   // Calculate highest unlocked level for current game
   const gameProgressObj = activeGame ? (progress[activeGame.id] || { completedLevel: 0, xp: 0 }) : { completedLevel: 0, xp: 0 };
   const maxUnlockedLevel = bypassLocks ? 500 : (gameProgressObj.completedLevel + 1 > 500 ? 500 : gameProgressObj.completedLevel + 1);
+
+  // Dynamic user details
+  const userNameDisplay = clerkUser?.username || clerkUser?.firstName || "Hacker";
+  const userEmailDisplay = clerkUser?.primaryEmailAddress?.emailAddress || "guest@mockrithm.com";
+  const userAvatarUrl = clerkUser?.imageUrl;
+
+  // Fetch client location from IP at launch
+  useEffect(() => {
+    async function fetchLocation() {
+      try {
+        const res = await fetch("https://ipapi.co/json/");
+        if (res.ok) {
+          const data = await res.json();
+          setUserLocation({
+            country: data.country_name || "United States",
+            city: data.city || "San Francisco"
+          });
+        }
+      } catch (err) {
+        console.warn("Failed to fetch location by IP, falling back:", err);
+      }
+    }
+    fetchLocation();
+  }, []);
 
   // Load User Progress and Achievements
   useEffect(() => {
@@ -289,11 +321,6 @@ export default function GamesPage() {
       }
     }
   }, [activeGame, maxUnlockedLevel, currentLevelNum]);
-
-  // Prerequisite Verification Logic
-  const isGameUnlocked = (gameId: string): boolean => {
-    return true;
-  };
 
   // Check if a game has missing prerequisites for warning notice at launch
   const hasMissingPrerequisites = (gameId: string): boolean => {
@@ -395,7 +422,7 @@ export default function GamesPage() {
     });
     setChatInput("");
 
-    // Simulate automated replies from friends (interactive chat loop)
+    // Simulate automated replies from friends
     setTimeout(() => {
       const replies = [
         "That implementation looks super clean! Let me know when you clear the next level.",
@@ -487,295 +514,18 @@ export default function GamesPage() {
     setGitCommandInput("");
   };
 
-  // Git Command parser
-  const handleGitCommandLineSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    const line = gitCommandInput.trim();
-    if (!line) return;
-
-    playSound("click");
-    setGitTerminalLogs(prev => [...prev, `$ ${line}`]);
-    setGitCommandInput("");
-
-    const parts = line.split(/\s+/);
-    const command = parts[0];
-
-    if (command !== "git" && command !== "help" && command !== "clear") {
-      setGitTerminalLogs(prev => [...prev, `command not found: ${command}`]);
-      return;
-    }
-
-    if (command === "clear") {
-      setGitTerminalLogs([]);
-      return;
-    }
-
-    if (command === "help") {
-      setGitTerminalLogs(prev => [
-        ...prev,
-        "Available commands:",
-        "  git init             - Initialize repository",
-        "  git status           - Check branch status",
-        "  git add <file>       - Stage files (use 'git add .' to stage all)",
-        "  git commit -m 'msg'  - Record timeline updates",
-        "  git log              - View commit timeline records"
-      ]);
-      return;
-    }
-
-    // Git commands parser
-    const subCommand = parts[1];
-    if (!subCommand) {
-      setGitTerminalLogs(prev => [...prev, "Usage: git <command> [options]"]);
-      return;
-    }
-
-    if (subCommand === "init") {
-      setGitState(prev => ({ ...prev, initialized: true }));
-      setGitTerminalLogs(prev => [
-        ...prev,
-        "Initialized empty Git repository in /dungeon/project/.git/",
-        "Created staging zone. Ready to record files."
-      ]);
-    } else if (!gitState.initialized) {
-      setGitTerminalLogs(prev => [...prev, "fatal: not a git repository (or any of the parent directories): .git"]);
-    } else if (subCommand === "status") {
-      const trackingStatus = gitState.staged.length > 0 
-        ? `Changes to be committed:\n  (use "git restore --staged <file>..." to unstage)\n\tmodified:   src/app.js`
-        : `nothing to commit, working tree clean`;
-      setGitTerminalLogs(prev => [
-        ...prev,
-        `On branch main`,
-        `Your branch is up to date with 'origin/main'.`,
-        trackingStatus
-      ]);
-    } else if (subCommand === "add") {
-      const target = parts[2];
-      if (!target) {
-        setGitTerminalLogs(prev => [...prev, "Nothing specified, nothing added."]);
-      } else {
-        setGitState(prev => ({ ...prev, staged: ["src/app.js"] }));
-        setGitTerminalLogs(prev => [...prev, "staged file: src/app.js"]);
-      }
-    } else if (subCommand === "commit") {
-      const flag = parts[2];
-      let msg = parts.slice(3).join(" ").replace(/['"]/g, "");
-      if (flag !== "-m" || !msg) {
-        setGitTerminalLogs(prev => [...prev, "error: switch `m' requires a value"]);
-      } else if (gitState.staged.length === 0) {
-        setGitTerminalLogs(prev => [...prev, "On branch main\nnothing to commit, working tree clean"]);
-      } else {
-        const commitId = Math.random().toString(16).substring(2, 9);
-        const newCommit = { id: commitId, message: msg };
-        setGitState(prev => ({
-          ...prev,
-          committed: [...prev.committed, ...prev.staged],
-          staged: [],
-          commits: [...prev.commits, newCommit]
-        }));
-        setGitTerminalLogs(prev => [
-          ...prev,
-          `[main ${commitId}] ${msg}`,
-          " 1 file changed, 25 insertions(+)"
-        ]);
-      }
-    } else if (subCommand === "log") {
-      if (gitState.commits.length === 0) {
-        setGitTerminalLogs(prev => [...prev, "fatal: your current branch 'main' does not have any commits yet"]);
-      } else {
-        const logLines = gitState.commits.map(c => `commit ${c.id}\nAuthor: Hacker <hack@mockrithm.com>\nDate:   Sun Jun 28\n\n    ${c.message}`).reverse();
-        setGitTerminalLogs(prev => [...prev, ...logLines]);
-      }
-    } else {
-      setGitTerminalLogs(prev => [...prev, `git sub-command not supported: ${subCommand}`]);
-    }
-  };
-
-  // Compile & run code tests
-  const evaluateCode = () => {
-    if (!activeLevelData) return;
-
-    playSound("click");
-    setEvalLogs(["Spinning up sandbox engine...", "Executing validation assertions..."]);
-    
-    const { checkType, testCases } = activeLevelData.validation;
-    let allPassed = true;
-    const testResults: string[] = [];
-
-    try {
-      testCases.forEach((tc, idx) => {
-        const descriptionText = tc.description || tc.name || `Test Case ${idx + 1}`;
-        
-        // 1. Regex Match Validation
-        if (tc.testRegex) {
-          try {
-            const rx = new RegExp(tc.testRegex, "i");
-            const result = rx.test(editorCode);
-            if (result) {
-              testResults.push(`✔️ Passed: ${descriptionText}`);
-            } else {
-              testResults.push(`❌ Failed: ${descriptionText}`);
-              allPassed = false;
-            }
-          } catch (e: any) {
-            testResults.push(`❌ Regex Error: ${descriptionText} (${e.message})`);
-            allPassed = false;
-          }
-        } 
-        // 2. Custom code execution fallback
-        else if (tc.customCheck) {
-          try {
-            const checkFn = eval(tc.customCheck);
-            const result = checkFn(editorCode);
-            if (result === tc.expected) {
-              testResults.push(`✔️ Passed: ${descriptionText}`);
-            } else {
-              testResults.push(`❌ Failed: ${descriptionText}`);
-              allPassed = false;
-            }
-          } catch (e: any) {
-            testResults.push(`❌ Custom check error: ${descriptionText} (${e.message})`);
-            allPassed = false;
-          }
-        } 
-        // 3. JS execution test mapping
-        else {
-          try {
-            const cleanCode = editorCode.replace(/export\s+default\s+/g, "");
-            const inputArgs = tc.input ? tc.input.map(x => JSON.stringify(x)).join(", ") : "";
-            const runStr = `${cleanCode}\nreturn processData(${inputArgs});`;
-            const runner = new Function(runStr);
-            const result = runner();
-            if (result === tc.expected) {
-              testResults.push(`✔️ Passed: Input: [${inputArgs}] -> Output: ${result}`);
-            } else {
-              testResults.push(`❌ Failed: Input: [${inputArgs}] -> Expected ${tc.expected}, got ${result}`);
-              allPassed = false;
-            }
-          } catch (e: any) {
-            testResults.push(`❌ Exception: ${e.message}`);
-            allPassed = false;
-          }
-        }
-      });
-
-      // Special visual simulator updates
-      if (allPassed) {
-        if (checkType === "sql" && editorCode.toLowerCase().includes("where")) {
-          const whereMatch = editorCode.match(/level\s*(>|<|=)\s*(\d+)/i);
-          if (whereMatch) {
-            const op = whereMatch[1];
-            const val = parseInt(whereMatch[2], 10);
-            setSqlTableData(prev => prev.filter(row => {
-              if (op === ">") return row.level > val;
-              if (op === "<") return row.level < val;
-              return row.level === val;
-            }));
-          }
-        }
-      }
-    } catch (err: any) {
-      testResults.push(`❌ Core Evaluation Crash: ${err.message}`);
-      allPassed = false;
-    }
-
-    setEvalLogs(prev => [...prev, ...testResults]);
-    setEvaluationSuccess(allPassed);
-
-    if (allPassed) {
-      playSound("success");
-      toast.success("Level Complete! Great job.");
-      handleLevelCompletion();
-    } else {
-      playSound("fail");
-      toast.error("Evaluation Failed. Please check the console output and try again.");
-    }
-  };
-
-  // Update game progress locally and on Firestore
-  const handleLevelCompletion = async () => {
-    if (!activeGame || !activeLevelData) return;
-
-    const gameId = activeGame.id;
-    const completedLvl = currentLevelNum;
-    const xpReward = 100;
-
-    // Calculate next overall progress state
-    const currentProgress = progress[gameId] || { completedLevel: 0, xp: 0 };
-    const nextCompletedLevel = Math.max(currentProgress.completedLevel, completedLvl);
-    let nextXp = currentProgress.xp;
-    let nextTotalXp = totalXp;
-
-    if (completedLvl > currentProgress.completedLevel) {
-      nextXp += xpReward;
-      nextTotalXp += xpReward;
-    }
-
-    const nextProgress = {
-      ...progress,
-      [gameId]: {
-        completedLevel: nextCompletedLevel,
-        xp: nextXp
-      }
-    };
-
-    setProgress(nextProgress);
-    setTotalXp(nextTotalXp);
-
-    // Save locally
-    localStorage.setItem("mockrithm_games_progress", JSON.stringify(nextProgress));
-    localStorage.setItem("mockrithm_games_xp", nextTotalXp.toString());
-
-    // Sync to Firestore
-    if (isSignedIn && clerkUser) {
-      try {
-        await updateUserGamesProgress(clerkUser.id, gameId, completedLvl, xpReward);
-      } catch (err) {
-        console.error("Failed syncing progress to cloud database:", err);
-      }
-    }
-  };
-
-  // Block top-level selector skipping unless verified
-  const canGoNext = currentLevelNum < maxUnlockedLevel || evaluationSuccess === true;
-
-  const handleNextLevel = () => {
-    if (!canGoNext) {
-      toast.error("You must compile and pass the current level's tests before progressing!");
-      return;
-    }
-    playSound("click");
-    if (currentLevelNum < 500) {
-      setCurrentLevelNum(prev => prev + 1);
-    } else {
-      toast.info("Congratulations! You completed all 500 levels of this game!");
-      setActiveGame(null);
-    }
-  };
-
-  const handlePrevLevel = () => {
-    playSound("click");
-    if (currentLevelNum > 1) {
-      setCurrentLevelNum(prev => prev - 1);
-    }
-  };
-
-  const handleSelectLevel = (num: number) => {
-    if (isNaN(num) || num < 1) return;
-    if (num > maxUnlockedLevel) {
-      toast.error(`Level ${num} is locked! Clear preceding levels first.`);
-      return;
-    }
-    playSound("click");
-    setCurrentLevelNum(num);
-  };
-
-  // Filtered Leaderboard computation
+  // Filtered Leaderboard computation with dynamic IP parameters
   const getFilteredLeaderboard = () => {
-    const list = [...MOCK_LEADERBOARD];
-    // append user to leaderboard dynamically if logged in
-    const userNameDisplay = clerkUser?.username || clerkUser?.firstName || "Hacker";
-    const userRow = { rank: 10, name: userNameDisplay, country: "United States", city: "San Francisco", xp: totalXp, badges: Object.keys(progress).length, achievements: claimedAchievements.length, avatar: "🛸" };
+    const list = [...BASE_LEADERBOARD];
+    const userRow = { 
+      name: userNameDisplay, 
+      country: userLocation.country, 
+      city: userLocation.city, 
+      xp: totalXp, 
+      badges: Object.keys(progress).length, 
+      achievements: claimedAchievements.length, 
+      avatar: "🛸" 
+    };
     
     // Add user if not already there
     if (!list.some(r => r.name === userNameDisplay)) {
@@ -784,19 +534,17 @@ export default function GamesPage() {
 
     let filtered = list;
     if (leaderboardScope === "country") {
-      filtered = list.filter(r => r.country === "United States");
+      filtered = list.filter(r => r.country.toLowerCase() === userLocation.country.toLowerCase());
     } else if (leaderboardScope === "city") {
-      filtered = list.filter(r => r.city === "San Francisco");
+      filtered = list.filter(r => r.city.toLowerCase() === userLocation.city.toLowerCase());
     }
 
     // Sort by selected metric
-    filtered.sort((a, b) => b[leaderboardMetric] - a[leaderboardMetric]);
+    filtered.sort((a, b) => (b[leaderboardMetric] || 0) - (a[leaderboardMetric] || 0));
     
-    // Recalculate rank values based on sorting
     return filtered.map((row, idx) => ({ ...row, rank: idx + 1 }));
   };
 
-  // Red Notification dot counter
   const unclaimedCount = getUnclaimedAchievementsCount();
 
   return (
@@ -804,21 +552,21 @@ export default function GamesPage() {
       {/* Background Dots Grid */}
       <div className="absolute inset-0 premium-grid-dot pointer-events-none opacity-20 z-0" />
 
-      {/* Left Custom Gaming Sidebar Menu */}
+      {/* Left Custom Sidebar Menu */}
       <div className="w-64 border-r border-zinc-900 bg-zinc-950 flex flex-col justify-between h-full relative z-20">
         <div className="p-6 flex flex-col gap-6">
           {/* Logo & Back button */}
           <div>
             <Link 
               href="/" 
-              className="flex items-center gap-1.5 text-[10px] font-mono font-black text-zinc-500 hover:text-white uppercase tracking-widest transition-all mb-4"
+              className="flex items-center gap-1.5 text-[10px] font-mono font-black text-zinc-550 hover:text-white uppercase tracking-widest transition-all mb-4"
               onClick={() => playSound("click")}
             >
               <ArrowLeft className="size-3.5" /> Back to Site
             </Link>
             <div className="flex items-center gap-2">
               <span className="h-2 w-2 rounded-full bg-emerald-500 animate-ping" />
-              <h2 className="text-sm font-black tracking-wider uppercase font-mono text-white">Citadel Games</h2>
+              <h2 className="text-sm font-black tracking-wider uppercase font-mono text-white">mockrithm</h2>
             </div>
           </div>
 
@@ -836,6 +584,17 @@ export default function GamesPage() {
             </button>
 
             <button
+              onClick={() => { playSound("click"); setActiveTab("profile"); }}
+              className={`w-full flex items-center justify-between px-4 py-3 rounded-xl transition-all font-bold text-xs uppercase tracking-wider ${
+                activeTab === "profile" ? "bg-white text-black font-extrabold" : "text-zinc-400 hover:bg-zinc-900 hover:text-white"
+              }`}
+            >
+              <span className="flex items-center gap-2">
+                <UserIcon className="size-4" /> Profile Stats
+              </span>
+            </button>
+
+            <button
               onClick={() => { playSound("click"); setActiveTab("achievements"); }}
               className={`w-full flex items-center justify-between px-4 py-3 rounded-xl transition-all font-bold text-xs uppercase tracking-wider ${
                 activeTab === "achievements" ? "bg-white text-black font-extrabold" : "text-zinc-400 hover:bg-zinc-900 hover:text-white"
@@ -843,7 +602,6 @@ export default function GamesPage() {
             >
               <span className="flex items-center gap-2 relative">
                 <Trophy className="size-4" /> Achievements
-                {/* Red Notification Dot indicator */}
                 {unclaimedCount > 0 && (
                   <span className="absolute -top-1 -right-2 flex h-2 w-2">
                     <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
@@ -885,12 +643,16 @@ export default function GamesPage() {
         {/* User Mini Profile Block */}
         <div className="p-6 border-t border-zinc-900 bg-zinc-950 flex flex-col gap-2.5">
           <div className="flex items-center gap-3">
-            <div className="size-8 rounded-full bg-gradient-to-tr from-zinc-800 to-zinc-900 border border-zinc-700 flex items-center justify-center text-sm">
-              {clerkUser?.username?.[0]?.toUpperCase() || clerkUser?.firstName?.[0]?.toUpperCase() || "H"}
-            </div>
+            {userAvatarUrl ? (
+              <img src={userAvatarUrl} alt="Avatar" className="size-8 rounded-full border border-zinc-700 object-cover" />
+            ) : (
+              <div className="size-8 rounded-full bg-gradient-to-tr from-zinc-800 to-zinc-900 border border-zinc-700 flex items-center justify-center text-sm">
+                {userNameDisplay[0]?.toUpperCase()}
+              </div>
+            )}
             <div className="overflow-hidden">
               <h4 className="text-xs font-bold truncate text-white uppercase tracking-wide">
-                {clerkUser?.username || clerkUser?.firstName || "Developer"}
+                {userNameDisplay}
               </h4>
               <p className="text-[8px] font-mono text-zinc-550 uppercase font-black">{totalXp} Global XP</p>
             </div>
@@ -901,17 +663,17 @@ export default function GamesPage() {
       {/* Right Content Panel */}
       <div className="flex-1 flex flex-col h-full overflow-y-auto relative z-10 p-8">
         
-        {/* Tab 1: Arena Dashboard (prerequisite network tree & game grid) */}
+        {/* Tab 1: Arena Dashboard */}
         {activeTab === "dashboard" && (
           <div className="w-full max-w-7xl mx-auto flex flex-col gap-6">
             {!activeGame ? (
               <>
-                {/* Top Section */}
+                {/* Header */}
                 <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 border-b border-zinc-900 pb-8 mb-4">
                   <div className="space-y-2">
                     <div className="flex items-center gap-2">
                       <span className="h-2 w-2 rounded-full bg-emerald-500 animate-ping" />
-                      <span className="text-[10px] font-mono tracking-widest text-zinc-500 uppercase">GAMIFIED SYSTEM CITADEL</span>
+                      <span className="text-[10px] font-mono tracking-widest text-zinc-550 uppercase">GAMIFIED SYSTEM CITADEL</span>
                     </div>
                     <h1 className="text-4xl font-black tracking-tight leading-none uppercase font-mono">
                       Mastery Arena
@@ -921,11 +683,10 @@ export default function GamesPage() {
                     </p>
                   </div>
 
-                  {/* Sound controls and Developer bypass */}
-                  <div className="flex items-center gap-3 bg-zinc-950 border border-zinc-900 p-3 rounded-2xl">
+                  <div className="flex items-center gap-3 bg-zinc-955 border border-zinc-900 p-3 rounded-2xl">
                     <button 
                       onClick={() => { playSound("click"); setSoundEnabled(!soundEnabled); }}
-                      className="p-2 rounded-xl bg-zinc-900 border border-zinc-850 text-zinc-400 hover:text-white transition-all cursor-pointer"
+                      className="p-2 rounded-xl bg-zinc-900 border border-zinc-850 text-zinc-450 hover:text-white transition-all cursor-pointer"
                     >
                       {soundEnabled ? <Volume2 className="size-4" /> : <VolumeX className="size-4" />}
                     </button>
@@ -967,13 +728,13 @@ export default function GamesPage() {
                             >
                               <TechIcon name={game.iconName} className="size-5 text-white" />
                               <span className="text-[10px] font-bold truncate w-full">{game.name}</span>
-                              <span className="text-[8px] font-mono text-zinc-500">{prog.completedLevel}/500</span>
+                              <span className="text-[8px] font-mono text-zinc-550">{prog.completedLevel}/500</span>
                             </div>
                           );
                         })}
                       </div>
 
-                      {/* Line */}
+                      {/* Divider Line */}
                       <div className="h-[2px] bg-zinc-900 relative my-1 mx-12">
                         <div className="absolute left-[20%] -top-1 size-2 rounded-full bg-zinc-800" />
                         <div className="absolute left-[50%] -top-1 size-2 rounded-full bg-zinc-800" />
@@ -999,7 +760,7 @@ export default function GamesPage() {
                                   : "bg-zinc-900/60 border-zinc-850 hover:border-zinc-500"
                               }`}
                             >
-                              <TechIcon name={game.iconName} className="size-5 text-white" />
+                                <TechIcon name={game.iconName} className="size-5 text-white" />
                               <span className="text-[10px] font-bold truncate w-full">{game.name}</span>
                               {hasWarn && (
                                 <span className="text-[7.5px] font-mono text-amber-500 font-bold uppercase leading-none">Warning</span>
@@ -1012,7 +773,7 @@ export default function GamesPage() {
                   </div>
                 </div>
 
-                {/* List of Game Cards */}
+                {/* Grid list cards */}
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                   {GAMES_LIST.map((game) => {
                     const gameProg = progress[game.id] || { completedLevel: 0, xp: 0 };
@@ -1061,9 +822,8 @@ export default function GamesPage() {
                 </div>
               </>
             ) : (
-              /* Inside active Game Runner */
+              /* Workspace UI */
               <div className="flex flex-col gap-6">
-                {/* Top Nav inside Arena */}
                 <div className="flex items-center justify-between border-b border-zinc-900 pb-4">
                   <button
                     onClick={() => { playSound("click"); setActiveGame(null); }}
@@ -1087,11 +847,11 @@ export default function GamesPage() {
                     <button
                       onClick={handlePrevLevel}
                       disabled={currentLevelNum === 1}
-                      className="px-2.5 py-1.5 rounded-lg bg-zinc-955 border border-zinc-900 hover:border-zinc-700 text-zinc-450 hover:text-white transition-all cursor-pointer disabled:opacity-30 disabled:pointer-events-none text-xs"
+                      className="px-2.5 py-1.5 rounded-lg bg-zinc-955 border border-zinc-900 hover:border-zinc-700 text-zinc-455 hover:text-white transition-all cursor-pointer disabled:opacity-30 disabled:pointer-events-none text-xs"
                     >
                       ◀
                     </button>
-                    <div className="flex items-center gap-1 bg-zinc-955 border border-zinc-900 px-3 py-1.5 rounded-lg text-xs font-mono font-bold">
+                    <div className="flex items-center gap-1 bg-zinc-955 border border-zinc-900 px-3 py-1.5 rounded-lg text-xs font-mono font-bold font-mono">
                       LEVEL 
                       <input
                         type="number"
@@ -1111,16 +871,14 @@ export default function GamesPage() {
                     <button
                       onClick={handleNextLevel}
                       disabled={currentLevelNum === 500 || !canGoNext}
-                      className="px-2.5 py-1.5 rounded-lg bg-zinc-955 border border-zinc-900 hover:border-zinc-700 text-zinc-450 hover:text-white transition-all cursor-pointer disabled:opacity-30 disabled:pointer-events-none text-xs"
+                      className="px-2.5 py-1.5 rounded-lg bg-zinc-955 border border-zinc-900 hover:border-zinc-700 text-zinc-455 hover:text-white transition-all cursor-pointer disabled:opacity-30 disabled:pointer-events-none text-xs"
                     >
                       ▶
                     </button>
                   </div>
                 </div>
 
-                {/* Workspace Panels */}
                 <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-stretch">
-                  {/* Left Sidebar */}
                   <div className="lg:col-span-4 flex flex-col gap-6 max-h-[85vh] overflow-y-auto pr-1">
                     
                     {/* Prerequisite Alert */}
@@ -1168,7 +926,7 @@ export default function GamesPage() {
                       </div>
 
                       <div className="border-t border-zinc-900 pt-4 mt-2">
-                        <h4 className="text-xs font-black tracking-wider text-white uppercase mb-2 font-mono">Validation Criteria</h4>
+                        <h4 className="text-xs font-black tracking-wider text-white uppercase mb-2 font-mono font-mono">Validation Criteria</h4>
                         <ul className="space-y-1.5 list-none pl-0">
                           {activeLevelData?.validation.testCases.map((tc, idx) => (
                             <li key={idx} className="text-[10.5px] text-zinc-500 font-medium flex items-start gap-2">
@@ -1205,10 +963,10 @@ export default function GamesPage() {
                       </div>
                     </div>
 
-                    {/* Arena ranks indicator */}
+                    {/* Arena Ranks progress */}
                     <div className="bg-zinc-950/40 border border-zinc-900 rounded-2xl p-6 flex flex-col gap-4">
                       <div className="flex items-center justify-between">
-                        <h4 className="text-[10px] font-mono font-bold text-zinc-450 uppercase tracking-widest">
+                        <h4 className="text-[10px] font-mono font-bold text-zinc-455 uppercase tracking-widest">
                           Arena Ranks & Badges
                         </h4>
                         <span className="text-[9px] font-mono text-zinc-550 uppercase font-black">PROGRESSIVE TITLES</span>
@@ -1253,13 +1011,13 @@ export default function GamesPage() {
                       </div>
                     </div>
 
-                    {/* Previews sandboxes */}
+                    {/* Previews Output */}
                     <div className="bg-zinc-950/40 border border-zinc-900 rounded-2xl p-6 flex flex-col gap-4">
                       <div className="flex items-center justify-between">
                         <h4 className="text-[10px] font-mono font-bold text-zinc-450 uppercase tracking-widest">
                           Live Sandbox Output
                         </h4>
-                        <span className="text-[9px] font-mono text-zinc-650 uppercase font-black">COMPILING ON-THE-FLY</span>
+                        <span className="text-[9px] font-mono text-zinc-655 uppercase font-black font-mono">COMPILING ON-THE-FLY</span>
                       </div>
 
                       <div className="min-h-52 bg-black border border-zinc-900 rounded-xl overflow-hidden relative flex flex-col justify-center items-center p-3 text-center">
@@ -1290,10 +1048,10 @@ export default function GamesPage() {
                             <table className="w-full border-collapse">
                               <thead>
                                 <tr className="border-b border-zinc-800 bg-zinc-955">
-                                  <th className="p-2 text-zinc-500 font-bold">id</th>
-                                  <th className="p-2 text-zinc-500 font-bold">name</th>
-                                  <th className="p-2 text-zinc-500 font-bold">level</th>
-                                  <th className="p-2 text-zinc-500 font-bold">class</th>
+                                  <th className="p-2 text-zinc-500 font-bold font-mono">id</th>
+                                  <th className="p-2 text-zinc-500 font-bold font-mono">name</th>
+                                  <th className="p-2 text-zinc-500 font-bold font-mono">level</th>
+                                  <th className="p-2 text-zinc-500 font-bold font-mono">class</th>
                                 </tr>
                               </thead>
                               <tbody>
@@ -1346,11 +1104,11 @@ export default function GamesPage() {
                     </div>
                   </div>
 
-                  {/* Right Column: Monaco Editor & Logger */}
+                  {/* Monaco Editor Pane */}
                   <div className="lg:col-span-8 flex flex-col gap-6">
                     <div className="bg-zinc-950/40 border border-zinc-900 rounded-2xl overflow-hidden flex flex-col">
                       <div className="flex items-center justify-between px-6 py-4 bg-zinc-950/80 border-b border-zinc-900">
-                        <span className="text-[10px] font-mono font-bold text-zinc-400 uppercase tracking-widest">
+                        <span className="text-[10px] font-mono font-bold text-zinc-400 uppercase tracking-widest font-mono">
                           SOURCE CODE WORKSPACE
                         </span>
                         <button
@@ -1386,10 +1144,10 @@ export default function GamesPage() {
                       </div>
                     </div>
 
-                    {/* Console Test Logger */}
+                    {/* Console test logger */}
                     <div className="bg-zinc-950/40 border border-zinc-900 rounded-2xl p-6 flex flex-col gap-4">
                       <div className="flex items-center justify-between">
-                        <h4 className="text-[10px] font-mono font-bold text-zinc-400 uppercase tracking-widest">
+                        <h4 className="text-[10px] font-mono font-bold text-zinc-400 uppercase tracking-widest font-mono">
                           UNIT TEST OUTPUT LOGGER
                         </h4>
                         {evaluationSuccess === true && (
@@ -1436,12 +1194,115 @@ export default function GamesPage() {
           </div>
         )}
 
-        {/* Tab 2: Achievements Claim Board */}
+        {/* Tab 2: Profile Stats Board */}
+        {activeTab === "profile" && (
+          <div className="w-full max-w-5xl mx-auto flex flex-col gap-8">
+            <div className="border-b border-zinc-900 pb-6">
+              <h2 className="text-3xl font-black uppercase font-mono tracking-tight">Hacker Dossier</h2>
+              <p className="text-xs text-zinc-500 mt-1">Review live metadata parameters, language clearance profiles, and milestone claims.</p>
+            </div>
+
+            {/* Profile Overview Card */}
+            <div className="bg-zinc-950/40 border border-zinc-900 rounded-3xl p-8 relative overflow-hidden flex flex-col md:flex-row items-center gap-8 shadow-2xl">
+              <div className="absolute inset-0 premium-grid-dot opacity-5 pointer-events-none" />
+              
+              {/* User Avatar */}
+              <div className="relative shrink-0">
+                {userAvatarUrl ? (
+                  <img src={userAvatarUrl} alt="User Avatar" className="size-32 rounded-3xl border-2 border-zinc-805 object-cover shadow-xl" />
+                ) : (
+                  <div className="size-32 rounded-3xl bg-gradient-to-tr from-zinc-800 to-zinc-900 border-2 border-zinc-800 flex items-center justify-center text-4xl font-mono font-bold shadow-xl">
+                    {userNameDisplay[0]?.toUpperCase()}
+                  </div>
+                )}
+                <span className="absolute -bottom-2 -right-2 p-2 rounded-xl bg-emerald-500 text-black border-2 border-black flex items-center justify-center">
+                  <Activity className="size-4" />
+                </span>
+              </div>
+
+              {/* Dossier Specifications */}
+              <div className="flex-1 text-center md:text-left space-y-4">
+                <div>
+                  <span className="text-[9px] font-mono font-black px-2.5 py-0.5 rounded-full bg-zinc-900 border border-white/5 text-zinc-400 uppercase tracking-widest">
+                    ACTIVE PARAMETER
+                  </span>
+                  <h3 className="text-2xl font-black text-white mt-1.5 uppercase font-mono tracking-wide">{userNameDisplay}</h3>
+                  <p className="text-xs text-zinc-500 mt-1 font-mono font-semibold">{userEmailDisplay}</p>
+                </div>
+
+                <div className="grid grid-cols-2 md:grid-cols-3 gap-4 pt-2">
+                  <div className="bg-black/60 border border-zinc-900/60 p-3 rounded-2xl">
+                    <span className="text-[8px] font-mono font-bold text-zinc-650 uppercase tracking-wider block">Global Score</span>
+                    <span className="text-base font-black text-white font-mono">{totalXp} XP</span>
+                  </div>
+
+                  <div className="bg-black/60 border border-zinc-900/60 p-3 rounded-2xl">
+                    <span className="text-[8px] font-mono font-bold text-zinc-650 uppercase tracking-wider block">Completed Levels</span>
+                    <span className="text-base font-black text-white font-mono">
+                      {Object.keys(progress).reduce((acc, k) => acc + (progress[k]?.completedLevel || 0), 0)} / 7000
+                    </span>
+                  </div>
+
+                  <div className="bg-black/60 border border-zinc-900/60 p-3 rounded-2xl col-span-2 md:col-span-1">
+                    <span className="text-[8px] font-mono font-bold text-zinc-655 uppercase tracking-wider block">IP Location</span>
+                    <span className="text-[11px] font-bold text-zinc-300 truncate block mt-0.5">{userLocation.city}, {userLocation.country}</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Language Progress Shelf */}
+            <div className="space-y-4">
+              <h3 className="text-sm font-bold uppercase tracking-widest text-zinc-450 font-mono flex items-center gap-2">
+                <FileCode className="size-4" /> Language Progression Matrix
+              </h3>
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {GAMES_LIST.map((game) => {
+                  const gameProg = progress[game.id] || { completedLevel: 0, xp: 0 };
+                  const pct = Math.round((gameProg.completedLevel / 500) * 100);
+                  const isStarted = gameProg.completedLevel > 0;
+
+                  return (
+                    <div 
+                      key={game.id}
+                      className={`p-5 rounded-2xl border bg-zinc-950/20 flex flex-col justify-between h-36 relative overflow-hidden transition-all duration-300 ${
+                        isStarted ? "border-zinc-800" : "border-zinc-900 opacity-60"
+                      }`}
+                    >
+                      <div className="flex items-center gap-3">
+                        <div className={`p-2.5 rounded-xl bg-gradient-to-br ${game.gradient} border border-white/5`}>
+                          <TechIcon name={game.iconName} className="size-4 text-white" />
+                        </div>
+                        <div>
+                          <h4 className="text-xs font-bold text-white uppercase font-mono">{game.name}</h4>
+                          <span className="text-[8px] font-mono text-zinc-550 uppercase font-black">{game.theme}</span>
+                        </div>
+                      </div>
+
+                      <div className="space-y-1.5 mt-4">
+                        <div className="flex justify-between text-[8px] font-mono text-zinc-550 font-bold font-mono">
+                          <span>LEVEL {gameProg.completedLevel}/500</span>
+                          <span>{pct}%</span>
+                        </div>
+                        <div className="w-full h-1 bg-zinc-900 rounded-full overflow-hidden">
+                          <div className={`h-full bg-gradient-to-r ${game.gradient}`} style={{ width: `${pct}%` }} />
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Tab 3: Achievements Claim Board */}
         {activeTab === "achievements" && (
           <div className="w-full max-w-7xl mx-auto flex flex-col gap-6">
             <div className="border-b border-zinc-900 pb-6 mb-4">
               <h2 className="text-3xl font-black uppercase font-mono tracking-tight">Campaign Achievements Shelf</h2>
-              <p className="text-xs text-zinc-500 mt-1">Complete structural tasks in coding sandboxes to unlock rewards. Unlocked rewards must be claimed below to add to your global XP.</p>
+              <p className="text-xs text-zinc-550 mt-1">Complete structural tasks in coding sandboxes to unlock rewards. Unlocked rewards must be claimed below to add to your global XP.</p>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -1452,7 +1313,7 @@ export default function GamesPage() {
                 return (
                   <div 
                     key={ach.id}
-                    className={`relative rounded-2xl border p-5 bg-zinc-950/40 flex flex-col justify-between h-44 transition-all duration-300 ${
+                    className={`relative rounded-2xl border p-5 bg-zinc-955/40 flex flex-col justify-between h-44 transition-all duration-300 ${
                       isClaimed 
                         ? "border-emerald-500/20 bg-emerald-500/[0.01]" 
                         : ach.completed 
@@ -1464,7 +1325,7 @@ export default function GamesPage() {
                       <div className="flex justify-between items-start">
                         <h4 className="text-xs font-bold uppercase tracking-wider text-white font-mono">{ach.title}</h4>
                         {isClaimed ? (
-                          <span className="text-[8px] font-mono font-bold text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-2 py-0.5 rounded-full uppercase">CLAIMED</span>
+                          <span className="text-[8px] font-mono font-bold text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-2 py-0.5 rounded-full uppercase leading-none font-mono">CLAIMED</span>
                         ) : ach.completed ? (
                           <button
                             onClick={() => claimAchievementReward(ach.id, ach.xp)}
@@ -1473,11 +1334,11 @@ export default function GamesPage() {
                             <Award className="size-3" /> CLAIM REWARD
                           </button>
                         ) : (
-                          <span className="text-[8px] font-mono font-bold text-zinc-500 bg-zinc-900 border border-zinc-800 px-2 py-0.5 rounded-full uppercase">LOCKED</span>
+                          <span className="text-[8px] font-mono font-bold text-zinc-500 bg-zinc-900 border border-zinc-800 px-2 py-0.5 rounded-full uppercase leading-none font-mono">LOCKED</span>
                         )}
                       </div>
                       <p className="text-[10.5px] text-zinc-450 mt-2.5 leading-relaxed">{ach.desc}</p>
-                      <p className="text-[9px] font-mono text-zinc-600 mt-1 uppercase font-bold">Target: {ach.target}</p>
+                      <p className="text-[9px] font-mono text-zinc-600 mt-1 uppercase font-bold font-mono">Target: {ach.target}</p>
                     </div>
 
                     <div className="mt-4 flex items-center justify-between gap-4">
@@ -1489,7 +1350,7 @@ export default function GamesPage() {
                           />
                         </div>
                       </div>
-                      <span className={`text-[9px] font-mono font-black ${ach.completed ? "text-amber-400" : "text-zinc-500"}`}>
+                      <span className={`text-[9px] font-mono font-black ${ach.completed ? "text-amber-400" : "text-zinc-500"} font-mono`}>
                         +{ach.xp} XP
                       </span>
                     </div>
@@ -1500,21 +1361,21 @@ export default function GamesPage() {
           </div>
         )}
 
-        {/* Tab 3: Competitive Leaderboards */}
+        {/* Tab 4: Leaderboard Filter */}
         {activeTab === "leaderboard" && (
           <div className="w-full max-w-4xl mx-auto flex flex-col gap-6">
             <div className="border-b border-zinc-900 pb-6">
               <h2 className="text-3xl font-black uppercase font-mono tracking-tight">Citadel Leaderboards</h2>
-              <p className="text-xs text-zinc-500 mt-1">Compare achievements, XP parameters, and badge completions against regional, country, or global hackers.</p>
+              <p className="text-xs text-zinc-550 mt-1 font-semibold">Compare achievements, XP parameters, and badge completions against regional, country, or global hackers.</p>
             </div>
 
-            {/* Filtering Controls */}
-            <div className="flex flex-col sm:flex-row justify-between items-stretch sm:items-center gap-4 bg-zinc-950 p-4 border border-zinc-900 rounded-2xl">
+            {/* Filters */}
+            <div className="flex flex-col sm:flex-row justify-between items-stretch sm:items-center gap-4 bg-zinc-955 p-4 border border-zinc-900 rounded-2xl">
               <div className="flex gap-2">
                 {[
                   { value: "world", label: "World" },
-                  { value: "country", label: "United States" },
-                  { value: "city", label: "San Francisco" }
+                  { value: "country", label: userLocation.country },
+                  { value: "city", label: userLocation.city }
                 ].map((s) => (
                   <button
                     key={s.value}
@@ -1563,7 +1424,7 @@ export default function GamesPage() {
                 </thead>
                 <tbody>
                   {getFilteredLeaderboard().map((row) => {
-                    const isCurrentUser = row.name === (clerkUser?.username || clerkUser?.firstName || "Hacker");
+                    const isCurrentUser = row.name === userNameDisplay;
                     return (
                       <tr 
                         key={row.name} 
@@ -1575,10 +1436,14 @@ export default function GamesPage() {
                           {row.rank === 1 ? "🥇" : row.rank === 2 ? "🥈" : row.rank === 3 ? "🥉" : `#${row.rank}`}
                         </td>
                         <td className="p-4 flex items-center gap-2.5">
-                          <span className="text-base select-none">{row.avatar}</span>
+                          {isCurrentUser && userAvatarUrl ? (
+                            <img src={userAvatarUrl} alt="Avatar" className="size-6 rounded-full object-cover border border-zinc-800" />
+                          ) : (
+                            <span className="text-base select-none">{row.avatar}</span>
+                          )}
                           <span className={isCurrentUser ? "text-emerald-400" : "text-white"}>{row.name}</span>
                           {isCurrentUser && (
-                            <span className="text-[7.5px] font-mono bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 px-1.5 py-0.5 rounded uppercase font-bold">YOU</span>
+                            <span className="text-[7.5px] font-mono bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 px-1.5 py-0.5 rounded uppercase font-bold font-mono">YOU</span>
                           )}
                         </td>
                         <td className="p-4 text-zinc-400">{row.country}</td>
@@ -1595,12 +1460,12 @@ export default function GamesPage() {
           </div>
         )}
 
-        {/* Tab 4: Social Friends List & Interactive Messaging chat */}
+        {/* Tab 5: Social Friends List & Chat channel */}
         {activeTab === "social" && (
           <div className="w-full max-w-5xl mx-auto flex flex-col gap-6 h-[80vh]">
             <div className="border-b border-zinc-900 pb-6 shrink-0">
               <h2 className="text-3xl font-black uppercase font-mono tracking-tight">Social Network</h2>
-              <p className="text-xs text-zinc-500 mt-1">Connect with peer developers, exchange suggestions, and coordinate milestones.</p>
+              <p className="text-xs text-zinc-500 mt-1 font-semibold">Connect with peer developers, exchange suggestions, and coordinate milestones.</p>
             </div>
 
             <div className="flex-1 flex gap-6 min-h-0">
@@ -1644,7 +1509,7 @@ export default function GamesPage() {
                     />
                     <button 
                       type="submit"
-                      className="p-2 bg-white text-black hover:bg-zinc-250 rounded-lg transition-all cursor-pointer flex items-center justify-center shadow"
+                      className="p-2 bg-white text-black hover:bg-zinc-200 rounded-lg transition-all cursor-pointer flex items-center justify-center shadow"
                     >
                       <Plus className="size-3.5" />
                     </button>
@@ -1653,14 +1518,14 @@ export default function GamesPage() {
               </div>
 
               {/* Chat Right Panel */}
-              <div className="flex-1 border border-zinc-900 rounded-2xl bg-zinc-950/40 flex flex-col justify-between overflow-hidden">
+              <div className="flex-1 border border-zinc-900 rounded-2xl bg-zinc-955/40 flex flex-col justify-between overflow-hidden">
                 {/* Chat Header */}
                 <div className="px-5 py-4 bg-zinc-950 border-b border-zinc-900 flex items-center justify-between">
                   <div className="flex items-center gap-2">
                     <span className="h-2 w-2 rounded-full bg-emerald-500 animate-ping" />
                     <h3 className="text-xs font-black uppercase font-mono text-white">Direct Channel: {selectedFriend}</h3>
                   </div>
-                  <span className="text-[9px] font-mono text-zinc-550 uppercase font-black">Encrypted Sandbox Session</span>
+                  <span className="text-[9px] font-mono text-zinc-555 uppercase font-black font-mono">Secure Connection</span>
                 </div>
 
                 {/* Message Log */}
@@ -1682,12 +1547,12 @@ export default function GamesPage() {
                           }`}>
                             {msg.text}
                           </div>
-                          <span className="text-[7.5px] font-mono text-zinc-600 mt-1 select-none">{msg.time}</span>
+                          <span className="text-[7.5px] font-mono text-zinc-600 mt-1 select-none font-mono">{msg.time}</span>
                         </div>
                       );
                     })
                   ) : (
-                    <div className="flex-1 flex items-center justify-center text-zinc-650 italic text-[10px]">
+                    <div className="flex-1 flex items-center justify-center text-zinc-655 italic text-[10px]">
                       Send a message to open the secure timeline connection.
                     </div>
                   )}
