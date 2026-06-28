@@ -2,10 +2,9 @@
 
 import React, { useState, useEffect, useRef } from "react";
 import { useUser } from "@clerk/nextjs";
-import dynamic from "next/dynamic";
-const Editor = dynamic(() => import("@monaco-editor/react"), { ssr: false });
-import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
+import dynamic from "next/dynamic";
+import Link from "next/link";
 import {
   FileCode,
   Palette,
@@ -62,6 +61,8 @@ import {
   getLeaderboardUsers,
   GameProgress
 } from "@/lib/actions/games.action";
+
+const Editor = dynamic(() => import("@monaco-editor/react"), { ssr: false });
 
 // Dynamic Icon Selector Component
 const TechIcon = ({ name, className }: { name: string; className?: string }) => {
@@ -156,15 +157,15 @@ interface Achievement {
 export default function GamesPage() {
   const { isLoaded, isSignedIn, user: clerkUser } = useUser();
 
-  // Sidebar Tab States: 'dashboard' | 'achievements' | 'leaderboard' | 'social' | 'profile' | 'friends'
-  const [activeTab, setActiveTab] = useState<"dashboard" | "achievements" | "leaderboard" | "social" | "profile" | "friends">("dashboard");
+  // Sidebar Tab States: 'dashboard' | 'achievements' | 'leaderboard' | 'social' | 'profile' | 'friends' | 'badges'
+  const [activeTab, setActiveTab] = useState<"dashboard" | "achievements" | "leaderboard" | "social" | "profile" | "friends" | "badges">("dashboard");
 
   // Progress State
   const [progress, setProgress] = useState<Record<string, GameProgress>>({});
   const [totalXp, setTotalXp] = useState(0);
   const [loading, setLoading] = useState(true);
 
-  // User location states (determined dynamically from IP)
+  // User location states (determined dynamically from IP and Geolocation prompts)
   const [userLocation, setUserLocation] = useState({
     country: "United States",
     city: "San Francisco"
@@ -219,14 +220,14 @@ export default function GamesPage() {
   const [callStatus, setCallStatus] = useState<"calling" | "connected" | "ended">("ended");
   const [callTimer, setCallTimer] = useState(0);
   const [callAudioMuted, setCallAudioMuted] = useState(false);
-  const callIntervalRef = useRef<NodeJS.Timeout | null>(null);
+  const callIntervalRef = useRef<any>(null);
 
   // Dynamic user details
   const userNameDisplay = clerkUser?.username || clerkUser?.firstName || "Hacker";
   const userEmailDisplay = clerkUser?.primaryEmailAddress?.emailAddress || "guest@mockrithm.com";
   const userAvatarUrl = clerkUser?.imageUrl;
 
-  // Fetch client actual location from IP and synchronize progress from Firestore
+  // Ask for precise location via HTML5 Geolocation API and sync progress
   useEffect(() => {
     async function loadProgress() {
       if (!isLoaded) return;
@@ -270,47 +271,33 @@ export default function GamesPage() {
           }
         }
 
-        // Fetch actual client location from IP via robust APIs
-        let ipCountry = "";
-        let ipCity = "";
-
-        // 1. Try freeipapi.com
-        try {
-          const res = await fetch("https://freeipapi.com/api/json");
-          if (res.ok) {
-            const data = await res.json();
-            if (data.countryName && data.cityName) {
-              ipCountry = data.countryName;
-              ipCity = data.cityName;
-            }
-          }
-        } catch (e) {
-          console.warn("freeipapi lookup failed");
-        }
-
-        // 2. Try ipapi.co as fallback
-        if (!ipCountry || !ipCity) {
-          try {
-            const res = await fetch("https://ipapi.co/json/");
-            if (res.ok) {
-              const data = await res.json();
-              if (data.country_name && data.city) {
-                ipCountry = data.country_name;
-                ipCity = data.city;
+        // Ask for precise HTML5 browser geolocation
+        if (typeof navigator !== "undefined" && navigator.geolocation) {
+          navigator.geolocation.getCurrentPosition(
+            async (position) => {
+              const lat = position.coords.latitude;
+              const lon = position.coords.longitude;
+              try {
+                const res = await fetch(`https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${lat}&longitude=${lon}&localityLanguage=en`);
+                if (res.ok) {
+                  const geoData = await res.json();
+                  const countryName = geoData.countryName || "Pakistan";
+                  const cityName = geoData.city || geoData.locality || "Lahore";
+                  
+                  setUserLocation({ country: countryName, city: cityName });
+                  
+                  if (isSignedIn && clerkUser) {
+                    await saveUserLocation(clerkUser.id, countryName, cityName);
+                  }
+                }
+              } catch (e) {
+                console.error("Reverse geocoding lookup failed:", e);
               }
+            },
+            (err) => {
+              console.warn("User declined geolocation permissions:", err.message);
             }
-          } catch (e) {
-            console.warn("ipapi lookup failed");
-          }
-        }
-
-        if (ipCountry && ipCity) {
-          setUserLocation({ country: ipCountry, city: ipCity });
-          
-          // Persist actual location to DB if changed
-          if (isSignedIn && clerkUser && (ipCountry !== fetchedCountry || ipCity !== fetchedCity)) {
-            await saveUserLocation(clerkUser.id, ipCountry, ipCity);
-          }
+          );
         }
 
         // Load leaderboard database records
@@ -369,10 +356,6 @@ export default function GamesPage() {
     }
   }, [activeGame, currentLevelNum]);
 
-  // Calculate highest unlocked level for current game
-  const gameProgressObj = activeGame ? (progress[activeGame.id] || { completedLevel: 0, xp: 0 }) : { completedLevel: 0, xp: 0 };
-  const maxUnlockedLevel = bypassLocks ? 500 : (gameProgressObj.completedLevel + 1 > 500 ? 500 : gameProgressObj.completedLevel + 1);
-
   // Clamp direct level selection to block skipping
   useEffect(() => {
     if (activeGame) {
@@ -380,7 +363,7 @@ export default function GamesPage() {
         setCurrentLevelNum(maxUnlockedLevel);
       }
     }
-  }, [activeGame, maxUnlockedLevel, currentLevelNum]);
+  }, [activeGame, currentLevelNum]);
 
   // Check if a game has missing prerequisites for warning notice at launch
   const hasMissingPrerequisites = (gameId: string): boolean => {
@@ -393,33 +376,60 @@ export default function GamesPage() {
     });
   };
 
-  // Calculate dynamic achievements shelf
+  // Calculate dynamic achievements shelf (110 achievements total)
   const getAchievements = (): Achievement[] => {
+    const list: Achievement[] = [];
+    
+    // General achievements (12)
     const playList = Object.keys(progress);
     const anyPlayed = playList.some(k => progress[k].completedLevel > 0);
-    const polyglotCount = playList.filter(k => progress[k].completedLevel >= 5).length;
+    const anyTen = playList.some(k => progress[k].completedLevel >= 10);
+    const anyCent = playList.some(k => progress[k].completedLevel >= 100);
+    const anyHalf = playList.some(k => progress[k].completedLevel >= 250);
+    const anyApex = playList.some(k => progress[k].completedLevel >= 500);
+    const unlockedBadges = playList.filter(k => progress[k].completedLevel > 0).length;
     
-    const htmlLvl = progress["html5"]?.completedLevel || 0;
-    const cssLvl = progress["css3"]?.completedLevel || 0;
-    const jsLvl = progress["javascript"]?.completedLevel || 0;
-    const tsLvl = progress["typescript"]?.completedLevel || 0;
-    const nodeLvl = progress["nodejs"]?.completedLevel || 0;
-    const cyberLvl = progress["cybersecurity"]?.completedLevel || 0;
-    const gitLvl = progress["git"]?.completedLevel || 0;
-    const anyGrand = playList.some(k => progress[k].completedLevel >= 100);
+    list.push({ id: "first_syntax", title: "First Syntax", desc: "Clear Level 1 on any game stack.", target: "Level 1", current: anyPlayed ? 1 : 0, max: 1, completed: anyPlayed, xp: 50 });
+    list.push({ id: "first_rank", title: "First Rank Up", desc: "Reach Level 10 on any game stack.", target: "Level 10", current: anyTen ? 10 : 0, max: 10, completed: anyTen, xp: 100 });
+    list.push({ id: "century_club", title: "Century Club", desc: "Reach Level 100 on any game stack.", target: "Level 100", current: anyCent ? 100 : 0, max: 100, completed: anyCent, xp: 250 });
+    list.push({ id: "halfway_there", title: "Halfway There", desc: "Reach Level 250 on any game stack.", target: "Level 250", current: anyHalf ? 250 : 0, max: 250, completed: anyHalf, xp: 400 });
+    list.push({ id: "apex_dev", title: "Apex Developer", desc: "Reach Level 500 on any game stack.", target: "Level 500", current: anyApex ? 500 : 0, max: 500, completed: anyApex, xp: 600 });
+    list.push({ id: "poly_1", title: "Polyglot I", desc: "Unlock 3 different badges.", target: "3 badges", current: Math.min(unlockedBadges, 3), max: 3, completed: unlockedBadges >= 3, xp: 150 });
+    list.push({ id: "poly_2", title: "Polyglot II", desc: "Unlock 6 different badges.", target: "6 badges", current: Math.min(unlockedBadges, 6), max: 6, completed: unlockedBadges >= 6, xp: 300 });
+    list.push({ id: "poly_3", title: "Polyglot III", desc: "Unlock 10 different badges.", target: "10 badges", current: Math.min(unlockedBadges, 10), max: 10, completed: unlockedBadges >= 10, xp: 500 });
+    list.push({ id: "legend", title: "Citadel Legend", desc: "Claim 5 achievements.", target: "5 claimed", current: Math.min(claimedAchievements.length, 5), max: 5, completed: claimedAchievements.length >= 5, xp: 200 });
+    list.push({ id: "god", title: "Citadel God", desc: "Claim 20 achievements.", target: "20 claimed", current: Math.min(claimedAchievements.length, 20), max: 20, completed: claimedAchievements.length >= 20, xp: 500 });
+    list.push({ id: "social_1", title: "Socialite", desc: "Add 1 friend to your roster.", target: "1 friend", current: Math.min(friendsList.length, 1), max: 1, completed: friendsList.length >= 1, xp: 50 });
+    list.push({ id: "social_2", title: "Squad Commander", desc: "Add 5 friends to your roster.", target: "5 friends", current: Math.min(friendsList.length, 5), max: 5, completed: friendsList.length >= 5, xp: 150 });
 
-    return [
-      { id: "genesis", title: "First Syntax", desc: "Clear Level 1 on any game stack.", target: "Any game Level 1", current: anyPlayed ? 1 : 0, max: 1, completed: anyPlayed, xp: 50 },
-      { id: "explorer", title: "Tech Explorer", desc: "Reach Level 5 on 3 different languages.", target: "3 games", current: Math.min(polyglotCount, 3), max: 3, completed: polyglotCount >= 3, xp: 150 },
-      { id: "html_app", title: "Apprentice Weaver", desc: "Reach Level 10 in HTML5.", target: "HTML5 Level 10", current: Math.min(htmlLvl, 10), max: 10, completed: htmlLvl >= 10, xp: 100 },
-      { id: "css_alc", title: "Style Alchemist", desc: "Reach Level 10 in CSS3.", target: "CSS3 Level 10", current: Math.min(cssLvl, 10), max: 10, completed: cssLvl >= 10, xp: 100 },
-      { id: "js_hack", title: "Logic Hacker", desc: "Reach Level 10 in JavaScript.", target: "JavaScript Level 10", current: Math.min(jsLvl, 10), max: 10, completed: jsLvl >= 10, xp: 100 },
-      { id: "ts_guard", title: "Type Guardian", desc: "Reach Level 5 in TypeScript.", target: "TypeScript Level 5", current: Math.min(tsLvl, 5), max: 5, completed: tsLvl >= 5, xp: 100 },
-      { id: "node_core", title: "Server Core", desc: "Reach Level 5 in NodeJS.", target: "NodeJS Level 5", current: Math.min(nodeLvl, 5), max: 5, completed: nodeLvl >= 5, xp: 100 },
-      { id: "cyber_sentinel", title: "Citadel Sentinel", desc: "Reach Level 5 in Cyber Security.", target: "Security Level 5", current: Math.min(cyberLvl, 5), max: 5, completed: cyberLvl >= 5, xp: 150 },
-      { id: "git_weaver", title: "Timeline Weaver", desc: "Reach Level 5 in Git.", target: "Git Level 5", current: Math.min(gitLvl, 5), max: 5, completed: gitLvl >= 5, xp: 100 },
-      { id: "grandmaster_badge", title: "Grandmaster Title", desc: "Reach Level 100 in any game stack.", target: "Level 100", current: anyGrand ? 100 : 0, max: 100, completed: anyGrand, xp: 500 }
-    ];
+    // Language achievements (14 games * 7 = 98)
+    GAMES_LIST.forEach(game => {
+      const lvl = progress[game.id]?.completedLevel || 0;
+      const tiers = [
+        { lvl: 5, xp: 50, key: "novice", label: "Novice" },
+        { lvl: 25, xp: 100, key: "apprentice", label: "Apprentice" },
+        { lvl: 50, xp: 150, key: "acolyte", label: "Acolyte" },
+        { lvl: 100, xp: 200, key: "expert", label: "Expert" },
+        { lvl: 200, xp: 300, key: "master", label: "Master" },
+        { lvl: 350, xp: 400, key: "grandmaster", label: "Grandmaster" },
+        { lvl: 500, xp: 500, key: "conqueror", label: "Conqueror" }
+      ];
+
+      tiers.forEach(t => {
+        list.push({
+          id: `${game.id}_${t.key}`,
+          title: `${t.label} ${game.name}`,
+          desc: `Reach Level ${t.lvl} in ${game.name}.`,
+          target: `Level ${t.lvl}`,
+          current: Math.min(lvl, t.lvl),
+          max: t.lvl,
+          completed: lvl >= t.lvl,
+          xp: t.xp
+        });
+      });
+    });
+
+    return list;
   };
 
   // Get completed but unclaimed achievements
@@ -659,6 +669,19 @@ export default function GamesPage() {
     
     return filtered.map((row, idx) => ({ ...row, rank: idx + 1 }));
   };
+
+  // Calculate highest unlocked level for current game
+  const gameProgressObj = activeGame ? (progress[activeGame.id] || { completedLevel: 0, xp: 0 }) : { completedLevel: 0, xp: 0 };
+  const maxUnlockedLevel = bypassLocks ? 500 : (gameProgressObj.completedLevel + 1 > 500 ? 500 : gameProgressObj.completedLevel + 1);
+
+  // Clamp direct level selection to block skipping
+  useEffect(() => {
+    if (activeGame) {
+      if (currentLevelNum > maxUnlockedLevel) {
+        setCurrentLevelNum(maxUnlockedLevel);
+      }
+    }
+  }, [activeGame, currentLevelNum]);
 
   const canGoNext = currentLevelNum < maxUnlockedLevel || evaluationSuccess === true;
 
@@ -1009,7 +1032,7 @@ export default function GamesPage() {
               className="flex items-center gap-1.5 text-[10px] font-mono font-black text-zinc-550 hover:text-white uppercase tracking-widest transition-all mb-4"
               onClick={() => playSound("click")}
             >
-              <ArrowLeft className="size-3.5" /> Back to Site
+              <ArrowLeft className="size-3.5" /> Back to Home
             </Link>
             <div className="flex items-center gap-2">
               <h2 className="text-sm font-black tracking-wider uppercase font-mono text-white">mockrithm</h2>
@@ -1025,7 +1048,7 @@ export default function GamesPage() {
               }`}
             >
               <span className="flex items-center gap-2">
-                <Play className="size-4" /> Arena Workspace
+                <Play className="size-4" /> Play
               </span>
             </button>
 
@@ -1036,7 +1059,18 @@ export default function GamesPage() {
               }`}
             >
               <span className="flex items-center gap-2">
-                <UserIcon className="size-4" /> Profile Stats
+                <UserIcon className="size-4" /> Profile
+              </span>
+            </button>
+
+            <button
+              onClick={() => { playSound("click"); setActiveTab("badges"); }}
+              className={`w-full flex items-center justify-between px-4 py-3 rounded-xl transition-all font-bold text-xs uppercase tracking-wider ${
+                activeTab === "badges" ? "bg-white text-black font-extrabold" : "text-zinc-400 hover:bg-zinc-900 hover:text-white"
+              }`}
+            >
+              <span className="flex items-center gap-2">
+                <Award className="size-4" /> Badges
               </span>
             </button>
 
@@ -1080,7 +1114,7 @@ export default function GamesPage() {
               }`}
             >
               <span className="flex items-center gap-2">
-                <Users className="size-4" /> Friends Matrix
+                <Users className="size-4" /> Friends
               </span>
             </button>
 
@@ -1092,7 +1126,7 @@ export default function GamesPage() {
               disabled={friendsList.length === 0}
             >
               <span className="flex items-center gap-2">
-                <MessageSquare className="size-4" /> Secure Live Chat
+                <MessageSquare className="size-4" /> Chat
               </span>
             </button>
           </nav>
@@ -1112,7 +1146,7 @@ export default function GamesPage() {
               <h4 className="text-xs font-bold truncate text-white uppercase tracking-wide">
                 {userNameDisplay}
               </h4>
-              <p className="text-[8px] font-mono text-zinc-550 uppercase font-black">{totalXp} Global XP</p>
+              <p className="text-[8px] font-mono text-zinc-555 uppercase font-black">{totalXp} XP</p>
             </div>
           </div>
         </div>
@@ -1121,7 +1155,7 @@ export default function GamesPage() {
       {/* Right Content Panel */}
       <div className="flex-1 flex flex-col h-full overflow-y-auto relative z-10 p-8">
         
-        {/* Tab 1: Arena Dashboard */}
+        {/* Tab 1: Play Dashboard */}
         {activeTab === "dashboard" && (
           <div className="w-full max-w-7xl mx-auto flex flex-col gap-6">
             {!activeGame ? (
@@ -1130,7 +1164,7 @@ export default function GamesPage() {
                 <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 border-b border-zinc-900 pb-8 mb-4">
                   <div className="space-y-2">
                     <div className="flex items-center gap-2">
-                      <span className="text-[10px] font-mono tracking-widest text-zinc-550 uppercase">GAMIFIED SYSTEM CITADEL</span>
+                      <span className="text-[10px] font-mono tracking-widest text-zinc-500 uppercase">Games Dashboard</span>
                     </div>
                     <h1 className="text-4xl font-black tracking-tight leading-none uppercase font-mono">
                       Mastery Arena
@@ -1161,11 +1195,11 @@ export default function GamesPage() {
                 </div>
 
                 {/* Tree Network */}
-                <div className="bg-zinc-950/40 border border-zinc-900 rounded-2xl p-6 relative overflow-hidden mb-6">
+                <div className="bg-zinc-955/40 border border-zinc-900 rounded-2xl p-6 relative overflow-hidden mb-6">
                   <div className="absolute inset-0 premium-grid-dot opacity-5 pointer-events-none" />
                   <div className="flex items-center gap-2 mb-4">
                     <BookOpen className="size-4 text-zinc-400" />
-                    <h3 className="text-xs font-bold uppercase tracking-widest text-zinc-355 font-mono">Interactive Dependency Tree</h3>
+                    <h3 className="text-xs font-bold uppercase tracking-widest text-zinc-400 font-mono">Dependency Tree</h3>
                   </div>
                   <div className="relative w-full overflow-x-auto py-4">
                     <div className="min-w-[900px] flex flex-col gap-8">
@@ -1407,7 +1441,7 @@ export default function GamesPage() {
                               initial={{ opacity: 0, height: 0 }}
                               animate={{ opacity: 1, height: "auto" }}
                               exit={{ opacity: 0, height: 0 }}
-                              className="mt-3 bg-zinc-950 border border-zinc-900 rounded-xl p-3 text-[10.5px] text-zinc-450 leading-relaxed font-medium"
+                              className="mt-3 bg-zinc-955 border border-zinc-900 rounded-xl p-3 text-[10.5px] text-zinc-455 leading-relaxed font-medium"
                             >
                               <ul className="list-disc pl-4 space-y-1.5">
                                 {activeLevelData.hints.map((h, i) => (
@@ -1471,7 +1505,7 @@ export default function GamesPage() {
                     {/* Previews Output */}
                     <div className="bg-zinc-950/40 border border-zinc-900 rounded-2xl p-6 flex flex-col gap-4">
                       <div className="flex items-center justify-between">
-                        <h4 className="text-[10px] font-mono font-bold text-zinc-450 uppercase tracking-widest">
+                        <h4 className="text-[10px] font-mono font-bold text-zinc-455 uppercase tracking-widest">
                           Live Sandbox Output
                         </h4>
                         <span className="text-[9px] font-mono text-zinc-655 uppercase font-black font-mono">COMPILING ON-THE-FLY</span>
@@ -1550,7 +1584,7 @@ export default function GamesPage() {
                          activeLevelData?.validation.checkType !== "sql" && 
                          activeLevelData?.validation.checkType !== "git" && (
                           <div className="flex flex-col items-center gap-2">
-                            <Code2 className="size-8 text-zinc-650 animate-pulse" />
+                            <Code2 className="size-8 text-zinc-655 animate-pulse" />
                             <span className="text-[10px] font-mono text-zinc-550 uppercase tracking-widest font-bold">Standard Console</span>
                             <p className="text-[10px] text-zinc-555 max-w-[200px] leading-relaxed">
                               Your script evaluations will execute inside sandboxed unit test assertions. Output will print below.
@@ -1565,7 +1599,7 @@ export default function GamesPage() {
                   <div className="lg:col-span-8 flex flex-col gap-6">
                     <div className="bg-zinc-950/40 border border-zinc-900 rounded-2xl overflow-hidden flex flex-col">
                       <div className="flex items-center justify-between px-6 py-4 bg-zinc-950/80 border-b border-zinc-900">
-                        <span className="text-[10px] font-mono font-bold text-zinc-400 uppercase tracking-widest font-mono font-mono">
+                        <span className="text-[10px] font-mono font-bold text-zinc-400 uppercase tracking-widest font-mono">
                           SOURCE CODE WORKSPACE
                         </span>
                         <button
@@ -1604,7 +1638,7 @@ export default function GamesPage() {
                     {/* Console test logger */}
                     <div className="bg-zinc-950/40 border border-zinc-900 rounded-2xl p-6 flex flex-col gap-4">
                       <div className="flex items-center justify-between">
-                        <h4 className="text-[10px] font-mono font-bold text-zinc-400 uppercase tracking-widest font-mono font-mono font-mono">
+                        <h4 className="text-[10px] font-mono font-bold text-zinc-400 uppercase tracking-widest font-mono font-mono">
                           UNIT TEST OUTPUT LOGGER
                         </h4>
                         {evaluationSuccess === true && (
@@ -1655,8 +1689,8 @@ export default function GamesPage() {
         {activeTab === "profile" && (
           <div className="w-full max-w-5xl mx-auto flex flex-col gap-8">
             <div className="border-b border-zinc-900 pb-6">
-              <h2 className="text-3xl font-black uppercase font-mono tracking-tight font-mono">Hacker Dossier</h2>
-              <p className="text-xs text-zinc-500 mt-1">Review live metadata parameters, language clearance profiles, and milestone claims.</p>
+              <h2 className="text-3xl font-black uppercase font-mono tracking-tight">My Profile</h2>
+              <p className="text-xs text-zinc-550 mt-1">Review live metadata parameters, language clearance profiles, and milestone claims.</p>
             </div>
 
             {/* Profile Overview Card */}
@@ -1666,13 +1700,13 @@ export default function GamesPage() {
               {/* User Avatar */}
               <div className="relative shrink-0">
                 {userAvatarUrl ? (
-                  <img src={userAvatarUrl} alt="User Avatar" className="size-32 rounded-3xl border-2 border-zinc-805 object-cover shadow-xl" />
+                  <img src={userAvatarUrl} alt="User Avatar" className="size-32 rounded-3xl border border-zinc-800 object-cover shadow-xl" />
                 ) : (
-                  <div className="size-32 rounded-3xl bg-gradient-to-tr from-zinc-800 to-zinc-900 border-2 border-zinc-800 flex items-center justify-center text-4xl font-mono font-bold shadow-xl">
+                  <div className="size-32 rounded-3xl bg-gradient-to-tr from-zinc-800 to-zinc-900 border border-zinc-800 flex items-center justify-center text-4xl font-mono font-bold shadow-xl">
                     {userNameDisplay[0]?.toUpperCase()}
                   </div>
                 )}
-                <span className="absolute -bottom-2 -right-2 p-2 rounded-xl bg-emerald-500 text-black border-2 border-black flex items-center justify-center">
+                <span className="absolute -bottom-2 -right-2 p-2 rounded-xl bg-emerald-500 text-black border border-black flex items-center justify-center">
                   <Activity className="size-4" />
                 </span>
               </div>
@@ -1680,7 +1714,7 @@ export default function GamesPage() {
               {/* Dossier Specifications */}
               <div className="flex-1 text-center md:text-left space-y-4">
                 <div>
-                  <span className="text-[9px] font-mono font-black px-2.5 py-0.5 rounded-full bg-zinc-900 border border-white/5 text-zinc-400 uppercase tracking-widest font-mono">
+                  <span className="text-[9px] font-mono font-black px-2.5 py-0.5 rounded-full bg-zinc-900 border border-white/5 text-zinc-400 uppercase tracking-widest">
                     ACTIVE PARAMETER
                   </span>
                   <h3 className="text-2xl font-black text-white mt-1.5 uppercase font-mono tracking-wide">{userNameDisplay}</h3>
@@ -1701,17 +1735,47 @@ export default function GamesPage() {
                   </div>
 
                   <div className="bg-black/60 border border-zinc-900/60 p-3 rounded-2xl col-span-2 md:col-span-1">
-                    <span className="text-[8px] font-mono font-bold text-zinc-655 uppercase tracking-wider block font-mono">IP Location</span>
+                    <span className="text-[8px] font-mono font-bold text-zinc-655 uppercase tracking-wider block font-mono">Location</span>
                     <span className="text-[11px] font-bold text-zinc-300 truncate block mt-0.5 font-mono">{userLocation.city}, {userLocation.country}</span>
                   </div>
                 </div>
               </div>
             </div>
 
+            {/* Badges showcase section inside Profile */}
+            <div className="bg-zinc-950/40 border border-zinc-900 rounded-3xl p-6 flex flex-col gap-4">
+              <h3 className="text-xs font-mono font-bold text-zinc-400 uppercase tracking-widest font-mono">My Badges</h3>
+              <div className="flex flex-wrap gap-3">
+                {GAMES_LIST.map((game) => {
+                  const gameProg = progress[game.id] || { completedLevel: 0, xp: 0 };
+                  const isUnlocked = gameProg.completedLevel > 0;
+                  const tier = getTierName(gameProg.completedLevel);
+                  return (
+                    <div 
+                      key={game.id} 
+                      className={`flex items-center gap-2.5 px-3 py-2 rounded-xl border text-xs transition-all ${
+                        isUnlocked 
+                          ? "bg-zinc-900/60 border-zinc-800 text-white" 
+                          : "bg-zinc-950/20 border-zinc-955 text-zinc-650 opacity-40"
+                      }`}
+                    >
+                      <div className={`p-1.5 rounded-lg bg-gradient-to-br ${isUnlocked ? game.gradient : "from-zinc-900 to-zinc-950"} border border-white/5`}>
+                        <TechIcon name={game.iconName} className="size-3.5" />
+                      </div>
+                      <div>
+                        <div className="font-bold font-mono text-[10px]">{game.name}</div>
+                        <div className="text-[8px] text-zinc-500 uppercase font-mono">{isUnlocked ? `${tier} (Lvl ${gameProg.completedLevel})` : "Locked"}</div>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+
             {/* Language Progress matrix */}
             <div className="space-y-4">
               <h3 className="text-sm font-bold uppercase tracking-widest text-zinc-450 font-mono flex items-center gap-2 font-mono">
-                <FileCode className="size-4" /> Language Progression Matrix
+                <FileCode className="size-4" /> Language Progression
               </h3>
               
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -1754,12 +1818,64 @@ export default function GamesPage() {
           </div>
         )}
 
-        {/* Tab 3: Achievements shelf */}
+        {/* Tab 3: Badges Matrix catalog */}
+        {activeTab === "badges" && (
+          <div className="w-full max-w-6xl mx-auto flex flex-col gap-6">
+            <div className="border-b border-zinc-900 pb-6 mb-4">
+              <h2 className="text-3xl font-black uppercase font-mono tracking-tight">Unlocked Badges</h2>
+              <p className="text-xs text-zinc-550 mt-1 font-semibold font-mono">Earn badges by completing lessons inside target language stacks.</p>
+            </div>
+
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+              {GAMES_LIST.map((game) => {
+                const gameProg = progress[game.id] || { completedLevel: 0, xp: 0 };
+                const isUnlocked = gameProg.completedLevel > 0;
+                const tier = getTierName(gameProg.completedLevel);
+                const pct = Math.round((gameProg.completedLevel / 500) * 100);
+
+                return (
+                  <div 
+                    key={game.id}
+                    className={`p-6 rounded-2xl border flex flex-col justify-between h-48 relative overflow-hidden transition-all duration-300 ${
+                      isUnlocked 
+                        ? "bg-zinc-900/60 border-zinc-800 shadow-[0_0_15px_rgba(255,255,255,0.02)]" 
+                        : "bg-zinc-950/20 border-zinc-905 opacity-30"
+                    }`}
+                  >
+                    <div className="flex items-center gap-3">
+                      <div className={`p-3 rounded-xl bg-gradient-to-br ${isUnlocked ? game.gradient : "from-zinc-900 to-zinc-950"} border border-white/5`}>
+                        <TechIcon name={game.iconName} className="size-5 text-white" />
+                      </div>
+                      <div>
+                        <h4 className="text-xs font-bold text-white uppercase font-mono">{game.name}</h4>
+                        <span className="text-[8px] font-mono text-zinc-550 uppercase font-black">{isUnlocked ? tier : "Locked"}</span>
+                      </div>
+                    </div>
+
+                    <p className="text-[10px] text-zinc-450 mt-3 leading-normal font-mono">{game.theme}</p>
+
+                    <div className="mt-4 space-y-1.5">
+                      <div className="flex justify-between text-[8px] font-mono text-zinc-550 font-bold font-mono">
+                        <span>Lvl {gameProg.completedLevel}/500</span>
+                        <span>{pct}%</span>
+                      </div>
+                      <div className="w-full h-1 bg-zinc-900 rounded-full overflow-hidden">
+                        <div className={`h-full bg-gradient-to-r ${isUnlocked ? game.gradient : "from-zinc-900 to-zinc-950"}`} style={{ width: `${pct}%` }} />
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        )}
+
+        {/* Tab 4: Achievements shelf */}
         {activeTab === "achievements" && (
           <div className="w-full max-w-7xl mx-auto flex flex-col gap-6">
             <div className="border-b border-zinc-900 pb-6 mb-4">
-              <h2 className="text-3xl font-black uppercase font-mono tracking-tight">Campaign Achievements Shelf</h2>
-              <p className="text-xs text-zinc-550 mt-1">Complete structural tasks in coding sandboxes to unlock rewards. Unlocked rewards must be claimed below to add to your global XP.</p>
+              <h2 className="text-3xl font-black uppercase font-mono tracking-tight">Achievements</h2>
+              <p className="text-xs text-zinc-550 mt-1 font-mono">Clear levels on programming sandboxes to unlock credentials. Claim unlocked achievements to collect XP.</p>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -1788,14 +1904,14 @@ export default function GamesPage() {
                             onClick={() => claimAchievementReward(ach.id, ach.xp)}
                             className="text-[8.5px] font-mono font-black text-black bg-amber-400 hover:bg-amber-300 px-3 py-1 rounded-full uppercase transition-all cursor-pointer flex items-center gap-1 shadow-lg"
                           >
-                            <Award className="size-3" /> CLAIM REWARD
+                            <Award className="size-3" /> CLAIM
                           </button>
                         ) : (
                           <span className="text-[8px] font-mono font-bold text-zinc-500 bg-zinc-900 border border-zinc-800 px-2 py-0.5 rounded-full uppercase leading-none font-mono">LOCKED</span>
                         )}
                       </div>
-                      <p className="text-[10.5px] text-zinc-450 mt-2.5 leading-relaxed">{ach.desc}</p>
-                      <p className="text-[9px] font-mono text-zinc-600 mt-1 uppercase font-bold font-mono">Target: {ach.target}</p>
+                      <p className="text-[10.5px] text-zinc-450 mt-2.5 leading-relaxed font-mono">{ach.desc}</p>
+                      <p className="text-[9px] font-mono text-zinc-600 mt-1 uppercase font-bold">Target: {ach.target}</p>
                     </div>
 
                     <div className="mt-4 flex items-center justify-between gap-4">
@@ -1807,7 +1923,7 @@ export default function GamesPage() {
                           />
                         </div>
                       </div>
-                      <span className={`text-[9px] font-mono font-black ${ach.completed ? "text-amber-400" : "text-zinc-500"} font-mono`}>
+                      <span className={`text-[9px] font-mono font-black ${ach.completed ? "text-amber-400" : "text-zinc-500"}`}>
                         +{ach.xp} XP
                       </span>
                     </div>
@@ -1818,11 +1934,11 @@ export default function GamesPage() {
           </div>
         )}
 
-        {/* Tab 4: Leaderboard Filter */}
+        {/* Tab 5: Leaderboards */}
         {activeTab === "leaderboard" && (
           <div className="w-full max-w-4xl mx-auto flex flex-col gap-6">
             <div className="border-b border-zinc-905 pb-6">
-              <h2 className="text-3xl font-black uppercase font-mono tracking-tight">Citadel Leaderboards</h2>
+              <h2 className="text-3xl font-black uppercase font-mono tracking-tight">Leaderboards</h2>
               <p className="text-xs text-zinc-550 mt-1 font-semibold">Compare achievements, XP parameters, and badge completions against regional, country, or global hackers.</p>
             </div>
 
@@ -1865,11 +1981,11 @@ export default function GamesPage() {
               </div>
             </div>
 
-            {/* Leaderboard Grid */}
+            {/* Leaderboard Table Grid */}
             <div className="bg-zinc-950/40 border border-zinc-900 rounded-2xl overflow-hidden shadow-2xl">
               <table className="w-full border-collapse text-left text-xs">
                 <thead>
-                  <tr className="border-b border-zinc-900 bg-zinc-950 text-zinc-400 font-mono text-[10px] uppercase">
+                  <tr className="border-b border-zinc-900 bg-zinc-955 text-zinc-400 font-mono text-[10px] uppercase">
                     <th className="p-4 font-bold">Rank</th>
                     <th className="p-4 font-bold">Hacker</th>
                     <th className="p-4 font-bold font-mono">Country</th>
@@ -1921,18 +2037,18 @@ export default function GamesPage() {
           </div>
         )}
 
-        {/* Tab 5: Friends Matrix */}
+        {/* Tab 6: Friends List */}
         {activeTab === "friends" && (
           <div className="w-full max-w-4xl mx-auto flex flex-col gap-6">
             <div className="border-b border-zinc-905 pb-6">
-              <h2 className="text-3xl font-black uppercase font-mono tracking-tight">Friends Matrix</h2>
-              <p className="text-xs text-zinc-500 mt-1">Add and check other developers, or initiate a simulated audio call session.</p>
+              <h2 className="text-3xl font-black uppercase font-mono tracking-tight">Friends</h2>
+              <p className="text-xs text-zinc-500 mt-1">Connect with other developers and start voice calls.</p>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               {/* Friends lists */}
               <div className="md:col-span-2 space-y-4">
-                <h3 className="text-xs font-mono font-bold text-zinc-450 uppercase tracking-widest">Added Hackers</h3>
+                <h3 className="text-xs font-mono font-bold text-zinc-450 uppercase tracking-widest">Contact List</h3>
                 
                 {friendsList.length > 0 ? (
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -1944,7 +2060,7 @@ export default function GamesPage() {
                           </div>
                           <div>
                             <h4 className="text-xs font-bold text-white uppercase font-mono">{friend}</h4>
-                            <span className="text-[7.5px] font-mono text-zinc-550 uppercase font-black">Connected</span>
+                            <span className="text-[7.5px] font-mono text-zinc-550 uppercase font-black">Online</span>
                           </div>
                         </div>
 
@@ -1959,7 +2075,7 @@ export default function GamesPage() {
                   </div>
                 ) : (
                   <div className="bg-zinc-950/20 border border-dashed border-zinc-900 rounded-2xl p-8 text-center text-zinc-550 text-xs italic">
-                    Your friends list is currently empty. Query usernames in the sidebar form to persist friends.
+                    Your friends list is currently empty. Add users using the sidebar form to persist contacts.
                   </div>
                 )}
               </div>
@@ -1967,8 +2083,8 @@ export default function GamesPage() {
               {/* Add friend card */}
               <div className="bg-zinc-955/40 border border-zinc-900 p-6 rounded-2xl flex flex-col gap-4 h-fit">
                 <div>
-                  <h4 className="text-xs font-bold uppercase tracking-wider text-white font-mono">Add Hacker Profile</h4>
-                  <p className="text-[10px] text-zinc-550 leading-relaxed mt-1">Type the exact username of a registered Mockrithm user to add them persistently.</p>
+                  <h4 className="text-xs font-bold uppercase tracking-wider text-white font-mono">Add Contact</h4>
+                  <p className="text-[10px] text-zinc-550 leading-relaxed mt-1">Type the username of a registered user to add them persistently.</p>
                 </div>
 
                 <form onSubmit={handleAddFriend} className="flex flex-col gap-2">
@@ -1991,19 +2107,19 @@ export default function GamesPage() {
           </div>
         )}
 
-        {/* Tab 6: Social secure Live Chat */}
+        {/* Tab 7: Chat channel */}
         {activeTab === "social" && (
           <div className="w-full max-w-5xl mx-auto flex flex-col gap-6 h-[80vh]">
             <div className="border-b border-zinc-900 pb-6 shrink-0">
-              <h2 className="text-3xl font-black uppercase font-mono tracking-tight">Social Network Chat</h2>
-              <p className="text-xs text-zinc-500 mt-1 font-semibold font-mono">Connect with peer developers, exchange suggestions, and coordinate milestones.</p>
+              <h2 className="text-3xl font-black uppercase font-mono tracking-tight">Chat</h2>
+              <p className="text-xs text-zinc-500 mt-1 font-semibold font-mono">Send secure direct messages to your added contacts.</p>
             </div>
 
             <div className="flex-1 flex gap-6 min-h-0">
               
               {/* Friends Left Selector */}
-              <div className="w-64 border border-zinc-900 rounded-2xl bg-zinc-950/40 p-4 flex flex-col gap-4 shrink-0">
-                <h3 className="text-[10px] font-mono font-bold text-zinc-450 uppercase tracking-widest font-mono">Select Contact</h3>
+              <div className="w-64 border border-zinc-900 rounded-2xl bg-zinc-955/40 p-4 flex flex-col gap-4 shrink-0">
+                <h3 className="text-[10px] font-mono font-bold text-zinc-450 uppercase tracking-widest">Select Contact</h3>
                 
                 <div className="flex flex-col gap-1.5 overflow-y-auto pr-1">
                   {friendsList.map(friend => {
@@ -2028,9 +2144,9 @@ export default function GamesPage() {
               {/* Chat Panel */}
               <div className="flex-1 border border-zinc-905 rounded-2xl bg-zinc-955/40 flex flex-col justify-between overflow-hidden">
                 {/* Chat Header */}
-                <div className="px-5 py-4 bg-zinc-950 border-b border-zinc-900 flex items-center justify-between">
-                  <h3 className="text-xs font-black uppercase font-mono text-white">Direct Channel: {selectedFriend || "No Contact Selected"}</h3>
-                  <span className="text-[9px] font-mono text-zinc-555 uppercase font-black">Secure Connection</span>
+                <div className="px-5 py-4 bg-zinc-955 border-b border-zinc-900 flex items-center justify-between">
+                  <h3 className="text-xs font-black uppercase font-mono text-white">Direct Message: {selectedFriend || "No Contact Selected"}</h3>
+                  <span className="text-[9px] font-mono text-zinc-555 uppercase font-black">Connected</span>
                 </div>
 
                 {/* Message Log */}
@@ -2064,7 +2180,7 @@ export default function GamesPage() {
                 </div>
 
                 {/* Input form */}
-                <form onSubmit={handleSendChatMessage} className="p-4 bg-zinc-950 border-t border-zinc-900 flex gap-2 shrink-0">
+                <form onSubmit={handleSendChatMessage} className="p-4 bg-zinc-955 border-t border-zinc-900 flex gap-2 shrink-0">
                   <input
                     type="text"
                     disabled={!selectedFriend}
