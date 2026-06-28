@@ -15,11 +15,13 @@ export interface UserGamesProgress {
   city: string;
   claimedAchievements: string[];
   gamesFriends: string[];
+  soundPreference: string;
+  locationSet: boolean;
 }
 
 /**
- * Fetch the game progress and total XP for a user from Firestore
- * Auto-creates document with passed Clerk metadata if it doesn't exist
+ * Fetch the game progress and total XP for a user from Firestore.
+ * Auto-creates document with passed Clerk metadata if it doesn't exist.
  */
 export async function getUserGamesProgress(
   userId: string,
@@ -29,11 +31,20 @@ export async function getUserGamesProgress(
 ): Promise<UserGamesProgress> {
   try {
     if (!userId) {
-      return { progress: {}, totalXp: 0, country: "United States", city: "San Francisco", claimedAchievements: [], gamesFriends: [] };
+      return {
+        progress: {},
+        totalXp: 0,
+        country: "",
+        city: "",
+        claimedAchievements: [],
+        gamesFriends: [],
+        soundPreference: "chime",
+        locationSet: false
+      };
     }
     const userDocRef = db.collection("users").doc(userId);
     let userDoc = await userDocRef.get();
-    
+
     if (!userDoc.exists) {
       console.log("Auto-creating user document in games module for ID:", userId);
       const email = clientEmail || "";
@@ -49,10 +60,12 @@ export async function getUserGamesProgress(
         status: "Active",
         gamesProgress: {},
         gamesXp: 0,
-        country: "United States",
-        city: "San Francisco",
+        country: "",
+        city: "",
+        locationSet: false,
         claimedAchievements: [],
-        gamesFriends: []
+        gamesFriends: [],
+        soundPreference: "chime"
       };
 
       await userDocRef.set(newUserData);
@@ -62,10 +75,12 @@ export async function getUserGamesProgress(
     const data = userDoc.data();
     const progress = data?.gamesProgress || {};
     const totalXp = data?.gamesXp || 0;
-    const country = data?.country || "United States";
-    const city = data?.city || "San Francisco";
+    const country = data?.country || "";
+    const city = data?.city || "";
+    const locationSet = data?.locationSet === true;
     const claimedAchievements = data?.claimedAchievements || [];
     const gamesFriends = data?.gamesFriends || [];
+    const soundPreference = data?.soundPreference || "chime";
 
     // Safely serialize nested gamesProgress updatedAt timestamps
     const serializedProgress: Record<string, GameProgress> = {};
@@ -87,10 +102,28 @@ export async function getUserGamesProgress(
       }
     }
 
-    return { progress: serializedProgress, totalXp, country, city, claimedAchievements, gamesFriends };
+    return {
+      progress: serializedProgress,
+      totalXp,
+      country,
+      city,
+      claimedAchievements,
+      gamesFriends,
+      soundPreference,
+      locationSet
+    };
   } catch (error: any) {
     console.error("Error fetching user games progress:", error);
-    return { progress: {}, totalXp: 0, country: "United States", city: "San Francisco", claimedAchievements: [], gamesFriends: [] };
+    return {
+      progress: {},
+      totalXp: 0,
+      country: "",
+      city: "",
+      claimedAchievements: [],
+      gamesFriends: [],
+      soundPreference: "chime",
+      locationSet: false
+    };
   }
 }
 
@@ -112,11 +145,11 @@ export async function updateUserGamesProgress(
     }
 
     const userDocRef = db.collection("users").doc(userId);
-    
+
     await db.runTransaction(async (transaction: any) => {
       const doc = await transaction.get(userDocRef);
       let data: any = {};
-      
+
       if (doc.exists) {
         data = doc.data();
       } else {
@@ -132,10 +165,12 @@ export async function updateUserGamesProgress(
           status: "Active",
           gamesProgress: {},
           gamesXp: 0,
-          country: "United States",
-          city: "San Francisco",
+          country: "",
+          city: "",
+          locationSet: false,
           claimedAchievements: [],
-          gamesFriends: []
+          gamesFriends: [],
+          soundPreference: "chime"
         };
       }
 
@@ -144,7 +179,7 @@ export async function updateUserGamesProgress(
 
       const gameData = currentProgress[gameId] || { completedLevel: 0, xp: 0 };
       const newCompletedLevel = Math.max(gameData.completedLevel, level);
-      
+
       let newXp = gameData.xp;
       let newTotalXp = currentTotalXp;
       if (level > gameData.completedLevel) {
@@ -185,16 +220,31 @@ export async function updateUserGamesProgress(
 }
 
 /**
- * Save user location
+ * Save user location and mark locationSet = true
  */
 export async function saveUserLocation(userId: string, country: string, city: string) {
   try {
     if (!userId) return { success: false };
     const userDocRef = db.collection("users").doc(userId);
-    await userDocRef.set({ country, city }, { merge: true });
+    await userDocRef.set({ country, city, locationSet: true }, { merge: true });
     return { success: true };
   } catch (e: any) {
     console.error("Error saving user location:", e);
+    return { success: false, error: e.message };
+  }
+}
+
+/**
+ * Save user sound preference
+ */
+export async function saveUserSoundPreference(userId: string, soundPreference: string) {
+  try {
+    if (!userId) return { success: false };
+    const userDocRef = db.collection("users").doc(userId);
+    await userDocRef.set({ soundPreference }, { merge: true });
+    return { success: true };
+  } catch (e: any) {
+    console.error("Error saving sound preference:", e);
     return { success: false, error: e.message };
   }
 }
@@ -233,7 +283,7 @@ export async function claimAchievementPersistent(userId: string, achievementId: 
 }
 
 /**
- * Persistent Friend adding
+ * Add a friend persistently
  */
 export async function addFriendPersistent(userId: string, friendName: string) {
   try {
@@ -247,12 +297,12 @@ export async function addFriendPersistent(userId: string, friendName: string) {
     const friends = data.gamesFriends || [];
 
     if (friends.includes(friendName)) {
-      return { success: false, error: "Friend already added" };
+      return { success: false, error: "Already in your friends list" };
     }
 
     const friendQuery = await db.collection("users").where("name", "==", friendName).get();
     if (friendQuery.empty) {
-      return { success: false, error: "Hacker not found in Mockrithm database" };
+      return { success: false, error: "User not found in Mockrithm database" };
     }
 
     const updatedFriends = [...friends, friendName];
@@ -279,8 +329,8 @@ export async function getLeaderboardUsers() {
       const claimedAchievements = data.claimedAchievements || [];
       return {
         name: data.name || "Anonymous",
-        country: data.country || "United States",
-        city: data.city || "San Francisco",
+        country: data.country || "",
+        city: data.city || "",
         xp: data.gamesXp || 0,
         badges: Object.keys(progress).length,
         achievements: claimedAchievements.length,
