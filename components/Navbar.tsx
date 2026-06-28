@@ -36,6 +36,7 @@ import {
   MessageSquare,
   CreditCard,
   Mic,
+  Gamepad2,
 } from "lucide-react";
 
 interface NavbarProps {
@@ -106,7 +107,7 @@ const Navbar = ({ userId, userName, userRole }: NavbarProps) => {
     ? [
         { href: "/", label: "Home", icon: Home },
         { href: "/about", label: "About", icon: Info },
-        { href: "/contact", label: "Contact", icon: Mail },
+        { href: "/games", label: "Games", icon: Gamepad2 },
       ]
     : [
         { href: "/#intro", label: "Intro", icon: Home },

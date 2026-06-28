@@ -61,6 +61,8 @@ interface User {
   resumeData?: any;
   country?: string;
   targetRole?: string;
+  gamesProgress?: Record<string, { completedLevel: number; xp: number; updatedAt?: string }>;
+  gamesXp?: number;
 }
 
 interface InterviewCardProps {

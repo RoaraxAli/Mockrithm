@@ -1,9 +1,5 @@
-import FeedbackForm from "@/components/FeedbackForm";
+import { redirect } from "next/navigation";
 
 export default function ContactPage() {
-  return (
-    <div className="min-h-screen bg-black text-white p-8">
-      <FeedbackForm />
-    </div>
-  );
+  redirect("/about#contact");
 }

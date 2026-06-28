@@ -6,6 +6,7 @@ import { CardContent } from "@/components/ui/card"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { motion } from "framer-motion"
+import FeedbackForm from "@/components/FeedbackForm"
 import {
   Mic,
   Brain,
@@ -289,6 +290,21 @@ export default function AboutPage() {
               </p>
             </CardContent>
           </ThreeDTiltCard>
+        </section>
+
+        {/* 6. Contact / Feedback Form */}
+        <section id="contact" className="w-full border-t border-zinc-900 pt-10">
+          <div className="text-center mb-6">
+            <h2 className="text-[9px] font-black uppercase tracking-widest text-zinc-500 mb-1">Get In Touch</h2>
+            <h3 className="text-xl font-black text-white">Contact & Feedback</h3>
+            <p className="text-[11px] text-zinc-450 max-w-md mx-auto mt-2 leading-relaxed">
+              Have questions, feedback, or need support? Send us a message directly and our team will get back to you shortly.
+            </p>
+          </div>
+          <div className="max-w-2xl mx-auto bg-zinc-950/40 border border-zinc-900 rounded-2xl p-6 relative">
+            <div className="absolute inset-0 premium-grid-dot opacity-5 pointer-events-none" />
+            <FeedbackForm />
+          </div>
         </section>
 
       </div>
