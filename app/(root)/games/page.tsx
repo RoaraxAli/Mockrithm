@@ -225,18 +225,17 @@ export default function GamesPage() {
     }
   }, [activeGame, maxUnlockedLevel, currentLevelNum]);
 
-  // Prerequisite Verification Logic
+  // Prerequisite Verification Logic - Always return true so languages are not locked
   const isGameUnlocked = (gameId: string): boolean => {
-    if (bypassLocks) return true;
-    
+    return true;
+  };
+
+  // Check if a game has missing prerequisites for warning notice at launch
+  const hasMissingPrerequisites = (gameId: string): boolean => {
+    if (bypassLocks) return false;
     const game = GAMES_LIST.find(g => g.id === gameId);
-    if (!game) return false;
-
-    // Unlocked if there are no prerequisites
-    if (game.prerequisites.length === 0) return true;
-
-    // Unlocked if all prerequisite games are completed (reached level 10+ or at least played)
-    return game.prerequisites.every(prereqId => {
+    if (!game || game.prerequisites.length === 0) return false;
+    return !game.prerequisites.every(prereqId => {
       const prereqProg = progress[prereqId];
       return prereqProg && prereqProg.completedLevel > 0;
     });
@@ -903,6 +902,20 @@ export default function GamesPage() {
               {/* Left Column: Codédex-style Sidebar Lesson Parameters Panel */}
               <div className="lg:col-span-4 flex flex-col gap-6 max-h-[85vh] overflow-y-auto pr-1">
                 
+                {/* Prerequisite Alert Banner */}
+                {hasMissingPrerequisites(activeGame.id) && (
+                  <div className="bg-amber-500/10 border border-amber-500/20 rounded-2xl p-5 flex flex-col gap-2 relative overflow-hidden">
+                    <div className="absolute inset-0 premium-grid-dot opacity-5 pointer-events-none" />
+                    <div className="flex items-center gap-2 text-amber-400">
+                      <AlertCircle className="size-4 shrink-0" />
+                      <span className="text-[10px] font-mono font-black uppercase tracking-wider">Prerequisite Recommended</span>
+                    </div>
+                    <p className="text-[10.5px] text-zinc-450 leading-relaxed font-medium">
+                      Wait! You haven't completed the prerequisites for this stack. We recommend completing <strong>{activeGame.prerequisites.map(p => p.toUpperCase()).join(", ")}</strong> first for the best learning experience.
+                    </p>
+                  </div>
+                )}
+
                 {/* Level parameters block */}
                 <div className="bg-zinc-950/40 border border-zinc-900 rounded-2xl p-6 flex flex-col gap-4">
                   <div className="flex justify-between items-center">
