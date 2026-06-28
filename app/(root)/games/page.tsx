@@ -1020,7 +1020,7 @@ export default function GamesPage() {
             </div>
             {callStatus === "connected" && (
               <div className="flex gap-1.5 h-8 items-end">
-                {[1,2,3,4,5,6].map(i => <span key={i} className="w-1 bg-emerald-500 rounded-full animate-bounce" style={{ height: `${30 + Math.random() * 60}%`, animationDelay: `${i * 0.15}s` }} />)}
+                {[1,2,3,4,5,6].map(i => <span key={i} className="w-1 bg-emerald-500 rounded-full animate-bounce" style={{ height: `${30 + (i * 17 % 60)}%`, animationDelay: `${i * 0.15}s` }} />)}
               </div>
             )}
             <div className="flex gap-4">
