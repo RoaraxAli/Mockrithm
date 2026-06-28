@@ -344,3 +344,129 @@ export async function getLeaderboardUsers() {
     return { success: false, leaderboard: [] };
   }
 }
+
+/**
+ * Send a friend request
+ */
+export async function sendFriendRequest(userId: string, senderName: string, receiverName: string) {
+  try {
+    if (!userId) return { success: false, error: "Unauthenticated" };
+    if (senderName.toLowerCase() === receiverName.toLowerCase()) {
+      return { success: false, error: "You cannot add yourself as a friend." };
+    }
+
+    // Find receiver
+    const receiverQuery = await db.collection("users").where("name", "==", receiverName).get();
+    if (receiverQuery.empty) {
+      return { success: false, error: "User not found in Mockrithm database." };
+    }
+    const receiverDoc = receiverQuery.docs[0];
+    const receiverNameExact = receiverDoc.data().name;
+    const receiverId = receiverDoc.id;
+
+    // Check if already friends
+    const senderDoc = await db.collection("users").doc(userId).get();
+    const senderData = senderDoc.data() || {};
+    const friends = senderData.gamesFriends || [];
+    if (friends.includes(receiverNameExact)) {
+      return { success: false, error: "Already in your friends list." };
+    }
+
+    // Check if request already exists
+    const existingReq = await db.collection("friendRequests")
+      .where("senderName", "==", senderName)
+      .where("receiverName", "==", receiverNameExact)
+      .where("status", "==", "pending")
+      .get();
+    if (!existingReq.empty) {
+      return { success: false, error: "Friend request already sent." };
+    }
+
+    // Check if there is an incoming request from them instead
+    const incomingReq = await db.collection("friendRequests")
+      .where("senderName", "==", receiverNameExact)
+      .where("receiverName", "==", senderName)
+      .where("status", "==", "pending")
+      .get();
+    if (!incomingReq.empty) {
+      return { success: false, error: "They have already sent you a request. Accept it instead." };
+    }
+
+    // Create the request
+    await db.collection("friendRequests").add({
+      senderId: userId,
+      senderName,
+      receiverId,
+      receiverName: receiverNameExact,
+      status: "pending",
+      createdAt: new Date()
+    });
+
+    return { success: true };
+  } catch (e: any) {
+    console.error("Error sending friend request:", e);
+    return { success: false, error: e.message };
+  }
+}
+
+/**
+ * Accept a friend request
+ */
+export async function acceptFriendRequest(userId: string, currentUserName: string, requestId: string) {
+  try {
+    if (!userId) return { success: false, error: "Unauthenticated" };
+    const reqRef = db.collection("friendRequests").doc(requestId);
+    const reqSnap = await reqRef.get();
+    if (!reqSnap.exists) return { success: false, error: "Request not found" };
+
+    const reqData = reqSnap.data();
+    if (reqData.status !== "pending") return { success: false, error: "Request is not pending" };
+
+    const senderName = reqData.senderName;
+    const receiverName = reqData.receiverName;
+    const senderId = reqData.senderId;
+    const receiverId = reqData.receiverId;
+
+    // Update request status to accepted
+    await reqRef.update({ status: "accepted" });
+
+    // Add friends bidirectionally
+    const senderDocRef = db.collection("users").doc(senderId);
+    const receiverDocRef = db.collection("users").doc(receiverId);
+
+    const senderDoc = await senderDocRef.get();
+    const senderFriends = senderDoc.data()?.gamesFriends || [];
+    if (!senderFriends.includes(receiverName)) {
+      await senderDocRef.update({
+        gamesFriends: [...senderFriends, receiverName]
+      });
+    }
+
+    const receiverDoc = await receiverDocRef.get();
+    const receiverFriends = receiverDoc.data()?.gamesFriends || [];
+    if (!receiverFriends.includes(senderName)) {
+      await receiverDocRef.update({
+        gamesFriends: [...receiverFriends, senderName]
+      });
+    }
+
+    return { success: true };
+  } catch (e: any) {
+    console.error("Error accepting friend request:", e);
+    return { success: false, error: e.message };
+  }
+}
+
+/**
+ * Decline/Delete a friend request
+ */
+export async function declineFriendRequest(userId: string, requestId: string) {
+  try {
+    if (!userId) return { success: false, error: "Unauthenticated" };
+    await db.collection("friendRequests").doc(requestId).delete();
+    return { success: true };
+  } catch (e: any) {
+    console.error("Error declining friend request:", e);
+    return { success: false, error: e.message };
+  }
+}

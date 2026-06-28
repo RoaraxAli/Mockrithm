@@ -18,7 +18,8 @@ import { GAMES_LIST, generateLevel, getTierName, LevelData, GameInfo } from "@/l
 import {
   getUserGamesProgress, updateUserGamesProgress, saveUserLocation,
   saveUserSoundPreference, claimAchievementPersistent, addFriendPersistent,
-  getLeaderboardUsers, GameProgress
+  getLeaderboardUsers, GameProgress,
+  sendFriendRequest, acceptFriendRequest, declineFriendRequest
 } from "@/lib/actions/games.action";
 
 const Editor = dynamic(() => import("@monaco-editor/react"), { ssr: false });
@@ -161,14 +162,12 @@ export default function GamesPage() {
   const [newFriendInput, setNewFriendInput] = useState("");
   const [selectedFriend, setSelectedFriend] = useState("");
   const [chatInput, setChatInput] = useState("");
-  const [messages, setMessages] = useState<Record<string, { sender: "user" | "friend"; text: string; time: string }[]>>({});
+  const [messages, setMessages] = useState<Record<string, { id?: string; sender: "user" | "friend"; text: string; time: string; status?: string }[]>>({});
 
-  // Call sim
-  const [activeCallFriend, setActiveCallFriend] = useState<string | null>(null);
-  const [callStatus, setCallStatus] = useState<"calling" | "connected" | "ended">("ended");
-  const [callTimer, setCallTimer] = useState(0);
-  const [callAudioMuted, setCallAudioMuted] = useState(false);
-  const callIntervalRef = useRef<any>(null);
+  // Real-time friend request & presence states
+  const [receivedRequests, setReceivedRequests] = useState<any[]>([]);
+  const [sentRequests, setSentRequests] = useState<any[]>([]);
+  const [friendsPresence, setFriendsPresence] = useState<Record<string, { status: string; lastActive: any }>>({});
 
   // Editor
   const [editorCode, setEditorCode] = useState("");
@@ -242,16 +241,175 @@ export default function GamesPage() {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  // --- Call timer tick ---
+  // --- Real-time Friends List Sync ---
   useEffect(() => {
-    if (callStatus === "connected") {
-      callIntervalRef.current = setInterval(() => setCallTimer(p => p + 1), 1000);
-    } else {
-      if (callIntervalRef.current) { clearInterval(callIntervalRef.current); callIntervalRef.current = null; }
-      setCallTimer(0);
+    if (!isLoaded || !isSignedIn || !clerkUser) return;
+
+    const listenUserDoc = async () => {
+      const { doc, onSnapshot } = await import("firebase/firestore");
+      const { db } = await import("@/firebase/client");
+
+      return onSnapshot(doc(db, "users", clerkUser.id), (snap) => {
+        if (snap.exists()) {
+          const data = snap.data();
+          const fl = data.gamesFriends || [];
+          setFriendsList(fl);
+          setSelectedFriend(prev => {
+            if (prev === "__global__") return prev;
+            if (!prev && fl.length > 0) return fl[0];
+            return prev;
+          });
+        }
+      });
+    };
+
+    let unsub: any;
+    listenUserDoc().then(u => unsub = u);
+    return () => { if (unsub) unsub(); };
+  }, [isLoaded, isSignedIn, clerkUser]);
+
+  // --- Real-time Friends Presence Sync ---
+  useEffect(() => {
+    if (friendsList.length === 0) {
+      setFriendsPresence({});
+      return;
     }
-    return () => { if (callIntervalRef.current) clearInterval(callIntervalRef.current); };
-  }, [callStatus]);
+
+    const listenPresence = async () => {
+      const { collection, query, where, onSnapshot } = await import("firebase/firestore");
+      const { db } = await import("@/firebase/client");
+
+      const q = query(collection(db, "users"), where("name", "in", friendsList));
+      return onSnapshot(q, (snapshot) => {
+        const presence: Record<string, { status: string; lastActive: any }> = {};
+        snapshot.docs.forEach(doc => {
+          const data = doc.data();
+          presence[data.name] = {
+            status: data.status || "offline",
+            lastActive: data.lastActive
+          };
+        });
+        setFriendsPresence(presence);
+      });
+    };
+
+    let unsub: any;
+    listenPresence().then(u => unsub = u);
+    return () => { if (unsub) unsub(); };
+  }, [friendsList]);
+
+  // --- Real-time Friend Requests Sync ---
+  useEffect(() => {
+    if (!userNameDisplay) return;
+
+    const listenRequests = async () => {
+      const { collection, query, where, onSnapshot } = await import("firebase/firestore");
+      const { db } = await import("@/firebase/client");
+
+      const qRec = query(
+        collection(db, "friendRequests"),
+        where("receiverName", "==", userNameDisplay),
+        where("status", "==", "pending")
+      );
+      const unsubRec = onSnapshot(qRec, (snapshot) => {
+        setReceivedRequests(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })));
+      });
+
+      const qSent = query(
+        collection(db, "friendRequests"),
+        where("senderName", "==", userNameDisplay),
+        where("status", "==", "pending")
+      );
+      const unsubSent = onSnapshot(qSent, (snapshot) => {
+        setSentRequests(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })));
+      });
+
+      return () => {
+        unsubRec();
+        unsubSent();
+      };
+    };
+
+    let unsub: any;
+    listenRequests().then(u => unsub = u);
+    return () => { if (unsub) unsub(); };
+  }, [userNameDisplay]);
+
+  // --- Real-time Chat Messages Sync ---
+  useEffect(() => {
+    if (!selectedFriend || !userNameDisplay) return;
+
+    const listenMessages = async () => {
+      const { collection, query, where, orderBy, onSnapshot } = await import("firebase/firestore");
+      const { db } = await import("@/firebase/client");
+
+      const isGlobal = selectedFriend === "__global__";
+      const chatId = isGlobal ? "global" : [userNameDisplay, selectedFriend].sort().join("_");
+
+      const q = query(
+        collection(db, "messages"),
+        where("chatId", "==", chatId),
+        orderBy("timestamp", "asc")
+      );
+
+      return onSnapshot(q, (snapshot) => {
+        const list = snapshot.docs.map(doc => {
+          const data = doc.data();
+          const t = data.timestamp?.toDate?.() || new Date();
+          const timeStr = t.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+          return {
+            id: doc.id,
+            sender: data.sender === userNameDisplay ? ("user" as const) : ("friend" as const),
+            text: data.text || "",
+            time: timeStr,
+            status: data.status,
+            timestamp: t
+          };
+        });
+
+        setMessages(prev => ({
+          ...prev,
+          [selectedFriend]: list
+        }));
+
+        // Mark incoming messages as read/seen in Firestore
+        if (!isGlobal) {
+          const unreadDocs = snapshot.docs.filter(doc => {
+            const data = doc.data();
+            return data.sender === selectedFriend && data.receiver === userNameDisplay && data.status !== "seen";
+          });
+
+          if (unreadDocs.length > 0) {
+            import("firebase/firestore").then(async ({ doc, updateDoc }) => {
+              for (const uDoc of unreadDocs) {
+                await updateDoc(doc(db, "messages", uDoc.id), { status: "seen" });
+              }
+            });
+          }
+        }
+      });
+    };
+
+    let unsub: any;
+    listenMessages().then(u => unsub = u);
+    return () => { if (unsub) unsub(); };
+  }, [selectedFriend, userNameDisplay]);
+
+  const getStatusIndicator = (friendName: string) => {
+    const presence = friendsPresence[friendName];
+    if (!presence) return { color: "bg-zinc-600", label: "offline" };
+    
+    const lastActiveTime = presence.lastActive?.toDate?.()?.getTime() || 0;
+    const isRecent = Date.now() - lastActiveTime < 15000;
+    
+    if (presence.status === "offline" || !isRecent) {
+      return { color: "bg-zinc-600", label: "offline" };
+    }
+    if (presence.status === "interview") {
+      return { color: "bg-amber-500 animate-pulse", label: "in interview" };
+    }
+    return { color: "bg-emerald-500 animate-pulse", label: "online" };
+  };
 
   // --- Level data load ---
   useEffect(() => {
@@ -463,50 +621,181 @@ export default function GamesPage() {
     if (isSignedIn && clerkUser) await claimAchievementPersistent(clerkUser.id, id, xp);
   };
 
-  // --- Friend add ---
+  // --- Friend requests & social handlers ---
   const handleAddFriend = async (e: React.FormEvent) => {
     e.preventDefault();
     const name = newFriendInput.trim();
     if (!name) return;
-    if (friendsList.includes(name)) { toast.error(`${name} is already in your list.`); return; }
+    if (friendsList.includes(name)) { toast.error(`${name} is already in your friends list.`); return; }
+    if (name === userNameDisplay) { toast.error("You cannot add yourself."); return; }
+
     playSound("click");
     if (isSignedIn && clerkUser) {
-      const res = await addFriendPersistent(clerkUser.id, name);
-      if (res.success) { setFriendsList(res.friends || []); if (!selectedFriend) setSelectedFriend(name); toast.success(`${name} added!`); }
-      else toast.error(res.error || "Failed to add friend");
+      const res = await sendFriendRequest(clerkUser.id, userNameDisplay, name);
+      if (res.success) {
+        toast.success(`Friend request sent to ${name}!`);
+        setNewFriendInput("");
+      } else {
+        toast.error(res.error || "Failed to send friend request.");
+      }
     } else {
-      setFriendsList(p => [...p, name]); if (!selectedFriend) setSelectedFriend(name); toast.success(`${name} added!`);
+      toast.error("Please sign in to add friends.");
     }
-    setNewFriendInput("");
   };
 
-  // --- Chat ---
-  const handleSendChatMessage = (e: React.FormEvent) => {
+  const handleAcceptRequest = async (requestId: string) => {
+    playSound("click");
+    if (isSignedIn && clerkUser) {
+      const res = await acceptFriendRequest(clerkUser.id, userNameDisplay, requestId);
+      if (res.success) {
+        toast.success("Friend request accepted!");
+      } else {
+        toast.error(res.error || "Failed to accept friend request.");
+      }
+    }
+  };
+
+  const handleDeclineRequest = async (requestId: string) => {
+    playSound("click");
+    if (isSignedIn && clerkUser) {
+      const res = await declineFriendRequest(clerkUser.id, requestId);
+      if (res.success) {
+        toast.info("Friend request declined.");
+      } else {
+        toast.error(res.error || "Failed to decline friend request.");
+      }
+    }
+  };
+
+  const handleCancelRequest = async (requestId: string) => {
+    playSound("click");
+    if (isSignedIn && clerkUser) {
+      const res = await declineFriendRequest(clerkUser.id, requestId);
+      if (res.success) {
+        toast.info("Friend request cancelled.");
+      } else {
+        toast.error(res.error || "Failed to cancel friend request.");
+      }
+    }
+  };
+
+  // --- Persistent Chat ---
+  const handleSendChatMessage = async (e: React.FormEvent) => {
     e.preventDefault();
     const text = chatInput.trim();
     if (!text || !selectedFriend) return;
+    
     playSound("click");
-    const time = new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
-    setMessages(prev => ({ ...prev, [selectedFriend]: [...(prev[selectedFriend] || []), { sender: "user", text, time }] }));
     setChatInput("");
-    setTimeout(() => {
-      const replies = ["Nice work!", "How's the code going?", "Which level are you on?", "Let's team up soon!", "Keep pushing!"];
-      const reply = replies[Math.floor(Math.random() * replies.length)];
-      const replyTime = new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
-      setMessages(prev => ({ ...prev, [selectedFriend]: [...(prev[selectedFriend] || []), { sender: "friend", text: reply, time: replyTime }] }));
-      playSound("success");
-    }, 1200);
+    
+    try {
+      const { collection, addDoc, serverTimestamp } = await import("firebase/firestore");
+      const { db } = await import("@/firebase/client");
+
+      const isGlobal = selectedFriend === "__global__";
+      const chatId = isGlobal ? "global" : [userNameDisplay, selectedFriend].sort().join("_");
+      
+      let initialStatus = "sent";
+      if (!isGlobal) {
+        const friendPres = friendsPresence[selectedFriend];
+        const isOnline = friendPres && friendPres.status !== "offline" && (Date.now() - (friendPres.lastActive?.toDate?.()?.getTime() || Date.now()) < 15000);
+        if (isOnline) {
+          initialStatus = "delivered";
+        }
+      }
+
+      await addDoc(collection(db, "messages"), {
+        chatId,
+        sender: userNameDisplay,
+        receiver: isGlobal ? "global" : selectedFriend,
+        text,
+        timestamp: serverTimestamp(),
+        status: initialStatus
+      });
+
+      if (!isGlobal) {
+        triggerSimulatedReply(selectedFriend, text);
+      }
+    } catch (err: any) {
+      console.error("Chat send error:", err);
+      toast.error("Failed to send message.");
+    }
   };
 
-  // --- Voice call sim ---
-  const triggerVoiceCall = (friend: string) => {
+  const triggerSimulatedReply = (friendName: string, userMessageText: string) => {
+    const presence = friendsPresence[friendName];
+    if (!presence) return;
+
+    const lastActiveTime = presence.lastActive?.toDate?.()?.getTime() || 0;
+    const isRecent = Date.now() - lastActiveTime < 15000;
+    const isOnline = presence.status === "online" && isRecent;
+
+    if (!isOnline) {
+      console.log(`Friend ${friendName} is offline or busy. No auto-reply.`);
+      return;
+    }
+
+    setTimeout(async () => {
+      try {
+        const replies = [
+          "Nice work!",
+          "How's the code going?",
+          "Which level are you on?",
+          "Let's team up soon!",
+          "Keep pushing!",
+          "That's awesome! Code on!",
+          "Interesting... Tell me more."
+        ];
+        const reply = replies[Math.floor(Math.random() * replies.length)];
+
+        const { collection, addDoc, serverTimestamp } = await import("firebase/firestore");
+        const { db } = await import("@/firebase/client");
+
+        await addDoc(collection(db, "messages"), {
+          chatId: [userNameDisplay, friendName].sort().join("_"),
+          sender: friendName,
+          receiver: userNameDisplay,
+          text: reply,
+          timestamp: serverTimestamp(),
+          status: "sent"
+        });
+
+        playSound("success");
+      } catch (err) {
+        console.error("Simulated reply error:", err);
+      }
+    }, 2000);
+  };
+
+  // --- Voice Call Trigger ---
+  const placeCall = async (friend: string) => {
     playSound("click");
-    setActiveCallFriend(friend);
-    setCallStatus("calling");
-    setTimeout(() => { setCallStatus("connected"); playSound("success"); }, 2500);
-  };
+    const indicator = getStatusIndicator(friend);
+    if (indicator.label === "offline") {
+      toast.error(`${friend} is offline. Call cannot be placed.`);
+      return;
+    }
+    if (indicator.label === "in interview") {
+      toast.error(`${friend} is busy in a mock interview.`);
+      return;
+    }
 
-  const terminateVoiceCall = () => { playSound("click"); setCallStatus("ended"); setActiveCallFriend(null); };
+    try {
+      const { collection, addDoc, serverTimestamp } = await import("firebase/firestore");
+      const { db } = await import("@/firebase/client");
+
+      await addDoc(collection(db, "calls"), {
+        caller: userNameDisplay,
+        receiver: friend,
+        status: "ringing",
+        createdAt: serverTimestamp()
+      });
+      toast.success(`Calling ${friend}...`);
+    } catch (e) {
+      console.error(e);
+      toast.error("Failed to place call.");
+    }
+  };
 
   const formatCallTime = (s: number) => `${Math.floor(s / 60).toString().padStart(2, "0")}:${(s % 60).toString().padStart(2, "0")}`;
 
@@ -1579,49 +1868,112 @@ export default function GamesPage() {
           <div className="w-full max-w-4xl mx-auto flex flex-col gap-6">
             <div className="border-b border-zinc-900 pb-6">
               <h2 className="text-3xl font-black uppercase font-mono tracking-tight">Friends</h2>
-              <p className="text-xs text-zinc-500 mt-1">Add friends and start voice calls.</p>
+              <p className="text-xs text-zinc-500 mt-1">Manage friends, pending requests, and start voice calls.</p>
             </div>
+            
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              <div className="md:col-span-2 space-y-4">
-                <h3 className="text-xs font-mono font-bold text-zinc-400 uppercase tracking-widest">Your Contacts</h3>
-                {friendsList.length > 0 ? (
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    {friendsList.map(friend => (
-                      <div key={friend} className="bg-zinc-950/40 border border-zinc-900 p-4 rounded-2xl flex items-center justify-between hover:border-zinc-800 transition-all">
-                        <div className="flex items-center gap-3">
-                          <div className="size-8 rounded-full bg-zinc-900 border border-zinc-800 flex items-center justify-center text-xs font-bold text-zinc-300 font-mono">{friend[0]?.toUpperCase()}</div>
-                          <div>
-                            <h4 className="text-xs font-bold text-white uppercase font-mono">{friend}</h4>
-                            <span className="text-[7.5px] font-mono text-zinc-500 uppercase">Online</span>
+              <div className="md:col-span-2 space-y-6">
+                
+                {/* Active Friends */}
+                <div className="space-y-3">
+                  <h3 className="text-xs font-mono font-bold text-zinc-400 uppercase tracking-widest">Your Contacts</h3>
+                  {friendsList.length > 0 ? (
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      {friendsList.map(friend => {
+                        const statusInfo = getStatusIndicator(friend);
+                        return (
+                          <div key={friend} className="bg-zinc-950/40 border border-zinc-900 p-4 rounded-2xl flex items-center justify-between hover:border-zinc-800 transition-all">
+                            <div className="flex items-center gap-3">
+                              <div className="relative">
+                                <div className="size-8 rounded-full bg-zinc-900 border border-zinc-800 flex items-center justify-center text-xs font-bold text-zinc-300 font-mono">
+                                  {friend[0]?.toUpperCase()}
+                                </div>
+                                <span className={`absolute bottom-0 right-0 size-2.5 rounded-full border border-black ${statusInfo.color}`} />
+                              </div>
+                              <div>
+                                <h4 className="text-xs font-bold text-white uppercase font-mono">{friend}</h4>
+                                <span className="text-[8px] font-mono text-zinc-500 uppercase">{statusInfo.label}</span>
+                              </div>
+                            </div>
+                            <button onClick={() => placeCall(friend)}
+                              className="p-2 rounded-xl bg-zinc-900 hover:bg-emerald-500 hover:text-black border border-zinc-800 hover:border-emerald-600 text-zinc-400 transition-all cursor-pointer">
+                              <Phone className="size-3.5 fill-current" />
+                            </button>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  ) : (
+                    <div className="bg-zinc-950/20 border border-dashed border-zinc-900 rounded-2xl p-6 text-center text-zinc-500 text-xs italic">
+                      No friends yet. Send a request to connect!
+                    </div>
+                  )}
+                </div>
+
+                {/* Incoming Requests */}
+                <div className="space-y-3">
+                  <h3 className="text-xs font-mono font-bold text-zinc-400 uppercase tracking-widest">Incoming Requests</h3>
+                  {receivedRequests.length > 0 ? (
+                    <div className="flex flex-col gap-2">
+                      {receivedRequests.map(req => (
+                        <div key={req.id} className="bg-zinc-950/40 border border-zinc-900 p-3 rounded-xl flex items-center justify-between">
+                          <span className="text-xs font-bold font-mono text-white">{req.senderName}</span>
+                          <div className="flex gap-2">
+                            <button onClick={() => handleAcceptRequest(req.id)}
+                              className="px-2.5 py-1 bg-emerald-600 hover:bg-emerald-500 text-white text-[10px] rounded-lg font-bold uppercase transition-all cursor-pointer">
+                              Accept
+                            </button>
+                            <button onClick={() => handleDeclineRequest(req.id)}
+                              className="px-2.5 py-1 bg-zinc-800 hover:bg-zinc-700 text-zinc-400 text-[10px] rounded-lg font-bold uppercase transition-all cursor-pointer">
+                              Decline
+                            </button>
                           </div>
                         </div>
-                        <button onClick={() => triggerVoiceCall(friend)}
-                          className="p-2 rounded-xl bg-zinc-900 hover:bg-emerald-500 hover:text-black border border-zinc-800 hover:border-emerald-600 text-zinc-400 transition-all cursor-pointer">
-                          <Phone className="size-3.5 fill-current" />
-                        </button>
-                      </div>
-                    ))}
-                  </div>
-                ) : (
-                  <div className="bg-zinc-950/20 border border-dashed border-zinc-900 rounded-2xl p-8 text-center text-zinc-500 text-xs italic">
-                    No friends added yet. Use the form to add a user by their username.
-                  </div>
-                )}
+                      ))}
+                    </div>
+                  ) : (
+                    <p className="text-[10px] text-zinc-600 italic font-mono">No pending incoming requests.</p>
+                  )}
+                </div>
+
+                {/* Sent Requests */}
+                <div className="space-y-3">
+                  <h3 className="text-xs font-mono font-bold text-zinc-400 uppercase tracking-widest">Sent Requests</h3>
+                  {sentRequests.length > 0 ? (
+                    <div className="flex flex-col gap-2">
+                      {sentRequests.map(req => (
+                        <div key={req.id} className="bg-zinc-950/40 border border-zinc-900 p-3 rounded-xl flex items-center justify-between">
+                          <span className="text-xs font-bold font-mono text-white">{req.receiverName}</span>
+                          <button onClick={() => handleCancelRequest(req.id)}
+                            className="px-2.5 py-1 bg-zinc-950 border border-zinc-900 hover:bg-red-950 hover:text-red-400 text-zinc-500 text-[10px] rounded-lg font-bold uppercase transition-all cursor-pointer">
+                            Cancel
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <p className="text-[10px] text-zinc-600 italic font-mono">No pending sent requests.</p>
+                  )}
+                </div>
+
               </div>
+
+              {/* Add Friend Sidebar */}
               <div className="bg-zinc-950/40 border border-zinc-900 p-6 rounded-2xl flex flex-col gap-4 h-fit">
                 <div>
                   <h4 className="text-xs font-bold uppercase tracking-wider text-white font-mono">Add a Friend</h4>
-                  <p className="text-[10px] text-zinc-500 leading-relaxed mt-1">Enter their Mockrithm username to add them.</p>
+                  <p className="text-[10px] text-zinc-500 leading-relaxed mt-1">Enter their username to send a friend request.</p>
                 </div>
                 <form onSubmit={handleAddFriend} className="flex flex-col gap-2">
                   <input type="text" placeholder="Username..." value={newFriendInput} onChange={e => setNewFriendInput(e.target.value)}
                     className="bg-black border border-zinc-900 rounded-xl px-3 py-2 focus:outline-none focus:border-zinc-700 text-xs text-white" />
                   <button type="submit"
                     className="py-2 bg-white text-black hover:bg-zinc-200 rounded-xl transition-all cursor-pointer flex items-center justify-center gap-1.5 text-xs font-bold uppercase tracking-wider">
-                    <Plus className="size-4" /> Add Friend
+                    <Plus className="size-4" /> Send Request
                   </button>
                 </form>
               </div>
+
             </div>
           </div>
         )}
@@ -1633,9 +1985,10 @@ export default function GamesPage() {
               <h2 className="text-3xl font-black uppercase font-mono tracking-tight">Chat</h2>
               <p className="text-xs text-zinc-500 mt-1 font-mono">Message friends directly or talk to everyone in global chat.</p>
             </div>
+            
             <div className="flex-1 flex gap-6 min-h-0">
               {/* Contact sidebar */}
-              <div className="w-56 border border-zinc-900 rounded-2xl bg-zinc-950/40 p-4 flex flex-col gap-3 shrink-0">
+              <div className="w-60 border border-zinc-900 rounded-2xl bg-zinc-950/40 p-4 flex flex-col gap-3 shrink-0">
                 <h3 className="text-[10px] font-mono font-bold text-zinc-400 uppercase tracking-widest">Channels</h3>
                 {/* Global chat channel */}
                 <button onClick={() => { playSound("click"); setSelectedFriend("__global__"); }}
@@ -1644,46 +1997,88 @@ export default function GamesPage() {
                 </button>
                 <div className="h-px bg-zinc-900 my-1" />
                 <h3 className="text-[10px] font-mono font-bold text-zinc-400 uppercase tracking-widest">Friends</h3>
-                <div className="flex flex-col gap-1.5 overflow-y-auto pr-1">
+                <div className="flex flex-col gap-1.5 overflow-y-auto pr-1 flex-1">
                   {friendsList.length === 0 ? (
                     <p className="text-[10px] text-zinc-600 italic font-mono">No friends added yet.</p>
-                  ) : friendsList.map(friend => (
-                    <button key={friend} onClick={() => { playSound("click"); setSelectedFriend(friend); }}
-                      className={`w-full flex items-center gap-2 p-2.5 rounded-xl transition-all text-xs ${selectedFriend === friend ? "bg-zinc-900 text-white font-bold" : "text-zinc-400 hover:bg-zinc-900/40 hover:text-white"}`}>
-                      <div className="size-5 rounded-full bg-zinc-900 border border-zinc-800 flex items-center justify-center text-[8px] font-bold">{friend[0]?.toUpperCase()}</div>
-                      {friend}
-                    </button>
-                  ))}
+                  ) : friendsList.map(friend => {
+                    const statusInfo = getStatusIndicator(friend);
+                    return (
+                      <button key={friend} onClick={() => { playSound("click"); setSelectedFriend(friend); }}
+                        className={`w-full flex items-center justify-between p-2.5 rounded-xl transition-all text-xs ${selectedFriend === friend ? "bg-zinc-900 text-white font-bold" : "text-zinc-400 hover:bg-zinc-900/40 hover:text-white"}`}>
+                        <div className="flex items-center gap-2 truncate">
+                          <div className="size-5 rounded-full bg-zinc-900 border border-zinc-800 flex items-center justify-center text-[8px] font-bold">{friend[0]?.toUpperCase()}</div>
+                          <span className="truncate max-w-[100px]">{friend}</span>
+                        </div>
+                        <span className={`size-1.5 rounded-full shrink-0 ${statusInfo.color}`} />
+                      </button>
+                    );
+                  })}
                 </div>
               </div>
 
-              {/* Chat panel */}
-              <div className="flex-1 border border-zinc-900 rounded-2xl bg-zinc-950/40 flex flex-col justify-between overflow-hidden">
+              {/* Chat panel (WhatsApp Aesthetics) */}
+              <div className="flex-1 border border-zinc-900 rounded-2xl bg-zinc-950/20 flex flex-col justify-between overflow-hidden relative">
+                
+                {/* Chat Header */}
                 <div className="px-5 py-4 bg-zinc-950 border-b border-zinc-900 flex items-center justify-between">
-                  <h3 className="text-xs font-black uppercase font-mono text-white">
-                    {selectedFriend === "__global__" ? "🌍 Global Chat" : selectedFriend ? `Chat with ${selectedFriend}` : "Select a channel"}
-                  </h3>
+                  <div>
+                    <h3 className="text-xs font-black uppercase font-mono text-white flex items-center gap-2">
+                      {selectedFriend === "__global__" ? "🌍 Global Chat" : selectedFriend ? `Chat with ${selectedFriend}` : "Select a channel"}
+                    </h3>
+                    {selectedFriend && selectedFriend !== "__global__" && (
+                      <p className="text-[8px] font-mono text-zinc-500 uppercase mt-0.5">
+                        {getStatusIndicator(selectedFriend).label}
+                      </p>
+                    )}
+                  </div>
                   {selectedFriend === "__global__" && <span className="text-[9px] font-mono text-zinc-500 uppercase">Everyone can see messages here</span>}
                 </div>
-                <div className="flex-1 p-5 overflow-y-auto flex flex-col gap-3 min-h-0">
-                  {selectedFriend && (messages[selectedFriend] || []).length > 0 ? (
-                    (messages[selectedFriend] || []).map((msg, idx) => {
-                      const isUser = msg.sender === "user";
-                      return (
-                        <div key={idx} className={`flex flex-col max-w-[70%] ${isUser ? "self-end items-end" : "self-start items-start"}`}>
-                          <div className={`p-3 rounded-2xl text-xs leading-relaxed font-medium ${isUser ? "bg-white text-black rounded-tr-none" : "bg-zinc-900 text-zinc-300 rounded-tl-none border border-zinc-800"}`}>
-                            {msg.text}
+
+                {/* Messages Body */}
+                <div className="flex-1 p-5 overflow-y-auto flex flex-col gap-3.5 min-h-0 bg-black/10">
+                  {selectedFriend ? (
+                    (messages[selectedFriend] || []).length > 0 ? (
+                      (messages[selectedFriend] || []).map((msg, idx) => {
+                        const isUser = msg.sender === "user";
+                        return (
+                          <div key={msg.id || idx} className={`flex flex-col max-w-[70%] ${isUser ? "self-end items-end" : "self-start items-start"}`}>
+                            <div className={`p-3 pb-5 rounded-2xl text-xs leading-relaxed font-medium relative ${
+                              isUser 
+                                ? "bg-emerald-950 text-emerald-100 border border-emerald-900/60 rounded-tr-none" 
+                                : "bg-zinc-900 text-zinc-100 rounded-tl-none border border-zinc-800"
+                            }`}>
+                              <p className="pr-12">{msg.text}</p>
+                              <div className="absolute bottom-1 right-2 flex items-center gap-1">
+                                <span className="text-[7.5px] font-mono text-zinc-500 select-none">{msg.time}</span>
+                                {isUser && selectedFriend !== "__global__" && (
+                                  <span className="text-[10px] select-none flex items-center justify-center font-bold">
+                                    {msg.status === "seen" ? (
+                                      <span className="text-sky-400 font-sans leading-none">✓✓</span>
+                                    ) : msg.status === "delivered" ? (
+                                      <span className="text-zinc-500 font-sans leading-none">✓✓</span>
+                                    ) : (
+                                      <span className="text-zinc-500 font-sans leading-none">✓</span>
+                                    )}
+                                  </span>
+                                )}
+                              </div>
+                            </div>
                           </div>
-                          <span className="text-[8px] font-mono text-zinc-600 mt-1">{msg.time}</span>
-                        </div>
-                      );
-                    })
+                        );
+                      })
+                    ) : (
+                      <div className="flex-1 flex items-center justify-center text-zinc-600 italic text-xs font-mono">
+                        {selectedFriend === "__global__" ? "Be the first to say something!" : "Say hello!"}
+                      </div>
+                    )
                   ) : (
                     <div className="flex-1 flex items-center justify-center text-zinc-600 italic text-xs font-mono">
-                      {selectedFriend ? (selectedFriend === "__global__" ? "Be the first to say something!" : "Say hello!") : "Pick a channel or friend to start chatting."}
+                      Pick a channel or friend to start chatting.
                     </div>
                   )}
                 </div>
+
+                {/* Messages Input */}
                 <form onSubmit={handleSendChatMessage} className="p-4 bg-zinc-950 border-t border-zinc-900 flex gap-2 shrink-0">
                   <input type="text" disabled={!selectedFriend} value={chatInput} onChange={e => setChatInput(e.target.value)}
                     placeholder={selectedFriend === "__global__" ? "Message everyone..." : selectedFriend ? `Message ${selectedFriend}...` : "Select a channel first..."}
@@ -1697,7 +2092,6 @@ export default function GamesPage() {
             </div>
           </div>
         )}
-
       </div>
     </div>
   );
