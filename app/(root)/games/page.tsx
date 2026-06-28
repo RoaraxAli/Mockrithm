@@ -3,6 +3,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useUser } from "@clerk/nextjs";
 import Editor from "@monaco-editor/react";
+import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   FileCode,
@@ -30,7 +31,12 @@ import {
   VolumeX,
   Code2,
   RotateCcw,
-  AlertCircle
+  AlertCircle,
+  MessageSquare,
+  Users,
+  Trophy,
+  Plus,
+  Send
 } from "lucide-react";
 import { toast } from "sonner";
 import {
@@ -125,23 +131,43 @@ function renderCodeExample(codeBlock: string) {
   );
 }
 
-interface Quest {
+interface Achievement {
   id: string;
   title: string;
-  description: string;
-  xpReward: number;
-  progressText: string;
-  pct: number;
+  desc: string;
+  target: string;
+  current: number;
+  max: number;
   completed: boolean;
+  xp: number;
 }
+
+// Mock Leaderboard Data with filtering attributes
+const MOCK_LEADERBOARD = [
+  { rank: 1, name: "CyberKing", country: "United States", city: "San Francisco", xp: 12500, badges: 15, achievements: 12, avatar: "👑" },
+  { rank: 2, name: "CodeWitch", country: "Canada", city: "Toronto", xp: 11200, badges: 14, achievements: 10, avatar: "🧙‍♀️" },
+  { rank: 3, name: "NodeNinja", country: "Japan", city: "Tokyo", xp: 9800, badges: 11, achievements: 9, avatar: "🥷" },
+  { rank: 4, name: "AlchemistJS", country: "Germany", city: "Berlin", xp: 8500, badges: 9, achievements: 8, avatar: "🧪" },
+  { rank: 5, name: "RustGuardian", country: "United States", city: "San Francisco", xp: 7200, badges: 8, achievements: 7, avatar: "🛡️" },
+  { rank: 6, name: "Pythonista", country: "Canada", city: "Toronto", xp: 6400, badges: 7, achievements: 6, avatar: "🐍" },
+  { rank: 7, name: "DockerMaster", country: "United Kingdom", city: "London", xp: 5900, badges: 6, achievements: 5, avatar: "🐳" },
+  { rank: 8, name: "GitWeaver", country: "Germany", city: "Berlin", xp: 5100, badges: 5, achievements: 4, avatar: "🕸️" },
+  { rank: 9, name: "TailwindGenius", country: "United States", city: "New York", xp: 4200, badges: 4, achievements: 3, avatar: "🎨" }
+];
 
 export default function GamesPage() {
   const { isLoaded, isSignedIn, user: clerkUser } = useUser();
+
+  // Sidebar Tab States: 'dashboard' | 'achievements' | 'leaderboard' | 'social'
+  const [activeTab, setActiveTab] = useState<"dashboard" | "achievements" | "leaderboard" | "social">("dashboard");
 
   // Progress State
   const [progress, setProgress] = useState<Record<string, GameProgress>>({});
   const [totalXp, setTotalXp] = useState(0);
   const [loading, setLoading] = useState(true);
+
+  // Gamification Claimed Achievements (local persistence)
+  const [claimedAchievements, setClaimedAchievements] = useState<string[]>([]);
 
   // Active Game/Level Runner States
   const [activeGame, setActiveGame] = useState<GameInfo | null>(null);
@@ -170,11 +196,34 @@ export default function GamesPage() {
     commits: [] as { id: string; message: string }[]
   });
 
+  // Leaderboard Filtering Options
+  const [leaderboardScope, setLeaderboardScope] = useState<"world" | "country" | "city">("world");
+  const [leaderboardMetric, setLeaderboardMetric] = useState<"xp" | "badges" | "achievements">("xp");
+
+  // Social / Friends & Chat States
+  const [friendsList, setFriendsList] = useState<string[]>(["ZeroCool", "NeoCoder", "AlgorithmKnight"]);
+  const [newFriendInput, setNewFriendInput] = useState("");
+  const [selectedFriend, setSelectedFriend] = useState("ZeroCool");
+  const [chatInput, setChatInput] = useState("");
+  const [messages, setMessages] = useState<Record<string, { sender: "user" | "friend"; text: string; time: string }[]>>({
+    "ZeroCool": [
+      { sender: "friend", text: "Hey! Did you clear the HTML5 skeleton levels yet?", time: "2:15 PM" },
+      { sender: "user", text: "Working on it now. The tags are pretty cool.", time: "2:17 PM" },
+      { sender: "friend", text: "Awesome, let me know if you get stuck on the list alignments!", time: "2:18 PM" }
+    ],
+    "NeoCoder": [
+      { sender: "friend", text: "TypeScript generics are saving my life today.", time: "Yesterday" }
+    ],
+    "AlgorithmKnight": [
+      { sender: "friend", text: "Leaderboards are getting competitive. Good luck!", time: "3:04 PM" }
+    ]
+  });
+
   // Calculate highest unlocked level for current game
   const gameProgressObj = activeGame ? (progress[activeGame.id] || { completedLevel: 0, xp: 0 }) : { completedLevel: 0, xp: 0 };
   const maxUnlockedLevel = bypassLocks ? 500 : (gameProgressObj.completedLevel + 1 > 500 ? 500 : gameProgressObj.completedLevel + 1);
 
-  // Load User Progress
+  // Load User Progress and Achievements
   useEffect(() => {
     async function loadProgress() {
       if (!isLoaded) return;
@@ -195,6 +244,12 @@ export default function GamesPage() {
           if (localXp) {
             setTotalXp(parseInt(localXp, 10));
           }
+        }
+
+        // Load claimed achievements from local storage
+        const claimed = localStorage.getItem("mockrithm_claimed_achievements");
+        if (claimed) {
+          setClaimedAchievements(JSON.parse(claimed));
         }
       } catch (err) {
         console.error("Failed to load game progress:", err);
@@ -235,7 +290,7 @@ export default function GamesPage() {
     }
   }, [activeGame, maxUnlockedLevel, currentLevelNum]);
 
-  // Prerequisite Verification Logic - Always return true so languages are not locked
+  // Prerequisite Verification Logic
   const isGameUnlocked = (gameId: string): boolean => {
     return true;
   };
@@ -251,84 +306,118 @@ export default function GamesPage() {
     });
   };
 
-  // Calculate Quest Achievements
-  const getGlobalQuests = (): Quest[] => {
+  // Calculate dynamic achievements shelf
+  const getAchievements = (): Achievement[] => {
     const playList = Object.keys(progress);
-    
     const anyPlayed = playList.some(k => progress[k].completedLevel > 0);
     const polyglotCount = playList.filter(k => progress[k].completedLevel >= 5).length;
     
     const htmlLvl = progress["html5"]?.completedLevel || 0;
     const cssLvl = progress["css3"]?.completedLevel || 0;
-    const tailwindLvl = progress["tailwind"]?.completedLevel || 0;
-    const frontendCount = [htmlLvl, cssLvl, tailwindLvl].filter(l => l >= 10).length;
-
     const jsLvl = progress["javascript"]?.completedLevel || 0;
-    const reactLvl = progress["reactjs"]?.completedLevel || 0;
-    const fsCount = [jsLvl, reactLvl].filter(l => l >= 10).length;
-
-    const gitLvl = progress["git"]?.completedLevel || 0;
-    const dockerLvl = progress["docker"]?.completedLevel || 0;
-    const devopsCount = [gitLvl, dockerLvl].filter(l => l >= 5).length;
-
+    const tsLvl = progress["typescript"]?.completedLevel || 0;
+    const nodeLvl = progress["nodejs"]?.completedLevel || 0;
     const cyberLvl = progress["cybersecurity"]?.completedLevel || 0;
+    const gitLvl = progress["git"]?.completedLevel || 0;
+    const anyGrand = playList.some(k => progress[k].completedLevel >= 100);
 
     return [
-      {
-        id: "genesis",
-        title: "Genesis Sandbox",
-        description: "Embark on your journey. Clear Level 1 on any game.",
-        xpReward: 50,
-        progressText: anyPlayed ? "1/1" : "0/1",
-        pct: anyPlayed ? 100 : 0,
-        completed: anyPlayed
-      },
-      {
-        id: "polyglot",
-        title: "Polyglot Apprentice",
-        description: "Harness multiple energies. Reach Level 5 on 3 different stacks.",
-        xpReward: 150,
-        progressText: `${Math.min(polyglotCount, 3)}/3 stacks`,
-        pct: Math.round((Math.min(polyglotCount, 3) / 3) * 100),
-        completed: polyglotCount >= 3
-      },
-      {
-        id: "frontend",
-        title: "Frontend Sorcerer",
-        description: "Weave style matrices. Reach Level 10 on HTML5, CSS3, and Tailwind CSS.",
-        xpReward: 250,
-        progressText: `${frontendCount}/3 completed`,
-        pct: Math.round((frontendCount / 3) * 100),
-        completed: frontendCount >= 3
-      },
-      {
-        id: "fullstack",
-        title: "Fullstack Alchemist",
-        description: "Master DOM state portals. Reach Level 10 on JavaScript and ReactJS.",
-        xpReward: 200,
-        progressText: `${fsCount}/2 completed`,
-        pct: Math.round((fsCount / 2) * 100),
-        completed: fsCount >= 2
-      },
-      {
-        id: "devops",
-        title: "DevOps Helmsman",
-        description: "Deploy ships to registries. Reach Level 5 on Git and Docker.",
-        xpReward: 150,
-        progressText: `${devopsCount}/2 completed`,
-        pct: Math.round((devopsCount / 2) * 100),
-        completed: devopsCount >= 2
-      },
-      {
-        id: "cyber",
-        title: "Security Sentinel",
-        description: "Fortify node perimeters. Reach Level 5 on Cyber Security.",
-        xpReward: 150,
-        progressText: cyberLvl >= 5 ? "1/1" : "0/1",
-        pct: cyberLvl >= 5 ? 100 : Math.round((cyberLvl / 5) * 100),
-        completed: cyberLvl >= 5
-      }
+      { id: "genesis", title: "First Syntax", desc: "Clear Level 1 on any game stack.", target: "Any game Level 1", current: anyPlayed ? 1 : 0, max: 1, completed: anyPlayed, xp: 50 },
+      { id: "explorer", title: "Tech Explorer", desc: "Reach Level 5 on 3 different languages.", target: "3 games", current: Math.min(polyglotCount, 3), max: 3, completed: polyglotCount >= 3, xp: 150 },
+      { id: "html_app", title: "Apprentice Weaver", desc: "Reach Level 10 in HTML5.", target: "HTML5 Level 10", current: Math.min(htmlLvl, 10), max: 10, completed: htmlLvl >= 10, xp: 100 },
+      { id: "css_alc", title: "Style Alchemist", desc: "Reach Level 10 in CSS3.", target: "CSS3 Level 10", current: Math.min(cssLvl, 10), max: 10, completed: cssLvl >= 10, xp: 100 },
+      { id: "js_hack", title: "Logic Hacker", desc: "Reach Level 10 in JavaScript.", target: "JavaScript Level 10", current: Math.min(jsLvl, 10), max: 10, completed: jsLvl >= 10, xp: 100 },
+      { id: "ts_guard", title: "Type Guardian", desc: "Reach Level 5 in TypeScript.", target: "TypeScript Level 5", current: Math.min(tsLvl, 5), max: 5, completed: tsLvl >= 5, xp: 100 },
+      { id: "node_core", title: "Server Core", desc: "Reach Level 5 in NodeJS.", target: "NodeJS Level 5", current: Math.min(nodeLvl, 5), max: 5, completed: nodeLvl >= 5, xp: 100 },
+      { id: "cyber_sentinel", title: "Citadel Sentinel", desc: "Reach Level 5 in Cyber Security.", target: "Security Level 5", current: Math.min(cyberLvl, 5), max: 5, completed: cyberLvl >= 5, xp: 150 },
+      { id: "git_weaver", title: "Timeline Weaver", desc: "Reach Level 5 in Git.", target: "Git Level 5", current: Math.min(gitLvl, 5), max: 5, completed: gitLvl >= 5, xp: 100 },
+      { id: "grandmaster_badge", title: "Grandmaster Title", desc: "Reach Level 100 in any game stack.", target: "Level 100", current: anyGrand ? 100 : 0, max: 100, completed: anyGrand, xp: 500 }
     ];
+  };
+
+  // Get completed but unclaimed achievements (to show red dot indicator)
+  const getUnclaimedAchievementsCount = (): number => {
+    const list = getAchievements();
+    const unclaimed = list.filter(a => a.completed && !claimedAchievements.includes(a.id));
+    return unclaimed.length;
+  };
+
+  // Claim achievement reward action
+  const claimAchievementReward = (achievementId: string, xpReward: number) => {
+    if (claimedAchievements.includes(achievementId)) return;
+    
+    playSound("success");
+    toast.success(`🏆 Achievement Unlocked! Claimed +${xpReward} XP!`);
+
+    const nextClaimed = [...claimedAchievements, achievementId];
+    setClaimedAchievements(nextClaimed);
+    localStorage.setItem("mockrithm_claimed_achievements", JSON.stringify(nextClaimed));
+
+    const nextTotalXp = totalXp + xpReward;
+    setTotalXp(nextTotalXp);
+    localStorage.setItem("mockrithm_games_xp", nextTotalXp.toString());
+  };
+
+  // Add friend to Social List
+  const handleAddFriend = (e: React.FormEvent) => {
+    e.preventDefault();
+    const name = newFriendInput.trim();
+    if (!name) return;
+
+    if (friendsList.includes(name)) {
+      toast.error(`${name} is already in your friends list!`);
+      return;
+    }
+
+    playSound("click");
+    toast.success(`Sent friend invitation to ${name}!`);
+    const nextFriends = [...friendsList, name];
+    setFriendsList(nextFriends);
+    setNewFriendInput("");
+  };
+
+  // Chat message submit handler
+  const handleSendChatMessage = (e: React.FormEvent) => {
+    e.preventDefault();
+    const text = chatInput.trim();
+    if (!text) return;
+
+    playSound("click");
+    const timestamp = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    const userMsg = { sender: "user" as const, text, time: timestamp };
+
+    setMessages(prev => {
+      const activeLogs = prev[selectedFriend] || [];
+      return {
+        ...prev,
+        [selectedFriend]: [...activeLogs, userMsg]
+      };
+    });
+    setChatInput("");
+
+    // Simulate automated replies from friends (interactive chat loop)
+    setTimeout(() => {
+      const replies = [
+        "That implementation looks super clean! Let me know when you clear the next level.",
+        "Generics are rough, but we'll conquer TypeScript Warlord ranks soon!",
+        "Stuck on Docker WORKDIR commands... any hints?",
+        "Awesome! Let's duel in the coding arena soon.",
+        "Try using standard regex validation searches if the code editor keeps throwing errors."
+      ];
+      const friendReply = {
+        sender: "friend" as const,
+        text: replies[Math.floor(Math.random() * replies.length)],
+        time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+      };
+      setMessages(prev => {
+        const activeLogs = prev[selectedFriend] || [];
+        return {
+          ...prev,
+          [selectedFriend]: [...activeLogs, friendReply]
+        };
+      });
+      playSound("success");
+    }, 1200);
   };
 
   // Sound effects controller
@@ -681,107 +770,200 @@ export default function GamesPage() {
     setCurrentLevelNum(num);
   };
 
+  // Filtered Leaderboard computation
+  const getFilteredLeaderboard = () => {
+    const list = [...MOCK_LEADERBOARD];
+    // append user to leaderboard dynamically if logged in
+    const userNameDisplay = clerkUser?.username || clerkUser?.firstName || "Hacker";
+    const userRow = { rank: 10, name: userNameDisplay, country: "United States", city: "San Francisco", xp: totalXp, badges: Object.keys(progress).length, achievements: claimedAchievements.length, avatar: "🛸" };
+    
+    // Add user if not already there
+    if (!list.some(r => r.name === userNameDisplay)) {
+      list.push(userRow);
+    }
+
+    let filtered = list;
+    if (leaderboardScope === "country") {
+      filtered = list.filter(r => r.country === "United States");
+    } else if (leaderboardScope === "city") {
+      filtered = list.filter(r => r.city === "San Francisco");
+    }
+
+    // Sort by selected metric
+    filtered.sort((a, b) => b[leaderboardMetric] - a[leaderboardMetric]);
+    
+    // Recalculate rank values based on sorting
+    return filtered.map((row, idx) => ({ ...row, rank: idx + 1 }));
+  };
+
+  // Red Notification dot counter
+  const unclaimedCount = getUnclaimedAchievementsCount();
+
   return (
-    <div className="min-h-screen bg-black text-white relative font-mona-sans overflow-x-hidden selection:bg-white selection:text-black">
+    <div className="flex h-screen bg-black text-white relative font-mona-sans overflow-hidden selection:bg-white selection:text-black">
       {/* Background Dots Grid */}
       <div className="absolute inset-0 premium-grid-dot pointer-events-none opacity-20 z-0" />
-      <div className="absolute top-0 left-0 right-0 h-[400px] bg-gradient-to-b from-white/[0.02] to-transparent pointer-events-none z-0" />
 
-      {/* Header Dashboard section */}
-      <div className="max-w-7xl mx-auto px-6 py-8 relative z-10">
-        {!activeGame ? (
-          <>
-            {/* Top Dashboard Header */}
-            <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 border-b border-zinc-900 pb-8 mb-10">
-              <div className="space-y-2">
-                <div className="flex items-center gap-2">
-                  <span className="h-2 w-2 rounded-full bg-emerald-500 animate-ping" />
-                  <span className="text-[10px] font-mono tracking-widest text-zinc-500 uppercase">GAMIFIED SYLLABUS ENGINE</span>
-                </div>
-                <h1 className="text-4xl font-black tracking-tight leading-none">
-                  Lvl 500. <span className="text-zinc-400">Mastery Citadel</span>
-                </h1>
-                <p className="text-xs text-zinc-400 max-w-xl">
-                  Elevate your software development parameters. Progress through 14 progressive tech stack universes spanning absolute apprentice syntax up to grandmaster optimizations.
-                </p>
-              </div>
-
-              {/* XP and Badges Board */}
-              <div className="flex items-center gap-4 flex-wrap bg-zinc-950/60 border border-zinc-900 rounded-2xl p-4">
-                <div className="flex flex-col justify-center">
-                  <span className="text-[9px] font-mono font-bold text-zinc-550 uppercase tracking-widest flex items-center gap-1">
-                    <Award className="size-3.5 text-zinc-400" /> TOTAL EXPERIENCE (XP)
-                  </span>
-                  <span className="text-2xl font-black text-white font-mono">{totalXp} XP</span>
-                </div>
-
-                <div className="h-8 w-[1px] bg-zinc-900" />
-
-                <div className="flex items-center gap-3">
-                  {/* Sound control */}
-                  <button 
-                    onClick={() => { playSound("click"); setSoundEnabled(!soundEnabled); }}
-                    className="p-2 rounded-xl bg-zinc-900 border border-zinc-800 text-zinc-400 hover:text-white transition-all cursor-pointer"
-                    title="Toggle Audio Feedback"
-                  >
-                    {soundEnabled ? <Volume2 className="size-4" /> : <VolumeX className="size-4" />}
-                  </button>
-
-                  {/* Dev mode switch */}
-                  <button 
-                    onClick={() => { playSound("click"); setBypassLocks(!bypassLocks); }}
-                    className={`px-3 py-2 text-[10px] font-bold tracking-wider uppercase border rounded-xl transition-all cursor-pointer ${
-                      bypassLocks 
-                        ? "bg-white text-black border-white shadow-lg" 
-                        : "bg-zinc-900 text-zinc-400 border-zinc-800 hover:border-zinc-700"
-                    }`}
-                  >
-                    Bypass Locks
-                  </button>
-                </div>
-              </div>
+      {/* Left Custom Gaming Sidebar Menu */}
+      <div className="w-64 border-r border-zinc-900 bg-zinc-950 flex flex-col justify-between h-full relative z-20">
+        <div className="p-6 flex flex-col gap-6">
+          {/* Logo & Back button */}
+          <div>
+            <Link 
+              href="/" 
+              className="flex items-center gap-1.5 text-[10px] font-mono font-black text-zinc-500 hover:text-white uppercase tracking-widest transition-all mb-4"
+              onClick={() => playSound("click")}
+            >
+              <ArrowLeft className="size-3.5" /> Back to Site
+            </Link>
+            <div className="flex items-center gap-2">
+              <span className="h-2 w-2 rounded-full bg-emerald-500 animate-ping" />
+              <h2 className="text-sm font-black tracking-wider uppercase font-mono text-white">Citadel Games</h2>
             </div>
+          </div>
 
-            {/* Interactive Prerequisite Tree Network */}
-            <div className="mb-12 bg-zinc-950/40 border border-zinc-900 rounded-2xl p-6 relative overflow-hidden">
-              <div className="absolute inset-0 premium-grid-dot opacity-5 pointer-events-none" />
-              <div className="flex items-center gap-2 mb-4">
-                <BookOpen className="size-4 text-zinc-400" />
-                <h3 className="text-xs font-bold uppercase tracking-widest text-zinc-350">Interactive Dependency Tree</h3>
-              </div>
-              <p className="text-[11px] text-zinc-500 mb-6">
-                Complete predecessor games to unlock next modules. Drag or hover to explore learning pathways. Toggle "Bypass Locks" above to override.
-              </p>
+          {/* Navigation Links */}
+          <nav className="flex flex-col gap-1.5">
+            <button
+              onClick={() => { playSound("click"); setActiveTab("dashboard"); }}
+              className={`w-full flex items-center justify-between px-4 py-3 rounded-xl transition-all font-bold text-xs uppercase tracking-wider ${
+                activeTab === "dashboard" ? "bg-white text-black font-extrabold" : "text-zinc-400 hover:bg-zinc-900 hover:text-white"
+              }`}
+            >
+              <span className="flex items-center gap-2">
+                <Play className="size-4" /> Arena Workspace
+              </span>
+            </button>
 
-              {/* Dynamic SVG Connectors and Flex Containers mapping tree layout */}
-              <div className="relative w-full overflow-x-auto py-8">
-                <div className="min-w-[900px] flex flex-col gap-10">
-                  {/* Tier 1: Fundamentals */}
-                  <div className="flex justify-around items-center">
-                    <div className="flex flex-col items-center gap-1">
-                      <span className="text-[8px] font-mono text-zinc-500 uppercase">T1 Foundations</span>
-                      <div className="flex gap-4">
+            <button
+              onClick={() => { playSound("click"); setActiveTab("achievements"); }}
+              className={`w-full flex items-center justify-between px-4 py-3 rounded-xl transition-all font-bold text-xs uppercase tracking-wider ${
+                activeTab === "achievements" ? "bg-white text-black font-extrabold" : "text-zinc-400 hover:bg-zinc-900 hover:text-white"
+              }`}
+            >
+              <span className="flex items-center gap-2 relative">
+                <Trophy className="size-4" /> Achievements
+                {/* Red Notification Dot indicator */}
+                {unclaimedCount > 0 && (
+                  <span className="absolute -top-1 -right-2 flex h-2 w-2">
+                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
+                    <span className="relative inline-flex rounded-full h-2 w-2 bg-red-500"></span>
+                  </span>
+                )}
+              </span>
+              {unclaimedCount > 0 && (
+                <span className="text-[9px] font-bold font-mono px-2 py-0.5 rounded-full bg-red-500 text-white leading-none">
+                  {unclaimedCount}
+                </span>
+              )}
+            </button>
+
+            <button
+              onClick={() => { playSound("click"); setActiveTab("leaderboard"); }}
+              className={`w-full flex items-center justify-between px-4 py-3 rounded-xl transition-all font-bold text-xs uppercase tracking-wider ${
+                activeTab === "leaderboard" ? "bg-white text-black font-extrabold" : "text-zinc-400 hover:bg-zinc-900 hover:text-white"
+              }`}
+            >
+              <span className="flex items-center gap-2">
+                <Layers className="size-4" /> Leaderboards
+              </span>
+            </button>
+
+            <button
+              onClick={() => { playSound("click"); setActiveTab("social"); }}
+              className={`w-full flex items-center justify-between px-4 py-3 rounded-xl transition-all font-bold text-xs uppercase tracking-wider ${
+                activeTab === "social" ? "bg-white text-black font-extrabold" : "text-zinc-400 hover:bg-zinc-900 hover:text-white"
+              }`}
+            >
+              <span className="flex items-center gap-2">
+                <MessageSquare className="size-4" /> Friends & Chat
+              </span>
+            </button>
+          </nav>
+        </div>
+
+        {/* User Mini Profile Block */}
+        <div className="p-6 border-t border-zinc-900 bg-zinc-950 flex flex-col gap-2.5">
+          <div className="flex items-center gap-3">
+            <div className="size-8 rounded-full bg-gradient-to-tr from-zinc-800 to-zinc-900 border border-zinc-700 flex items-center justify-center text-sm">
+              {clerkUser?.username?.[0]?.toUpperCase() || clerkUser?.firstName?.[0]?.toUpperCase() || "H"}
+            </div>
+            <div className="overflow-hidden">
+              <h4 className="text-xs font-bold truncate text-white uppercase tracking-wide">
+                {clerkUser?.username || clerkUser?.firstName || "Developer"}
+              </h4>
+              <p className="text-[8px] font-mono text-zinc-550 uppercase font-black">{totalXp} Global XP</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Right Content Panel */}
+      <div className="flex-1 flex flex-col h-full overflow-y-auto relative z-10 p-8">
+        
+        {/* Tab 1: Arena Dashboard (prerequisite network tree & game grid) */}
+        {activeTab === "dashboard" && (
+          <div className="w-full max-w-7xl mx-auto flex flex-col gap-6">
+            {!activeGame ? (
+              <>
+                {/* Top Section */}
+                <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 border-b border-zinc-900 pb-8 mb-4">
+                  <div className="space-y-2">
+                    <div className="flex items-center gap-2">
+                      <span className="h-2 w-2 rounded-full bg-emerald-500 animate-ping" />
+                      <span className="text-[10px] font-mono tracking-widest text-zinc-500 uppercase">GAMIFIED SYSTEM CITADEL</span>
+                    </div>
+                    <h1 className="text-4xl font-black tracking-tight leading-none uppercase font-mono">
+                      Mastery Arena
+                    </h1>
+                    <p className="text-xs text-zinc-400 max-w-xl">
+                      Embark on syntax quests. Earn XP, claim badges, challenge friends, and climb the leaderboard.
+                    </p>
+                  </div>
+
+                  {/* Sound controls and Developer bypass */}
+                  <div className="flex items-center gap-3 bg-zinc-950 border border-zinc-900 p-3 rounded-2xl">
+                    <button 
+                      onClick={() => { playSound("click"); setSoundEnabled(!soundEnabled); }}
+                      className="p-2 rounded-xl bg-zinc-900 border border-zinc-850 text-zinc-400 hover:text-white transition-all cursor-pointer"
+                    >
+                      {soundEnabled ? <Volume2 className="size-4" /> : <VolumeX className="size-4" />}
+                    </button>
+                    <button 
+                      onClick={() => { playSound("click"); setBypassLocks(!bypassLocks); }}
+                      className={`px-3 py-2 text-[10px] font-bold tracking-wider uppercase border rounded-xl transition-all cursor-pointer ${
+                        bypassLocks 
+                          ? "bg-white text-black border-white shadow-lg" 
+                          : "bg-zinc-900 text-zinc-450 border-zinc-800 hover:border-zinc-700"
+                      }`}
+                    >
+                      Bypass Locks
+                    </button>
+                  </div>
+                </div>
+
+                {/* Tree Network */}
+                <div className="bg-zinc-950/40 border border-zinc-900 rounded-2xl p-6 relative overflow-hidden mb-6">
+                  <div className="absolute inset-0 premium-grid-dot opacity-5 pointer-events-none" />
+                  <div className="flex items-center gap-2 mb-4">
+                    <BookOpen className="size-4 text-zinc-400" />
+                    <h3 className="text-xs font-bold uppercase tracking-widest text-zinc-350">Interactive Dependency Tree</h3>
+                  </div>
+                  <div className="relative w-full overflow-x-auto py-4">
+                    <div className="min-w-[900px] flex flex-col gap-8">
+                      {/* Tier 1 */}
+                      <div className="flex justify-around items-center">
                         {GAMES_LIST.filter(g => g.prerequisites.length === 0).map(game => {
-                          const unlocked = isGameUnlocked(game.id);
                           const prog = progress[game.id] || { completedLevel: 0, xp: 0 };
                           return (
                             <div 
                               key={game.id}
                               onClick={() => {
-                                if (unlocked) {
-                                  playSound("click");
-                                  setActiveGame(game);
-                                  setCurrentLevelNum(prog.completedLevel + 1 > 500 ? 500 : prog.completedLevel + 1);
-                                } else {
-                                  playSound("fail");
-                                  toast.error(`Game Locked! Clear prerequisite challenges first.`);
-                                }
+                                playSound("click");
+                                setActiveGame(game);
+                                setCurrentLevelNum(prog.completedLevel + 1 > 500 ? 500 : prog.completedLevel + 1);
                               }}
-                              className={`p-3 rounded-xl border flex flex-col items-center gap-2 text-center w-28 cursor-pointer transition-all ${
-                                unlocked 
-                                  ? "bg-zinc-900/60 border-zinc-800 hover:border-zinc-500 hover:scale-105" 
-                                  : "bg-zinc-950/20 border-zinc-950 opacity-40"
-                              }`}
+                              className="p-3 rounded-xl border border-zinc-850 bg-zinc-900/60 hover:border-zinc-500 hover:scale-105 flex flex-col items-center gap-2 text-center w-28 cursor-pointer transition-all"
                             >
                               <TechIcon name={game.iconName} className="size-5 text-white" />
                               <span className="text-[10px] font-bold truncate w-full">{game.name}</span>
@@ -790,50 +972,38 @@ export default function GamesPage() {
                           );
                         })}
                       </div>
-                    </div>
-                  </div>
 
-                  {/* Connectors divider representation */}
-                  <div className="h-[2px] bg-zinc-900 relative my-2 mx-12">
-                    <div className="absolute left-[20%] -top-1 size-2 rounded-full bg-zinc-800" />
-                    <div className="absolute left-[50%] -top-1 size-2 rounded-full bg-zinc-800" />
-                    <div className="absolute left-[80%] -top-1 size-2 rounded-full bg-zinc-800" />
-                  </div>
+                      {/* Line */}
+                      <div className="h-[2px] bg-zinc-900 relative my-1 mx-12">
+                        <div className="absolute left-[20%] -top-1 size-2 rounded-full bg-zinc-800" />
+                        <div className="absolute left-[50%] -top-1 size-2 rounded-full bg-zinc-800" />
+                        <div className="absolute left-[80%] -top-1 size-2 rounded-full bg-zinc-800" />
+                      </div>
 
-                  {/* Tier 2: Specialized & Frameworks */}
-                  <div className="flex justify-around items-center">
-                    <div className="flex flex-col items-center gap-1 w-full">
-                      <span className="text-[8px] font-mono text-zinc-500 uppercase">T2 Frameworks & Scripting</span>
+                      {/* Tier 2 */}
                       <div className="flex justify-around w-full flex-wrap gap-4">
                         {GAMES_LIST.filter(g => g.prerequisites.length > 0).map(game => {
-                          const unlocked = isGameUnlocked(game.id);
+                          const hasWarn = hasMissingPrerequisites(game.id);
                           const prog = progress[game.id] || { completedLevel: 0, xp: 0 };
                           return (
                             <div 
                               key={game.id}
                               onClick={() => {
-                                if (unlocked) {
-                                  playSound("click");
-                                  setActiveGame(game);
-                                  setCurrentLevelNum(prog.completedLevel + 1 > 500 ? 500 : prog.completedLevel + 1);
-                                } else {
-                                  playSound("fail");
-                                  toast.error(`Locked! Clear prerequisites: ${game.prerequisites.join(", ").toUpperCase()}`);
-                                }
+                                playSound("click");
+                                setActiveGame(game);
+                                setCurrentLevelNum(prog.completedLevel + 1 > 500 ? 500 : prog.completedLevel + 1);
                               }}
                               className={`p-3 rounded-xl border flex flex-col items-center gap-2 text-center w-28 cursor-pointer transition-all ${
-                                unlocked 
-                                  ? "bg-zinc-900/60 border-zinc-800 hover:border-zinc-500 hover:scale-105" 
-                                  : "bg-zinc-950/20 border-zinc-950 opacity-40"
+                                hasWarn 
+                                  ? "bg-zinc-900/40 border-dashed border-zinc-800 hover:border-amber-500" 
+                                  : "bg-zinc-900/60 border-zinc-850 hover:border-zinc-500"
                               }`}
                             >
-                              {!unlocked ? (
-                                <Lock className="size-5 text-zinc-600" />
-                              ) : (
-                                <TechIcon name={game.iconName} className="size-5 text-white" />
-                              )}
+                              <TechIcon name={game.iconName} className="size-5 text-white" />
                               <span className="text-[10px] font-bold truncate w-full">{game.name}</span>
-                              <span className="text-[8px] font-mono text-zinc-500">{prog.completedLevel}/500</span>
+                              {hasWarn && (
+                                <span className="text-[7.5px] font-mono text-amber-500 font-bold uppercase leading-none">Warning</span>
+                              )}
                             </div>
                           );
                         })}
@@ -841,121 +1011,38 @@ export default function GamesPage() {
                     </div>
                   </div>
                 </div>
-              </div>
-            </div>
 
-            {/* Global Achievements & Quests Board */}
-            <div className="mb-12">
-              <div className="flex items-center gap-2 mb-6">
-                <Award className="size-5 text-zinc-400" />
-                <h2 className="text-sm font-bold uppercase tracking-widest text-zinc-300 font-mono">Campaign Quests & Achievements</h2>
-              </div>
+                {/* List of Game Cards */}
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {GAMES_LIST.map((game) => {
+                    const gameProg = progress[game.id] || { completedLevel: 0, xp: 0 };
+                    const pct = Math.round((gameProg.completedLevel / 500) * 100);
 
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {getGlobalQuests().map((quest) => (
-                  <div 
-                    key={quest.id}
-                    className={`relative rounded-2xl border p-5 bg-zinc-955/40 flex flex-col justify-between h-36 transition-all duration-300 ${
-                      quest.completed 
-                        ? "border-emerald-500/20 bg-emerald-500/[0.01] shadow-[0_0_15px_rgba(16,185,129,0.02)]" 
-                        : "border-zinc-900 hover:border-zinc-800"
-                    }`}
-                  >
-                    <div>
-                      <div className="flex justify-between items-start">
-                        <h4 className="text-xs font-bold uppercase tracking-wider text-white font-mono">{quest.title}</h4>
-                        {quest.completed ? (
-                          <span className="flex items-center gap-1 text-[8.5px] font-mono font-bold text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-2 py-0.5 rounded-full uppercase leading-none">
-                            <CheckCircle className="size-3" /> CLAIMED
-                          </span>
-                        ) : (
-                          <span className="text-[8.5px] font-mono font-bold text-zinc-500 bg-zinc-900 border border-zinc-800 px-2 py-0.5 rounded-full uppercase leading-none">
-                            {quest.progressText}
-                          </span>
-                        )}
-                      </div>
-                      <p className="text-[10.5px] text-zinc-450 mt-2 leading-relaxed">{quest.description}</p>
-                    </div>
-
-                    <div className="mt-4 flex items-center justify-between gap-4">
-                      <div className="flex-1">
-                        <div className="w-full h-1 bg-zinc-900 rounded-full overflow-hidden">
-                          <div 
-                            className={`h-full transition-all duration-500 ${quest.completed ? "bg-emerald-500" : "bg-zinc-700"}`}
-                            style={{ width: `${quest.pct}%` }}
-                          />
-                        </div>
-                      </div>
-                      <span className={`text-[9px] font-mono font-black ${quest.completed ? "text-emerald-400" : "text-zinc-500"}`}>
-                        +{quest.xpReward} XP
-                      </span>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            {/* List of Game Cards */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {GAMES_LIST.map((game) => {
-                const unlocked = isGameUnlocked(game.id);
-                const gameProg = progress[game.id] || { completedLevel: 0, xp: 0 };
-                const pct = Math.round((gameProg.completedLevel / 500) * 100);
-
-                return (
-                  <motion.div
-                    key={game.id}
-                    whileHover={unlocked ? { y: -5 } : {}}
-                    className={`relative rounded-2xl border bg-zinc-950/50 p-6 flex flex-col justify-between h-64 overflow-hidden group/card transition-all duration-300 ${
-                      unlocked 
-                        ? "border-zinc-900 hover:border-zinc-755 hover:shadow-2xl" 
-                        : "border-zinc-950 opacity-50 select-none"
-                    }`}
-                  >
-                    {/* Background glows */}
-                    <div className={`absolute top-0 right-0 w-24 h-24 bg-gradient-to-br ${game.gradient} opacity-5 group-hover/card:opacity-10 blur-xl rounded-full transition-all`} />
-
-                    <div>
-                      {/* Header */}
-                      <div className="flex justify-between items-start mb-4">
-                        <div className={`p-3 rounded-xl bg-gradient-to-br ${unlocked ? game.gradient : "from-zinc-900 to-zinc-955"} border border-white/5 shadow-md`}>
-                          {unlocked ? (
-                            <TechIcon name={game.iconName} className="size-5 text-white" />
-                          ) : (
-                            <Lock className="size-5 text-zinc-500" />
-                          )}
+                    return (
+                      <div
+                        key={game.id}
+                        className="relative rounded-2xl border border-zinc-900 bg-zinc-950/50 p-6 flex flex-col justify-between h-64 overflow-hidden group/card hover:border-zinc-750 transition-all duration-300"
+                      >
+                        <div className={`absolute top-0 right-0 w-24 h-24 bg-gradient-to-br ${game.gradient} opacity-5 group-hover/card:opacity-10 blur-xl rounded-full transition-all`} />
+                        <div>
+                          <div className="flex justify-between items-start mb-4">
+                            <div className={`p-3 rounded-xl bg-gradient-to-br ${game.gradient} border border-white/5`}>
+                              <TechIcon name={game.iconName} className="size-5 text-white" />
+                            </div>
+                            <span className="text-[9px] font-mono bg-zinc-900 border border-zinc-800 text-zinc-400 px-2 py-0.5 rounded-full uppercase font-bold">READY</span>
+                          </div>
+                          <h3 className="text-base font-black tracking-wide text-white uppercase">{game.name}</h3>
+                          <p className="text-[10px] text-zinc-500 mt-1 uppercase font-bold tracking-wider italic">{game.theme}</p>
+                          <p className="text-[11px] text-zinc-400 mt-2 line-clamp-2 leading-relaxed">{game.description}</p>
                         </div>
 
-                        {unlocked ? (
-                          gameProg.completedLevel === 500 ? (
-                            <span className="text-[9px] font-mono bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 px-2 py-0.5 rounded-full uppercase font-bold">COMPLETED</span>
-                          ) : (
-                            <span className="text-[9px] font-mono bg-zinc-900 border border-zinc-800 text-zinc-400 px-2 py-0.5 rounded-full uppercase font-bold">ACTIVE</span>
-                          )
-                        ) : (
-                          <span className="text-[9px] font-mono bg-zinc-950 border border-zinc-900 text-zinc-650 px-2 py-0.5 rounded-full uppercase font-bold">LOCKED</span>
-                        )}
-                      </div>
-
-                      {/* Content */}
-                      <h3 className="text-base font-black tracking-wide text-white uppercase">{game.name}</h3>
-                      <p className="text-[10px] text-zinc-500 mt-1 uppercase font-bold tracking-wider italic">{game.theme}</p>
-                      <p className="text-[11px] text-zinc-400 mt-2 line-clamp-2 leading-relaxed">{game.description}</p>
-                    </div>
-
-                    {/* Progress details */}
-                    <div className="mt-4">
-                      {unlocked ? (
-                        <div className="space-y-1.5">
+                        <div className="mt-4 space-y-1.5">
                           <div className="flex justify-between text-[9px] font-mono font-bold text-zinc-550">
                             <span>LEVEL {gameProg.completedLevel}/500</span>
                             <span>{pct}% COMPLETE</span>
                           </div>
                           <div className="w-full h-1 bg-zinc-900 rounded-full overflow-hidden">
-                            <div 
-                              className={`h-full bg-gradient-to-r ${game.gradient}`} 
-                              style={{ width: `${pct}%` }}
-                            />
+                            <div className={`h-full bg-gradient-to-r ${game.gradient}`} style={{ width: `${pct}%` }} />
                           </div>
                           <button
                             onClick={() => {
@@ -968,422 +1055,666 @@ export default function GamesPage() {
                             <Play className="size-3 fill-current" /> Enter Arena
                           </button>
                         </div>
-                      ) : (
-                        <div className="text-[9px] font-mono font-bold text-zinc-655 flex items-center gap-1 uppercase">
-                          <AlertCircle className="size-3.5 text-zinc-655" /> Prerequisites: {game.prerequisites.join(", ").toUpperCase()}
+                      </div>
+                    );
+                  })}
+                </div>
+              </>
+            ) : (
+              /* Inside active Game Runner */
+              <div className="flex flex-col gap-6">
+                {/* Top Nav inside Arena */}
+                <div className="flex items-center justify-between border-b border-zinc-900 pb-4">
+                  <button
+                    onClick={() => { playSound("click"); setActiveGame(null); }}
+                    className="flex items-center gap-2 text-xs font-bold text-zinc-400 hover:text-white uppercase tracking-wider transition-colors cursor-pointer bg-zinc-900 px-4 py-2 border border-zinc-800 rounded-xl"
+                  >
+                    <ArrowLeft className="size-4" /> Exit Arena
+                  </button>
+
+                  <div className="flex items-center gap-3">
+                    <div className={`p-2.5 rounded-xl bg-gradient-to-br ${activeGame.gradient} border border-white/5`}>
+                      <TechIcon name={activeGame.iconName} className="size-4 text-white" />
+                    </div>
+                    <div>
+                      <h2 className="text-sm font-bold uppercase tracking-wider text-white leading-tight">{activeGame.name}</h2>
+                      <p className="text-[9px] text-zinc-505 uppercase tracking-widest font-semibold">{activeGame.theme}</p>
+                    </div>
+                  </div>
+
+                  {/* Level Controls */}
+                  <div className="flex items-center gap-2 font-mono">
+                    <button
+                      onClick={handlePrevLevel}
+                      disabled={currentLevelNum === 1}
+                      className="px-2.5 py-1.5 rounded-lg bg-zinc-955 border border-zinc-900 hover:border-zinc-700 text-zinc-450 hover:text-white transition-all cursor-pointer disabled:opacity-30 disabled:pointer-events-none text-xs"
+                    >
+                      ◀
+                    </button>
+                    <div className="flex items-center gap-1 bg-zinc-955 border border-zinc-900 px-3 py-1.5 rounded-lg text-xs font-mono font-bold">
+                      LEVEL 
+                      <input
+                        type="number"
+                        min={1}
+                        max={500}
+                        value={currentLevelNum}
+                        onChange={(e) => {
+                          const num = parseInt(e.target.value, 10);
+                          if (!isNaN(num)) {
+                            handleSelectLevel(num);
+                          }
+                        }}
+                        className="w-10 bg-transparent text-center focus:outline-none border-b border-zinc-800 focus:border-white text-white font-bold"
+                      />
+                      / 500
+                    </div>
+                    <button
+                      onClick={handleNextLevel}
+                      disabled={currentLevelNum === 500 || !canGoNext}
+                      className="px-2.5 py-1.5 rounded-lg bg-zinc-955 border border-zinc-900 hover:border-zinc-700 text-zinc-450 hover:text-white transition-all cursor-pointer disabled:opacity-30 disabled:pointer-events-none text-xs"
+                    >
+                      ▶
+                    </button>
+                  </div>
+                </div>
+
+                {/* Workspace Panels */}
+                <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-stretch">
+                  {/* Left Sidebar */}
+                  <div className="lg:col-span-4 flex flex-col gap-6 max-h-[85vh] overflow-y-auto pr-1">
+                    
+                    {/* Prerequisite Alert */}
+                    {hasMissingPrerequisites(activeGame.id) && (
+                      <div className="bg-amber-500/10 border border-amber-500/20 rounded-2xl p-5 flex flex-col gap-2 relative overflow-hidden">
+                        <div className="absolute inset-0 premium-grid-dot opacity-5 pointer-events-none" />
+                        <div className="flex items-center gap-2 text-amber-400">
+                          <AlertCircle className="size-4 shrink-0" />
+                          <span className="text-[10px] font-mono font-black uppercase tracking-wider">Prerequisite Recommended</span>
+                        </div>
+                        <p className="text-[10.5px] text-zinc-450 leading-relaxed font-medium">
+                          Wait! You haven't completed the prerequisites for this stack. We recommend completing <strong>{activeGame.prerequisites.map(p => p.toUpperCase()).join(", ")}</strong> first for the best learning experience.
+                        </p>
+                      </div>
+                    )}
+
+                    {/* Lesson Parameters Panel */}
+                    <div className="bg-zinc-950/40 border border-zinc-900 rounded-2xl p-6 flex flex-col gap-4">
+                      <div className="flex justify-between items-center">
+                        <span className={`text-[9px] font-mono font-black uppercase tracking-widest px-2.5 py-0.5 rounded-full border border-white/5 bg-zinc-900 text-zinc-350`}>
+                          {activeLevelData?.tier}
+                        </span>
+                        <span className="text-[10px] font-mono text-zinc-550 font-bold">100 XP REWARD</span>
+                      </div>
+
+                      <h3 className="text-lg font-black tracking-wide text-white uppercase leading-tight font-mono">
+                        {activeLevelData?.title}
+                      </h3>
+
+                      <div className="h-[1px] bg-zinc-900 my-1" />
+
+                      <div className="space-y-1">
+                        {renderMarkdown(activeLevelData?.conceptText || "")}
+                      </div>
+
+                      {activeLevelData?.codeExample && (
+                        <div className="mt-2">
+                          <h4 className="text-xs font-black tracking-wider text-white uppercase mb-2 font-mono">Code Example</h4>
+                          {renderCodeExample(activeLevelData.codeExample)}
                         </div>
                       )}
+
+                      <div className="space-y-1 border-t border-zinc-900 pt-4 mt-2">
+                        {renderMarkdown(activeLevelData?.missionText || "")}
+                      </div>
+
+                      <div className="border-t border-zinc-900 pt-4 mt-2">
+                        <h4 className="text-xs font-black tracking-wider text-white uppercase mb-2 font-mono">Validation Criteria</h4>
+                        <ul className="space-y-1.5 list-none pl-0">
+                          {activeLevelData?.validation.testCases.map((tc, idx) => (
+                            <li key={idx} className="text-[10.5px] text-zinc-500 font-medium flex items-start gap-2">
+                              <span className="text-zinc-650">•</span>
+                              <span>{tc.description || tc.name}</span>
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+
+                      <div className="mt-2 border-t border-zinc-900 pt-4">
+                        <button
+                          onClick={() => { playSound("click"); setShowHint(!showHint); }}
+                          className="text-[10px] font-mono font-bold text-zinc-500 hover:text-white flex items-center gap-1 transition-colors cursor-pointer uppercase"
+                        >
+                          <HelpCircle className="size-4 text-zinc-500" /> {showHint ? "Hide Hint" : "Reveal Hint"}
+                        </button>
+                        <AnimatePresence>
+                          {showHint && activeLevelData?.hints && (
+                            <motion.div
+                              initial={{ opacity: 0, height: 0 }}
+                              animate={{ opacity: 1, height: "auto" }}
+                              exit={{ opacity: 0, height: 0 }}
+                              className="mt-3 bg-zinc-950 border border-zinc-900 rounded-xl p-3 text-[10.5px] text-zinc-450 leading-relaxed font-medium"
+                            >
+                              <ul className="list-disc pl-4 space-y-1.5">
+                                {activeLevelData.hints.map((h, i) => (
+                                  <li key={i}>{h}</li>
+                                ))}
+                              </ul>
+                            </motion.div>
+                          )}
+                        </AnimatePresence>
+                      </div>
                     </div>
-                  </motion.div>
+
+                    {/* Arena ranks indicator */}
+                    <div className="bg-zinc-950/40 border border-zinc-900 rounded-2xl p-6 flex flex-col gap-4">
+                      <div className="flex items-center justify-between">
+                        <h4 className="text-[10px] font-mono font-bold text-zinc-450 uppercase tracking-widest">
+                          Arena Ranks & Badges
+                        </h4>
+                        <span className="text-[9px] font-mono text-zinc-550 uppercase font-black">PROGRESSIVE TITLES</span>
+                      </div>
+
+                      <div className="grid grid-cols-5 gap-2">
+                        {[
+                          { tier: "Apprentice", minLvl: 1, color: "from-amber-700 to-orange-500", desc: "Lv. 1-100" },
+                          { tier: "Mage", minLvl: 101, color: "from-cyan-600 to-teal-500", desc: "Lv. 101-200" },
+                          { tier: "Knight", minLvl: 201, color: "from-yellow-500 to-amber-600", desc: "Lv. 201-300" },
+                          { tier: "Warlord", minLvl: 301, color: "from-purple-600 to-fuchsia-500", desc: "Lv. 301-400" },
+                          { tier: "Grandmaster", minLvl: 401, color: "from-red-600 to-rose-700", desc: "Lv. 401-500" }
+                        ].map((badge) => {
+                          const isUnlocked = currentLevelNum >= badge.minLvl;
+                          const isActive = getTierName(currentLevelNum) === badge.tier;
+                          return (
+                            <div 
+                              key={badge.tier}
+                              className={`p-2 rounded-xl border flex flex-col items-center justify-between text-center relative overflow-hidden transition-all duration-300 h-24 ${
+                                isActive 
+                                  ? "bg-zinc-900 border-white/20 shadow-[0_0_15px_rgba(255,255,255,0.05)] scale-105" 
+                                  : isUnlocked
+                                  ? "bg-zinc-900/60 border-zinc-800"
+                                  : "bg-zinc-950/20 border-zinc-950 opacity-30"
+                              }`}
+                            >
+                              {isActive && (
+                                <span className={`absolute top-0 inset-x-0 h-[2px] bg-gradient-to-r ${badge.color}`} />
+                              )}
+                              <div className={`p-1.5 rounded-lg bg-gradient-to-br ${isUnlocked ? badge.color : "from-zinc-900 to-zinc-955"} border border-white/5`}>
+                                {isUnlocked ? (
+                                  <Award className="size-3.5 text-white" />
+                                ) : (
+                                  <Lock className="size-3.5 text-zinc-650" />
+                                )}
+                              </div>
+                              <span className="text-[7.5px] font-bold uppercase tracking-wider text-zinc-300 truncate w-full mt-2 leading-none">{badge.tier}</span>
+                              <span className="text-[7px] font-mono text-zinc-550 leading-none mt-1">{badge.desc}</span>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
+
+                    {/* Previews sandboxes */}
+                    <div className="bg-zinc-950/40 border border-zinc-900 rounded-2xl p-6 flex flex-col gap-4">
+                      <div className="flex items-center justify-between">
+                        <h4 className="text-[10px] font-mono font-bold text-zinc-450 uppercase tracking-widest">
+                          Live Sandbox Output
+                        </h4>
+                        <span className="text-[9px] font-mono text-zinc-650 uppercase font-black">COMPILING ON-THE-FLY</span>
+                      </div>
+
+                      <div className="min-h-52 bg-black border border-zinc-900 rounded-xl overflow-hidden relative flex flex-col justify-center items-center p-3 text-center">
+                        {(activeLevelData?.validation.checkType === "html" || activeLevelData?.validation.checkType === "css") && (
+                          <div className="w-full h-52 bg-white rounded-lg overflow-hidden">
+                            <iframe
+                              title="HTML Live Preview"
+                              srcDoc={`
+                                <html>
+                                  <head>
+                                    <style>
+                                      body { font-family: sans-serif; margin: 15px; color: #333; }
+                                      ${activeLevelData.validation.checkType === 'css' ? editorCode : ''}
+                                    </style>
+                                  </head>
+                                  <body>
+                                    ${activeLevelData.validation.checkType === 'html' ? editorCode : '<div class="visual-box">Visual Target</div>'}
+                                  </body>
+                                </html>
+                              `}
+                              className="w-full h-full border-none bg-white"
+                            />
+                          </div>
+                        )}
+
+                        {activeLevelData?.validation.checkType === "sql" && (
+                          <div className="w-full h-52 overflow-auto text-left font-mono text-[9.5px]">
+                            <table className="w-full border-collapse">
+                              <thead>
+                                <tr className="border-b border-zinc-800 bg-zinc-955">
+                                  <th className="p-2 text-zinc-500 font-bold">id</th>
+                                  <th className="p-2 text-zinc-500 font-bold">name</th>
+                                  <th className="p-2 text-zinc-500 font-bold">level</th>
+                                  <th className="p-2 text-zinc-500 font-bold">class</th>
+                                </tr>
+                              </thead>
+                              <tbody>
+                                {sqlTableData.map(row => (
+                                  <tr key={row.id} className="border-b border-zinc-900 hover:bg-zinc-900/40">
+                                    <td className="p-2 text-white font-bold">{row.id}</td>
+                                    <td className="p-2 text-zinc-300">{row.name}</td>
+                                    <td className="p-2 text-emerald-400">{row.level}</td>
+                                    <td className="p-2 text-zinc-450">{row.class}</td>
+                                  </tr>
+                                ))}
+                              </tbody>
+                            </table>
+                          </div>
+                        )}
+
+                        {activeLevelData?.validation.checkType === "git" && (
+                          <div className="w-full h-52 flex flex-col font-mono text-[9px] text-left">
+                            <div className="flex-1 overflow-y-auto space-y-1 bg-black p-3 border border-zinc-900 rounded-lg max-h-40">
+                              {gitTerminalLogs.map((log, idx) => (
+                                <div key={idx} className="whitespace-pre-wrap">{log}</div>
+                              ))}
+                            </div>
+                            <form onSubmit={handleGitCommandLineSubmit} className="mt-2 flex gap-2">
+                              <span className="text-zinc-550 font-bold select-none pt-1.5">$</span>
+                              <input
+                                type="text"
+                                value={gitCommandInput}
+                                onChange={(e) => setGitCommandInput(e.target.value)}
+                                placeholder="Type git command here..."
+                                className="flex-1 bg-zinc-955 border border-zinc-900 rounded-lg px-3 py-1.5 focus:outline-none focus:border-zinc-650 text-white text-[10px]"
+                              />
+                            </form>
+                          </div>
+                        )}
+
+                        {activeLevelData?.validation.checkType !== "html" && 
+                         activeLevelData?.validation.checkType !== "css" && 
+                         activeLevelData?.validation.checkType !== "sql" && 
+                         activeLevelData?.validation.checkType !== "git" && (
+                          <div className="flex flex-col items-center gap-2">
+                            <Code2 className="size-8 text-zinc-650 animate-pulse" />
+                            <span className="text-[10px] font-mono text-zinc-550 uppercase tracking-widest font-bold">Standard Console</span>
+                            <p className="text-[10px] text-zinc-550 max-w-[200px] leading-relaxed">
+                              Your script evaluations will execute inside sandboxed unit test assertions. Output will print below.
+                            </p>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Right Column: Monaco Editor & Logger */}
+                  <div className="lg:col-span-8 flex flex-col gap-6">
+                    <div className="bg-zinc-950/40 border border-zinc-900 rounded-2xl overflow-hidden flex flex-col">
+                      <div className="flex items-center justify-between px-6 py-4 bg-zinc-950/80 border-b border-zinc-900">
+                        <span className="text-[10px] font-mono font-bold text-zinc-400 uppercase tracking-widest">
+                          SOURCE CODE WORKSPACE
+                        </span>
+                        <button
+                          onClick={() => { playSound("click"); setEditorCode(activeLevelData?.starterCode || ""); }}
+                          className="p-1.5 rounded-lg bg-zinc-900 border border-zinc-800 text-zinc-450 hover:text-white transition-all cursor-pointer"
+                        >
+                          <RotateCcw className="size-4" />
+                        </button>
+                      </div>
+                      <div className="h-96 w-full">
+                        <Editor
+                          height="100%"
+                          defaultLanguage={
+                            activeGame.id === "html5" || activeGame.id === "tailwind" ? "html" :
+                            activeGame.id === "css3" ? "css" :
+                            activeGame.id === "typescript" ? "typescript" :
+                            activeGame.id === "python" || activeGame.id === "django" ? "python" :
+                            activeGame.id === "sql" ? "sql" : "javascript"
+                          }
+                          theme="vs-dark"
+                          value={editorCode}
+                          onChange={(val) => setEditorCode(val || "")}
+                          options={{
+                            minimap: { enabled: false },
+                            fontSize: 12.5,
+                            fontFamily: "var(--font-mono), monospace",
+                            scrollbar: { vertical: "visible" },
+                            padding: { top: 15, bottom: 15 },
+                            lineNumbers: "on",
+                            tabSize: 2
+                          }}
+                        />
+                      </div>
+                    </div>
+
+                    {/* Console Test Logger */}
+                    <div className="bg-zinc-950/40 border border-zinc-900 rounded-2xl p-6 flex flex-col gap-4">
+                      <div className="flex items-center justify-between">
+                        <h4 className="text-[10px] font-mono font-bold text-zinc-400 uppercase tracking-widest">
+                          UNIT TEST OUTPUT LOGGER
+                        </h4>
+                        {evaluationSuccess === true && (
+                          <span className="text-[9px] font-mono bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 px-2 py-0.5 rounded-full uppercase font-bold">ALL TESTS PASSED</span>
+                        )}
+                        {evaluationSuccess === false && (
+                          <span className="text-[9px] font-mono bg-red-500/10 border border-red-500/20 text-red-400 px-2 py-0.5 rounded-full uppercase font-bold">VALIDATION FAILURE</span>
+                        )}
+                      </div>
+
+                      <div className="h-28 overflow-y-auto bg-black border border-zinc-900 rounded-xl p-4 font-mono text-[10.5px] leading-relaxed flex flex-col gap-1.5">
+                        {evalLogs.length > 0 ? (
+                          evalLogs.map((log, idx) => (
+                            <div key={idx} className={log.startsWith("✔️") ? "text-emerald-400 font-bold" : log.startsWith("❌") ? "text-red-400 font-bold" : "text-zinc-400"}>
+                              {log}
+                            </div>
+                          ))
+                        ) : (
+                          <div className="text-zinc-650 italic">Execute code validations to populate test run logs.</div>
+                        )}
+                      </div>
+
+                      <div className="flex gap-4">
+                        <button
+                          onClick={evaluateCode}
+                          className="flex-1 py-3 bg-white text-black hover:bg-zinc-200 text-xs font-bold uppercase tracking-widest rounded-xl transition-all cursor-pointer flex items-center justify-center gap-1.5 border border-white"
+                        >
+                          <Zap className="size-4 fill-current" /> Compile & Run Code
+                        </button>
+                        {evaluationSuccess === true && (
+                          <button
+                            onClick={handleNextLevel}
+                            className="flex-1 py-3 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold uppercase tracking-widest rounded-xl transition-all cursor-pointer flex items-center justify-center gap-1.5 border border-emerald-600"
+                          >
+                            <CheckCircle className="size-4" /> Next Level →
+                          </button>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Tab 2: Achievements Claim Board */}
+        {activeTab === "achievements" && (
+          <div className="w-full max-w-7xl mx-auto flex flex-col gap-6">
+            <div className="border-b border-zinc-900 pb-6 mb-4">
+              <h2 className="text-3xl font-black uppercase font-mono tracking-tight">Campaign Achievements Shelf</h2>
+              <p className="text-xs text-zinc-500 mt-1">Complete structural tasks in coding sandboxes to unlock rewards. Unlocked rewards must be claimed below to add to your global XP.</p>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {getAchievements().map((ach) => {
+                const isClaimed = claimedAchievements.includes(ach.id);
+                const pct = Math.round((ach.current / ach.max) * 100);
+
+                return (
+                  <div 
+                    key={ach.id}
+                    className={`relative rounded-2xl border p-5 bg-zinc-950/40 flex flex-col justify-between h-44 transition-all duration-300 ${
+                      isClaimed 
+                        ? "border-emerald-500/20 bg-emerald-500/[0.01]" 
+                        : ach.completed 
+                        ? "border-amber-500/30 bg-amber-500/[0.02]" 
+                        : "border-zinc-900"
+                    }`}
+                  >
+                    <div>
+                      <div className="flex justify-between items-start">
+                        <h4 className="text-xs font-bold uppercase tracking-wider text-white font-mono">{ach.title}</h4>
+                        {isClaimed ? (
+                          <span className="text-[8px] font-mono font-bold text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-2 py-0.5 rounded-full uppercase">CLAIMED</span>
+                        ) : ach.completed ? (
+                          <button
+                            onClick={() => claimAchievementReward(ach.id, ach.xp)}
+                            className="text-[8.5px] font-mono font-black text-black bg-amber-400 hover:bg-amber-300 px-3 py-1 rounded-full uppercase transition-all cursor-pointer flex items-center gap-1 shadow-lg"
+                          >
+                            <Award className="size-3" /> CLAIM REWARD
+                          </button>
+                        ) : (
+                          <span className="text-[8px] font-mono font-bold text-zinc-500 bg-zinc-900 border border-zinc-800 px-2 py-0.5 rounded-full uppercase">LOCKED</span>
+                        )}
+                      </div>
+                      <p className="text-[10.5px] text-zinc-450 mt-2.5 leading-relaxed">{ach.desc}</p>
+                      <p className="text-[9px] font-mono text-zinc-600 mt-1 uppercase font-bold">Target: {ach.target}</p>
+                    </div>
+
+                    <div className="mt-4 flex items-center justify-between gap-4">
+                      <div className="flex-1">
+                        <div className="w-full h-1 bg-zinc-900 rounded-full overflow-hidden">
+                          <div 
+                            className={`h-full transition-all duration-500 ${ach.completed ? "bg-emerald-500" : "bg-zinc-700"}`}
+                            style={{ width: `${pct}%` }}
+                          />
+                        </div>
+                      </div>
+                      <span className={`text-[9px] font-mono font-black ${ach.completed ? "text-amber-400" : "text-zinc-500"}`}>
+                        +{ach.xp} XP
+                      </span>
+                    </div>
+                  </div>
                 );
               })}
             </div>
-          </>
-        ) : (
-          /* Game Runner Interface (Arena Mode) */
-          <div className="flex flex-col gap-6">
-            {/* Top Bar Navigation */}
-            <div className="flex items-center justify-between border-b border-zinc-900 pb-4">
-              <button
-                onClick={() => { playSound("click"); setActiveGame(null); }}
-                className="flex items-center gap-2 text-xs font-bold text-zinc-400 hover:text-white uppercase tracking-wider transition-colors cursor-pointer bg-zinc-900 px-4 py-2 border border-zinc-800 rounded-xl"
-              >
-                <ArrowLeft className="size-4" /> Exit Arena
-              </button>
+          </div>
+        )}
 
-              <div className="flex items-center gap-3">
-                <div className={`p-2.5 rounded-xl bg-gradient-to-br ${activeGame.gradient} border border-white/5`}>
-                  <TechIcon name={activeGame.iconName} className="size-4 text-white" />
-                </div>
-                <div>
-                  <h2 className="text-sm font-bold uppercase tracking-wider text-white leading-tight">{activeGame.name}</h2>
-                  <p className="text-[9px] text-zinc-505 uppercase tracking-widest font-semibold">{activeGame.theme}</p>
-                </div>
+        {/* Tab 3: Competitive Leaderboards */}
+        {activeTab === "leaderboard" && (
+          <div className="w-full max-w-4xl mx-auto flex flex-col gap-6">
+            <div className="border-b border-zinc-900 pb-6">
+              <h2 className="text-3xl font-black uppercase font-mono tracking-tight">Citadel Leaderboards</h2>
+              <p className="text-xs text-zinc-500 mt-1">Compare achievements, XP parameters, and badge completions against regional, country, or global hackers.</p>
+            </div>
+
+            {/* Filtering Controls */}
+            <div className="flex flex-col sm:flex-row justify-between items-stretch sm:items-center gap-4 bg-zinc-950 p-4 border border-zinc-900 rounded-2xl">
+              <div className="flex gap-2">
+                {[
+                  { value: "world", label: "World" },
+                  { value: "country", label: "United States" },
+                  { value: "city", label: "San Francisco" }
+                ].map((s) => (
+                  <button
+                    key={s.value}
+                    onClick={() => { playSound("click"); setLeaderboardScope(s.value as any); }}
+                    className={`px-3 py-1.5 rounded-lg text-[10px] font-bold uppercase tracking-wider transition-all cursor-pointer ${
+                      leaderboardScope === s.value ? "bg-white text-black font-extrabold" : "text-zinc-400 hover:text-white bg-zinc-900/40"
+                    }`}
+                  >
+                    {s.label}
+                  </button>
+                ))}
               </div>
 
-              {/* Levels controls switcher */}
-              <div className="flex items-center gap-2 font-mono">
-                <button
-                  onClick={handlePrevLevel}
-                  disabled={currentLevelNum === 1}
-                  className="px-2.5 py-1.5 rounded-lg bg-zinc-955 border border-zinc-900 hover:border-zinc-700 text-zinc-450 hover:text-white transition-all cursor-pointer disabled:opacity-30 disabled:pointer-events-none text-xs"
-                >
-                  ◀
-                </button>
-                <div className="flex items-center gap-1 bg-zinc-955 border border-zinc-900 px-3 py-1.5 rounded-lg text-xs font-mono font-bold">
-                  LEVEL 
-                  <input
-                    type="number"
-                    min={1}
-                    max={500}
-                    value={currentLevelNum}
-                    onChange={(e) => {
-                      const num = parseInt(e.target.value, 10);
-                      if (!isNaN(num)) {
-                        handleSelectLevel(num);
-                      }
-                    }}
-                    className="w-10 bg-transparent text-center focus:outline-none border-b border-zinc-800 focus:border-white text-white"
-                  />
-                  / 500
-                </div>
-                <button
-                  onClick={handleNextLevel}
-                  disabled={currentLevelNum === 500 || !canGoNext}
-                  className="px-2.5 py-1.5 rounded-lg bg-zinc-955 border border-zinc-900 hover:border-zinc-700 text-zinc-450 hover:text-white transition-all cursor-pointer disabled:opacity-30 disabled:pointer-events-none text-xs"
-                >
-                  ▶
-                </button>
+              <div className="flex gap-2">
+                {[
+                  { value: "xp", label: "Global XP" },
+                  { value: "badges", label: "Badges" },
+                  { value: "achievements", label: "Achievements" }
+                ].map((m) => (
+                  <button
+                    key={m.value}
+                    onClick={() => { playSound("click"); setLeaderboardMetric(m.value as any); }}
+                    className={`px-3 py-1.5 rounded-lg text-[10px] font-bold uppercase tracking-wider transition-all cursor-pointer ${
+                      leaderboardMetric === m.value ? "bg-white text-black font-extrabold" : "text-zinc-400 hover:text-white bg-zinc-900/40"
+                    }`}
+                  >
+                    {m.label}
+                  </button>
+                ))}
               </div>
             </div>
 
-            {/* Split Screen Panel Layout */}
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-stretch">
+            {/* Leaderboard Table Grid */}
+            <div className="bg-zinc-950/40 border border-zinc-900 rounded-2xl overflow-hidden shadow-2xl">
+              <table className="w-full border-collapse text-left text-xs">
+                <thead>
+                  <tr className="border-b border-zinc-900 bg-zinc-950 text-zinc-400 font-mono text-[10px] uppercase">
+                    <th className="p-4 font-bold">Rank</th>
+                    <th className="p-4 font-bold">Hacker</th>
+                    <th className="p-4 font-bold">Country</th>
+                    <th className="p-4 font-bold">City</th>
+                    <th className="p-4 font-bold text-center">Badges</th>
+                    <th className="p-4 font-bold text-center">Achievements</th>
+                    <th className="p-4 font-bold text-right">XP Score</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {getFilteredLeaderboard().map((row) => {
+                    const isCurrentUser = row.name === (clerkUser?.username || clerkUser?.firstName || "Hacker");
+                    return (
+                      <tr 
+                        key={row.name} 
+                        className={`border-b border-zinc-900/60 hover:bg-zinc-900/20 transition-colors ${
+                          isCurrentUser ? "bg-white/[0.02] font-semibold" : ""
+                        }`}
+                      >
+                        <td className="p-4 font-mono font-bold text-zinc-450">
+                          {row.rank === 1 ? "🥇" : row.rank === 2 ? "🥈" : row.rank === 3 ? "🥉" : `#${row.rank}`}
+                        </td>
+                        <td className="p-4 flex items-center gap-2.5">
+                          <span className="text-base select-none">{row.avatar}</span>
+                          <span className={isCurrentUser ? "text-emerald-400" : "text-white"}>{row.name}</span>
+                          {isCurrentUser && (
+                            <span className="text-[7.5px] font-mono bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 px-1.5 py-0.5 rounded uppercase font-bold">YOU</span>
+                          )}
+                        </td>
+                        <td className="p-4 text-zinc-400">{row.country}</td>
+                        <td className="p-4 text-zinc-500 font-mono">{row.city}</td>
+                        <td className="p-4 text-center font-mono text-zinc-300">{row.badges}</td>
+                        <td className="p-4 text-center font-mono text-zinc-300">{row.achievements}</td>
+                        <td className="p-4 text-right font-mono font-black text-white">{row.xp}</td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        )}
+
+        {/* Tab 4: Social Friends List & Interactive Messaging chat */}
+        {activeTab === "social" && (
+          <div className="w-full max-w-5xl mx-auto flex flex-col gap-6 h-[80vh]">
+            <div className="border-b border-zinc-900 pb-6 shrink-0">
+              <h2 className="text-3xl font-black uppercase font-mono tracking-tight">Social Network</h2>
+              <p className="text-xs text-zinc-500 mt-1">Connect with peer developers, exchange suggestions, and coordinate milestones.</p>
+            </div>
+
+            <div className="flex-1 flex gap-6 min-h-0">
               
-              {/* Left Column: Codédex-style Sidebar Lesson Parameters Panel */}
-              <div className="lg:col-span-4 flex flex-col gap-6 max-h-[85vh] overflow-y-auto pr-1">
-                
-                {/* Prerequisite Alert Banner */}
-                {hasMissingPrerequisites(activeGame.id) && (
-                  <div className="bg-amber-500/10 border border-amber-500/20 rounded-2xl p-5 flex flex-col gap-2 relative overflow-hidden">
-                    <div className="absolute inset-0 premium-grid-dot opacity-5 pointer-events-none" />
-                    <div className="flex items-center gap-2 text-amber-400">
-                      <AlertCircle className="size-4 shrink-0" />
-                      <span className="text-[10px] font-mono font-black uppercase tracking-wider">Prerequisite Recommended</span>
-                    </div>
-                    <p className="text-[10.5px] text-zinc-450 leading-relaxed font-medium">
-                      Wait! You haven't completed the prerequisites for this stack. We recommend completing <strong>{activeGame.prerequisites.map(p => p.toUpperCase()).join(", ")}</strong> first for the best learning experience.
-                    </p>
-                  </div>
-                )}
-
-                {/* Level parameters block */}
-                <div className="bg-zinc-950/40 border border-zinc-900 rounded-2xl p-6 flex flex-col gap-4">
-                  <div className="flex justify-between items-center">
-                    <span className={`text-[9px] font-mono font-black uppercase tracking-widest px-2.5 py-0.5 rounded-full border border-white/5 bg-zinc-900 text-zinc-350`}>
-                      {activeLevelData?.tier}
-                    </span>
-                    <span className="text-[10px] font-mono text-zinc-550 font-bold">100 XP REWARD</span>
-                  </div>
-
-                  <h3 className="text-lg font-black tracking-wide text-white uppercase leading-tight font-mono">
-                    {activeLevelData?.title}
-                  </h3>
-
-                  <div className="h-[1px] bg-zinc-900 my-1" />
-
-                  {/* 1. Concept (The "Why") */}
-                  <div className="space-y-1">
-                    {renderMarkdown(activeLevelData?.conceptText || "")}
-                  </div>
-
-                  {/* 2. Code Example */}
-                  {activeLevelData?.codeExample && (
-                    <div className="mt-2">
-                      <h4 className="text-xs font-black tracking-wider text-white uppercase mb-2 font-mono">Code Example</h4>
-                      {renderCodeExample(activeLevelData.codeExample)}
-                    </div>
-                  )}
-
-                  {/* 3. The Mission (The Task) */}
-                  <div className="space-y-1 border-t border-zinc-900 pt-4 mt-2">
-                    {renderMarkdown(activeLevelData?.missionText || "")}
-                  </div>
-
-                  {/* 4. Validation Criteria */}
-                  <div className="border-t border-zinc-900 pt-4 mt-2">
-                    <h4 className="text-xs font-black tracking-wider text-white uppercase mb-2 font-mono">Validation Criteria</h4>
-                    <ul className="space-y-1.5 list-none pl-0">
-                      {activeLevelData?.validation.testCases.map((tc, idx) => (
-                        <li key={idx} className="text-[10.5px] text-zinc-500 font-medium flex items-start gap-2">
-                          <span className="text-zinc-650">•</span>
-                          <span>{tc.description || tc.name}</span>
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-
-                  {/* Hints container */}
-                  <div className="mt-2 border-t border-zinc-900 pt-4">
-                    <button
-                      onClick={() => { playSound("click"); setShowHint(!showHint); }}
-                      className="text-[10px] font-mono font-bold text-zinc-500 hover:text-white flex items-center gap-1 transition-colors cursor-pointer uppercase"
-                    >
-                      <HelpCircle className="size-4 text-zinc-500" /> {showHint ? "Hide Hint" : "Reveal Hint"}
-                    </button>
-                    <AnimatePresence>
-                      {showHint && activeLevelData?.hints && (
-                        <motion.div
-                          initial={{ opacity: 0, height: 0 }}
-                          animate={{ opacity: 1, height: "auto" }}
-                          exit={{ opacity: 0, height: 0 }}
-                          className="mt-3 bg-zinc-950 border border-zinc-900 rounded-xl p-3 text-[10.5px] text-zinc-450 leading-relaxed font-medium"
-                        >
-                          <ul className="list-disc pl-4 space-y-1.5">
-                            {activeLevelData.hints.map((h, i) => (
-                              <li key={i}>{h}</li>
-                            ))}
-                          </ul>
-                        </motion.div>
-                      )}
-                    </AnimatePresence>
-                  </div>
-                </div>
-
-                {/* Local Badges & Ranks Progress Card */}
-                <div className="bg-zinc-950/40 border border-zinc-900 rounded-2xl p-6 flex flex-col gap-4">
-                  <div className="flex items-center justify-between">
-                    <h4 className="text-[10px] font-mono font-bold text-zinc-450 uppercase tracking-widest">
-                      Arena Ranks & Badges
-                    </h4>
-                    <span className="text-[9px] font-mono text-zinc-550 uppercase font-black">PROGRESSIVE TITLES</span>
-                  </div>
-
-                  <div className="grid grid-cols-5 gap-2">
-                    {[
-                      { tier: "Apprentice", minLvl: 1, color: "from-amber-700 to-orange-500", desc: "Lv. 1-100" },
-                      { tier: "Mage", minLvl: 101, color: "from-cyan-600 to-teal-500", desc: "Lv. 101-200" },
-                      { tier: "Knight", minLvl: 201, color: "from-yellow-500 to-amber-600", desc: "Lv. 201-300" },
-                      { tier: "Warlord", minLvl: 301, color: "from-purple-600 to-fuchsia-500", desc: "Lv. 301-400" },
-                      { tier: "Grandmaster", minLvl: 401, color: "from-red-600 to-rose-700", desc: "Lv. 401-500" }
-                    ].map((badge) => {
-                      const isUnlocked = currentLevelNum >= badge.minLvl;
-                      const isActive = getTierName(currentLevelNum) === badge.tier;
+              {/* Friends Left Panel */}
+              <div className="w-64 border border-zinc-900 rounded-2xl bg-zinc-950/40 p-4 flex flex-col gap-4 justify-between shrink-0">
+                <div className="flex flex-col gap-4">
+                  <h3 className="text-[10px] font-mono font-bold text-zinc-450 uppercase tracking-widest">Active Friends</h3>
+                  
+                  <div className="flex flex-col gap-1.5 max-h-60 overflow-y-auto pr-1">
+                    {friendsList.map(friend => {
+                      const isActive = selectedFriend === friend;
                       return (
-                        <div 
-                          key={badge.tier}
-                          className={`p-2 rounded-xl border flex flex-col items-center justify-between text-center relative overflow-hidden transition-all duration-300 h-24 ${
-                            isActive 
-                              ? "bg-zinc-900 border-white/20 shadow-[0_0_15px_rgba(255,255,255,0.05)] scale-105" 
-                              : isUnlocked
-                              ? "bg-zinc-900/60 border-zinc-800"
-                              : "bg-zinc-950/20 border-zinc-950 opacity-30"
+                        <button
+                          key={friend}
+                          onClick={() => { playSound("click"); setSelectedFriend(friend); }}
+                          className={`w-full flex items-center justify-between p-2.5 rounded-xl transition-all ${
+                            isActive ? "bg-zinc-900 text-white" : "text-zinc-450 hover:bg-zinc-900/40 hover:text-white"
                           }`}
                         >
-                          {/* Top Glow on Active Badge */}
-                          {isActive && (
-                            <span className={`absolute top-0 inset-x-0 h-[2px] bg-gradient-to-r ${badge.color}`} />
-                          )}
-                          <div className={`p-1.5 rounded-lg bg-gradient-to-br ${isUnlocked ? badge.color : "from-zinc-900 to-zinc-950"} border border-white/5`}>
-                            {isUnlocked ? (
-                              <Award className="size-3.5 text-white" />
-                            ) : (
-                              <Lock className="size-3.5 text-zinc-650" />
-                            )}
-                          </div>
-                          <span className="text-[7.5px] font-bold uppercase tracking-wider text-zinc-300 truncate w-full mt-2 leading-none">{badge.tier}</span>
-                          <span className="text-[7px] font-mono text-zinc-550 leading-none mt-1">{badge.desc}</span>
-                        </div>
+                          <span className="flex items-center gap-2 text-xs font-bold">
+                            <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                            {friend}
+                          </span>
+                        </button>
                       );
                     })}
                   </div>
                 </div>
 
-                {/* Live Sandbox Interactive Previews */}
-                <div className="bg-zinc-950/40 border border-zinc-900 rounded-2xl p-6 flex flex-col gap-4">
-                  <div className="flex items-center justify-between">
-                    <h4 className="text-[10px] font-mono font-bold text-zinc-450 uppercase tracking-widest">
-                      Live Sandbox Output
-                    </h4>
-                    <span className="text-[9px] font-mono text-zinc-650 uppercase font-black">COMPILING ON-THE-FLY</span>
+                {/* Add Friend form */}
+                <form onSubmit={handleAddFriend} className="border-t border-zinc-900 pt-4 flex flex-col gap-2">
+                  <span className="text-[8px] font-mono font-bold text-zinc-550 uppercase tracking-widest">Add Hacker</span>
+                  <div className="flex gap-1.5">
+                    <input
+                      type="text"
+                      placeholder="Username..."
+                      value={newFriendInput}
+                      onChange={(e) => setNewFriendInput(e.target.value)}
+                      className="flex-1 bg-zinc-950 border border-zinc-900 rounded-lg px-2.5 py-1.5 focus:outline-none focus:border-zinc-700 text-[10px] text-white"
+                    />
+                    <button 
+                      type="submit"
+                      className="p-2 bg-white text-black hover:bg-zinc-250 rounded-lg transition-all cursor-pointer flex items-center justify-center shadow"
+                    >
+                      <Plus className="size-3.5" />
+                    </button>
                   </div>
-
-                  <div className="min-h-52 bg-black border border-zinc-900 rounded-xl overflow-hidden relative flex flex-col justify-center items-center p-3 text-center">
-                    
-                    {/* HTML/CSS Iframe Output Renderer */}
-                    {(activeLevelData?.validation.checkType === "html" || activeLevelData?.validation.checkType === "css") && (
-                      <div className="w-full h-52 bg-white rounded-lg overflow-hidden">
-                        <iframe
-                          title="HTML Live Preview"
-                          srcDoc={`
-                            <html>
-                              <head>
-                                <style>
-                                  body { font-family: sans-serif; margin: 15px; color: #333; }
-                                  ${activeLevelData.validation.checkType === 'css' ? editorCode : ''}
-                                </style>
-                              </head>
-                              <body>
-                                ${activeLevelData.validation.checkType === 'html' ? editorCode : '<div class="visual-box">Visual Target</div>'}
-                              </body>
-                            </html>
-                          `}
-                          className="w-full h-full border-none bg-white"
-                        />
-                      </div>
-                    )}
-
-                    {/* SQL Relational Database Inspector */}
-                    {activeLevelData?.validation.checkType === "sql" && (
-                      <div className="w-full h-52 overflow-auto text-left font-mono text-[9.5px]">
-                        <table className="w-full border-collapse">
-                          <thead>
-                            <tr className="border-b border-zinc-800 bg-zinc-950">
-                              <th className="p-2 text-zinc-500 font-bold">id</th>
-                              <th className="p-2 text-zinc-500 font-bold">name</th>
-                              <th className="p-2 text-zinc-500 font-bold">level</th>
-                              <th className="p-2 text-zinc-500 font-bold">class</th>
-                            </tr>
-                          </thead>
-                          <tbody>
-                            {sqlTableData.map(row => (
-                              <tr key={row.id} className="border-b border-zinc-900 hover:bg-zinc-900/40">
-                                <td className="p-2 text-white font-bold">{row.id}</td>
-                                <td className="p-2 text-zinc-300">{row.name}</td>
-                                <td className="p-2 text-emerald-400">{row.level}</td>
-                                <td className="p-2 text-zinc-450">{row.class}</td>
-                              </tr>
-                            ))}
-                          </tbody>
-                        </table>
-                      </div>
-                    )}
-
-                    {/* Git Timeline Interactive Terminal */}
-                    {activeLevelData?.validation.checkType === "git" && (
-                      <div className="w-full h-52 flex flex-col font-mono text-[9px] text-left">
-                        <div className="flex-1 overflow-y-auto space-y-1 bg-black p-3 border border-zinc-900 rounded-lg max-h-40">
-                          {gitTerminalLogs.map((log, idx) => (
-                            <div key={idx} className="whitespace-pre-wrap">{log}</div>
-                          ))}
-                        </div>
-                        <form onSubmit={handleGitCommandLineSubmit} className="mt-2 flex gap-2">
-                          <span className="text-zinc-550 font-bold select-none pt-1.5">$</span>
-                          <input
-                            type="text"
-                            value={gitCommandInput}
-                            onChange={(e) => setGitCommandInput(e.target.value)}
-                            placeholder="Type git command here..."
-                            className="flex-1 bg-zinc-955 border border-zinc-900 rounded-lg px-3 py-1.5 focus:outline-none focus:border-zinc-650 text-white text-[10px]"
-                          />
-                        </form>
-                      </div>
-                    )}
-
-                    {/* Default Console Visualizer */}
-                    {activeLevelData?.validation.checkType !== "html" && 
-                     activeLevelData?.validation.checkType !== "css" && 
-                     activeLevelData?.validation.checkType !== "sql" && 
-                     activeLevelData?.validation.checkType !== "git" && (
-                      <div className="flex flex-col items-center gap-2">
-                        <Code2 className="size-8 text-zinc-650 animate-pulse" />
-                        <span className="text-[10px] font-mono text-zinc-550 uppercase tracking-widest font-bold">Standard Console</span>
-                        <p className="text-[10px] text-zinc-550 max-w-[200px] leading-relaxed">
-                          Your script evaluations will execute inside sandboxed unit test assertions. Output will print below.
-                        </p>
-                      </div>
-                    )}
-
-                  </div>
-                </div>
-
+                </form>
               </div>
 
-              {/* Right Column: Code Editor & Runner Console */}
-              <div className="lg:col-span-8 flex flex-col gap-6">
-                
-                {/* Monaco Editor Pane */}
-                <div className="bg-zinc-950/40 border border-zinc-900 rounded-2xl overflow-hidden flex flex-col">
-                  <div className="flex items-center justify-between px-6 py-4 bg-zinc-950/80 border-b border-zinc-900">
-                    <span className="text-[10px] font-mono font-bold text-zinc-400 uppercase tracking-widest">
-                      SOURCE CODE WORKSPACE
-                    </span>
-                    <div className="flex items-center gap-2">
-                      <button
-                        onClick={() => { playSound("click"); setEditorCode(activeLevelData?.starterCode || ""); }}
-                        className="p-1.5 rounded-lg bg-zinc-900 border border-zinc-800 text-zinc-450 hover:text-white transition-all cursor-pointer"
-                        title="Reset code template"
-                      >
-                        <RotateCcw className="size-4" />
-                      </button>
-                    </div>
+              {/* Chat Right Panel */}
+              <div className="flex-1 border border-zinc-900 rounded-2xl bg-zinc-950/40 flex flex-col justify-between overflow-hidden">
+                {/* Chat Header */}
+                <div className="px-5 py-4 bg-zinc-950 border-b border-zinc-900 flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <span className="h-2 w-2 rounded-full bg-emerald-500 animate-ping" />
+                    <h3 className="text-xs font-black uppercase font-mono text-white">Direct Channel: {selectedFriend}</h3>
                   </div>
-
-                  <div className="h-96 w-full">
-                    <Editor
-                      height="100%"
-                      defaultLanguage={
-                        activeGame.id === "html5" || activeGame.id === "tailwind" ? "html" :
-                        activeGame.id === "css3" ? "css" :
-                        activeGame.id === "typescript" ? "typescript" :
-                        activeGame.id === "python" || activeGame.id === "django" ? "python" :
-                        activeGame.id === "sql" ? "sql" : "javascript"
-                      }
-                      theme="vs-dark"
-                      value={editorCode}
-                      onChange={(val) => setEditorCode(val || "")}
-                      options={{
-                        minimap: { enabled: false },
-                        fontSize: 12.5,
-                        fontFamily: "var(--font-mono), monospace",
-                        scrollbar: { vertical: "visible" },
-                        padding: { top: 15, bottom: 15 },
-                        lineNumbers: "on",
-                        tabSize: 2
-                      }}
-                    />
-                  </div>
+                  <span className="text-[9px] font-mono text-zinc-550 uppercase font-black">Encrypted Sandbox Session</span>
                 </div>
 
-                {/* Console Log Runner */}
-                <div className="bg-zinc-950/40 border border-zinc-900 rounded-2xl p-6 flex flex-col gap-4">
-                  <div className="flex items-center justify-between">
-                    <h4 className="text-[10px] font-mono font-bold text-zinc-400 uppercase tracking-widest">
-                      UNIT TEST OUTPUT LOGGER
-                    </h4>
-                    
-                    {evaluationSuccess === true && (
-                      <span className="text-[9px] font-mono bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 px-2 py-0.5 rounded-full uppercase font-bold">ALL TESTS PASSED</span>
-                    )}
-                    {evaluationSuccess === false && (
-                      <span className="text-[9px] font-mono bg-red-500/10 border border-red-500/20 text-red-400 px-2 py-0.5 rounded-full uppercase font-bold">VALIDATION FAILURE</span>
-                    )}
-                  </div>
-
-                  {/* Output logger lines */}
-                  <div className="h-28 overflow-y-auto bg-black border border-zinc-900 rounded-xl p-4 font-mono text-[10.5px] leading-relaxed flex flex-col gap-1.5">
-                    {evalLogs.length > 0 ? (
-                      evalLogs.map((log, i) => (
+                {/* Message Log */}
+                <div className="flex-1 p-5 overflow-y-auto flex flex-col gap-3 min-h-0">
+                  {(messages[selectedFriend] || []).length > 0 ? (
+                    (messages[selectedFriend] || []).map((msg, idx) => {
+                      const isUser = msg.sender === "user";
+                      return (
                         <div 
-                          key={i} 
-                          className={
-                            log.startsWith("✔️") ? "text-emerald-400 font-bold" :
-                            log.startsWith("❌") ? "text-red-400 font-bold" : "text-zinc-400"
-                          }
+                          key={idx} 
+                          className={`flex flex-col max-w-[70%] ${
+                            isUser ? "self-end items-end" : "self-start items-start"
+                          }`}
                         >
-                          {log}
+                          <div className={`p-3 rounded-2xl text-[11.5px] leading-relaxed font-medium ${
+                            isUser 
+                              ? "bg-white text-black rounded-tr-none" 
+                              : "bg-zinc-900 text-zinc-300 rounded-tl-none border border-zinc-850"
+                          }`}>
+                            {msg.text}
+                          </div>
+                          <span className="text-[7.5px] font-mono text-zinc-600 mt-1 select-none">{msg.time}</span>
                         </div>
-                      ))
-                    ) : (
-                      <div className="text-zinc-650 italic">Execute code validations to populate test run logs.</div>
-                    )}
-                  </div>
-
-                  {/* Runner controls */}
-                  <div className="flex gap-4">
-                    <button
-                      onClick={evaluateCode}
-                      className="flex-1 py-3 bg-white text-black hover:bg-zinc-200 text-xs font-bold uppercase tracking-widest rounded-xl transition-all cursor-pointer flex items-center justify-center gap-1.5 border border-white"
-                    >
-                      <Zap className="size-4 fill-current" /> Compile & Run Code
-                    </button>
-
-                    {evaluationSuccess === true && (
-                      <button
-                        onClick={handleNextLevel}
-                        className="flex-1 py-3 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold uppercase tracking-widest rounded-xl transition-all cursor-pointer flex items-center justify-center gap-1.5 border border-emerald-600"
-                      >
-                        <CheckCircle className="size-4" /> Next Level →
-                      </button>
-                    )}
-                  </div>
+                      );
+                    })
+                  ) : (
+                    <div className="flex-1 flex items-center justify-center text-zinc-650 italic text-[10px]">
+                      Send a message to open the secure timeline connection.
+                    </div>
+                  )}
                 </div>
 
+                {/* Input form */}
+                <form onSubmit={handleSendChatMessage} className="p-4 bg-zinc-950 border-t border-zinc-900 flex gap-2 shrink-0">
+                  <input
+                    type="text"
+                    value={chatInput}
+                    onChange={(e) => setChatInput(e.target.value)}
+                    placeholder={`Type message to ${selectedFriend}...`}
+                    className="flex-1 bg-zinc-900 border border-zinc-850 rounded-xl px-4 py-2.5 focus:outline-none focus:border-zinc-600 text-xs text-white"
+                  />
+                  <button
+                    type="submit"
+                    className="px-4 bg-white text-black hover:bg-zinc-200 rounded-xl transition-all cursor-pointer flex items-center justify-center gap-1.5 text-xs font-bold uppercase tracking-wider border border-white"
+                  >
+                    <Send className="size-3.5 fill-current" /> Send
+                  </button>
+                </form>
               </div>
 
             </div>
           </div>
         )}
+
       </div>
     </div>
   );
