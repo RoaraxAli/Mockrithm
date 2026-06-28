@@ -369,6 +369,10 @@ export default function GamesPage() {
     }
   }, [activeGame, currentLevelNum]);
 
+  // Calculate highest unlocked level for current game
+  const gameProgressObj = activeGame ? (progress[activeGame.id] || { completedLevel: 0, xp: 0 }) : { completedLevel: 0, xp: 0 };
+  const maxUnlockedLevel = bypassLocks ? 500 : (gameProgressObj.completedLevel + 1 > 500 ? 500 : gameProgressObj.completedLevel + 1);
+
   // Clamp direct level selection to block skipping
   useEffect(() => {
     if (activeGame) {
