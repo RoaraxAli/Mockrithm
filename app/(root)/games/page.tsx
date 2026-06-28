@@ -60,7 +60,7 @@ const TechIcon = ({ name, className }: { name: string; className?: string }) => 
     Database,
     Server,
     GitBranch,
-    Container: TerminalIcon, // Map Container to TerminalIcon
+    Container: TerminalIcon,
     Wind,
     ShieldAlert
   };
@@ -68,6 +68,62 @@ const TechIcon = ({ name, className }: { name: string; className?: string }) => 
   const IconComponent = icons[name] || Code2;
   return <IconComponent className={className} />;
 };
+
+// Codédex-style simple markdown text renderer
+function renderMarkdown(text: string) {
+  if (!text) return null;
+  const lines = text.split("\n");
+  return lines.map((line, idx) => {
+    if (line.startsWith("### ")) {
+      return (
+        <h4 key={idx} className="text-xs font-black tracking-wider text-white uppercase mt-4 mb-2 font-mono">
+          {line.replace("### ", "")}
+        </h4>
+      );
+    }
+    if (line.startsWith("## ")) {
+      return (
+        <h3 key={idx} className="text-sm font-black tracking-wider text-white uppercase mt-4 mb-2 font-mono">
+          {line.replace("## ", "")}
+        </h3>
+      );
+    }
+    
+    // Process bold segments inside the line
+    let formattedLine: React.ReactNode = line;
+    if (line.includes("**")) {
+      const parts = line.split("**");
+      formattedLine = parts.map((part, i) => 
+        i % 2 === 1 ? <strong key={i} className="text-white font-bold">{part}</strong> : part
+      );
+    }
+
+    if (line.startsWith("- ")) {
+      return (
+        <li key={idx} className="text-[11px] text-zinc-400 list-disc ml-4 mt-1 font-medium">
+          {formattedLine}
+        </li>
+      );
+    }
+    
+    return (
+      <p key={idx} className="text-[11px] text-zinc-400 leading-relaxed mt-2 font-medium">
+        {formattedLine}
+      </p>
+    );
+  });
+}
+
+// Codédex-style formatted copyable code snippets
+function renderCodeExample(codeBlock: string) {
+  if (!codeBlock) return null;
+  const cleanCode = codeBlock.replace(/```[a-zA-Z0-9]*\n/, "").replace(/\n```$/, "");
+  return (
+    <div className="bg-zinc-950 border border-zinc-900 rounded-xl p-3 my-3 font-mono text-[10px] text-zinc-300 overflow-x-auto whitespace-pre">
+      <code>{cleanCode}</code>
+    </div>
+  );
+}
 
 export default function GamesPage() {
   const { isLoaded, isSignedIn, user: clerkUser } = useUser();
@@ -103,6 +159,10 @@ export default function GamesPage() {
     committed: [] as string[],
     commits: [] as { id: string; message: string }[]
   });
+
+  // Calculate highest unlocked level for current game
+  const gameProgressObj = activeGame ? (progress[activeGame.id] || { completedLevel: 0, xp: 0 }) : { completedLevel: 0, xp: 0 };
+  const maxUnlockedLevel = bypassLocks ? 500 : (gameProgressObj.completedLevel + 1 > 500 ? 500 : gameProgressObj.completedLevel + 1);
 
   // Load User Progress
   useEffect(() => {
@@ -156,6 +216,15 @@ export default function GamesPage() {
     }
   }, [activeGame, currentLevelNum]);
 
+  // Clamp direct level selection to block skipping
+  useEffect(() => {
+    if (activeGame) {
+      if (currentLevelNum > maxUnlockedLevel) {
+        setCurrentLevelNum(maxUnlockedLevel);
+      }
+    }
+  }, [activeGame, maxUnlockedLevel, currentLevelNum]);
+
   // Prerequisite Verification Logic
   const isGameUnlocked = (gameId: string): boolean => {
     if (bypassLocks) return true;
@@ -169,7 +238,6 @@ export default function GamesPage() {
     // Unlocked if all prerequisite games are completed (reached level 10+ or at least played)
     return game.prerequisites.every(prereqId => {
       const prereqProg = progress[prereqId];
-      // Conceptually unlocked if prerequisite completed level is > 0
       return prereqProg && prereqProg.completedLevel > 0;
     });
   };
@@ -294,7 +362,6 @@ export default function GamesPage() {
     } else if (!gitState.initialized) {
       setGitTerminalLogs(prev => [...prev, "fatal: not a git repository (or any of the parent directories): .git"]);
     } else if (subCommand === "status") {
-      const stagedFiles = gitState.staged.length > 0 ? gitState.staged.join(", ") : "none";
       const trackingStatus = gitState.staged.length > 0 
         ? `Changes to be committed:\n  (use "git restore --staged <file>..." to unstage)\n\tmodified:   src/app.js`
         : `nothing to commit, working tree clean`;
@@ -358,68 +425,65 @@ export default function GamesPage() {
     const testResults: string[] = [];
 
     try {
-      if (checkType === "html" || checkType === "css") {
-        // Run validations inside browser parser
-        testCases.forEach((tc, idx) => {
-          if (tc.customCheck) {
-            try {
-              const checkFn = eval(tc.customCheck);
-              const result = checkFn(editorCode);
-              if (result === tc.expected) {
-                testResults.push(`✔️ Test Case ${idx + 1} Passed: ${tc.name}`);
-              } else {
-                testResults.push(`❌ Test Case ${idx + 1} Failed: ${tc.name} (Expected ${tc.expected}, got ${result})`);
-                allPassed = false;
-              }
-            } catch (e: any) {
-              testResults.push(`❌ Test Case ${idx + 1} Error: ${e.message}`);
-              allPassed = false;
-            }
-          }
-        });
-      } else if (checkType === "git") {
-        // Evaluate git commands input
-        testCases.forEach((tc, idx) => {
-          if (tc.customCheck) {
-            try {
-              const checkFn = eval(tc.customCheck);
-              const gitLogBlock = gitTerminalLogs.join("\n");
-              const result = checkFn(gitLogBlock);
-              if (result === tc.expected) {
-                testResults.push(`✔️ Git Goal ${idx + 1} Passed: ${tc.name}`);
-              } else {
-                testResults.push(`❌ Git Goal ${idx + 1} Failed: ${tc.name}`);
-                allPassed = false;
-              }
-            } catch (e: any) {
-              testResults.push(`❌ Test Case ${idx + 1} Error: ${e.message}`);
-              allPassed = false;
-            }
-          }
-        });
-      } else if (checkType === "sql") {
-        // Validate SQL clauses
-        testCases.forEach((tc, idx) => {
-          if (tc.customCheck) {
-            try {
-              const checkFn = eval(tc.customCheck);
-              const result = checkFn(editorCode);
-              if (result === tc.expected) {
-                testResults.push(`✔️ SQL Statement check ${idx + 1} Passed: ${tc.name}`);
-              } else {
-                testResults.push(`❌ SQL Statement check ${idx + 1} Failed: ${tc.name}`);
-                allPassed = false;
-              }
-            } catch (e: any) {
-              testResults.push(`❌ Test Case ${idx + 1} Error: ${e.message}`);
-              allPassed = false;
-            }
-          }
-        });
+      testCases.forEach((tc, idx) => {
+        const descriptionText = tc.description || tc.name || `Test Case ${idx + 1}`;
         
-        // Simulating SQL outputs in table visualizer
-        if (editorCode.toLowerCase().includes("where")) {
-          // simple regex filter mockup for UI preview
+        // 1. Regex Match Validation
+        if (tc.testRegex) {
+          try {
+            const rx = new RegExp(tc.testRegex, "i");
+            const result = rx.test(editorCode);
+            if (result) {
+              testResults.push(`✔️ Passed: ${descriptionText}`);
+            } else {
+              testResults.push(`❌ Failed: ${descriptionText}`);
+              allPassed = false;
+            }
+          } catch (e: any) {
+            testResults.push(`❌ Regex Error: ${descriptionText} (${e.message})`);
+            allPassed = false;
+          }
+        } 
+        // 2. Custom code execution fallback
+        else if (tc.customCheck) {
+          try {
+            const checkFn = eval(tc.customCheck);
+            const result = checkFn(editorCode);
+            if (result === tc.expected) {
+              testResults.push(`✔️ Passed: ${descriptionText}`);
+            } else {
+              testResults.push(`❌ Failed: ${descriptionText}`);
+              allPassed = false;
+            }
+          } catch (e: any) {
+            testResults.push(`❌ Custom check error: ${descriptionText} (${e.message})`);
+            allPassed = false;
+          }
+        } 
+        // 3. JS execution test mapping
+        else {
+          try {
+            const cleanCode = editorCode.replace(/export\s+default\s+/g, "");
+            const inputArgs = tc.input ? tc.input.map(x => JSON.stringify(x)).join(", ") : "";
+            const runStr = `${cleanCode}\nreturn processData(${inputArgs});`;
+            const runner = new Function(runStr);
+            const result = runner();
+            if (result === tc.expected) {
+              testResults.push(`✔️ Passed: Input: [${inputArgs}] -> Output: ${result}`);
+            } else {
+              testResults.push(`❌ Failed: Input: [${inputArgs}] -> Expected ${tc.expected}, got ${result}`);
+              allPassed = false;
+            }
+          } catch (e: any) {
+            testResults.push(`❌ Exception: ${e.message}`);
+            allPassed = false;
+          }
+        }
+      });
+
+      // Special visual simulator updates
+      if (allPassed) {
+        if (checkType === "sql" && editorCode.toLowerCase().includes("where")) {
           const whereMatch = editorCode.match(/level\s*(>|<|=)\s*(\d+)/i);
           if (whereMatch) {
             const op = whereMatch[1];
@@ -431,62 +495,6 @@ export default function GamesPage() {
             }));
           }
         }
-      } else if (checkType === "security") {
-        // Exploit evaluation
-        testCases.forEach((tc, idx) => {
-          if (tc.customCheck) {
-            try {
-              const checkFn = eval(tc.customCheck);
-              const result = checkFn(editorCode);
-              if (result === tc.expected) {
-                testResults.push(`✔️ Security Exploit check ${idx + 1} Passed: ${tc.name}`);
-              } else {
-                testResults.push(`❌ Security Exploit check ${idx + 1} Failed: ${tc.name}`);
-                allPassed = false;
-              }
-            } catch (e: any) {
-              testResults.push(`❌ Exploit check ${idx + 1} Error: ${e.message}`);
-              allPassed = false;
-            }
-          }
-        });
-      } else {
-        // Default Javascript evaluation runner
-        testCases.forEach((tc, idx) => {
-          if (tc.customCheck) {
-            try {
-              const checkFn = eval(tc.customCheck);
-              const result = checkFn(editorCode);
-              if (result === tc.expected) {
-                testResults.push(`✔️ Test Case ${idx + 1} Passed: ${tc.name}`);
-              } else {
-                testResults.push(`❌ Test Case ${idx + 1} Failed: ${tc.name}`);
-                allPassed = false;
-              }
-            } catch (e: any) {
-              testResults.push(`❌ Test Case ${idx + 1} Error: ${e.message}`);
-              allPassed = false;
-            }
-          } else {
-            // standard input/output mapping
-            try {
-              const cleanCode = editorCode.replace(/export\s+default\s+/g, "");
-              const inputArgs = tc.input ? tc.input.map(x => JSON.stringify(x)).join(", ") : "";
-              const runStr = `${cleanCode}\nreturn processData(${inputArgs});`;
-              const runner = new Function(runStr);
-              const result = runner();
-              if (result === tc.expected) {
-                testResults.push(`✔️ Test Case ${idx + 1} Passed: Input: [${inputArgs}] -> Output: ${result}`);
-              } else {
-                testResults.push(`❌ Test Case ${idx + 1} Failed: Input: [${inputArgs}] -> Expected ${tc.expected}, got ${result}`);
-                allPassed = false;
-              }
-            } catch (e: any) {
-              testResults.push(`❌ Test Case ${idx + 1} Exception: ${e.message}`);
-              allPassed = false;
-            }
-          }
-        });
       }
     } catch (err: any) {
       testResults.push(`❌ Core Evaluation Crash: ${err.message}`);
@@ -512,7 +520,7 @@ export default function GamesPage() {
 
     const gameId = activeGame.id;
     const completedLvl = currentLevelNum;
-    const xpReward = 100; // 100 XP per level
+    const xpReward = 100;
 
     // Calculate next overall progress state
     const currentProgress = progress[gameId] || { completedLevel: 0, xp: 0 };
@@ -550,8 +558,14 @@ export default function GamesPage() {
     }
   };
 
-  // Navigation handlers
+  // Block top-level selector skipping unless verified
+  const canGoNext = currentLevelNum < maxUnlockedLevel || evaluationSuccess === true;
+
   const handleNextLevel = () => {
+    if (!canGoNext) {
+      toast.error("You must compile and pass the current level's tests before progressing!");
+      return;
+    }
     playSound("click");
     if (currentLevelNum < 500) {
       setCurrentLevelNum(prev => prev + 1);
@@ -569,14 +583,14 @@ export default function GamesPage() {
   };
 
   const handleSelectLevel = (num: number) => {
-    playSound("click");
-    if (num >= 1 && num <= 500) {
-      setCurrentLevelNum(num);
+    if (isNaN(num) || num < 1) return;
+    if (num > maxUnlockedLevel) {
+      toast.error(`Level ${num} is locked! Clear preceding levels first.`);
+      return;
     }
+    playSound("click");
+    setCurrentLevelNum(num);
   };
-
-  // Helper values for current levels
-  const gameProgressObj = activeGame ? (progress[activeGame.id] || { completedLevel: 0, xp: 0 }) : { completedLevel: 0, xp: 0 };
 
   return (
     <div className="min-h-screen bg-black text-white relative font-mona-sans overflow-x-hidden selection:bg-white selection:text-black">
@@ -697,7 +711,7 @@ export default function GamesPage() {
                     <div className="absolute left-[80%] -top-1 size-2 rounded-full bg-zinc-800" />
                   </div>
 
-                  {/* Tier 2: Specialized & Framworks */}
+                  {/* Tier 2: Specialized & Frameworks */}
                   <div className="flex justify-around items-center">
                     <div className="flex flex-col items-center gap-1 w-full">
                       <span className="text-[8px] font-mono text-zinc-500 uppercase">T2 Frameworks & Scripting</span>
@@ -779,7 +793,7 @@ export default function GamesPage() {
                             <span className="text-[9px] font-mono bg-zinc-900 border border-zinc-800 text-zinc-400 px-2 py-0.5 rounded-full uppercase font-bold">ACTIVE</span>
                           )
                         ) : (
-                          <span className="text-[9px] font-mono bg-zinc-950 border border-zinc-900 text-zinc-600 px-2 py-0.5 rounded-full uppercase font-bold">LOCKED</span>
+                          <span className="text-[9px] font-mono bg-zinc-950 border border-zinc-900 text-zinc-650 px-2 py-0.5 rounded-full uppercase font-bold">LOCKED</span>
                         )}
                       </div>
 
@@ -793,7 +807,7 @@ export default function GamesPage() {
                     <div className="mt-4">
                       {unlocked ? (
                         <div className="space-y-1.5">
-                          <div className="flex justify-between text-[9px] font-mono font-bold text-zinc-500">
+                          <div className="flex justify-between text-[9px] font-mono font-bold text-zinc-550">
                             <span>LEVEL {gameProg.completedLevel}/500</span>
                             <span>{pct}% COMPLETE</span>
                           </div>
@@ -843,35 +857,40 @@ export default function GamesPage() {
                 </div>
                 <div>
                   <h2 className="text-sm font-bold uppercase tracking-wider text-white leading-tight">{activeGame.name}</h2>
-                  <p className="text-[9px] text-zinc-500 uppercase tracking-widest font-semibold">{activeGame.theme}</p>
+                  <p className="text-[9px] text-zinc-505 uppercase tracking-widest font-semibold">{activeGame.theme}</p>
                 </div>
               </div>
 
               {/* Levels controls switcher */}
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2 font-mono">
                 <button
                   onClick={handlePrevLevel}
                   disabled={currentLevelNum === 1}
-                  className="px-2.5 py-1.5 rounded-lg bg-zinc-950 border border-zinc-900 hover:border-zinc-700 text-zinc-400 hover:text-white transition-all cursor-pointer disabled:opacity-30 disabled:pointer-events-none text-xs"
+                  className="px-2.5 py-1.5 rounded-lg bg-zinc-955 border border-zinc-900 hover:border-zinc-700 text-zinc-450 hover:text-white transition-all cursor-pointer disabled:opacity-30 disabled:pointer-events-none text-xs"
                 >
                   ◀
                 </button>
-                <div className="flex items-center gap-1 bg-zinc-950 border border-zinc-900 px-3 py-1.5 rounded-lg text-xs font-mono font-bold">
+                <div className="flex items-center gap-1 bg-zinc-955 border border-zinc-900 px-3 py-1.5 rounded-lg text-xs font-mono font-bold">
                   LEVEL 
                   <input
                     type="number"
                     min={1}
                     max={500}
                     value={currentLevelNum}
-                    onChange={(e) => handleSelectLevel(parseInt(e.target.value, 10))}
+                    onChange={(e) => {
+                      const num = parseInt(e.target.value, 10);
+                      if (!isNaN(num)) {
+                        handleSelectLevel(num);
+                      }
+                    }}
                     className="w-10 bg-transparent text-center focus:outline-none border-b border-zinc-800 focus:border-white text-white"
                   />
                   / 500
                 </div>
                 <button
                   onClick={handleNextLevel}
-                  disabled={currentLevelNum === 500}
-                  className="px-2.5 py-1.5 rounded-lg bg-zinc-950 border border-zinc-900 hover:border-zinc-700 text-zinc-400 hover:text-white transition-all cursor-pointer disabled:opacity-30 disabled:pointer-events-none text-xs"
+                  disabled={currentLevelNum === 500 || !canGoNext}
+                  className="px-2.5 py-1.5 rounded-lg bg-zinc-955 border border-zinc-900 hover:border-zinc-700 text-zinc-450 hover:text-white transition-all cursor-pointer disabled:opacity-30 disabled:pointer-events-none text-xs"
                 >
                   ▶
                 </button>
@@ -881,31 +900,57 @@ export default function GamesPage() {
             {/* Split Screen Panel Layout */}
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-stretch">
               
-              {/* Left Column: Instructions and Hints */}
-              <div className="lg:col-span-4 flex flex-col gap-6">
+              {/* Left Column: Codédex-style Sidebar Lesson Parameters Panel */}
+              <div className="lg:col-span-4 flex flex-col gap-6 max-h-[85vh] overflow-y-auto pr-1">
                 
                 {/* Level parameters block */}
                 <div className="bg-zinc-950/40 border border-zinc-900 rounded-2xl p-6 flex flex-col gap-4">
                   <div className="flex justify-between items-center">
-                    <span className={`text-[9px] font-mono font-black uppercase tracking-widest px-2.5 py-0.5 rounded-full border border-white/5 bg-zinc-900 text-zinc-300`}>
+                    <span className={`text-[9px] font-mono font-black uppercase tracking-widest px-2.5 py-0.5 rounded-full border border-white/5 bg-zinc-900 text-zinc-350`}>
                       {activeLevelData?.tier}
                     </span>
-                    <span className="text-[10px] font-mono text-zinc-500 font-bold">100 XP REWARD</span>
+                    <span className="text-[10px] font-mono text-zinc-550 font-bold">100 XP REWARD</span>
                   </div>
 
-                  <h3 className="text-lg font-black tracking-wide text-white uppercase leading-tight">
+                  <h3 className="text-lg font-black tracking-wide text-white uppercase leading-tight font-mono">
                     {activeLevelData?.title}
                   </h3>
 
                   <div className="h-[1px] bg-zinc-900 my-1" />
 
-                  {/* Level text description */}
-                  <div className="text-[11px] text-zinc-350 leading-relaxed font-medium whitespace-pre-line max-h-72 overflow-y-auto pr-1">
-                    {activeLevelData?.instructions}
+                  {/* 1. Concept (The "Why") */}
+                  <div className="space-y-1">
+                    {renderMarkdown(activeLevelData?.conceptText || "")}
+                  </div>
+
+                  {/* 2. Code Example */}
+                  {activeLevelData?.codeExample && (
+                    <div className="mt-2">
+                      <h4 className="text-xs font-black tracking-wider text-white uppercase mb-2 font-mono">Code Example</h4>
+                      {renderCodeExample(activeLevelData.codeExample)}
+                    </div>
+                  )}
+
+                  {/* 3. The Mission (The Task) */}
+                  <div className="space-y-1 border-t border-zinc-900 pt-4 mt-2">
+                    {renderMarkdown(activeLevelData?.missionText || "")}
+                  </div>
+
+                  {/* 4. Validation Criteria */}
+                  <div className="border-t border-zinc-900 pt-4 mt-2">
+                    <h4 className="text-xs font-black tracking-wider text-white uppercase mb-2 font-mono">Validation Criteria</h4>
+                    <ul className="space-y-1.5 list-none pl-0">
+                      {activeLevelData?.validation.testCases.map((tc, idx) => (
+                        <li key={idx} className="text-[10.5px] text-zinc-500 font-medium flex items-start gap-2">
+                          <span className="text-zinc-650">•</span>
+                          <span>{tc.description || tc.name}</span>
+                        </li>
+                      ))}
+                    </ul>
                   </div>
 
                   {/* Hints container */}
-                  <div className="mt-2">
+                  <div className="mt-2 border-t border-zinc-900 pt-4">
                     <button
                       onClick={() => { playSound("click"); setShowHint(!showHint); }}
                       className="text-[10px] font-mono font-bold text-zinc-500 hover:text-white flex items-center gap-1 transition-colors cursor-pointer uppercase"
@@ -934,7 +979,7 @@ export default function GamesPage() {
                 {/* Live Sandbox Interactive Previews */}
                 <div className="bg-zinc-950/40 border border-zinc-900 rounded-2xl p-6 flex flex-col gap-4">
                   <div className="flex items-center justify-between">
-                    <h4 className="text-[10px] font-mono font-bold text-zinc-400 uppercase tracking-widest">
+                    <h4 className="text-[10px] font-mono font-bold text-zinc-450 uppercase tracking-widest">
                       Live Sandbox Output
                     </h4>
                     <span className="text-[9px] font-mono text-zinc-650 uppercase font-black">COMPILING ON-THE-FLY</span>
@@ -1000,13 +1045,13 @@ export default function GamesPage() {
                           ))}
                         </div>
                         <form onSubmit={handleGitCommandLineSubmit} className="mt-2 flex gap-2">
-                          <span className="text-zinc-500 font-bold select-none pt-1.5">$</span>
+                          <span className="text-zinc-550 font-bold select-none pt-1.5">$</span>
                           <input
                             type="text"
                             value={gitCommandInput}
                             onChange={(e) => setGitCommandInput(e.target.value)}
                             placeholder="Type git command here..."
-                            className="flex-1 bg-zinc-950 border border-zinc-900 rounded-lg px-3 py-1.5 focus:outline-none focus:border-zinc-650 text-white text-[10px]"
+                            className="flex-1 bg-zinc-955 border border-zinc-900 rounded-lg px-3 py-1.5 focus:outline-none focus:border-zinc-650 text-white text-[10px]"
                           />
                         </form>
                       </div>
@@ -1018,9 +1063,9 @@ export default function GamesPage() {
                      activeLevelData?.validation.checkType !== "sql" && 
                      activeLevelData?.validation.checkType !== "git" && (
                       <div className="flex flex-col items-center gap-2">
-                        <Code2 className="size-8 text-zinc-600 animate-pulse" />
-                        <span className="text-[10px] font-mono text-zinc-500 uppercase tracking-widest font-bold">Standard Standard Console</span>
-                        <p className="text-[10px] text-zinc-500 max-w-[200px] leading-relaxed">
+                        <Code2 className="size-8 text-zinc-650 animate-pulse" />
+                        <span className="text-[10px] font-mono text-zinc-500 uppercase tracking-widest font-bold">Standard Console</span>
+                        <p className="text-[10px] text-zinc-550 max-w-[200px] leading-relaxed">
                           Your script evaluations will execute inside sandboxed unit test assertions. Output will print below.
                         </p>
                       </div>
@@ -1043,7 +1088,7 @@ export default function GamesPage() {
                     <div className="flex items-center gap-2">
                       <button
                         onClick={() => { playSound("click"); setEditorCode(activeLevelData?.starterCode || ""); }}
-                        className="p-1.5 rounded-lg bg-zinc-900 border border-zinc-800 text-zinc-400 hover:text-white transition-all cursor-pointer"
+                        className="p-1.5 rounded-lg bg-zinc-900 border border-zinc-800 text-zinc-450 hover:text-white transition-all cursor-pointer"
                         title="Reset code template"
                       >
                         <RotateCcw className="size-4" />

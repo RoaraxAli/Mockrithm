@@ -11,19 +11,23 @@ export interface GameInfo {
 }
 
 export interface TestCase {
-  name: string;
+  name?: string; // Legacy support
+  description?: string; // Codédex-style: text telling what the test is checking
   input?: any[];
-  expected: any;
-  customCheck?: string; // JS code string for advanced checking
+  expected?: any;
+  customCheck?: string; // legacy custom JS code
+  testRegex?: string; // Codédex-style regex validation pattern
 }
 
 export interface LevelData {
   id: string;
   level: number;
+  levelId: number;
   tier: "Apprentice" | "Mage" | "Knight" | "Warlord" | "Grandmaster";
   title: string;
-  concept: string;
-  instructions: string;
+  conceptText: string; // Narrative Concept section (The "Why")
+  codeExample: string; // Syntax Code Examples section
+  missionText: string; // Level mission tasks
   starterCode: string;
   hints: string[];
   validation: {
@@ -39,7 +43,7 @@ export const GAMES_LIST: GameInfo[] = [
     name: "HTML5",
     theme: "Hypertext Architect",
     iconName: "FileCode",
-    description: "Construct the skeletal foundations of the web. Learn layout layouts, meta-tags, and semantic schemas.",
+    description: "Construct the skeletal foundations of the web. Learn layouts, meta-tags, and semantic schemas.",
     gradient: "from-orange-600 to-amber-500",
     prerequisites: []
   },
@@ -140,7 +144,7 @@ export const GAMES_LIST: GameInfo[] = [
     iconName: "Container",
     description: "Encapsulate applications in container fleets. Build multi-stage Dockerfiles and deploy CI/CD.",
     gradient: "from-blue-500 to-cyan-500",
-    prerequisites: ["nodejs"] // Simplified prerequisite tree (NodeJS or Django -> NodeJS is sufficient)
+    prerequisites: ["nodejs"]
   },
   {
     id: "tailwind",
@@ -162,7 +166,6 @@ export const GAMES_LIST: GameInfo[] = [
   }
 ];
 
-// Helper to determine Level Tier
 export function getTierName(level: number): "Apprentice" | "Mage" | "Knight" | "Warlord" | "Grandmaster" {
   if (level <= 100) return "Apprentice";
   if (level <= 200) return "Mage";
@@ -171,9 +174,210 @@ export function getTierName(level: number): "Apprentice" | "Mage" | "Knight" | "
   return "Grandmaster";
 }
 
-/**
- * Procedural Syllabus Concept Map
- */
+// Handcrafted Codédex blueprints for initial sequence (HTML5 Game target)
+const HTML5_INITIAL_LEVELS: LevelData[] = [
+  {
+    id: "html5-1",
+    level: 1,
+    levelId: 1,
+    tier: "Apprentice",
+    title: "Document Skeleton",
+    conceptText: `### 1. The Concept (The "Why")
+Web pages are structured just like a **human skeleton**. In HTML5, we define structural wrappers to hold text content.
+The container \`<div id="element-container">\` acts as the chest cavity, and we are going to place a **heart** inside it using a text layout!`,
+    codeExample: `\`\`\`html
+<div id="element-container">
+  <h1>Document Skeleton</h1>
+</div>
+\`\`\``,
+    missionText: `### 2. Your Mission
+Write an HTML tag containing the text **"Document Skeleton Part 1"** inside the starter wrapper container.`,
+    starterCode: `<!-- HTML Apprentice - Level 1 -->
+<div id="element-container">
+  
+</div>`,
+    hints: [
+      "Use an <h1> or <h2> heading element.",
+      "Ensure you close your tags properly.",
+      "Check spelling: 'Document Skeleton Part 1'"
+    ],
+    validation: {
+      checkType: "html",
+      testCases: [
+        {
+          description: "Should contain an h1 or h2 heading tag inside container",
+          testRegex: "<(h1|h2)[\\s>]"
+        },
+        {
+          description: "Should render the text 'Document Skeleton Part 1'",
+          testRegex: "Document\\s+Skeleton\\s+Part\\s+1"
+        }
+      ]
+    }
+  },
+  {
+    id: "html5-2",
+    level: 2,
+    levelId: 2,
+    tier: "Apprentice",
+    title: "Headings & Paragraphs",
+    conceptText: `### 1. The Concept (The "Why")
+A page needs structural hierarchy. Headings range from \`<h1>\` (largest, main titles) down to \`<h6>\` (smallest subheaders).
+For regular text blocks, we use the paragraph \`<p>\` tag, which adds standard spacing above and below.`,
+    codeExample: `\`\`\`html
+<h1>Main Title</h1>
+<p>This is a standard body text block.</p>
+\`\`\``,
+    missionText: `### 2. Your Mission
+Add an \`<h2>\` subtitle and a \`<p>\` description paragraph inside the container. The description paragraph must contain the phrase "Learn layout foundations".`,
+    starterCode: `<!-- HTML Apprentice - Level 2 -->
+<div id="element-container">
+  
+</div>`,
+    hints: [
+      "Add an <h2> element first.",
+      "Create a <p> element next containing the target text.",
+      "Verify tags close cleanly."
+    ],
+    validation: {
+      checkType: "html",
+      testCases: [
+        {
+          description: "Should contain an h2 tag",
+          testRegex: "<h2[\\s>]"
+        },
+        {
+          description: "Should contain a p paragraph tag",
+          testRegex: "<p[\\s>]"
+        },
+        {
+          description: "Paragraph should contain the text 'Learn layout foundations'",
+          testRegex: "Learn\\s+layout\\s+foundations"
+        }
+      ]
+    }
+  },
+  {
+    id: "html5-3",
+    level: 3,
+    levelId: 3,
+    tier: "Apprentice",
+    title: "Text Formatting",
+    conceptText: `### 1. The Concept (The "Why")
+Skeletel content can be highlighted. To make text **bold**, we use the \`<strong>\` tag. To *italicize* text, we wrap it in the \`<em>\` (emphasis) tag.
+This lets the browser and screen readers know which words carry weight.`,
+    codeExample: `\`\`\`html
+<p>We must defend the <strong>Citadel</strong> from danger.</p>
+\`\`\``,
+    missionText: `### 2. Your Mission
+Write a paragraph tag containing the bolded word **"stronghold"** inside the container using the \`<strong>\` tag.`,
+    starterCode: `<!-- HTML Apprentice - Level 3 -->
+<div id="element-container">
+  
+</div>`,
+    hints: [
+      "Wrap the target word inside <strong> and </strong>.",
+      "Place the strong tag inside a <p> element.",
+      "Check spelling of 'stronghold'"
+    ],
+    validation: {
+      checkType: "html",
+      testCases: [
+        {
+          description: "Should include a strong tag",
+          testRegex: "<strong[\\s>]"
+        },
+        {
+          description: "Should contain the word 'stronghold'",
+          testRegex: "stronghold"
+        }
+      ]
+    }
+  },
+  {
+    id: "html5-4",
+    level: 4,
+    levelId: 4,
+    tier: "Apprentice",
+    title: "Hyperlinks",
+    conceptText: `### 1. The Concept (The "Why")
+Links are the neural pathways of the internet. We weave them using the anchor \`<a>\` tag.
+It requires an \`href\` attribute stating the target URL and wraps the clickable text.`,
+    codeExample: `\`\`\`html
+<a href="https://mockrithm.com">Click Here</a>
+\`\`\``,
+    missionText: `### 2. Your Mission
+Create an anchor link pointing to **"https://mockrithm.com/games"** displaying the text "Enter Arena".`,
+    starterCode: `<!-- HTML Apprentice - Level 4 -->
+<div id="element-container">
+  
+</div>`,
+    hints: [
+      "Set the href attribute to 'https://mockrithm.com/games'.",
+      "Set the anchor inner text to 'Enter Arena'."
+    ],
+    validation: {
+      checkType: "html",
+      testCases: [
+        {
+          description: "Should contain an anchor link tag",
+          testRegex: "<a[\\s>]"
+        },
+        {
+          description: "Should specify the target href parameter",
+          testRegex: "href=[\"']https://mockrithm\\.com/games[\"']"
+        },
+        {
+          description: "Link text must read 'Enter Arena'",
+          testRegex: ">Enter\\s+Arena</a>"
+        }
+      ]
+    }
+  },
+  {
+    id: "html5-5",
+    level: 5,
+    levelId: 5,
+    tier: "Apprentice",
+    title: "Image Embedding",
+    conceptText: `### 1. The Concept (The "Why")
+Images add portals to other visual dimensions. We embed them with the \`<img>\` tag.
+It is a **self-closing tag** (meaning it does not need a closing \`</img>\` element) and uses the \`src\` attribute for the file path, along with \`alt\` for accessibility descriptions.`,
+    codeExample: `\`\`\`html
+<img src="/logo.svg" alt="Mockrithm Logo" />
+\`\`\``,
+    missionText: `### 2. Your Mission
+Embed an image using the source path **"/logo.svg"** and an alt description tag set to "Cyber Logo".`,
+    starterCode: `<!-- HTML Apprentice - Level 5 -->
+<div id="element-container">
+  
+</div>`,
+    hints: [
+      "Use img tag properties src and alt.",
+      "Remember that image tags are self-closing.",
+      "Check spelling of '/logo.svg'"
+    ],
+    validation: {
+      checkType: "html",
+      testCases: [
+        {
+          description: "Should contain an img tag",
+          testRegex: "<img[\\s>]"
+        },
+        {
+          description: "Source must point to '/logo.svg'",
+          testRegex: "src=[\"']/logo\\.svg[\"']"
+        },
+        {
+          description: "Alt description must read 'Cyber Logo'",
+          testRegex: "alt=[\"']Cyber\\s+Logo[\"']"
+        }
+      ]
+    }
+  }
+];
+
+// Procedural concepts mapping for games
 const GAME_SYLLABUS: Record<string, {
   Apprentice: string[];
   Mage: string[];
@@ -286,6 +490,11 @@ const GAME_SYLLABUS: Record<string, {
  * Transforms any gameId + level (1-500) into a fully structured, playable level.
  */
 export function generateLevel(gameId: string, level: number): LevelData {
+  // Check if we have handcrafted blueprints first
+  if (gameId === "html5" && level <= 5) {
+    return HTML5_INITIAL_LEVELS[level - 1];
+  }
+
   const game = GAMES_LIST.find(g => g.id === gameId);
   if (!game) {
     throw new Error(`Game ${gameId} not found`);
@@ -305,16 +514,44 @@ export function generateLevel(gameId: string, level: number): LevelData {
   const id = `${gameId}-${level}`;
 
   // Procedural content generation based on gameId and level
-  let instructions = "";
+  let conceptText = "";
+  let codeExample = "";
+  let missionText = "";
   let starterCode = "";
   let hints: string[] = [];
   let checkType: LevelData["validation"]["checkType"] = "eval";
   let testCases: TestCase[] = [];
 
+  // General concept fallback builder
+  conceptText = `### 1. The Concept (The "Why")
+Understanding **${concept}** is essential to mastering ${game.name}.
+In this lesson, we cover key design principles, syntactic constructs, and logical flows associated with ${concept} under ${tier} guidelines.`;
+
+  codeExample = `\`\`\`${
+    gameId === "python" || gameId === "django" ? "python" : 
+    gameId === "sql" ? "sql" : 
+    gameId === "html5" || gameId === "tailwind" ? "html" :
+    gameId === "css3" ? "css" : "javascript"
+  }
+// Code Example for ${concept}
+${
+  gameId === "html5" || gameId === "tailwind" 
+    ? `<!-- ${concept} syntax -->\n<div class="container">\n  <p>${concept} display</p>\n</div>`
+    : gameId === "css3"
+    ? `/* Styling ${concept} */\n.visual-box {\n  color: #ffffff;\n  background: linear-gradient(to right, #000, #fff);\n}`
+    : gameId === "python" || gameId === "django"
+    ? `def process_logic(value):\n    # Process ${concept}\n    return value * 2`
+    : `function processData(x) {\n  // Process ${concept}\n  return x;\n}`
+}
+\`\`\``;
+
+  missionText = `### 2. Your Mission
+Implement a clean, syntactically correct structure or script matching the rules for **${concept}**.
+Update the starter template accordingly.`;
+
   switch (gameId) {
     case "html5":
       checkType = "html";
-      instructions = `Build a structural element for ${concept}. You need to implement an element with tag details suitable for this task.\n\nTask: Add an HTML snippet containing a proper structure representing '${concept}'. The node must contain matching identifier or class content, and display content related to '${concept} Part ${stepIndex + 1}'.`;
       starterCode = `<!-- Write your HTML code below -->\n<div id="element-container">\n  \n</div>`;
       hints = [
         "Ensure all HTML elements are correctly closed.",
@@ -323,25 +560,18 @@ export function generateLevel(gameId: string, level: number): LevelData {
       ];
       testCases = [
         {
-          name: "Contains required tags",
-          expected: true,
-          customCheck: `(code) => {
-            const doc = new DOMParser().parseFromString(code, 'text/html');
-            const container = doc.getElementById('element-container');
-            return !!container && container.children.length > 0;
-          }`
+          description: "Contains required tags",
+          testRegex: "<[a-zA-Z0-9]+[\\s>]"
         },
         {
-          name: "Includes concept topic text",
-          expected: true,
-          customCheck: `(code) => code.toLowerCase().includes("${concept.toLowerCase()}")`
+          description: `Includes concept text '${concept}'`,
+          testRegex: concept.toLowerCase().split(/\s+/)[0]
         }
       ];
       break;
 
     case "css3":
       checkType = "css";
-      instructions = `Develop CSS rules to style a ${concept} component.\n\nTask: Target class '.visual-box' and write style statements to apply styles. You need to assign the appropriate color codes, layout flex/grid properties, or animation parameters.\n\nConfigure: set property values reflecting topic details.`;
       starterCode = `/* Write your CSS rules targeting .visual-box */\n.visual-box {\n  \n}`;
       hints = [
         "Remember class selectors start with a period (.) in CSS.",
@@ -350,14 +580,12 @@ export function generateLevel(gameId: string, level: number): LevelData {
       ];
       testCases = [
         {
-          name: "CSS Selector Matches",
-          expected: true,
-          customCheck: `(code) => code.includes(".visual-box")`
+          description: "CSS Selector Matches .visual-box",
+          testRegex: "\\.visual-box"
         },
         {
-          name: "Specifies style rules",
-          expected: true,
-          customCheck: `(code) => code.includes("{") && code.includes("}") && code.length > 30`
+          description: "Specifies style braces",
+          testRegex: "\\{[^}]+\\}"
         }
       ];
       break;
@@ -365,8 +593,6 @@ export function generateLevel(gameId: string, level: number): LevelData {
     case "javascript":
       checkType = "eval";
       if (level <= 100) {
-        // Apprentice syntax coding
-        instructions = `Implement code for ${concept}.\n\nTask: Write a function named 'processData' that takes parameters based on ${concept} and returns output matching topic criteria.\n\nExample: returns double value, verifies conditionals, or processes loop inputs.`;
         starterCode = `// JS Apprentice - ${concept}\nfunction processData(x) {\n  // Write your code here\n  \n}`;
         hints = [
           "Use basic primitive variables and control structures.",
@@ -375,24 +601,18 @@ export function generateLevel(gameId: string, level: number): LevelData {
         ];
         testCases = [
           {
-            name: "Function exists",
-            input: [5],
-            expected: true,
-            customCheck: `(code) => typeof eval(code + "; processData") === "function"`
+            description: "Function 'processData' exists",
+            testRegex: "function\\s+processData"
           },
           {
-            name: "Returns correct value for input",
-            input: [10],
-            expected: 20,
+            description: "Returns double the inputs",
             customCheck: `(code) => {
               const fn = new Function(code + "; return processData(10);");
-              return fn();
+              return fn() === 20;
             }`
           }
         ];
       } else {
-        // Advanced logic Knight/Warlord/Grandmaster
-        instructions = `Write an optimized handler for ${concept} under Mage/Knight/Warlord conditions.\n\nTask: Define a function 'handleProcess' that resolves inputs using advanced paradigms (promises, closure, or generators).`;
         starterCode = `// JS Advanced - ${concept}\nfunction handleProcess(data) {\n  // Implement high performance algorithm\n  \n}`;
         hints = [
           "Avoid nested callback locks. Use modern ES6+ structures.",
@@ -401,14 +621,8 @@ export function generateLevel(gameId: string, level: number): LevelData {
         ];
         testCases = [
           {
-            name: "Resolves data array input",
-            input: [[1, 2, 3]],
-            expected: 6,
-            customCheck: `(code) => {
-              const fn = new Function(code + "; return handleProcess([1, 2, 3]);");
-              const res = fn();
-              return Array.isArray(res) ? res.reduce((a,b)=>a+b, 0) : res;
-            }`
+            description: "Function 'handleProcess' exists",
+            testRegex: "function\\s+handleProcess"
           }
         ];
       }
@@ -416,7 +630,6 @@ export function generateLevel(gameId: string, level: number): LevelData {
 
     case "typescript":
       checkType = "eval";
-      instructions = `Write typed code for Type Guardian - ${concept}.\n\nTask: Create interfaces, types, or generic handlers enforcing strict typing. Declare your exports or functions.\n\nMake sure the Javascript equivalent compiles successfully.`;
       starterCode = `// TypeScript - ${concept}\ntype TopicType = string | number;\n\nfunction processType(arg: TopicType) {\n  // Write implementation code\n  \n}`;
       hints = [
         "Enforce strict compile-time types.",
@@ -425,21 +638,14 @@ export function generateLevel(gameId: string, level: number): LevelData {
       ];
       testCases = [
         {
-          name: "Compiles without error",
-          expected: true,
-          customCheck: `(code) => {
-            // Strip simple TS types for dynamic client-side evaluation checks
-            const cleanCode = code.replace(/:\\s*[a-zA-Z<>|\\[\\]]+/g, "").replace(/type\\s+\\w+\\s*=\\s*[^;]+;/g, "");
-            const fn = new Function(cleanCode + "; return typeof processType;");
-            return fn() === "function";
-          }`
+          description: "Defines processType handler",
+          testRegex: "function\\s+processType"
         }
       ];
       break;
 
     case "reactjs":
       checkType = "react";
-      instructions = `Implement a React Component to manage ${concept}.\n\nTask: Build a functional React component named 'CounterControl' that uses React state/hooks to update text and output based on user actions.`;
       starterCode = `import React, { useState } from 'react';\n\nexport default function CounterControl() {\n  // Implement useState and elements\n  return (\n    <div className="react-box">\n      \n    </div>\n  );\n}`;
       hints = [
         "Keep components pure and return JSX.",
@@ -448,21 +654,18 @@ export function generateLevel(gameId: string, level: number): LevelData {
       ];
       testCases = [
         {
-          name: "Imports React correctly",
-          expected: true,
-          customCheck: `(code) => code.includes("react")`
+          description: "Imports React hook dependencies",
+          testRegex: "import\\s+React"
         },
         {
-          name: "Declares CounterControl component",
-          expected: true,
-          customCheck: `(code) => code.includes("function CounterControl") || code.includes("const CounterControl")`
+          description: "Declares CounterControl component",
+          testRegex: "function\\s+CounterControl"
         }
       ];
       break;
 
     case "nodejs":
       checkType = "node";
-      instructions = `Implement Node.js logic for ${concept}.\n\nTask: Create a Node script that uses module abstractions (like fs or path) or writes standard HTTP routing checks.\n\nWrite a function 'runNodeScript(require)' that uses the mocked node imports.`;
       starterCode = `// Node.js - ${concept}\nfunction runNodeScript(require) {\n  const fs = require('fs');\n  // Write code using fs module\n  \n}`;
       hints = [
         "Use the provided mock require functions.",
@@ -471,27 +674,14 @@ export function generateLevel(gameId: string, level: number): LevelData {
       ];
       testCases = [
         {
-          name: "Uses require('fs') module",
-          expected: true,
-          customCheck: `(code) => code.includes("require('fs')") || code.includes('require("fs")')`
-        },
-        {
-          name: "Fulfills script execution block",
-          expected: true,
-          customCheck: `(code) => {
-            const fsMock = { writeFileSync: () => {} };
-            const reqMock = (mod) => mod === 'fs' ? fsMock : {};
-            const fn = new Function(code + "; return runNodeScript;");
-            fn()(reqMock);
-            return true;
-          }`
+          description: "Uses require('fs') module",
+          testRegex: "require\\(['\"]fs['\"]\\)"
         }
       ];
       break;
 
     case "nextjs":
       checkType = "react";
-      instructions = `Implement a Next.js App Router layout for ${concept}.\n\nTask: Code a React Server Action or a layout component exporting meta headers suited for page routes.`;
       starterCode = `// Next.js Route Page - ${concept}\nexport const metadata = {\n  title: "${concept}",\n};\n\nexport default function Page() {\n  return (\n    <main>\n      <h1>${concept} Server Rendered</h1>\n    </main>\n  );\n}`;
       hints = [
         "Make sure to export metadata for SEO layout.",
@@ -500,21 +690,18 @@ export function generateLevel(gameId: string, level: number): LevelData {
       ];
       testCases = [
         {
-          name: "Contains metadata object",
-          expected: true,
-          customCheck: `(code) => code.includes("metadata")`
+          description: "Defines metadata properties",
+          testRegex: "metadata"
         },
         {
-          name: "Defines Page component default export",
-          expected: true,
-          customCheck: `(code) => code.includes("export default function Page")`
+          description: "Default export is Page component",
+          testRegex: "export\\s+default\\s+function\\s+Page"
         }
       ];
       break;
 
     case "python":
       checkType = "eval";
-      instructions = `Write Python script parameters for ${concept}.\n\nTask: Create a python function 'solve_logic(x)' that evaluates logic parameters.\n\nSince this runner simulates code parsing, structure the parameters exactly as described.`;
       starterCode = `# Python Apprentice - ${concept}\ndef solve_logic(x):\n    # Write python code with proper indentation\n    pass`;
       hints = [
         "Python relies on strict indentation.",
@@ -523,21 +710,14 @@ export function generateLevel(gameId: string, level: number): LevelData {
       ];
       testCases = [
         {
-          name: "Function definition present",
-          expected: true,
-          customCheck: `(code) => code.includes("def solve_logic")`
-        },
-        {
-          name: "Avoids syntax errors",
-          expected: true,
-          customCheck: `(code) => !code.includes("function")` // Check that JavaScript syntax is not used
+          description: "Defines solve_logic function",
+          testRegex: "def\\s+solve_logic"
         }
       ];
       break;
 
     case "sql":
       checkType = "sql";
-      instructions = `Formulate an SQL statement for Database Crawler - ${concept}.\n\nTask: Write a query selecting records from table 'dungeon_users' matching filters.\n\nFilter: select required columns where values correspond to '${concept}' thresholds.`;
       starterCode = `-- SQL Relational Query - ${concept}\nSELECT * FROM dungeon_users\nWHERE \nORDER BY id ASC;`;
       hints = [
         "Specify the exact fields instead of wildcard SELECT * if needed.",
@@ -546,21 +726,18 @@ export function generateLevel(gameId: string, level: number): LevelData {
       ];
       testCases = [
         {
-          name: "Uses SELECT statements",
-          expected: true,
-          customCheck: `(code) => code.toUpperCase().includes("SELECT")`
+          description: "Uses SELECT statements",
+          testRegex: "SELECT"
         },
         {
-          name: "References table dungeon_users",
-          expected: true,
-          customCheck: `(code) => code.toLowerCase().includes("dungeon_users")`
+          description: "References table dungeon_users",
+          testRegex: "dungeon_users"
         }
       ];
       break;
 
     case "django":
       checkType = "eval";
-      instructions = `Develop Django/FastAPI configurations for ${concept}.\n\nTask: Design models or async route parameters. Declare a class or path handler.`;
       starterCode = `# Django/FastAPI Controller - ${concept}\nfrom pydantic import BaseModel\n\nclass TopicItem(BaseModel):\n    name: str\n    level: int\n`;
       hints = [
         "Inherit from BaseModel for FastAPI Pydantic requests.",
@@ -569,16 +746,14 @@ export function generateLevel(gameId: string, level: number): LevelData {
       ];
       testCases = [
         {
-          name: "Declares TopicItem schema class",
-          expected: true,
-          customCheck: `(code) => code.includes("class TopicItem")`
+          description: "Declares TopicItem schema class",
+          testRegex: "class\\s+TopicItem"
         }
       ];
       break;
 
     case "git":
       checkType = "git";
-      instructions = `Orchestrate a sequence of Git operations to manage ${concept}.\n\nTask: Provide the commands in order, each on a new line, to accomplish this timeline task.\n\nCommands needed: git init, git add, and commit parameters.`;
       starterCode = `# Type your Git commands, one per line\ngit init\n`;
       hints = [
         "Include the exact file name if adding specific documents.",
@@ -587,21 +762,14 @@ export function generateLevel(gameId: string, level: number): LevelData {
       ];
       testCases = [
         {
-          name: "Initializes repository",
-          expected: true,
-          customCheck: `(code) => code.toLowerCase().includes("git init")`
-        },
-        {
-          name: "Adds assets to staging",
-          expected: true,
-          customCheck: `(code) => code.toLowerCase().includes("git add")`
+          description: "Initializes repository",
+          testRegex: "git\\s+init"
         }
       ];
       break;
 
     case "docker":
       checkType = "docker";
-      instructions = `Construct image parameters in a Dockerfile for ${concept}.\n\nTask: Specify the base image, directories, commands to execute, and run points.`;
       starterCode = `# Dockerfile - ${concept}\nFROM node:18-alpine\n\nWORKDIR /app\n`;
       hints = [
         "Select lightweight alpine bases for efficiency.",
@@ -610,21 +778,14 @@ export function generateLevel(gameId: string, level: number): LevelData {
       ];
       testCases = [
         {
-          name: "Specifies base image",
-          expected: true,
-          customCheck: `(code) => code.toUpperCase().includes("FROM ")`
-        },
-        {
-          name: "Sets working directory",
-          expected: true,
-          customCheck: `(code) => code.toUpperCase().includes("WORKDIR ")`
+          description: "Specifies base image",
+          testRegex: "FROM"
         }
       ];
       break;
 
     case "tailwind":
       checkType = "html";
-      instructions = `Build custom component styles using Tailwind CSS for ${concept}.\n\nTask: Apply responsive utilities, background gradients, flex grids, or dark states onto HTML nodes.\n\nClasses: include appropriate responsive text size and layout styles.`;
       starterCode = `<!-- Tailwind UI Sandbox - ${concept} -->\n<div class="flex flex-col items-center justify-center p-6 bg-zinc-950 rounded-xl">\n  <h2 class="text-xl font-bold text-white">\n    ${concept}\n  </h2>\n</div>`;
       hints = [
         "Hover rules prefix as hover:modifier.",
@@ -633,16 +794,14 @@ export function generateLevel(gameId: string, level: number): LevelData {
       ];
       testCases = [
         {
-          name: "Applies Tailwind grid/flex classes",
-          expected: true,
-          customCheck: `(code) => code.includes("class=") && (code.includes("flex") || code.includes("grid"))`
+          description: "Applies layout classes",
+          testRegex: "flex|grid"
         }
       ];
       break;
 
     case "cybersecurity":
       checkType = "security";
-      instructions = `Conduct security audit tasks for Net Defender - ${concept}.\n\nTask: Identify vulnerabilities or write payload hashes satisfying target gates.\n\nInput: Enter exploitation queries, decode hash payloads, or solve authentication bypass parameters.`;
       starterCode = `# Enter security key, payload string, or hash decode below\npayload = ""\n`;
       hints = [
         "SQL bypasses often use OR operations.",
@@ -651,43 +810,27 @@ export function generateLevel(gameId: string, level: number): LevelData {
       ];
       testCases = [
         {
-          name: "Inputs a non-empty payload key",
-          expected: true,
-          customCheck: `(code) => code.includes("payload = ") && code.split("payload =")[1].trim().length > 2`
+          description: "Inputs a non-empty payload key",
+          testRegex: "payload\\s*=\\s*['\"][^'\"]+['\"]"
         }
       ];
       break;
 
     default:
-      instructions = `Review code conventions for ${concept}.`;
       starterCode = `// Code goes here`;
       hints = ["Write clean code."];
-      testCases = [{ name: "Valid structure", expected: true, customCheck: `() => true` }];
+      testCases = [{ description: "Valid structure", testRegex: ".+" }];
   }
-
-  // Inject additional progressive descriptions for tiers
-  let tierDesc = "";
-  if (tier === "Apprentice") {
-    tierDesc = "🔰 APPRENTICE LEVEL: Establish basic syntax capabilities and core foundations.";
-  } else if (tier === "Mage") {
-    tierDesc = "🔮 MAGE LEVEL: Implement functional workflows, basic logic, and clean returns.";
-  } else if (tier === "Knight") {
-    tierDesc = "⚔️ KNIGHT LEVEL: Manipulate data arrays, async workflows, and structural layouts.";
-  } else if (tier === "Warlord") {
-    tierDesc = "👑 WARLORD LEVEL: Orchestrate state managers, endpoint security, and APIs.";
-  } else {
-    tierDesc = "🌌 GRANDMASTER LEVEL: Optimize rendering performance, profiling, and build systems.";
-  }
-
-  instructions = `${tierDesc}\n\n${instructions}`;
 
   return {
     id,
     level,
+    levelId: level,
     tier,
     title,
-    concept,
-    instructions,
+    conceptText,
+    codeExample,
+    missionText,
     starterCode,
     hints,
     validation: {
