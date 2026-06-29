@@ -23,6 +23,10 @@ export default function ExecutiveTemplate({ data }: { data: ParsedResume }) {
             <h2 className="text-[9px] font-bold text-white/40 uppercase tracking-widest border-b border-white/10 pb-1">Contact</h2>
             {basics.email && <p className="text-[10px] text-white/80">{basics.email}</p>}
             {basics.phone && <p className="text-[10px] text-white/80">{basics.phone}</p>}
+            {basics.location && <p className="text-[10px] text-white/80">{basics.location}</p>}
+            {basics.github && <p className="text-[10px] text-white/80 break-all">Github: {basics.github}</p>}
+            {basics.linkedin && <p className="text-[10px] text-white/80 break-all">LinkedIn: {basics.linkedin}</p>}
+            {basics.website && <p className="text-[10px] text-white/80 break-all">Website: {basics.website}</p>}
             {socialLinks.map((link, idx) => (
               <p key={idx} className="text-[10px] text-white/80 break-all">{link.platform}: {link.url}</p>
             ))}

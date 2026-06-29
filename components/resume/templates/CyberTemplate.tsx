@@ -13,6 +13,10 @@ export default function CyberTemplate({ data }: { data: ParsedResume }) {
           <div className="flex flex-wrap justify-end gap-x-3 gap-y-0.5 text-[10px] text-slate-600 font-mono">
             {basics.email && <span>{basics.email}</span>}
             {basics.phone && <span>{basics.phone}</span>}
+            {basics.location && <span>{basics.location}</span>}
+            {basics.github && <span className="break-all">Github: {basics.github}</span>}
+            {basics.linkedin && <span className="break-all">LinkedIn: {basics.linkedin}</span>}
+            {basics.website && <span className="break-all">Website: {basics.website}</span>}
             {socialLinks.map((link, idx) => (
               <span key={idx}>{link.platform}: {link.url}</span>
             ))}

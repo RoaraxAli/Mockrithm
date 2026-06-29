@@ -60,6 +60,10 @@ export default function TechTemplate({ data, templateId }: { data: ParsedResume;
         <div className="flex flex-wrap gap-x-4 gap-y-1 text-zinc-500 mt-2 text-[9px]">
           {basics.email && <span>email: {basics.email}</span>}
           {basics.phone && <span>phone: {basics.phone}</span>}
+          {basics.location && <span>location: {basics.location}</span>}
+          {basics.github && <span className="break-all">github: {basics.github}</span>}
+          {basics.linkedin && <span className="break-all">linkedin: {basics.linkedin}</span>}
+          {basics.website && <span className="break-all">website: {basics.website}</span>}
           {socialLinks.map((link, idx) => (
             <span key={idx} className={`underline ${linkColor}`} style={primaryColor ? { color: primaryColor } : {}}>
               {link.platform.toLowerCase()}: {link.url}

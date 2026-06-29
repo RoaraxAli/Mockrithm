@@ -97,6 +97,10 @@ export default function MinimalTemplate({ data, templateId }: { data: ParsedResu
         <div className="flex flex-wrap justify-center gap-x-4 gap-y-1 text-xs text-slate-500 mt-2 font-mono">
           {basics.email && <span>{basics.email}</span>}
           {basics.phone && <span>{basics.phone}</span>}
+          {basics.location && <span>{basics.location}</span>}
+          {basics.github && <span className="break-all">Github: {basics.github}</span>}
+          {basics.linkedin && <span className="break-all">LinkedIn: {basics.linkedin}</span>}
+          {basics.website && <span className="break-all">Website: {basics.website}</span>}
           {socialLinks.map((link, idx) => (
             <span key={idx}>{link.platform}: {link.url}</span>
           ))}

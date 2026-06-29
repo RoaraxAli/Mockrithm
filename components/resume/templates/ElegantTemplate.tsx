@@ -18,6 +18,10 @@ export default function ElegantTemplate({ data }: { data: ParsedResume }) {
           <div className="flex flex-col gap-1 text-right text-[10px] text-stone-600 font-sans">
             {basics.email && <div>{basics.email}</div>}
             {basics.phone && <div>{basics.phone}</div>}
+            {basics.location && <div>{basics.location}</div>}
+            {basics.github && <div className="break-all">Github: {basics.github}</div>}
+            {basics.linkedin && <div className="break-all">LinkedIn: {basics.linkedin}</div>}
+            {basics.website && <div className="break-all">Website: {basics.website}</div>}
             {socialLinks.map((link, idx) => (
               <div key={idx} className="underline text-stone-700">{link.platform}: {link.url}</div>
             ))}

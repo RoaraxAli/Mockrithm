@@ -57,6 +57,10 @@ export default function CreativeTemplate({ data, templateId }: { data: ParsedRes
         <div className="flex flex-wrap gap-x-4 gap-y-1 text-[10px] font-mono mt-2 opacity-90">
           {basics.email && <span>Email: {basics.email}</span>}
           {basics.phone && <span>Phone: {basics.phone}</span>}
+          {basics.location && <span>Location: {basics.location}</span>}
+          {basics.github && <span className="break-all">Github: {basics.github}</span>}
+          {basics.linkedin && <span className="break-all">LinkedIn: {basics.linkedin}</span>}
+          {basics.website && <span className="break-all">Website: {basics.website}</span>}
           {socialLinks.map((link, idx) => (
             <span key={idx}>{link.platform}: {link.url}</span>
           ))}
