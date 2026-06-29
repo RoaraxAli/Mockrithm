@@ -6,7 +6,7 @@ import { motion } from "framer-motion";
 import { createResumeFromTemplate } from "@/lib/actions/resume.action";
 import { Layout, Check, Sparkles, Loader2, ArrowRight, User, Briefcase, Calendar } from "lucide-react";
 import { toast } from "sonner";
-import { getTemplateComponent } from "./templates";
+import { getTemplateComponent, TEMPLATE_MAPPING } from "./templates";
 import { ParsedResume } from "@/types/resume";
 
 interface Props {
@@ -267,92 +267,317 @@ const SAMPLE_PROFILES: Record<string, ParsedResume> = {
 };
 
 const TEMPLATES = [
+  // 1. Education
   {
-    id: "minimal",
-    name: "Minimalist",
-    color: "from-white/10 to-white/5",
-    tags: ["ATS Friendly", "Clean", "Universal"],
-    description: "Clean, distraction-free layout highlighting experience and skills.",
-    audience: "Best for tech professionals and traditional industries."
+    id: "elementary-teacher",
+    name: "Elementary School Teacher",
+    category: "Education",
+    tags: ["Compact", "One-Page"],
+    description: "Highly structured layout ideal for primary school teachers."
   },
   {
-    id: "corporate",
-    name: "Classic Corporate",
-    color: "from-white/10 to-white/5",
-    tags: ["Professional", "Structured", "Traditional"],
-    description: "Structured, formal style with traditional layout rules.",
-    audience: "Best for banking, legal, and executive applications."
+    id: "high-school-teacher",
+    name: "High School Teacher",
+    category: "Education",
+    tags: ["Minimalist", "ATS Friendly"],
+    description: "Clean layout prioritizing subject specialization and classroom results."
   },
   {
-    id: "cyber",
-    name: "Tech & Cyberpunk",
-    color: "from-white/10 to-white/5",
-    tags: ["Tech", "Modern", "Creative"],
-    description: "High-contrast modern look with subtle digital grid highlights.",
-    audience: "Best for creative tech roles and startup environments."
+    id: "college-professor",
+    name: "College Professor",
+    category: "Education",
+    tags: ["Academic", "Detailed"],
+    description: "Research-heavy layout optimized for publications and lectures."
   },
   {
-    id: "modern",
-    name: "Modern Sidebar",
-    color: "from-white/10 to-white/5",
-    tags: ["Two-Column", "Designer", "Sleek"],
-    description: "Two-column design with a dark left sidebar for credentials.",
-    audience: "Great for designers, marketers, and developers."
+    id: "special-education",
+    name: "Special Education Teacher",
+    category: "Education",
+    tags: ["Modern", "Spacious"],
+    description: "Two-column design showing special needs certifications and highlights."
+  },
+
+  // 2. Government
+  {
+    id: "public-policy",
+    name: "Public Policy Analyst",
+    category: "Government",
+    tags: ["Corporate", "Structured"],
+    description: "Formal corporate grid layout emphasizing policy drafts and statistics."
   },
   {
-    id: "creative",
-    name: "Vibrant Creative",
-    color: "from-white/10 to-white/5",
-    tags: ["Artistic", "Bold", "Impactful"],
-    description: "Dynamic top color banner with offset multi-column highlights.",
-    audience: "Best for copywriters, artists, and creators."
+    id: "city-planner",
+    name: "Urban City Planner",
+    category: "Government",
+    tags: ["Minimalist", "Clean"],
+    description: "Clear layout showing spatial planning experience and public works."
   },
   {
-    id: "executive",
-    name: "Executive Leader",
-    color: "from-white/10 to-white/5",
-    tags: ["Executive", "Formal", "Leadership"],
-    description: "Serif-based elegant style designed for leadership profiles.",
-    audience: "Best for directors, VPs, and senior executives."
+    id: "environmental-officer",
+    name: "Environmental Officer",
+    category: "Government",
+    tags: ["Executive", "Formal"],
+    description: "Structured design focused on regulatory compliance and field operations."
   },
   {
-    id: "academic",
-    name: "Academic CV",
-    color: "from-white/10 to-white/5",
-    tags: ["Academic", "Extended", "Detailed"],
-    description: "Detail-heavy layout optimized for lists and publications.",
-    audience: "Best for researchers, educators, and PhD candidates."
+    id: "federal-admin",
+    name: "Federal Program Admin",
+    category: "Government",
+    tags: ["Academic", "Detailed"],
+    description: "Comprehensive template designed for federal job applications."
+  },
+
+  // 3. Legal
+  {
+    id: "corporate-counsel",
+    name: "Corporate Legal Counsel",
+    category: "Legal",
+    tags: ["Elegant", "Serif"],
+    description: "Classy warm layout showing transaction highlights and advisory."
   },
   {
-    id: "elegant",
-    name: "Elegant Serif",
-    color: "from-white/10 to-white/5",
-    tags: ["Warm", "Creative", "Sophisticated"],
-    description: "Classy warm layout with beautiful font borders.",
-    audience: "Great for luxury brands, consulting, and finance."
+    id: "litigation-attorney",
+    name: "Litigation Attorney",
+    category: "Legal",
+    tags: ["Corporate", "Traditional"],
+    description: "Structured, formal style with traditional layout rules for courts."
   },
   {
-    id: "tech",
-    name: "Developer Tech",
-    color: "from-white/10 to-white/5",
-    tags: ["Developer", "Markdown", "Compact"],
-    description: "Monospaced developer code layout with bold tech tags.",
-    audience: "Designed specifically for programmers and devops engineers."
+    id: "compliance-specialist",
+    name: "Compliance Specialist",
+    category: "Legal",
+    tags: ["Minimalist", "Clean"],
+    description: "Clean, distraction-free layout highlighting regulatory guidelines."
   },
   {
-    id: "compact",
-    name: "Compact Grid",
-    color: "from-white/10 to-white/5",
-    tags: ["High Density", "One-Page", "Structured"],
-    description: "Dense double-column layout designed to fit maximum details in 1 page.",
-    audience: "Best for professionals with extensive project portfolios."
+    id: "legal-assistant",
+    name: "Legal Assistant / Paralegal",
+    category: "Legal",
+    tags: ["Compact", "One-Page"],
+    description: "Dense double-column layout designed to fit extensive support details."
+  },
+
+  // 4. Technology
+  {
+    id: "full-stack-dev",
+    name: "Full-Stack Developer",
+    category: "Technology",
+    tags: ["Tech", "Code"],
+    description: "Monospaced developer code layout with bold tech tags."
+  },
+  {
+    id: "devops-engineer",
+    name: "DevOps Engineer",
+    category: "Technology",
+    tags: ["Tech", "Cloud"],
+    description: "Kubernetes and infrastructure-themed clean layout."
+  },
+  {
+    id: "ui-ux-designer",
+    name: "UI/UX Designer",
+    category: "Technology",
+    tags: ["Modern", "Sleek"],
+    description: "Two-column design showing design systems and UX research."
+  },
+  {
+    id: "data-scientist",
+    name: "Data Scientist",
+    category: "Technology",
+    tags: ["Minimalist", "ATS Friendly"],
+    description: "Clean layout prioritizing quantitative models and data projects."
+  },
+
+  // 5. Creative
+  {
+    id: "art-director",
+    name: "Creative Art Director",
+    category: "Creative",
+    tags: ["Creative", "Artistic"],
+    description: "Dynamic top color banner with offset multi-column highlights."
+  },
+  {
+    id: "copywriter",
+    name: "Professional Copywriter",
+    category: "Creative",
+    tags: ["Creative", "Minimalist"],
+    description: "Clean, storytelling layout focusing on copy impact and client list."
+  },
+  {
+    id: "social-media",
+    name: "Social Media Manager",
+    category: "Creative",
+    tags: ["Creative", "Modern"],
+    description: "Bold layout emphasizing audience growth and campaign stats."
+  },
+  {
+    id: "content-producer",
+    name: "Digital Content Producer",
+    category: "Creative",
+    tags: ["Modern", "Spacious"],
+    description: "Two-column template showing media production skills and links."
+  },
+
+  // 6. Executive
+  {
+    id: "ops-director",
+    name: "Operations Director",
+    category: "Executive",
+    tags: ["Executive", "Leadership"],
+    description: "Serif-based elegant style designed for leadership profiles."
+  },
+  {
+    id: "vp-product",
+    name: "VP of Product Management",
+    category: "Executive",
+    tags: ["Executive", "Modern"],
+    description: "Clean, high-impact layout for product roadmaps and releases."
+  },
+  {
+    id: "chief-staff",
+    name: "Chief of Staff",
+    category: "Executive",
+    tags: ["Elegant", "Formal"],
+    description: "Classy warm layout showing cross-functional strategy."
+  },
+  {
+    id: "managing-director",
+    name: "Managing Director",
+    category: "Executive",
+    tags: ["Executive", "Corporate"],
+    description: "Traditional executive design highlighting P&L management."
+  },
+
+  // 7. Healthcare
+  {
+    id: "registered-nurse",
+    name: "Registered Nurse",
+    category: "Healthcare",
+    tags: ["Minimalist", "ATS Friendly"],
+    description: "Distraction-free layout highlighting clinical skills and license details."
+  },
+  {
+    id: "clinical-coordinator",
+    name: "Clinical Trial Coordinator",
+    category: "Healthcare",
+    tags: ["Academic", "Detailed"],
+    description: "Detail-heavy layout optimized for trials and research protocols."
+  },
+  {
+    id: "physical-therapist",
+    name: "Physical Therapist",
+    category: "Healthcare",
+    tags: ["Corporate", "Structured"],
+    description: "Traditional structured style focused on patient rehab and care."
+  },
+  {
+    id: "health-admin",
+    name: "Healthcare Administrator",
+    category: "Healthcare",
+    tags: ["Compact", "One-Page"],
+    description: "High density layout to fit operational compliance in one page."
+  },
+
+  // 8. Finance
+  {
+    id: "banking-associate",
+    name: "Investment Banking Associate",
+    category: "Finance",
+    tags: ["Elegant", "Serif"],
+    description: "Elegant serif design emphasizing M&A deals and transactions."
+  },
+  {
+    id: "wealth-consultant",
+    name: "Wealth Advisor / Consultant",
+    category: "Finance",
+    tags: ["Elegant", "Corporate"],
+    description: "Sophisticated styling focusing on wealth strategy and assets."
+  },
+  {
+    id: "management-consultant",
+    name: "Management Consultant",
+    category: "Finance",
+    tags: ["Corporate", "Structured"],
+    description: "Structured corporate design outlining advisory casework."
+  },
+  {
+    id: "tax-associate",
+    name: "Senior Tax Associate",
+    category: "Finance",
+    tags: ["Minimalist", "ATS Friendly"],
+    description: "Clean layout prioritizing tax accounting and auditing qualifications."
+  },
+
+  // 9. Sales
+  {
+    id: "account-executive",
+    name: "Enterprise Account Executive",
+    category: "Sales",
+    tags: ["Modern", "Sleek"],
+    description: "Modern two-column design focusing on quota attainment and sales pipeline."
+  },
+  {
+    id: "brand-manager",
+    name: "Global Brand Manager",
+    category: "Sales",
+    tags: ["Creative", "Impactful"],
+    description: "Vibrant accents focusing on campaign launches and market shares."
+  },
+  {
+    id: "marketing-director",
+    name: "Director of Marketing",
+    category: "Sales",
+    tags: ["Executive", "Formal"],
+    description: "Premium leadership layout focusing on marketing ROI and growth."
+  },
+  {
+    id: "sales-rep",
+    name: "Medical Sales Representative",
+    category: "Sales",
+    tags: ["Compact", "Structured"],
+    description: "Dense single page layout outlining territory numbers and products."
+  },
+
+  // 10. Hospitality
+  {
+    id: "hotel-manager",
+    name: "Hotel Operations Manager",
+    category: "Hospitality",
+    tags: ["Corporate", "Structured"],
+    description: "Traditional structured style highlighting hospitality standards."
+  },
+  {
+    id: "customer-success",
+    name: "Customer Success Lead",
+    category: "Hospitality",
+    tags: ["Minimalist", "ATS Friendly"],
+    description: "Clean, distraction-free layout emphasizing client retention."
+  },
+  {
+    id: "restaurant-manager",
+    name: "Restaurant General Manager",
+    category: "Hospitality",
+    tags: ["Compact", "One-Page"],
+    description: "Compact template focusing on team scheduling and food safety."
+  },
+  {
+    id: "event-coordinator",
+    name: "Lead Event Coordinator",
+    category: "Hospitality",
+    tags: ["Modern", "Sleek"],
+    description: "Elegant layout outlining vendor contacts and logistics planning."
   }
+];
+
+const CATEGORIES = [
+  "All", "Education", "Government", "Legal", "Technology",
+  "Creative", "Executive", "Healthcare", "Finance", "Sales", "Hospitality"
 ];
 
 export default function TemplateSelectorClient({ userId }: Props) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const fromOnboarding = searchParams.get("from") === "onboarding";
+  const [activeCategory, setActiveCategory] = useState<string>("All");
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -380,80 +605,107 @@ export default function TemplateSelectorClient({ userId }: Props) {
     }
   };
 
+  const filteredTemplates = activeCategory === "All"
+    ? TEMPLATES
+    : TEMPLATES.filter((t) => t.category === activeCategory);
+
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8 w-full">
-      {TEMPLATES.map((tpl) => (
-        <motion.div
-          key={tpl.id}
-          whileHover={{ y: -6 }}
-          onClick={() => !isSubmitting && handleSelect(tpl.id)}
-          className={`group cursor-pointer relative rounded-2xl bg-zinc-900/30 border border-zinc-850 p-4 flex flex-col justify-between hover:border-white/20 hover:shadow-[0_20px_50px_rgba(0,0,0,0.5)] transition-all duration-300 ${
-            isSubmitting && selectedId === tpl.id ? "border-white shadow-lg" : ""
-          }`}
-        >
-          <div>
-            {/* High fidelity A4 preview of the actual template (resume.io style!) */}
-            <div className="w-full aspect-[1/1.414] overflow-hidden rounded-xl bg-white border border-zinc-200/50 relative shadow-inner mb-4 transition-all duration-500 group-hover:shadow-[0_8px_30px_rgb(0,0,0,0.12)] flex justify-center items-start">
+    <div className="flex flex-col gap-8 w-full">
+      {/* Category selector row */}
+      <div className="flex items-center gap-2 overflow-x-auto pb-4 scrollbar-thin scrollbar-thumb-zinc-800 scrollbar-track-transparent">
+        {CATEGORIES.map((cat) => (
+          <button
+            key={cat}
+            onClick={() => setActiveCategory(cat)}
+            className={`px-4 py-2 rounded-full font-mono text-[10px] uppercase tracking-wider font-bold transition-all border shrink-0 ${
+              activeCategory === cat
+                ? "bg-white text-black border-white shadow-md"
+                : "bg-zinc-950 text-zinc-400 border-zinc-850 hover:border-zinc-700 hover:text-white"
+            }`}
+          >
+            {cat}
+          </button>
+        ))}
+      </div>
+
+      {/* Grid displaying filtered templates */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8 w-full">
+        {filteredTemplates.map((tpl) => (
+          <motion.div
+            key={tpl.id}
+            whileHover={{ y: -6 }}
+            onClick={() => !isSubmitting && handleSelect(tpl.id)}
+            className={`group cursor-pointer relative rounded-2xl bg-zinc-900/30 border border-zinc-850 p-4 flex flex-col justify-between hover:border-white/20 hover:shadow-[0_20px_50px_rgba(0,0,0,0.5)] transition-all duration-300 ${
+              isSubmitting && selectedId === tpl.id ? "border-white shadow-lg" : ""
+            }`}
+          >
+            <div>
+              {/* High fidelity flat A4 preview of the actual template (resume.io style!) */}
               <div 
-                className="absolute top-2 left-1/2 -translate-x-1/2 pointer-events-none select-none shadow-2xl rounded text-slate-800 origin-top"
-                style={{ 
-                  width: "800px", 
-                  transform: "scale(0.32)", 
-                  height: "1131px"
-                }}
+                className="w-full aspect-[1/1.414] overflow-hidden bg-white border border-zinc-200 relative shadow-inner mb-4 transition-all duration-500 group-hover:shadow-[0_8px_30px_rgba(0,0,0,0.12)] flex justify-center items-start"
+                style={{ containerType: "inline-size" }}
               >
-                {(() => {
-                  const TemplateComponent = getTemplateComponent(tpl.id);
-                  const profileData = SAMPLE_PROFILES[tpl.id] || SAMPLE_PROFILES.minimal;
-                  return <TemplateComponent data={profileData} />;
-                })()}
-              </div>
-              {/* Subtle hover overlay to darken/soften the document */}
-              <div className="absolute inset-0 bg-black/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none" />
-            </div>
-
-            {/* Template Info */}
-            <div className="flex flex-col gap-1.5">
-              <div className="flex items-center justify-between">
-                <h3 className="text-xs font-bold text-white group-hover:text-cyan-400 transition-colors font-mono uppercase tracking-wider">
-                  {tpl.name}
-                </h3>
-                <div className="flex gap-1">
-                  {tpl.tags.slice(0, 1).map((tag) => (
-                    <span key={tag} className="text-[8px] font-mono font-bold px-1.5 py-0.5 rounded bg-zinc-950 text-zinc-400 border border-zinc-800 uppercase">
-                      {tag}
-                    </span>
-                  ))}
+                <div 
+                  className="absolute top-0 left-0 pointer-events-none select-none text-slate-800 origin-top-left"
+                  style={{ 
+                    width: "800px", 
+                    height: "1131px",
+                    transform: "scale(calc(100cqw / 800))",
+                  }}
+                >
+                  {(() => {
+                    const TemplateComponent = getTemplateComponent(tpl.id);
+                    const profileData = SAMPLE_PROFILES[tpl.id] || SAMPLE_PROFILES[TEMPLATE_MAPPING[tpl.id]] || SAMPLE_PROFILES.minimal;
+                    return <TemplateComponent data={profileData} />;
+                  })()}
                 </div>
+                {/* Subtle hover overlay to darken/soften the document */}
+                <div className="absolute inset-0 bg-black/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none" />
               </div>
-              <p className="text-[10px] text-zinc-400 leading-relaxed line-clamp-2">
-                {tpl.description}
-              </p>
-            </div>
-          </div>
 
-          <div className="mt-4">
-            <button
-              disabled={isSubmitting}
-              className={`w-full py-2.5 rounded-lg border font-mono font-bold text-[10px] uppercase tracking-wider transition-all duration-300 flex items-center justify-center gap-1.5 ${
-                isSubmitting && selectedId === tpl.id
-                  ? "bg-zinc-900 border-zinc-800 text-zinc-500 cursor-not-allowed"
-                  : "bg-white/5 border-white/10 group-hover:border-white group-hover:bg-white group-hover:text-black text-white"
-              }`}
-            >
-              {isSubmitting && selectedId === tpl.id ? (
-                <>
-                  <Loader2 className="size-3 animate-spin" /> Preparing...
-                </>
-              ) : (
-                <>
-                  <Sparkles className="size-3" /> Use Template
-                </>
-              )}
-            </button>
-          </div>
-        </motion.div>
-      ))}
+              {/* Template Info */}
+              <div className="flex flex-col gap-1.5">
+                <div className="flex items-center justify-between">
+                  <h3 className="text-xs font-bold text-white group-hover:text-cyan-400 transition-colors font-mono uppercase tracking-wider">
+                    {tpl.name}
+                  </h3>
+                  <div className="flex gap-1">
+                    {tpl.tags.slice(0, 1).map((tag) => (
+                      <span key={tag} className="text-[8px] font-mono font-bold px-1.5 py-0.5 rounded bg-zinc-950 text-zinc-400 border border-zinc-800 uppercase">
+                        {tag}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+                <p className="text-[10px] text-zinc-400 leading-relaxed line-clamp-2">
+                  {tpl.description}
+                </p>
+              </div>
+            </div>
+
+            <div className="mt-4">
+              <button
+                disabled={isSubmitting}
+                className={`w-full py-2.5 rounded-lg border font-mono font-bold text-[10px] uppercase tracking-wider transition-all duration-300 flex items-center justify-center gap-1.5 ${
+                  isSubmitting && selectedId === tpl.id
+                    ? "bg-zinc-900 border-zinc-800 text-zinc-500 cursor-not-allowed"
+                    : "bg-white/5 border-white/10 group-hover:border-white group-hover:bg-white group-hover:text-black text-white"
+                }`}
+              >
+                {isSubmitting && selectedId === tpl.id ? (
+                  <>
+                    <Loader2 className="size-3 animate-spin" /> Preparing...
+                  </>
+                ) : (
+                  <>
+                    <Sparkles className="size-3" /> Use Template
+                  </>
+                )}
+              </button>
+            </div>
+          </motion.div>
+        ))}
+      </div>
     </div>
   );
 }

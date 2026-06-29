@@ -1,6 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
+import { TEMPLATE_MAPPING } from "./templates";
 
 // Mapping of template IDs to gradient classes and font families
 const gradientMap: Record<string, string> = {
@@ -34,8 +35,9 @@ interface AnimatedResumeCardProps {
 }
 
 export default function AnimatedResumeCard({ templateId }: AnimatedResumeCardProps) {
-  const gradient = gradientMap[templateId] ?? "from-gray-800 to-gray-700";
-  const fontClass = fontMap[templateId] ?? "font-sans";
+  const baseId = TEMPLATE_MAPPING[templateId.toLowerCase()] || templateId.toLowerCase();
+  const gradient = gradientMap[baseId] ?? "from-gray-800 to-gray-700";
+  const fontClass = fontMap[baseId] ?? "font-sans";
 
   return (
     <motion.div
