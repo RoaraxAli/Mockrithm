@@ -5,8 +5,10 @@ import { useResumeStore } from "@/lib/store/resumeStore";
 import { motion, AnimatePresence } from "framer-motion";
 import { 
   User, Briefcase, GraduationCap, Code, 
-  Layers, Award, Globe, Plus, Trash2, ChevronDown, ChevronUp 
+  Layers, Award, Globe, Plus, Trash2, ChevronDown, ChevronUp,
+  Sparkles, Loader2, CheckCircle2, AlertCircle
 } from "lucide-react";
+import { toast } from "sonner";
 
 type SectionType = "basics" | "work" | "education" | "skills" | "projects" | "certifications" | "socialLinks";
 
@@ -20,13 +22,14 @@ const ACCORDION_CONTAINER_CLASS = (isActive: boolean) =>
 
 const ACCORDION_HEADER_CLASS = "w-full flex items-center justify-between p-4.5 font-mono font-bold text-xs text-white uppercase tracking-wider hover:bg-slate-900/40 transition-all border-b border-slate-850/40 cursor-pointer";
 
-const INPUT_CLASS = "bg-slate-950/70 border border-slate-850 text-sm text-slate-100 rounded-xl p-3 outline-none focus:border-cyan-500/50 focus:ring-2 focus:ring-cyan-500/10 font-sans transition-all duration-200 placeholder:text-slate-600 w-full";
+const INPUT_CLASS = "bg-slate-950/70 border border-slate-850 text-sm text-slate-100 rounded-xl p-3 outline-none focus:border-cyan-500/50 focus:ring-2 focus:ring-cyan-500/10 font-sans transition-all duration-200 placeholder:text-slate-650 w-full";
 
 const SUB_INPUT_CLASS = "bg-slate-900/60 border border-slate-800 text-xs text-slate-100 rounded-xl p-2.5 outline-none focus:border-cyan-500/50 focus:ring-2 focus:ring-cyan-500/10 font-sans transition-all duration-200 placeholder:text-slate-600 w-full";
 
 export default function ResumeFormEditor() {
   const { parsedData, updateParsedData } = useResumeStore();
   const [activeSection, setActiveSection] = useState<SectionType>("basics");
+  const [isGeneratingSummary, setIsGeneratingSummary] = useState(false);
 
   const toggleSection = (section: SectionType) => {
     setActiveSection(activeSection === section ? "basics" : section);
@@ -40,6 +43,37 @@ export default function ResumeFormEditor() {
         [field]: value
       }
     });
+  };
+
+  // AI Summary generation
+  const handleImproveSummary = async () => {
+    try {
+      setIsGeneratingSummary(true);
+      toast.info("Generating professional summary...");
+      
+      const res = await fetch("/api/resume/improve-summary", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          label: parsedData.basics.label,
+          skills: parsedData.skills,
+          currentSummary: parsedData.basics.summary
+        })
+      });
+
+      if (!res.ok) throw new Error("Failed to generate summary");
+      const data = await res.json();
+      
+      if (data.summary) {
+        handleBasicsChange("summary", data.summary);
+        toast.success("AI summary generated successfully!");
+      }
+    } catch (err: any) {
+      console.error(err);
+      toast.error(err.message || "Failed to generate summary.");
+    } finally {
+      setIsGeneratingSummary(false);
+    }
   };
 
   // Work Handlers
@@ -185,9 +219,150 @@ export default function ResumeFormEditor() {
     });
   };
 
+  // Calculate completeness & items
+  let score = 0;
+  const checklist: { label: string; actionText: string; weight: number; isDone: boolean; onAction?: () => void }[] = [];
+
+  // Basics Name
+  if (parsedData.basics?.name) score += 15;
+  checklist.push({
+    label: "Full Name",
+    actionText: "+15 Add Full Name",
+    weight: 15,
+    isDone: !!parsedData.basics?.name,
+    onAction: () => setActiveSection("basics")
+  });
+
+  // Basics Job Title
+  if (parsedData.basics?.label) score += 15;
+  checklist.push({
+    label: "Job Title",
+    actionText: "+15 Add Job Title",
+    weight: 15,
+    isDone: !!parsedData.basics?.label,
+    onAction: () => setActiveSection("basics")
+  });
+
+  // Basics Email
+  if (parsedData.basics?.email) score += 15;
+  checklist.push({
+    label: "Email Address",
+    actionText: "+15 Add Email Address",
+    weight: 15,
+    isDone: !!parsedData.basics?.email,
+    onAction: () => setActiveSection("basics")
+  });
+
+  // Basics Phone
+  if (parsedData.basics?.phone) score += 10;
+  checklist.push({
+    label: "Phone Number",
+    actionText: "+10 Add Phone Number",
+    weight: 10,
+    isDone: !!parsedData.basics?.phone,
+    onAction: () => setActiveSection("basics")
+  });
+
+  // Basics Summary
+  if (parsedData.basics?.summary) score += 15;
+  checklist.push({
+    label: "Profile Summary",
+    actionText: "Try AI profile summary",
+    weight: 15,
+    isDone: !!parsedData.basics?.summary,
+    onAction: () => {
+      setActiveSection("basics");
+      handleImproveSummary();
+    }
+  });
+
+  // Work Experience
+  if (parsedData.work && parsedData.work.length > 0) score += 15;
+  checklist.push({
+    label: "Work Experience",
+    actionText: "+15 Add Work Experience",
+    weight: 15,
+    isDone: !!(parsedData.work && parsedData.work.length > 0),
+    onAction: () => setActiveSection("work")
+  });
+
+  // Education
+  if (parsedData.education && parsedData.education.length > 0) score += 10;
+  checklist.push({
+    label: "Education",
+    actionText: "+10 Add Education",
+    weight: 10,
+    isDone: !!(parsedData.education && parsedData.education.length > 0),
+    onAction: () => setActiveSection("education")
+  });
+
+  // Skills
+  if (parsedData.skills && parsedData.skills.length > 0) score += 5;
+  checklist.push({
+    label: "Skills",
+    actionText: "+5 Add Skills",
+    weight: 5,
+    isDone: !!(parsedData.skills && parsedData.skills.length > 0),
+    onAction: () => setActiveSection("skills")
+  });
+
   return (
     <div className="flex flex-col p-6 gap-5 text-slate-200">
       
+      {/* COMPLETENESS WIDGET */}
+      <div className="border border-slate-800/80 rounded-2xl bg-slate-900/30 p-5 flex flex-col gap-4">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <span className="bg-emerald-500/10 border border-emerald-500/25 text-emerald-400 font-bold px-2 py-0.5 rounded text-xs font-mono">
+              {score}%
+            </span>
+            <span className="text-xs font-semibold text-slate-350 font-mono uppercase tracking-wider">
+              Resume Completeness
+            </span>
+          </div>
+          {score === 100 && (
+            <span className="text-[10px] text-emerald-400 font-bold font-mono uppercase tracking-widest flex items-center gap-1">
+              <CheckCircle2 className="size-3" /> Fully complete
+            </span>
+          )}
+        </div>
+
+        {/* Progress Bar */}
+        <div className="h-2 bg-slate-950 rounded-full overflow-hidden border border-slate-850/50">
+          <div 
+            className="h-full bg-emerald-500 rounded-full transition-all duration-500" 
+            style={{ width: `${score}%` }}
+          />
+        </div>
+
+        {/* Action Grid (checklist items that are not done) */}
+        {score < 100 && (
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 mt-2">
+            {checklist.filter(item => !item.isDone).map((item, idx) => (
+              <button
+                key={idx}
+                onClick={item.onAction}
+                disabled={item.label === "Profile Summary" && isGeneratingSummary}
+                className="p-2.5 rounded-xl border border-slate-800 bg-slate-950/40 text-[10px] font-mono font-bold uppercase tracking-wider text-slate-400 hover:text-white hover:border-slate-700 disabled:opacity-50 flex items-center justify-between group cursor-pointer transition-all"
+              >
+                <span className="flex items-center gap-1.5">
+                  {item.label === "Profile Summary" ? (
+                    isGeneratingSummary ? (
+                      <Loader2 className="size-3.5 text-cyan-400 animate-spin" />
+                    ) : (
+                      <Sparkles className="size-3.5 text-cyan-400 animate-pulse" />
+                    )
+                  ) : (
+                    <Plus className="size-3.5 text-slate-500 group-hover:text-white transition-colors" />
+                  )}
+                  {item.label === "Profile Summary" && isGeneratingSummary ? "Writing summary..." : item.actionText}
+                </span>
+              </button>
+            ))}
+          </div>
+        )}
+      </div>
+
       {/* SECTION: BASICS */}
       <div className={ACCORDION_CONTAINER_CLASS(activeSection === "basics")}>
         <button
@@ -257,7 +432,25 @@ export default function ResumeFormEditor() {
                 </div>
 
                 <div className="flex flex-col gap-1.5">
-                  <label className="text-[10px] font-mono text-slate-500 uppercase tracking-widest">Summary / Objective</label>
+                  <div className="flex justify-between items-center">
+                    <label className="text-[10px] font-mono text-slate-500 uppercase tracking-widest">Summary / Objective</label>
+                    <button
+                      type="button"
+                      onClick={handleImproveSummary}
+                      disabled={isGeneratingSummary}
+                      className="flex items-center gap-1.5 text-[10px] font-mono font-bold text-cyan-400 hover:text-cyan-300 disabled:opacity-50 transition-colors uppercase tracking-wider cursor-pointer"
+                    >
+                      {isGeneratingSummary ? (
+                        <>
+                          <Loader2 className="size-3 animate-spin text-cyan-400" /> Writing summary...
+                        </>
+                      ) : (
+                        <>
+                          <Sparkles className="size-3 text-cyan-400" /> Get help with writing
+                        </>
+                      )}
+                    </button>
+                  </div>
                   <textarea
                     value={parsedData.basics.summary || ""}
                     onChange={(e) => handleBasicsChange("summary", e.target.value)}
