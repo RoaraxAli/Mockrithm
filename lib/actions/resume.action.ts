@@ -96,20 +96,26 @@ export async function hasUploadedResume(userId: string): Promise<boolean> {
   }
 }
 
+import { SAMPLE_PROFILES } from "@/components/resume/sampleProfiles";
+
 export async function createResumeFromTemplate(
   userId: string,
   templateId: string,
   fileName: string = "Untitled Resume"
 ): Promise<{ success: boolean; resumeId?: string; error?: string }> {
   try {
-    const emptyResume: ParsedResume = {
+    const defaultProfile = SAMPLE_PROFILES[templateId] || {
       basics: { name: "", label: "", email: "", phone: "", summary: "" },
       work: [],
       education: [],
       skills: [],
       projects: [],
       certifications: [],
-      socialLinks: [],
+      socialLinks: []
+    };
+
+    const initialResumeData: ParsedResume = {
+      ...defaultProfile,
       templateId
     };
 
@@ -117,7 +123,7 @@ export async function createResumeFromTemplate(
       userId,
       fileName,
       rawText: "",
-      parsedData: emptyResume,
+      parsedData: initialResumeData,
       createdAt: new Date().toISOString(),
     };
 

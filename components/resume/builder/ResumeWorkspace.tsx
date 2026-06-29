@@ -10,7 +10,7 @@ import {
   X, Sparkles, CheckCircle2, XCircle, AlertCircle, ShieldAlert, Award, Play 
 } from "lucide-react";
 import { toast } from "sonner";
-import { updateResumeData, saveAtsAnalysis } from "@/lib/actions/resume.action";
+import { updateResumeData, saveAtsAnalysis, getUserResumes } from "@/lib/actions/resume.action";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 
@@ -38,6 +38,8 @@ export default function ResumeWorkspace({ initialResume }: Props) {
   const [isAtsOpen, setIsAtsOpen] = useState(false);
   const [jobDescription, setJobDescription] = useState("");
   const [isAnalyzing, setIsAnalyzing] = useState(false);
+  const [showImportDialog, setShowImportDialog] = useState(false);
+  const [userResumes, setUserResumes] = useState<ResumeDocument[]>([]);
   const isInitialMount = useRef(true);
 
   // Initialize Zustand state on mount
@@ -48,6 +50,21 @@ export default function ResumeWorkspace({ initialResume }: Props) {
       setAtsAnalysis(initialResume.atsAnalysis);
     }
   }, [initialResume]);
+
+  // Load user's other resumes on mount
+  useEffect(() => {
+    async function loadResumes() {
+      try {
+        const res = await getUserResumes(initialResume.userId);
+        setUserResumes(res.filter((r) => r.id !== initialResume.id));
+      } catch (err) {
+        console.error("Failed to load user resumes:", err);
+      }
+    }
+    if (initialResume.userId) {
+      loadResumes();
+    }
+  }, [initialResume.userId, initialResume.id]);
 
   // Debounced Autosave to Database
   useEffect(() => {
@@ -175,6 +192,14 @@ export default function ResumeWorkspace({ initialResume }: Props) {
               </>
             )}
           </div>
+
+          <button
+            onClick={() => setShowImportDialog(true)}
+            className="flex items-center gap-1.5 text-xs font-mono font-bold text-slate-350 hover:text-white uppercase tracking-wider bg-slate-900 border border-slate-800 px-3.5 py-1.5 rounded-full transition-all cursor-pointer"
+          >
+            <Sparkles className="size-3 text-cyan-400" />
+            Import Details
+          </button>
         </div>
 
         <div className="flex items-center gap-3">
@@ -224,8 +249,11 @@ export default function ResumeWorkspace({ initialResume }: Props) {
         </div>
 
         {/* Right Pane: Live Preview */}
-        <div className="w-1/2 overflow-y-auto bg-slate-900 relative custom-scrollbar flex justify-center p-8">
-          <LivePreviewRenderer />
+        <div className="w-1/2 overflow-y-auto bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-slate-900 via-zinc-950 to-black relative custom-scrollbar flex justify-center p-8 border-l border-slate-900/80">
+          <div className="absolute inset-0 bg-[linear-gradient(to_right,#0f172a_1px,transparent_1px),linear-gradient(to_bottom,#0f172a_1px,transparent_1px)] bg-[size:4rem_4rem] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_0%,#000_70%,transparent_100%)] opacity-30 pointer-events-none" />
+          <div className="relative z-10 w-full max-w-[800px] flex justify-center">
+            <LivePreviewRenderer />
+          </div>
         </div>
       </div>
 
@@ -395,6 +423,59 @@ export default function ResumeWorkspace({ initialResume }: Props) {
                 </div>
               )}
 
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Import Resume Modal */}
+      {showImportDialog && (
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div className="bg-slate-900 border border-slate-800 rounded-2xl w-full max-w-lg overflow-hidden shadow-2xl flex flex-col max-h-[80%] animate-scaleIn">
+            {/* Modal Header */}
+            <div className="flex justify-between items-center px-6 py-4 border-b border-slate-800">
+              <div>
+                <h3 className="text-sm font-bold text-white uppercase tracking-wider">Import details</h3>
+                <p className="text-[10px] text-slate-400 mt-0.5 font-mono">Select a resume to copy all personal details and section items.</p>
+              </div>
+              <button 
+                onClick={() => setShowImportDialog(false)}
+                className="text-slate-450 hover:text-white p-1.5 transition-colors cursor-pointer"
+              >
+                <X className="size-5" />
+              </button>
+            </div>
+
+            {/* Modal Content */}
+            <div className="p-6 overflow-y-auto flex flex-col gap-3 custom-scrollbar">
+              {userResumes.length === 0 ? (
+                <div className="text-center py-8 flex flex-col items-center justify-center gap-2">
+                  <AlertCircle className="size-8 text-slate-650" />
+                  <p className="text-xs text-slate-400 font-semibold font-mono uppercase">No other resumes found in your account.</p>
+                </div>
+              ) : (
+                userResumes.map((res) => (
+                  <button
+                    key={res.id}
+                    onClick={() => {
+                      setParsedData(res.parsedData);
+                      setShowImportDialog(false);
+                      toast.success(`Successfully imported data from "${res.fileName}"!`);
+                    }}
+                    className="w-full text-left p-4 rounded-xl border border-slate-800 bg-slate-950/40 hover:bg-slate-950 hover:border-slate-700 transition-all flex justify-between items-center group cursor-pointer"
+                  >
+                    <div>
+                      <span className="text-xs font-bold text-white block group-hover:text-cyan-400 transition-colors">
+                        {res.fileName || "Untitled Resume"}
+                      </span>
+                      <span className="text-[10px] text-slate-500 font-mono block mt-1">
+                        Template: {res.parsedData?.templateId || "minimal"} • Created: {new Date(res.createdAt).toLocaleDateString()}
+                      </span>
+                    </div>
+                    <Play className="size-3 text-slate-500 group-hover:text-cyan-400 transition-colors" />
+                  </button>
+                ))
+              )}
             </div>
           </div>
         </div>
