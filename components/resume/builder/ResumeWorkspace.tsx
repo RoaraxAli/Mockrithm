@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState, useRef, Component, ReactNode } from "react";
 import { ResumeDocument, AtsScoreResult } from "@/types/resume";
 import { useResumeStore } from "@/lib/store/resumeStore";
 import ResumeFormEditor from "./ResumeFormEditor";
@@ -21,7 +21,7 @@ interface Props {
   initialResume: ResumeDocument;
 }
 
-type TabType = "edit" | "customize" | "ats" | "tailor";
+type TabType = "edit" | "customize" | "ats";
 type CustomizeSubTab = "layout" | "color" | "typography";
 
 const ALL_TEMPLATES = [
@@ -36,6 +36,30 @@ const ALL_TEMPLATES = [
   { id: "cyber", name: "Cyberpunk", category: "Creative & Portfolio" },
   { id: "academic", name: "Academic", category: "Creative & Portfolio" }
 ];
+
+// Error boundary so a single failing template preview can't crash the entire page
+class PreviewErrorBoundary extends Component<{ children: ReactNode }, { hasError: boolean }> {
+  constructor(props: { children: ReactNode }) {
+    super(props);
+    this.state = { hasError: false };
+  }
+  static getDerivedStateFromError() {
+    return { hasError: true };
+  }
+  componentDidCatch(error: Error) {
+    console.error("Template preview failed to render:", error);
+  }
+  render() {
+    if (this.state.hasError) {
+      return (
+        <div className="w-full aspect-[1/1.414] flex items-center justify-center bg-slate-950 border border-slate-800 rounded-xl">
+          <span className="text-[9px] font-mono text-slate-600 uppercase">Preview unavailable</span>
+        </div>
+      );
+    }
+    return this.props.children;
+  }
+}
 
 function TemplatePreview({ templateId }: { templateId: string }) {
   const containerRef = useRef<HTMLDivElement>(null);
@@ -54,7 +78,7 @@ function TemplatePreview({ templateId }: { templateId: string }) {
   }, []);
 
   const TemplateComponent = getTemplateComponent(templateId);
-  const profileData = SAMPLE_PROFILES[templateId] || SAMPLE_PROFILES[TEMPLATE_MAPPING[templateId]] || SAMPLE_PROFILES.minimal;
+  const profileData = SAMPLE_PROFILES[templateId] || SAMPLE_PROFILES[TEMPLATE_MAPPING[templateId]] || SAMPLE_PROFILES["elementary-teacher"];
 
   return (
     <div 
@@ -472,7 +496,9 @@ export default function ResumeWorkspace({ initialResume }: Props) {
                         </span>
                       )}
                     </div>
-                    <TemplatePreview templateId={t.id} />
+                    <PreviewErrorBoundary>
+                      <TemplatePreview templateId={t.id} />
+                    </PreviewErrorBoundary>
                     <span className="text-[9px] font-mono text-slate-500 uppercase mt-0.5 px-1">
                       {t.category}
                     </span>
@@ -551,18 +577,19 @@ export default function ResumeWorkspace({ initialResume }: Props) {
     );
   };
 
-  // Tab: AI Review
+  // Tab: AI Review & Tailor (merged)
   const renderAtsReviewTab = () => {
+    const isBusy = isAnalyzing || isTailoring;
     return (
       <div className="flex flex-col p-6 gap-6 text-slate-200">
         
-        {/* Run Scan card */}
+        {/* Unified Scan + Tailor card */}
         <div className="flex flex-col gap-3 p-5 rounded-2xl bg-slate-900/30 border border-slate-800/80">
           <span className="text-[10px] font-mono tracking-widest text-white uppercase flex items-center gap-1.5 font-bold">
-            <Sparkles className="size-3.5" /> AI Scan Settings
+            <Sparkles className="size-3.5 animate-pulse" /> AI Review &amp; Tailoring Studio
           </span>
           <p className="text-xs text-slate-400 font-semibold leading-relaxed">
-            Provide the URL of your target job posting. Gemini will calculate your ATS match rating and suggest revisions.
+            Paste your target job posting URL. Run an AI checkup to calculate your ATS match rating and revisions, or have AI automatically tailor your resume to the requirements.
           </p>
           <input
             type="url"
@@ -571,21 +598,40 @@ export default function ResumeWorkspace({ initialResume }: Props) {
             placeholder="Paste LinkedIn, Indeed or company job posting URL..."
             className="bg-slate-950/70 text-slate-100 text-xs rounded-xl border border-slate-850 p-3.5 outline-none focus:border-white/30 focus:ring-2 focus:ring-white/5 font-sans transition-all placeholder:text-slate-650"
           />
-          <button
-            onClick={handleRunAtsAnalysis}
-            disabled={isAnalyzing || !jobUrl.trim()}
-            className="w-full py-3 rounded-xl bg-white hover:bg-gray-200 disabled:opacity-50 text-black font-mono font-bold text-xs uppercase tracking-wider flex items-center justify-center gap-2 transition-all shadow-md cursor-pointer"
-          >
-            {isAnalyzing ? (
-              <>
-                <Loader2 className="size-4 animate-spin" /> SCANNING DOCUMENT...
-              </>
-            ) : (
-              <>
-                <Play className="size-3.5 fill-current" /> RUN AI CHECKUP
-              </>
-            )}
-          </button>
+
+          {/* Action buttons */}
+          <div className="grid grid-cols-2 gap-2.5 mt-1">
+            <button
+              onClick={handleRunAtsAnalysis}
+              disabled={isBusy || !jobUrl.trim()}
+              className="py-3 rounded-xl bg-white hover:bg-gray-200 disabled:opacity-50 text-black font-mono font-bold text-[10px] uppercase tracking-wider flex items-center justify-center gap-1.5 transition-all shadow-md cursor-pointer"
+            >
+              {isAnalyzing ? (
+                <>
+                  <Loader2 className="size-3.5 animate-spin" /> SCANNING...
+                </>
+              ) : (
+                <>
+                  <Play className="size-3.5 fill-current" /> RUN AI CHECKUP
+                </>
+              )}
+            </button>
+            <button
+              onClick={handleTailorResume}
+              disabled={isBusy || !jobUrl.trim()}
+              className="py-3 rounded-xl bg-slate-800 hover:bg-slate-700 disabled:opacity-50 text-white font-mono font-bold text-[10px] uppercase tracking-wider flex items-center justify-center gap-1.5 transition-all shadow-md cursor-pointer"
+            >
+              {isTailoring ? (
+                <>
+                  <Loader2 className="size-3.5 animate-spin" /> TAILORING...
+                </>
+              ) : (
+                <>
+                  <Sparkles className="size-3.5" /> START AI TAILORING
+                </>
+              )}
+            </button>
+          </div>
         </div>
 
         {atsAnalysis ? (
@@ -654,49 +700,6 @@ export default function ResumeWorkspace({ initialResume }: Props) {
     );
   };
 
-  // Tab: Tailor
-  const renderTailorTab = () => {
-    return (
-      <div className="flex flex-col p-6 gap-6 text-slate-200">
-        <div className="flex flex-col gap-3 p-5 rounded-2xl bg-slate-900/30 border border-slate-800/80">
-          <span className="text-[10px] font-mono tracking-widest text-white uppercase flex items-center gap-1.5 font-bold">
-            <Sparkles className="size-3.5 animate-pulse" /> AI Job-Tailoring Studio
-          </span>
-          <p className="text-xs text-slate-400 font-semibold leading-relaxed">
-            AI will analyze the target job link, rewrite your summary, optimize your work descriptions in STAR format, and inject target keywords automatically.
-          </p>
-          
-          <div className="flex flex-col gap-1.5 mt-2">
-            <label className="text-[9px] font-mono text-slate-500 uppercase tracking-widest">Target Job URL</label>
-            <input
-              type="url"
-              value={jobUrl}
-              onChange={(e) => setJobUrl(e.target.value)}
-              placeholder="Paste LinkedIn, Indeed or company job posting URL..."
-              className="bg-slate-950/70 text-slate-100 text-xs rounded-xl border border-slate-850 p-3.5 outline-none focus:border-white/30 focus:ring-2 focus:ring-white/5 font-sans transition-all placeholder:text-slate-650"
-            />
-          </div>
-
-          <button
-            onClick={handleTailorResume}
-            disabled={isTailoring || !jobUrl.trim()}
-            className="w-full py-3.5 rounded-xl bg-white hover:bg-gray-200 disabled:opacity-50 text-black font-mono font-bold text-xs uppercase tracking-wider flex items-center justify-center gap-2 transition-all shadow-md cursor-pointer"
-          >
-            {isTailoring ? (
-              <>
-                <Loader2 className="size-4 animate-spin" /> TAILORING RESUME...
-              </>
-            ) : (
-              <>
-                <Sparkles className="size-4" /> START AI TAILORING
-              </>
-            )}
-          </button>
-        </div>
-      </div>
-    );
-  };
-
   return (
     <div className="flex flex-col h-screen w-full bg-slate-950 font-mona-sans relative overflow-hidden">
       {/* Top Header */}
@@ -738,7 +741,7 @@ export default function ResumeWorkspace({ initialResume }: Props) {
 
         {/* Dynamic Center Navigation Switcher */}
         <div className="flex bg-slate-950/70 p-1 border border-slate-850 rounded-2xl">
-          {(["edit", "customize", "ats", "tailor"] as TabType[]).map((tab) => (
+          {(["edit", "customize", "ats"] as TabType[]).map((tab) => (
             <button
               key={tab}
               onClick={() => setActiveTab(tab)}
@@ -838,7 +841,6 @@ export default function ResumeWorkspace({ initialResume }: Props) {
           {activeTab === "edit" && <ResumeFormEditor />}
           {activeTab === "customize" && renderCustomizeTab()}
           {activeTab === "ats" && renderAtsReviewTab()}
-          {activeTab === "tailor" && renderTailorTab()}
         </div>
 
         {/* Right Pane: Live Preview */}
