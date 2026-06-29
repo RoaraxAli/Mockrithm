@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { generateObject } from "ai";
+import { generateObject, generateText } from "ai";
 import { google } from "@ai-sdk/google";
 import { z } from "zod";
 import { getCurrentUser } from "@/lib/actions/auth.action";
@@ -25,12 +25,40 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const { parsedData, jobDescription } = await request.json();
+    const { parsedData, jobDescription, jobUrl } = await request.json();
     if (!parsedData) {
       return NextResponse.json({ error: "parsedData is required" }, { status: 400 });
     }
 
-    const targetDesc = jobDescription || "General modern professional benchmarks";
+    let targetDesc = jobDescription || "";
+    if (jobUrl && !targetDesc) {
+      try {
+        const fetchRes = await fetch(jobUrl, { headers: { "User-Agent": "Mozilla/5.0" } });
+        if (fetchRes.ok) {
+          const html = await fetchRes.text();
+          const cleanText = html.replace(/<[^>]*>/g, " ").replace(/\s+/g, " ").trim();
+          targetDesc = cleanText.slice(0, 8000);
+        }
+      } catch (err) {
+        console.warn("Autofix URL fetch failed, falling back to inference:", err);
+      }
+
+      if (!targetDesc) {
+        try {
+          const inferResult = await generateText({
+            model: google("gemini-2.5-flash"),
+            prompt: `Based on this Job URL, infer a highly realistic Job Description including typical roles, responsibilities, and tech stack for this position:\nURL: ${jobUrl}\n\nOutput only the inferred job description details.`,
+          });
+          targetDesc = inferResult.text;
+        } catch (err) {
+          targetDesc = `Position at URL: ${jobUrl}`;
+        }
+      }
+    }
+
+    if (!targetDesc) {
+      targetDesc = "General modern professional benchmarks";
+    }
 
     let object;
     const promptText = `

@@ -12,19 +12,19 @@ import { toast } from "sonner";
 
 type SectionType = "basics" | "work" | "education" | "skills" | "projects" | "certifications" | "socialLinks";
 
-// Standard Theme Styles
+// Standard Greyscale Theme Styles
 const ACCORDION_CONTAINER_CLASS = (isActive: boolean) => 
   `border rounded-2xl transition-all duration-300 overflow-hidden ${
     isActive 
-      ? "border-cyan-500/30 bg-slate-900/40 shadow-[0_0_25px_rgba(6,182,212,0.03)]" 
+      ? "border-white/20 bg-slate-900/40 shadow-[0_0_25px_rgba(255,255,255,0.01)]" 
       : "border-slate-800/80 bg-slate-900/10 hover:border-slate-700/80"
   }`;
 
 const ACCORDION_HEADER_CLASS = "w-full flex items-center justify-between p-4.5 font-mono font-bold text-xs text-white uppercase tracking-wider hover:bg-slate-900/40 transition-all border-b border-slate-850/40 cursor-pointer";
 
-const INPUT_CLASS = "bg-slate-950/70 border border-slate-850 text-sm text-slate-100 rounded-xl p-3 outline-none focus:border-cyan-500/50 focus:ring-2 focus:ring-cyan-500/10 font-sans transition-all duration-200 placeholder:text-slate-650 w-full";
+const INPUT_CLASS = "bg-slate-950/70 border border-slate-850 text-sm text-slate-100 rounded-xl p-3 outline-none focus:border-white/30 focus:ring-2 focus:ring-white/5 font-sans transition-all duration-200 placeholder:text-slate-650 w-full";
 
-const SUB_INPUT_CLASS = "bg-slate-900/60 border border-slate-800 text-xs text-slate-100 rounded-xl p-2.5 outline-none focus:border-cyan-500/50 focus:ring-2 focus:ring-cyan-500/10 font-sans transition-all duration-200 placeholder:text-slate-600 w-full";
+const SUB_INPUT_CLASS = "bg-slate-900/60 border border-slate-800 text-xs text-slate-100 rounded-xl p-2.5 outline-none focus:border-white/30 focus:ring-2 focus:ring-white/5 font-sans transition-all duration-200 placeholder:text-slate-600 w-full";
 
 export default function ResumeFormEditor() {
   const { parsedData, updateParsedData } = useResumeStore();
@@ -313,7 +313,7 @@ export default function ResumeFormEditor() {
       <div className="border border-slate-800/80 rounded-2xl bg-slate-900/30 p-5 flex flex-col gap-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <span className="bg-emerald-500/10 border border-emerald-500/25 text-emerald-400 font-bold px-2 py-0.5 rounded text-xs font-mono">
+            <span className="bg-white/10 border border-white/20 text-white font-bold px-2 py-0.5 rounded text-xs font-mono">
               {score}%
             </span>
             <span className="text-xs font-semibold text-slate-350 font-mono uppercase tracking-wider">
@@ -321,7 +321,7 @@ export default function ResumeFormEditor() {
             </span>
           </div>
           {score === 100 && (
-            <span className="text-[10px] text-emerald-400 font-bold font-mono uppercase tracking-widest flex items-center gap-1">
+            <span className="text-[10px] text-white font-bold font-mono uppercase tracking-widest flex items-center gap-1">
               <CheckCircle2 className="size-3" /> Fully complete
             </span>
           )}
@@ -330,7 +330,7 @@ export default function ResumeFormEditor() {
         {/* Progress Bar */}
         <div className="h-2 bg-slate-950 rounded-full overflow-hidden border border-slate-850/50">
           <div 
-            className="h-full bg-emerald-500 rounded-full transition-all duration-500" 
+            className="h-full bg-white rounded-full transition-all duration-500" 
             style={{ width: `${score}%` }}
           />
         </div>
@@ -348,12 +348,12 @@ export default function ResumeFormEditor() {
                 <span className="flex items-center gap-1.5">
                   {item.label === "Profile Summary" ? (
                     isGeneratingSummary ? (
-                      <Loader2 className="size-3.5 text-cyan-400 animate-spin" />
+                      <Loader2 className="size-3.5 text-white animate-spin" />
                     ) : (
-                      <Sparkles className="size-3.5 text-cyan-400 animate-pulse" />
+                      <Sparkles className="size-3.5 text-white animate-pulse" />
                     )
                   ) : (
-                    <Plus className="size-3.5 text-slate-500 group-hover:text-white transition-colors" />
+                    <Plus className="size-3.5 text-slate-550 group-hover:text-white transition-colors" />
                   )}
                   {item.label === "Profile Summary" && isGeneratingSummary ? "Writing summary..." : item.actionText}
                 </span>
@@ -370,9 +370,9 @@ export default function ResumeFormEditor() {
           className={ACCORDION_HEADER_CLASS}
         >
           <span className="flex items-center gap-2">
-            <User className={`size-4 ${activeSection === "basics" ? "text-cyan-400" : "text-white"}`} /> Basics Info
+            <User className={`size-4 ${activeSection === "basics" ? "text-white" : "text-white"}`} /> Basics Info
           </span>
-          {activeSection === "basics" ? <ChevronUp className="size-4 text-cyan-450" /> : <ChevronDown className="size-4" />}
+          {activeSection === "basics" ? <ChevronUp className="size-4 text-white" /> : <ChevronDown className="size-4" />}
         </button>
 
         <AnimatePresence initial={false}>
@@ -387,7 +387,7 @@ export default function ResumeFormEditor() {
               <div className="p-5 flex flex-col gap-4">
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div className="flex flex-col gap-1.5">
-                    <label className="text-[10px] font-mono text-slate-500 uppercase tracking-widest">Full Name</label>
+                    <label className="text-[10px] font-mono text-slate-550 uppercase tracking-widest">Full Name</label>
                     <input
                       type="text"
                       value={parsedData.basics.name || ""}
@@ -397,7 +397,7 @@ export default function ResumeFormEditor() {
                     />
                   </div>
                   <div className="flex flex-col gap-1.5">
-                    <label className="text-[10px] font-mono text-slate-500 uppercase tracking-widest">Job Title</label>
+                    <label className="text-[10px] font-mono text-slate-555 uppercase tracking-widest">Job Title</label>
                     <input
                       type="text"
                       value={parsedData.basics.label || ""}
@@ -410,7 +410,7 @@ export default function ResumeFormEditor() {
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div className="flex flex-col gap-1.5">
-                    <label className="text-[10px] font-mono text-slate-500 uppercase tracking-widest">Email Address</label>
+                    <label className="text-[10px] font-mono text-slate-550 uppercase tracking-widest">Email Address</label>
                     <input
                       type="email"
                       value={parsedData.basics.email || ""}
@@ -420,7 +420,7 @@ export default function ResumeFormEditor() {
                     />
                   </div>
                   <div className="flex flex-col gap-1.5">
-                    <label className="text-[10px] font-mono text-slate-500 uppercase tracking-widest">Phone Number</label>
+                    <label className="text-[10px] font-mono text-slate-550 uppercase tracking-widest">Phone Number</label>
                     <input
                       type="text"
                       value={parsedData.basics.phone || ""}
@@ -433,20 +433,20 @@ export default function ResumeFormEditor() {
 
                 <div className="flex flex-col gap-1.5">
                   <div className="flex justify-between items-center">
-                    <label className="text-[10px] font-mono text-slate-500 uppercase tracking-widest">Summary / Objective</label>
+                    <label className="text-[10px] font-mono text-slate-550 uppercase tracking-widest">Summary / Objective</label>
                     <button
                       type="button"
                       onClick={handleImproveSummary}
                       disabled={isGeneratingSummary}
-                      className="flex items-center gap-1.5 text-[10px] font-mono font-bold text-cyan-400 hover:text-cyan-300 disabled:opacity-50 transition-colors uppercase tracking-wider cursor-pointer"
+                      className="flex items-center gap-1.5 text-[10px] font-mono font-bold text-white hover:text-slate-350 disabled:opacity-50 transition-colors uppercase tracking-wider cursor-pointer"
                     >
                       {isGeneratingSummary ? (
                         <>
-                          <Loader2 className="size-3 animate-spin text-cyan-400" /> Writing summary...
+                          <Loader2 className="size-3 animate-spin text-white" /> Writing summary...
                         </>
                       ) : (
                         <>
-                          <Sparkles className="size-3 text-cyan-400" /> Get help with writing
+                          <Sparkles className="size-3 text-white" /> Get help with writing
                         </>
                       )}
                     </button>
@@ -472,9 +472,9 @@ export default function ResumeFormEditor() {
           className={ACCORDION_HEADER_CLASS}
         >
           <span className="flex items-center gap-2">
-            <Briefcase className={`size-4 ${activeSection === "work" ? "text-cyan-400" : "text-white"}`} /> Work Experience ({parsedData.work.length})
+            <Briefcase className={`size-4 ${activeSection === "work" ? "text-white" : "text-white"}`} /> Work Experience ({parsedData.work.length})
           </span>
-          {activeSection === "work" ? <ChevronUp className="size-4 text-cyan-455" /> : <ChevronDown className="size-4" />}
+          {activeSection === "work" ? <ChevronUp className="size-4 text-white" /> : <ChevronDown className="size-4" />}
         </button>
 
         <AnimatePresence initial={false}>
@@ -498,7 +498,7 @@ export default function ResumeFormEditor() {
 
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-4">
                       <div className="flex flex-col gap-1.5">
-                        <label className="text-[9px] font-mono text-slate-500 uppercase tracking-widest">Company</label>
+                        <label className="text-[9px] font-mono text-slate-550 uppercase tracking-widest">Company</label>
                         <input
                           type="text"
                           value={item.company || ""}
@@ -508,7 +508,7 @@ export default function ResumeFormEditor() {
                         />
                       </div>
                       <div className="flex flex-col gap-1.5">
-                        <label className="text-[9px] font-mono text-slate-500 uppercase tracking-widest">Position</label>
+                        <label className="text-[9px] font-mono text-slate-555 uppercase tracking-widest">Position</label>
                         <input
                           type="text"
                           value={item.position || ""}
@@ -521,7 +521,7 @@ export default function ResumeFormEditor() {
 
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                       <div className="flex flex-col gap-1.5">
-                        <label className="text-[9px] font-mono text-slate-500 uppercase tracking-widest">Start Date</label>
+                        <label className="text-[9px] font-mono text-slate-550 uppercase tracking-widest">Start Date</label>
                         <input
                           type="text"
                           value={item.startDate || ""}
@@ -531,7 +531,7 @@ export default function ResumeFormEditor() {
                         />
                       </div>
                       <div className="flex flex-col gap-1.5">
-                        <label className="text-[9px] font-mono text-slate-500 uppercase tracking-widest">End Date</label>
+                        <label className="text-[9px] font-mono text-slate-550 uppercase tracking-widest">End Date</label>
                         <input
                           type="text"
                           value={item.endDate || ""}
@@ -544,11 +544,11 @@ export default function ResumeFormEditor() {
 
                     {/* Highlights */}
                     <div className="flex flex-col gap-2 mt-2">
-                      <label className="text-[9px] font-mono text-slate-500 uppercase tracking-widest flex items-center justify-between">
+                      <label className="text-[9px] font-mono text-slate-550 uppercase tracking-widest flex items-center justify-between">
                         Key Responsibilities & Highlights
                         <button
                           onClick={() => addHighlight(idx)}
-                          className="flex items-center gap-1 text-[8px] bg-slate-900 border border-slate-800 text-white px-2 py-1 rounded-md uppercase hover:bg-slate-850 cursor-pointer transition-colors"
+                          className="flex items-center gap-1 text-[8px] bg-slate-900 border border-slate-805 text-white px-2 py-1 rounded-md uppercase hover:bg-slate-850 cursor-pointer transition-colors"
                         >
                           <Plus className="size-3" /> Add Highlight
                         </button>
@@ -579,7 +579,7 @@ export default function ResumeFormEditor() {
 
                 <button
                   onClick={addWork}
-                  className="w-full py-3 rounded-xl border border-dashed border-slate-800 hover:border-cyan-500/40 text-xs font-mono font-bold uppercase text-white hover:bg-cyan-500/5 transition-all flex items-center justify-center gap-2 cursor-pointer"
+                  className="w-full py-3 rounded-xl border border-dashed border-slate-800 hover:border-white/30 text-xs font-mono font-bold uppercase text-white hover:bg-white/5 transition-all flex items-center justify-center gap-2 cursor-pointer"
                 >
                   <Plus className="size-4" /> Add Experience Position
                 </button>
@@ -596,9 +596,9 @@ export default function ResumeFormEditor() {
           className={ACCORDION_HEADER_CLASS}
         >
           <span className="flex items-center gap-2">
-            <GraduationCap className={`size-4 ${activeSection === "education" ? "text-cyan-400" : "text-white"}`} /> Education ({parsedData.education.length})
+            <GraduationCap className={`size-4 ${activeSection === "education" ? "text-white" : "text-white"}`} /> Education ({parsedData.education.length})
           </span>
-          {activeSection === "education" ? <ChevronUp className="size-4 text-cyan-455" /> : <ChevronDown className="size-4" />}
+          {activeSection === "education" ? <ChevronUp className="size-4 text-white" /> : <ChevronDown className="size-4" />}
         </button>
 
         <AnimatePresence initial={false}>
@@ -622,7 +622,7 @@ export default function ResumeFormEditor() {
 
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-4">
                       <div className="flex flex-col gap-1.5">
-                        <label className="text-[9px] font-mono text-slate-500 uppercase tracking-widest">Institution</label>
+                        <label className="text-[9px] font-mono text-slate-550 uppercase tracking-widest">Institution</label>
                         <input
                           type="text"
                           value={item.institution || ""}
@@ -632,7 +632,7 @@ export default function ResumeFormEditor() {
                         />
                       </div>
                       <div className="flex flex-col gap-1.5">
-                        <label className="text-[9px] font-mono text-slate-500 uppercase tracking-widest">Degree / Certificate</label>
+                        <label className="text-[9px] font-mono text-slate-555 uppercase tracking-widest">Degree / Certificate</label>
                         <input
                           type="text"
                           value={item.studyType || ""}
@@ -645,7 +645,7 @@ export default function ResumeFormEditor() {
 
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                       <div className="flex flex-col gap-1.5">
-                        <label className="text-[9px] font-mono text-slate-500 uppercase tracking-widest">Field of Study</label>
+                        <label className="text-[9px] font-mono text-slate-550 uppercase tracking-widest">Field of Study</label>
                         <input
                           type="text"
                           value={item.area || ""}
@@ -655,7 +655,7 @@ export default function ResumeFormEditor() {
                         />
                       </div>
                       <div className="flex flex-col gap-1.5">
-                        <label className="text-[9px] font-mono text-slate-500 uppercase tracking-widest">Graduation Date</label>
+                        <label className="text-[9px] font-mono text-slate-550 uppercase tracking-widest">Graduation Date</label>
                         <input
                           type="text"
                           value={item.endDate || ""}
@@ -670,7 +670,7 @@ export default function ResumeFormEditor() {
 
                 <button
                   onClick={addEducation}
-                  className="w-full py-3 rounded-xl border border-dashed border-slate-800 hover:border-cyan-500/40 text-xs font-mono font-bold uppercase text-white hover:bg-cyan-500/5 transition-all flex items-center justify-center gap-2 cursor-pointer"
+                  className="w-full py-3 rounded-xl border border-dashed border-slate-800 hover:border-white/30 text-xs font-mono font-bold uppercase text-white hover:bg-white/5 transition-all flex items-center justify-center gap-2 cursor-pointer"
                 >
                   <Plus className="size-4" /> Add Education
                 </button>
@@ -687,9 +687,9 @@ export default function ResumeFormEditor() {
           className={ACCORDION_HEADER_CLASS}
         >
           <span className="flex items-center gap-2">
-            <Code className={`size-4 ${activeSection === "skills" ? "text-cyan-400" : "text-white"}`} /> Skills ({parsedData.skills.length})
+            <Code className={`size-4 ${activeSection === "skills" ? "text-white" : "text-white"}`} /> Skills ({parsedData.skills.length})
           </span>
-          {activeSection === "skills" ? <ChevronUp className="size-4 text-cyan-455" /> : <ChevronDown className="size-4" />}
+          {activeSection === "skills" ? <ChevronUp className="size-4 text-white" /> : <ChevronDown className="size-4" />}
         </button>
 
         <AnimatePresence initial={false}>
@@ -743,9 +743,9 @@ export default function ResumeFormEditor() {
           className={ACCORDION_HEADER_CLASS}
         >
           <span className="flex items-center gap-2">
-            <Layers className={`size-4 ${activeSection === "projects" ? "text-cyan-400" : "text-white"}`} /> Projects ({parsedData.projects.length})
+            <Layers className={`size-4 ${activeSection === "projects" ? "text-white" : "text-white"}`} /> Projects ({parsedData.projects.length})
           </span>
-          {activeSection === "projects" ? <ChevronUp className="size-4 text-cyan-455" /> : <ChevronDown className="size-4" />}
+          {activeSection === "projects" ? <ChevronUp className="size-4 text-white" /> : <ChevronDown className="size-4" />}
         </button>
 
         <AnimatePresence initial={false}>
@@ -769,7 +769,7 @@ export default function ResumeFormEditor() {
 
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-4">
                       <div className="flex flex-col gap-1.5">
-                        <label className="text-[9px] font-mono text-slate-500 uppercase tracking-widest">Project Name</label>
+                        <label className="text-[9px] font-mono text-slate-550 uppercase tracking-widest">Project Name</label>
                         <input
                           type="text"
                           value={proj.name || ""}
@@ -779,7 +779,7 @@ export default function ResumeFormEditor() {
                         />
                       </div>
                       <div className="flex flex-col gap-1.5">
-                        <label className="text-[9px] font-mono text-slate-500 uppercase tracking-widest">Technologies (Comma Separated)</label>
+                        <label className="text-[9px] font-mono text-slate-555 uppercase tracking-widest">Technologies (Comma Separated)</label>
                         <input
                           type="text"
                           value={proj.technologies?.join(", ") || ""}
@@ -791,7 +791,7 @@ export default function ResumeFormEditor() {
                     </div>
 
                     <div className="flex flex-col gap-1.5">
-                      <label className="text-[9px] font-mono text-slate-500 uppercase tracking-widest">Project Link URL (Optional)</label>
+                      <label className="text-[9px] font-mono text-slate-550 uppercase tracking-widest">Project Link URL (Optional)</label>
                       <input
                         type="text"
                         value={proj.link || ""}
@@ -802,7 +802,7 @@ export default function ResumeFormEditor() {
                     </div>
 
                     <div className="flex flex-col gap-1.5">
-                      <label className="text-[9px] font-mono text-slate-500 uppercase tracking-widest">Description</label>
+                      <label className="text-[9px] font-mono text-slate-550 uppercase tracking-widest">Description</label>
                       <textarea
                         value={proj.description || ""}
                         onChange={(e) => handleProjectChange(idx, "description", e.target.value)}
@@ -816,7 +816,7 @@ export default function ResumeFormEditor() {
 
                 <button
                   onClick={addProject}
-                  className="w-full py-3 rounded-xl border border-dashed border-slate-800 hover:border-cyan-500/40 text-xs font-mono font-bold uppercase text-white hover:bg-cyan-500/5 transition-all flex items-center justify-center gap-2 cursor-pointer"
+                  className="w-full py-3 rounded-xl border border-dashed border-slate-800 hover:border-white/30 text-xs font-mono font-bold uppercase text-white hover:bg-white/5 transition-all flex items-center justify-center gap-2 cursor-pointer"
                 >
                   <Plus className="size-4" /> Add Project
                 </button>
@@ -833,9 +833,9 @@ export default function ResumeFormEditor() {
           className={ACCORDION_HEADER_CLASS}
         >
           <span className="flex items-center gap-2">
-            <Award className={`size-4 ${activeSection === "certifications" ? "text-cyan-400" : "text-white"}`} /> Certifications ({parsedData.certifications.length})
+            <Award className={`size-4 ${activeSection === "certifications" ? "text-white" : "text-white"}`} /> Certifications ({parsedData.certifications.length})
           </span>
-          {activeSection === "certifications" ? <ChevronUp className="size-4 text-cyan-455" /> : <ChevronDown className="size-4" />}
+          {activeSection === "certifications" ? <ChevronUp className="size-4 text-white" /> : <ChevronDown className="size-4" />}
         </button>
 
         <AnimatePresence initial={false}>
@@ -859,7 +859,7 @@ export default function ResumeFormEditor() {
 
                     <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mt-4">
                       <div className="flex flex-col gap-1.5">
-                        <label className="text-[9px] font-mono text-slate-500 uppercase tracking-widest">Name</label>
+                        <label className="text-[9px] font-mono text-slate-550 uppercase tracking-widest">Name</label>
                         <input
                           type="text"
                           value={cert.name || ""}
@@ -869,7 +869,7 @@ export default function ResumeFormEditor() {
                         />
                       </div>
                       <div className="flex flex-col gap-1.5">
-                        <label className="text-[9px] font-mono text-slate-500 uppercase tracking-widest">Issuer</label>
+                        <label className="text-[9px] font-mono text-slate-550 uppercase tracking-widest">Issuer</label>
                         <input
                           type="text"
                           value={cert.issuer || ""}
@@ -879,7 +879,7 @@ export default function ResumeFormEditor() {
                         />
                       </div>
                       <div className="flex flex-col gap-1.5">
-                        <label className="text-[9px] font-mono text-slate-500 uppercase tracking-widest">Date</label>
+                        <label className="text-[9px] font-mono text-slate-550 uppercase tracking-widest">Date</label>
                         <input
                           type="text"
                           value={cert.date || ""}
@@ -894,7 +894,7 @@ export default function ResumeFormEditor() {
 
                 <button
                   onClick={addCert}
-                  className="w-full py-3 rounded-xl border border-dashed border-slate-800 hover:border-cyan-500/40 text-xs font-mono font-bold uppercase text-white hover:bg-cyan-500/5 transition-all flex items-center justify-center gap-2 cursor-pointer"
+                  className="w-full py-3 rounded-xl border border-dashed border-slate-800 hover:border-white/30 text-xs font-mono font-bold uppercase text-white hover:bg-white/5 transition-all flex items-center justify-center gap-2 cursor-pointer"
                 >
                   <Plus className="size-4" /> Add Certification
                 </button>
@@ -911,9 +911,9 @@ export default function ResumeFormEditor() {
           className={ACCORDION_HEADER_CLASS}
         >
           <span className="flex items-center gap-2">
-            <Globe className={`size-4 ${activeSection === "socialLinks" ? "text-cyan-400" : "text-white"}`} /> Social Links ({parsedData.socialLinks.length})
+            <Globe className={`size-4 ${activeSection === "socialLinks" ? "text-white" : "text-white"}`} /> Social Links ({parsedData.socialLinks.length})
           </span>
-          {activeSection === "socialLinks" ? <ChevronUp className="size-4 text-cyan-455" /> : <ChevronDown className="size-4" />}
+          {activeSection === "socialLinks" ? <ChevronUp className="size-4 text-white" /> : <ChevronDown className="size-4" />}
         </button>
 
         <AnimatePresence initial={false}>
@@ -937,7 +937,7 @@ export default function ResumeFormEditor() {
 
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-4">
                       <div className="flex flex-col gap-1.5">
-                        <label className="text-[9px] font-mono text-slate-500 uppercase tracking-widest">Platform</label>
+                        <label className="text-[9px] font-mono text-slate-550 uppercase tracking-widest">Platform</label>
                         <input
                           type="text"
                           value={link.platform || ""}
@@ -947,7 +947,7 @@ export default function ResumeFormEditor() {
                         />
                       </div>
                       <div className="flex flex-col gap-1.5">
-                        <label className="text-[9px] font-mono text-slate-500 uppercase tracking-widest">Link URL</label>
+                        <label className="text-[9px] font-mono text-slate-550 uppercase tracking-widest">Link URL</label>
                         <input
                           type="text"
                           value={link.url || ""}
@@ -962,7 +962,7 @@ export default function ResumeFormEditor() {
 
                 <button
                   onClick={addSocial}
-                  className="w-full py-3 rounded-xl border border-dashed border-slate-800 hover:border-cyan-500/40 text-xs font-mono font-bold uppercase text-white hover:bg-cyan-500/5 transition-all flex items-center justify-center gap-2 cursor-pointer"
+                  className="w-full py-3 rounded-xl border border-dashed border-slate-800 hover:border-white/30 text-xs font-mono font-bold uppercase text-white hover:bg-white/5 transition-all flex items-center justify-center gap-2 cursor-pointer"
                 >
                   <Plus className="size-4" /> Add Social Link
                 </button>

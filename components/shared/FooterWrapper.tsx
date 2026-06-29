@@ -36,7 +36,7 @@ const FooterWrapper = () => {
     return null;
   }
   
-  if (pathname.startsWith("/interview") || pathname.startsWith("/admin") || pathname.startsWith("/onboarding") || pathname.startsWith("/documentation") || pathname.startsWith("/games")) {
+  if (pathname.startsWith("/interview") || pathname.startsWith("/admin") || pathname.startsWith("/onboarding") || pathname.startsWith("/documentation") || pathname.startsWith("/games") || pathname.startsWith("/resume") || pathname.startsWith("/user/resume")) {
     return null;
   }
 
