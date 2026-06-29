@@ -935,9 +935,9 @@ export default function ResumeWorkspace({ initialResume }: Props) {
         </div>
 
         {/* Right Pane: Live Preview */}
-        <div className="w-1/2 overflow-hidden bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-slate-900 via-zinc-950 to-black relative flex justify-center p-6 border-l border-slate-900/80">
+        <div className="w-1/2 overflow-y-auto bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-slate-900 via-zinc-950 to-black relative custom-scrollbar flex justify-center p-8 border-l border-slate-900/80">
           <div className="absolute inset-0 bg-[linear-gradient(to_right,#0f172a_1px,transparent_1px),linear-gradient(to_bottom,#0f172a_1px,transparent_1px)] bg-[size:4rem_4rem] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_0%,#000_70%,transparent_100%)] opacity-30 pointer-events-none" />
-          <div className="relative z-10 w-full max-w-[800px] h-full flex justify-center">
+          <div className="relative z-10 w-full max-w-[800px] flex justify-center">
             <LivePreviewRenderer />
           </div>
         </div>
