@@ -12,7 +12,8 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { updateResumeData, saveAtsAnalysis } from "@/lib/actions/resume.action";
-import { TEMPLATE_MAPPING } from "@/components/resume/templates";
+import { getTemplateComponent, TEMPLATE_MAPPING } from "@/components/resume/templates";
+import { SAMPLE_PROFILES } from "@/components/resume/sampleProfiles";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 
@@ -21,12 +22,58 @@ interface Props {
 }
 
 type TabType = "edit" | "customize" | "ats" | "tailor";
+type CustomizeSubTab = "layout" | "color" | "typography";
 
-const TEMPLATE_CATEGORIES = {
-  "ATS Friendly": ["minimal", "tech", "compact"],
-  "Two Column": ["corporate", "modern", "executive"],
-  "Creative & Portfolio": ["creative", "elegant", "cyber", "academic"]
-};
+const ALL_TEMPLATES = [
+  { id: "minimal", name: "Minimalist", category: "ATS Friendly" },
+  { id: "tech", name: "Tech / Developer", category: "ATS Friendly" },
+  { id: "compact", name: "Compact / Clean", category: "ATS Friendly" },
+  { id: "corporate", name: "Corporate", category: "Two Column" },
+  { id: "modern", name: "Modern", category: "Two Column" },
+  { id: "executive", name: "Executive", category: "Two Column" },
+  { id: "creative", name: "Creative", category: "Creative & Portfolio" },
+  { id: "elegant", name: "Elegant", category: "Creative & Portfolio" },
+  { id: "cyber", name: "Cyberpunk", category: "Creative & Portfolio" },
+  { id: "academic", name: "Academic", category: "Creative & Portfolio" }
+];
+
+function TemplatePreview({ templateId }: { templateId: string }) {
+  const containerRef = useRef<HTMLDivElement>(null);
+  const [scale, setScale] = useState(0.2);
+
+  useEffect(() => {
+    if (!containerRef.current) return;
+    const observer = new ResizeObserver((entries) => {
+      for (let entry of entries) {
+        const width = entry.contentRect.width;
+        setScale(width / 800);
+      }
+    });
+    observer.observe(containerRef.current);
+    return () => observer.disconnect();
+  }, []);
+
+  const TemplateComponent = getTemplateComponent(templateId);
+  const profileData = SAMPLE_PROFILES[templateId] || SAMPLE_PROFILES[TEMPLATE_MAPPING[templateId]] || SAMPLE_PROFILES.minimal;
+
+  return (
+    <div 
+      ref={containerRef}
+      className="w-full aspect-[1/1.414] overflow-hidden bg-white border border-slate-900 relative shadow-inner flex justify-center items-start rounded-xl"
+    >
+      <div 
+        className="absolute top-0 left-0 pointer-events-none select-none text-slate-800 origin-top-left"
+        style={{ 
+          width: "800px", 
+          height: "1131px",
+          transform: `scale(${scale})`,
+        }}
+      >
+        <TemplateComponent data={profileData} templateId={templateId} />
+      </div>
+    </div>
+  );
+}
 
 export default function ResumeWorkspace({ initialResume }: Props) {
   const { 
@@ -47,6 +94,10 @@ export default function ResumeWorkspace({ initialResume }: Props) {
   const fromOnboarding = searchParams.get("from") === "onboarding";
   const [isExporting, setIsExporting] = useState(false);
   const [activeTab, setActiveTab] = useState<TabType>("edit");
+  const [customSubTab, setCustomSubTab] = useState<CustomizeSubTab>("layout");
+  const [layoutFilter, setLayoutFilter] = useState<"all" | "ats" | "twocol" | "creative">("all");
+  const [layoutSort, setLayoutSort] = useState<"default" | "name">("default");
+  
   const [jobUrl, setJobUrl] = useState("");
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [isTailoring, setIsTailoring] = useState(false);
@@ -292,109 +343,210 @@ export default function ResumeWorkspace({ initialResume }: Props) {
 
     const presets = ["#000000", "#1f2937", "#4b5563", "#9ca3af", "#d1d5db", "#ffffff"];
 
+    // Filter templates
+    let filtered = ALL_TEMPLATES;
+    if (layoutFilter === "ats") {
+      filtered = ALL_TEMPLATES.filter(t => t.category === "ATS Friendly");
+    } else if (layoutFilter === "twocol") {
+      filtered = ALL_TEMPLATES.filter(t => t.category === "Two Column");
+    } else if (layoutFilter === "creative") {
+      filtered = ALL_TEMPLATES.filter(t => t.category === "Creative & Portfolio");
+    }
+
+    // Sort templates
+    if (layoutSort === "name") {
+      filtered = [...filtered].sort((a, b) => a.name.localeCompare(b.name));
+    }
+
     return (
       <div className="flex flex-col p-6 gap-6 text-slate-200">
         
-        {/* Template Gallery Categories */}
-        <div className="flex flex-col gap-4">
-          <div className="flex justify-between items-center">
-            <span className="text-[10px] font-mono tracking-widest text-slate-400 uppercase">Select Base Layout</span>
-            {parsedData.templateId !== initialTemplateId && (
-              <button
-                onClick={() => updateParsedData({ templateId: initialTemplateId })}
-                className="text-[9px] font-mono font-bold text-slate-400 hover:text-white underline cursor-pointer"
-              >
-                ← Revert layout ({initialTemplateId})
-              </button>
-            )}
-          </div>
+        {/* Customize Sub-tab Selector */}
+        <div className="flex bg-slate-950/60 p-1 border border-slate-850 rounded-2xl">
+          <button
+            onClick={() => setCustomSubTab("layout")}
+            className={`flex-1 py-1.5 rounded-xl text-[10px] font-mono font-bold uppercase tracking-wider transition-all cursor-pointer ${
+              customSubTab === "layout"
+                ? "bg-white text-black shadow-md"
+                : "text-slate-400 hover:text-white"
+            }`}
+          >
+            Layouts
+          </button>
+          <button
+            onClick={() => setCustomSubTab("color")}
+            className={`flex-1 py-1.5 rounded-xl text-[10px] font-mono font-bold uppercase tracking-wider transition-all cursor-pointer ${
+              customSubTab === "color"
+                ? "bg-white text-black shadow-md"
+                : "text-slate-400 hover:text-white"
+            }`}
+          >
+            Color
+          </button>
+          <button
+            onClick={() => setCustomSubTab("typography")}
+            className={`flex-1 py-1.5 rounded-xl text-[10px] font-mono font-bold uppercase tracking-wider transition-all cursor-pointer ${
+              customSubTab === "typography"
+                ? "bg-white text-black shadow-md"
+                : "text-slate-400 hover:text-white"
+            }`}
+          >
+            Typography &amp; Density
+          </button>
+        </div>
 
-          {Object.entries(TEMPLATE_CATEGORIES).map(([categoryName, templateIds]) => (
-            <div key={categoryName} className="flex flex-col gap-2">
-              <span className="text-[9px] font-mono tracking-widest text-slate-550 uppercase">{categoryName}</span>
-              <div className="grid grid-cols-2 gap-2.5">
-                {templateIds.map((key) => {
-                  const label = key.split("-").map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(" ");
-                  const isSelected = parsedData.templateId === key;
-                  return (
-                    <button
-                      key={key}
-                      onClick={() => updateParsedData({ templateId: key })}
-                      className={`p-3 rounded-xl border text-[10px] font-mono font-bold uppercase transition-all text-left cursor-pointer ${
-                        isSelected
-                          ? "border-white bg-slate-900 text-white shadow-lg shadow-white/5"
-                          : "border-slate-800 bg-slate-950/20 text-slate-400 hover:text-white hover:border-slate-700"
-                      }`}
-                    >
-                      {label}
-                    </button>
-                  );
-                })}
+        {customSubTab === "layout" ? (
+          <div className="flex flex-col gap-4 animate-fadeIn">
+            {/* Filters and Sort */}
+            <div className="flex flex-col gap-2.5">
+              <div className="flex justify-between items-center">
+                <span className="text-[10px] font-mono tracking-widest text-slate-500 uppercase">Filters</span>
+                {parsedData.templateId !== initialTemplateId && (
+                  <button
+                    onClick={() => updateParsedData({ templateId: initialTemplateId })}
+                    className="text-[9px] font-mono font-bold text-slate-400 hover:text-white underline cursor-pointer"
+                  >
+                    Revert layout
+                  </button>
+                )}
+              </div>
+
+              {/* Layout category tags */}
+              <div className="flex flex-wrap gap-1.5">
+                {(["all", "ats", "twocol", "creative"] as const).map((cat) => (
+                  <button
+                    key={cat}
+                    onClick={() => setLayoutFilter(cat)}
+                    className={`px-3 py-1 rounded-full border text-[9px] font-mono uppercase font-bold transition-all cursor-pointer ${
+                      layoutFilter === cat
+                        ? "border-white bg-white text-black font-extrabold"
+                        : "border-slate-800 text-slate-400 hover:text-white"
+                    }`}
+                  >
+                    {cat === "all" ? "All" : cat === "ats" ? "ATS Friendly" : cat === "twocol" ? "Two Column" : "Creative"}
+                  </button>
+                ))}
+              </div>
+
+              {/* Sort selector */}
+              <div className="flex justify-between items-center mt-2 border-t border-slate-900 pt-3">
+                <span className="text-[9px] font-mono tracking-widest text-slate-550 uppercase">Sort Order</span>
+                <div className="flex gap-2">
+                  <button
+                    onClick={() => setLayoutSort("default")}
+                    className={`text-[9px] font-mono font-bold px-2 py-0.5 rounded cursor-pointer ${layoutSort === "default" ? "bg-white/10 text-white" : "text-slate-500 hover:text-white"}`}
+                  >
+                    Default
+                  </button>
+                  <button
+                    onClick={() => setLayoutSort("name")}
+                    className={`text-[9px] font-mono font-bold px-2 py-0.5 rounded cursor-pointer ${layoutSort === "name" ? "bg-white/10 text-white" : "text-slate-500 hover:text-white"}`}
+                  >
+                    Name (A-Z)
+                  </button>
+                </div>
               </div>
             </div>
-          ))}
-        </div>
 
-        {/* Color Customization */}
-        <div className="flex flex-col gap-3 border-t border-slate-900 pt-5">
-          <span className="text-[10px] font-mono tracking-widest text-slate-550 uppercase font-bold">Accent Shades (Greyscale)</span>
-          <div className="flex flex-wrap gap-2.5 items-center">
-            {presets.map((color) => (
-              <button
-                key={color}
-                onClick={() => updateParsedData({ 
-                  customStyles: { ...currentStyles, primaryColor: color } 
-                })}
-                className="size-7 rounded-full border border-slate-800 shadow-inner cursor-pointer transition-transform hover:scale-110 active:scale-95"
-                style={{ backgroundColor: color, outline: selectedColor === color ? "2px solid #ffffff" : "none" }}
-              />
-            ))}
+            {/* Template Gallery with large single-column live previews */}
+            <div className="flex flex-col gap-4 mt-2">
+              {filtered.map((t) => {
+                const isSelected = parsedData.templateId === t.id;
+                return (
+                  <button
+                    key={t.id}
+                    onClick={() => updateParsedData({ templateId: t.id })}
+                    className={`flex flex-col gap-2.5 p-3 rounded-2xl border transition-all text-left cursor-pointer group ${
+                      isSelected
+                        ? "border-white bg-slate-900/50 shadow-lg shadow-white/5"
+                        : "border-slate-800 bg-slate-950/20 hover:border-slate-700"
+                    }`}
+                  >
+                    <div className="flex items-center justify-between px-1">
+                      <span className="text-xs font-bold text-white uppercase tracking-wider group-hover:text-white transition-colors">
+                        {t.name}
+                      </span>
+                      {isSelected && (
+                        <span className="text-[9px] font-mono font-bold uppercase tracking-wider text-black bg-white px-2 py-0.5 rounded-full">
+                          Selected
+                        </span>
+                      )}
+                    </div>
+                    <TemplatePreview templateId={t.id} />
+                    <span className="text-[9px] font-mono text-slate-500 uppercase mt-0.5 px-1">
+                      {t.category}
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
           </div>
-        </div>
+        ) : customSubTab === "color" ? (
+          <div className="flex flex-col gap-6 animate-fadeIn">
+            {/* Color Customization */}
+            <div className="flex flex-col gap-3">
+              <span className="text-[10px] font-mono tracking-widest text-slate-500 uppercase font-bold">Accent Shades (Greyscale)</span>
+              <div className="flex flex-wrap gap-2.5 items-center">
+                {presets.map((color) => (
+                  <button
+                    key={color}
+                    onClick={() => updateParsedData({ 
+                      customStyles: { ...currentStyles, primaryColor: color } 
+                    })}
+                    className="size-7 rounded-full border border-slate-800 shadow-inner cursor-pointer transition-transform hover:scale-110 active:scale-95"
+                    style={{ backgroundColor: color, outline: selectedColor === color ? "2px solid #ffffff" : "none" }}
+                  />
+                ))}
+              </div>
+            </div>
+          </div>
+        ) : (
+          <div className="flex flex-col gap-6 animate-fadeIn">
+            {/* Typography Customization */}
+            <div className="flex flex-col gap-3">
+              <span className="text-[10px] font-mono tracking-widest text-slate-500 uppercase font-bold">Typography</span>
+              <div className="grid grid-cols-3 gap-2">
+                {(["sans", "serif", "mono"] as const).map((font) => (
+                  <button
+                    key={font}
+                    onClick={() => updateParsedData({
+                      customStyles: { ...currentStyles, fontFamily: font }
+                    })}
+                    className={`py-2 rounded-xl border text-[10px] font-mono font-bold uppercase transition-all cursor-pointer ${
+                      selectedFont === font
+                        ? "border-white bg-slate-900 text-white shadow-lg"
+                        : "border-slate-800 bg-slate-950/20 text-slate-400 hover:text-white"
+                    }`}
+                  >
+                    {font === "sans" ? "Sans-Serif" : font === "serif" ? "Serif" : "Monospace"}
+                  </button>
+                ))}
+              </div>
+            </div>
 
-        {/* Typography Customization */}
-        <div className="flex flex-col gap-3 border-t border-slate-900 pt-5">
-          <span className="text-[10px] font-mono tracking-widest text-slate-550 uppercase">Typography</span>
-          <div className="grid grid-cols-3 gap-2">
-            {(["sans", "serif", "mono"] as const).map((font) => (
-              <button
-                key={font}
-                onClick={() => updateParsedData({
-                  customStyles: { ...currentStyles, fontFamily: font }
-                })}
-                className={`py-2 rounded-xl border text-[10px] font-mono font-bold uppercase transition-all cursor-pointer ${
-                  selectedFont === font
-                    ? "border-white bg-slate-900 text-white shadow-lg"
-                    : "border-slate-800 bg-slate-950/20 text-slate-400 hover:text-white"
-                }`}
-              >
-                {font === "sans" ? "Sans-Serif" : font === "serif" ? "Serif" : "Monospace"}
-              </button>
-            ))}
+            {/* Text Size Customization */}
+            <div className="flex flex-col gap-3 border-t border-slate-900 pt-5">
+              <span className="text-[10px] font-mono tracking-widest text-slate-550 uppercase font-bold">Text Density</span>
+              <div className="grid grid-cols-3 gap-2">
+                {(["sm", "base", "lg"] as const).map((size) => (
+                  <button
+                    key={size}
+                    onClick={() => updateParsedData({
+                      customStyles: { ...currentStyles, fontSize: size }
+                    })}
+                    className={`py-2 rounded-xl border text-[10px] font-mono font-bold uppercase transition-all cursor-pointer ${
+                      selectedSize === size
+                        ? "border-white bg-slate-900 text-white shadow-lg"
+                        : "border-slate-800 bg-slate-950/20 text-slate-400 hover:text-white"
+                    }`}
+                  >
+                    {size === "sm" ? "High" : size === "lg" ? "Low" : "Standard"}
+                  </button>
+                ))}
+              </div>
+            </div>
           </div>
-        </div>
-
-        {/* Text Size Customization */}
-        <div className="flex flex-col gap-3 border-t border-slate-900 pt-5">
-          <span className="text-[10px] font-mono tracking-widest text-slate-550 uppercase">Text Density</span>
-          <div className="grid grid-cols-3 gap-2">
-            {(["sm", "base", "lg"] as const).map((size) => (
-              <button
-                key={size}
-                onClick={() => updateParsedData({
-                  customStyles: { ...currentStyles, fontSize: size }
-                })}
-                className={`py-2 rounded-xl border text-[10px] font-mono font-bold uppercase transition-all cursor-pointer ${
-                  selectedSize === size
-                    ? "border-white bg-slate-900 text-white shadow-lg"
-                    : "border-slate-800 bg-slate-950/20 text-slate-400 hover:text-white"
-                }`}
-              >
-                {size === "sm" ? "High" : size === "lg" ? "Low" : "Standard"}
-              </button>
-            ))}
-          </div>
-        </div>
+        )}
       </div>
     );
   };
@@ -631,27 +783,27 @@ export default function ResumeWorkspace({ initialResume }: Props) {
                       setShowDownloadDropdown(false);
                       handleExportPDF();
                     }}
-                    className="w-full text-left px-4 py-2.5 text-xs font-mono text-slate-350 hover:text-white hover:bg-slate-950/50 transition-colors flex items-center gap-2 cursor-pointer border-b border-slate-955/20"
+                    className="w-full text-left px-4 py-2.5 text-xs font-mono text-slate-350 hover:text-white hover:bg-slate-955/50 transition-colors flex items-center gap-2 cursor-pointer border-b border-slate-955/20"
                   >
-                    <FileText className="size-3.5 text-slate-400" /> PDF Document (.pdf)
+                    <FileText className="size-3.5 text-slate-450" /> PDF Document (.pdf)
                   </button>
                   <button
                     onClick={() => {
                       setShowDownloadDropdown(false);
                       exportAsDOCX();
                     }}
-                    className="w-full text-left px-4 py-2.5 text-xs font-mono text-slate-350 hover:text-white hover:bg-slate-950/50 transition-colors flex items-center gap-2 cursor-pointer border-b border-slate-955/20"
+                    className="w-full text-left px-4 py-2.5 text-xs font-mono text-slate-350 hover:text-white hover:bg-slate-955/50 transition-colors flex items-center gap-2 cursor-pointer border-b border-slate-955/20"
                   >
-                    <FileText className="size-3.5 text-slate-400" /> Word Document (.doc)
+                    <FileText className="size-3.5 text-slate-450" /> Word Document (.doc)
                   </button>
                   <button
                     onClick={() => {
                       setShowDownloadDropdown(false);
                       exportAsTXT();
                     }}
-                    className="w-full text-left px-4 py-2.5 text-xs font-mono text-slate-350 hover:text-white hover:bg-slate-950/50 transition-colors flex items-center gap-2 cursor-pointer"
+                    className="w-full text-left px-4 py-2.5 text-xs font-mono text-slate-350 hover:text-white hover:bg-slate-955/50 transition-colors flex items-center gap-2 cursor-pointer"
                   >
-                    <File className="size-3.5 text-slate-400" /> Plain Text (.txt)
+                    <File className="size-3.5 text-slate-450" /> Plain Text (.txt)
                   </button>
                 </div>
               </>
