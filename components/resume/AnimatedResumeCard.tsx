@@ -11,16 +11,22 @@ const gradientMap: Record<string, string> = {
   creative: "from-pink-800 to-red-600",
   executive: "from-green-800 to-emerald-600",
   academic: "from-yellow-800 to-amber-600",
+  elegant: "from-orange-900 to-orange-700",
+  tech: "from-teal-800 to-emerald-700",
+  compact: "from-rose-800 to-amber-650"
 };
 
 const fontMap: Record<string, string> = {
   minimal: "font-sans",
-  corporate: "font-mono",
+  corporate: "font-serif",
   cyber: "font-mono",
   modern: "font-sans",
-  creative: "font-serif",
-  executive: "font-sans",
+  creative: "font-sans",
+  executive: "font-serif",
   academic: "font-serif",
+  elegant: "font-serif",
+  tech: "font-mono",
+  compact: "font-sans"
 };
 
 interface AnimatedResumeCardProps {

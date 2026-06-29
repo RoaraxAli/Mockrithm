@@ -5,9 +5,16 @@ import { getTemplateComponent } from "../templates";
 import { Layout } from "lucide-react";
 
 const TEMPLATE_CHOICES = [
-  { id: "minimal", name: "Minimalist" },
+  { id: "minimal", name: "Minimal" },
   { id: "corporate", name: "Corporate" },
-  { id: "cyber", name: "Cyberpunk" }
+  { id: "cyber", name: "Cyberpunk" },
+  { id: "modern", name: "Modern" },
+  { id: "creative", name: "Creative" },
+  { id: "executive", name: "Executive" },
+  { id: "academic", name: "Academic" },
+  { id: "elegant", name: "Elegant" },
+  { id: "tech", name: "Tech" },
+  { id: "compact", name: "Compact" }
 ];
 
 export default function LivePreviewRenderer() {

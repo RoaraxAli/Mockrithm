@@ -109,6 +109,38 @@ export async function POST(request: Request) {
         skillRelevance: "Moderate",
       };
     }
+    // Run deterministic custom ATS checks
+    const customChecks = (() => {
+      const extraWeaknesses: string[] = [];
+      const extraSuggestions: string[] = [];
+
+      const work = parsedData.work || [];
+      if (work.length === 0) {
+        extraWeaknesses.push("Professional work history and experience section is completely empty.");
+        extraSuggestions.push("Add at least 1-2 items under work or personal experience. ATS systems and recruiters prioritize your concrete work history to evaluate your profile.");
+      }
+
+      const skills = (parsedData.skills || []).map((s: any) => (typeof s === "string" ? s : s.name || "").toLowerCase());
+      const hasDotNet = skills.some((s: string) => s.includes(".net"));
+      const hasCSharp = skills.some((s: string) => s === "c#" || s === "csharp" || s.includes("c #"));
+      if (hasDotNet && !hasCSharp) {
+        extraWeaknesses.push("Listed '.NET' skill but missing 'C#' keyword.");
+        extraSuggestions.push("Since .NET development is primarily done in C#, ATS filters searching for C# developer roles might screen you out. Be sure to list C# explicitly alongside .NET.");
+      }
+
+      if (skills.length > 5) {
+        extraSuggestions.push("Group your skills into categories (e.g., Programming Languages, Databases, Frameworks, Tools) on your resume rather than using a single flat list. This improves readability for human recruiters.");
+      }
+
+      return { extraWeaknesses, extraSuggestions };
+    })();
+
+    object.weaknesses = [...customChecks.extraWeaknesses, ...object.weaknesses];
+    object.improvementSuggestions = [...customChecks.extraSuggestions, ...object.improvementSuggestions];
+
+    if (parsedData.work && parsedData.work.length === 0) {
+      object.atsScore = Math.max(0, Math.min(object.atsScore, 30));
+    }
 
     return NextResponse.json(object, { status: 200 });
   } catch (error: any) {

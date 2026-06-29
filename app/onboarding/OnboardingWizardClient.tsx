@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useCallback, useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useDropzone } from "react-dropzone";
 import { motion, AnimatePresence } from "framer-motion";
 import { 
@@ -11,6 +11,7 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { saveOnboardingData } from "@/lib/actions/onboarding.action";
+import { getResumeById } from "@/lib/actions/resume.action";
 import PDFRenderer from "@/components/resume/PDFRenderer";
 
 // Interactive Legible Resume Preview Component
@@ -94,10 +95,52 @@ interface OnboardingWizardClientProps {
 
 export default function OnboardingWizardClient({ userId, userName }: OnboardingWizardClientProps) {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const paramResumeId = searchParams.get("resumeId");
   const [step, setStep] = useState<1 | 2 | 3 | 4 | 5 | 6>(1);
   const [country, setCountry] = useState("");
   const [role, setRole] = useState("");
   const [file, setFile] = useState<File | null>(null);
+  const [fileUrl, setFileUrl] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (file) {
+      const url = URL.createObjectURL(file);
+      setFileUrl(url);
+      return () => URL.revokeObjectURL(url);
+    } else {
+      setFileUrl(null);
+    }
+  }, [file]);
+
+  useEffect(() => {
+    if (paramResumeId) {
+      const loadBuiltResume = async () => {
+        try {
+          setIsProcessing(true);
+          setStatusText("Loading built resume...");
+          const resume = await getResumeById(userId, paramResumeId);
+          if (resume && resume.parsedData) {
+            setParsedData(resume.parsedData);
+            setFileName(resume.fileName || "Built_Resume.pdf");
+            if (resume.parsedData.basics?.label) {
+              setRole(resume.parsedData.basics.label);
+            }
+            const basics = resume.parsedData.basics as any;
+            if (basics?.country) {
+              setCountry(basics.country);
+            }
+            setStep(3);
+          }
+        } catch (err: any) {
+          console.error("Error loading built resume:", err);
+        } finally {
+          setIsProcessing(false);
+        }
+      };
+      loadBuiltResume();
+    }
+  }, [paramResumeId, userId]);
   
   // States for API interactions
   const [isProcessing, setIsProcessing] = useState(false);
@@ -190,8 +233,9 @@ export default function OnboardingWizardClient({ userId, userName }: OnboardingW
       if (data.parsedData?.basics?.label) {
         setRole(data.parsedData.basics.label);
       }
-      if (data.parsedData?.basics?.country) {
-        setCountry(data.parsedData.basics.country);
+      const basics = data.parsedData?.basics as any;
+      if (basics?.country) {
+        setCountry(basics.country);
       }
 
       setIsProcessing(false);
@@ -329,14 +373,26 @@ export default function OnboardingWizardClient({ userId, userName }: OnboardingW
 
         {/* Step tracker dot indicator */}
         <div className="flex justify-between items-center w-full mb-2 border-b border-white/5 pb-4">
-          <div className="flex flex-col">
-            <span className="text-xs font-mono tracking-wider text-zinc-400 uppercase">MOCKRITHM ARCHITECTURE</span>
-            <span className="text-sm font-bold text-zinc-200 uppercase tracking-wider mt-0.5">
-              Career calibration
-            </span>
+          <div className="flex items-center gap-3">
+            <div className="relative">
+              <div className="absolute inset-0 bg-white rounded-lg blur opacity-15" />
+              <div className="relative bg-white/5 p-1.5 rounded-lg border border-white/10">
+                <img
+                  src="/logo.svg"
+                  alt="Mockrithm Logo"
+                  className="w-5.5 h-5.5"
+                />
+              </div>
+            </div>
+            <div className="flex flex-col leading-tight">
+              <span className="text-sm font-black text-white font-mono tracking-tight">MOCKRITHM</span>
+              <span className="text-[10px] font-mono tracking-wider text-zinc-400 uppercase">
+                Career Calibration
+              </span>
+            </div>
           </div>
           <div className="flex gap-1.5">
-            {[1, 2, 3, 4, 5].map((s) => (
+            {[1, 2, 3, 4].map((s) => (
               <span 
                 key={s} 
                 className={`h-1.5 rounded-full transition-all duration-300 ${
@@ -373,7 +429,7 @@ export default function OnboardingWizardClient({ userId, userName }: OnboardingW
                   Welcome to Mockrithm, {userName}!
                 </h1>
                 <p className="text-base text-zinc-200 leading-relaxed font-semibold">
-                  Let&apos;s build your professional career engine. We will parse your resume, assess your ATS score, automatically optimize it, and configure our AI to give you the ultimate personalized preparation experience.
+                  Let&apos;s build your professional career engine. We will parse your resume, assess your ATS score, and configure our AI to give you the ultimate personalized preparation experience.
                 </p>
               </div>
 
@@ -385,8 +441,8 @@ export default function OnboardingWizardClient({ userId, userName }: OnboardingW
                     <Sparkles className="size-5 text-white" />
                   </div>
                   <div>
-                    <h4 className="text-sm font-bold text-white uppercase tracking-wider">Tailored Feedback loop</h4>
-                    <p className="text-xs text-zinc-300 mt-1 leading-relaxed">Every mock interview dynamically targets your real credentials and goals.</p>
+                    <h4 className="text-sm font-bold text-white uppercase tracking-wider">Practice that fits you</h4>
+                    <p className="text-xs text-zinc-300 mt-1 leading-relaxed">Every interview adapts to your specific resume, background, and career goals.</p>
                   </div>
                 </div>
 
@@ -395,8 +451,8 @@ export default function OnboardingWizardClient({ userId, userName }: OnboardingW
                     <RefreshCw className="size-5 text-white" />
                   </div>
                   <div>
-                    <h4 className="text-sm font-bold text-white uppercase tracking-wider">Self-Improving Profile</h4>
-                    <p className="text-xs text-zinc-300 mt-1 leading-relaxed">Mockrithm learns from your interview results to continuously perfect your details.</p>
+                    <h4 className="text-sm font-bold text-white uppercase tracking-wider">Track your progress</h4>
+                    <p className="text-xs text-zinc-300 mt-1 leading-relaxed">We analyze your mock interviews to update your details and show your improvement over time.</p>
                   </div>
                 </div>
               </div>
@@ -438,14 +494,50 @@ export default function OnboardingWizardClient({ userId, userName }: OnboardingW
                 <FileUp className="size-10 mb-4 text-zinc-400" />
                 
                 {file ? (
-                  <div className="flex flex-col gap-1.5 items-center">
-                    <span className="text-sm font-bold text-white">{file.name}</span>
-                    <span className="text-xs font-mono text-zinc-350">{(file.size / 1024 / 1024).toFixed(2)} MB • READY</span>
+                  <div className="flex flex-col gap-4 items-center w-full max-w-sm">
+                    <div className="flex flex-col gap-1.5 items-center">
+                      <span className="text-sm font-bold text-white max-w-[280px] truncate">{file.name}</span>
+                      <span className="text-xs font-mono text-zinc-350">{(file.size / 1024 / 1024).toFixed(2)} MB • READY</span>
+                    </div>
+                    <div className="flex gap-2.5 mt-2 w-full justify-center">
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setFile(null);
+                        }}
+                        className="px-4 py-2 bg-red-950/40 border border-red-500/30 hover:bg-red-900/40 text-red-200 text-xs font-bold uppercase rounded-xl transition-all cursor-pointer"
+                      >
+                        Delete File
+                      </button>
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          router.push("/user/dashboard/resume/templates?from=onboarding");
+                        }}
+                        className="px-4 py-2 bg-white/5 border border-white/10 hover:bg-white/10 text-white text-xs font-bold uppercase rounded-xl transition-all cursor-pointer"
+                      >
+                        Build a Resume
+                      </button>
+                    </div>
                   </div>
                 ) : (
                   <div className="flex flex-col gap-1.5 items-center">
                     <span className="text-sm font-bold text-zinc-200">Drag & drop your resume PDF here</span>
                     <span className="text-xs font-mono text-zinc-400">or click to browse local files (Max 5MB)</span>
+                    <div className="mt-4">
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          router.push("/user/dashboard/resume/templates?from=onboarding");
+                        }}
+                        className="px-4 py-2 bg-white/5 border border-white/10 hover:bg-white/10 text-white text-xs font-bold uppercase rounded-xl transition-all cursor-pointer flex items-center gap-1.5"
+                      >
+                        <Sparkles className="size-3.5 text-white animate-pulse" /> Create with Resume Builder
+                      </button>
+                    </div>
                   </div>
                 )}
               </div>
@@ -628,7 +720,7 @@ export default function OnboardingWizardClient({ userId, userName }: OnboardingW
             >
               <div className="flex flex-col gap-1 border-b border-white/5 pb-4">
                 <h2 className="text-2xl font-bold tracking-tight text-white">ATS Diagnostics & Feedback</h2>
-                <p className="text-xs text-zinc-400 uppercase tracking-wider font-mono">STEP 04 OF 05</p>
+                <p className="text-xs text-zinc-400 uppercase tracking-wider font-mono">STEP 04 OF 04</p>
               </div>
 
               {isProcessing ? (
@@ -645,7 +737,7 @@ export default function OnboardingWizardClient({ userId, userName }: OnboardingW
                     {/* Graded Circle Stamp */}
                     <div className="p-6 bg-rose-950/10 border border-rose-500/20 rounded-2xl flex flex-col items-center gap-4 text-center relative overflow-hidden">
                       <div className="absolute top-0 right-0 p-1 bg-red-500/10 text-red-400 text-[10px] font-mono uppercase tracking-wider border-b border-l border-red-500/20 rounded-bl-lg">
-                        Correction Phase
+                        Analysis Phase
                       </div>
                       
                       <span className="text-xs font-mono uppercase tracking-wider text-rose-350">ATS Compliance Grade</span>
@@ -657,55 +749,93 @@ export default function OnboardingWizardClient({ userId, userName }: OnboardingW
                       <div className="flex flex-col gap-1 mt-1">
                         <span className="text-2xl font-black text-white font-mono">{atsAnalysis.atsScore}% Score</span>
                         <p className="text-xs text-zinc-300 font-semibold leading-relaxed max-w-xs mt-1">
-                          Your resume requires critical corrections to align with requirements for a <span className="font-bold text-white">#{role}</span>.
+                          Review feedback tags to align your resume with target role: <span className="font-bold text-white">#{role}</span>.
                         </p>
                       </div>
                     </div>
 
-                    {/* Score Explanation Callout */}
-                    <div className="p-4 bg-zinc-900/50 border border-zinc-800 rounded-xl flex flex-col gap-2">
-                      <div className="flex items-center gap-2 text-amber-400">
-                        <AlertTriangle className="size-4 shrink-0" />
-                        <span className="text-xs font-bold uppercase tracking-wider font-mono">Why is my score {atsAnalysis.atsScore}%?</span>
-                      </div>
-                      <p className="text-[11px] text-zinc-350 leading-relaxed font-semibold">
-                        Since your uploaded resume has sparse content (e.g. very brief experience or few projects), the initial compliance score is low.
-                        We do not fabricate fake jobs or credentials. Optimizing it in the next step will align your existing details to the STAR framework and add key skills, boosting your score up to around 58%. To get a 90%+ score, you should add more project achievements and job descriptions once you reach your dashboard.
-                      </p>
+                    {/* Detailed ATS Checklist & Advice */}
+                    <div className="flex flex-col gap-4 p-5 bg-zinc-950/60 border border-zinc-900 rounded-2xl overflow-y-auto max-h-[380px]">
+                      {/* Strengths */}
+                      {atsAnalysis.strengths && atsAnalysis.strengths.length > 0 && (
+                        <div className="flex flex-col gap-2">
+                          <span className="text-[10px] font-mono font-bold text-emerald-400 uppercase tracking-wider flex items-center gap-1.5">
+                            <CheckCircle className="size-3.5 text-emerald-400" /> Strengths
+                          </span>
+                          <ul className="list-disc list-inside space-y-1 text-xs text-zinc-300 pl-1 font-semibold leading-relaxed">
+                            {atsAnalysis.strengths.map((str: string, i: number) => (
+                              <li key={i}>{str}</li>
+                            ))}
+                          </ul>
+                        </div>
+                      )}
+
+                      {/* Gaps / Critical Warnings */}
+                      {atsAnalysis.weaknesses && atsAnalysis.weaknesses.length > 0 && (
+                        <div className="flex flex-col gap-2 border-t border-white/5 pt-3">
+                          <span className="text-[10px] font-mono font-bold text-rose-405 uppercase tracking-wider flex items-center gap-1.5">
+                            <AlertTriangle className="size-3.5 text-rose-450" /> Critical Gaps
+                          </span>
+                          <ul className="list-disc list-inside space-y-1 text-xs text-zinc-300 pl-1 font-semibold leading-relaxed">
+                            {atsAnalysis.weaknesses.map((weak: string, i: number) => (
+                              <li key={i}>{weak}</li>
+                            ))}
+                          </ul>
+                        </div>
+                      )}
+
+                      {/* Actionable Suggestions */}
+                      {atsAnalysis.improvementSuggestions && atsAnalysis.improvementSuggestions.length > 0 && (
+                        <div className="flex flex-col gap-2 border-t border-white/5 pt-3">
+                          <span className="text-[10px] font-mono font-bold text-amber-405 uppercase tracking-wider flex items-center gap-1.5">
+                            <HelpCircle className="size-3.5 text-amber-450" /> Recommendations
+                          </span>
+                          <ul className="list-disc list-inside space-y-1 text-xs text-zinc-300 pl-1 font-semibold leading-relaxed">
+                            {atsAnalysis.improvementSuggestions.map((sug: string, i: number) => (
+                              <li key={i}>{sug}</li>
+                            ))}
+                          </ul>
+                        </div>
+                      )}
                     </div>
 
-                    {/* Auto-Fix Callout Card */}
-                    <div className="p-5 bg-white/[0.01] border border-white/10 rounded-2xl flex flex-col gap-3">
-                      <div className="flex items-center gap-2">
-                        <Sparkles className="size-4.5 text-white animate-pulse" />
-                        <h4 className="text-sm font-bold text-white uppercase tracking-wider">AI Optimization</h4>
-                      </div>
-                      <p className="text-xs text-zinc-300 leading-relaxed font-semibold">
-                        We can automatically fix these corrections by integrating missing keywords, restructuring highlights under the STAR framework, and strengthening summaries.
-                      </p>
-                      
+                    <div className="flex gap-4 mt-2">
                       <Button 
-                        onClick={handleOptimizeResume}
-                        disabled={isProcessing}
-                        className="w-full mt-2 h-12 rounded-xl bg-white text-black hover:bg-zinc-200 text-xs font-bold uppercase tracking-wider flex items-center justify-center gap-1.5 cursor-pointer"
+                        onClick={() => setStep(3)}
+                        variant="outline"
+                        className="flex-1 h-12 rounded-xl border border-zinc-850 hover:bg-zinc-900 text-xs font-bold uppercase tracking-wider text-zinc-200 cursor-pointer"
                       >
-                        <RefreshCw className="size-4" /> Auto-Fix Resume
+                        Back
+                      </Button>
+                      <Button 
+                        onClick={handleCompleteOnboarding}
+                        disabled={isProcessing}
+                        className="flex-1 h-12 rounded-xl bg-white text-black hover:bg-zinc-200 text-xs font-bold uppercase tracking-wider cursor-pointer"
+                      >
+                        {isProcessing ? (
+                          <span className="flex items-center justify-center gap-1.5">
+                            <Loader2 className="size-4 animate-spin" /> Finalizing...
+                          </span>
+                        ) : (
+                          "Complete Onboarding"
+                        )}
                       </Button>
                     </div>
-
-                    <Button 
-                      onClick={() => setStep(3)}
-                      variant="outline"
-                      className="w-full h-11 rounded-xl border border-zinc-850 hover:bg-zinc-900 text-xs font-bold uppercase tracking-wider text-zinc-200 cursor-pointer"
-                    >
-                      Back to Review details
-                    </Button>
                   </div>
 
-                  {/* Right Side: Graded PDF copy view with corrections */}
+                  {/* Right Side: Original PDF or PDFRenderer Fallback */}
                   <div className="lg:col-span-7 flex flex-col gap-3">
-                    <span className="text-xs font-mono uppercase tracking-wider text-zinc-400">ATS Marked Resume Preview</span>
-                    <PDFRenderer data={parsedData} mode="diagnostic" atsAnalysis={atsAnalysis} />
+                    <span className="text-xs font-mono uppercase tracking-wider text-zinc-400">
+                      {fileUrl ? "Original Resume Document" : "Structured Resume Preview"}
+                    </span>
+                    {fileUrl ? (
+                      <iframe
+                        src={fileUrl}
+                        className="w-full h-[600px] border border-zinc-900 rounded-2xl bg-zinc-950 shadow-inner"
+                      />
+                    ) : (
+                      <PDFRenderer data={parsedData} mode="normal" />
+                    )}
                   </div>
 
                 </div>

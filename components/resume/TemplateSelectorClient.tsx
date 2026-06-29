@@ -1,13 +1,16 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { motion } from "framer-motion";
 import { createResumeFromTemplate } from "@/lib/actions/resume.action";
 import { Layout, Check, Sparkles, Loader2, ArrowRight, User, Briefcase, Calendar } from "lucide-react";
 import { toast } from "sonner";
-import { Props } from "next/script";
 import AnimatedResumeCard from "./AnimatedResumeCard";
+
+interface Props {
+  userId: string;
+}
 
 // Sample data for mini-resume previews (same as before)
 const SAMPLE_PROFILES = {
@@ -82,7 +85,7 @@ const SAMPLE_PROFILES = {
 };
 
 function MiniResumeCard({ templateId }: { templateId: string }) {
-  const profile = SAMPLE_PROFILES[templateId];
+  const profile = (SAMPLE_PROFILES as Record<string, any>)[templateId];
   if (!profile) return null;
   const { name, title, summary, skills, experience, education } = profile;
   const gradientMap: Record<string, string> = {
@@ -144,47 +147,87 @@ const TEMPLATES = [
     name: "Minimalist",
     color: "from-white/10 to-white/5",
     tags: ["ATS Friendly", "Clean", "Universal"],
+    description: "Clean, distraction-free layout highlighting experience and skills.",
+    audience: "Best for tech professionals and traditional industries."
   },
   {
     id: "corporate",
     name: "Classic Corporate",
     color: "from-white/10 to-white/5",
     tags: ["Professional", "Structured", "Traditional"],
-    },
+    description: "Structured, formal style with traditional layout rules.",
+    audience: "Best for banking, legal, and executive applications."
+  },
   {
     id: "cyber",
     name: "Tech & Cyberpunk",
     color: "from-white/10 to-white/5",
     tags: ["Tech", "Modern", "Creative"],
+    description: "High-contrast modern look with subtle digital grid highlights.",
+    audience: "Best for creative tech roles and startup environments."
   },
   {
     id: "modern",
     name: "Modern Sidebar",
     color: "from-white/10 to-white/5",
     tags: ["Two-Column", "Designer", "Sleek"],
+    description: "Two-column design with a dark left sidebar for credentials.",
+    audience: "Great for designers, marketers, and developers."
   },
   {
     id: "creative",
     name: "Vibrant Creative",
     color: "from-white/10 to-white/5",
     tags: ["Artistic", "Bold", "Impactful"],
+    description: "Dynamic top color banner with offset multi-column highlights.",
+    audience: "Best for copywriters, artists, and creators."
   },
   {
     id: "executive",
     name: "Executive Leader",
     color: "from-white/10 to-white/5",
     tags: ["Executive", "Formal", "Leadership"],
+    description: "Serif-based elegant style designed for leadership profiles.",
+    audience: "Best for directors, VPs, and senior executives."
   },
   {
     id: "academic",
     name: "Academic CV",
     color: "from-white/10 to-white/5",
     tags: ["Academic", "Extended", "Detailed"],
+    description: "Detail-heavy layout optimized for lists and publications.",
+    audience: "Best for researchers, educators, and PhD candidates."
+  },
+  {
+    id: "elegant",
+    name: "Elegant Serif",
+    color: "from-white/10 to-white/5",
+    tags: ["Warm", "Creative", "Sophisticated"],
+    description: "Classy warm layout with beautiful font borders.",
+    audience: "Great for luxury brands, consulting, and finance."
+  },
+  {
+    id: "tech",
+    name: "Developer Tech",
+    color: "from-white/10 to-white/5",
+    tags: ["Developer", "Markdown", "Compact"],
+    description: "Monospaced developer code layout with bold tech tags.",
+    audience: "Designed specifically for programmers and devops engineers."
+  },
+  {
+    id: "compact",
+    name: "Compact Grid",
+    color: "from-white/10 to-white/5",
+    tags: ["High Density", "One-Page", "Structured"],
+    description: "Dense double-column layout designed to fit maximum details in 1 page.",
+    audience: "Best for professionals with extensive project portfolios."
   }
 ];
 
 export default function TemplateSelectorClient({ userId }: Props) {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const fromOnboarding = searchParams.get("from") === "onboarding";
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -197,7 +240,11 @@ export default function TemplateSelectorClient({ userId }: Props) {
       const res = await createResumeFromTemplate(userId, templateId);
       if (res.success && res.resumeId) {
         toast.success("Workspace loaded successfully!");
-        router.push(`/user/dashboard/resume/workspace/${res.resumeId}`);
+        if (fromOnboarding) {
+          router.push(`/user/dashboard/resume/workspace/${res.resumeId}?from=onboarding`);
+        } else {
+          router.push(`/user/dashboard/resume/workspace/${res.resumeId}`);
+        }
       } else {
         throw new Error(res.error || "Failed to create resume template");
       }

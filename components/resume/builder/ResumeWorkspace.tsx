@@ -12,6 +12,7 @@ import {
 import { toast } from "sonner";
 import { updateResumeData, saveAtsAnalysis } from "@/lib/actions/resume.action";
 import Link from "next/link";
+import { useRouter, useSearchParams } from "next/navigation";
 
 interface Props {
   initialResume: ResumeDocument;
@@ -30,6 +31,9 @@ export default function ResumeWorkspace({ initialResume }: Props) {
     lastSaved, 
     setLastSaved 
   } = useResumeStore();
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const fromOnboarding = searchParams.get("from") === "onboarding";
   const [isExporting, setIsExporting] = useState(false);
   const [isAtsOpen, setIsAtsOpen] = useState(false);
   const [jobDescription, setJobDescription] = useState("");
@@ -140,12 +144,21 @@ export default function ResumeWorkspace({ initialResume }: Props) {
       {/* Top Header */}
       <header className="h-16 border-b border-slate-800 bg-slate-900/50 backdrop-blur-xl flex items-center justify-between px-6 shrink-0 z-10">
         <div className="flex items-center gap-4">
-          <Link 
-            href="/user/resume"
-            className="flex items-center gap-1.5 text-xs text-slate-400 hover:text-white font-mono uppercase tracking-wider transition-colors mr-2"
-          >
-            <ArrowLeft className="size-4" /> Back
-          </Link>
+          {fromOnboarding ? (
+            <Link 
+              href="/onboarding"
+              className="flex items-center gap-1.5 text-xs text-slate-400 hover:text-white font-mono uppercase tracking-wider transition-colors mr-2 animate-fadeIn"
+            >
+              <ArrowLeft className="size-4" /> Cancel & Return
+            </Link>
+          ) : (
+            <Link 
+              href="/user/resume"
+              className="flex items-center gap-1.5 text-xs text-slate-400 hover:text-white font-mono uppercase tracking-wider transition-colors mr-2"
+            >
+              <ArrowLeft className="size-4" /> Back
+            </Link>
+          )}
           <h1 className="text-xl font-black text-white uppercase tracking-wider">
             Resume Builder
           </h1>
@@ -182,12 +195,24 @@ export default function ResumeWorkspace({ initialResume }: Props) {
             Export PDF
           </button>
 
-          <Link
-            href="/user/dashboard"
-            className="flex items-center gap-2 bg-emerald-600 hover:bg-emerald-500 text-white font-bold px-4 py-2 rounded-lg transition-all shadow-md text-sm uppercase tracking-wider"
-          >
-            Finish
-          </Link>
+          {fromOnboarding ? (
+            <button
+              onClick={async () => {
+                await handleExportPDF();
+                router.push(`/onboarding?resumeId=${resumeId}`);
+              }}
+              className="flex items-center gap-2 bg-emerald-600 hover:bg-emerald-500 text-white font-bold px-4 py-2 rounded-lg transition-all shadow-md text-sm uppercase tracking-wider cursor-pointer animate-pulse"
+            >
+              Download & Return
+            </button>
+          ) : (
+            <Link
+              href="/user/dashboard"
+              className="flex items-center gap-2 bg-emerald-600 hover:bg-emerald-500 text-white font-bold px-4 py-2 rounded-lg transition-all shadow-md text-sm uppercase tracking-wider"
+            >
+              Finish
+            </Link>
+          )}
         </div>
       </header>
 

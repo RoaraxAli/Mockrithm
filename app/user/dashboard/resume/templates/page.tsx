@@ -4,7 +4,9 @@ import TemplateSelectorClient from "@/components/resume/TemplateSelectorClient";
 import Link from "next/link";
 import { ChevronLeft } from "lucide-react";
 
-export default async function TemplatesPage() {
+export default async function TemplatesPage({ searchParams }: { searchParams: Promise<{ from?: string }> }) {
+  const resolvedParams = await searchParams;
+  const fromOnboarding = resolvedParams?.from === "onboarding";
   const user = await getCurrentUser();
   if (!user) redirect("/sign-in");
 
@@ -12,12 +14,12 @@ export default async function TemplatesPage() {
   <div className="flex flex-col gap-6 w-full max-w-6xl mx-auto py-12 px-4 font-mona-sans">
     <div className="flex items-center gap-2 mb-4">
       <Link
-  href="/user/dashboard/resume"
-  className="inline-flex items-center gap-2 px-4 py-2 bg-white/10 border border-white/20 text-white rounded-lg hover:bg-white/20 transition-colors"
->
-  <ChevronLeft className="size-5" />
-  Back
-</Link>
+        href={fromOnboarding ? "/onboarding" : "/user/dashboard/resume"}
+        className="inline-flex items-center gap-2 px-4 py-2 bg-white/10 border border-white/20 text-white rounded-lg hover:bg-white/20 transition-colors"
+      >
+        <ChevronLeft className="size-5" />
+        Back
+      </Link>
     </div>
     <div className="flex flex-col gap-2 mb-8">
       <span className="text-[10px] font-mono tracking-[0.2em] text-gray-400 uppercase">STEP 02 // VISUAL LAYOUT</span>
