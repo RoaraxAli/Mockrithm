@@ -6,140 +6,265 @@ import { motion } from "framer-motion";
 import { createResumeFromTemplate } from "@/lib/actions/resume.action";
 import { Layout, Check, Sparkles, Loader2, ArrowRight, User, Briefcase, Calendar } from "lucide-react";
 import { toast } from "sonner";
-import AnimatedResumeCard from "./AnimatedResumeCard";
+import { getTemplateComponent } from "./templates";
+import { ParsedResume } from "@/types/resume";
 
 interface Props {
   userId: string;
 }
 
-// Sample data for mini-resume previews (same as before)
-const SAMPLE_PROFILES = {
+const SAMPLE_PROFILES: Record<string, ParsedResume> = {
   minimal: {
-    name: "Alex Johnson",
-    title: "Software Engineer",
-    summary: "Full‑stack developer with 5+ years experience building scalable web applications.",
-    skills: ["JavaScript", "React", "Node.js", "TypeScript", "AWS"],
-    experience: [
-      { role: "Senior Engineer", company: "TechCorp", years: "2021‑Present" },
-      { role: "Developer", company: "WebStart", years: "2018‑2021" }
-    ],
-    education: [{ degree: "B.Sc. Computer Science", school: "State University", year: "2018" }]
-  },
-  corporate: {
-    name: "Maria Lopez",
-    title: "Financial Analyst",
-    summary: "Analytical professional with 6 years in banking and investment analysis.",
-    skills: ["Excel", "Financial Modeling", "SQL", "PowerBI", "Risk Management"],
-    experience: [
-      { role: "Senior Analyst", company: "Global Bank", years: "2020‑Present" },
-      { role: "Analyst", company: "Capital Advisors", years: "2017‑2020" }
-    ],
-    education: [{ degree: "M.B.A. Finance", school: "Harvard Business School", year: "2017" }]
-  },
-  cyber: {
-    name: "Samir Patel",
-    title: "Full‑Stack Developer",
-    summary: "Passionate about cutting‑edge web tech and building performant UI/UX.",
-    skills: ["React", "Next.js", "Tailwind", "GraphQL", "Docker"],
-    experience: [
-      { role: "Lead Engineer", company: "Neon Labs", years: "2022‑Present" },
-      { role: "Junior Developer", company: "Pixel Forge", years: "2020‑2022" }
-    ],
-    education: [{ degree: "B.Tech Computer Engineering", school: "MIT", year: "2020" }]
-  },
-  modern: {
-    name: "Lena Chen",
-    title: "Creative Designer",
-    summary: "Design specialist with a focus on brand identity and digital experiences.",
-    skills: ["Figma", "Adobe CC", "UI/UX", "Brand Strategy", "Illustration"],
-    experience: [
-      { role: "Senior Designer", company: "CreativeWorks", years: "2021‑Present" },
-      { role: "Designer", company: "Studio 9", years: "2018‑2021" }
-    ],
-    education: [{ degree: "B.A. Visual Communication", school: "Art Institute", year: "2018" }]
-  },
-  creative: {
-    name: "Jenna Ruiz",
-    title: "Content Creator & Copywriter",
-    summary: "Storyteller crafting compelling copy for brands across media platforms.",
-    skills: ["Copywriting", "SEO", "Social Media", "WordPress", "Video Editing"],
-    experience: [
-      { role: "Lead Content Strategist", company: "MediaSpark", years: "2019‑Present" },
-      { role: "Freelance Writer", company: "Various", years: "2016‑2019" }
-    ],
-    education: [{ degree: "B.Sc. Journalism", school: "Columbia University", year: "2016" }]
-  },
-  academic: {
-    name: "Daniel Kim",
-    title: "Ph.D. Candidate in Biology",
-    summary: "Researcher focused on cellular signaling pathways and gene expression analysis.",
-    skills: ["R", "Python", "Bioinformatics", "NGS", "Lab Techniques"],
-    experience: [
-      { role: "Research Assistant", company: "University Lab", years: "2019‑Present" }
+    basics: {
+      name: "Alex Johnson",
+      label: "Software Engineer",
+      email: "alex.johnson@email.com",
+      phone: "+1 (555) 019-2834",
+      summary: "Full-stack developer with 5+ years of experience building scalable web applications. Passionate about performance, clean code, and UI/UX design."
+    },
+    work: [
+      { company: "TechCorp", position: "Senior Engineer", startDate: "2021", endDate: "Present", highlights: ["Led development of React-based cloud portal, improving load times by 40%.", "Mentored 4 junior engineers and introduced automated testing pipelines."] }
     ],
     education: [
-      { degree: "M.Sc. Molecular Biology", school: "UCLA", year: "2019" },
-      { degree: "B.Sc. Biochemistry", school: "UCLA", year: "2017" }
+      { institution: "State University", studyType: "B.Sc.", area: "Computer Science", endDate: "2018" }
+    ],
+    skills: ["React", "Node.js", "TypeScript", "Next.js", "AWS"],
+    projects: [
+      { name: "Analytics Dashboard", description: "Built real-time telemetry dashboard using Tailwind and React.", technologies: ["React", "Tailwind"] }
+    ],
+    certifications: [
+      { name: "AWS Solutions Architect", issuer: "Amazon", date: "2023" }
+    ],
+    socialLinks: [
+      { platform: "GitHub", url: "github.com/alexj" }
+    ]
+  },
+  corporate: {
+    basics: {
+      name: "Maria Lopez",
+      label: "Financial Analyst",
+      email: "maria.lopez@email.com",
+      phone: "+1 (555) 012-7729",
+      summary: "Analytical finance professional with 6 years of experience in corporate banking, financial modeling, and risk assessment."
+    },
+    work: [
+      { company: "Global Bank", position: "Senior Analyst", startDate: "2020", endDate: "Present", highlights: ["Managed $50M portfolio of corporate clients, optimizing yield by 8%.", "Created dynamic forecasting models to support executive budgeting decisions."] }
+    ],
+    education: [
+      { institution: "Harvard Business School", studyType: "M.B.A.", area: "Finance", endDate: "2017" }
+    ],
+    skills: ["Excel", "Financial Modeling", "SQL", "PowerBI", "Risk Management"],
+    projects: [
+      { name: "Treasury Sync Project", description: "Redesigned reporting automation using PowerBI.", technologies: ["SQL", "PowerBI"] }
+    ],
+    certifications: [
+      { name: "Chartered Financial Analyst (CFA)", issuer: "CFA Institute", date: "2021" }
+    ],
+    socialLinks: [
+      { platform: "LinkedIn", url: "linkedin.com/in/marialopez" }
+    ]
+  },
+  cyber: {
+    basics: {
+      name: "Samir Patel",
+      label: "Security Engineer",
+      email: "samir.patel@email.com",
+      phone: "+1 (555) 015-8839",
+      summary: "Cybersecurity specialist focused on application penetration testing, cloud security compliance, and network monitoring."
+    },
+    work: [
+      { company: "Neon Labs", position: "Lead Security Analyst", startDate: "2022", endDate: "Present", highlights: ["Discovered and patched 12 critical vulnerabilities in the core API infrastructure.", "Conducted audit of AWS IAM structures, reducing access overlap by 60%."] }
+    ],
+    education: [
+      { institution: "MIT", studyType: "B.Tech", area: "Computer Engineering", endDate: "2020" }
+    ],
+    skills: ["Pentesting", "Next.js", "IAM Auditing", "Docker", "Wireshark"],
+    projects: [
+      { name: "Vulnerability Scanner", description: "Created an automated API penetration scanning tool.", technologies: ["Python", "Docker"] }
+    ],
+    certifications: [
+      { name: "Certified Ethical Hacker (CEH)", issuer: "EC-Council", date: "2021" }
+    ],
+    socialLinks: [
+      { platform: "GitHub", url: "github.com/samirp" }
+    ]
+  },
+  modern: {
+    basics: {
+      name: "Lena Chen",
+      label: "Creative Designer",
+      email: "lena.chen@email.com",
+      phone: "+1 (555) 011-9230",
+      summary: "UX/UI designer crafting elegant digital experiences and distinct corporate branding guidelines."
+    },
+    work: [
+      { company: "CreativeWorks", position: "Senior Designer", startDate: "2021", endDate: "Present", highlights: ["Rebranded consumer web app, boosting conversion rates by 22%.", "Designed responsive layout templates used by 10k+ clients."] }
+    ],
+    education: [
+      { institution: "Art Institute", studyType: "B.A.", area: "Visual Communication", endDate: "2018" }
+    ],
+    skills: ["Figma", "Adobe CC", "UI/UX", "Brand Strategy", "Illustration"],
+    projects: [
+      { name: "Design System Build", description: "Created UI kit in Figma to speed up developer handoffs.", technologies: ["Figma"] }
+    ],
+    certifications: [
+      { name: "UX Design Certificate", issuer: "Google", date: "2020" }
+    ],
+    socialLinks: [
+      { platform: "Dribbble", url: "dribbble.com/lenachen" }
+    ]
+  },
+  creative: {
+    basics: {
+      name: "Jenna Ruiz",
+      label: "Content Strategist",
+      email: "jenna.ruiz@email.com",
+      phone: "+1 (555) 013-6450",
+      summary: "Digital copywriter and content strategist specialized in building brand narrative across social channels."
+    },
+    work: [
+      { company: "MediaSpark", position: "Lead Content Writer", startDate: "2019", endDate: "Present", highlights: ["Grew newsletter subscribers from 2k to 50k inside 12 months.", "Created SEO-focused article database driving 200k+ organic views monthly."] }
+    ],
+    education: [
+      { institution: "Columbia University", studyType: "B.Sc.", area: "Journalism", endDate: "2016" }
+    ],
+    skills: ["SEO", "Copywriting", "WordPress", "Campaign Analytics"],
+    projects: [
+      { name: "Viral Growth Hack", description: "Engineered campaign generating 10M social media impressions.", technologies: ["Analytics"] }
+    ],
+    certifications: [
+      { name: "SEO Expert certification", issuer: "HubSpot", date: "2020" }
+    ],
+    socialLinks: [
+      { platform: "Twitter", url: "twitter.com/jennaruiz" }
+    ]
+  },
+  executive: {
+    basics: {
+      name: "Arthur Pendelton",
+      label: "Operations Director",
+      email: "arthur.p@email.com",
+      phone: "+1 (555) 017-9092",
+      summary: "Executive with 12+ years of management driving manufacturing process scaling, quality control, and regional scaling."
+    },
+    work: [
+      { company: "Apex Industrial", position: "Director of Operations", startDate: "2020", endDate: "Present", highlights: ["Oversaw 3 regional hubs, streamlining logistics to save $2M annually.", "Implemented Lean Six Sigma framework across factories, reducing waste by 25%."] }
+    ],
+    education: [
+      { institution: "Stanford Graduate School", studyType: "M.S.", area: "Management", endDate: "2012" }
+    ],
+    skills: ["Operations", "Budgeting", "Lean Six Sigma", "Supply Chain", "ERP"],
+    projects: [
+      { name: "Hub Consolidation", description: "Managed merge of two distribution facilities in Texas.", technologies: ["Six Sigma", "ERP"] }
+    ],
+    certifications: [
+      { name: "Six Sigma Black Belt", issuer: "ASQ", date: "2018" }
+    ],
+    socialLinks: [
+      { platform: "LinkedIn", url: "linkedin.com/in/arthurpendelton" }
+    ]
+  },
+  academic: {
+    basics: {
+      name: "Dr. Nancy Adams",
+      label: "Biology Professor",
+      email: "n.adams@university.edu",
+      phone: "+1 (555) 019-3382",
+      summary: "Academic researcher specializing in genetics, DNA sequencing pathways, and biochemistry lab guidance."
+    },
+    work: [
+      { company: "State University", position: "Associate Professor", startDate: "2019", endDate: "Present", highlights: ["Secured $500k research grant for genetic pathway modeling.", "Published 8 peer-reviewed articles in core biochemical journals."] }
+    ],
+    education: [
+      { institution: "UCLA", studyType: "Ph.D.", area: "Molecular Biology", endDate: "2016" }
+    ],
+    skills: ["Genetics", "Grant Writing", "Bioinformatics", "Data Analysis", "Lecturing"],
+    projects: [
+      { name: "Gene Map Pipeline", description: "Created open-source sequencing parser for research labs.", technologies: ["R", "Python"] }
+    ],
+    certifications: [
+      { name: "Lab Safety Director Certification", issuer: "OSHA", date: "2021" }
+    ],
+    socialLinks: [
+      { platform: "ResearchGate", url: "researchgate.net/profile/nancy_adams" }
+    ]
+  },
+  elegant: {
+    basics: {
+      name: "Victoria Sterling",
+      label: "Wealth Management Consultant",
+      email: "v.sterling@consulting.com",
+      phone: "+1 (555) 012-4422",
+      summary: "Bespoke wealth consultant guiding high-net-worth individuals in portfolio diversity, estate planning, and tax strategy."
+    },
+    work: [
+      { company: "Sterling Assets", position: "Senior Partner", startDate: "2018", endDate: "Present", highlights: ["Advised 80+ active clients on capital allocations, maintaining 99% client retention.", "Reduced average client tax liabilities by 14% via structured asset diversification."] }
+    ],
+    education: [
+      { institution: "Penn State University", studyType: "B.Sc.", area: "Economics", endDate: "2015" }
+    ],
+    skills: ["Tax Strategy", "Capital Allocation", "Estate Planning", "Client Relations"],
+    projects: [
+      { name: "Estate Trust Redesign", description: "Custom trust structures for high-net-worth generational planning.", technologies: ["Finance"] }
+    ],
+    certifications: [
+      { name: "Certified Financial Planner (CFP)", issuer: "CFP Board", date: "2017" }
+    ],
+    socialLinks: [
+      { platform: "LinkedIn", url: "linkedin.com/in/vsterling" }
+    ]
+  },
+  tech: {
+    basics: {
+      name: "Marcus Chen",
+      label: "DevOps Engineer",
+      email: "marcus.chen@tech.io",
+      phone: "+1 (555) 014-9988",
+      summary: "Infrastructure engineer specialized in Kubernetes orchestration, CI/CD automation, and cloud cost reduction."
+    },
+    work: [
+      { company: "CloudScale Inc", position: "Senior DevOps Engineer", startDate: "2021", endDate: "Present", highlights: ["Automated cloud resource provisioning using Terraform, saving 30% on AWS costs.", "Migrated legacy monolith to Docker containers orchestrated by Kubernetes."] }
+    ],
+    education: [
+      { institution: "University of Washington", studyType: "B.S.", area: "Informatics", endDate: "2019" }
+    ],
+    skills: ["Kubernetes", "Docker", "Terraform", "GitHub Actions", "AWS"],
+    projects: [
+      { name: "GitOps Infrastructure", description: "Automated continuous delivery deployments using ArgoCD.", technologies: ["Kubernetes", "ArgoCD"] }
+    ],
+    certifications: [
+      { name: "Certified Kubernetes Administrator (CKA)", issuer: "CNCF", date: "2022" }
+    ],
+    socialLinks: [
+      { platform: "GitHub", url: "github.com/marcusdevops" }
+    ]
+  },
+  compact: {
+    basics: {
+      name: "Diana Klein",
+      label: "Elementary School Teacher",
+      email: "diana.klein@school.org",
+      phone: "+1 (555) 016-5511",
+      summary: "Passionate elementary educator with 7 years of classroom management experience and child development instruction."
+    },
+    work: [
+      { company: "The Hill School", position: "Lead Kindergarten Teacher", startDate: "2018", endDate: "Present", highlights: ["Designed interactive science curriculum adopted across 4 district schools.", "Organized quarterly parent conferences to review children developmental scores."] }
+    ],
+    education: [
+      { institution: "Boston College", studyType: "B.Ed.", area: "Elementary Education", endDate: "2016" }
+    ],
+    skills: ["Classroom Management", "Curriculum Design", "Early Literacy", "Child Psychology"],
+    projects: [
+      { name: "Reading Circle Initiative", description: "Improved class average reading levels by 35% through parent collaboration.", technologies: ["Education"] }
+    ],
+    certifications: [
+      { name: "State Educator License", issuer: "Board of Education", date: "2016" }
+    ],
+    socialLinks: [
+      { platform: "LinkedIn", url: "linkedin.com/in/dianaklein" }
     ]
   }
 };
-
-function MiniResumeCard({ templateId }: { templateId: string }) {
-  const profile = (SAMPLE_PROFILES as Record<string, any>)[templateId];
-  if (!profile) return null;
-  const { name, title, summary, skills, experience, education } = profile;
-  const gradientMap: Record<string, string> = {
-    minimal: "from-gray-800 to-gray-700",
-    corporate: "from-indigo-800 to-indigo-600",
-    cyber: "from-purple-800 to-pink-600",
-    modern: "from-blue-800 to-cyan-600",
-    creative: "from-pink-800 to-red-600",
-    executive: "from-green-800 to-emerald-600",
-    academic: "from-yellow-800 to-amber-600",
-  };
-  const gradient = gradientMap[templateId] || "from-gray-800 to-gray-700";
-  return (
-    <motion.div
-      className={`bg-gradient-to-br ${gradient} rounded-xl shadow-xl p-4 text-gray-200 text-xs overflow-hidden`}
-      initial={{ opacity: 0, scale: 0.9 }}
-      animate={{ opacity: 1, scale: 1 }}
-      whileHover={{ scale: 1.03, rotate: 0.5 }}
-      transition={{ duration: 0.6 }}
-    >
-      {/* Header with avatar */}
-      <div className="flex items-center mb-2">
-        <div className="w-8 h-8 bg-gray-300 rounded-full flex items-center justify-center text-xs mr-2 text-gray-800">
-          {name.split(' ')[0][0]}
-          {name.split(' ')[1] ? name.split(' ')[1][0] : ''}
-        </div>
-        <div>
-          <div className="font-bold text-white">{name}</div>
-          <div className="italic text-gray-300">{title}</div>
-        </div>
-      </div>
-      <p className="mb-2 text-gray-100">{summary}</p>
-      <div className="mb-2"><span className="font-semibold text-white">Skills:</span> {skills.join(', ')}</div>
-      <div className="mb-2"><span className="font-semibold text-white">Experience:</span>
-        <ul className="list-disc list-inside">
-          {experience.map((exp: any, i: number) => (
-            <li key={i}>{exp.role} @ {exp.company} ({exp.years})</li>
-          ))}
-        </ul>
-      </div>
-      <div className="mb-2"><span className="font-semibold text-white">Education:</span>
-        <ul className="list-disc list-inside">
-          {education.map((ed: any, i: number) => (
-            <li key={i}>{ed.degree}, {ed.school} ({ed.year})</li>
-          ))}
-        </ul>
-      </div>
-    </motion.div>
-  );
-}
-
-function renderPreview(id: string) {
-  return <AnimatedResumeCard templateId={id} />;
-}
 
 const TEMPLATES = [
   {
@@ -288,9 +413,22 @@ export default function TemplateSelectorClient({ userId }: Props) {
             {/* Audience label */}
             <p className="text-sm text-gray-300 italic mb-4">{tpl.audience}</p>
 
-            {/* Mini resume preview */}
-            <div className="bg-slate-950/30 backdrop-blur-xl rounded-xl p-4 border border-slate-800 mb-4">
-              {renderPreview(tpl.id)}
+            {/* Mini resume preview (White paper look like resume.io!) */}
+            <div className="w-full h-[260px] overflow-hidden border border-slate-800/80 rounded-xl bg-slate-950/80 relative flex justify-center items-start mb-4 shadow-inner">
+              <div 
+                className="absolute top-4 left-1/2 -translate-x-1/2 pointer-events-none select-none shadow-2xl rounded bg-white text-slate-800"
+                style={{ 
+                  width: "800px", 
+                  transform: "scale(0.26)", 
+                  transformOrigin: "top center" 
+                }}
+              >
+                {(() => {
+                  const TemplateComponent = getTemplateComponent(tpl.id);
+                  const profileData = SAMPLE_PROFILES[tpl.id] || SAMPLE_PROFILES.minimal;
+                  return <TemplateComponent data={profileData} />;
+                })()}
+              </div>
             </div>
           </div>
 
