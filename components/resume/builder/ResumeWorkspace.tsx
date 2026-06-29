@@ -349,7 +349,14 @@ export default function ResumeWorkspace({ initialResume }: Props) {
       const data = await res.json();
 
       if (data.parsedData) {
-        setParsedData(data.parsedData);
+        // Preserve current template and custom styles when importing new resume data
+        const currentTemplateId = parsedData.templateId || initialTemplateId;
+        const currentCustomStyles = parsedData.customStyles || {};
+        setParsedData({
+          ...data.parsedData,
+          templateId: data.parsedData.templateId || currentTemplateId,
+          customStyles: data.parsedData.customStyles || currentCustomStyles,
+        });
         setShowImportDialog(false);
         toast.success("Successfully extracted and imported details from your resume!");
       }
