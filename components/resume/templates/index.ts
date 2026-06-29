@@ -92,7 +92,7 @@ export const TEMPLATE_MAPPING: Record<string, string> = {
   "sommelier": "creative"
 };
 
-export const RESUME_TEMPLATES: Record<string, React.ComponentType<{ data: ParsedResume }>> = {
+export const RESUME_TEMPLATES: Record<string, React.ComponentType<{ data: ParsedResume; templateId?: string }>> = {
   minimal: MinimalTemplate,
   corporate: CorporateTemplate,
   cyber: CyberTemplate,

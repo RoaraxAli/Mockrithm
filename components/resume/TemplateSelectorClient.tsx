@@ -46,7 +46,7 @@ function TemplatePreview({ templateId }: { templateId: string }) {
           transform: `scale(${scale})`,
         }}
       >
-        <TemplateComponent data={profileData} />
+        <TemplateComponent data={profileData} templateId={templateId} />
       </div>
       <div className="absolute inset-0 bg-black/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none" />
     </div>
