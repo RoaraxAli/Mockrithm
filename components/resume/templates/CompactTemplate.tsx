@@ -4,7 +4,7 @@ export default function CompactTemplate({ data }: { data: ParsedResume }) {
   const { basics, work = [], education = [], skills = [], projects = [], certifications = [], socialLinks = [] } = data;
 
   return (
-    <div className="p-6 bg-white text-zinc-900 font-sans max-w-[800px] mx-auto min-h-[1050px] shadow-sm flex flex-col gap-4 select-text text-[10px] leading-snug">
+    <div className="p-6 bg-white text-zinc-900 font-sans max-w-[800px] mx-auto min-h-[1131px] shadow-sm flex flex-col gap-4 select-text text-[10px] leading-snug">
       {/* Dense Header */}
       <div className="flex justify-between items-center border-b border-zinc-300 pb-2">
         <div className="flex flex-col gap-0.5">

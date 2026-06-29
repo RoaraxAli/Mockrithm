@@ -43,7 +43,7 @@ export default function LivePreviewRenderer() {
         ))}
       </div>
 
-      <div className="w-full bg-white rounded-xl shadow-2xl overflow-hidden min-h-[1050px] scale-[0.98] origin-top transition-all duration-300">
+      <div className="w-full bg-white rounded-xl shadow-2xl overflow-hidden min-h-[1131px] scale-[0.98] origin-top transition-all duration-300">
         <TemplateComponent data={parsedData} templateId={currentTemplateId} />
       </div>
     </div>

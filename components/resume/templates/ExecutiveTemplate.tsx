@@ -4,7 +4,7 @@ export default function ExecutiveTemplate({ data }: { data: ParsedResume }) {
   const { basics, work = [], education = [], skills = [], projects = [], certifications = [], socialLinks = [] } = data;
 
   return (
-    <div className="p-10 bg-white text-zinc-800 font-serif max-w-[800px] mx-auto min-h-[1050px] shadow-sm flex flex-col gap-6 border-t-8 border-indigo-950 select-text text-[11px] leading-relaxed">
+    <div className="p-10 bg-white text-zinc-800 font-serif max-w-[800px] mx-auto min-h-[1131px] shadow-sm flex flex-col gap-6 border-t-8 border-indigo-950 select-text text-[11px] leading-relaxed">
       {/* Centered Premium Header */}
       <div className="text-center flex flex-col gap-1 border-b border-zinc-200 pb-4">
         <h1 className="text-3xl font-normal tracking-wide text-indigo-950 uppercase">{basics.name || "Your Name"}</h1>

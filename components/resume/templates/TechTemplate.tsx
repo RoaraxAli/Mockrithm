@@ -32,7 +32,7 @@ export default function TechTemplate({ data, templateId }: { data: ParsedResume;
   }
 
   return (
-    <div className={`p-8 font-mono max-w-[800px] mx-auto min-h-[1050px] shadow-sm flex flex-col gap-5 select-text text-[10px] leading-relaxed ${themeBg}`}>
+    <div className={`p-8 font-mono max-w-[800px] mx-auto min-h-[1131px] shadow-sm flex flex-col gap-5 select-text text-[10px] leading-relaxed ${themeBg}`}>
       {/* Dev Header */}
       <div className="border-b border-zinc-800 pb-4">
         <h1 className="text-2xl font-black text-white uppercase tracking-tight flex items-center gap-1.5">

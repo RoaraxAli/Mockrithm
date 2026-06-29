@@ -4,7 +4,7 @@ export default function CorporateTemplate({ data }: { data: ParsedResume }) {
   const { basics, work = [], education = [], skills = [], projects = [], certifications = [], socialLinks = [] } = data;
 
   return (
-    <div className="p-8 bg-white text-slate-900 font-serif max-w-[800px] mx-auto min-h-[1050px] shadow-sm flex flex-col gap-5 border-t-8 border-slate-900">
+    <div className="p-8 bg-white text-slate-900 font-serif max-w-[800px] mx-auto min-h-[1131px] shadow-sm flex flex-col gap-5 border-t-8 border-slate-900">
       {/* Header */}
       <div className="flex flex-col gap-2">
         <h1 className="text-4xl font-extrabold tracking-tight text-slate-900 leading-none">{basics.name || "Your Name"}</h1>

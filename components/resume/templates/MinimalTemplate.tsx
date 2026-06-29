@@ -73,7 +73,7 @@ export default function MinimalTemplate({ data, templateId }: { data: ParsedResu
   }
 
   return (
-    <div className={`p-8 max-w-[800px] mx-auto min-h-[1050px] shadow-sm flex flex-col gap-6 ${containerBg}`}>
+    <div className={`p-8 max-w-[800px] mx-auto min-h-[1131px] shadow-sm flex flex-col gap-6 ${containerBg}`}>
       {/* Header */}
       <div className={headerClass}>
         <h1 className={`text-3xl font-bold tracking-tight ${nameColor}`}>{basics.name || "Your Name"}</h1>

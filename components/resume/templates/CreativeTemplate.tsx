@@ -49,7 +49,7 @@ export default function CreativeTemplate({ data, templateId }: { data: ParsedRes
   }
 
   return (
-    <div className="bg-white text-slate-800 font-sans max-w-[800px] mx-auto min-h-[1050px] shadow-sm flex flex-col overflow-hidden text-[11px] leading-relaxed select-text">
+    <div className="bg-white text-slate-800 font-sans max-w-[800px] mx-auto min-h-[1131px] shadow-sm flex flex-col overflow-hidden text-[11px] leading-relaxed select-text">
       {/* Colorful Header block */}
       <div className={`p-8 flex flex-col gap-2 ${headerBg}`}>
         <h1 className="text-3xl font-extrabold tracking-tight">{basics.name || "Your Name"}</h1>

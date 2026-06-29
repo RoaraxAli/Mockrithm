@@ -4,7 +4,7 @@ export default function AcademicTemplate({ data }: { data: ParsedResume }) {
   const { basics, work = [], education = [], skills = [], projects = [], certifications = [], socialLinks = [] } = data;
 
   return (
-    <div className="p-10 bg-white text-zinc-900 font-serif max-w-[800px] mx-auto min-h-[1050px] shadow-sm flex flex-col gap-6 select-text text-[11px] leading-relaxed">
+    <div className="p-10 bg-white text-zinc-900 font-serif max-w-[800px] mx-auto min-h-[1131px] shadow-sm flex flex-col gap-6 select-text text-[11px] leading-relaxed">
       {/* Name and Title Centered */}
       <div className="text-center flex flex-col gap-1 border-b-2 border-zinc-900 pb-3">
         <h1 className="text-2xl font-bold tracking-tight uppercase text-zinc-950">{basics.name || "Your Name"}</h1>

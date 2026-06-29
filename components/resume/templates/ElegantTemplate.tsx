@@ -4,7 +4,7 @@ export default function ElegantTemplate({ data }: { data: ParsedResume }) {
   const { basics, work = [], education = [], skills = [], projects = [], certifications = [], socialLinks = [] } = data;
 
   return (
-    <div className="p-8 bg-stone-50/15 text-stone-850 font-serif max-w-[800px] mx-auto min-h-[1050px] shadow-sm flex flex-col gap-6 border border-stone-200 select-text text-[11px] leading-relaxed relative">
+    <div className="p-8 bg-stone-50/15 text-stone-850 font-serif max-w-[800px] mx-auto min-h-[1131px] shadow-sm flex flex-col gap-6 border border-stone-200 select-text text-[11px] leading-relaxed relative">
       {/* Accent frame decoration */}
       <div className="absolute inset-4 border border-stone-200/50 pointer-events-none" />
 

@@ -53,7 +53,7 @@ export default function ModernTemplate({ data, templateId }: { data: ParsedResum
   }
 
   return (
-    <div className={`flex max-w-[800px] mx-auto min-h-[1050px] shadow-sm overflow-hidden text-[11px] leading-relaxed ${contentBg} ${flexRowClass}`}>
+    <div className={`flex max-w-[800px] mx-auto min-h-[1131px] shadow-sm overflow-hidden text-[11px] leading-relaxed ${contentBg} ${flexRowClass}`}>
       {/* Left Sidebar */}
       <div className={`w-1/3 p-6 flex flex-col gap-6 select-text ${sidebarBg}`}>
         <div className={`flex flex-col gap-1 border-b pb-4 ${accentBorder}`}>
