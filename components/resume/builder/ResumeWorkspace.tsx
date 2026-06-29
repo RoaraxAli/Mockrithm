@@ -13,6 +13,7 @@ import {
 import { toast } from "sonner";
 import { updateResumeData, saveAtsAnalysis } from "@/lib/actions/resume.action";
 import { getTemplateComponent, TEMPLATE_MAPPING } from "@/components/resume/templates";
+import { FONT_OPTIONS, getFontClass, getFontLabel } from "@/components/resume/templates/fonts";
 import { SAMPLE_PROFILES } from "@/components/resume/sampleProfiles";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";

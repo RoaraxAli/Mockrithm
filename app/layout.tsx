@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Mona_Sans, Inter } from "next/font/google";
+import { Mona_Sans, Inter, Poppins, Merriweather, Playfair_Display, Lora, Roboto_Slab, Source_Sans_3, JetBrains_Mono } from "next/font/google";
 import { Toaster } from "sonner";
 import { ClerkProvider } from "@clerk/nextjs";
 
@@ -24,6 +24,48 @@ const inter = Inter({
   subsets: ["latin"],
 });
 
+const poppins = Poppins({
+  variable: "--font-poppins",
+  subsets: ["latin"],
+  weight: ["400", "500", "600", "700", "800"],
+});
+
+const merriweather = Merriweather({
+  variable: "--font-merriweather",
+  subsets: ["latin"],
+  weight: ["400", "700"],
+});
+
+const playfairDisplay = Playfair_Display({
+  variable: "--font-playfair",
+  subsets: ["latin"],
+  weight: ["400", "500", "600", "700", "800"],
+});
+
+const lora = Lora({
+  variable: "--font-lora",
+  subsets: ["latin"],
+  weight: ["400", "500", "600", "700"],
+});
+
+const robotoSlab = Roboto_Slab({
+  variable: "--font-roboto-slab",
+  subsets: ["latin"],
+  weight: ["400", "500", "600", "700"],
+});
+
+const sourceSans3 = Source_Sans_3({
+  variable: "--font-source-sans",
+  subsets: ["latin"],
+  weight: ["400", "500", "600", "700"],
+});
+
+const jetbrainsMono = JetBrains_Mono({
+  variable: "--font-jetbrains-mono",
+  subsets: ["latin"],
+  weight: ["400", "500", "600", "700"],
+});
+
 export const metadata: Metadata = {
   title: "Mockrithm",
   description: "An AI-powered platform for mock interviews and admin control",
@@ -39,7 +81,7 @@ export default async function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body
-        className={`${monaSans.className} ${inter.variable} bg-background text-foreground antialiased pattern`}
+        className={`${monaSans.className} ${inter.variable} ${poppins.variable} ${merriweather.variable} ${playfairDisplay.variable} ${lora.variable} ${robotoSlab.variable} ${sourceSans3.variable} ${jetbrainsMono.variable} bg-background text-foreground antialiased pattern`}
         suppressHydrationWarning
       >
         <ClerkProvider
