@@ -5,6 +5,10 @@ export interface ParsedResume {
     email: string;
     phone: string;
     summary: string;
+    github?: string;
+    linkedin?: string;
+    website?: string;
+    location?: string;
   };
   work: Array<{
     company: string;

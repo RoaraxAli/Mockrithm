@@ -6,7 +6,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { 
   User, Briefcase, GraduationCap, Code, 
   Layers, Award, Globe, Plus, Trash2, ChevronDown, ChevronUp,
-  Sparkles, Loader2, CheckCircle2, AlertCircle
+  Sparkles, Loader2, CheckCircle2, AlertCircle, Github, Linkedin, MapPin, Link
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -426,6 +426,60 @@ export default function ResumeFormEditor() {
                       value={parsedData.basics.phone || ""}
                       onChange={(e) => handleBasicsChange("phone", e.target.value)}
                       placeholder="+1 (555) 019-2834"
+                      className={INPUT_CLASS}
+                    />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div className="flex flex-col gap-1.5">
+                    <label className="text-[10px] font-mono text-slate-550 uppercase tracking-widest flex items-center gap-1">
+                      <MapPin className="size-3" /> Location
+                    </label>
+                    <input
+                      type="text"
+                      value={parsedData.basics.location || ""}
+                      onChange={(e) => handleBasicsChange("location", e.target.value)}
+                      placeholder="San Francisco, CA"
+                      className={INPUT_CLASS}
+                    />
+                  </div>
+                  <div className="flex flex-col gap-1.5">
+                    <label className="text-[10px] font-mono text-slate-550 uppercase tracking-widest flex items-center gap-1">
+                      <Globe className="size-3" /> Website
+                    </label>
+                    <input
+                      type="text"
+                      value={parsedData.basics.website || ""}
+                      onChange={(e) => handleBasicsChange("website", e.target.value)}
+                      placeholder="https://yoursite.com"
+                      className={INPUT_CLASS}
+                    />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div className="flex flex-col gap-1.5">
+                    <label className="text-[10px] font-mono text-slate-550 uppercase tracking-widest flex items-center gap-1">
+                      <Github className="size-3" /> GitHub
+                    </label>
+                    <input
+                      type="text"
+                      value={parsedData.basics.github || ""}
+                      onChange={(e) => handleBasicsChange("github", e.target.value)}
+                      placeholder="https://github.com/username"
+                      className={INPUT_CLASS}
+                    />
+                  </div>
+                  <div className="flex flex-col gap-1.5">
+                    <label className="text-[10px] font-mono text-slate-550 uppercase tracking-widest flex items-center gap-1">
+                      <Linkedin className="size-3" /> LinkedIn
+                    </label>
+                    <input
+                      type="text"
+                      value={parsedData.basics.linkedin || ""}
+                      onChange={(e) => handleBasicsChange("linkedin", e.target.value)}
+                      placeholder="https://linkedin.com/in/username"
                       className={INPUT_CLASS}
                     />
                   </div>
