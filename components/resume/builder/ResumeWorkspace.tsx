@@ -26,16 +26,16 @@ type TabType = "edit" | "customize" | "ats";
 type CustomizeSubTab = "layout" | "color" | "typography";
 
 const ALL_TEMPLATES = [
-  { id: "minimal", name: "Minimalist", category: "ATS Friendly" },
-  { id: "tech", name: "Tech / Developer", category: "ATS Friendly" },
-  { id: "compact", name: "Compact / Clean", category: "ATS Friendly" },
-  { id: "corporate", name: "Corporate", category: "Two Column" },
-  { id: "modern", name: "Modern", category: "Two Column" },
-  { id: "executive", name: "Executive", category: "Two Column" },
-  { id: "creative", name: "Creative", category: "Creative & Portfolio" },
-  { id: "elegant", name: "Elegant", category: "Creative & Portfolio" },
-  { id: "cyber", name: "Cyberpunk", category: "Creative & Portfolio" },
-  { id: "academic", name: "Academic", category: "Creative & Portfolio" }
+  { id: "minimal", name: "Minimalist", category: "ATS Friendly", supportsColor: false },
+  { id: "tech", name: "Tech / Developer", category: "ATS Friendly", supportsColor: false },
+  { id: "compact", name: "Compact / Clean", category: "ATS Friendly", supportsColor: false },
+  { id: "corporate", name: "Corporate", category: "Two Column", supportsColor: true },
+  { id: "modern", name: "Modern", category: "Two Column", supportsColor: true },
+  { id: "executive", name: "Executive", category: "Two Column", supportsColor: true },
+  { id: "creative", name: "Creative", category: "Creative & Portfolio", supportsColor: true },
+  { id: "elegant", name: "Elegant", category: "Creative & Portfolio", supportsColor: true },
+  { id: "cyber", name: "Cyberpunk", category: "Creative & Portfolio", supportsColor: true },
+  { id: "academic", name: "Academic", category: "Creative & Portfolio", supportsColor: false }
 ];
 
 // Error boundary so a single failing template preview can't crash the entire page
@@ -129,6 +129,8 @@ export default function ResumeWorkspace({ initialResume }: Props) {
   const [showImportDialog, setShowImportDialog] = useState(false);
   const [isExtracting, setIsExtracting] = useState(false);
   const [showDownloadDropdown, setShowDownloadDropdown] = useState(false);
+  const [showFontDropdown, setShowFontDropdown] = useState(false);
+  const [showDensityDropdown, setShowDensityDropdown] = useState(false);
   const [initialTemplateId, setInitialTemplateId] = useState("minimal");
   const isInitialMount = useRef(true);
 
@@ -363,10 +365,18 @@ export default function ResumeWorkspace({ initialResume }: Props) {
   const renderCustomizeTab = () => {
     const currentStyles = parsedData.customStyles || {};
     const selectedColor = currentStyles.primaryColor || "";
-    const selectedFont = currentStyles.fontFamily || "";
-    const selectedSize = currentStyles.fontSize || "";
+    const selectedFont = currentStyles.fontFamily || "inter";
+    const selectedSize = currentStyles.fontSize || "base";
 
-    const presets = ["#000000", "#1f2937", "#4b5563", "#9ca3af", "#d1d5db", "#ffffff"];
+    // Per-template color support check
+    const currentTemplate = ALL_TEMPLATES.find(t => t.id === (parsedData.templateId || "minimal"));
+    const templateSupportsColor = currentTemplate?.supportsColor ?? false;
+
+    // Color presets for color-capable templates
+    const colorPresets = [
+      "#1e3a5f", "#2d5a3d", "#7c2d3e", "#4a5568", "#0d7377",
+      "#4338ca", "#b45309", "#1e293b", "#6d28d9", "#be123c"
+    ];
 
     // Filter templates
     let filtered = ALL_TEMPLATES;
@@ -473,34 +483,34 @@ export default function ResumeWorkspace({ initialResume }: Props) {
               </div>
             </div>
 
-            {/* Template Gallery with large single-column live previews */}
-            <div className="flex flex-col gap-4 mt-2">
+            {/* Template Gallery — 2-column grid */}
+            <div className="grid grid-cols-2 gap-3 mt-2">
               {filtered.map((t) => {
                 const isSelected = parsedData.templateId === t.id;
                 return (
                   <button
                     key={t.id}
                     onClick={() => updateParsedData({ templateId: t.id })}
-                    className={`flex flex-col gap-2.5 p-3 rounded-2xl border transition-all text-left cursor-pointer group ${
+                    className={`flex flex-col gap-2 p-2.5 rounded-2xl border transition-all text-left cursor-pointer group ${
                       isSelected
                         ? "border-white bg-slate-900/50 shadow-lg shadow-white/5"
                         : "border-slate-800 bg-slate-950/20 hover:border-slate-700"
                     }`}
                   >
-                    <div className="flex items-center justify-between px-1">
-                      <span className="text-xs font-bold text-white uppercase tracking-wider group-hover:text-white transition-colors">
+                    <PreviewErrorBoundary>
+                      <TemplatePreview templateId={t.id} />
+                    </PreviewErrorBoundary>
+                    <div className="flex items-center justify-between px-1 pb-0.5">
+                      <span className="text-[10px] font-bold text-white uppercase tracking-wider group-hover:text-white transition-colors">
                         {t.name}
                       </span>
                       {isSelected && (
-                        <span className="text-[9px] font-mono font-bold uppercase tracking-wider text-black bg-white px-2 py-0.5 rounded-full">
+                        <span className="text-[8px] font-mono font-bold uppercase tracking-wider text-black bg-white px-2 py-0.5 rounded-full">
                           Selected
                         </span>
                       )}
                     </div>
-                    <PreviewErrorBoundary>
-                      <TemplatePreview templateId={t.id} />
-                    </PreviewErrorBoundary>
-                    <span className="text-[9px] font-mono text-slate-500 uppercase mt-0.5 px-1">
+                    <span className="text-[8px] font-mono text-slate-500 uppercase px-1">
                       {t.category}
                     </span>
                   </button>
@@ -510,66 +520,139 @@ export default function ResumeWorkspace({ initialResume }: Props) {
           </div>
         ) : customSubTab === "color" ? (
           <div className="flex flex-col gap-6 animate-fadeIn">
-            {/* Color Customization */}
-            <div className="flex flex-col gap-3">
-              <span className="text-[10px] font-mono tracking-widest text-slate-500 uppercase font-bold">Accent Shades (Greyscale)</span>
-              <div className="flex flex-wrap gap-2.5 items-center">
-                {presets.map((color) => (
-                  <button
-                    key={color}
-                    onClick={() => updateParsedData({ 
-                      customStyles: { ...currentStyles, primaryColor: color } 
-                    })}
-                    className="size-7 rounded-full border border-slate-800 shadow-inner cursor-pointer transition-transform hover:scale-110 active:scale-95"
-                    style={{ backgroundColor: color, outline: selectedColor === color ? "2px solid #ffffff" : "none" }}
-                  />
-                ))}
+            {templateSupportsColor ? (
+              <>
+                {/* Color Presets */}
+                <div className="flex flex-col gap-3">
+                  <span className="text-[10px] font-mono tracking-widest text-slate-500 uppercase font-bold">Accent Color</span>
+                  <div className="flex flex-wrap gap-2.5 items-center">
+                    {colorPresets.map((color) => (
+                      <button
+                        key={color}
+                        onClick={() => updateParsedData({ 
+                          customStyles: { ...currentStyles, primaryColor: color } 
+                        })}
+                        className="size-7 rounded-full border border-slate-800 shadow-inner cursor-pointer transition-transform hover:scale-110 active:scale-95"
+                        style={{ backgroundColor: color, outline: selectedColor === color ? "2px solid #ffffff" : "none" }}
+                      />
+                    ))}
+                  </div>
+                </div>
+
+                {/* Full Color Picker */}
+                <div className="flex flex-col gap-3 border-t border-slate-900 pt-5">
+                  <span className="text-[10px] font-mono tracking-widest text-slate-500 uppercase font-bold">Custom Color</span>
+                  <div className="flex items-center gap-3">
+                    <div className="relative">
+                      <input
+                        type="color"
+                        value={selectedColor || "#1e3a5f"}
+                        onChange={(e) => updateParsedData({
+                          customStyles: { ...currentStyles, primaryColor: e.target.value }
+                        })}
+                        className="absolute inset-0 opacity-0 w-full h-full cursor-pointer"
+                      />
+                      <div 
+                        className="w-10 h-10 rounded-xl border border-slate-800 shadow-inner cursor-pointer"
+                        style={{ backgroundColor: selectedColor || "#1e3a5f" }}
+                      />
+                    </div>
+                    <span className="text-xs font-mono text-slate-400 uppercase">{selectedColor || "None selected"}</span>
+                  </div>
+                </div>
+              </>
+            ) : (
+              <div className="flex flex-col items-center justify-center p-10 text-slate-600 gap-3 border border-dashed border-slate-800 rounded-2xl">
+                <span className="text-[10px] font-mono uppercase tracking-wider text-center font-bold">
+                  This layout is black &amp; white only.
+                </span>
+                <span className="text-[9px] font-mono text-slate-700 text-center">
+                  Color customization is not available for this template. Switch to a two-column or creative layout to access color options.
+                </span>
               </div>
-            </div>
+            )}
           </div>
         ) : (
           <div className="flex flex-col gap-6 animate-fadeIn">
-            {/* Typography Customization */}
+            {/* Font Family Dropdown */}
             <div className="flex flex-col gap-3">
-              <span className="text-[10px] font-mono tracking-widest text-slate-500 uppercase font-bold">Typography</span>
-              <div className="grid grid-cols-3 gap-2">
-                {(["sans", "serif", "mono"] as const).map((font) => (
-                  <button
-                    key={font}
-                    onClick={() => updateParsedData({
-                      customStyles: { ...currentStyles, fontFamily: font }
-                    })}
-                    className={`py-2 rounded-xl border text-[10px] font-mono font-bold uppercase transition-all cursor-pointer ${
-                      selectedFont === font
-                        ? "border-white bg-slate-900 text-white shadow-lg"
-                        : "border-slate-800 bg-slate-950/20 text-slate-400 hover:text-white"
-                    }`}
-                  >
-                    {font === "sans" ? "Sans-Serif" : font === "serif" ? "Serif" : "Monospace"}
-                  </button>
-                ))}
+              <span className="text-[10px] font-mono tracking-widest text-slate-500 uppercase font-bold">Font Family</span>
+              <div className="relative">
+                <button
+                  onClick={() => setShowFontDropdown(!showFontDropdown)}
+                  className="w-full flex items-center justify-between px-4 py-2.5 rounded-xl border border-slate-800 bg-slate-950/50 text-white text-xs font-mono transition-all hover:border-slate-700 cursor-pointer"
+                >
+                  <span className={getFontClass(selectedFont)}>{getFontLabel(selectedFont)}</span>
+                  <ChevronDown className={`size-3.5 text-slate-400 transition-transform ${showFontDropdown ? "rotate-180" : ""}`} />
+                </button>
+                
+                {showFontDropdown && (
+                  <>
+                    <div className="fixed inset-0 z-20" onClick={() => setShowFontDropdown(false)} />
+                    <div className="absolute left-0 right-0 mt-1 bg-slate-900 border border-slate-800 rounded-xl shadow-2xl overflow-hidden z-30 animate-scaleIn">
+                      {FONT_OPTIONS.map((font) => (
+                        <button
+                          key={font.id}
+                          onClick={() => {
+                            updateParsedData({ customStyles: { ...currentStyles, fontFamily: font.id } });
+                            setShowFontDropdown(false);
+                          }}
+                          className={`w-full text-left px-4 py-2.5 text-xs transition-colors flex items-center justify-between cursor-pointer border-b border-slate-800/50 last:border-0 ${
+                            selectedFont === font.id
+                              ? "bg-slate-800 text-white"
+                              : "text-slate-300 hover:text-white hover:bg-slate-800/50"
+                          }`}
+                        >
+                          <span className={font.className}>{font.label}</span>
+                          {selectedFont === font.id && <span className="text-[8px] text-white font-bold">✓</span>}
+                        </button>
+                      ))}
+                    </div>
+                  </>
+                )}
               </div>
             </div>
 
-            {/* Text Size Customization */}
+            {/* Text Density Dropdown */}
             <div className="flex flex-col gap-3 border-t border-slate-900 pt-5">
-              <span className="text-[10px] font-mono tracking-widest text-slate-550 uppercase font-bold">Text Density</span>
-              <div className="grid grid-cols-3 gap-2">
-                {(["sm", "base", "lg"] as const).map((size) => (
-                  <button
-                    key={size}
-                    onClick={() => updateParsedData({
-                      customStyles: { ...currentStyles, fontSize: size }
-                    })}
-                    className={`py-2 rounded-xl border text-[10px] font-mono font-bold uppercase transition-all cursor-pointer ${
-                      selectedSize === size
-                        ? "border-white bg-slate-900 text-white shadow-lg"
-                        : "border-slate-800 bg-slate-950/20 text-slate-400 hover:text-white"
-                    }`}
-                  >
-                    {size === "sm" ? "High" : size === "lg" ? "Low" : "Standard"}
-                  </button>
-                ))}
+              <span className="text-[10px] font-mono tracking-widest text-slate-500 uppercase font-bold">Text Density</span>
+              <div className="relative">
+                <button
+                  onClick={() => setShowDensityDropdown(!showDensityDropdown)}
+                  className="w-full flex items-center justify-between px-4 py-2.5 rounded-xl border border-slate-800 bg-slate-950/50 text-white text-xs font-mono transition-all hover:border-slate-700 cursor-pointer"
+                >
+                  <span>{selectedSize === "sm" ? "High Density" : selectedSize === "lg" ? "Low Density" : "Standard"}</span>
+                  <ChevronDown className={`size-3.5 text-slate-400 transition-transform ${showDensityDropdown ? "rotate-180" : ""}`} />
+                </button>
+                
+                {showDensityDropdown && (
+                  <>
+                    <div className="fixed inset-0 z-20" onClick={() => setShowDensityDropdown(false)} />
+                    <div className="absolute left-0 right-0 mt-1 bg-slate-900 border border-slate-800 rounded-xl shadow-2xl overflow-hidden z-30 animate-scaleIn">
+                      {([
+                        { id: "sm", label: "High Density", desc: "Compact text — fits more content" },
+                        { id: "base", label: "Standard", desc: "Balanced text — default sizing" },
+                        { id: "lg", label: "Low Density", desc: "Spacious text — more breathing room" }
+                      ] as const).map((size) => (
+                        <button
+                          key={size.id}
+                          onClick={() => {
+                            updateParsedData({ customStyles: { ...currentStyles, fontSize: size.id } });
+                            setShowDensityDropdown(false);
+                          }}
+                          className={`w-full text-left px-4 py-2.5 transition-colors flex flex-col gap-0.5 cursor-pointer border-b border-slate-800/50 last:border-0 ${
+                            selectedSize === size.id
+                              ? "bg-slate-800 text-white"
+                              : "text-slate-300 hover:text-white hover:bg-slate-800/50"
+                          }`}
+                        >
+                          <span className="text-xs font-mono font-bold">{size.label}</span>
+                          <span className="text-[9px] text-slate-500">{size.desc}</span>
+                        </button>
+                      ))}
+                    </div>
+                  </>
+                )}
               </div>
             </div>
           </div>

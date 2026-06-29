@@ -1,170 +1,112 @@
 import { ParsedResume } from "@/types/resume";
+import { getFontClass } from "./fonts";
 
-export default function ModernTemplate({ data, templateId }: { data: ParsedResume; templateId?: string }) {
+export default function ModernTemplate({ data }: { data: ParsedResume }) {
   const { basics, work = [], education = [], skills = [], projects = [], certifications = [], socialLinks = [] } = data;
-  const normId = (templateId || "").toLowerCase();
-
-  let flexRowClass = "flex-row";
-  let sidebarBg = "bg-slate-900 text-slate-200";
-  let accentText = "text-emerald-400";
-  let accentBorder = "border-slate-800";
-  let contentBg = "bg-white text-slate-800";
-  let skillBadge = "bg-slate-855 border border-slate-800 text-slate-300";
-  let labelColor = "text-emerald-400";
-
-  if (normId === "special-education") {
-    sidebarBg = "bg-indigo-950 text-indigo-100";
-    accentText = "text-indigo-300";
-    accentBorder = "border-indigo-900";
-    labelColor = "text-indigo-300";
-    skillBadge = "bg-indigo-900 border border-indigo-800 text-indigo-200";
-  } else if (normId === "arbitrator") {
-    sidebarBg = "bg-zinc-900 text-zinc-200";
-    accentText = "text-zinc-400";
-    accentBorder = "border-zinc-800";
-    labelColor = "text-zinc-450";
-    skillBadge = "bg-zinc-800 border border-zinc-700 text-zinc-350";
-  } else if (normId === "ui-ux-designer") {
-    flexRowClass = "flex-row-reverse";
-    sidebarBg = "bg-neutral-900 text-neutral-200";
-    accentText = "text-cyan-400";
-    accentBorder = "border-neutral-850";
-    labelColor = "text-cyan-400 font-bold";
-    skillBadge = "bg-neutral-800 border border-neutral-700 text-cyan-200";
-  } else if (normId === "content-producer") {
-    sidebarBg = "bg-violet-950 text-violet-100";
-    accentText = "text-pink-450";
-    accentBorder = "border-violet-900";
-    labelColor = "text-pink-400";
-    skillBadge = "bg-violet-900 border border-violet-850 text-pink-200";
-  } else if (normId === "dentist") {
-    sidebarBg = "bg-teal-950 text-teal-100";
-    accentText = "text-teal-450";
-    accentBorder = "border-teal-900";
-    labelColor = "text-teal-455";
-    skillBadge = "bg-teal-900 border border-teal-850 text-teal-200";
-  } else if (normId === "event-coordinator") {
-    flexRowClass = "flex-row-reverse";
-    sidebarBg = "bg-stone-900 text-stone-200";
-    accentText = "text-amber-500";
-    accentBorder = "border-stone-800";
-    labelColor = "text-amber-500";
-    skillBadge = "bg-stone-800 border border-stone-700 text-amber-200";
-  }
+  const primaryColor = data.customStyles?.primaryColor || "#1e293b";
+  const fontClass = getFontClass(data.customStyles?.fontFamily);
+  const sizeClass = data.customStyles?.fontSize === "sm" ? "text-[10px]" : data.customStyles?.fontSize === "lg" ? "text-[13px]" : "text-[11px]";
 
   return (
-    <div className={`flex max-w-[800px] mx-auto min-h-[1131px] shadow-sm overflow-hidden text-[11px] leading-relaxed ${contentBg} ${flexRowClass}`}>
+    <div className={`flex max-w-[800px] mx-auto min-h-[1131px] shadow-sm overflow-hidden bg-white ${fontClass} ${sizeClass} leading-relaxed`}>
       {/* Left Sidebar */}
-      <div className={`w-1/3 p-6 flex flex-col gap-6 select-text ${sidebarBg}`}>
-        <div className={`flex flex-col gap-1 border-b pb-4 ${accentBorder}`}>
-          <h1 className="text-xl font-bold tracking-tight text-white">{basics.name || "Your Name"}</h1>
-          <p className={`text-[10px] font-mono uppercase tracking-wider ${labelColor}`}>{basics.label || "Professional Label"}</p>
+      <div className="w-[260px] shrink-0 p-6 flex flex-col items-center text-white" style={{ backgroundColor: primaryColor }}>
+        {/* Photo */}
+        <div className="w-24 h-24 rounded-xl bg-white/15 border-2 border-white/25 flex items-center justify-center mb-4 mt-2 overflow-hidden">
+          <svg className="w-12 h-12 text-white/30" fill="currentColor" viewBox="0 0 24 24"><path d="M12 12c2.7 0 4.8-2.1 4.8-4.8S14.7 2.4 12 2.4 7.2 4.5 7.2 7.2 9.3 12 12 12zm0 2.4c-3.2 0-9.6 1.6-9.6 4.8v2.4h19.2v-2.4c0-3.2-6.4-4.8-9.6-4.8z"/></svg>
         </div>
+        <h1 className="text-lg font-bold text-center tracking-tight">{basics.name || "Your Name"}</h1>
+        <p className="text-[10px] text-white/60 mt-0.5 uppercase tracking-[0.15em]">{basics.label || "Professional Title"}</p>
 
-        <div className="flex flex-col gap-3">
-          <span className={`text-[9px] font-mono uppercase tracking-widest border-b pb-1 ${accentBorder}`}>Contact</span>
-          <div className="flex flex-col gap-2 text-[10px] font-mono break-all text-slate-300">
-            {basics.email && <div>Email: <span className="text-white block">{basics.email}</span></div>}
-            {basics.phone && <div>Phone: <span className="text-white block">{basics.phone}</span></div>}
+        <div className="w-full mt-6 flex flex-col gap-5">
+          <div className="flex flex-col gap-1.5">
+            <h2 className="text-[9px] font-bold text-white/40 uppercase tracking-widest">Contact</h2>
+            {basics.email && <p className="text-[10px] text-white/75">{basics.email}</p>}
+            {basics.phone && <p className="text-[10px] text-white/75">{basics.phone}</p>}
             {socialLinks.map((link, idx) => (
-              <div key={idx}>
-                {link.platform}: <a href={link.url} target="_blank" rel="noopener noreferrer" className={`underline block ${accentText}`}>{link.url}</a>
-              </div>
+              <p key={idx} className="text-[10px] text-white/75 break-all">{link.platform}: {link.url}</p>
             ))}
           </div>
-        </div>
 
-        {skills.length > 0 && (
-          <div className="flex flex-col gap-3">
-            <span className={`text-[9px] font-mono uppercase tracking-widest border-b pb-1 ${accentBorder}`}>Skills</span>
-            <div className="flex flex-wrap gap-1.5">
-              {skills.map((skill, idx) => (
-                <span key={idx} className={`text-[9px] font-mono px-2 py-0.5 rounded ${skillBadge}`}>
-                  {skill}
-                </span>
+          {skills.length > 0 && (
+            <div className="flex flex-col gap-2">
+              <h2 className="text-[9px] font-bold text-white/40 uppercase tracking-widest">Skills</h2>
+              <div className="flex flex-wrap gap-1">
+                {skills.map((skill, idx) => (
+                  <span key={idx} className="text-[9px] px-2 py-0.5 rounded-md bg-white/10 text-white/85">{skill}</span>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {education.length > 0 && (
+            <div className="flex flex-col gap-2">
+              <h2 className="text-[9px] font-bold text-white/40 uppercase tracking-widest">Education</h2>
+              {education.map((item, idx) => (
+                <div key={idx}>
+                  <p className="text-[10px] font-semibold">{item.studyType} in {item.area}</p>
+                  <p className="text-[9px] text-white/55">{item.institution} · {item.endDate}</p>
+                </div>
               ))}
             </div>
-          </div>
-        )}
+          )}
+        </div>
       </div>
 
-      {/* Right Column */}
-      <div className="w-2/3 p-6 flex flex-col gap-5 select-text">
+      {/* Right Content */}
+      <div className="flex-1 p-6 pt-7 flex flex-col gap-5 text-slate-800">
         {basics.summary && (
           <div className="flex flex-col gap-1.5">
-            <h2 className="text-xs font-bold uppercase tracking-wider text-slate-900 border-b border-slate-100 pb-1">Profile Summary</h2>
-            <p className="text-slate-650 text-justify leading-relaxed">{basics.summary}</p>
+            <h2 className="text-xs font-bold uppercase tracking-wider text-slate-900 pb-1">Profile</h2>
+            <p className="text-slate-600 leading-relaxed text-justify">{basics.summary}</p>
           </div>
         )}
 
         {work.length > 0 && (
-          <div className="flex flex-col gap-2">
-            <h2 className="text-xs font-bold uppercase tracking-wider text-slate-900 border-b border-slate-100 pb-1">Experience</h2>
-            <div className="flex flex-col gap-4">
-              {work.map((item, idx) => (
-                <div key={idx} className="flex flex-col gap-1">
-                  <div className="flex justify-between items-baseline">
-                    <span className="font-bold text-slate-800 text-[12px]">{item.position} <span className="font-normal text-slate-450">at</span> {item.company}</span>
-                    <span className="text-[9px] font-mono text-slate-400">{item.startDate} – {item.endDate || "Present"}</span>
+          <div className="flex flex-col gap-3">
+            <h2 className="text-xs font-bold uppercase tracking-wider text-slate-900 pb-1">Experience</h2>
+            {work.map((item, idx) => (
+              <div key={idx} className="flex flex-col gap-1">
+                <div className="flex justify-between items-baseline">
+                  <div className="flex flex-col">
+                    <span className="font-bold text-slate-900 text-[12px]">{item.position}</span>
+                    <span className="text-slate-500 text-[10px]">{item.company}</span>
                   </div>
-                  {item.highlights && item.highlights.length > 0 && (
-                    <ul className="list-disc list-outside ml-4 text-slate-600 space-y-0.5">
-                      {item.highlights.map((hl, hIdx) => (
-                        <li key={hIdx}>{hl}</li>
-                      ))}
-                    </ul>
-                  )}
+                  <span className="text-[9px] text-slate-400 shrink-0">{item.startDate} – {item.endDate || "Present"}</span>
                 </div>
-              ))}
-            </div>
+                {item.highlights && item.highlights.length > 0 && (
+                  <ul className="list-disc list-outside ml-4 text-slate-600 space-y-0.5">
+                    {item.highlights.map((hl, hIdx) => (
+                      <li key={hIdx}>{hl}</li>
+                    ))}
+                  </ul>
+                )}
+              </div>
+            ))}
           </div>
         )}
 
         {projects.length > 0 && (
           <div className="flex flex-col gap-2">
-            <h2 className="text-xs font-bold uppercase tracking-wider text-slate-900 border-b border-slate-100 pb-1">Projects</h2>
-            <div className="flex flex-col gap-3">
-              {projects.map((proj, idx) => (
-                <div key={idx} className="flex flex-col gap-0.5">
-                  <div className="flex justify-between items-center">
-                    <span className="font-bold text-slate-800">{proj.name}</span>
-                    {proj.technologies && proj.technologies.length > 0 && (
-                      <span className="text-[9px] font-mono text-slate-500">[{proj.technologies.join(", ")}]</span>
-                    )}
-                  </div>
-                  <p className="text-slate-650 leading-normal">{proj.description}</p>
+            <h2 className="text-xs font-bold uppercase tracking-wider text-slate-900 pb-1">Projects</h2>
+            {projects.map((proj, idx) => (
+              <div key={idx} className="flex flex-col gap-0.5">
+                <div className="flex justify-between items-center">
+                  <span className="font-bold text-slate-900">{proj.name}</span>
+                  {proj.technologies && <span className="text-[9px] text-slate-400 font-mono">[{proj.technologies.join(", ")}]</span>}
                 </div>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {education.length > 0 && (
-          <div className="flex flex-col gap-2">
-            <h2 className="text-xs font-bold uppercase tracking-wider text-slate-900 border-b border-slate-100 pb-1">Education</h2>
-            <div className="flex flex-col gap-2">
-              {education.map((item, idx) => (
-                <div key={idx} className="flex justify-between items-baseline">
-                  <div>
-                    <span className="font-bold text-slate-850">{item.studyType} in {item.area}</span>
-                    <div className="text-[10px] text-slate-500">{item.institution}</div>
-                  </div>
-                  <span className="text-[9px] font-mono text-slate-400">{item.endDate}</span>
-                </div>
-              ))}
-            </div>
+                <p className="text-slate-600">{proj.description}</p>
+              </div>
+            ))}
           </div>
         )}
 
         {certifications.length > 0 && (
           <div className="flex flex-col gap-2">
-            <h2 className="text-xs font-bold uppercase tracking-wider text-slate-900 border-b border-slate-100 pb-1">Certifications</h2>
-            <div className="flex flex-wrap gap-x-4 gap-y-1 text-slate-650">
+            <h2 className="text-xs font-bold uppercase tracking-wider text-slate-900 pb-1">Certifications</h2>
+            <div className="flex flex-wrap gap-x-4 gap-y-1 text-slate-600">
               {certifications.map((cert, idx) => (
-                <div key={idx} className="text-xs">
-                  <span className="font-semibold text-slate-800">{cert.name}</span>
-                  <span className="text-slate-400 text-[10px]"> ({cert.issuer}, {cert.date})</span>
-                </div>
+                <p key={idx}><span className="font-semibold text-slate-800">{cert.name}</span> <span className="text-slate-400">— {cert.issuer}, {cert.date}</span></p>
               ))}
             </div>
           </div>
