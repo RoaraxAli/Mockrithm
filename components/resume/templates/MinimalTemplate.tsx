@@ -13,13 +13,26 @@ export default function MinimalTemplate({ data, templateId }: { data: ParsedResu
   let skillClass = "text-xs bg-slate-100 text-slate-700 px-2.5 py-1 rounded font-medium border border-slate-150";
   let bulletClass = "text-slate-600";
 
+  const primaryColor = data.customStyles?.primaryColor;
+  const fontFamily = data.customStyles?.fontFamily;
+  const fontSize = data.customStyles?.fontSize;
+
+  const fontClass = 
+    fontFamily === "sans" ? "font-sans" : 
+    fontFamily === "serif" ? "font-serif" : 
+    fontFamily === "mono" ? "font-mono" : "";
+
+  const sizeClass = 
+    fontSize === "sm" ? "text-[10px]" : 
+    fontSize === "lg" ? "text-[12px]" : "";
+
   if (normId === "high-school-teacher") {
     containerBg = "bg-stone-50 text-stone-900 font-serif border-t-8 border-amber-800";
     nameColor = "text-amber-950 font-serif";
     labelColor = "text-stone-500";
     headerClass = "border-b border-stone-200 pb-4 text-left pl-2";
     headingClass = "text-xs font-serif font-bold uppercase tracking-widest text-amber-900 border-b-2 border-stone-200 pb-1";
-    skillClass = "text-xs bg-stone-100 text-stone-850 px-2.5 py-1 font-medium border border-stone-250";
+    skillClass = "text-xs bg-stone-100 text-stone-855 px-2.5 py-1 font-medium border border-stone-250";
   } else if (normId === "city-planner") {
     containerBg = "bg-white text-emerald-950 font-sans border-t-8 border-emerald-700";
     nameColor = "text-emerald-900 font-sans font-black";
@@ -73,7 +86,10 @@ export default function MinimalTemplate({ data, templateId }: { data: ParsedResu
   }
 
   return (
-    <div className={`p-8 max-w-[800px] mx-auto min-h-[1131px] shadow-sm flex flex-col gap-6 ${containerBg}`}>
+    <div 
+      className={`p-8 max-w-[800px] mx-auto min-h-[1131px] shadow-sm flex flex-col gap-6 ${containerBg} ${fontClass} ${sizeClass}`}
+      style={primaryColor ? { borderTopColor: primaryColor } : {}}
+    >
       {/* Header */}
       <div className={headerClass}>
         <h1 className={`text-3xl font-bold tracking-tight ${nameColor}`}>{basics.name || "Your Name"}</h1>
@@ -89,7 +105,7 @@ export default function MinimalTemplate({ data, templateId }: { data: ParsedResu
 
       {basics.summary && (
         <div className="flex flex-col gap-1.5">
-          <h2 className={headingClass}>Summary</h2>
+          <h2 className={headingClass} style={primaryColor ? { color: primaryColor, borderBottomColor: primaryColor } : {}}>Summary</h2>
           <p className="text-sm leading-relaxed text-justify">{basics.summary}</p>
         </div>
       )}
@@ -97,7 +113,7 @@ export default function MinimalTemplate({ data, templateId }: { data: ParsedResu
       {/* Experience */}
       {work.length > 0 && (
         <div className="flex flex-col gap-2">
-          <h2 className={headingClass}>Experience</h2>
+          <h2 className={headingClass} style={primaryColor ? { color: primaryColor, borderBottomColor: primaryColor } : {}}>Experience</h2>
           <div className="flex flex-col gap-4">
             {work.map((item, idx) => (
               <div key={idx} className="flex flex-col gap-1">
@@ -127,7 +143,7 @@ export default function MinimalTemplate({ data, templateId }: { data: ParsedResu
       {/* Education */}
       {education.length > 0 && (
         <div className="flex flex-col gap-2">
-          <h2 className={headingClass}>Education</h2>
+          <h2 className={headingClass} style={primaryColor ? { color: primaryColor, borderBottomColor: primaryColor } : {}}>Education</h2>
           <div className="flex flex-col gap-3">
             {education.map((item, idx) => (
               <div key={idx} className="flex justify-between items-start text-sm">
@@ -145,7 +161,7 @@ export default function MinimalTemplate({ data, templateId }: { data: ParsedResu
       {/* Skills */}
       {skills.length > 0 && (
         <div className="flex flex-col gap-2">
-          <h2 className={headingClass}>Skills</h2>
+          <h2 className={headingClass} style={primaryColor ? { color: primaryColor, borderBottomColor: primaryColor } : {}}>Skills</h2>
           <div className="flex flex-wrap gap-2">
             {skills.map((skill, idx) => (
               <span key={idx} className={skillClass}>
@@ -159,7 +175,7 @@ export default function MinimalTemplate({ data, templateId }: { data: ParsedResu
       {/* Projects */}
       {projects.length > 0 && (
         <div className="flex flex-col gap-2">
-          <h2 className={headingClass}>Projects</h2>
+          <h2 className={headingClass} style={primaryColor ? { color: primaryColor, borderBottomColor: primaryColor } : {}}>Projects</h2>
           <div className="flex flex-col gap-3">
             {projects.map((proj, idx) => (
               <div key={idx} className="flex flex-col gap-1 text-sm">
@@ -184,7 +200,7 @@ export default function MinimalTemplate({ data, templateId }: { data: ParsedResu
       {/* Certifications */}
       {certifications.length > 0 && (
         <div className="flex flex-col gap-2">
-          <h2 className={headingClass}>Certifications</h2>
+          <h2 className={headingClass} style={primaryColor ? { color: primaryColor, borderBottomColor: primaryColor } : {}}>Certifications</h2>
           <div className="flex flex-col gap-1.5">
             {certifications.map((cert, idx) => (
               <div key={idx} className="flex justify-between items-center text-xs">

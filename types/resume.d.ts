@@ -36,6 +36,11 @@ export interface ParsedResume {
     url: string;
   }>;
   templateId?: string; // which template is currently selected
+  customStyles?: {
+    primaryColor?: string;
+    fontFamily?: string; // 'sans' | 'serif' | 'mono'
+    fontSize?: string; // 'sm' | 'base' | 'lg'
+  };
 }
 
 export interface AtsScoreResult {

@@ -4,6 +4,19 @@ export default function TechTemplate({ data, templateId }: { data: ParsedResume;
   const { basics, work = [], education = [], skills = [], projects = [], certifications = [], socialLinks = [] } = data;
   const normId = (templateId || "").toLowerCase();
 
+  const primaryColor = data.customStyles?.primaryColor;
+  const fontFamily = data.customStyles?.fontFamily;
+  const fontSize = data.customStyles?.fontSize;
+
+  const fontClass = 
+    fontFamily === "sans" ? "font-sans" : 
+    fontFamily === "serif" ? "font-serif" : 
+    fontFamily === "mono" ? "font-mono" : "";
+
+  const sizeClass = 
+    fontSize === "sm" ? "text-[9px]" : 
+    fontSize === "lg" ? "text-[11px]" : "text-[10px]";
+
   // Custom styles for TechTemplate variants
   let themeBg = "bg-zinc-950 text-zinc-300 border-t-8 border-emerald-500";
   let promptColor = "text-emerald-500";
@@ -14,7 +27,7 @@ export default function TechTemplate({ data, templateId }: { data: ParsedResume;
   let linkColor = "text-emerald-400";
 
   if (normId === "full-stack-dev") {
-    themeBg = "bg-slate-950 text-slate-350 border-t-8 border-cyan-500";
+    themeBg = "bg-slate-950 text-slate-355 border-t-8 border-cyan-500";
     promptColor = "text-cyan-400";
     promptChar = "$";
     commentColor = "text-slate-500 font-mono";
@@ -31,19 +44,24 @@ export default function TechTemplate({ data, templateId }: { data: ParsedResume;
     linkColor = "text-sky-400";
   }
 
+  const containerBorder = primaryColor ? { borderTopColor: primaryColor } : {};
+
   return (
-    <div className={`p-8 font-mono max-w-[800px] mx-auto min-h-[1131px] shadow-sm flex flex-col gap-5 select-text text-[10px] leading-relaxed ${themeBg}`}>
+    <div 
+      className={`p-8 max-w-[800px] mx-auto min-h-[1131px] shadow-sm flex flex-col gap-5 select-text leading-relaxed ${themeBg} ${fontClass || "font-mono"} ${sizeClass}`}
+      style={containerBorder}
+    >
       {/* Dev Header */}
       <div className="border-b border-zinc-800 pb-4">
         <h1 className="text-2xl font-black text-white uppercase tracking-tight flex items-center gap-1.5">
-          <span className={promptColor}>{promptChar}</span> {basics.name || "Developer_Name"}
+          <span className={promptColor} style={primaryColor ? { color: primaryColor } : {}}>{promptChar}</span> {basics.name || "Developer_Name"}
         </h1>
         <p className="text-[11px] font-bold text-zinc-400 mt-1 uppercase tracking-widest">{basics.label || "Full_Stack_Engineer"}</p>
         <div className="flex flex-wrap gap-x-4 gap-y-1 text-zinc-500 mt-2 text-[9px]">
           {basics.email && <span>email: {basics.email}</span>}
           {basics.phone && <span>phone: {basics.phone}</span>}
           {socialLinks.map((link, idx) => (
-            <span key={idx} className={`underline ${linkColor}`}>
+            <span key={idx} className={`underline ${linkColor}`} style={primaryColor ? { color: primaryColor } : {}}>
               {link.platform.toLowerCase()}: {link.url}
             </span>
           ))}
@@ -62,7 +80,7 @@ export default function TechTemplate({ data, templateId }: { data: ParsedResume;
           <span className={`text-[9px] uppercase tracking-widest ${commentColor}`}>{commentPrefix}Core Technologies</span>
           <div className="flex flex-wrap gap-1.5">
             {skills.map((skill, idx) => (
-              <span key={idx} className={`px-2 py-0.5 rounded font-bold ${tagBg}`}>
+              <span key={idx} className={`px-2 py-0.5 rounded font-bold ${tagBg}`} style={primaryColor ? { color: primaryColor, borderColor: primaryColor } : {}}>
                 {skill}
               </span>
             ))}
@@ -102,7 +120,7 @@ export default function TechTemplate({ data, templateId }: { data: ParsedResume;
                 <div className="flex justify-between items-center font-bold">
                   <span className="text-white">{proj.name}</span>
                   {proj.technologies && proj.technologies.length > 0 && (
-                    <span className={`${promptColor} text-[9px]`}>{`[${proj.technologies.join(", ")}]`}</span>
+                    <span className={`${promptColor} text-[9px]`} style={primaryColor ? { color: primaryColor } : {}}>{`[${proj.technologies.join(", ")}]`}</span>
                   )}
                 </div>
                 <p className="text-zinc-400 leading-normal">{proj.description}</p>
