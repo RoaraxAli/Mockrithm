@@ -381,46 +381,25 @@ export default function TemplateSelectorClient({ userId }: Props) {
   };
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 w-full">
+    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8 w-full">
       {TEMPLATES.map((tpl) => (
         <motion.div
           key={tpl.id}
-          whileHover={{ y: -4 }}
+          whileHover={{ y: -6 }}
           onClick={() => !isSubmitting && handleSelect(tpl.id)}
-          className={`group cursor-pointer relative rounded-2xl bg-slate-900 border border-slate-800 p-6 flex flex-col justify-between hover:border-white/20 hover:shadow-xl transition-all ${
-            isSubmitting && selectedId === tpl.id ? "border-white" : ""
+          className={`group cursor-pointer relative rounded-2xl bg-zinc-900/30 border border-zinc-850 p-4 flex flex-col justify-between hover:border-white/20 hover:shadow-[0_20px_50px_rgba(0,0,0,0.5)] transition-all duration-300 ${
+            isSubmitting && selectedId === tpl.id ? "border-white shadow-lg" : ""
           }`}
         >
           <div>
-            {/* Tags */}
-            <div className="flex flex-wrap gap-1.5 mb-3">
-              {tpl.tags.map((tag) => (
-                <span key={tag} className="text-[9px] font-mono font-bold px-2 py-0.5 rounded bg-slate-950 text-slate-400 uppercase border border-slate-850">
-                  {tag}
-                </span>
-              ))}
-            </div>
-
-            {/* Title */}
-            <h3 className="text-xl font-bold text-white mb-2 flex items-center justify-between">
-              {tpl.name}
-              <ArrowRight className="size-4 text-white opacity-0 group-hover:opacity-100 group-hover:translate-x-1 transition-all duration-300" />
-            </h3>
-            {/* Description */}
-            <p className="text-xs text-slate-400 leading-relaxed font-medium mb-2">
-              {tpl.description}
-            </p>
-            {/* Audience label */}
-            <p className="text-sm text-gray-300 italic mb-4">{tpl.audience}</p>
-
-            {/* Mini resume preview (White paper look like resume.io!) */}
-            <div className="w-full h-[260px] overflow-hidden border border-slate-800/80 rounded-xl bg-slate-950/80 relative flex justify-center items-start mb-4 shadow-inner">
+            {/* High fidelity A4 preview of the actual template (resume.io style!) */}
+            <div className="w-full aspect-[1/1.414] overflow-hidden rounded-xl bg-white border border-zinc-200/50 relative shadow-inner mb-4 transition-all duration-500 group-hover:shadow-[0_8px_30px_rgb(0,0,0,0.12)] flex justify-center items-start">
               <div 
-                className="absolute top-4 left-1/2 -translate-x-1/2 pointer-events-none select-none shadow-2xl rounded bg-white text-slate-800"
+                className="absolute top-2 left-1/2 -translate-x-1/2 pointer-events-none select-none shadow-2xl rounded text-slate-800 origin-top"
                 style={{ 
                   width: "800px", 
-                  transform: "scale(0.26)", 
-                  transformOrigin: "top center" 
+                  transform: "scale(0.32)", 
+                  height: "1131px"
                 }}
               >
                 {(() => {
@@ -429,29 +408,50 @@ export default function TemplateSelectorClient({ userId }: Props) {
                   return <TemplateComponent data={profileData} />;
                 })()}
               </div>
+              {/* Subtle hover overlay to darken/soften the document */}
+              <div className="absolute inset-0 bg-black/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none" />
+            </div>
+
+            {/* Template Info */}
+            <div className="flex flex-col gap-1.5">
+              <div className="flex items-center justify-between">
+                <h3 className="text-xs font-bold text-white group-hover:text-cyan-400 transition-colors font-mono uppercase tracking-wider">
+                  {tpl.name}
+                </h3>
+                <div className="flex gap-1">
+                  {tpl.tags.slice(0, 1).map((tag) => (
+                    <span key={tag} className="text-[8px] font-mono font-bold px-1.5 py-0.5 rounded bg-zinc-950 text-zinc-400 border border-zinc-800 uppercase">
+                      {tag}
+                    </span>
+                  ))}
+                </div>
+              </div>
+              <p className="text-[10px] text-zinc-400 leading-relaxed line-clamp-2">
+                {tpl.description}
+              </p>
             </div>
           </div>
 
-          <div className="w-full h-[1px] bg-slate-850 mb-4" />
-          
-          <button
-            disabled={isSubmitting}
-            className={`w-full py-2.5 rounded-lg border font-mono font-bold text-xs uppercase tracking-wider transition-all flex items-center justify-center gap-2 ${
-              isSubmitting && selectedId === tpl.id
-                ? "bg-slate-900 border-slate-800 text-slate-500 cursor-not-allowed"
-                : "bg-white/5 border-white/10 hover:border-white/20 hover:bg-white hover:text-black text-white"
-            }`}
-          >
-            {isSubmitting && selectedId === tpl.id ? (
-              <>
-                <Loader2 className="size-3.5 animate-spin" /> Preparing...
-              </>
-            ) : (
-              <>
-                <Sparkles className="size-3.5" /> Use Template
-              </>
-            )}
-          </button>
+          <div className="mt-4">
+            <button
+              disabled={isSubmitting}
+              className={`w-full py-2.5 rounded-lg border font-mono font-bold text-[10px] uppercase tracking-wider transition-all duration-300 flex items-center justify-center gap-1.5 ${
+                isSubmitting && selectedId === tpl.id
+                  ? "bg-zinc-900 border-zinc-800 text-zinc-500 cursor-not-allowed"
+                  : "bg-white/5 border-white/10 group-hover:border-white group-hover:bg-white group-hover:text-black text-white"
+              }`}
+            >
+              {isSubmitting && selectedId === tpl.id ? (
+                <>
+                  <Loader2 className="size-3 animate-spin" /> Preparing...
+                </>
+              ) : (
+                <>
+                  <Sparkles className="size-3" /> Use Template
+                </>
+              )}
+            </button>
+          </div>
         </motion.div>
       ))}
     </div>
