@@ -53,10 +53,15 @@ export async function POST(request: Request) {
     }
 
     // Groq TTS path (English and Arabic)
-    const apiKey = process.env.GROQ_API_KEY;
-    if (!apiKey) {
-      return NextResponse.json({ error: "GROQ_API_KEY is not configured on the server." }, { status: 400 });
+    const apiKey1 = process.env.GROQ_API_KEY;
+    const apiKey2 = process.env.GROQ_API_KEY_2;
+    
+    // Randomly assign one of the active API keys to spread quota load
+    const activeKeys = [apiKey1, apiKey2].filter(Boolean);
+    if (activeKeys.length === 0) {
+      return NextResponse.json({ error: "No GROQ_API_KEY configured on the server." }, { status: 400 });
     }
+    const apiKey = activeKeys[Math.floor(Math.random() * activeKeys.length)];
 
     const voiceName = voice || "troy";
     const arabicVoices = ["abdullah", "aisha", "fahad", "sultan", "lulwa", "noura"];
