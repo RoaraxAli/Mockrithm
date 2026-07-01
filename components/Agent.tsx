@@ -116,11 +116,6 @@ const Agent = ({
   const languageRef = useRef<string>("en-US");
   useEffect(() => {
     languageRef.current = selectedLanguage;
-    if (selectedLanguage === "ar-SA") {
-      setSelectedVoice("groq-abdullah");
-    } else {
-      setSelectedVoice("groq-autumn");
-    }
   }, [selectedLanguage]);
 
   // Interview Duration Selection
