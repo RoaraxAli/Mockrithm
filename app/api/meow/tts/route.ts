@@ -72,7 +72,7 @@ export async function POST(request: Request) {
     console.log(`[TTS Route] Active API key selected (truncated): ...${apiKey.slice(-6)}`);
     console.log(`[TTS Route] Parameters - Voice: ${voiceName}, Model: ${model}, Language: ${language}`);
 
-    const response = await fetch("https://api.groq.com/openai/v1/audio/speech", {
+    let response = await fetch("https://api.groq.com/openai/v1/audio/speech", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -85,6 +85,27 @@ export async function POST(request: Request) {
         response_format: "wav",
       }),
     });
+
+    // If selected key rate-limits with 429, immediately try the other key as fallback
+    if (response.status === 429 && activeKeys.length > 1) {
+      const alternateKey = activeKeys.find(key => key !== apiKey);
+      if (alternateKey) {
+        console.warn(`[TTS Route] Selected key got 429. Falling back to alternative API key...`);
+        response = await fetch("https://api.groq.com/openai/v1/audio/speech", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${alternateKey}`,
+          },
+          body: JSON.stringify({
+            model: model,
+            input: text,
+            voice: voiceName,
+            response_format: "wav",
+          }),
+        });
+      }
+    }
 
     if (!response.ok) {
       const errText = await response.text();
