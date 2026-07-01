@@ -33,9 +33,10 @@ async function groqChatCompletion(messages: any[], jsonMode = false) {
 
 export async function POST(request: Request) {
   try {
-    const { messages, userid, userResumeData } = await request.json();
+    const { messages, userid, userResumeData, language } = await request.json();
     console.log("[DEBUG] /api/interview/parse-and-create received payload:");
     console.log(`- User ID: ${userid}`);
+    console.log(`- Language: ${language || "en-US"}`);
     console.log(`- Messages Count: ${messages?.length || 0}`);
     console.log(`- Resume Data Target Role: ${userResumeData?.targetRole || "None Provided"}`);
 
@@ -62,6 +63,9 @@ export async function POST(request: Request) {
     const userData = userSnap.data();
     const userName = userData?.name || "Candidate";
     console.log(`[DEBUG] Candidate name: ${userName}`);
+
+    const targetLangConfig = interviewLanguages.find((l) => l.code === language) || interviewLanguages[0];
+    const languageInstruction = `LANGUAGE REQUIREMENT: The session language is "${targetLangConfig.name}" (Code: ${targetLangConfig.code}). You MUST output text ONLY in this language. Do not mix languages. Do not write Roman script translation (e.g. if Urdu is selected, write exclusively in actual Urdu script/characters, never in English or Roman Urdu).`;
 
     // 2. Parse setup preferences from conversation transcript
     const transcriptText = messages
@@ -123,6 +127,7 @@ export async function POST(request: Request) {
       The focus between behavioral and technical questions should lean towards: ${setup.type}.
       
       CRITICAL REQUIREMENTS:
+      - ${languageInstruction}
       - Questions MUST be strictly relevant to the listed tech stack or core competencies: ${(setup.techstack || []).join(", ")}. Do NOT ask questions about other tools, languages, or frameworks not explicitly listed.
       - Return ONLY a JSON object with a single "questions" key containing the array of questions. Example:
       {
@@ -155,6 +160,9 @@ export async function POST(request: Request) {
         const codingPrompt = `
           Generate a written, coding, or mathematical challenge suitable for a ${setup.level}-level ${setup.role} for the session mode "${setup.type}".
           Key topics/skills: ${(setup.techstack || []).join(", ") || "General"}.
+          
+          CRITICAL:
+          - ${languageInstruction}
           
           You must return ONLY a JSON object conforming to this schema:
           {
@@ -189,7 +197,8 @@ export async function POST(request: Request) {
       Job Role: ${setup.role} (${setup.level})
       
       Guidelines:
-      - Warmly welcome the candidate, use their name, and tell them you are ready to start.
+      - ${languageInstruction}
+      - Warmly welcome the candidate, use their name, and tell them you are ready to start the interview.
       - Keep it short, engaging, and professional. 2 sentences maximum. No markdown.
     `;
 

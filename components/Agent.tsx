@@ -307,6 +307,7 @@ const Agent = ({
               .map((m) => ({ role: m.role, content: m.content })),
             userid: userId,
             userResumeData: userResumeData,
+            language: selectedLanguage,
           }),
         });
         const data = await res.json();
@@ -805,8 +806,17 @@ const Agent = ({
       turnStartRef.current = null;
     }
 
+    // Clean speech of Urdu filler words (ام, امم, etc.) to keep transcripts clean
+    let cleanedSpeechText = text;
+    if (languageRef.current === "ur-PK") {
+      cleanedSpeechText = cleanedSpeechText
+        .replace(/\b(امم|ام|آں|اہ|اہہ|اہہہ)\b/g, "")
+        .replace(/\s+/g, " ")
+        .trim();
+    }
+
     // Accumulate and count filler words
-    const wordsList = text.toLowerCase().split(/\s+/);
+    const wordsList = cleanedSpeechText.toLowerCase().split(/\s+/);
     wordsList.forEach((w) => {
       const cleanW = w.replace(/[.,\/#!$%\^&\*;:{}=\-_`~()]/g, "");
       if (cleanW in fillerCountsRef.current) {
@@ -833,7 +843,7 @@ const Agent = ({
     streamCompletedRef.current = false;
 
     // STT Corrections
-    let cleanedText = text;
+    let cleanedText = cleanedSpeechText;
     const sttCorrections: Record<string, string> = {
       "yo yo exercise": "UI UX design",
       "yo-yo exercise": "UI UX design",
@@ -1230,6 +1240,7 @@ ${code}
         messages: messagesRef.current.map((m) => ({ role: m.role, content: m.content })),
         userid: userId,
         userResumeData: userResumeData,
+        language: selectedLanguage,
       };
       console.log("[Agent.tsx] POST payload to /api/interview/parse-and-create:", payload);
 
@@ -1373,7 +1384,27 @@ ${code}
     let welcomeMsg = firstMessage || interviewer.firstMessage || "Hello! Thank you for taking the time to speak with me today.";
     if (type === "generate") {
       const profileRole = userResumeData?.targetRole || "Software Engineer";
-      welcomeMsg = `Hello ${userName}! I see your target role is listed as "${profileRole}". Would you like to practice for this role, or would you like to prepare for a different role today?`;
+      if (selectedLanguage === "ur-PK") {
+        welcomeMsg = `ہیلو ${userName}! میں دیکھ سکتا ہوں کہ آپ کا ہدف کردار "${profileRole}" ہے۔ کیا آپ اسی کردار کے لیے مشق کرنا چاہیں گے، یا آج کسی دوسرے کردار کی تیاری کرنا چاہتے ہیں؟`;
+      } else if (selectedLanguage === "es-ES") {
+        welcomeMsg = `¡Hola ${userName}! Veo que tu rol objetivo es "${profileRole}". ¿Te gustaría practicar para este rol o prefieres prepararte para un rol diferente hoy?`;
+      } else if (selectedLanguage === "fr-FR") {
+        welcomeMsg = `Bonjour ${userName}! Je vois que votre rôle cible est "${profileRole}". Souhaitez-vous vous entraîner pour ce rôle, ou préférez-vous vous préparer pour un autre rôle aujourd'hui?`;
+      } else if (selectedLanguage === "zh-CN") {
+        welcomeMsg = `你好 ${userName}！我看到你的目标职位是 "${profileRole}"。你想针对这个职位进行练习，还是今天想准备其他职位？`;
+      } else if (selectedLanguage === "ar-SA") {
+        welcomeMsg = `مرحباً ${userName}! أرى أن دورك المستهدف هو "${profileRole}". هل ترغب في التدرب على هذا الدور، أم ترغب في الاستعداد لدور مختلف اليوم؟`;
+      } else if (selectedLanguage === "hi-IN") {
+        welcomeMsg = `नमस्ते ${userName}! मैं देख सकता हूँ कि आपकी लक्षित भूमिका "${profileRole}" है। क्या आप इस भूमिका के लिए अभ्यास करना चाहेंगे, या आज किसी अन्य भूमिका की तैयारी करना चाहेंगे?`;
+      } else if (selectedLanguage === "de-DE") {
+        welcomeMsg = `Hallo ${userName}! Ich sehe, dass deine Zielrolle als "${profileRole}" aufgeführt ist. Möchtest du für diese Rolle üben oder dich heute auf eine andere Rolle vorbereiten?`;
+      } else if (selectedLanguage === "pt-BR") {
+        welcomeMsg = `Olá ${userName}! Vejo que seu cargo de interesse é "${profileRole}". Você gostaria de praticar para este cargo ou prefere se preparar para um cargo diferente hoje?`;
+      } else if (selectedLanguage === "ja-JP") {
+        welcomeMsg = `こんにちは ${userName}さん！目標の職種が「${profileRole}」に設定されているようですね。この職種の練習を始めますか？それとも今日は別の職種の準備をしますか？`;
+      } else {
+        welcomeMsg = `Hello ${userName}! I see your target role is listed as "${profileRole}". Would you like to practice for this role, or would you like to prepare for a different role today?`;
+      }
     }
 
     setMessages([]);
