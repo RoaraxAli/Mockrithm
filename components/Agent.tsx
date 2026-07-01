@@ -330,6 +330,7 @@ const Agent = ({
     }
   }, [messages, callStatus, feedbackId, interviewId, router, type, userId]);
 
+
   // TTS Control Deck
   const stopTTSPlayback = () => {
     speechQueueRef.current = [];
@@ -606,6 +607,7 @@ const Agent = ({
       console.log("[Agent.tsx] SpeechRecognition already listening. Skipping duplicate start.");
       return;
     }
+    isListeningRef.current = true;
 
     console.log("[Agent.tsx] Initializing new SpeechRecognition instance...");
     const rec = new SpeechRecognition();
@@ -712,14 +714,14 @@ const Agent = ({
       if (displayText.length > 0) {
         setLastMessage(displayText);
 
-        // Reset/start silence detection timer to submit speech when user pauses for 1.6s
+        // Reset/start silence detection timer to submit speech when user pauses for 1.1s
         if (silenceTimerRef.current) {
           clearTimeout(silenceTimerRef.current);
         }
         silenceTimerRef.current = setTimeout(() => {
-          console.log("[Agent.tsx] Silence detected (1.6s). Submitting speech to AI...");
+          console.log("[Agent.tsx] Silence detected (1.1s). Submitting speech to AI...");
           submitCapturedSpeech(displayText);
-        }, 1600);
+        }, 1100);
       }
     };
 
