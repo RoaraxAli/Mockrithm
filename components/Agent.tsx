@@ -1459,608 +1459,797 @@ ${code}
     } catch (e) {}
   };
 
-  const currentWpmList = userWPMsRef.current;
-  const currentAverageWpm = currentWpmList.length > 0
-    ? Math.round(currentWpmList.reduce((a, b) => a + b, 0) / currentWpmList.length)
-    : 135; // Fallback typical conversation rate
+    // Quick inline localization translations dictionary
+    const translations: Record<string, Record<string, string>> = {
+      "ur-PK": {
+        "active": "مشق کا سیشن فعال ہے",
+        "session_id": "سیشن آئی ڈی",
+        "type": "قسم",
+        "language": "زبان",
+        "connection": "کنکشن",
+        "stable": "مستحکم",
+        "title": "مصنوعی ذہانت کا انٹرویو لینے والا",
+        "profile": "امیدوار کا پروفائل",
+        "pace": "بولنے کی رفتار",
+        "fillers": "فالتو الفاظ",
+        "detected": "پائے گئے",
+        "analyzer": "جواب کا تجزیہ کار",
+        "insights": "براہ راست بصیرت",
+        "situation": "صورتحال",
+        "task": "کام",
+        "action": "عمل",
+        "result": "نتیجہ",
+        "evaluation_insights": "تشخیص کی بصیرت",
+        "default_feedback": "تجزیہ شروع کرنے کے لیے سلوکی سوالات کے جواب دینا شروع کریں۔",
+        "start_session": "وائس سیشن شروع کریں",
+        "connecting": "رابطہ قائم کیا جا رہا ہے...",
+        "end_session": "مشق کا سیشن ختم کریں",
+        "interview_length": "انٹرویو کا دورانیہ",
+        "length_desc": "آپ اس سیشن کو کتنا طویل رکھنا چاہیں گے؟",
+        "brief": "مختصر",
+        "brief_desc": "~5 منٹ · فوری مشق کا دور",
+        "medium": "درمیانہ",
+        "medium_desc": "~10 منٹ · متوازن سیشن",
+        "lengthy": "طویل",
+        "lengthy_desc": "20+ منٹ · مکمل انٹرویو کا تجربہ",
+        "no_limit": "کوئی حد نہیں",
+        "workspace_sandbox": "کام کی جگہ کا سینڈ باکس",
+        "coding_sandbox": "کوڈنگ سینڈ باکس",
+        "ready": "تیار",
+        "need_hint": "کیا آپ کو کوئی اشارہ چاہیے؟",
+        "get_hint": "اشارہ حاصل کریں",
+        "req_hint": "سقراطی اشارہ کی درخواست کریں",
+        "calibration": "مشق کی ترتیب",
+        "show_settings": "ترتیبات دکھائیں",
+        "hide_settings": "ترتیبات چھپائیں",
+        "model": "انٹرویو کا ماڈل",
+        "voice": "آواز کا انجن"
+      },
+      "es-ES": {
+        "active": "Sesión de práctica activa",
+        "session_id": "ID de sesión",
+        "type": "Tipo",
+        "language": "Idioma",
+        "connection": "Conexión",
+        "stable": "Estable",
+        "title": "Entrevistador de voz de IA",
+        "profile": "Perfil del candidato",
+        "pace": "Ritmo de voz",
+        "fillers": "Muletillas detectadas",
+        "detected": "Detectado",
+        "analyzer": "Analizador de respuestas",
+        "insights": "Información en vivo",
+        "situation": "Situación",
+        "task": "Tarea",
+        "action": "Acción",
+        "result": "Resultado",
+        "evaluation_insights": "Análisis de evaluación",
+        "default_feedback": "Comienza a responder las preguntas de comportamiento para iniciar el análisis.",
+        "start_session": "Iniciar sesión de voz",
+        "connecting": "Conectando...",
+        "end_session": "Finalizar sesión de práctica",
+        "interview_length": "Duración de la entrevista",
+        "length_desc": "¿Cuánto tiempo te gustaría que dure esta sesión?",
+        "brief": "Breve",
+        "brief_desc": "~5 minutos · Ronda de práctica rápida",
+        "medium": "Medio",
+        "medium_desc": "~10 minutos · Sesión equilibrada",
+        "lengthy": "Largo",
+        "lengthy_desc": "20+ minutos · Experiencia completa de entrevista",
+        "no_limit": "Sin límite",
+        "workspace_sandbox": "Sandbox del espacio de trabajo",
+        "coding_sandbox": "Sandbox de código",
+        "ready": "Listo",
+        "need_hint": "¿Necesitas una pista?",
+        "get_hint": "Obtener pista",
+        "req_hint": "Solicitar pista socrática",
+        "calibration": "Calibración de práctica",
+        "show_settings": "Mostrar configuración",
+        "hide_settings": "Ocultar configuración",
+        "model": "Modelo de entrevista",
+        "voice": "Motor de voz"
+      },
+      "fr-FR": {
+        "active": "Session de pratique active",
+        "session_id": "ID de session",
+        "type": "Type",
+        "language": "Langue",
+        "connection": "Connexion",
+        "stable": "Stable",
+        "title": "Interviewer vocal IA",
+        "profile": "Profil du candidat",
+        "pace": "Rythme de parole",
+        "fillers": "Tics de langage détectés",
+        "detected": "Détecté",
+        "analyzer": "Analyseur de réponse",
+        "insights": "Aperçu en direct",
+        "situation": "Situation",
+        "task": "Tâche",
+        "action": "Action",
+        "result": "Résultat",
+        "evaluation_insights": "Analyses d'évaluation",
+        "default_feedback": "Commencez à répondre aux questions comportementales pour lancer l'analyse.",
+        "start_session": "Démarrer la session vocale",
+        "connecting": "Connexion...",
+        "end_session": "Terminer la session",
+        "interview_length": "Durée de l'entretien",
+        "length_desc": "Combien de temps souhaitez-vous que cette session dure ?",
+        "brief": "Court",
+        "brief_desc": "~5 minutes · Entraînement rapide",
+        "medium": "Moyen",
+        "medium_desc": "~10 minutes · Session équilibrée",
+        "lengthy": "Long",
+        "lengthy_desc": "20+ minutes · Entretien complet",
+        "no_limit": "Pas de limite",
+        "workspace_sandbox": "Bac à sable de rédaction",
+        "coding_sandbox": "Bac à sable de codage",
+        "ready": "Prêt",
+        "need_hint": "Besoin d'un indice ?",
+        "get_hint": "Obtenir un indice",
+        "req_hint": "Demander un indice socratique",
+        "calibration": "Configuration",
+        "show_settings": "Afficher les paramètres",
+        "hide_settings": "Masquer les paramètres",
+        "model": "Modèle d'entretien",
+        "voice": "Moteur vocal"
+      }
+    };
 
-  const fillerUm = fillerCountsRef.current?.um || 0;
-  const fillerLike = fillerCountsRef.current?.like || 0;
-  const fillerUh = fillerCountsRef.current?.uh || 0;
-  const fillerSo = fillerCountsRef.current?.so || 0;
+    const t = (key: string): string => {
+      const lang = selectedLanguage;
+      if (translations[lang] && translations[lang][key]) {
+        return translations[lang][key];
+      }
+      // Fallback translation table to English default mappings
+      const defaults: Record<string, string> = {
+        "active": "Practice Session Active",
+        "session_id": "Session ID",
+        "type": "Type",
+        "language": "Language",
+        "connection": "Connection",
+        "stable": "Stable",
+        "title": "AI Voice Interviewer",
+        "profile": "Candidate Profile",
+        "pace": "Speaking Pace",
+        "fillers": "Fillers Detected",
+        "detected": "Live Insights",
+        "analyzer": "Response Analyzer",
+        "insights": "Live Insights",
+        "situation": "Situation",
+        "task": "Task",
+        "action": "Action",
+        "result": "Result",
+        "evaluation_insights": "Evaluation Insights",
+        "default_feedback": "Begin answering the behavioral questions to start analysis.",
+        "start_session": "Start Voice Session",
+        "connecting": "Connecting...",
+        "end_session": "End Practice Session",
+        "interview_length": "Interview Length",
+        "length_desc": "How long would you like this session to be?",
+        "brief": "Brief",
+        "brief_desc": "~5 minutes · Quick practice round",
+        "medium": "Medium",
+        "medium_desc": "~10 minutes · Balanced session",
+        "lengthy": "Lengthy",
+        "lengthy_desc": "20+ minutes · Full interview experience",
+        "no_limit": "No limit",
+        "workspace_sandbox": "Workspace Sandbox",
+        "coding_sandbox": "Coding Sandbox",
+        "ready": "Ready",
+        "need_hint": "Need a hint?",
+        "get_hint": "Get Hint",
+        "req_hint": "Request Socratic Hint",
+        "calibration": "Practice Calibration",
+        "show_settings": "Show Settings",
+        "hide_settings": "Hide Settings",
+        "model": "Interview Model",
+        "voice": "Speech Engine Voice"
+      };
+      return defaults[key] || key;
+    };
 
-  return (
-    <div className="w-full flex flex-col gap-6 font-mona-sans text-zinc-100 selection:bg-violet-500/30 selection:text-white">
-      {/* Duration Selection Modal */}
-      <AnimatePresence>
-        {showDurationModal && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 z-50 flex items-center justify-center bg-zinc-950/80 backdrop-blur-md"
-          >
+    const currentWpmList = userWPMsRef.current;
+    const currentAverageWpm = currentWpmList.length > 0
+      ? Math.round(currentWpmList.reduce((a, b) => a + b, 0) / currentWpmList.length)
+      : 135; // Fallback typical conversation rate
+
+    const fillerUm = fillerCountsRef.current?.um || 0;
+    const fillerLike = fillerCountsRef.current?.like || 0;
+    const fillerUh = fillerCountsRef.current?.uh || 0;
+    const fillerSo = fillerCountsRef.current?.so || 0;
+
+    return (
+      <div className="w-full flex flex-col gap-6 font-mona-sans text-zinc-100 selection:bg-violet-500/30 selection:text-white">
+        {/* Duration Selection Modal */}
+        <AnimatePresence>
+          {showDurationModal && (
             <motion.div
-              initial={{ scale: 0.9, opacity: 0, y: 20 }}
-              animate={{ scale: 1, opacity: 1, y: 0 }}
-              exit={{ scale: 0.9, opacity: 0 }}
-              transition={{ type: "spring", damping: 20 }}
-              className="relative w-full max-w-sm mx-4 bg-zinc-950 border border-zinc-800 rounded-2xl p-7 shadow-2xl"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="fixed inset-0 z-50 flex items-center justify-center bg-zinc-950/80 backdrop-blur-md"
             >
-              <button
-                onClick={() => setShowDurationModal(false)}
-                className="absolute top-4 right-4 text-zinc-600 hover:text-zinc-300 transition-colors text-xs font-bold"
+              <motion.div
+                initial={{ scale: 0.9, opacity: 0, y: 20 }}
+                animate={{ scale: 1, opacity: 1, y: 0 }}
+                exit={{ scale: 0.9, opacity: 0 }}
+                transition={{ type: "spring", damping: 20 }}
+                className="relative w-full max-w-sm mx-4 bg-zinc-950 border border-zinc-800 rounded-2xl p-7 shadow-2xl"
               >
-                ✕
-              </button>
-              <h2 className="text-sm font-bold text-white uppercase tracking-widest mb-1">Interview Length</h2>
-              <p className="text-[11px] text-zinc-500 mb-6">How long would you like this session to be?</p>
-              <div className="flex flex-col gap-3">
                 <button
-                  onClick={() => startCallWithDuration("brief")}
-                  className="group w-full flex items-center justify-between px-5 py-4 rounded-xl border border-zinc-800 bg-zinc-900/60 hover:border-emerald-500/40 hover:bg-emerald-950/20 transition-all duration-300 cursor-pointer"
+                  onClick={() => setShowDurationModal(false)}
+                  className="absolute top-4 right-4 text-zinc-600 hover:text-zinc-300 transition-colors text-xs font-bold"
                 >
-                  <div className="text-left">
-                    <div className="text-xs font-bold text-white uppercase tracking-wider group-hover:text-emerald-300 transition-colors">Brief</div>
-                    <div className="text-[10px] text-zinc-500 mt-0.5">~5 minutes · Quick practice round</div>
-                  </div>
-                  <span className="text-[10px] font-bold text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-2.5 py-1 rounded-full">5 min</span>
+                  ✕
                 </button>
-                <button
-                  onClick={() => startCallWithDuration("medium")}
-                  className="group w-full flex items-center justify-between px-5 py-4 rounded-xl border border-zinc-800 bg-zinc-900/60 hover:border-amber-500/40 hover:bg-amber-950/20 transition-all duration-300 cursor-pointer"
-                >
-                  <div className="text-left">
-                    <div className="text-xs font-bold text-white uppercase tracking-wider group-hover:text-amber-300 transition-colors">Medium</div>
-                    <div className="text-[10px] text-zinc-500 mt-0.5">~10 minutes · Balanced session</div>
-                  </div>
-                  <span className="text-[10px] font-bold text-amber-400 bg-amber-500/10 border border-amber-500/20 px-2.5 py-1 rounded-full">10 min</span>
-                </button>
-                <button
-                  onClick={() => startCallWithDuration("lengthy")}
-                  className="group w-full flex items-center justify-between px-5 py-4 rounded-xl border border-zinc-800 bg-zinc-900/60 hover:border-violet-500/40 hover:bg-violet-950/20 transition-all duration-300 cursor-pointer"
-                >
-                  <div className="text-left">
-                    <div className="text-xs font-bold text-white uppercase tracking-wider group-hover:text-violet-300 transition-colors">Lengthy</div>
-                    <div className="text-[10px] text-zinc-500 mt-0.5">20+ minutes · Full interview experience</div>
-                  </div>
-                  <span className="text-[10px] font-bold text-violet-400 bg-violet-500/10 border border-violet-500/20 px-2.5 py-1 rounded-full">No limit</span>
-                </button>
-              </div>
+                <h2 className="text-sm font-bold text-white uppercase tracking-widest mb-1">{t("interview_length")}</h2>
+                <p className="text-[11px] text-zinc-500 mb-6">{t("length_desc")}</p>
+                <div className="flex flex-col gap-3">
+                  <button
+                    onClick={() => startCallWithDuration("brief")}
+                    className="group w-full flex items-center justify-between px-5 py-4 rounded-xl border border-zinc-800 bg-zinc-900/60 hover:border-emerald-500/40 hover:bg-emerald-950/20 transition-all duration-300 cursor-pointer"
+                  >
+                    <div className="text-left">
+                      <div className="text-xs font-bold text-white uppercase tracking-wider group-hover:text-emerald-300 transition-colors">{t("brief")}</div>
+                      <div className="text-[10px] text-zinc-500 mt-0.5">{t("brief_desc")}</div>
+                    </div>
+                    <span className="text-[10px] font-bold text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-2.5 py-1 rounded-full">5 min</span>
+                  </button>
+                  <button
+                    onClick={() => startCallWithDuration("medium")}
+                    className="group w-full flex items-center justify-between px-5 py-4 rounded-xl border border-zinc-800 bg-zinc-900/60 hover:border-amber-500/40 hover:bg-amber-950/20 transition-all duration-300 cursor-pointer"
+                  >
+                    <div className="text-left">
+                      <div className="text-xs font-bold text-white uppercase tracking-wider group-hover:text-amber-300 transition-colors">{t("medium")}</div>
+                      <div className="text-[10px] text-zinc-500 mt-0.5">{t("medium_desc")}</div>
+                    </div>
+                    <span className="text-[10px] font-bold text-amber-400 bg-amber-500/10 border border-amber-500/20 px-2.5 py-1 rounded-full">10 min</span>
+                  </button>
+                  <button
+                    onClick={() => startCallWithDuration("lengthy")}
+                    className="group w-full flex items-center justify-between px-5 py-4 rounded-xl border border-zinc-800 bg-zinc-900/60 hover:border-violet-500/40 hover:bg-violet-950/20 transition-all duration-300 cursor-pointer"
+                  >
+                    <div className="text-left">
+                      <div className="text-xs font-bold text-white uppercase tracking-wider group-hover:text-violet-300 transition-colors">{t("lengthy")}</div>
+                      <div className="text-[10px] text-zinc-500 mt-0.5">{t("lengthy_desc")}</div>
+                    </div>
+                    <span className="text-[10px] font-bold text-violet-400 bg-violet-500/10 border border-violet-500/20 px-2.5 py-1 rounded-full">{t("no_limit")}</span>
+                  </button>
+                </div>
+              </motion.div>
             </motion.div>
+          )}
+        </AnimatePresence>
+
+        {/* Sleek Modern Session Status Bar */}
+        {callStatus !== CallStatus.INACTIVE && (
+          <motion.div
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.4 }}
+            className="w-full backdrop-blur-xl bg-zinc-950/40 border border-zinc-900 px-6 py-3.5 rounded-2xl flex items-center justify-between flex-wrap gap-4 shadow-xl"
+          >
+            <div className="flex items-center gap-3">
+              <span className="relative flex h-2 w-2">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-white opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-2 w-2 bg-white"></span>
+              </span>
+              <span className="text-[11px] font-bold text-zinc-300 uppercase tracking-wider">
+                {t("active")}
+              </span>
+            </div>
+
+            <div className="flex gap-6 items-center text-zinc-500 text-[11px] font-semibold">
+              <div>
+                <span className="text-zinc-600 mr-1.5">{t("session_id")}:</span>
+                <span className="text-zinc-300 font-mono">#{interviewId ? interviewId.slice(0, 8).toUpperCase() : "GENERATE"}</span>
+              </div>
+              <div className="max-sm:hidden">
+                <span className="text-zinc-600 mr-1.5">{t("type")}:</span>
+                <span className="text-zinc-300 uppercase">{type}</span>
+              </div>
+              <div className="max-sm:hidden">
+                <span className="text-zinc-600 mr-1.5">{t("language")}:</span>
+                <span className="text-sky-300 font-bold">{currentLangConfig.name.split(" (")[0]}</span>
+              </div>
+               {timerSecondsLeft !== null && (
+                <div className={cn(
+                  "flex items-center gap-1.5 font-mono font-black px-3 py-1 rounded-full border transition-all duration-500",
+                  timerSecondsLeft <= 60
+                    ? "text-rose-400 border-rose-500/30 bg-rose-500/10 animate-pulse"
+                    : timerSecondsLeft <= 120
+                    ? "text-amber-400 border-amber-500/30 bg-amber-500/10"
+                    : "text-emerald-400 border-emerald-500/30 bg-emerald-500/10"
+                )}>
+                  {String(Math.floor(timerSecondsLeft / 60)).padStart(2, "0")}:{String(timerSecondsLeft % 60).padStart(2, "0")}
+                </div>
+              )}
+              <div>
+                <span className="text-zinc-600 mr-1.5">{t("connection")}:</span>
+                <span className="text-emerald-400 font-bold">{t("stable")}</span>
+              </div>
+            </div>
           </motion.div>
         )}
-      </AnimatePresence>
 
-      {/* Sleek Modern Session Status Bar */}
-      {callStatus !== CallStatus.INACTIVE && (
-        <motion.div
-          initial={{ opacity: 0, y: -10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.4 }}
-          className="w-full backdrop-blur-xl bg-zinc-950/40 border border-zinc-900 px-6 py-3.5 rounded-2xl flex items-center justify-between flex-wrap gap-4 shadow-xl"
-        >
-          <div className="flex items-center gap-3">
-            <span className="relative flex h-2 w-2">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-white opacity-75"></span>
-              <span className="relative inline-flex rounded-full h-2 w-2 bg-white"></span>
-            </span>
-            <span className="text-[11px] font-bold text-zinc-300 uppercase tracking-wider">
-              Practice Session Active
-            </span>
-          </div>
-
-          <div className="flex gap-6 items-center text-zinc-500 text-[11px] font-semibold">
-            <div>
-              <span className="text-zinc-600 mr-1.5">Session ID:</span>
-              <span className="text-zinc-300 font-mono">#{interviewId ? interviewId.slice(0, 8).toUpperCase() : "GENERATE"}</span>
-            </div>
-            <div className="max-sm:hidden">
-              <span className="text-zinc-600 mr-1.5">Type:</span>
-              <span className="text-zinc-300 uppercase">{type}</span>
-            </div>
-            <div className="max-sm:hidden">
-              <span className="text-zinc-600 mr-1.5">Language:</span>
-              <span className="text-sky-300 font-bold">{currentLangConfig.name.split(" (")[0]}</span>
-            </div>
-             {timerSecondsLeft !== null && (
-              <div className={cn(
-                "flex items-center gap-1.5 font-mono font-black px-3 py-1 rounded-full border transition-all duration-500",
-                timerSecondsLeft <= 60
-                  ? "text-rose-400 border-rose-500/30 bg-rose-500/10 animate-pulse"
-                  : timerSecondsLeft <= 120
-                  ? "text-amber-400 border-amber-500/30 bg-amber-500/10"
-                  : "text-emerald-400 border-emerald-500/30 bg-emerald-500/10"
-              )}>
-                {String(Math.floor(timerSecondsLeft / 60)).padStart(2, "0")}:{String(timerSecondsLeft % 60).padStart(2, "0")}
-              </div>
-            )}
-            <div>
-              <span className="text-zinc-600 mr-1.5">Connection:</span>
-              <span className="text-emerald-400 font-bold">Stable</span>
-            </div>
-          </div>
-        </motion.div>
-      )}
-
-      {/* Settings Panel: Styled as Modern Calibration Drawer */}
-      {callStatus === CallStatus.INACTIVE && (
-        <motion.div 
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.4, ease: "easeOut" }}
-          className="w-full max-w-xl mx-auto p-6 backdrop-blur-2xl bg-zinc-950/40 rounded-2xl flex flex-col gap-5 border border-zinc-900 shadow-2xl relative overflow-hidden group"
-        >
-          <div className="flex items-center justify-between">
-            <h4 className="text-xs font-bold text-white uppercase tracking-widest flex items-center gap-2.5">
-              <span className="p-1.5 bg-zinc-900 rounded-lg border border-zinc-800">
-                <Settings className="size-4 text-white" />
-              </span>
-              Practice Calibration
-            </h4>
-            <button
-              onClick={() => setShowSettings(!showSettings)}
-              className="text-[10px] font-bold text-white hover:text-zinc-350 cursor-pointer transition-colors duration-200 px-3 py-1.5 bg-zinc-950 border border-zinc-900 rounded-lg hover:border-zinc-800 shadow-md uppercase tracking-wider"
-            >
-              {showSettings ? "Hide Settings" : "Show Settings"}
-            </button>
-          </div>
-
-          {/* Interview Language — always visible, must be chosen before starting */}
-          <div className="flex flex-col gap-2">
-            <label className="text-[10px] text-zinc-500 font-semibold uppercase tracking-wider flex items-center gap-1.5">
-              <Languages className="size-3.5 text-zinc-400" /> Interview Language
-            </label>
-            <select
-              value={selectedLanguage}
-              onChange={(e) => setSelectedLanguage(e.target.value)}
-              className="bg-zinc-950 text-zinc-100 text-xs rounded-xl p-3 border border-zinc-900 focus:border-zinc-700 focus:ring-1 focus:ring-zinc-800 outline-none cursor-pointer hover:bg-zinc-900 transition-all font-semibold"
-            >
-              {interviewLanguages.map((lang) => (
-                <option key={lang.code} value={lang.code}>
-                  {lang.name} {!lang.neuralTTS && "(Browser Voice)"}
-                </option>
-              ))}
-            </select>
-            {!currentLangConfig.neuralTTS && (
-              <p className="text-[10px] text-amber-400/80 font-semibold leading-relaxed">
-                This language uses your browser/OS built-in voice for the interviewer. For best results, install the {currentLangConfig.name.split(" ")[0]} voice in your system settings.
-              </p>
-            )}
-          </div>
-
-          <AnimatePresence>
-            {showSettings && (
-              <motion.div 
-                initial={{ opacity: 0, height: 0 }}
-                animate={{ opacity: 1, height: "auto" }}
-                exit={{ opacity: 0, height: 0 }}
-                transition={{ duration: 0.3 }}
-                className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-2 border-t border-zinc-900 pt-4 overflow-hidden"
+        {/* Settings Panel: Styled as Modern Calibration Drawer */}
+        {callStatus === CallStatus.INACTIVE && (
+          <motion.div 
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.4, ease: "easeOut" }}
+            className="w-full max-w-xl mx-auto p-6 backdrop-blur-2xl bg-zinc-950/40 rounded-2xl flex flex-col gap-5 border border-zinc-900 shadow-2xl relative overflow-hidden group"
+          >
+            <div className="flex items-center justify-between">
+              <h4 className="text-xs font-bold text-white uppercase tracking-widest flex items-center gap-2.5">
+                <span className="p-1.5 bg-zinc-900 rounded-lg border border-zinc-800">
+                  <Settings className="size-4 text-white" />
+                </span>
+                {t("calibration")}
+              </h4>
+              <button
+                onClick={() => setShowSettings(!showSettings)}
+                className="text-[10px] font-bold text-white hover:text-zinc-350 cursor-pointer transition-colors duration-200 px-3 py-1.5 bg-zinc-950 border border-zinc-900 rounded-lg hover:border-zinc-800 shadow-md uppercase tracking-wider"
               >
-                <div className="flex flex-col gap-2">
-                  <label className="text-[10px] text-zinc-500 font-semibold uppercase tracking-wider flex items-center gap-1.5">
-                    <Brain className="size-3.5 text-zinc-400" /> Interview Model
-                  </label>
-                  <select
-                    value={selectedModel}
-                    onChange={(e) => setSelectedModel(e.target.value)}
-                    className="bg-zinc-950 text-zinc-100 text-xs rounded-xl p-3 border border-zinc-900 focus:border-zinc-700 focus:ring-1 focus:ring-zinc-800 outline-none cursor-pointer hover:bg-zinc-900 transition-all font-semibold"
-                  >
-                    <option value="llama-3.1-8b-instant">Llama 3.1 8B (Fast & Recommended)</option>
-                    <option value="llama-3.3-70b-versatile">Llama 3.3 70B (High Quality)</option>
-                  </select>
+                {showSettings ? t("hide_settings") : t("show_settings")}
+              </button>
+            </div>
+
+            {/* Interview Language — always visible, must be chosen before starting */}
+            <div className="flex flex-col gap-2">
+              <label className="text-[10px] text-zinc-500 font-semibold uppercase tracking-wider flex items-center gap-1.5">
+                <Languages className="size-3.5 text-zinc-400" /> {t("language")}
+              </label>
+              <select
+                value={selectedLanguage}
+                onChange={(e) => setSelectedLanguage(e.target.value)}
+                className="bg-zinc-950 text-zinc-100 text-xs rounded-xl p-3 border border-zinc-900 focus:border-zinc-700 focus:ring-1 focus:ring-zinc-800 outline-none cursor-pointer hover:bg-zinc-900 transition-all font-semibold"
+              >
+                {interviewLanguages.map((lang) => (
+                  <option key={lang.code} value={lang.code}>
+                    {lang.name} {!lang.neuralTTS && "(Browser Voice)"}
+                  </option>
+                ))}
+              </select>
+              {!currentLangConfig.neuralTTS && (
+                <p className="text-[10px] text-amber-400/80 font-semibold leading-relaxed">
+                  This language uses your browser/OS built-in voice for the interviewer. For best results, install the {currentLangConfig.name.split(" ")[0]} voice in your system settings.
+                </p>
+              )}
+            </div>
+
+            <AnimatePresence>
+              {showSettings && (
+                <motion.div 
+                  initial={{ opacity: 0, height: 0 }}
+                  animate={{ opacity: 1, height: "auto" }}
+                  exit={{ opacity: 0, height: 0 }}
+                  transition={{ duration: 0.3 }}
+                  className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-2 border-t border-zinc-900 pt-4 overflow-hidden"
+                >
+                  <div className="flex flex-col gap-2">
+                    <label className="text-[10px] text-zinc-500 font-semibold uppercase tracking-wider flex items-center gap-1.5">
+                      <Brain className="size-3.5 text-zinc-400" /> {t("model")}
+                    </label>
+                    <select
+                      value={selectedModel}
+                      onChange={(e) => setSelectedModel(e.target.value)}
+                      className="bg-zinc-950 text-zinc-100 text-xs rounded-xl p-3 border border-zinc-900 focus:border-zinc-700 focus:ring-1 focus:ring-zinc-800 outline-none cursor-pointer hover:bg-zinc-900 transition-all font-semibold"
+                    >
+                      <option value="llama-3.1-8b-instant">Llama 3.1 8B (Fast & Recommended)</option>
+                      <option value="llama-3.3-70b-versatile">Llama 3.3 70B (High Quality)</option>
+                    </select>
+                  </div>
+
+                  <div className="flex flex-col gap-2">
+                    <label className="text-[10px] text-zinc-500 font-semibold uppercase tracking-wider flex items-center gap-1.5">
+                      <Volume2 className="size-3.5 text-zinc-400" /> {t("voice")}
+                    </label>
+                    <select
+                      value={selectedVoice}
+                      onChange={(e) => setSelectedVoice(e.target.value)}
+                      className="bg-zinc-950 text-zinc-100 text-xs rounded-xl p-3 border border-zinc-900 focus:border-zinc-700 focus:ring-1 focus:ring-zinc-800 outline-none cursor-pointer hover:bg-zinc-900 transition-all font-semibold"
+                    >
+                      <option value="groq-autumn">Autumn (Female - Natural)</option>
+                      <option value="groq-diana">Diana (Female - Crisp)</option>
+                      <option value="groq-hannah">Hannah (Female - Warm)</option>
+                      <option value="groq-austin">Austin (Male - Business)</option>
+                      <option value="groq-daniel">Daniel (Male - Composed)</option>
+                      <option value="groq-troy">Troy (Male - Deep)</option>
+                      <option value="local">Local Browser Synthesis</option>
+                    </select>
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </motion.div>
+        )}
+
+        {/* Main Split Grid for Practice & Editor */}
+        <div className={cn(
+          "grid grid-cols-1 gap-5 items-start w-full",
+          (codingProblem && showSandbox) ? "lg:grid-cols-12" : "max-w-4xl mx-auto"
+        )}>
+          
+          {/* Left Side: Voice Card, Transcript, STAR Tracker */}
+          <div className={cn(
+            "flex flex-col gap-4 w-full",
+            (codingProblem && showSandbox) ? "lg:col-span-6" : "col-span-1"
+          )}>
+            
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 w-full items-stretch">
+              {/* AI Voice Interviewer Orb Card */}
+              <motion.div 
+                whileHover={{ y: -1 }}
+                className={cn(
+                  "flex items-center justify-center flex-col gap-3.5 p-4 min-h-[175px] backdrop-blur-xl border rounded-2xl flex-1 w-full shadow-2xl relative overflow-hidden transition-all duration-500",
+                  callStatus === CallStatus.ACTIVE && isSpeaking
+                    ? "bg-zinc-950/60 border-zinc-700 shadow-[0_0_50px_rgba(255,255,255,0.03)]"
+                    : "bg-zinc-950/20 border-zinc-900"
+                )}
+              >
+                <div className="relative flex justify-center items-center h-16 w-16">
+                  {/* Modern circular breathing halo aura */}
+                  <div className={cn(
+                    "absolute inset-0 border border-zinc-700/10 rounded-full transition-all duration-1000",
+                    callStatus === CallStatus.ACTIVE && isSpeaking ? "scale-110 opacity-100 bg-white/5" : "scale-100 opacity-0"
+                  )} />
+                  <div className={cn(
+                    "absolute inset-1.5 border border-zinc-700/10 rounded-full transition-all duration-1000",
+                    callStatus === CallStatus.ACTIVE && isSpeaking ? "scale-105 opacity-100 bg-white/5 animate-pulse" : "scale-100 opacity-0"
+                  )} />
+                  
+                  {/* Voice core orb */}
+                  <div className={cn(
+                    "z-10 flex items-center justify-center rounded-full size-[48px] relative border transition-all duration-500 shadow-2xl bg-zinc-950",
+                    callStatus === CallStatus.ACTIVE && isSpeaking 
+                      ? "border-white scale-105 shadow-[0_0_20px_rgba(255,255,255,0.1)]" 
+                      : "border-zinc-800"
+                  )}>
+                    {/* Glowing core animation */}
+                    <svg className={cn("w-5 h-5 text-white", callStatus === CallStatus.ACTIVE && isSpeaking ? "animate-pulse" : "opacity-60")} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <circle cx="12" cy="12" r="9" strokeWidth="1.5" />
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z" />
+                    </svg>
+                  </div>
+                </div>
+                
+                <div className="text-center flex flex-col gap-0.5 items-center">
+                  <h3 className="text-xs font-bold text-white tracking-wider uppercase">Alex</h3>
+                  <span className="text-[8px] text-zinc-455 font-bold tracking-widest bg-zinc-900/60 border border-zinc-850 px-2 py-0.5 rounded-full uppercase">
+                    {t("title")}
+                  </span>
                 </div>
 
-                <div className="flex flex-col gap-2">
-                  <label className="text-[10px] text-zinc-500 font-semibold uppercase tracking-wider flex items-center gap-1.5">
-                    <Volume2 className="size-3.5 text-zinc-400" /> Speech Engine Voice
-                  </label>
-                  <select
-                    value={selectedVoice}
-                    onChange={(e) => setSelectedVoice(e.target.value)}
-                    className="bg-zinc-950 text-zinc-100 text-xs rounded-xl p-3 border border-zinc-900 focus:border-zinc-700 focus:ring-1 focus:ring-zinc-800 outline-none cursor-pointer hover:bg-zinc-900 transition-all font-semibold"
+                {callStatus === CallStatus.ACTIVE && (
+                  <div className="flex flex-col items-center gap-2 w-full mt-0.5">
+                    {/* Subtle clean visualizer */}
+                    {isSpeaking ? (
+                      <div className="flex items-end justify-center gap-1 h-3.5">
+                        <div className="w-1 bg-white rounded-full h-2 animate-[pulse_0.7s_infinite]" />
+                        <div className="w-1 bg-zinc-400 rounded-full h-3.5 animate-[pulse_1s_infinite] delay-100" />
+                        <div className="w-1 bg-zinc-350 rounded-full h-2.5 animate-[pulse_0.6s_infinite] delay-200" />
+                        <div className="w-1 bg-white rounded-full h-1.5 animate-[pulse_0.8s_infinite] delay-150" />
+                      </div>
+                    ) : (
+                      <div className="flex items-center gap-1 h-3.5 opacity-35">
+                        <span className="w-1 h-1 bg-zinc-650 rounded-full" />
+                        <span className="w-1 h-1 bg-zinc-650 rounded-full animate-ping" />
+                        <span className="w-1 h-1 bg-zinc-650 rounded-full" />
+                      </div>
+                    )}
+                  </div>
+                )}
+              </motion.div>
+
+              {/* Candidate Premium Profile Panel */}
+              <motion.div 
+                whileHover={{ y: -1 }}
+                className="flex items-center justify-center flex-col gap-3.5 p-4 min-h-[175px] backdrop-blur-xl border border-zinc-900 bg-zinc-950/20 rounded-2xl flex-1 w-full shadow-2xl relative overflow-hidden transition-all duration-500 max-md:hidden"
+              >
+                <div className="relative">
+                  <div className="absolute -inset-0.5 rounded-full bg-gradient-to-tr from-zinc-800 to-zinc-700 group-hover:from-violet-500 group-hover:to-cyan-400 p-[1px] transition-all duration-500" />
+                  <div className="relative w-11 h-11 rounded-full overflow-hidden bg-zinc-900">
+                    {profileImage ? (
+                      <Image
+                        src={profileImage}
+                        alt={userName}
+                        width={44}
+                        height={44}
+                        className="rounded-full object-cover size-full"
+                      />
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center bg-zinc-900 border border-zinc-850">
+                        <User className="w-5 h-5 text-zinc-550" />
+                      </div>
+                    )}
+                  </div>
+                </div>
+                
+                <div className="text-center flex flex-col gap-0.5 items-center w-full">
+                  <h3 className="text-xs font-bold text-white tracking-wide truncate max-w-[140px]">
+                    {userName}
+                  </h3>
+                  <span className="text-[8px] text-zinc-500 font-bold uppercase tracking-wider">
+                    {t("profile")}
+                  </span>
+                </div>
+
+                {/* Dynamic stats tracking */}
+                {callStatus === CallStatus.ACTIVE && (
+                  <div className="w-full flex flex-col gap-2 mt-1 bg-zinc-950/40 border border-zinc-900/60 p-2.5 rounded-xl">
+                    <div className="flex justify-between items-center text-[9px] font-bold">
+                      <span className="text-zinc-500">{t("pace")}</span>
+                      <span className="text-emerald-400">{currentAverageWpm} WPM</span>
+                    </div>
+                    {/* Speedometer line */}
+                    <div className="w-full h-1 bg-zinc-900 rounded-full overflow-hidden">
+                      <div 
+                        className="h-full bg-emerald-400 transition-all duration-500"
+                        style={{ width: `${Math.min(100, (currentAverageWpm / 200) * 100)}%` }}
+                      />
+                    </div>
+
+                    {/* Filler words indicator */}
+                    <div className="flex justify-between text-[8px] font-bold text-zinc-500 border-t border-zinc-900/60 pt-1.5 mt-0.5">
+                      <span>{t("fillers")}:</span>
+                      <span className="text-amber-400">
+                        Like ({fillerLike}) / Um ({fillerUm}) / Uh ({fillerUh})
+                      </span>
+                    </div>
+                  </div>
+                )}
+              </motion.div>
+            </div>
+
+            {/* Premium Chat Bubble Transcript */}
+            {messages.length > 0 && (
+              <motion.div 
+                initial={{ opacity: 0, y: 5 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="border border-zinc-900 rounded-2xl w-full shadow-2xl relative overflow-hidden backdrop-blur-xl bg-zinc-950/30"
+              >
+                <div className="rounded-2xl px-5 py-4 flex items-center justify-center bg-zinc-950/20">
+                  <p
+                    key={lastMessage}
+                    className="text-xs text-center text-zinc-300 font-semibold leading-relaxed animate-fadeIn"
                   >
-                    <option value="groq-autumn">Autumn (Female - Natural)</option>
-                    <option value="groq-diana">Diana (Female - Crisp)</option>
-                    <option value="groq-hannah">Hannah (Female - Warm)</option>
-                    <option value="groq-austin">Austin (Male - Business)</option>
-                    <option value="groq-daniel">Daniel (Male - Composed)</option>
-                    <option value="groq-troy">Troy (Male - Deep)</option>
-                    <option value="local">Local Browser Synthesis</option>
-                  </select>
+                    "{lastMessage}"
+                  </p>
                 </div>
               </motion.div>
             )}
-          </AnimatePresence>
-        </motion.div>
-      )}
 
-      {/* Main Split Grid for Practice & Editor */}
-      <div className={cn(
-        "grid grid-cols-1 gap-5 items-start w-full",
-        (codingProblem && showSandbox) ? "lg:grid-cols-12" : "max-w-4xl mx-auto"
-      )}>
-        
-        {/* Left Side: Voice Card, Transcript, STAR Tracker */}
-        <div className={cn(
-          "flex flex-col gap-4 w-full",
-          (codingProblem && showSandbox) ? "lg:col-span-6" : "col-span-1"
-        )}>
-          
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 w-full items-stretch">
-            {/* AI Voice Interviewer Orb Card */}
-            <motion.div 
-              whileHover={{ y: -1 }}
-              className={cn(
-                "flex items-center justify-center flex-col gap-3.5 p-4 min-h-[175px] backdrop-blur-xl border rounded-2xl flex-1 w-full shadow-2xl relative overflow-hidden transition-all duration-500",
-                callStatus === CallStatus.ACTIVE && isSpeaking
-                  ? "bg-zinc-950/60 border-zinc-700 shadow-[0_0_50px_rgba(255,255,255,0.03)]"
-                  : "bg-zinc-950/20 border-zinc-900"
-              )}
-            >
-              <div className="relative flex justify-center items-center h-16 w-16">
-                {/* Modern circular breathing halo aura */}
-                <div className={cn(
-                  "absolute inset-0 border border-zinc-700/10 rounded-full transition-all duration-1000",
-                  callStatus === CallStatus.ACTIVE && isSpeaking ? "scale-110 opacity-100 bg-white/5" : "scale-100 opacity-0"
-                )} />
-                <div className={cn(
-                  "absolute inset-1.5 border border-zinc-700/10 rounded-full transition-all duration-1000",
-                  callStatus === CallStatus.ACTIVE && isSpeaking ? "scale-105 opacity-100 bg-white/5 animate-pulse" : "scale-100 opacity-0"
-                )} />
-                
-                {/* Voice core orb */}
-                <div className={cn(
-                  "z-10 flex items-center justify-center rounded-full size-[48px] relative border transition-all duration-500 shadow-2xl bg-zinc-950",
-                  callStatus === CallStatus.ACTIVE && isSpeaking 
-                    ? "border-white scale-105 shadow-[0_0_20px_rgba(255,255,255,0.1)]" 
-                    : "border-zinc-800"
-                )}>
-                  {/* Glowing core animation */}
-                  <svg className={cn("w-5 h-5 text-white", callStatus === CallStatus.ACTIVE && isSpeaking ? "animate-pulse" : "opacity-60")} fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <circle cx="12" cy="12" r="9" strokeWidth="1.5" />
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z" />
-                  </svg>
-                </div>
-              </div>
-              
-              <div className="text-center flex flex-col gap-0.5 items-center">
-                <h3 className="text-xs font-bold text-white tracking-wider uppercase">Alex</h3>
-                <span className="text-[8px] text-zinc-455 font-bold tracking-widest bg-zinc-900/60 border border-zinc-850 px-2 py-0.5 rounded-full uppercase">
-                  AI Voice Interviewer
-                </span>
-              </div>
-
-              {callStatus === CallStatus.ACTIVE && (
-                <div className="flex flex-col items-center gap-2 w-full mt-0.5">
-                  {/* Subtle clean visualizer */}
-                  {isSpeaking ? (
-                    <div className="flex items-end justify-center gap-1 h-3.5">
-                      <div className="w-1 bg-white rounded-full h-2 animate-[pulse_0.7s_infinite]" />
-                      <div className="w-1 bg-zinc-400 rounded-full h-3.5 animate-[pulse_1s_infinite] delay-100" />
-                      <div className="w-1 bg-zinc-350 rounded-full h-2.5 animate-[pulse_0.6s_infinite] delay-200" />
-                      <div className="w-1 bg-white rounded-full h-1.5 animate-[pulse_0.8s_infinite] delay-150" />
-                    </div>
-                  ) : (
-                    <div className="flex items-center gap-1 h-3.5 opacity-35">
-                      <span className="w-1 h-1 bg-zinc-650 rounded-full" />
-                      <span className="w-1 h-1 bg-zinc-650 rounded-full animate-ping" />
-                      <span className="w-1 h-1 bg-zinc-650 rounded-full" />
-                    </div>
-                  )}
-                </div>
-              )}
-            </motion.div>
-
-            {/* Candidate Premium Profile Panel */}
-            <motion.div 
-              whileHover={{ y: -1 }}
-              className="flex items-center justify-center flex-col gap-3.5 p-4 min-h-[175px] backdrop-blur-xl border border-zinc-900 bg-zinc-950/20 rounded-2xl flex-1 w-full shadow-2xl relative overflow-hidden transition-all duration-500 max-md:hidden"
-            >
-              <div className="relative">
-                <div className="absolute -inset-0.5 rounded-full bg-gradient-to-tr from-zinc-800 to-zinc-700 group-hover:from-violet-500 group-hover:to-cyan-400 p-[1px] transition-all duration-500" />
-                <div className="relative w-11 h-11 rounded-full overflow-hidden bg-zinc-900">
-                  {profileImage ? (
-                    <Image
-                      src={profileImage}
-                      alt={userName}
-                      width={44}
-                      height={44}
-                      className="rounded-full object-cover size-full"
-                    />
-                  ) : (
-                    <div className="w-full h-full flex items-center justify-center bg-zinc-900 border border-zinc-850">
-                      <User className="w-5 h-5 text-zinc-550" />
-                    </div>
-                  )}
-                </div>
-              </div>
-              
-              <div className="text-center flex flex-col gap-0.5 items-center w-full">
-                <h3 className="text-xs font-bold text-white tracking-wide truncate max-w-[140px]">
-                  {userName}
-                </h3>
-                <span className="text-[8px] text-zinc-500 font-bold uppercase tracking-wider">
-                  Candidate Profile
-                </span>
-              </div>
-
-              {/* Dynamic stats tracking */}
-              {callStatus === CallStatus.ACTIVE && (
-                <div className="w-full flex flex-col gap-2 mt-1 bg-zinc-950/40 border border-zinc-900/60 p-2.5 rounded-xl">
-                  <div className="flex justify-between items-center text-[9px] font-bold">
-                    <span className="text-zinc-500">Speaking Pace</span>
-                    <span className="text-emerald-400">{currentAverageWpm} WPM</span>
-                  </div>
-                  {/* Speedometer line */}
-                  <div className="w-full h-1 bg-zinc-900 rounded-full overflow-hidden">
-                    <div 
-                      className="h-full bg-emerald-400 transition-all duration-500"
-                      style={{ width: `${Math.min(100, (currentAverageWpm / 200) * 100)}%` }}
-                    />
-                  </div>
-
-                  {/* Filler words indicator */}
-                  <div className="flex justify-between text-[8px] font-bold text-zinc-500 border-t border-zinc-900/60 pt-1.5 mt-0.5">
-                    <span>Fillers Detected:</span>
-                    <span className="text-amber-400">
-                      Like ({fillerLike}) / Um ({fillerUm}) / Uh ({fillerUh})
-                    </span>
-                  </div>
-                </div>
-              )}
-            </motion.div>
-          </div>
-
-          {/* Premium Chat Bubble Transcript */}
-          {messages.length > 0 && (
-            <motion.div 
-              initial={{ opacity: 0, y: 5 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="border border-zinc-900 rounded-2xl w-full shadow-2xl relative overflow-hidden backdrop-blur-xl bg-zinc-950/30"
-            >
-              <div className="rounded-2xl px-5 py-4 flex items-center justify-center bg-zinc-950/20">
-                <p
-                  key={lastMessage}
-                  className="text-xs text-center text-zinc-300 font-semibold leading-relaxed animate-fadeIn"
-                >
-                  "{lastMessage}"
-                </p>
-              </div>
-            </motion.div>
-          )}
-
-          {/* STAR Response Analyzer Board */}
-          {callStatus === CallStatus.ACTIVE && (
-            <motion.div 
-              initial={{ opacity: 0, scale: 0.98 }}
-              animate={{ opacity: 1, scale: 1 }}
-              className="p-4.5 backdrop-blur-2xl bg-zinc-950/40 border border-zinc-900 rounded-2xl flex flex-col gap-3 shadow-2xl relative overflow-hidden"
-            >
-              <div className="flex items-center justify-between border-b border-zinc-900 pb-2">
-                <h4 className="text-[10px] font-bold uppercase text-zinc-400 tracking-wider flex items-center gap-2">
-                  <Sparkles className="size-3.5 text-violet-400" />
-                  {activeSessionType ? `${activeSessionType} Evaluation` : "Response Analyzer"}
-                </h4>
-                <span className="text-[8px] bg-violet-500/10 text-violet-400 font-bold px-2 py-0.5 rounded-full border border-violet-500/25 uppercase tracking-wider">
-                  Live Insights
-                </span>
-              </div>
-              
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
-                {/* Situation */}
-                <div className={cn(
-                  "p-2.5 rounded-xl border flex flex-col gap-1 items-center justify-center text-center transition-all duration-500 backdrop-blur-md",
-                  starChecklist.situation 
-                    ? "bg-emerald-950/10 border-emerald-500/20 text-emerald-400 shadow-md" 
-                    : "bg-zinc-900/10 border-zinc-900 text-zinc-650 hover:border-zinc-800"
-                )}>
-                  <CheckCircle2 className={cn("size-3.5 transition-colors duration-500", starChecklist.situation ? "text-emerald-400" : "text-zinc-800")} />
-                  <span className="text-[9px] font-bold uppercase tracking-wider truncate max-w-full">{starChecklist.labels?.situation || "Situation"}</span>
-                </div>
-                
-                {/* Task */}
-                <div className={cn(
-                  "p-2.5 rounded-xl border flex flex-col gap-1 items-center justify-center text-center transition-all duration-500 backdrop-blur-md",
-                  starChecklist.task 
-                    ? "bg-emerald-950/10 border-emerald-500/20 text-emerald-400 shadow-md" 
-                    : "bg-zinc-900/10 border-zinc-900 text-zinc-650 hover:border-zinc-800"
-                )}>
-                  <CheckCircle2 className={cn("size-3.5 transition-colors duration-500", starChecklist.task ? "text-emerald-400" : "text-zinc-800")} />
-                  <span className="text-[9px] font-bold uppercase tracking-wider truncate max-w-full">{starChecklist.labels?.task || "Task"}</span>
-                </div>
-                
-                {/* Action */}
-                <div className={cn(
-                  "p-2.5 rounded-xl border flex flex-col gap-1 items-center justify-center text-center transition-all duration-500 backdrop-blur-md",
-                  starChecklist.action 
-                    ? "bg-emerald-950/10 border-emerald-500/20 text-emerald-400 shadow-md" 
-                    : "bg-zinc-900/10 border-zinc-900 text-zinc-650 hover:border-zinc-800"
-                )}>
-                  <CheckCircle2 className={cn("size-3.5 transition-colors duration-500", starChecklist.action ? "text-emerald-400" : "text-zinc-800")} />
-                  <span className="text-[9px] font-bold uppercase tracking-wider truncate max-w-full">{starChecklist.labels?.action || "Action"}</span>
-                </div>
-                
-                {/* Result */}
-                <div className={cn(
-                  "p-2.5 rounded-xl border flex flex-col gap-1 items-center justify-center text-center transition-all duration-500 backdrop-blur-md",
-                  starChecklist.result 
-                    ? "bg-emerald-950/10 border-emerald-500/20 text-emerald-400 shadow-md" 
-                    : "bg-zinc-900/10 border-zinc-900 text-zinc-650 hover:border-zinc-800"
-                )}>
-                  <CheckCircle2 className={cn("size-3.5 transition-colors duration-500", starChecklist.result ? "text-emerald-400" : "text-zinc-800")} />
-                  <span className="text-[9px] font-bold uppercase tracking-wider truncate max-w-full">{starChecklist.labels?.result || "Result"}</span>
-                </div>
-              </div>
- 
-              {/* Warnings and Dynamic Feedback */}
-              <AnimatePresence>
-                {starChecklist.result && !starChecklist.hasMetrics && (
-                  <motion.div 
-                    initial={{ opacity: 0, y: 5 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0 }}
-                    className="bg-amber-950/10 border border-amber-500/20 text-amber-400 rounded-xl p-3 text-[10px] flex gap-2.5 items-start shadow-md"
-                  >
-                    <AlertTriangle className="size-3.5 shrink-0 mt-0.5 text-amber-400" />
-                    <span>
-                      <strong className="text-amber-300 font-bold uppercase">Missing {starChecklist.labels?.hasMetrics || "Evidence"}:</strong> You outlined a response, but did not support it with specific {starChecklist.labels?.hasMetrics?.toLowerCase() || "details or metrics"}.
-                    </span>
-                  </motion.div>
-                )}
-              </AnimatePresence>
-
-              <div className="text-[10px] text-zinc-400 leading-relaxed bg-zinc-950/40 p-3 rounded-xl border border-zinc-900 font-semibold">
-                <span className="text-violet-400 font-bold uppercase tracking-wider mr-2">Evaluation Insights:</span>
-                {starChecklist.feedback}
-              </div>
-            </motion.div>
-          )}
-
-          {/* Action Trigger Buttons */}
-          <div className="w-full flex justify-center mt-0.5">
-            {callStatus !== "ACTIVE" ? (
-              <button 
-                className="relative cursor-pointer flex items-center justify-center font-bold text-xs bg-white text-black px-8 py-3 rounded-full hover:bg-zinc-200 transition-all duration-300 active:scale-95 border border-white shadow-xl uppercase tracking-wider shadow-[0_4px_25px_rgba(255,255,255,0.15)]" 
-                onClick={() => handleCall()}
+            {/* STAR Response Analyzer Board */}
+            {callStatus === CallStatus.ACTIVE && (
+              <motion.div 
+                initial={{ opacity: 0, scale: 0.98 }}
+                animate={{ opacity: 1, scale: 1 }}
+                className="p-4.5 backdrop-blur-2xl bg-zinc-950/40 border border-zinc-900 rounded-2xl flex flex-col gap-3 shadow-2xl relative overflow-hidden"
               >
-                <span
-                  className={cn(
-                    "absolute animate-ping rounded-full opacity-40 bg-zinc-400 h-[80%] w-[80%]",
-                    callStatus !== "CONNECTING" && "hidden"
-                  )}
-                />
-                <span className="relative flex items-center gap-2 font-black">
-                  <span className="size-2 rounded-full bg-black animate-pulse" />
-                  {callStatus === "INACTIVE" || callStatus === "FINISHED" ? "Start Voice Session" : "Connecting..."}
-                </span>
-              </button>
-            ) : (
-              <button 
-                className="cursor-pointer flex items-center justify-center gap-2 font-bold text-xs bg-rose-600 hover:bg-rose-500 text-white px-8 py-3 rounded-full transition-all duration-300 active:scale-95 border border-rose-500 shadow-xl tracking-wider uppercase hover:shadow-[0_4px_25px_rgba(225,29,72,0.25)]" 
-                onClick={() => handleDisconnect()}
-              >
-                <PhoneOff className="size-4.5" /> End Practice Session
-              </button>
-            )}
-          </div>
-        </div>
-
-        {/* Right Side: Technical Coding Sandbox Redesigned as Premium IDE */}
-        {codingProblem && showSandbox && (
-          <motion.div 
-            initial={{ opacity: 0, x: 20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.6, ease: "easeOut" }}
-            className="lg:col-span-6 flex flex-col gap-3.5 p-4.5 backdrop-blur-2xl bg-zinc-950/20 rounded-2xl border border-zinc-900 shadow-2xl w-full relative overflow-hidden"
-          >
-            <div className="flex items-center justify-between border-b border-zinc-900 pb-2.5">
-              <h3 className="text-[10px] font-bold text-zinc-400 tracking-wider uppercase flex items-center gap-2">
-                <Code className="size-4.5 text-violet-400" />
-                {codingProblem.language === "text" || codingProblem.language === "markdown" ? "Workspace Sandbox" : "Coding Sandbox"}
-              </h3>
-              <span className="bg-zinc-900 border border-zinc-850 text-zinc-300 font-mono text-[9px] px-3 py-1 rounded-full font-bold uppercase tracking-wider shadow-inner">
-                {codingProblem.language.toUpperCase()}
-              </span>
-            </div>
-
-            {/* Problem Statement Display */}
-            <div className="flex flex-col gap-1.5 bg-zinc-950/40 border border-zinc-900 p-3.5 rounded-xl max-h-[100px] overflow-y-auto custom-scrollbar relative">
-              <h4 className="text-xs font-bold text-white flex items-center gap-2">
-                <Lightbulb className="size-4 text-amber-400 shrink-0" />
-                {codingProblem.title}
-              </h4>
-              <p className="text-[11px] text-zinc-400 whitespace-pre-line leading-relaxed font-semibold mt-0.5">
-                {codingProblem.description}
-              </p>
-            </div>
-
-            {/* Premium Code Textarea */}
-            <div className="flex flex-col gap-0 relative">
-              {/* IDE Top Window Bar */}
-              <div className="flex px-4 py-2.5 border border-zinc-900 rounded-t-xl text-[9px] text-zinc-500 font-semibold flex-row justify-between items-center bg-zinc-950/60 shadow-md">
-                <div className="flex items-center gap-2">
-                  <span className="w-2 h-2 rounded-full bg-rose-500/40" />
-                  <span className="w-2 h-2 rounded-full bg-amber-500/40" />
-                  <span className="w-2 h-2 rounded-full bg-emerald-500/40" />
-                  <span className="ml-2 text-zinc-400 font-bold">
-                    {codingProblem.language === "python" ? "solution.py" : 
-                     codingProblem.language === "javascript" || codingProblem.language === "typescript" ? "solution.ts" :
-                     codingProblem.language === "markdown" ? "draft.md" : "draft.txt"}
+                <div className="flex items-center justify-between border-b border-zinc-900 pb-2">
+                  <h4 className="text-[10px] font-bold uppercase text-zinc-400 tracking-wider flex items-center gap-2">
+                    <Sparkles className="size-3.5 text-violet-400" />
+                    {activeSessionType ? `${activeSessionType} Evaluation` : t("analyzer")}
+                  </h4>
+                  <span className="text-[8px] bg-violet-500/10 text-violet-400 font-bold px-2 py-0.5 rounded-full border border-violet-500/25 uppercase tracking-wider">
+                    {t("insights")}
                   </span>
                 </div>
-                <span className="text-[8px] uppercase font-bold tracking-widest text-violet-400 bg-violet-500/10 px-2.5 py-0.5 rounded-full border border-violet-500/20">
-                  Ready
+                
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
+                  {/* Situation */}
+                  <div className={cn(
+                    "p-2.5 rounded-xl border flex flex-col gap-1 items-center justify-center text-center transition-all duration-500 backdrop-blur-md",
+                    starChecklist.situation 
+                      ? "bg-emerald-950/10 border-emerald-500/20 text-emerald-400 shadow-md" 
+                      : "bg-zinc-900/10 border-zinc-900 text-zinc-650 hover:border-zinc-800"
+                  )}>
+                    <CheckCircle2 className={cn("size-3.5 transition-colors duration-500", starChecklist.situation ? "text-emerald-400" : "text-zinc-800")} />
+                    <span className="text-[9px] font-bold uppercase tracking-wider truncate max-w-full">{starChecklist.labels?.situation || t("situation")}</span>
+                  </div>
+                  
+                  {/* Task */}
+                  <div className={cn(
+                    "p-2.5 rounded-xl border flex flex-col gap-1 items-center justify-center text-center transition-all duration-500 backdrop-blur-md",
+                    starChecklist.task 
+                      ? "bg-emerald-950/10 border-emerald-500/20 text-emerald-400 shadow-md" 
+                      : "bg-zinc-900/10 border-zinc-900 text-zinc-650 hover:border-zinc-800"
+                  )}>
+                    <CheckCircle2 className={cn("size-3.5 transition-colors duration-500", starChecklist.task ? "text-emerald-400" : "text-zinc-800")} />
+                    <span className="text-[9px] font-bold uppercase tracking-wider truncate max-w-full">{starChecklist.labels?.task || t("task")}</span>
+                  </div>
+                  
+                  {/* Action */}
+                  <div className={cn(
+                    "p-2.5 rounded-xl border flex flex-col gap-1 items-center justify-center text-center transition-all duration-500 backdrop-blur-md",
+                    starChecklist.action 
+                      ? "bg-emerald-950/10 border-emerald-500/20 text-emerald-400 shadow-md" 
+                      : "bg-zinc-900/10 border-zinc-900 text-zinc-650 hover:border-zinc-800"
+                  )}>
+                    <CheckCircle2 className={cn("size-3.5 transition-colors duration-500", starChecklist.action ? "text-emerald-400" : "text-zinc-800")} />
+                    <span className="text-[9px] font-bold uppercase tracking-wider truncate max-w-full">{starChecklist.labels?.action || t("action")}</span>
+                  </div>
+                  
+                  {/* Result */}
+                  <div className={cn(
+                    "p-2.5 rounded-xl border flex flex-col gap-1 items-center justify-center text-center transition-all duration-500 backdrop-blur-md",
+                    starChecklist.result 
+                      ? "bg-emerald-950/10 border-emerald-500/20 text-emerald-400 shadow-md" 
+                      : "bg-zinc-900/10 border-zinc-900 text-zinc-650 hover:border-zinc-800"
+                  )}>
+                    <CheckCircle2 className={cn("size-3.5 transition-colors duration-500", starChecklist.result ? "text-emerald-400" : "text-zinc-800")} />
+                    <span className="text-[9px] font-bold uppercase tracking-wider truncate max-w-full">{starChecklist.labels?.result || t("result")}</span>
+                  </div>
+                </div>
+   
+                {/* Warnings and Dynamic Feedback */}
+                <AnimatePresence>
+                  {starChecklist.result && !starChecklist.hasMetrics && (
+                    <motion.div 
+                      initial={{ opacity: 0, y: 5 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0 }}
+                      className="bg-amber-950/10 border border-amber-500/20 text-amber-400 rounded-xl p-3 text-[10px] flex gap-2.5 items-start shadow-md"
+                    >
+                      <AlertTriangle className="size-3.5 shrink-0 mt-0.5 text-amber-400" />
+                      <span>
+                        <strong className="text-amber-300 font-bold uppercase">Missing {starChecklist.labels?.hasMetrics || "Evidence"}:</strong> You outlined a response, but did not support it with specific {starChecklist.labels?.hasMetrics?.toLowerCase() || "details or metrics"}.
+                      </span>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+
+                <div className="text-[10px] text-zinc-400 leading-relaxed bg-zinc-950/40 p-3 rounded-xl border border-zinc-900 font-semibold">
+                  <span className="text-violet-400 font-bold uppercase tracking-wider mr-2">{t("evaluation_insights")}:</span>
+                  {starChecklist.feedback === "Begin answering the behavioral questions to start analysis." ? t("default_feedback") : starChecklist.feedback}
+                </div>
+              </motion.div>
+            )}
+
+            {/* Action Trigger Buttons */}
+            <div className="w-full flex justify-center mt-0.5">
+              {callStatus !== "ACTIVE" ? (
+                <button 
+                  className="relative cursor-pointer flex items-center justify-center font-bold text-xs bg-white text-black px-8 py-3 rounded-full hover:bg-zinc-200 transition-all duration-300 active:scale-95 border border-white shadow-xl uppercase tracking-wider shadow-[0_4px_25px_rgba(255,255,255,0.15)]" 
+                  onClick={() => handleCall()}
+                >
+                  <span
+                    className={cn(
+                      "absolute animate-ping rounded-full opacity-40 bg-zinc-400 h-[80%] w-[80%]",
+                      callStatus !== "CONNECTING" && "hidden"
+                    )}
+                  />
+                  <span className="relative flex items-center gap-2 font-black">
+                    <span className="size-2 rounded-full bg-black animate-pulse" />
+                    {callStatus === "INACTIVE" || callStatus === "FINISHED" ? t("start_session") : t("connecting")}
+                  </span>
+                </button>
+              ) : (
+                <button 
+                  className="cursor-pointer flex items-center justify-center gap-2 font-bold text-xs bg-rose-600 hover:bg-rose-500 text-white px-8 py-3 rounded-full transition-all duration-300 active:scale-95 border border-rose-500 shadow-xl tracking-wider uppercase hover:shadow-[0_4px_25px_rgba(225,29,72,0.25)]" 
+                  onClick={() => handleDisconnect()}
+                >
+                  <PhoneOff className="size-4.5" /> {t("end_session")}
+                </button>
+              )}
+            </div>
+          </div>
+
+          {/* Right Side: Technical Coding Sandbox Redesigned as Premium IDE */}
+          {codingProblem && showSandbox && (
+            <motion.div 
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.6, ease: "easeOut" }}
+              className="lg:col-span-6 flex flex-col gap-3.5 p-4.5 backdrop-blur-2xl bg-zinc-950/20 rounded-2xl border border-zinc-900 shadow-2xl w-full relative overflow-hidden"
+            >
+              <div className="flex items-center justify-between border-b border-zinc-900 pb-2.5">
+                <h3 className="text-[10px] font-bold text-zinc-400 tracking-wider uppercase flex items-center gap-2">
+                  <Code className="size-4.5 text-violet-400" />
+                  {codingProblem.language === "text" || codingProblem.language === "markdown" ? t("workspace_sandbox") : t("coding_sandbox")}
+                </h3>
+                <span className="bg-zinc-900 border border-zinc-850 text-zinc-300 font-mono text-[9px] px-3 py-1 rounded-full font-bold uppercase tracking-wider shadow-inner">
+                  {codingProblem.language.toUpperCase()}
                 </span>
               </div>
 
-              {/* Gutter + TextArea Container */}
-              <div className="relative flex items-stretch border border-t-0 border-zinc-900 rounded-b-xl overflow-hidden bg-zinc-950/10 shadow-[inset_0_4px_16px_rgba(0,0,0,0.4)]">
-                {/* Gutter Line Numbers Simulation */}
-                <div className="w-9 bg-zinc-950/40 border-r border-zinc-900/60 font-mono text-[10px] text-zinc-650 py-3.5 select-none flex flex-col items-center gap-1.5 leading-relaxed text-right pr-2">
-                  {Array.from({ length: 11 }).map((_, i) => (
-                    <div key={i}>{String(i + 1).padStart(2, "0")}</div>
-                  ))}
+              {/* Problem Statement Display */}
+              <div className="flex flex-col gap-1.5 bg-zinc-950/40 border border-zinc-900 p-3.5 rounded-xl max-h-[100px] overflow-y-auto custom-scrollbar relative">
+                <h4 className="text-xs font-bold text-white flex items-center gap-2">
+                  <Lightbulb className="size-4 text-amber-400 shrink-0" />
+                  {codingProblem.title}
+                </h4>
+                <p className="text-[11px] text-zinc-400 whitespace-pre-line leading-relaxed font-semibold mt-0.5">
+                  {codingProblem.description}
+                </p>
+              </div>
+
+              {/* Premium Code Textarea */}
+              <div className="flex flex-col gap-0 relative">
+                {/* IDE Top Window Bar */}
+                <div className="flex px-4 py-2.5 border border-zinc-900 rounded-t-xl text-[9px] text-zinc-500 font-semibold flex-row justify-between items-center bg-zinc-950/60 shadow-md">
+                  <div className="flex items-center gap-2">
+                    <span className="w-2 h-2 rounded-full bg-rose-500/40" />
+                    <span className="w-2 h-2 rounded-full bg-amber-500/40" />
+                    <span className="w-2 h-2 rounded-full bg-emerald-500/40" />
+                    <span className="ml-2 text-zinc-400 font-bold">
+                      {codingProblem.language === "python" ? "solution.py" : 
+                       codingProblem.language === "javascript" || codingProblem.language === "typescript" ? "solution.ts" :
+                       codingProblem.language === "markdown" ? "draft.md" : "draft.txt"}
+                    </span>
+                  </div>
+                  <span className="text-[8px] uppercase font-bold tracking-widest text-violet-400 bg-violet-500/10 px-2.5 py-0.5 rounded-full border border-violet-500/20">
+                    {t("ready")}
+                  </span>
                 </div>
 
-                <textarea
-                  value={code}
-                  onChange={(e) => handleCodeChange(e.target.value)}
-                  placeholder={codingProblem.language === "text" || codingProblem.language === "markdown" 
-                    ? "Draft your response here... Alex will observe your inputs." 
-                    : "// Implement your algorithm here... Alex will observe your code logic."}
-                  className="font-mono bg-transparent text-zinc-205 text-xs py-3.5 px-4 w-full h-[190px] outline-none focus:ring-0 resize-none leading-relaxed"
-                  disabled={callStatus !== CallStatus.ACTIVE}
-                />
-              </div>
+                {/* Gutter + TextArea Container */}
+                <div className="relative flex items-stretch border border-t-0 border-zinc-900 rounded-b-xl overflow-hidden bg-zinc-950/10 shadow-[inset_0_4px_16px_rgba(0,0,0,0.4)]">
+                  {/* Gutter Line Numbers Simulation */}
+                  <div className="w-9 bg-zinc-950/40 border-r border-zinc-900/60 font-mono text-[10px] text-zinc-650 py-3.5 select-none flex flex-col items-center gap-1.5 leading-relaxed text-right pr-2">
+                    {Array.from({ length: 11 }).map((_, i) => (
+                      <div key={i}>{String(i + 1).padStart(2, "0")}</div>
+                    ))}
+                  </div>
 
-              {/* Floating Socratic Advisor Alert */}
-              <AnimatePresence>
-                {isCodingStuck && callStatus === CallStatus.ACTIVE && (
-                  <motion.div 
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: 10 }}
-                    className="absolute bottom-4 left-4 right-4 bg-zinc-950 border border-violet-500/20 text-violet-400 rounded-xl p-3 flex gap-3 items-center justify-between shadow-2xl backdrop-blur-xl"
-                  >
-                    <div className="flex gap-2.5 items-center">
-                      <div className="p-1.5 bg-violet-500/10 rounded-lg border border-violet-500/20 animate-pulse">
-                        <Lightbulb className="size-4 text-violet-400" />
-                      </div>
-                      <span className="font-semibold text-zinc-300">
-                        {codingProblem.language === "text" || codingProblem.language === "markdown" 
-                          ? "Need a hint with your draft?" 
-                          : "Need a hint with your code?"}
-                      </span>
-                    </div>
-                    <Button
-                      onClick={requestSocraticHint}
-                      className="h-8 text-[9px] font-bold uppercase tracking-wider px-3.5 rounded-lg bg-violet-600 text-white hover:bg-violet-500 border border-violet-500/30 cursor-pointer shadow-lg active:scale-95"
+                  <textarea
+                    value={code}
+                    onChange={(e) => handleCodeChange(e.target.value)}
+                    placeholder={codingProblem.language === "text" || codingProblem.language === "markdown" 
+                      ? "Draft your response here... Alex will observe your inputs." 
+                      : "// Implement your algorithm here... Alex will observe your code logic."}
+                    className="font-mono bg-transparent text-zinc-205 text-xs py-3.5 px-4 w-full h-[190px] outline-none focus:ring-0 resize-none leading-relaxed"
+                    disabled={callStatus !== CallStatus.ACTIVE}
+                  />
+                </div>
+
+                {/* Floating Socratic Advisor Alert */}
+                <AnimatePresence>
+                  {isCodingStuck && callStatus === CallStatus.ACTIVE && (
+                    <motion.div 
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: 10 }}
+                      className="absolute bottom-4 left-4 right-4 bg-zinc-950 border border-violet-500/20 text-violet-400 rounded-xl p-3 flex gap-3 items-center justify-between shadow-2xl backdrop-blur-xl"
                     >
-                      Get Hint
-                    </Button>
-                  </motion.div>
-                )}
-              </AnimatePresence>
-            </div>
-
-            {/* Hint control trigger */}
-            {callStatus === CallStatus.ACTIVE && (
-              <div className="flex justify-end">
-                <Button
-                  variant="outline"
-                  onClick={requestSocraticHint}
-                  className="text-[9px] font-bold uppercase tracking-widest px-4 py-2 h-9 border border-zinc-900 text-zinc-500 hover:bg-zinc-900 hover:text-white hover:border-violet-500/30 transition-all rounded-lg cursor-pointer"
-                >
-                  <Sparkles className="size-3.5 text-violet-400" /> Request Socratic Hint
-                </Button>
+                      <div className="flex gap-2.5 items-center">
+                        <div className="p-1.5 bg-violet-500/10 rounded-lg border border-violet-500/20 animate-pulse">
+                          <Lightbulb className="size-4 text-violet-400" />
+                        </div>
+                        <span className="font-semibold text-zinc-300">
+                          {codingProblem.language === "text" || codingProblem.language === "markdown" 
+                            ? t("need_hint") 
+                            : t("need_hint")}
+                        </span>
+                      </div>
+                      <Button
+                        onClick={requestSocraticHint}
+                        className="h-8 text-[9px] font-bold uppercase tracking-wider px-3.5 rounded-lg bg-violet-600 text-white hover:bg-violet-500 border border-violet-500/30 cursor-pointer shadow-lg active:scale-95"
+                      >
+                        {t("get_hint")}
+                      </Button>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
               </div>
-            )}
-          </motion.div>
-        )}
 
-      </div>
+              {/* Hint control trigger */}
+              {callStatus === CallStatus.ACTIVE && (
+                <div className="flex justify-end">
+                  <Button
+                    variant="outline"
+                    onClick={requestSocraticHint}
+                    className="text-[9px] font-bold uppercase tracking-widest px-4 py-2 h-9 border border-zinc-900 text-zinc-500 hover:bg-zinc-900 hover:text-white hover:border-violet-500/30 transition-all rounded-lg cursor-pointer"
+                  >
+                    <Sparkles className="size-3.5 text-violet-400" /> {t("req_hint")}
+                  </Button>
+                </div>
+              )}
+            </motion.div>
+          )}
+
+        </div>
     </div>
   );
 };
