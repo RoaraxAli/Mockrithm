@@ -3,14 +3,14 @@
 import Image from "next/image";
 import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
-import { 
-  Phone, PhoneOff, Mic, Brain, Volume2, Settings, 
-  Code, Sparkles, CheckCircle2, AlertTriangle, Lightbulb, Play, User
+import {
+  Phone, PhoneOff, Mic, Brain, Volume2, Settings,
+  Code, Sparkles, CheckCircle2, AlertTriangle, Lightbulb, Play, User, Languages
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
 import { cn } from "@/lib/utils";
-import { interviewer } from "@/constants";
+import { interviewer, interviewLanguages } from "@/constants";
 import { createFeedback } from "@/lib/actions/general.action";
 import { Button } from "@/components/ui/button";
 
@@ -111,6 +111,13 @@ const Agent = ({
   const [selectedModel, setSelectedModel] = useState<string>("llama-3.1-8b-instant");
   const [showSettings, setShowSettings] = useState(false);
 
+  // Interview Language (selected before the session starts)
+  const [selectedLanguage, setSelectedLanguage] = useState<string>("en-US");
+  const languageRef = useRef<string>("en-US");
+  useEffect(() => {
+    languageRef.current = selectedLanguage;
+  }, [selectedLanguage]);
+
   // Interview Duration Selection
   const [showDurationModal, setShowDurationModal] = useState(false);
   const [selectedDuration, setSelectedDuration] = useState<"brief" | "medium" | "lengthy" | null>(null);
@@ -168,8 +175,29 @@ const Agent = ({
   const silenceTimerRef = useRef<NodeJS.Timeout | null>(null);
   const isProcessingRef = useRef<boolean>(false);
   const isCallActiveRef = useRef<boolean>(false);
+  const isListeningRef = useRef<boolean>(false); // true while a SpeechRecognition instance is live
+  const submittedThisTurnRef = useRef<boolean>(false); // true once this turn's speech has been captured
   const messagesRef = useRef<SavedMessage[]>([]);
   const submittedTextRef = useRef<string>(""); // track last submitted text to prevent duplicate processing
+
+  // Derive whether the selected language has a neural (Groq) TTS voice.
+  // Languages without one (Urdu, Spanish, French, etc.) always use the
+  // browser's built-in speech synthesis regardless of the user's voice pick.
+  const currentLangConfig = interviewLanguages.find((l) => l.code === selectedLanguage) || interviewLanguages[0];
+  const effectiveVoice: string = currentLangConfig.neuralTTS ? selectedVoice : "local";
+
+  // Pick a browser SpeechSynthesis voice that matches the current interview language.
+  const pickBrowserVoice = (voices: SpeechSynthesisVoice[]): SpeechSynthesisVoice | null => {
+    if (typeof window === "undefined" || !voices || voices.length === 0) return null;
+    const lang = languageRef.current.toLowerCase();
+    const langBase = lang.split("-")[0]; // e.g. "ur" from "ur-pk"
+    // Prefer high-quality voices for the exact locale, then the language family.
+    const exact = voices.find((v) => v.lang.toLowerCase() === lang);
+    if (exact) return exact;
+    const base = voices.find((v) => v.lang.toLowerCase().startsWith(langBase));
+    if (base) return base;
+    return null;
+  };
 
   // Helper to sync state and ref
   const setMessages = (updater: SavedMessage[] | ((prev: SavedMessage[]) => SavedMessage[])) => {
@@ -211,6 +239,8 @@ const Agent = ({
   useEffect(() => {
     return () => {
       isCallActiveRef.current = false;
+      isListeningRef.current = false;
+      submittedThisTurnRef.current = false;
       if (silenceTimerRef.current) {
         clearTimeout(silenceTimerRef.current);
       }
@@ -331,17 +361,13 @@ const Agent = ({
     }
 
     const utterance = new SpeechSynthesisUtterance(text);
-    utterance.lang = "en-US";
+    utterance.lang = languageRef.current;
     utterance.rate = 1.05;
 
     const voices = window.speechSynthesis.getVoices();
-    const enVoice = voices.find(
-      (v) =>
-        v.lang.startsWith("en") &&
-        (v.name.includes("Google") || v.name.includes("Natural") || v.name.includes("Microsoft"))
-    );
-    if (enVoice) {
-      utterance.voice = enVoice;
+    const matchVoice = pickBrowserVoice(voices);
+    if (matchVoice) {
+      utterance.voice = matchVoice;
     }
 
     utterance.onstart = () => {
@@ -375,15 +401,13 @@ const Agent = ({
       if (typeof window !== "undefined" && "speechSynthesis" in window) {
         window.speechSynthesis.cancel();
         const utterance = new SpeechSynthesisUtterance(text);
-        utterance.lang = "en-US";
+        utterance.lang = languageRef.current;
         utterance.rate = 1.05;
 
         const voices = window.speechSynthesis.getVoices();
-        const enVoice = voices.find(
-          (v) => v.lang.startsWith("en") && (v.name.includes("Google") || v.name.includes("Natural"))
-        );
-        if (enVoice) {
-          utterance.voice = enVoice;
+        const matchVoice = pickBrowserVoice(voices);
+        if (matchVoice) {
+          utterance.voice = matchVoice;
         }
 
         utterance.onstart = () => {
@@ -418,13 +442,13 @@ const Agent = ({
         return;
       }
 
-      if (selectedVoice === "local") {
-        console.log("[Agent.tsx] Selected voice is local. Using speakSentenceFallback.");
+      if (effectiveVoice === "local") {
+        console.log("[Agent.tsx] Effective voice is local. Using speakSentenceFallback.");
         speakSentenceFallback(cleanText).then(resolve);
         return;
       }
 
-      const voiceName = selectedVoice.startsWith("groq-") ? selectedVoice.substring(5) : "troy";
+      const voiceName = effectiveVoice.startsWith("groq-") ? effectiveVoice.substring(5) : "troy";
       console.log(`[Agent.tsx] Requesting TTS generation via API for voice: ${voiceName}...`);
 
       fetch("/api/meow/tts", {
@@ -515,7 +539,7 @@ const Agent = ({
   const queueSpeechChunk = (text: string) => {
     const cleanText = text.replace(/\[END_CALL\]/gi, "").replace(/\[SHOW_SANDBOX\]/gi, "").replace(/[*#_`~[\]]/g, "").trim();
     if (!cleanText) {
-      if (selectedVoice === "local") {
+      if (effectiveVoice === "local") {
         if (streamCompletedRef.current && localSpeechFinishedCountRef.current === localSpeechQueueCountRef.current) {
           localSpeechQueueCountRef.current = 0;
           localSpeechFinishedCountRef.current = 0;
@@ -529,7 +553,7 @@ const Agent = ({
       return;
     }
 
-    if (selectedVoice === "local") {
+    if (effectiveVoice === "local") {
       playLocalSpeechChunk(cleanText);
     } else {
       speechQueueRef.current.push(cleanText);
@@ -550,7 +574,7 @@ const Agent = ({
       .trim();
     setLastMessage(displayClean);
 
-    if (selectedVoice === "local") {
+    if (effectiveVoice === "local") {
       sentenceBufferRef.current += token;
       const sentenceBoundaryRegex = /[.?!;\n]/;
       const match = sentenceBufferRef.current.match(sentenceBoundaryRegex);
@@ -577,6 +601,12 @@ const Agent = ({
       return;
     }
 
+    // Single-entry guard: never start two recognition instances at once.
+    if (isListeningRef.current) {
+      console.log("[Agent.tsx] SpeechRecognition already listening. Skipping duplicate start.");
+      return;
+    }
+
     try {
       if (recognitionRef.current) {
         console.log("[Agent.tsx] Aborting previous SpeechRecognition instance...");
@@ -590,15 +620,39 @@ const Agent = ({
     const rec = new SpeechRecognition();
     rec.continuous = true;     // Continuous listening to allow pause/think/context correction
     rec.interimResults = true; // Show real-time transcription while speaking
-    rec.lang = "en-US";
+    rec.lang = languageRef.current;
     rec.maxAlternatives = 1;
 
     // Per-session accumulators (local vars, not refs)
     let sessionFinal = "";
     let sessionInterim = "";
 
+    // The ONLY path that submits captured speech. Guards against the race
+    // between the silence timer, onend, and onerror so a turn's speech is
+    // submitted exactly once and a duplicate "Listening... Speak now" never
+    // appears from a glitch-triggered restart.
+    const submitCapturedSpeech = (text: string) => {
+      if (!isCallActiveRef.current || isProcessingRef.current) return;
+      if (submittedThisTurnRef.current) {
+        console.log("[Agent.tsx] Speech already submitted this turn. Ignoring duplicate.");
+        return;
+      }
+      submittedThisTurnRef.current = true;
+      isProcessingRef.current = true;
+
+      if (silenceTimerRef.current) {
+        clearTimeout(silenceTimerRef.current);
+        silenceTimerRef.current = null;
+      }
+      try {
+        rec.stop();
+      } catch (e) {}
+      handleSpeechCompleted(text);
+    };
+
     rec.onstart = () => {
       console.log("[Agent.tsx] SpeechRecognition session started. Listening for user input...");
+      isListeningRef.current = true;
       sessionFinal = "";
       sessionInterim = "";
       turnStartRef.current = Date.now();
@@ -611,16 +665,23 @@ const Agent = ({
         handleDisconnect();
         return;
       }
-      // On no-speech or other transient errors, just restart
+      // On no-speech or other transient errors, just restart — but only if
+      // nothing has been submitted this turn and nothing is processing/speaking.
       if (
         event.error !== "aborted" &&
+        !submittedThisTurnRef.current &&
         isCallActiveRef.current &&
         !isProcessingRef.current &&
         !isSpeakingActiveRef.current
       ) {
         console.log("[Agent.tsx] Transient SpeechRecognition error. Restarting in 300ms...");
         setTimeout(() => {
-          if (isCallActiveRef.current && !isProcessingRef.current && !isSpeakingActiveRef.current) {
+          if (
+            !submittedThisTurnRef.current &&
+            isCallActiveRef.current &&
+            !isProcessingRef.current &&
+            !isSpeakingActiveRef.current
+          ) {
             startSpeechRecognition();
           }
         }, 300);
@@ -628,8 +689,8 @@ const Agent = ({
     };
 
     rec.onresult = (event: any) => {
-      if (!isCallActiveRef.current || isProcessingRef.current) {
-        console.log("[Agent.tsx] Result discarded: call inactive or process busy.");
+      if (!isCallActiveRef.current || isProcessingRef.current || submittedThisTurnRef.current) {
+        console.log("[Agent.tsx] Result discarded: call inactive, process busy, or already submitted.");
         return;
       }
 
@@ -666,23 +727,23 @@ const Agent = ({
         }
         silenceTimerRef.current = setTimeout(() => {
           console.log("[Agent.tsx] Silence detected (1.6s). Submitting speech to AI...");
-          if (isCallActiveRef.current && !isProcessingRef.current && !isSpeakingActiveRef.current) {
-            // Set processing flag immediately to lock state before stopping recognition
-            isProcessingRef.current = true;
-            try {
-              rec.stop();
-            } catch (e) {}
-            handleSpeechCompleted(displayText);
-          }
+          submitCapturedSpeech(displayText);
         }, 1600);
       }
     };
 
     rec.onend = () => {
       console.log("[Agent.tsx] SpeechRecognition session ended.");
+      isListeningRef.current = false;
       if (silenceTimerRef.current) {
         clearTimeout(silenceTimerRef.current);
         silenceTimerRef.current = null;
+      }
+
+      // If this turn's speech was already submitted, do nothing — no restart, no re-submit.
+      if (submittedThisTurnRef.current) {
+        console.log("[Agent.tsx] STT session ended after submission. No further action.");
+        return;
       }
 
       if (!isCallActiveRef.current || isProcessingRef.current || isSpeakingActiveRef.current) {
@@ -694,14 +755,18 @@ const Agent = ({
       console.log(`[Agent.tsx] STT session final captured text on end: "${capturedText}"`);
 
       if (capturedText.length > 2) {
-        // Set processing flag immediately to lock state
-        isProcessingRef.current = true;
-        handleSpeechCompleted(capturedText);
+        // Browser auto-stopped mid/after speech: submit the captured text exactly once.
+        submitCapturedSpeech(capturedText);
       } else {
         // Nothing useful captured, restart listening
         console.log("[Agent.tsx] Captured text is too short. Restarting SpeechRecognition in 150ms...");
         setTimeout(() => {
-          if (isCallActiveRef.current && !isProcessingRef.current && !isSpeakingActiveRef.current) {
+          if (
+            !submittedThisTurnRef.current &&
+            isCallActiveRef.current &&
+            !isProcessingRef.current &&
+            !isSpeakingActiveRef.current
+          ) {
             startSpeechRecognition();
           }
         }, 150);
@@ -713,6 +778,7 @@ const Agent = ({
       rec.start();
     } catch (e) {
       console.error("[Agent.tsx] Exception starting SpeechRecognition:", e);
+      isListeningRef.current = false;
     }
   };
 
@@ -813,6 +879,8 @@ const Agent = ({
 
     try {
       let systemPrompt = "";
+      const langConfig = interviewLanguages.find((l) => l.code === languageRef.current);
+      const languageInstruction = `LANGUAGE REQUIREMENT: The candidate selected "${langConfig?.name || "English"}" (${languageRef.current}). You MUST speak, ask questions, and reply ONLY in this language for the entire session. Never switch to another language unless the candidate explicitly asks you to. Keep all text plain and natural in that language.`;
       if (typeRef.current === "interview" && questionsRef.current) {
         const formattedQuestions = questionsRef.current.map((q: string) => `- ${q}`).join("\n");
         const candidateRoleName = roleRef.current || userResumeData?.targetRole || "Software Engineer";
@@ -828,6 +896,8 @@ Role: ${candidateRoleName}
 Session Mode/Type: ${candidateSessionType}
 
 ${personaText}
+
+${languageInstruction}
 
 Interview Guidelines:
 Follow this structured question flow:
@@ -883,6 +953,7 @@ YOUR CONVERSATION FLOW:
 RULES:
 - Keep every reply under 30 words.
 - Write only plain clean text. No markdown, no emojis, no symbols.
+- ${languageInstruction}
 - Once they choose/specify their choice and the role, confirm their choice and the chosen role in one short sentence, append "[END_CALL]" at the very end of your response, and end your response. The system will create the interview automatically.`;
       }
 
@@ -947,7 +1018,7 @@ RULES:
 
       streamCompletedRef.current = true;
 
-      if (selectedVoice === "local") {
+      if (effectiveVoice === "local") {
         if (sentenceBufferRef.current.trim().length > 0) {
           const chunk = sentenceBufferRef.current.trim();
           sentenceBufferRef.current = "";
@@ -1019,6 +1090,8 @@ RULES:
     try {
       const candidateRoleName = roleRef.current || userResumeData?.targetRole || "Software Engineer";
       const candidateSessionType = sessionTypeRef.current || "Interview";
+      const langConfig = interviewLanguages.find((l) => l.code === languageRef.current);
+      const languageInstruction = `LANGUAGE REQUIREMENT: The candidate selected "${langConfig?.name || "English"}" (${languageRef.current}). You MUST reply ONLY in this language.`;
       const personaText = candidateRoleName.toLowerCase().includes("president")
         ? "Your persona: A senior political debate moderator or veteran political journalist. Keep your tone formal, sharp, and demanding."
         : candidateRoleName.toLowerCase().includes("joker") || candidateRoleName.toLowerCase().includes("comedian")
@@ -1032,6 +1105,8 @@ Role: ${candidateRoleName}
 Session Mode/Type: ${candidateSessionType}
 
 ${personaText}
+
+${languageInstruction}
 
 Interview Guidelines:
 Follow this structured question flow:
@@ -1116,7 +1191,7 @@ ${code}
 
       streamCompletedRef.current = true;
 
-      if (selectedVoice === "local") {
+      if (effectiveVoice === "local") {
         if (sentenceBufferRef.current.trim().length > 0) {
           const chunk = sentenceBufferRef.current.trim();
           sentenceBufferRef.current = "";
@@ -1195,6 +1270,8 @@ ${code}
         if (isCallActiveRef.current) {
           setIsSpeaking(false);
           submittedTextRef.current = "";
+          submittedThisTurnRef.current = false;
+          isListeningRef.current = false;
           setLastMessage("Listening... Speak now");
           startSpeechRecognition();
         }
@@ -1245,7 +1322,10 @@ ${code}
           }, 1500);
         }
       } else {
+        // Reset per-turn flags so the next turn captures fresh speech exactly once.
         submittedTextRef.current = ""; // reset so next answer isn't blocked
+        submittedThisTurnRef.current = false;
+        isListeningRef.current = false;
         setLastMessage("Listening... Speak now");
         startSpeechRecognition();
       }
@@ -1264,6 +1344,8 @@ ${code}
     setCallStatus(CallStatus.CONNECTING);
     isCallActiveRef.current = true;
     isProcessingRef.current = false;
+    isListeningRef.current = false;
+    submittedThisTurnRef.current = false;
     accumulatedTextRef.current = "";
     sentenceBufferRef.current = "";
     speechQueueRef.current = [];
@@ -1307,6 +1389,8 @@ ${code}
     if (isCallActiveRef.current) {
       setIsSpeaking(false);
       submittedTextRef.current = ""; // reset for fresh session
+      submittedThisTurnRef.current = false;
+      isListeningRef.current = false;
       setLastMessage("Listening... Speak now");
       startSpeechRecognition();
     }
@@ -1320,6 +1404,8 @@ ${code}
   const handleDisconnect = () => {
     setCallStatus(CallStatus.FINISHED);
     isCallActiveRef.current = false;
+    isListeningRef.current = false;
+    submittedThisTurnRef.current = false;
 
     if (silenceTimerRef.current) {
       clearTimeout(silenceTimerRef.current);
@@ -1441,6 +1527,10 @@ ${code}
               <span className="text-zinc-600 mr-1.5">Type:</span>
               <span className="text-zinc-300 uppercase">{type}</span>
             </div>
+            <div className="max-sm:hidden">
+              <span className="text-zinc-600 mr-1.5">Language:</span>
+              <span className="text-sky-300 font-bold">{currentLangConfig.name.split(" (")[0]}</span>
+            </div>
              {timerSecondsLeft !== null && (
               <div className={cn(
                 "flex items-center gap-1.5 font-mono font-black px-3 py-1 rounded-full border transition-all duration-500",
@@ -1482,6 +1572,29 @@ ${code}
             >
               {showSettings ? "Hide Settings" : "Show Settings"}
             </button>
+          </div>
+
+          {/* Interview Language — always visible, must be chosen before starting */}
+          <div className="flex flex-col gap-2">
+            <label className="text-[10px] text-zinc-500 font-semibold uppercase tracking-wider flex items-center gap-1.5">
+              <Languages className="size-3.5 text-zinc-400" /> Interview Language
+            </label>
+            <select
+              value={selectedLanguage}
+              onChange={(e) => setSelectedLanguage(e.target.value)}
+              className="bg-zinc-950 text-zinc-100 text-xs rounded-xl p-3 border border-zinc-900 focus:border-zinc-700 focus:ring-1 focus:ring-zinc-800 outline-none cursor-pointer hover:bg-zinc-900 transition-all font-semibold"
+            >
+              {interviewLanguages.map((lang) => (
+                <option key={lang.code} value={lang.code}>
+                  {lang.name} {!lang.neuralTTS && "(Browser Voice)"}
+                </option>
+              ))}
+            </select>
+            {!currentLangConfig.neuralTTS && (
+              <p className="text-[10px] text-amber-400/80 font-semibold leading-relaxed">
+                This language uses your browser/OS built-in voice for the interviewer. For best results, install the {currentLangConfig.name.split(" ")[0]} voice in your system settings.
+              </p>
+            )}
           </div>
 
           <AnimatePresence>

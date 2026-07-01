@@ -96,6 +96,22 @@ export const mappings = {
   "aws amplify": "amplify",
 };
 
+// Languages available for voice interviews.
+// `neuralTTS` = true when Groq's neural TTS has a voice for this language;
+// otherwise the interviewer's spoken voice falls back to the browser/OS voices.
+export const interviewLanguages: { code: string; name: string; neuralTTS: boolean }[] = [
+  { code: "en-US", name: "English", neuralTTS: true },
+  { code: "ur-PK", name: "Urdu (اردو)", neuralTTS: false },
+  { code: "es-ES", name: "Spanish (Español)", neuralTTS: false },
+  { code: "fr-FR", name: "French (Français)", neuralTTS: false },
+  { code: "zh-CN", name: "Chinese (中文)", neuralTTS: false },
+  { code: "ar-SA", name: "Arabic (العربية)", neuralTTS: true },
+  { code: "hi-IN", name: "Hindi (हिन्दी)", neuralTTS: false },
+  { code: "de-DE", name: "German (Deutsch)", neuralTTS: false },
+  { code: "pt-BR", name: "Portuguese (Português)", neuralTTS: false },
+  { code: "ja-JP", name: "Japanese (日本語)", neuralTTS: false },
+];
+
 export const interviewer = {
   name: "Interviewer",
   get firstMessage() {
