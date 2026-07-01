@@ -116,6 +116,11 @@ const Agent = ({
   const languageRef = useRef<string>("en-US");
   useEffect(() => {
     languageRef.current = selectedLanguage;
+    if (selectedLanguage === "ar-SA") {
+      setSelectedVoice("groq-abdullah");
+    } else {
+      setSelectedVoice("groq-autumn");
+    }
   }, [selectedLanguage]);
 
   // Interview Duration Selection
@@ -1842,12 +1847,25 @@ ${code}
                       onChange={(e) => setSelectedVoice(e.target.value)}
                       className="bg-zinc-950 text-zinc-100 text-xs rounded-xl p-3 border border-zinc-900 focus:border-zinc-700 focus:ring-1 focus:ring-zinc-800 outline-none cursor-pointer hover:bg-zinc-900 transition-all font-semibold"
                     >
-                      <option value="groq-autumn">Autumn (Female - Natural)</option>
-                      <option value="groq-diana">Diana (Female - Crisp)</option>
-                      <option value="groq-hannah">Hannah (Female - Warm)</option>
-                      <option value="groq-austin">Austin (Male - Business)</option>
-                      <option value="groq-daniel">Daniel (Male - Composed)</option>
-                      <option value="groq-troy">Troy (Male - Deep)</option>
+                      {selectedLanguage === "ar-SA" ? (
+                        <>
+                          <option value="groq-abdullah">Abdullah (Male - Natural)</option>
+                          <option value="groq-aisha">Aisha (Female - Crisp)</option>
+                          <option value="groq-fahad">Fahad (Male - Composed)</option>
+                          <option value="groq-sultan">Sultan (Male - Deep)</option>
+                          <option value="groq-lulwa">Lulwa (Female - Warm)</option>
+                          <option value="groq-noura">Noura (Female - Natural)</option>
+                        </>
+                      ) : (
+                        <>
+                          <option value="groq-autumn">Autumn (Female - Natural)</option>
+                          <option value="groq-diana">Diana (Female - Crisp)</option>
+                          <option value="groq-hannah">Hannah (Female - Warm)</option>
+                          <option value="groq-austin">Austin (Male - Business)</option>
+                          <option value="groq-daniel">Daniel (Male - Composed)</option>
+                          <option value="groq-troy">Troy (Male - Deep)</option>
+                        </>
+                      )}
                       <option value="local">Local Browser Synthesis</option>
                     </select>
                   </div>
