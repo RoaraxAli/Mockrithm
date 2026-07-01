@@ -466,8 +466,9 @@ const Agent = ({
       })
         .then(async (response) => {
           if (!response.ok) {
-            console.error(`[Agent.tsx] TTS API response error. Status: ${response.status}`);
-            throw new Error(`TTS API error: ${response.status}`);
+            const errBody = await response.text();
+            console.error(`[Agent.tsx] TTS API response error. Status: ${response.status}. Payload:`, errBody);
+            throw new Error(`TTS API error: ${response.status} - ${errBody}`);
           }
           console.log("[Agent.tsx] TTS audio blob retrieved successfully.");
           return response.blob();

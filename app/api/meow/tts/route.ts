@@ -69,6 +69,9 @@ export async function POST(request: Request) {
       ? "canopylabs/orpheus-arabic-saudi"
       : "canopylabs/orpheus-v1-english";
 
+    console.log(`[TTS Route] Active API key selected (truncated): ...${apiKey.slice(-6)}`);
+    console.log(`[TTS Route] Parameters - Voice: ${voiceName}, Model: ${model}, Language: ${language}`);
+
     const response = await fetch("https://api.groq.com/openai/v1/audio/speech", {
       method: "POST",
       headers: {
@@ -85,7 +88,8 @@ export async function POST(request: Request) {
 
     if (!response.ok) {
       const errText = await response.text();
-      return new Response(errText, {
+      console.error(`[TTS Route] Groq TTS API error (Status: ${response.status}):`, errText);
+      return new Response(JSON.stringify({ error: errText, status: response.status }), {
         status: response.status,
         headers: { "Content-Type": "application/json" },
       });
