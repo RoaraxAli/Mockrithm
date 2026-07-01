@@ -1737,14 +1737,6 @@ ${code}
             </div>
 
             <div className="flex gap-6 items-center text-zinc-500 text-[11px] font-semibold">
-              <div>
-                <span className="text-zinc-600 mr-1.5">{t("session_id")}:</span>
-                <span className="text-zinc-300 font-mono">#{interviewId ? interviewId.slice(0, 8).toUpperCase() : "GENERATE"}</span>
-              </div>
-              <div className="max-sm:hidden">
-                <span className="text-zinc-600 mr-1.5">{t("type")}:</span>
-                <span className="text-zinc-300 uppercase">{type}</span>
-              </div>
               <div className="max-sm:hidden">
                 <span className="text-zinc-600 mr-1.5">{t("language")}:</span>
                 <span className="text-sky-300 font-bold">{currentLangConfig.name.split(" (")[0]}</span>
