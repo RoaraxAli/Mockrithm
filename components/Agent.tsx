@@ -745,23 +745,18 @@ const Agent = ({
       const capturedText = (sessionFinal + sessionInterim).trim();
       console.log(`[Agent.tsx] STT session final captured text on end: "${capturedText}"`);
 
-      if (capturedText.length > 2) {
-        // Browser auto-stopped mid/after speech: submit the captured text exactly once.
-        submitCapturedSpeech(capturedText);
-      } else {
-        // Nothing useful captured, restart listening
-        console.log("[Agent.tsx] Captured text is too short. Restarting SpeechRecognition in 150ms...");
-        setTimeout(() => {
-          if (
-            !submittedThisTurnRef.current &&
-            isCallActiveRef.current &&
-            !isProcessingRef.current &&
-            !isSpeakingActiveRef.current
-          ) {
-            startSpeechRecognition();
-          }
-        }, 150);
-      }
+      // Restart listening cleanly if session auto-stops
+      console.log("[Agent.tsx] STT session ended naturally. Restarting in 150ms...");
+      setTimeout(() => {
+        if (
+          !submittedThisTurnRef.current &&
+          isCallActiveRef.current &&
+          !isProcessingRef.current &&
+          !isSpeakingActiveRef.current
+        ) {
+          startSpeechRecognition();
+        }
+      }, 150);
     };
 
     recognitionRef.current = rec;
