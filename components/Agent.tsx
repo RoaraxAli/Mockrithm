@@ -611,7 +611,7 @@ const Agent = ({
 
     console.log("[Agent.tsx] Initializing new SpeechRecognition instance...");
     const rec = new SpeechRecognition();
-    rec.continuous = true;     // Continuous listening to allow pause/think/context correction
+    rec.continuous = false;    // Disabled to let natural single utterances finish and fire immediately
     rec.interimResults = true; // Show real-time transcription while speaking
     rec.lang = languageRef.current;
     rec.maxAlternatives = 1;
@@ -747,18 +747,22 @@ const Agent = ({
       const capturedText = (sessionFinal + sessionInterim).trim();
       console.log(`[Agent.tsx] STT session final captured text on end: "${capturedText}"`);
 
-      // Restart listening cleanly if session auto-stops
-      console.log("[Agent.tsx] STT session ended naturally. Restarting in 150ms...");
-      setTimeout(() => {
-        if (
-          !submittedThisTurnRef.current &&
-          isCallActiveRef.current &&
-          !isProcessingRef.current &&
-          !isSpeakingActiveRef.current
-        ) {
-          startSpeechRecognition();
-        }
-      }, 150);
+      if (capturedText.length > 1 && !submittedThisTurnRef.current) {
+        submitCapturedSpeech(capturedText);
+      } else {
+        // Restart listening cleanly if session auto-stops empty
+        console.log("[Agent.tsx] STT session ended empty. Restarting in 150ms...");
+        setTimeout(() => {
+          if (
+            !submittedThisTurnRef.current &&
+            isCallActiveRef.current &&
+            !isProcessingRef.current &&
+            !isSpeakingActiveRef.current
+          ) {
+            startSpeechRecognition();
+          }
+        }, 150);
+      }
     };
 
     recognitionRef.current = rec;
