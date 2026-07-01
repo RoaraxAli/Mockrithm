@@ -180,9 +180,9 @@ const Agent = ({
   const messagesRef = useRef<SavedMessage[]>([]);
   const submittedTextRef = useRef<string>(""); // track last submitted text to prevent duplicate processing
 
-  // Derive whether the selected language has a neural (Groq) TTS voice.
-  // Languages without one (Urdu, Spanish, French, etc.) always use the
-  // browser's built-in speech synthesis regardless of the user's voice pick.
+  // Derive the effective TTS voice. All languages now have neural TTS
+  // (Groq for English/Arabic, edge-tts for everything else). The local
+  // browser synthesis is only used when the user explicitly picks "local".
   const currentLangConfig = interviewLanguages.find((l) => l.code === selectedLanguage) || interviewLanguages[0];
   const effectiveVoice: string = currentLangConfig.neuralTTS ? selectedVoice : "local";
 
@@ -459,6 +459,7 @@ const Agent = ({
         body: JSON.stringify({
           text: cleanText,
           voice: voiceName,
+          language: languageRef.current,
         }),
       })
         .then(async (response) => {

@@ -97,19 +97,20 @@ export const mappings = {
 };
 
 // Languages available for voice interviews.
-// `neuralTTS` = true when Groq's neural TTS has a voice for this language;
-// otherwise the interviewer's spoken voice falls back to the browser/OS voices.
-export const interviewLanguages: { code: string; name: string; neuralTTS: boolean }[] = [
-  { code: "en-US", name: "English", neuralTTS: true },
-  { code: "ur-PK", name: "Urdu (اردو)", neuralTTS: false },
-  { code: "es-ES", name: "Spanish (Español)", neuralTTS: false },
-  { code: "fr-FR", name: "French (Français)", neuralTTS: false },
-  { code: "zh-CN", name: "Chinese (中文)", neuralTTS: false },
-  { code: "ar-SA", name: "Arabic (العربية)", neuralTTS: true },
-  { code: "hi-IN", name: "Hindi (हिन्दी)", neuralTTS: false },
-  { code: "de-DE", name: "German (Deutsch)", neuralTTS: false },
-  { code: "pt-BR", name: "Portuguese (Português)", neuralTTS: false },
-  { code: "ja-JP", name: "Japanese (日本語)", neuralTTS: false },
+// `neuralTTS` = true means a neural TTS backend is available (Groq or Edge).
+// `ttsProvider` = "groq" uses the Groq Orpheus API; "edge" uses Microsoft Edge neural TTS (free, no API key).
+// `edgeVoice` = the default Microsoft Edge neural voice name for this language.
+export const interviewLanguages: { code: string; name: string; neuralTTS: boolean; ttsProvider: "groq" | "edge"; edgeVoice: string }[] = [
+  { code: "en-US", name: "English", neuralTTS: true, ttsProvider: "groq", edgeVoice: "en-US-AndrewNeural" },
+  { code: "ur-PK", name: "Urdu (اردو)", neuralTTS: true, ttsProvider: "edge", edgeVoice: "ur-PK-AsadNeural" },
+  { code: "es-ES", name: "Spanish (Español)", neuralTTS: true, ttsProvider: "edge", edgeVoice: "es-ES-AlvaroNeural" },
+  { code: "fr-FR", name: "French (Français)", neuralTTS: true, ttsProvider: "edge", edgeVoice: "fr-FR-HenriNeural" },
+  { code: "zh-CN", name: "Chinese (中文)", neuralTTS: true, ttsProvider: "edge", edgeVoice: "zh-CN-YunxiNeural" },
+  { code: "ar-SA", name: "Arabic (العربية)", neuralTTS: true, ttsProvider: "groq", edgeVoice: "ar-SA-HamedNeural" },
+  { code: "hi-IN", name: "Hindi (हिन्दी)", neuralTTS: true, ttsProvider: "edge", edgeVoice: "hi-IN-MadhurNeural" },
+  { code: "de-DE", name: "German (Deutsch)", neuralTTS: true, ttsProvider: "edge", edgeVoice: "de-DE-ConradNeural" },
+  { code: "pt-BR", name: "Portuguese (Português)", neuralTTS: true, ttsProvider: "edge", edgeVoice: "pt-BR-AntonioNeural" },
+  { code: "ja-JP", name: "Japanese (日本語)", neuralTTS: true, ttsProvider: "edge", edgeVoice: "ja-JP-KeitaNeural" },
 ];
 
 export const interviewer = {
