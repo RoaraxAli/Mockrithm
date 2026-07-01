@@ -455,7 +455,7 @@ const Agent = ({
         return;
       }
 
-      const voiceName = effectiveVoice.startsWith("groq-") ? effectiveVoice.substring(5) : "troy";
+      const voiceName = effectiveVoice.startsWith("groq-") ? effectiveVoice.substring(5) : effectiveVoice;
       console.log(`[Agent.tsx] Requesting TTS generation via API for voice: ${voiceName}...`);
 
       fetch("/api/meow/tts", {
