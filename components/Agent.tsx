@@ -576,22 +576,20 @@ const Agent = ({
       .trim();
     setLastMessage(displayClean);
 
-    if (effectiveVoice === "local") {
-      sentenceBufferRef.current += token;
-      const sentenceBoundaryRegex = /[.?!;\n]/;
-      const match = sentenceBufferRef.current.match(sentenceBoundaryRegex);
+    sentenceBufferRef.current += token;
+    const sentenceBoundaryRegex = /[.?!;\n]/;
+    const match = sentenceBufferRef.current.match(sentenceBoundaryRegex);
 
-      if (match) {
-        const puncIndex = sentenceBufferRef.current.indexOf(match[0]);
-        const chunkText = sentenceBufferRef.current.substring(0, puncIndex + 1).trim();
-        if (chunkText.length > 0) {
-          sentenceBufferRef.current = sentenceBufferRef.current.substring(puncIndex + 1);
-          const cleanChunk = chunkText
-            .replace(/\[SHOW_SANDBOX\]/gi, "")
-            .replace(/\[END_CALL\]/gi, "")
-            .trim();
-          queueSpeechChunk(cleanChunk);
-        }
+    if (match) {
+      const puncIndex = sentenceBufferRef.current.indexOf(match[0]);
+      const chunkText = sentenceBufferRef.current.substring(0, puncIndex + 1).trim();
+      if (chunkText.length > 0) {
+        sentenceBufferRef.current = sentenceBufferRef.current.substring(puncIndex + 1);
+        const cleanChunk = chunkText
+          .replace(/\[SHOW_SANDBOX\]/gi, "")
+          .replace(/\[END_CALL\]/gi, "")
+          .trim();
+        queueSpeechChunk(cleanChunk);
       }
     }
   };
@@ -607,15 +605,6 @@ const Agent = ({
     if (isListeningRef.current) {
       console.log("[Agent.tsx] SpeechRecognition already listening. Skipping duplicate start.");
       return;
-    }
-
-    try {
-      if (recognitionRef.current) {
-        console.log("[Agent.tsx] Aborting previous SpeechRecognition instance...");
-        recognitionRef.current.abort();
-      }
-    } catch (e) {
-      console.warn("[Agent.tsx] Error aborting previous SpeechRecognition:", e);
     }
 
     console.log("[Agent.tsx] Initializing new SpeechRecognition instance...");
@@ -1029,12 +1018,12 @@ RULES:
 
       streamCompletedRef.current = true;
 
-      if (effectiveVoice === "local") {
-        if (sentenceBufferRef.current.trim().length > 0) {
-          const chunk = sentenceBufferRef.current.trim();
-          sentenceBufferRef.current = "";
-          queueSpeechChunk(chunk);
-        } else {
+      if (sentenceBufferRef.current.trim().length > 0) {
+        const chunk = sentenceBufferRef.current.trim();
+        sentenceBufferRef.current = "";
+        queueSpeechChunk(chunk);
+      } else {
+        if (effectiveVoice === "local") {
           if (
             localSpeechQueueCountRef.current === 0 ||
             localSpeechFinishedCountRef.current === localSpeechQueueCountRef.current
@@ -1043,9 +1032,11 @@ RULES:
             localSpeechFinishedCountRef.current = 0;
             resumeListeningAfterSpeech();
           }
+        } else {
+          if (speechQueueRef.current.length === 0 && !isSpeakingActiveRef.current) {
+            resumeListeningAfterSpeech();
+          }
         }
-      } else {
-        queueSpeechChunk(accumulatedTextRef.current.trim());
       }
     } catch (e: any) {
       console.error("[Agent.tsx] LLM streaming failed with error:", e);

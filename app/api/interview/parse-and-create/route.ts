@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { db } from "@/firebase/admin";
 import { getRandomInterviewCover } from "@/lib/utils";
 import { getCurrentUser } from "@/lib/actions/auth.action";
+import { interviewLanguages } from "@/constants";
 
 async function groqChatCompletion(messages: any[], jsonMode = false) {
   const apiKey = process.env.GROQ_API_KEY;
