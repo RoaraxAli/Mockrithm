@@ -1,0 +1,13 @@
+{
+  "root": true,
+  "title": "User Manual",
+  "pages": [
+    "index",
+    "getting-started",
+    "interviews",
+    "resume-builder",
+    "profiles",
+    "billing",
+    "legal"
+  ]
+}

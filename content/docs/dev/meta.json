@@ -1,0 +1,14 @@
+{
+  "root": true,
+  "title": "Developer Docs",
+  "pages": [
+    "index",
+    "overview",
+    "architecture",
+    "aesthetics",
+    "engines",
+    "checker",
+    "integrations",
+    "administration"
+  ]
+}

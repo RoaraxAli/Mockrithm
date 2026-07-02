@@ -28,13 +28,15 @@ const FooterWrapper = () => {
     "/forgot-password",
     "/reset-password",
     "/verify-code",
+    "/blogs",
+    "/blog",
   ];
   
   if (hideOnPaths.some((path) => pathname.startsWith(path))) {
     return null;
   }
   
-  if (pathname.startsWith("/interview") || pathname.startsWith("/admin")) {
+  if (pathname.startsWith("/interview") || pathname.startsWith("/admin") || pathname.startsWith("/onboarding") || pathname.startsWith("/documentation") || pathname.startsWith("/games") || pathname.startsWith("/resume") || pathname.startsWith("/user/resume") || pathname.startsWith("/user/dashboard/resume/workspace")) {
     return null;
   }
 

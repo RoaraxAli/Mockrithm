@@ -1,0 +1,10 @@
+{
+  "title": "Frontend & Aesthetics",
+  "pages": [
+    "design-system",
+    "three-bloom",
+    "three-shaders",
+    "gsap-pinning",
+    "lenis"
+  ]
+}

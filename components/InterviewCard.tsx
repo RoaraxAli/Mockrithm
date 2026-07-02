@@ -43,7 +43,7 @@ const InterviewCard = ({
       pulseColor: "bg-zinc-400",
     },
   }[normalizedType as "Behavioral" | "Mixed" | "Technical"] || {
-    label: "Practice Session",
+    label: type || "Practice Session",
     themeColor: "from-zinc-500/5 to-transparent",
     borderColor: "group-hover:border-zinc-500/30",
     textTheme: "text-zinc-400 border-zinc-500/10 bg-zinc-500/5",

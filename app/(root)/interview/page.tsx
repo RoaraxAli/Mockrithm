@@ -15,6 +15,11 @@ const Page = async () => {
         userId={user.id}
         profileImage={user.imageUrl || ""}
         type="generate"
+        userResumeData={{
+          targetRole: (user as any).targetRole || "",
+          resumeData: user.resumeData || null,
+          country: user.country || "",
+        }}
       />
     </div>
   );

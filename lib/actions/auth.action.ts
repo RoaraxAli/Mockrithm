@@ -101,8 +101,29 @@ export const getCurrentUser = cache(async (): Promise<User | null> => {
       console.error("Failed to sync Clerk data inside getCurrentUser:", e.message);
     }
 
+    // Serialize gamesProgress nested timestamps
+    const gamesProgress = rawData?.gamesProgress ? { ...rawData.gamesProgress } : null;
+    if (gamesProgress) {
+      for (const gameId in gamesProgress) {
+        if (gamesProgress[gameId]?.updatedAt) {
+          const dateVal = gamesProgress[gameId].updatedAt;
+          gamesProgress[gameId] = {
+            ...gamesProgress[gameId],
+            updatedAt: dateVal?.toDate
+              ? dateVal.toDate().toISOString()
+              : dateVal instanceof Date
+              ? dateVal.toISOString()
+              : typeof dateVal === "string"
+              ? dateVal
+              : null
+          };
+        }
+      }
+    }
+
     const userData = {
       ...rawData,
+      gamesProgress,
       id: userDoc.id,
       createdAt: rawData?.createdAt?.toDate
         ? rawData.createdAt.toDate().toISOString()
@@ -121,7 +142,7 @@ export const getCurrentUser = cache(async (): Promise<User | null> => {
         : rawData?.updatedAt ?? null,
     } as unknown as User;
     console.log("Server user data fetched:", userData.name);
-    return userData;
+    return JSON.parse(JSON.stringify(userData));
   } catch (error: any) {
     console.error("Error in getCurrentUser:", error.message);
     return null;

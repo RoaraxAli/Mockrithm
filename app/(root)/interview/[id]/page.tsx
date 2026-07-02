@@ -93,6 +93,8 @@ const InterviewDetails = async ({ params }: RouteParams) => {
         feedbackId={serializedFeedback?.id}
         firstMessage={serializedInterview.firstMessage}
         codingProblem={serializedInterview.codingProblem}
+        role={serializedInterview.role}
+        sessionType={serializedInterview.type}
       />
     </>
   );

@@ -2,7 +2,7 @@
 
 @plugin "tailwindcss-animate";
 
-@custom-variant dark (&:is(.dark *));
+@variant dark (&:where(.dark, .dark *));
 
 @theme {
   --color-success-100: #10b981;
@@ -23,21 +23,82 @@
   --color-dark-300: #1e293b;
 
   --font-mona-sans: "Mona Sans", sans-serif;
+  --font-inter: var(--font-inter), sans-serif;
+  --font-poppins: var(--font-poppins), sans-serif;
+  --font-merriweather: var(--font-merriweather), serif;
+  --font-playfair: var(--font-playfair), serif;
+  --font-lora: var(--font-lora), serif;
+  --font-roboto-slab: var(--font-roboto-slab), serif;
+  --font-source-sans: var(--font-source-sans), sans-serif;
+  --font-jetbrains-mono: var(--font-jetbrains-mono), monospace;
 
   --bg-pattern: url("/pattern.png");
 }
 
-/* Force dark theme variables on root by default to avoid light-mode text blending issues */
 :root {
-  --radius: 0.375rem; /* Flat sharp corners */
+  --radius: 0.375rem;
+  --background: oklch(0.99 0 0); /* White/zinc-50 */
+  --foreground: oklch(0.09 0 0); /* Zinc-950 */
+  --card: oklch(1 0 0);
+  --card-foreground: oklch(0.09 0 0);
+  --popover: oklch(1 0 0);
+  --popover-foreground: oklch(0.09 0 0);
+  --primary: oklch(0.09 0 0); /* Black */
+  --primary-foreground: oklch(0.99 0 0); /* White */
+  --secondary: oklch(0.96 0 0); /* Zinc-100 */
+  --secondary-foreground: oklch(0.09 0 0);
+  --muted: oklch(0.96 0 0); /* Zinc-100 */
+  --muted-foreground: oklch(0.4 0 0); /* Zinc-500 */
+  --accent: oklch(0.96 0 0);
+  --accent-foreground: oklch(0.09 0 0);
+  --destructive: oklch(0.6 0.18 20);
+  --border: oklch(0.09 0 0 / 8%);
+  --input: oklch(0.09 0 0 / 10%);
+  --ring: oklch(0.09 0 0 / 15%);
+  --chart-1: oklch(0.09 0 0);
+  --chart-2: oklch(0.4 0 0);
+  --chart-3: oklch(0.6 0 0);
+  --chart-4: oklch(0.8 0 0);
+  --chart-5: oklch(0.95 0 0);
+  --sidebar: oklch(0.98 0 0);
+  --sidebar-foreground: oklch(0.09 0 0);
+  --sidebar-primary: oklch(0.09 0 0);
+  --sidebar-primary-foreground: oklch(0.98 0 0);
+  --sidebar-accent: oklch(0.96 0 0);
+  --sidebar-accent-foreground: oklch(0.09 0 0);
+  --sidebar-border: oklch(0.09 0 0 / 8%);
+  --sidebar-ring: oklch(0.09 0 0 / 10%);
+  
+  /* Fumadocs Premium Monochrome Light overrides */
+  --fd-background: #ffffff;
+  --fd-foreground: #09090b;
+  --fd-muted: #f4f4f5;
+  --fd-muted-foreground: #71717a;
+  --fd-popover: #ffffff;
+  --fd-popover-foreground: #09090b;
+  --fd-card: #ffffff;
+  --fd-card-foreground: #09090b;
+  --fd-border: rgba(9, 9, 11, 0.08);
+  --fd-primary: #09090b;
+  --fd-primary-foreground: #ffffff;
+  --fd-accent: #f4f4f5;
+  --fd-accent-foreground: #09090b;
+  --fd-sidebar: #fafafa;
+  --fd-sidebar-foreground: #71717a;
+  --fd-sidebar-border: rgba(9, 9, 11, 0.05);
+  --fd-sidebar-active: #f4f4f5;
+  --fd-sidebar-active-foreground: #09090b;
+}
+
+.dark {
   --background: oklch(0.09 0 0); /* Pure black/zinc */
   --foreground: oklch(0.98 0 0); /* Crisp clean white */
   --card: oklch(0.12 0 0);
   --card-foreground: oklch(0.98 0 0);
   --popover: oklch(0.12 0 0);
   --popover-foreground: oklch(0.98 0 0);
-  --primary: oklch(0.99 0 0); /* Crisp Monochrome White */
-  --primary-foreground: oklch(0.1 0 0); /* Black */
+  --primary: oklch(0.99 0 0);
+  --primary-foreground: oklch(0.1 0 0);
   --secondary: oklch(0.18 0 0);
   --secondary-foreground: oklch(0.98 0 0);
   --muted: oklch(0.18 0 0);
@@ -61,12 +122,26 @@
   --sidebar-accent-foreground: oklch(0.98 0 0);
   --sidebar-border: oklch(1 0 0 / 8%);
   --sidebar-ring: oklch(0.99 0 0 / 10%);
-}
 
-.dark {
-  /* Aligned exactly with root dark config */
-  --background: oklch(0.09 0 0);
-  --foreground: oklch(0.98 0 0);
+  /* Fumadocs Premium Monochrome Dark overrides */
+  --fd-background: #09090b;
+  --fd-foreground: #f4f4f5;
+  --fd-muted: #18181b;
+  --fd-muted-foreground: #a1a1aa;
+  --fd-popover: #09090b;
+  --fd-popover-foreground: #fafafa;
+  --fd-card: #09090b;
+  --fd-card-foreground: #fafafa;
+  --fd-border: rgba(255, 255, 255, 0.08);
+  --fd-primary: #ffffff;
+  --fd-primary-foreground: #000000;
+  --fd-accent: #18181b;
+  --fd-accent-foreground: #ffffff;
+  --fd-sidebar: #050507;
+  --fd-sidebar-foreground: #a1a1aa;
+  --fd-sidebar-border: rgba(255, 255, 255, 0.05);
+  --fd-sidebar-active: #18181b;
+  --fd-sidebar-active-foreground: #ffffff;
 }
 
 @theme inline {
@@ -111,45 +186,55 @@
   * {
     @apply border-border outline-ring/50;
   }
+  .custom-cursor-active,
+  .custom-cursor-active * {
+    cursor: none !important;
+  }
   body {
     @apply bg-background text-foreground;
-    background-color: #09090b;
     min-height: 100vh;
   }
   p {
-    @apply text-slate-400;
+    @apply text-muted-foreground;
   }
   h2 {
-    @apply text-3xl font-bold text-white;
+    @apply text-3xl font-bold text-foreground;
   }
   h3 {
-    @apply text-2xl font-bold text-white;
+    @apply text-2xl font-bold text-foreground;
   }
   ul {
     @apply list-disc list-inside;
   }
   li {
-    @apply text-slate-400;
+    @apply text-muted-foreground;
   }
 
-  /* Custom modern thin scrollbar */
+  /* Premium thin custom scrollbar */
   ::-webkit-scrollbar {
-    width: 6px;
-    height: 6px;
+    width: 4px;
+    height: 4px;
   }
   ::-webkit-scrollbar-track {
     background: transparent;
   }
   ::-webkit-scrollbar-thumb {
-    background: rgba(255, 255, 255, 0.08);
+    background: linear-gradient(180deg, rgba(255, 255, 255, 1) 0%, rgba(255, 255, 255, 0.2) 100%);
     border-radius: 9999px;
+    transition: box-shadow 0.25s ease;
   }
   ::-webkit-scrollbar-thumb:hover {
-    background: rgba(255, 255, 255, 0.2);
+    background: linear-gradient(180deg, rgba(255, 255, 255, 1) 0%, rgba(255, 255, 255, 0.4) 100%);
+    box-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+  }
+  /* Firefox */
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: rgba(255, 255, 255, 0.35) transparent;
   }
 
   /* Shadcn card glassmorphic global override - flat premium */
-  [data-slot=card] {
+  .dark [data-slot=card] {
     backdrop-filter: blur(20px) !important;
     -webkit-backdrop-filter: blur(20px) !important;
     background-color: rgba(13, 15, 22, 0.7) !important;
@@ -159,7 +244,7 @@
     transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
   }
   
-  [data-slot=card]:hover {
+  .dark [data-slot=card]:hover {
     border-color: rgba(255, 255, 255, 0.2) !important;
     box-shadow: 0 12px 40px 0 rgba(0, 0, 0, 0.7),
                 0 0 25px 0 rgba(255, 255, 255, 0.03) !important;
@@ -357,6 +442,12 @@
   background-size: 24px 24px;
 }
 
+/* Circular clip-path reveal helper (driven by GSAP) */
+@utility clip-reveal {
+  clip-path: circle(0% at 50% 50%);
+  will-change: clip-path;
+}
+
 @utility dark-gradient {
   background: #09090b;
 }
@@ -366,7 +457,7 @@
 }
 
 @utility pattern {
-  background-color: #09090b;
+  background-color: var(--background);
 }
 
 @utility blue-gradient-dark {
@@ -406,6 +497,19 @@
   to {
     opacity: 1;
     transform: translateY(0);
+  }
+}
+
+@utility animate-slideRight {
+  animation: slideRight 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes slideRight {
+  from {
+    transform: translateX(-100%);
+  }
+  to {
+    transform: translateX(0);
   }
 }
 
@@ -451,7 +555,38 @@
 }
 
 /* Clerk navbar / sidebar in modals */
-.cl-navbar,
+.cl-card,
+.cl-main,
+.cl-userProfile-root {
+  height: 100% !important;
+  min-height: 100% !important;
+}
+
+@media (min-width: 640px) {
+  .cl-userProfile-root {
+    display: flex !important;
+    flex-direction: row !important;
+    align-items: stretch !important;
+  }
+  
+  .cl-navbar {
+    background-color: transparent !important;
+    border-right: 1px solid rgba(255, 255, 255, 0.05) !important;
+    height: 100% !important;
+    min-height: 100% !important;
+    align-self: stretch !important;
+  }
+  
+  .cl-scrollBox,
+  .cl-pageScrollBox,
+  .cl-profilePage,
+  .cl-page {
+    height: 100% !important;
+    min-height: 100% !important;
+    align-self: stretch !important;
+  }
+}
+
 .cl-navbarButtons {
   background-color: transparent !important;
   border-color: rgba(255, 255, 255, 0.05) !important;
@@ -476,13 +611,37 @@
 .cl-formHeaderSubtitle,
 .cl-breadcrumbs,
 .cl-breadcrumbsItem,
-.cl-breadcrumbsItemDivider {
+.cl-breadcrumbsItemDivider,
+.cl-navbarHeaderTitle,
+.cl-navbarHeaderSubtitle {
   color: #ffffff !important;
 }
 
 .cl-headerSubtitle,
-.cl-formHeaderSubtitle {
+.cl-formHeaderSubtitle,
+.cl-navbarHeaderSubtitle {
   color: #a1a1aa !important;
+}
+
+/* Fix Clerk Back Button, Close Button and SVG Icon Glitches in Dark Mode */
+.cl-profilePage__backButton,
+.cl-profilePage__backButton:hover,
+.cl-navbarCloseButton,
+.cl-navbarCloseButton:hover,
+.cl-navbarBackButton,
+.cl-navbarBackButton:hover,
+.cl-userProfile-navbarCloseButton,
+.cl-userProfile-navbarBackButton,
+.cl-profilePage__backButtonIcon,
+.cl-navbarCloseButtonIcon {
+  color: #ffffff !important;
+}
+
+.cl-userProfile-root svg:not(.cl-formButtonPrimary svg),
+.cl-modalContent svg:not(.cl-formButtonPrimary svg),
+.cl-card svg:not(.cl-formButtonPrimary svg) {
+  color: #ffffff !important;
+  stroke: currentColor !important;
 }
 
 /* Clerk form fields */
@@ -656,5 +815,15 @@
   animation: float-slow-3 20s ease-in-out infinite;
   transform-origin: center;
   will-change: transform;
+}
+
+/* Slow ping ring for the AI-engine mic visual */
+@keyframes ping-slow {
+  0% { transform: scale(0.9); opacity: 0.6; }
+  70%, 100% { transform: scale(1.6); opacity: 0; }
+}
+.animate-ping-slow {
+  animation: ping-slow 2.4s cubic-bezier(0, 0, 0.2, 1) infinite;
+  will-change: transform, opacity;
 }
 

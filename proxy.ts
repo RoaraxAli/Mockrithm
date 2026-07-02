@@ -16,6 +16,11 @@ export default clerkMiddleware(async (auth, req) => {
 
   const host = req.headers.get("host") || "";
 
+  // 📖 Bypass Clerk auth for documentation subdomain
+  if (host === "docs.mockrithm.me" || host.includes("docs.mockrithm.me")) {
+    return NextResponse.next();
+  }
+
   // 🔐 Redirect auth routes on apex domain to the accounts subdomain
   if (isAuthRoute(req) && (host === "mockrithm.me" || host === "www.mockrithm.me")) {
     const redirectUrl = `https://accounts.mockrithm.me${req.nextUrl.pathname}${req.nextUrl.search}`;

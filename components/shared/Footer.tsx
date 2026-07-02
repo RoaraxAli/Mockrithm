@@ -68,8 +68,8 @@ const Footer: React.FC<FooterProps> = ({ className = "", isSignedIn = false }) =
                   <Link href="/contact" className="text-[10.5px] text-zinc-400 hover:text-white font-medium transition-colors">
                     Contact & Support
                   </Link>
-                  <Link href="#" className="text-[10.5px] text-zinc-400 hover:text-white font-medium transition-colors">
-                    Resources
+                  <Link href="https://blog.mockrithm.me" className="text-[10.5px] text-zinc-400 hover:text-white font-medium transition-colors">
+                    Blogs
                   </Link>
                 </div>
               </div>
@@ -129,6 +129,9 @@ const Footer: React.FC<FooterProps> = ({ className = "", isSignedIn = false }) =
                   </Link>
                   <Link href="/contact" className="text-[10.5px] text-zinc-400 hover:text-white font-medium transition-colors">
                     Contact & Support
+                  </Link>
+                  <Link href="https://blog.mockrithm.me" className="text-[10.5px] text-zinc-400 hover:text-white font-medium transition-colors">
+                    Blogs
                   </Link>
                 </div>
               </div>
@@ -197,7 +200,7 @@ const Footer: React.FC<FooterProps> = ({ className = "", isSignedIn = false }) =
         {/* Bottom Row */}
         <div className="flex flex-col sm:flex-row items-center justify-between gap-4 border-t border-white/5 pt-6 mt-6">
           <p className="text-[10px] text-zinc-550 font-bold uppercase tracking-wider">
-            © 2024 Mockrithm Inc. Built for the ambitious.
+            © 2026 Mockrithm Inc. Built for the ambitious.
           </p>
 
           <div className="flex items-center gap-4 text-zinc-400">

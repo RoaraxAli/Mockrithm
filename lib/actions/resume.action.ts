@@ -10,9 +10,10 @@ export async function saveParsedResume(params: {
   rawText: string;
   parsedData: ParsedResume;
   atsAnalysis?: AtsScoreResult;
+  country?: string;
 }): Promise<{ success: boolean; resumeId?: string; error?: string }> {
   try {
-    const { userId, fileName, rawText, parsedData, atsAnalysis } = params;
+    const { userId, fileName, rawText, parsedData, atsAnalysis, country } = params;
 
     const resumeData: ResumeDocument = {
       userId,
@@ -28,6 +29,10 @@ export async function saveParsedResume(params: {
       .doc(userId)
       .collection("resumes")
       .add(resumeData);
+
+    if (country) {
+      await db.collection("users").doc(userId).set({ country }, { merge: true });
+    }
 
     return { success: true, resumeId: docRef.id };
   } catch (error: any) {
@@ -91,20 +96,26 @@ export async function hasUploadedResume(userId: string): Promise<boolean> {
   }
 }
 
+import { SAMPLE_PROFILES } from "@/components/resume/sampleProfiles";
+
 export async function createResumeFromTemplate(
   userId: string,
   templateId: string,
   fileName: string = "Untitled Resume"
 ): Promise<{ success: boolean; resumeId?: string; error?: string }> {
   try {
-    const emptyResume: ParsedResume = {
+    const defaultProfile = SAMPLE_PROFILES[templateId] || {
       basics: { name: "", label: "", email: "", phone: "", summary: "" },
       work: [],
       education: [],
       skills: [],
       projects: [],
       certifications: [],
-      socialLinks: [],
+      socialLinks: []
+    };
+
+    const initialResumeData: ParsedResume = {
+      ...defaultProfile,
       templateId
     };
 
@@ -112,7 +123,7 @@ export async function createResumeFromTemplate(
       userId,
       fileName,
       rawText: "",
-      parsedData: emptyResume,
+      parsedData: initialResumeData,
       createdAt: new Date().toISOString(),
     };
 

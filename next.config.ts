@@ -1,10 +1,16 @@
+import { createMDX } from "fumadocs-mdx/next";
 import type { NextConfig } from "next";
+
+const withMDX = createMDX();
 
 const nextConfig: NextConfig = {
   typescript: {
     ignoreBuildErrors: true,
   },
-  serverExternalPackages: ["pdf-parse"],
+  eslint: {
+    ignoreDuringBuilds: true,
+  },
+  serverExternalPackages: ["pdf-parse", "msedge-tts"],
   images: {
     remotePatterns: [
       {
@@ -19,4 +25,4 @@ const nextConfig: NextConfig = {
   },
 };
 
-export default nextConfig;
+export default withMDX(nextConfig);

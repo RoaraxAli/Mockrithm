@@ -10,6 +10,11 @@ export default function Preloader() {
 
   useEffect(() => {
     setMounted(true);
+    if (typeof window !== "undefined") {
+      if (window.location.hostname.startsWith("blog.") || window.location.pathname.includes("/blog")) {
+        return;
+      }
+    }
     // Check sessionStorage to show only on first launch of the session
     const hasVisited = sessionStorage.getItem("mockrithm_visited");
     if (hasVisited) {
@@ -69,14 +74,7 @@ export default function Preloader() {
                 MOCKRITHM.
               </motion.h1>
             </div>
-            <motion.p
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 0.5 }}
-              transition={{ delay: 0.5, duration: 0.5 }}
-              className="text-[10px] text-zinc-400 font-bold uppercase tracking-widest mt-4"
-            >
-              Face the Machine
-            </motion.p>
+
           </div>
 
           {/* Bottom Loading Telemetry */}

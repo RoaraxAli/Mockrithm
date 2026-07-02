@@ -7,18 +7,22 @@ import { cn } from "@/lib/utils"
 import { useClerk } from "@clerk/nextjs"
 import { 
   LayoutDashboard, PlayCircle, FileText, MessageSquare, User, Sparkles, 
-  Home, LogOut 
+  Home, LogOut, X, Mic 
 } from "lucide-react"
 
 const navigation = [
-  { name: "Dashboard", href: "/user/dashboard", icon: LayoutDashboard },
   { name: "Take Interview", href: "/user/take-interview", icon: PlayCircle },
   { name: "Resume Builder", href: "/user/resume", icon: Sparkles },
   { name: "Your Interviews", href: "/user/interviews", icon: FileText },
   { name: "Feedback", href: "/user/feedback", icon: MessageSquare },
+  { name: "Mic Check", href: "/user/mic-check", icon: Mic },
 ]
 
-export function Sidebar() {
+export function Sidebar({ 
+  onClose 
+}: { 
+  onClose?: () => void 
+}) {
   const pathname = usePathname()
   const router = useRouter()
   const { signOut: clerkSignOut } = useClerk()
@@ -36,7 +40,7 @@ export function Sidebar() {
     <div className="flex h-full w-64 flex-col border-r border-white/5 bg-zinc-950/20 backdrop-blur-3xl font-mona-sans relative overflow-hidden shrink-0">
       
       {/* Brand Logo Header */}
-      <div className="flex h-20 items-center px-6 border-b border-white/5 bg-white/[0.005]">
+      <div className="flex h-20 items-center justify-between px-6 border-b border-white/5 bg-white/[0.005]">
         <Link
           href="/"
           className="group flex items-center space-x-3 transition-all duration-300 hover:scale-102"
@@ -57,11 +61,16 @@ export function Sidebar() {
             <span className="text-[13px] font-black tracking-wider text-white group-hover:text-gray-200 transition-colors duration-300">
               MOCKRITHM
             </span>
-            <span className="text-[8px] font-bold tracking-widest text-zinc-400 group-hover:text-zinc-300 transition-colors duration-300 uppercase">
-              Face the Machine
-            </span>
           </div>
         </Link>
+        {onClose && (
+          <button 
+            onClick={onClose}
+            className="md:hidden text-zinc-400 hover:text-white p-1.5 rounded-lg hover:bg-white/5 transition-colors focus:outline-none"
+          >
+            <X className="h-4.5 w-4.5" />
+          </button>
+        )}
       </div>
 
       {/* Navigation menu */}

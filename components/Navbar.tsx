@@ -15,6 +15,10 @@ import { useState, useEffect } from "react";
 import { Show, useClerk, UserButton } from "@clerk/nextjs";
 import { getAuthRedirectUrl } from "@/lib/utils/auth";
 import { BillingOptions } from "@/app/user/components/BillingOptions";
+import { UserResumePanel } from "@/app/user/components/UserResumePanel";
+import InterviewsPage from "@/app/user/(sidebar-layout)/interviews/page";
+import FeedbackPage from "@/app/user/(sidebar-layout)/feedback/page";
+import MicCheckPage from "@/app/user/(sidebar-layout)/mic-check/page";
 import {
   ChevronDown,
   Menu,
@@ -31,6 +35,8 @@ import {
   FileText,
   MessageSquare,
   CreditCard,
+  Mic,
+  Gamepad2,
 } from "lucide-react";
 
 interface NavbarProps {
@@ -101,12 +107,11 @@ const Navbar = ({ userId, userName, userRole }: NavbarProps) => {
     ? [
         { href: "/", label: "Home", icon: Home },
         { href: "/about", label: "About", icon: Info },
-        { href: "/contact", label: "Contact", icon: Mail },
+        { href: "/games", label: "Games", icon: Gamepad2 },
       ]
     : [
         { href: "/#intro", label: "Intro", icon: Home },
         { href: "/#features", label: "Features", icon: Info },
-        { href: "/#resources", label: "Resources", icon: Mail },
         { href: "/#pricing", label: "Pricing", icon: CreditCard },
         { href: "/documentation", label: "Documentation", icon: Info },
       ];
@@ -148,9 +153,6 @@ const Navbar = ({ userId, userName, userRole }: NavbarProps) => {
               <div className="flex flex-col leading-tight">
                 <span className={`font-black tracking-wider text-white group-hover:text-gray-200 transition-all duration-300 ${isScrolled ? "text-[13px]" : "text-[16px]"}`}>
                   MOCKRITHM
-                </span>
-                <span className={`font-bold tracking-widest text-zinc-555 group-hover:text-zinc-400 transition-all duration-300 uppercase ${isScrolled ? "text-[8px]" : "text-[10px]"}`}>
-                  Face the Machine
                 </span>
               </div>
             </Link>
@@ -210,6 +212,7 @@ const Navbar = ({ userId, userName, userRole }: NavbarProps) => {
                       Admin
                     </Link>
                   )}
+
                   <UserButton
                     appearance={{
                       variables: {
@@ -253,13 +256,35 @@ const Navbar = ({ userId, userName, userRole }: NavbarProps) => {
                       }
                     }}
                   >
-                    <UserButton.MenuItems>
-                      <UserButton.Link
-                        label="Dashboard"
-                        href="/user/dashboard"
-                        labelIcon={<LayoutDashboard className="size-4 text-zinc-400" />}
-                      />
-                    </UserButton.MenuItems>
+
+                    <UserButton.UserProfilePage
+                      label="Resume Builder"
+                      url="resume"
+                      labelIcon={<Sparkles className="size-4" />}
+                    >
+                      <UserResumePanel />
+                    </UserButton.UserProfilePage>
+                    <UserButton.UserProfilePage
+                      label="Your Interviews"
+                      url="interviews"
+                      labelIcon={<FileText className="size-4" />}
+                    >
+                      <InterviewsPage />
+                    </UserButton.UserProfilePage>
+                    <UserButton.UserProfilePage
+                      label="Feedback"
+                      url="feedback"
+                      labelIcon={<MessageSquare className="size-4" />}
+                    >
+                      <FeedbackPage />
+                    </UserButton.UserProfilePage>
+                    <UserButton.UserProfilePage
+                      label="Mic Check"
+                      url="mic-check"
+                      labelIcon={<Mic className="size-4" />}
+                    >
+                      <MicCheckPage />
+                    </UserButton.UserProfilePage>
                     <UserButton.UserProfilePage
                       label="Billing & Subscription"
                       url="billing"
@@ -318,13 +343,35 @@ const Navbar = ({ userId, userName, userRole }: NavbarProps) => {
                     }
                   }}
                 >
-                  <UserButton.MenuItems>
-                    <UserButton.Link
-                      label="Dashboard"
-                      href="/user/dashboard"
-                      labelIcon={<LayoutDashboard className="size-4 text-zinc-450" />}
-                    />
-                  </UserButton.MenuItems>
+
+                  <UserButton.UserProfilePage
+                    label="Resume Builder"
+                    url="resume"
+                    labelIcon={<Sparkles className="size-4" />}
+                  >
+                    <UserResumePanel />
+                  </UserButton.UserProfilePage>
+                  <UserButton.UserProfilePage
+                    label="Your Interviews"
+                    url="interviews"
+                    labelIcon={<FileText className="size-4" />}
+                  >
+                    <InterviewsPage />
+                  </UserButton.UserProfilePage>
+                  <UserButton.UserProfilePage
+                    label="Feedback"
+                    url="feedback"
+                    labelIcon={<MessageSquare className="size-4" />}
+                  >
+                    <FeedbackPage />
+                  </UserButton.UserProfilePage>
+                  <UserButton.UserProfilePage
+                    label="Mic Check"
+                    url="mic-check"
+                    labelIcon={<Mic className="size-4" />}
+                  >
+                    <MicCheckPage />
+                  </UserButton.UserProfilePage>
                   <UserButton.UserProfilePage
                     label="Billing & Subscription"
                     url="billing"
@@ -336,17 +383,30 @@ const Navbar = ({ userId, userName, userRole }: NavbarProps) => {
               </div>
             </Show>
 
-            {/* Mobile Menu Toggle */}
-            <button
-              className="md:hidden relative p-2 rounded-lg bg-white/10 hover:bg-white/20 border border-white/20 hover:border-white/40 text-gray-300 hover:text-white transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-white/50 backdrop-blur-sm"
-              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-            >
-              {isMobileMenuOpen ? (
-                <X className="w-5 h-5" />
-              ) : (
-                <Menu className="w-5 h-5" />
-              )}
-            </button>
+            {/* Mobile Actions Container */}
+            <div className="flex items-center space-x-2 md:hidden">
+              <Show when="signed-out">
+                <Link
+                  href={getAuthRedirectUrl("sign-up")}
+                  className="bg-white text-black font-extrabold hover:bg-zinc-200 transition-all border border-white rounded-xl text-[9px] uppercase tracking-wider px-3.5 py-1.5"
+                >
+                  Start Prep
+                </Link>
+              </Show>
+
+
+              {/* Mobile Menu Toggle */}
+              <button
+                className="relative p-2 rounded-lg bg-white/10 hover:bg-white/20 border border-white/20 hover:border-white/40 text-gray-300 hover:text-white transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-white/50 backdrop-blur-sm"
+                onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+              >
+                {isMobileMenuOpen ? (
+                  <X className="w-5 h-5" />
+                ) : (
+                  <Menu className="w-5 h-5" />
+                )}
+              </button>
+            </div>
           </div>
         </div>
 
@@ -413,14 +473,7 @@ const Navbar = ({ userId, userName, userRole }: NavbarProps) => {
                   ) : (
                     <>
                       {/* User Panel Pages */}
-                      <Link
-                        href="/user/dashboard"
-                        className="group flex items-center space-x-3 w-full px-4 py-3 text-sm text-gray-300 hover:text-white hover:bg-white/10 transition-all duration-200"
-                        onClick={() => setIsMobileMenuOpen(false)}
-                      >
-                        <LayoutDashboard className="w-5 h-5 text-zinc-500 group-hover:text-white transition-colors" />
-                        <span className="font-medium">Dashboard</span>
-                      </Link>
+
                       <Link
                         href="/user/take-interview"
                         className="group flex items-center space-x-3 w-full px-4 py-3 text-sm text-gray-300 hover:text-white hover:bg-white/10 transition-all duration-200"
