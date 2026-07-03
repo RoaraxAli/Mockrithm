@@ -880,17 +880,30 @@ function GamesPageContent() {
     const gameId = activeGame.id;
     const xpReward = 100;
     const currentP = progress[gameId] || { completedLevel: 0, xp: 0 };
-    const nextCompletedLevel = Math.max(currentP.completedLevel, currentLevelNum);
+    // Only advance progress completedLevel if we completed the next unlocked level
+    const isNewCompletion = currentLevelNum > currentP.completedLevel;
+    const nextCompletedLevel = isNewCompletion ? currentLevelNum : currentP.completedLevel;
     let nextXp = currentP.xp;
     let nextTotalXp = totalXp;
-    if (currentLevelNum > currentP.completedLevel) { nextXp += xpReward; nextTotalXp += xpReward; }
+    if (isNewCompletion) {
+      nextXp += xpReward;
+      nextTotalXp += xpReward;
+    }
     const nextProgress = { ...progress, [gameId]: { completedLevel: nextCompletedLevel, xp: nextXp } };
     setProgress(nextProgress);
     setTotalXp(nextTotalXp);
     localStorage.setItem("mockrithm_games_progress", JSON.stringify(nextProgress));
     localStorage.setItem("mockrithm_games_xp", nextTotalXp.toString());
     if (isSignedIn && clerkUser) {
-      await updateUserGamesProgress(clerkUser.id, gameId, currentLevelNum, xpReward, clerkUser.fullName || "", clerkUser.primaryEmailAddress?.emailAddress || "", clerkUser.imageUrl || "");
+      await updateUserGamesProgress(
+        clerkUser.id,
+        gameId,
+        isNewCompletion ? currentLevelNum : currentP.completedLevel,
+        isNewCompletion ? xpReward : 0,
+        clerkUser.fullName || "",
+        clerkUser.primaryEmailAddress?.emailAddress || "",
+        clerkUser.imageUrl || ""
+      );
     }
   };
 
