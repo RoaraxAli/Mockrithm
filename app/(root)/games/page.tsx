@@ -1091,8 +1091,9 @@ function GamesPageContent() {
 
 
       {/* === LEFT SIDEBAR === */}
-      <div className="w-64 border-r border-zinc-900 bg-zinc-950 flex flex-col justify-between h-full relative z-20">
-        <div className="p-6 flex flex-col gap-6">
+      {!(activeTab === "dashboard" && gameView === "game-runner") && (
+        <div className="w-64 border-r border-zinc-900 bg-zinc-950 flex flex-col justify-between h-full relative z-20">
+          <div className="p-6 flex flex-col gap-6">
           <div>
             <Link href="/" className="flex items-center gap-1.5 text-[10px] font-mono font-black text-zinc-500 hover:text-white uppercase tracking-widest transition-all mb-4"
               onClick={() => playSound("click")}>
@@ -1181,6 +1182,7 @@ function GamesPageContent() {
           </div>
         </div>
       </div>
+      )}
 
       {/* === RIGHT CONTENT === */}
       <div className="flex-1 flex flex-col h-full overflow-y-auto relative z-10 p-8">
