@@ -79,12 +79,30 @@ const SOUND_OPTIONS = [
 
 // --- Icon map ---
 const TechIcon = ({ name, className }: { name: string; className?: string }) => {
-  const icons: Record<string, React.ComponentType<any>> = {
-    FileCode, Palette, Zap, Shield, Layers, Cpu, Sparkles, Compass,
-    Database, Server, GitBranch, Container: TerminalIcon, Wind, ShieldAlert
+  // Map our iconName/game properties to real Devicon CDN logo URLs
+  const logoUrls: Record<string, string> = {
+    "FileCode": "https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/html5/html5-original.svg", // HTML5
+    "Palette": "https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/css3/css3-original.svg", // CSS3
+    "Zap": "https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/javascript/javascript-original.svg", // JS
+    "Shield": "https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/typescript/typescript-original.svg", // TS
+    "Layers": "https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/react/react-original.svg", // React
+    "Cpu": "https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/nodejs/nodejs-original.svg", // Node
+    "Sparkles": "https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/nextjs/nextjs-original.svg", // Next.js
+    "Compass": "https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/python/python-original.svg", // Python
+    "Database": "https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/mysql/mysql-original.svg", // SQL
+    "Server": "https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/fastapi/fastapi-original.svg", // Django/FastAPI
+    "GitBranch": "https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/git/git-original.svg", // Git
+    "Container": "https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/docker/docker-original.svg", // Docker
+    "Wind": "https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/tailwindcss/tailwindcss-original.svg", // Tailwind
+    "ShieldAlert": "https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/oauth/oauth-original.svg" // Security
   };
-  const IconComponent = icons[name] || Code2;
-  return <IconComponent className={className} />;
+
+  const url = logoUrls[name];
+  if (url) {
+    return <img src={url} alt={name} className={`${className} select-none`} />;
+  }
+
+  return <Code2 className={className} />;
 };
 
 // --- Markdown renderer ---
@@ -1523,28 +1541,27 @@ export default function GamesPage() {
                     {userNameDisplay[0]?.toUpperCase()}
                   </div>
                 )}
-                <span className="absolute -bottom-2 -right-2 size-9 rounded-xl border border-black flex items-center justify-center text-lg shadow-lg"
-                  style={{ background: (() => {
-                    const allLvls = Object.values(progress).map(p => p?.completedLevel || 0);
-                    const max = Math.max(...allLvls, 0);
-                    if (max >= 401) return "linear-gradient(135deg,#dc2626,#be123c)";
-                    if (max >= 301) return "linear-gradient(135deg,#9333ea,#d946ef)";
-                    if (max >= 201) return "linear-gradient(135deg,#eab308,#f59e0b)";
-                    if (max >= 101) return "linear-gradient(135deg,#0891b2,#14b8a6)";
-                    if (max >= 1) return "linear-gradient(135deg,#92400e,#f97316)";
-                    return "#18181b";
-                  })() }}>
-                  {(() => {
-                    const allLvls = Object.values(progress).map(p => p?.completedLevel || 0);
-                    const max = Math.max(...allLvls, 0);
-                    if (max >= 401) return "🔴";
-                    if (max >= 301) return "💜";
-                    if (max >= 201) return "⚡";
-                    if (max >= 101) return "🔵";
-                    if (max >= 1) return "⚔️";
-                    return "🔒";
-                  })()}
-                </span>
+                {/* Overlay completed language badges in the corner */}
+                <div className="absolute -bottom-2 -right-2 flex flex-wrap gap-1 max-w-[120px] bg-zinc-950/80 p-1.5 rounded-xl border border-zinc-800 backdrop-blur-md shadow-lg">
+                  {GAMES_LIST.filter(game => {
+                    const gp = progress[game.id] || { completedLevel: 0 };
+                    const maxLvl = game.id === "html5" ? 100 : 500;
+                    return gp.completedLevel >= maxLvl;
+                  }).map(game => (
+                    <div key={game.id} className="size-6 p-1 bg-zinc-900 border border-zinc-800 rounded-lg" title={`${game.name} Completed`}>
+                      <TechIcon name={game.iconName} className="size-full" />
+                    </div>
+                  ))}
+                  {GAMES_LIST.filter(game => {
+                    const gp = progress[game.id] || { completedLevel: 0 };
+                    const maxLvl = game.id === "html5" ? 100 : 500;
+                    return gp.completedLevel >= maxLvl;
+                  }).length === 0 && (
+                    <div className="size-6 bg-zinc-900 border border-zinc-800 rounded-lg flex items-center justify-center text-[10px] text-zinc-500 font-mono" title="No completed games yet">
+                      🔒
+                    </div>
+                  )}
+                </div>
               </div>
               <div className="flex-1 text-center md:text-left space-y-4">
                 <div>
