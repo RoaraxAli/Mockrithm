@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect, useRef } from "react";
 import { useUser } from "@clerk/nextjs";
+import { useSearchParams, useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import dynamic from "next/dynamic";
 import Link from "next/link";
@@ -139,17 +140,62 @@ interface Achievement {
 // --- View states ---
 type View = "dashboard" | "game-detail" | "game-runner";
 
-export default function GamesPage() {
+function GamesPageContent() {
   const { isLoaded, isSignedIn, user: clerkUser } = useUser();
+  const searchParams = useSearchParams();
+  const router = useRouter();
 
   // Sidebar tab
-  const [activeTab, setActiveTab] = useState<"dashboard" | "achievements" | "leaderboard" | "social" | "profile" | "friends" | "badges">("dashboard");
+  const [activeTab, setActiveTab] = useState<"dashboard" | "achievements" | "leaderboard" | "social" | "profile" | "friends" | "badges">(() => {
+    const tab = searchParams.get("tab");
+    if (tab && ["dashboard", "achievements", "leaderboard", "social", "profile", "friends", "badges"].includes(tab)) {
+      return tab as any;
+    }
+    return "dashboard";
+  });
 
   // Game navigation
-  const [gameView, setGameView] = useState<View>("dashboard");
-  const [activeGame, setActiveGame] = useState<GameInfo | null>(null);
-  const [currentLevelNum, setCurrentLevelNum] = useState(1);
+  const [gameView, setGameView] = useState<View>(() => {
+    const gView = searchParams.get("view");
+    if (gView && ["dashboard", "game-detail", "game-runner"].includes(gView)) {
+      return gView as View;
+    }
+    return "dashboard";
+  });
+
+  const [activeGame, setActiveGame] = useState<GameInfo | null>(() => {
+    const gId = searchParams.get("game");
+    if (gId) {
+      const match = GAMES_LIST.find(g => g.id === gId);
+      return match || null;
+    }
+    return null;
+  });
+
+  const [currentLevelNum, setCurrentLevelNum] = useState<number>(() => {
+    const lvl = searchParams.get("level");
+    if (lvl) {
+      const parsed = parseInt(lvl, 10);
+      return isNaN(parsed) ? 1 : parsed;
+    }
+    return 1;
+  });
+
   const [activeLevelData, setActiveLevelData] = useState<LevelData | null>(null);
+
+  // Sync state changes back to search query parameters dynamically
+  useEffect(() => {
+    const params = new URLSearchParams();
+    params.set("tab", activeTab);
+    params.set("view", gameView);
+    if (activeGame) {
+      params.set("game", activeGame.id);
+    }
+    if (gameView === "game-runner") {
+      params.set("level", currentLevelNum.toString());
+    }
+    router.replace(`/games?${params.toString()}`, { scroll: false });
+  }, [activeTab, gameView, activeGame, currentLevelNum, router]);
 
   // Progress
   const [progress, setProgress] = useState<Record<string, GameProgress>>({});
@@ -2038,5 +2084,17 @@ export default function GamesPage() {
         )}
       </div>
     </div>
+  );
+}
+
+export default function GamesPage() {
+  return (
+    <React.Suspense fallback={
+      <div className="min-h-screen bg-black text-white flex flex-col items-center justify-center font-mono">
+        <div className="text-zinc-500 animate-pulse text-xs uppercase tracking-widest">Loading Game Terminal...</div>
+      </div>
+    }>
+      <GamesPageContent />
+    </React.Suspense>
   );
 }
