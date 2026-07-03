@@ -947,10 +947,17 @@ function GamesPageContent() {
 
   // --- Next/Prev level ---
   const handleNextLevel = () => {
-    if (!canGoNext) { toast.error("Pass the current level first!"); return; }
+    if (currentLevelNum >= gameMaxLvl) {
+      toast.info(`You finished all ${gameMaxLvl} levels!`);
+      setGameView("dashboard");
+      return;
+    }
+    if (!canGoNext) {
+      toast.error("Pass the current level first!");
+      return;
+    }
     playSound("click");
-    if (currentLevelNum < 500) setCurrentLevelNum(p => p + 1);
-    else { toast.info("You finished all 500 levels!"); setGameView("dashboard"); }
+    setCurrentLevelNum(p => p + 1);
   };
 
   const handlePrevLevel = () => { playSound("click"); if (currentLevelNum > 1) setCurrentLevelNum(p => p - 1); };
