@@ -454,7 +454,8 @@ export default function GamesPage() {
   }, [activeGame, currentLevelNum, gameView]);
 
   const gameProgressObj = activeGame ? (progress[activeGame.id] || { completedLevel: 0, xp: 0 }) : { completedLevel: 0, xp: 0 };
-  const maxUnlockedLevel = gameProgressObj.completedLevel + 1 > 500 ? 500 : gameProgressObj.completedLevel + 1;
+  const gameMaxLvl = activeGame?.id === "html5" ? 100 : 500;
+  const maxUnlockedLevel = gameProgressObj.completedLevel + 1 > gameMaxLvl ? gameMaxLvl : gameProgressObj.completedLevel + 1;
   const canGoNext = currentLevelNum < maxUnlockedLevel || evaluationSuccess === true;
 
   // --- Location validation ---
@@ -1232,7 +1233,7 @@ export default function GamesPage() {
                         <h3 className="text-xs font-black uppercase tracking-widest text-zinc-400 font-mono">About This Game</h3>
                         <p className="text-xs text-zinc-400 leading-relaxed">{activeGame.description}</p>
                         <div className="flex gap-2 mt-2 flex-wrap">
-                          {["500 Levels", "Dynamic Challenges", "XP Rewards", "Badge on completion"].map(tag => (
+                          {[`${maxLvl} Levels`, "Dynamic Challenges", "XP Rewards", "Badge on completion"].map(tag => (
                             <span key={tag} className="text-[9px] font-mono font-bold text-zinc-500 bg-zinc-900 border border-zinc-800 px-2.5 py-1 rounded-full uppercase">{tag}</span>
                           ))}
                         </div>
