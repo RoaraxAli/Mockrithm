@@ -1478,7 +1478,7 @@ export default function GamesPage() {
                         )}
 
                         <div className="flex gap-3 mt-1">
-                          <button onClick={handleRunEvaluation}
+                          <button onClick={evaluateCode}
                             className="flex-1 py-3 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold uppercase tracking-widest rounded-xl transition-all cursor-pointer flex items-center justify-center gap-1.5 border border-emerald-600 shadow-lg shadow-emerald-950/20">
                             🚀 Run Code & Verify
                           </button>
