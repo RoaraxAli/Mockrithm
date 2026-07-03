@@ -2447,45 +2447,50 @@ export function generateLevel(gameId: string, level: number): LevelData {
 
       if (level === 1) {
         title = "Paragraphs";
-        conceptText = "### 1. The Concept (The \"Why\")\nThe `<p>` tag is used to define a paragraph. It structures standard body text blocks on the page, automatically adding space above and below.";
-        codeExample = "```html\n<p>Hello World</p>\n```";
-        missionText = "### 2. Your Mission\nWrap the phrase **`\"Hello World\"`** in a paragraph tag.";
+        conceptText = `### 1. 🏗️ THE 3D OBJECT ANALOGY
+Think of the \`<p>\` tag as a **cargo box container**. It wraps around your cargo (text) to stack it neatly on the warehouse floor, giving it top and bottom buffer zones so other items don't crush it.`;
+        codeExample = "### 2. 🛠️ MATERIAL ANATOMY\n```html\n<p>Hello World</p>\n```\n* `<p>`: Left steel clamp (Opening Tag)\n* `Hello World`: The raw structural material inside\n* `</p>`: Right steel clamp (Closing Tag)";
+        missionText = "### 3. 👁️ VISUAL SCREEN RENDER\nWrapping your text instantly drops a rectangular concrete container box onto the stage ground with the label **\"Hello World\"** glowing on the front panel.\n\n### 4. 🎯 CONSTRUCTION MISSION\nWrap \"Hello World\" in a paragraph tag to drop your first box.";
         starterCode = "<!-- Level 1 -->\n<div id=\"element-container\">\n  \n</div>";
         hints = ["Write '<p>Hello World</p>' inside the container."];
         testRegex = "<p>\\s*Hello\\s+World\\s*</p>";
         desc = "Should contain <p>Hello World</p>";
       } else if (level === 2) {
         title = "Heading 1";
-        conceptText = "### 1. The Concept (The \"Why\")\nThe `<h1>` tag defines the primary, most important heading on a page. There should typically only be one main `<h1>` per page.";
-        codeExample = "```html\n<h1>Welcome to My Site</h1>\n```";
-        missionText = "### 2. Your Mission\nCreate a primary heading that says **`\"Welcome to My Site\"`**.";
+        conceptText = `### 1. 🏗️ THE 3D OBJECT ANALOGY
+Think of the \`<h1>\` tag as a **massive, glowing neon sign** mounted above your construction rig. It marks the main branding of the entire structure.`;
+        codeExample = "### 2. 🛠️ MATERIAL ANATOMY\n```html\n<h1>Welcome to My Site</h1>\n```\n* `<h1>`: Left brackets anchoring the neon light bars\n* `Welcome to My Site`: Text letters energized with power\n* `</h1>`: Right brackets closing the electrical circuit";
+        missionText = "### 3. 👁️ VISUAL SCREEN RENDER\nInstantly drops a massive, steel-framed glowing neon sign onto the scaffolding above, reading **\"Welcome to My Site\"**.\n\n### 4. 🎯 CONSTRUCTION MISSION\nCode a primary heading (h1) that reads \"Welcome to My Site\".";
         starterCode = "<!-- Level 2 -->\n<div id=\"element-container\">\n  \n</div>";
         hints = ["Write '<h1>Welcome to My Site</h1>' inside the container."];
         testRegex = "<h1>\\s*Welcome\\s+to\\s+My\\s+Site\\s*</h1>";
         desc = "Should contain <h1>Welcome to My Site</h1>";
       } else if (level === 3) {
         title = "Heading Hierarchy";
-        conceptText = "### 1. The Concept (The \"Why\")\nHTML provides six levels of headings (`<h1>` through `<h6>`) to organize content hierarchy. `<h2>` is used for secondary sections.";
-        codeExample = "```html\n<h2>About Me</h2>\n```";
-        missionText = "### 2. Your Mission\nCreate a secondary heading (h2) that says **`\"About Me\"`**.";
+        conceptText = `### 1. 🏗️ THE 3D OBJECT ANALOGY
+Think of subheadings (\`<h2>\` through \`<h6>\`) as **directional street signs** scaled down for sub-sections and pathways of your building.`;
+        codeExample = "### 2. 🛠️ MATERIAL ANATOMY\n```html\n<h2>About Me</h2>\n```\n* `<h2>`: Level 2 bracket clamps holding the panel\n* `About Me`: The location info labeled on the face\n* `</h2>`: End brackets locking the sign onto the pole";
+        missionText = "### 3. 👁️ VISUAL SCREEN RENDER\nA medium-sized secondary directional street sign snaps onto the pole right beneath your main neon sign, displaying **\"About Me\"**.\n\n### 4. 🎯 CONSTRUCTION MISSION\nCode an h2 heading tag that reads \"About Me\".";
         starterCode = "<!-- Level 3 -->\n<div id=\"element-container\">\n  \n</div>";
         hints = ["Write '<h2>About Me</h2>' inside the container."];
         testRegex = "<h2>\\s*About\\s+Me\\s*</h2>";
         desc = "Should contain <h2>About Me</h2>";
       } else if (level === 4) {
         title = "Line Breaks";
-        conceptText = "### 1. The Concept (The \"Why\")\nThe `<br>` tag inserts a single line break without starting a new paragraph. It is a self-closing (void) element.";
-        codeExample = "```html\nLine One<br>Line Two\n```";
-        missionText = "### 2. Your Mission\nWrite a paragraph with a line break `<br>` separating **`\"Line One\"`** and **`\"Line Two\"`**.";
+        conceptText = `### 1. 🏗️ THE 3D OBJECT ANALOGY
+Think of the \`<br>\` tag as a **physical trapdoor** that instantly drops the remaining elements on a line down to the conveyor belt layer directly below.`;
+        codeExample = "### 2. 🛠️ MATERIAL ANATOMY\n```html\nLine One<br>Line Two\n```\n* `Line One`: Materials loaded on the upper conveyor\n* `<br>`: The self-closing trapdoor node (no closing tag needed!)\n* `Line Two`: Materials dropped to the lower level";
+        missionText = "### 3. 👁️ VISUAL SCREEN RENDER\nSplits the text row in half, dropping \"Line Two\" onto a lower, secondary conveyor belt shelf.\n\n### 4. 🎯 CONSTRUCTION MISSION\nWrite a paragraph with a br separating \"Line One\" and \"Line Two\".";
         starterCode = "<!-- Level 4 -->\n<div id=\"element-container\">\n  <p>\n    \n  </p>\n</div>";
         hints = ["Add '<br>' between 'Line One' and 'Line Two' inside the paragraph."];
         testRegex = "<p>[\\s\\S]*Line\\s+One<br/?>Line\\s+Two[\\s\\S]*</p>";
         desc = "Paragraph contains Line One and Line Two separated by a line break";
       } else if (level === 5) {
         title = "Horizontal Rules";
-        conceptText = "### 1. The Concept (The \"Why\")\nThe `<hr>` tag defines a thematic break or divider line in an HTML page. Like `<br>`, it is self-closing and creates a visible separator.";
-        codeExample = "```html\n<h1>Title</h1>\n<hr>\n<p>Content</p>\n```";
-        missionText = "### 2. Your Mission\nPlace a horizontal rule `<hr>` divider between a primary heading and a paragraph.";
+        conceptText = `### 1. 🏗️ THE 3D OBJECT ANALOGY
+Think of the \`<hr>\` tag as a **glowing laser-beam divider wall** that slides out to physically divide two rooms.`;
+        codeExample = "### 2. 🛠️ MATERIAL ANATOMY\n```html\n<h1>Title</h1>\n<hr>\n<p>Content</p>\n```\n* `<hr>`: The self-closing laser emitter unit (does not need a closing tag!)";
+        missionText = "### 3. 👁️ VISUAL SCREEN RENDER\nA glowing, red horizontal laser divider wall fires up across the room, separating the header panel above from the content container below.\n\n### 4. 🎯 CONSTRUCTION MISSION\nPlace an hr divider between the primary h1 heading sign and the paragraph box.";
         starterCode = "<!-- Level 5 -->\n<div id=\"element-container\">\n  <h1>Title</h1>\n  \n  <p>Content</p>\n</div>";
         hints = ["Add '<hr>' in the empty space between the heading and the paragraph."];
         testRegex = "<h1>.*</h1>\\s*<hr/?>\\s*<p>.*</p>";
