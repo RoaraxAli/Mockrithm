@@ -406,8 +406,16 @@ const Agent = ({
         utterance.lang = languageRef.current;
         utterance.rate = 1.05;
 
-        const voices = window.speechSynthesis.getVoices();
-        const matchVoice = pickBrowserVoice(voices);
+        let voices = window.speechSynthesis.getVoices();
+        // Fallback for chrome async load
+        if (voices.length === 0) {
+          voices = speechSynthesis.getVoices();
+        }
+        let matchVoice = pickBrowserVoice(voices);
+        if (!matchVoice && voices.length > 0) {
+          // If no specific locale match, prefer a female voice fallback over the default male voice
+          matchVoice = voices.find(v => v.name.toLowerCase().includes("female") || v.name.toLowerCase().includes("zira")) || voices[0];
+        }
         if (matchVoice) {
           utterance.voice = matchVoice;
         }

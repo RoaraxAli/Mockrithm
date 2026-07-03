@@ -177,200 +177,2232 @@ export function getTierName(level: number): "Apprentice" | "Mage" | "Knight" | "
 // Handcrafted Codédex blueprints for initial sequence (HTML5 Game target)
 const HTML5_INITIAL_LEVELS: LevelData[] = [
   {
-    id: "html5-1",
-    level: 1,
-    levelId: 1,
-    tier: "Apprentice",
-    title: "Document Skeleton",
-    conceptText: `### 1. The Concept (The "Why")
-Web pages are structured just like a **human skeleton**. In HTML5, we define structural wrappers to hold text content.
-The container \`<div id="element-container">\` acts as the chest cavity, and we are going to place a **heart** inside it using a text layout!`,
-    codeExample: `\`\`\`html
-<div id="element-container">
-  <h1>Document Skeleton</h1>
-</div>
-\`\`\``,
-    missionText: `### 2. Your Mission
-Write an HTML tag containing the text **"Document Skeleton Part 1"** inside the starter wrapper container.`,
-    starterCode: `<!-- HTML Apprentice - Level 1 -->
-<div id="element-container">
-  
-</div>`,
-    hints: [
-      "Use an <h1> or <h2> heading element.",
-      "Ensure you close your tags properly.",
-      "Check spelling: 'Document Skeleton Part 1'"
+    "id": "html5-6",
+    "level": 6,
+    "levelId": 6,
+    "tier": "Apprentice",
+    "title": "Root Element",
+    "conceptText": "### 1. The Concept (The \"Why\")\nThe `<html>` tag is the root container element of any HTML document. Everything else on the page goes inside it.",
+    "codeExample": "```html\n<html>\n  <!-- other elements -->\n</html>\n```",
+    "missionText": "### 2. Your Mission\nWrap an empty set of `<html>` tags around nothing yet inside the container.",
+    "starterCode": "<!-- Level 6 -->\n<div id=\"element-container\">\n  \n</div>",
+    "hints": [
+      "Add opening <html> and closing </html> tags."
     ],
-    validation: {
-      checkType: "html",
-      testCases: [
+    "validation": {
+      "checkType": "html",
+      "testCases": [
         {
-          description: "Should contain an h1 or h2 heading tag inside container",
-          testRegex: "<(h1|h2)[\\s>]"
-        },
-        {
-          description: "Should render the text 'Document Skeleton Part 1'",
-          testRegex: "Document\\s+Skeleton\\s+Part\\s+1"
+          "description": "Should contain html tags",
+          "testRegex": "<html>\\s*</html>"
         }
       ]
     }
   },
   {
-    id: "html5-2",
-    level: 2,
-    levelId: 2,
-    tier: "Apprentice",
-    title: "Headings & Paragraphs",
-    conceptText: `### 1. The Concept (The "Why")
-A page needs structural hierarchy. Headings range from \`<h1>\` (largest, main titles) down to \`<h6>\` (smallest subheaders).
-For regular text blocks, we use the paragraph \`<p>\` tag, which adds standard spacing above and below.`,
-    codeExample: `\`\`\`html
-<h1>Main Title</h1>
-<p>This is a standard body text block.</p>
-\`\`\``,
-    missionText: `### 2. Your Mission
-Add an \`<h2>\` subtitle and a \`<p>\` description paragraph inside the container. The description paragraph must contain the phrase "Learn layout foundations".`,
-    starterCode: `<!-- HTML Apprentice - Level 2 -->
-<div id="element-container">
-  
-</div>`,
-    hints: [
-      "Add an <h2> element first.",
-      "Create a <p> element next containing the target text.",
-      "Verify tags close cleanly."
+    "id": "html5-7",
+    "level": 7,
+    "levelId": 7,
+    "tier": "Apprentice",
+    "title": "Document Head",
+    "conceptText": "### 1. The Concept (The \"Why\")\nThe `<head>` tag acts as a container for metadata about the document, such as character sets, stylesheets, and scripts, which are invisible to visitors.",
+    "codeExample": "```html\n<head>\n  <!-- metadata -->\n</head>\n```",
+    "missionText": "### 2. Your Mission\nCreate a basic `<head></head>` structural block inside the container.",
+    "starterCode": "<!-- Level 7 -->\n<div id=\"element-container\">\n  \n</div>",
+    "hints": [
+      "Add opening <head> and closing </head> tags."
     ],
-    validation: {
-      checkType: "html",
-      testCases: [
+    "validation": {
+      "checkType": "html",
+      "testCases": [
         {
-          description: "Should contain an h2 tag",
-          testRegex: "<h2[\\s>]"
-        },
-        {
-          description: "Should contain a p paragraph tag",
-          testRegex: "<p[\\s>]"
-        },
-        {
-          description: "Paragraph should contain the text 'Learn layout foundations'",
-          testRegex: "Learn\\s+layout\\s+foundations"
+          "description": "Should contain head tags",
+          "testRegex": "<head>\\s*</head>"
         }
       ]
     }
   },
   {
-    id: "html5-3",
-    level: 3,
-    levelId: 3,
-    tier: "Apprentice",
-    title: "Text Formatting",
-    conceptText: `### 1. The Concept (The "Why")
-Skeletel content can be highlighted. To make text **bold**, we use the \`<strong>\` tag. To *italicize* text, we wrap it in the \`<em>\` (emphasis) tag.
-This lets the browser and screen readers know which words carry weight.`,
-    codeExample: `\`\`\`html
-<p>We must defend the <strong>Citadel</strong> from danger.</p>
-\`\`\``,
-    missionText: `### 2. Your Mission
-Write a paragraph tag containing the bolded word **"stronghold"** inside the container using the \`<strong>\` tag.`,
-    starterCode: `<!-- HTML Apprentice - Level 3 -->
-<div id="element-container">
-  
-</div>`,
-    hints: [
-      "Wrap the target word inside <strong> and </strong>.",
-      "Place the strong tag inside a <p> element.",
-      "Check spelling of 'stronghold'"
+    "id": "html5-8",
+    "level": 8,
+    "levelId": 8,
+    "tier": "Apprentice",
+    "title": "Document Body",
+    "conceptText": "### 1. The Concept (The \"Why\")\nThe `<body>` tag contains all the visible elements that appear on the screen, such as headers, text, images, and lists.",
+    "codeExample": "```html\n<body>\n  <h1>Hello Web!</h1>\n</body>\n```",
+    "missionText": "### 2. Your Mission\nCreate a basic `<body></body>` structural block inside the container.",
+    "starterCode": "<!-- Level 8 -->\n<div id=\"element-container\">\n  \n</div>",
+    "hints": [
+      "Add opening <body> and closing </body> tags."
     ],
-    validation: {
-      checkType: "html",
-      testCases: [
+    "validation": {
+      "checkType": "html",
+      "testCases": [
         {
-          description: "Should include a strong tag",
-          testRegex: "<strong[\\s>]"
-        },
-        {
-          description: "Should contain the word 'stronghold'",
-          testRegex: "stronghold"
+          "description": "Should contain body tags",
+          "testRegex": "<body>\\s*</body>"
         }
       ]
     }
   },
   {
-    id: "html5-4",
-    level: 4,
-    levelId: 4,
-    tier: "Apprentice",
-    title: "Hyperlinks",
-    conceptText: `### 1. The Concept (The "Why")
-Links are the neural pathways of the internet. We weave them using the anchor \`<a>\` tag.
-It requires an \`href\` attribute stating the target URL and wraps the clickable text.`,
-    codeExample: `\`\`\`html
-<a href="https://mockrithm.com">Click Here</a>
-\`\`\``,
-    missionText: `### 2. Your Mission
-Create an anchor link pointing to **"https://mockrithm.com/games"** displaying the text "Enter Arena".`,
-    starterCode: `<!-- HTML Apprentice - Level 4 -->
-<div id="element-container">
-  
-</div>`,
-    hints: [
-      "Set the href attribute to 'https://mockrithm.com/games'.",
-      "Set the anchor inner text to 'Enter Arena'."
+    "id": "html5-9",
+    "level": 9,
+    "levelId": 9,
+    "tier": "Apprentice",
+    "title": "Doctype",
+    "conceptText": "### 1. The Concept (The \"Why\")\nThe `<!DOCTYPE html>` declaration is mandatory at the very start of your document to tell the browser it is a modern HTML5 page.",
+    "codeExample": "```html\n<!DOCTYPE html>\n```",
+    "missionText": "### 2. Your Mission\nWrite just the modern HTML5 doctype declaration line inside the container.",
+    "starterCode": "<!-- Level 9 -->\n<div id=\"element-container\">\n  \n</div>",
+    "hints": [
+      "Write '<!DOCTYPE html>' exactly."
     ],
-    validation: {
-      checkType: "html",
-      testCases: [
+    "validation": {
+      "checkType": "html",
+      "testCases": [
         {
-          description: "Should contain an anchor link tag",
-          testRegex: "<a[\\s>]"
-        },
-        {
-          description: "Should specify the target href parameter",
-          testRegex: "href=[\"']https://mockrithm\\.com/games[\"']"
-        },
-        {
-          description: "Link text must read 'Enter Arena'",
-          testRegex: ">Enter\\s+Arena</a>"
+          "description": "Should contain standard HTML5 doctype declaration",
+          "testRegex": "<!DOCTYPE\\s+html>"
         }
       ]
     }
   },
   {
-    id: "html5-5",
-    level: 5,
-    levelId: 5,
-    tier: "Apprentice",
-    title: "Image Embedding",
-    conceptText: `### 1. The Concept (The "Why")
-Images add portals to other visual dimensions. We embed them with the \`<img>\` tag.
-It is a **self-closing tag** (meaning it does not need a closing \`</img>\` element) and uses the \`src\` attribute for the file path, along with \`alt\` for accessibility descriptions.`,
-    codeExample: `\`\`\`html
-<img src="/logo.svg" alt="Mockrithm Logo" />
-\`\`\``,
-    missionText: `### 2. Your Mission
-Embed an image using the source path **"/logo.svg"** and an alt description tag set to "Cyber Logo".`,
-    starterCode: `<!-- HTML Apprentice - Level 5 -->
-<div id="element-container">
-  
-</div>`,
-    hints: [
-      "Use img tag properties src and alt.",
-      "Remember that image tags are self-closing.",
-      "Check spelling of '/logo.svg'"
+    "id": "html5-10",
+    "level": 10,
+    "levelId": 10,
+    "tier": "Apprentice",
+    "title": "Full Scaffold",
+    "conceptText": "### 1. The Concept (The \"Why\")\nA standard HTML document structure combines the DOCTYPE declaration, followed by the `<html>` block containing the `<head>` and `<body>` blocks.",
+    "codeExample": "```html\n<!DOCTYPE html>\n<html>\n  <head></head>\n  <body></body>\n</html>\n```",
+    "missionText": "### 2. Your Mission\nWrite a complete, empty basic HTML document skeleton inside the container.",
+    "starterCode": "<!-- Level 10 -->\n<div id=\"element-container\">\n  \n</div>",
+    "hints": [
+      "Combine <!DOCTYPE html>, <html>, <head>, and <body> in order."
     ],
-    validation: {
-      checkType: "html",
-      testCases: [
+    "validation": {
+      "checkType": "html",
+      "testCases": [
         {
-          description: "Should contain an img tag",
-          testRegex: "<img[\\s>]"
+          "description": "Should contain doctype, html, head, and body tags structured correctly",
+          "testRegex": "<!DOCTYPE\\s+html>\\s*<html>\\s*<head>\\s*</head>\\s*<body>\\s*</body>\\s*</html>"
+        }
+      ]
+    }
+  },
+  {
+    "id": "html5-11",
+    "level": 11,
+    "levelId": 11,
+    "tier": "Apprentice",
+    "title": "Document Title",
+    "conceptText": "### 1. The Concept (The \"Why\")\nThe `<title>` element goes inside the `<head>` section and sets the name that appears on the browser tab.",
+    "codeExample": "```html\n<head>\n  <title>My Cool Page</title>\n</head>\n```",
+    "missionText": "### 2. Your Mission\nCreate a head block containing a title set to \"My Portfolio\" inside the container.",
+    "starterCode": "<!-- Level 11 -->\n<div id=\"element-container\">\n  \n</div>",
+    "hints": [
+      "Nest <title>My Portfolio</title> inside a <head> block."
+    ],
+    "validation": {
+      "checkType": "html",
+      "testCases": [
+        {
+          "description": "Should contain head tag",
+          "testRegex": "<head[\\s>]"
         },
         {
-          description: "Source must point to '/logo.svg'",
-          testRegex: "src=[\"']/logo\\.svg[\"']"
+          "description": "Should contain title tag",
+          "testRegex": "<title[\\s>]"
         },
         {
-          description: "Alt description must read 'Cyber Logo'",
-          testRegex: "alt=[\"']Cyber\\s+Logo[\"']"
+          "description": "Should set title text to 'My Portfolio'",
+          "testRegex": "<title>\\s*My\\s+Portfolio\\s*</title>"
+        }
+      ]
+    }
+  },
+  {
+    "id": "html5-12",
+    "level": 12,
+    "levelId": 12,
+    "tier": "Apprentice",
+    "title": "Preformatted Text",
+    "conceptText": "### 1. The Concept (The \"Why\")\nNormally, HTML collapses multiple spaces and line breaks. The `<pre>` tag preserves exact spaces, tabs, and line breaks as typed.",
+    "codeExample": "```html\n<pre>\n  Line One\n    Line Two (indented)\n</pre>\n```",
+    "missionText": "### 2. Your Mission\nWrap a multi-line ASCII art character or spaced text in a pre tag inside the container. It should contain at least one line break inside the pre tag.",
+    "starterCode": "<!-- Level 12 -->\n<div id=\"element-container\">\n  \n</div>",
+    "hints": [
+      "Create a <pre> tag.",
+      "Add multiple lines or custom spacing inside, then close with </pre>."
+    ],
+    "validation": {
+      "checkType": "html",
+      "testCases": [
+        {
+          "description": "Should contain pre tag",
+          "testRegex": "<pre[\\s>]"
+        },
+        {
+          "description": "Pre tag should contain some text with line break",
+          "testRegex": "<pre>[^<]*\\n[^<]*</pre>"
+        }
+      ]
+    }
+  },
+  {
+    "id": "html5-13",
+    "level": 13,
+    "levelId": 13,
+    "tier": "Apprentice",
+    "title": "Elements Nesting",
+    "conceptText": "### 1. The Concept (The \"Why\")\nHTML tags must close in the reverse order they were opened. This is called nesting. For example, `<body><p>Text</p></body>`.",
+    "codeExample": "```html\n<div>\n  <p>Nested text</p>\n</div>\n```",
+    "missionText": "### 2. Your Mission\nNest a paragraph inside a body tag correctly inside the container.",
+    "starterCode": "<!-- Level 13 -->\n<div id=\"element-container\">\n  \n</div>",
+    "hints": [
+      "Open <body>, then open <p>, add some text, close </p>, and then close </body>."
+    ],
+    "validation": {
+      "checkType": "html",
+      "testCases": [
+        {
+          "description": "Should contain a p tag nested in a body tag",
+          "testRegex": "<body>\\s*<p>.*</p>\\s*</body>"
+        }
+      ]
+    }
+  },
+  {
+    "id": "html5-14",
+    "level": 14,
+    "levelId": 14,
+    "tier": "Apprentice",
+    "title": "Comments",
+    "conceptText": "### 1. The Concept (The \"Why\")\nHTML comments are used to leave notes in the code that are completely ignored by the browser and won't show up on the page.",
+    "codeExample": "```html\n<!-- This is a comment -->\n```",
+    "missionText": "### 2. Your Mission\nWrite an HTML comment that says \"Main content starts here\" inside the container.",
+    "starterCode": "<!-- Level 14 -->\n<div id=\"element-container\">\n  \n</div>",
+    "hints": [
+      "Use <!-- to open a comment and --> to close it."
+    ],
+    "validation": {
+      "checkType": "html",
+      "testCases": [
+        {
+          "description": "Should contain the exact comment",
+          "testRegex": "<!--\\s*Main\\s+content\\s+starts\\s+here\\s*-->"
+        }
+      ]
+    }
+  },
+  {
+    "id": "html5-15",
+    "level": 15,
+    "levelId": 15,
+    "tier": "Apprentice",
+    "title": "Structural Review",
+    "conceptText": "### 1. The Concept (The \"Why\")\nLet's review the fundamental structure elements we have learned in Module 1. We'll build a simple web page structure.",
+    "codeExample": "```html\n<!DOCTYPE html>\n<html>\n  <!-- Combine elements -->\n</html>\n```",
+    "missionText": "### 2. Your Mission\nBuild a full webpage skeleton with a title (My Page), an h1 (Welcome), a divider line, and a paragraph inside the container.",
+    "starterCode": "<!-- Level 15 -->\n<div id=\"element-container\">\n  \n</div>",
+    "hints": [
+      "Nest head and body within html.",
+      "Add title inside head, and h1, hr, p inside body."
+    ],
+    "validation": {
+      "checkType": "html",
+      "testCases": [
+        {
+          "description": "Should contain a title tag",
+          "testRegex": "<title[\\s>]"
+        },
+        {
+          "description": "Should contain h1, hr, and p tags inside body",
+          "testRegex": "<body>\\s*<h1[\\s>].*</h1>\\s*<hr\\s*/?>\\s*<p[\\s>].*</p>\\s*</body>"
+        }
+      ]
+    }
+  },
+  {
+    "id": "html5-16",
+    "level": 16,
+    "levelId": 16,
+    "tier": "Apprentice",
+    "title": "Strong Importance",
+    "conceptText": "### 1. The Concept (The \"Why\")\nThe `<strong>` element marks text that has strong importance or urgency, displaying it in bold.",
+    "codeExample": "```html\n<p>This is <strong>critical</strong> to understand.</p>\n```",
+    "missionText": "### 2. Your Mission\nMake the word \"Warning\" strong within a sentence inside the container.",
+    "starterCode": "<!-- Level 16 -->\n<div id=\"element-container\">\n  \n</div>",
+    "hints": [
+      "Wrap 'Warning' inside <strong> and </strong>."
+    ],
+    "validation": {
+      "checkType": "html",
+      "testCases": [
+        {
+          "description": "Should contain strong tag around Warning",
+          "testRegex": "<strong>\\s*Warning\\s*</strong>"
+        }
+      ]
+    }
+  },
+  {
+    "id": "html5-17",
+    "level": 17,
+    "levelId": 17,
+    "tier": "Apprentice",
+    "title": "Emphasis",
+    "conceptText": "### 1. The Concept (The \"Why\")\nThe `<em>` element italicizes text to show conversational emphasis or stress.",
+    "codeExample": "```html\n<p>You <em>must</em> save your progress.</p>\n```",
+    "missionText": "### 2. Your Mission\nMake the word \"must\" emphasized within a sentence inside the container.",
+    "starterCode": "<!-- Level 17 -->\n<div id=\"element-container\">\n  \n</div>",
+    "hints": [
+      "Wrap 'must' inside <em> and </em>."
+    ],
+    "validation": {
+      "checkType": "html",
+      "testCases": [
+        {
+          "description": "Should contain em tag around must",
+          "testRegex": "<em>\\s*must\\s*</em>"
+        }
+      ]
+    }
+  },
+  {
+    "id": "html5-18",
+    "level": 18,
+    "levelId": 18,
+    "tier": "Apprentice",
+    "title": "Highlighted Text",
+    "conceptText": "### 1. The Concept (The \"Why\")\nThe `<mark>` element highlights text, typically with a yellow background, to indicate relevance in a context.",
+    "codeExample": "```html\n<p>Check the <mark>important terms</mark> here.</p>\n```",
+    "missionText": "### 2. Your Mission\nHighlight the phrase \"Special Offer\" inside a paragraph inside the container.",
+    "starterCode": "<!-- Level 18 -->\n<div id=\"element-container\">\n  \n</div>",
+    "hints": [
+      "Use <mark>Special Offer</mark> nested inside <p>."
+    ],
+    "validation": {
+      "checkType": "html",
+      "testCases": [
+        {
+          "description": "Should contain mark tag around Special Offer",
+          "testRegex": "<mark>\\s*Special\\s+Offer\\s*</mark>"
+        }
+      ]
+    }
+  },
+  {
+    "id": "html5-19",
+    "level": 19,
+    "levelId": 19,
+    "tier": "Apprentice",
+    "title": "Deleted Text",
+    "conceptText": "### 1. The Concept (The \"Why\")\nThe `<del>` tag represents deleted or removed text, drawing a line (strikethrough) over it.",
+    "codeExample": "```html\n<p>Old pricing: <del>$99</del></p>\n```",
+    "missionText": "### 2. Your Mission\nShow an old price of \"$50\" marked as deleted inside the container.",
+    "starterCode": "<!-- Level 19 -->\n<div id=\"element-container\">\n  \n</div>",
+    "hints": [
+      "Wrap '$50' in <del> and </del> tags."
+    ],
+    "validation": {
+      "checkType": "html",
+      "testCases": [
+        {
+          "description": "Should contain del tag around $50",
+          "testRegex": "<del>\\s*\\$50\\s*</del>"
+        }
+      ]
+    }
+  },
+  {
+    "id": "html5-20",
+    "level": 20,
+    "levelId": 20,
+    "tier": "Apprentice",
+    "title": "Inserted Text",
+    "conceptText": "### 1. The Concept (The \"Why\")\nThe `<ins>` tag represents inserted or added text, rendering it with an underline. It is often paired with `<del>`.",
+    "codeExample": "```html\n<p><del>Old</del> <ins>New</ins></p>\n```",
+    "missionText": "### 2. Your Mission\nShow a new price of \"$30\" marked as inserted next to a deleted price of \"$50\" inside the container.",
+    "starterCode": "<!-- Level 20 -->\n<div id=\"element-container\">\n  \n</div>",
+    "hints": [
+      "Put <del>$50</del> followed by <ins>$30</ins>."
+    ],
+    "validation": {
+      "checkType": "html",
+      "testCases": [
+        {
+          "description": "Should contain del and ins tags next to each other",
+          "testRegex": "<del>\\s*\\$50\\s*</del>\\s*<ins>\\s*\\$30\\s*</ins>"
+        }
+      ]
+    }
+  },
+  {
+    "id": "html5-21",
+    "level": 21,
+    "levelId": 21,
+    "tier": "Apprentice",
+    "title": "Subscript",
+    "conceptText": "### 1. The Concept (The \"Why\")\nThe `<sub>` tag lowers text to a subscript position, useful for chemical equations or formulas.",
+    "codeExample": "```html\n<p>CO<sub>2</sub> represents Carbon Dioxide.</p>\n```",
+    "missionText": "### 2. Your Mission\nWrite the chemical formula for water (H2O) using subscript for the \"2\" inside the container.",
+    "starterCode": "<!-- Level 21 -->\n<div id=\"element-container\">\n  \n</div>",
+    "hints": [
+      "Format it as H<sub>2</sub>O."
+    ],
+    "validation": {
+      "checkType": "html",
+      "testCases": [
+        {
+          "description": "Should contain chemical formula for water with sub tag",
+          "testRegex": "H<sub>\\s*2\\s*</sub>O"
+        }
+      ]
+    }
+  },
+  {
+    "id": "html5-22",
+    "level": 22,
+    "levelId": 22,
+    "tier": "Apprentice",
+    "title": "Superscript",
+    "conceptText": "### 1. The Concept (The \"Why\")\nThe `<sup>` tag raises text to a superscript position, useful for math exponents or calendar dates.",
+    "codeExample": "```html\n<p>2<sup>3</sup> equals 8.</p>\n```",
+    "missionText": "### 2. Your Mission\nWrite \"October 4th\" using superscript for the \"th\" inside the container.",
+    "starterCode": "<!-- Level 22 -->\n<div id=\"element-container\">\n  \n</div>",
+    "hints": [
+      "Format it as October 4<sup>th</sup>."
+    ],
+    "validation": {
+      "checkType": "html",
+      "testCases": [
+        {
+          "description": "Should contain superscript 'th'",
+          "testRegex": "October\\s+4<sup>\\s*th\\s*</sup>"
+        }
+      ]
+    }
+  },
+  {
+    "id": "html5-23",
+    "level": 23,
+    "levelId": 23,
+    "tier": "Apprentice",
+    "title": "Inline Quotes",
+    "conceptText": "### 1. The Concept (The \"Why\")\nThe `<q>` tag defines an inline, short quote. Browsers normally insert quotation marks around the text automatically.",
+    "codeExample": "```html\n<p>She said, <q>This is great!</q></p>\n```",
+    "missionText": "### 2. Your Mission\nQuote someone saying \"Keep coding\" using the inline quote tag inside the container.",
+    "starterCode": "<!-- Level 23 -->\n<div id=\"element-container\">\n  \n</div>",
+    "hints": [
+      "Wrap 'Keep coding' in a <q> tag."
+    ],
+    "validation": {
+      "checkType": "html",
+      "testCases": [
+        {
+          "description": "Should contain q tag around Keep coding",
+          "testRegex": "<q>\\s*Keep\\s+coding\\s*</q>"
+        }
+      ]
+    }
+  },
+  {
+    "id": "html5-24",
+    "level": 24,
+    "levelId": 24,
+    "tier": "Apprentice",
+    "title": "Blockquotes",
+    "conceptText": "### 1. The Concept (The \"Why\")\nFor long, standalone quotes cited from other sources, we use the `<blockquote>` tag, which usually indents the block of text.",
+    "codeExample": "```html\n<blockquote>\n  This is a long quote that spans multiple lines.\n</blockquote>\n```",
+    "missionText": "### 2. Your Mission\nCreate a standalone blockquote containing a famous inspirational phrase (e.g. \"To be or not to be\") inside the container.",
+    "starterCode": "<!-- Level 24 -->\n<div id=\"element-container\">\n  \n</div>",
+    "hints": [
+      "Write <blockquote>Your quote here</blockquote>."
+    ],
+    "validation": {
+      "checkType": "html",
+      "testCases": [
+        {
+          "description": "Should contain blockquote tag",
+          "testRegex": "<blockquote>\\s*.*\\s*</blockquote>"
+        }
+      ]
+    }
+  },
+  {
+    "id": "html5-25",
+    "level": 25,
+    "levelId": 25,
+    "tier": "Apprentice",
+    "title": "Abbreviations",
+    "conceptText": "### 1. The Concept (The \"Why\")\nThe `<abbr>` element represents an abbreviation or acronym. It uses a `title` attribute to show the full version on hover.",
+    "codeExample": "```html\n<abbr title=\"World Wide Web\">WWW</abbr>\n```",
+    "missionText": "### 2. Your Mission\nCreate an abbreviation for \"HTML\" with the title \"HyperText Markup Language\" inside the container.",
+    "starterCode": "<!-- Level 25 -->\n<div id=\"element-container\">\n  \n</div>",
+    "hints": [
+      "Use <abbr title=\"HyperText Markup Language\">HTML</abbr>."
+    ],
+    "validation": {
+      "checkType": "html",
+      "testCases": [
+        {
+          "description": "Should contain abbr tag with correct title attribute",
+          "testRegex": "<abbr\\s+title=[\"']HyperText\\s+Markup\\s+Language[\"']>\\s*HTML\\s*</abbr>"
+        }
+      ]
+    }
+  },
+  {
+    "id": "html5-26",
+    "level": 26,
+    "levelId": 26,
+    "tier": "Apprentice",
+    "title": "Code Formatting",
+    "conceptText": "### 1. The Concept (The \"Why\")\nTo render snippets of inline computer code in a monospace font, we wrap them in the `<code>` tag.",
+    "codeExample": "```html\n<p>Define a variable with <code>let x = 10;</code>.</p>\n```",
+    "missionText": "### 2. Your Mission\nWrap the text \"var x = 5\" in a code tag inside a sentence inside the container.",
+    "starterCode": "<!-- Level 26 -->\n<div id=\"element-container\">\n  \n</div>",
+    "hints": [
+      "Wrap 'var x = 5' inside <code> and </code>."
+    ],
+    "validation": {
+      "checkType": "html",
+      "testCases": [
+        {
+          "description": "Should contain code tag around target text",
+          "testRegex": "<code>\\s*var\\s+x\\s*=\\s*5\\s*</code>"
+        }
+      ]
+    }
+  },
+  {
+    "id": "html5-27",
+    "level": 27,
+    "levelId": 27,
+    "tier": "Apprentice",
+    "title": "Unordered Lists",
+    "conceptText": "### 1. The Concept (The \"Why\")\nTo present items in no specific sequence, we use unordered lists (`<ul>`), wrapping each point in a list item (`<li>`) tag.",
+    "codeExample": "```html\n<ul>\n  <li>First item</li>\n  <li>Second item</li>\n</ul>\n```",
+    "missionText": "### 2. Your Mission\nCreate a bulleted list containing three grocery items (e.g. Milk, Bread, Eggs) inside the container.",
+    "starterCode": "<!-- Level 27 -->\n<div id=\"element-container\">\n  \n</div>",
+    "hints": [
+      "Use <ul> opening and closing tags, with three <li> elements nested inside."
+    ],
+    "validation": {
+      "checkType": "html",
+      "testCases": [
+        {
+          "description": "Should contain ul tag",
+          "testRegex": "<ul[\\s>]"
+        },
+        {
+          "description": "Should contain three li tags",
+          "testRegex": "(<li[\\s>].*</li>\\s*){3}"
+        }
+      ]
+    }
+  },
+  {
+    "id": "html5-28",
+    "level": 28,
+    "levelId": 28,
+    "tier": "Apprentice",
+    "title": "Ordered Lists",
+    "conceptText": "### 1. The Concept (The \"Why\")\nFor sequential guides, we use ordered lists (`<ol>`), which automatically number each nested list item (`<li>`).",
+    "codeExample": "```html\n<ol>\n  <li>Step One</li>\n  <li>Step Two</li>\n</ol>\n```",
+    "missionText": "### 2. Your Mission\nCreate a numbered list showing a 3-step setup guide inside the container.",
+    "starterCode": "<!-- Level 28 -->\n<div id=\"element-container\">\n  \n</div>",
+    "hints": [
+      "Use <ol> tags containing three <li> elements."
+    ],
+    "validation": {
+      "checkType": "html",
+      "testCases": [
+        {
+          "description": "Should contain ol tag",
+          "testRegex": "<ol[\\s>]"
+        },
+        {
+          "description": "Should contain three li tags",
+          "testRegex": "(<li[\\s>].*</li>\\s*){3}"
+        }
+      ]
+    }
+  },
+  {
+    "id": "html5-29",
+    "level": 29,
+    "levelId": 29,
+    "tier": "Apprentice",
+    "title": "Description Lists",
+    "conceptText": "### 1. The Concept (The \"Why\")\nDescription lists (`<dl>`) organize terms (`<dt>`) and their matching descriptions or definitions (`<dd>`).",
+    "codeExample": "```html\n<dl>\n  <dt>Term</dt>\n  <dd>Definition</dd>\n</dl>\n```",
+    "missionText": "### 2. Your Mission\nDefine the term \"CSS\" as \"Cascading Style Sheets\" using a description list inside the container.",
+    "starterCode": "<!-- Level 29 -->\n<div id=\"element-container\">\n  \n</div>",
+    "hints": [
+      "Nest <dt>CSS</dt> and <dd>Cascading Style Sheets</dd> inside a <dl> block."
+    ],
+    "validation": {
+      "checkType": "html",
+      "testCases": [
+        {
+          "description": "Should contain dl tag",
+          "testRegex": "<dl[\\s>]"
+        },
+        {
+          "description": "Should contain dt tag with term CSS",
+          "testRegex": "<dt>\\s*CSS\\s*</dt>"
+        },
+        {
+          "description": "Should contain dd tag with definition Cascading Style Sheets",
+          "testRegex": "<dd>\\s*Cascading\\s+Style\\s+Sheets\\s*</dd>"
+        }
+      ]
+    }
+  },
+  {
+    "id": "html5-30",
+    "level": 30,
+    "levelId": 30,
+    "tier": "Apprentice",
+    "title": "Nesting Lists",
+    "conceptText": "### 1. The Concept (The \"Why\")\nLists can be nested within list items to build hierarchical menu layouts or outlines.",
+    "codeExample": "```html\n<ul>\n  <li>Main Item\n    <ul>\n      <li>Sub-item</li>\n    </ul>\n  </li>\n</ul>\n```",
+    "missionText": "### 2. Your Mission\nCreate a numbered list (ol) with 2 items, where item #2 contains a 2-item bulleted sub-list (ul) inside the container.",
+    "starterCode": "<!-- Level 30 -->\n<div id=\"element-container\">\n  \n</div>",
+    "hints": [
+      "Create <ol> with two <li> items. Inside the second <li>, add a complete <ul> list."
+    ],
+    "validation": {
+      "checkType": "html",
+      "testCases": [
+        {
+          "description": "Should contain outer ol tag with two li elements",
+          "testRegex": "<ol>\\s*<li>\\s*.*\\s*</li>\\s*<li>\\s*.*\\s*<ul[\\s>].*</ul>\\s*</li>\\s*</ol>"
+        },
+        {
+          "description": "Should contain inner ul list with two nested li elements",
+          "testRegex": "<ul>\\s*(<li>\\s*.*\\s*</li>\\s*){2}</ul>"
+        }
+      ]
+    }
+  },
+  {
+    "id": "html5-31",
+    "level": 31,
+    "levelId": 31,
+    "tier": "Apprentice",
+    "title": "Introduction to Links",
+    "conceptText": "### 1. The Concept (The \"Why\")\nLinks are created using the anchor `<a>` tag. The `href` attribute specifies the URL target.",
+    "codeExample": "```html\n<a href=\"https://example.com\">Visit site</a>\n```",
+    "missionText": "### 2. Your Mission\nLink the text \"Google\" to \"https://www.google.com\" inside the container.",
+    "starterCode": "<!-- Level 31 -->\n<div id=\"element-container\">\n  \n</div>",
+    "hints": [
+      "Use <a href=\"https://www.google.com\">Google</a>."
+    ],
+    "validation": {
+      "checkType": "html",
+      "testCases": [
+        {
+          "description": "Should contain anchor tag pointing to google.com",
+          "testRegex": "<a\\s+href=[\"']https://www\\.google\\.com[\"']>\\s*Google\\s*</a>"
+        }
+      ]
+    }
+  },
+  {
+    "id": "html5-32",
+    "level": 32,
+    "levelId": 32,
+    "tier": "Apprentice",
+    "title": "Absolute URLs",
+    "conceptText": "### 1. The Concept (The \"Why\")\nAn absolute URL contains the complete address of a web resource, including the protocol (http:// or https://), pointing to external sites.",
+    "codeExample": "```html\n<a href=\"https://www.example.com\">External Link</a>\n```",
+    "missionText": "### 2. Your Mission\nLink to \"https://www.wikipedia.org\" with the text \"Wikipedia\" inside the container.",
+    "starterCode": "<!-- Level 32 -->\n<div id=\"element-container\">\n  \n</div>",
+    "hints": [
+      "Use href=\"https://www.wikipedia.org\"."
+    ],
+    "validation": {
+      "checkType": "html",
+      "testCases": [
+        {
+          "description": "Should contain external absolute link to wikipedia.org",
+          "testRegex": "<a\\s+href=[\"']https://www\\.wikipedia\\.org[\"']>\\s*Wikipedia\\s*</a>"
+        }
+      ]
+    }
+  },
+  {
+    "id": "html5-33",
+    "level": 33,
+    "levelId": 33,
+    "tier": "Apprentice",
+    "title": "Relative Paths",
+    "conceptText": "### 1. The Concept (The \"Why\")\nRelative paths link to pages residing on the same host or relative to the current file directory, omitting protocols and domains.",
+    "codeExample": "```html\n<a href=\"contact.html\">Contact Us</a>\n```",
+    "missionText": "### 2. Your Mission\nLink to a local file named \"about.html\" using the text \"About Us\" inside the container.",
+    "starterCode": "<!-- Level 33 -->\n<div id=\"element-container\">\n  \n</div>",
+    "hints": [
+      "Set href=\"about.html\" and link text to 'About Us'."
+    ],
+    "validation": {
+      "checkType": "html",
+      "testCases": [
+        {
+          "description": "Should contain relative link to about.html",
+          "testRegex": "<a\\s+href=[\"']about\\.html[\"']>\\s*About\\s+Us\\s*</a>"
+        }
+      ]
+    }
+  },
+  {
+    "id": "html5-34",
+    "level": 34,
+    "levelId": 34,
+    "tier": "Apprentice",
+    "title": "New Window Target",
+    "conceptText": "### 1. The Concept (The \"Why\")\nAdding `target=\"_blank\"` inside link tags forces the browser to open the target destination in a new window or tab.",
+    "codeExample": "```html\n<a href=\"https://example.com\" target=\"_blank\">Open new tab</a>\n```",
+    "missionText": "### 2. Your Mission\nMake an external link to Google (\"https://www.google.com\" with text \"Google\") open safely in a brand new tab.",
+    "starterCode": "<!-- Level 34 -->\n<div id=\"element-container\">\n  \n</div>",
+    "hints": [
+      "Add target=\"_blank\" inside your anchor tag attributes."
+    ],
+    "validation": {
+      "checkType": "html",
+      "testCases": [
+        {
+          "description": "Should contain target='_blank' attribute",
+          "testRegex": "<a\\s+[^>]*target=[\"']_blank[\"'][^>]*>\\s*Google\\s*</a>"
+        }
+      ]
+    }
+  },
+  {
+    "id": "html5-35",
+    "level": 35,
+    "levelId": 35,
+    "tier": "Apprentice",
+    "title": "Document Section Anchors",
+    "conceptText": "### 1. The Concept (The \"Why\")\nTo link to specific elements on the same page, we set the `href` attribute to point to the `id` selector of the target section (e.g. `#footer`).",
+    "codeExample": "```html\n<a href=\"#about\">Jump to About</a>\n...\n<section id=\"about\">About Details</section>\n```",
+    "missionText": "### 2. Your Mission\nCreate a link that jumps down to an element with id=\"contact\" inside the container. The link text should say \"Jump to Contact\".",
+    "starterCode": "<!-- Level 35 -->\n<div id=\"element-container\">\n  \n</div>",
+    "hints": [
+      "Use <a href=\"#contact\">Jump to Contact</a>."
+    ],
+    "validation": {
+      "checkType": "html",
+      "testCases": [
+        {
+          "description": "Should contain link pointing to #contact hash location",
+          "testRegex": "<a\\s+href=[\"']#contact[\"']>\\s*Jump\\s+to\\s+Contact\\s*</a>"
+        }
+      ]
+    }
+  },
+  {
+    "id": "html5-36",
+    "level": 36,
+    "levelId": 36,
+    "tier": "Apprentice",
+    "title": "Image Tag",
+    "conceptText": "### 1. The Concept (The \"Why\")\nThe self-closing `<img>` tag embeds images on web pages using the `src` attribute to reference image files.",
+    "codeExample": "```html\n<img src=\"pic.jpg\" />\n```",
+    "missionText": "### 2. Your Mission\nEmbed an image using the source path \"logo.png\" inside the container.",
+    "starterCode": "<!-- Level 36 -->\n<div id=\"element-container\">\n  \n</div>",
+    "hints": [
+      "Use <img src=\"logo.png\" />."
+    ],
+    "validation": {
+      "checkType": "html",
+      "testCases": [
+        {
+          "description": "Should contain an img tag pointing to logo.png",
+          "testRegex": "<img\\s+[^>]*src=[\"']logo\\.png[\"']\\s*/?>"
+        }
+      ]
+    }
+  },
+  {
+    "id": "html5-37",
+    "level": 37,
+    "levelId": 37,
+    "tier": "Apprentice",
+    "title": "Image Alt Text",
+    "conceptText": "### 1. The Concept (The \"Why\")\nThe `alt` attribute describes the content of an image. It is critical for web accessibility, allowing screen readers to describe images, and displays text if images fail to load.",
+    "codeExample": "```html\n<img src=\"logo.png\" alt=\"Company Logo\" />\n```",
+    "missionText": "### 2. Your Mission\nAdd descriptive alt text \"Company Logo\" to your \"logo.png\" image inside the container.",
+    "starterCode": "<!-- Level 37 -->\n<div id=\"element-container\">\n  \n</div>",
+    "hints": [
+      "Add alt=\"Company Logo\" attribute inside the img element."
+    ],
+    "validation": {
+      "checkType": "html",
+      "testCases": [
+        {
+          "description": "Should contain alt attribute with correct descriptive text",
+          "testRegex": "<img\\s+[^>]*alt=[\"']Company\\s+Logo[\"'][^>]*src=[\"']logo\\.png[\"']"
+        }
+      ]
+    }
+  },
+  {
+    "id": "html5-38",
+    "level": 38,
+    "levelId": 38,
+    "tier": "Apprentice",
+    "title": "Image Dimensions",
+    "conceptText": "### 1. The Concept (The \"Why\")\nWe can set pixel width and height boundaries directly on images using `width` and `height` attributes inside the tag.",
+    "codeExample": "```html\n<img src=\"logo.png\" width=\"300\" height=\"200\" />\n```",
+    "missionText": "### 2. Your Mission\nForce an image \"logo.png\" to display at exactly 200 pixels wide and 100 pixels tall inside the container.",
+    "starterCode": "<!-- Level 38 -->\n<div id=\"element-container\">\n  \n</div>",
+    "hints": [
+      "Specify width=\"200\" height=\"100\" attributes on the img element."
+    ],
+    "validation": {
+      "checkType": "html",
+      "testCases": [
+        {
+          "description": "Should set image width to 200 and height to 100",
+          "testRegex": "width=[\"']200[\"']"
+        },
+        {
+          "description": "Should check height parameter too",
+          "testRegex": "height=[\"']100[\"']"
+        }
+      ]
+    }
+  },
+  {
+    "id": "html5-39",
+    "level": 39,
+    "levelId": 39,
+    "tier": "Apprentice",
+    "title": "Clickable Image Links",
+    "conceptText": "### 1. The Concept (The \"Why\")\nTo make an image a clickable link, we nest the `<img>` tag inside an `<a>` anchor tag container.",
+    "codeExample": "```html\n<a href=\"index.html\">\n  <img src=\"home.png\" alt=\"Home\" />\n</a>\n```",
+    "missionText": "### 2. Your Mission\nMake a \"home.png\" image click through to navigate to \"index.html\" inside the container.",
+    "starterCode": "<!-- Level 39 -->\n<div id=\"element-container\">\n  \n</div>",
+    "hints": [
+      "Nest <img src=\"home.png\" /> inside <a href=\"index.html\">."
+    ],
+    "validation": {
+      "checkType": "html",
+      "testCases": [
+        {
+          "description": "Should wrap image in relative link to index.html",
+          "testRegex": "<a\\s+href=[\"']index\\.html[\"']>\\s*<img\\s+[^>]*src=[\"']home\\.png[\"']"
+        }
+      ]
+    }
+  },
+  {
+    "id": "html5-40",
+    "level": 40,
+    "levelId": 40,
+    "tier": "Apprentice",
+    "title": "Email Targets",
+    "conceptText": "### 1. The Concept (The \"Why\")\nUsing `mailto:` inside the link `href` attribute triggers the user's default email client, pre-filling the email address.",
+    "codeExample": "```html\n<a href=\"mailto:hello@example.com\">Contact Us</a>\n```",
+    "missionText": "### 2. Your Mission\nCreate a link labeled \"Email Me\" that points to \"test@example.com\" inside the container.",
+    "starterCode": "<!-- Level 40 -->\n<div id=\"element-container\">\n  \n</div>",
+    "hints": [
+      "Use <a href=\"mailto:test@example.com\">Email Me</a>."
+    ],
+    "validation": {
+      "checkType": "html",
+      "testCases": [
+        {
+          "description": "Should contain mailto link to test@example.com",
+          "testRegex": "<a\\s+href=[\"']mailto:test@example\\.com[\"']>\\s*Email\\s+Me\\s*</a>"
+        }
+      ]
+    }
+  },
+  {
+    "id": "html5-41",
+    "level": 41,
+    "levelId": 41,
+    "tier": "Apprentice",
+    "title": "Phone Connections",
+    "conceptText": "### 1. The Concept (The \"Why\")\nThe `tel:` protocol creates direct dialing links, allowing mobile visitors to easily place telephone calls directly.",
+    "codeExample": "```html\n<a href=\"tel:+1234567890\">Call Us</a>\n```",
+    "missionText": "### 2. Your Mission\nCreate a link labeled \"Call Support\" pointing to phone number \"1234567890\" inside the container.",
+    "starterCode": "<!-- Level 41 -->\n<div id=\"element-container\">\n  \n</div>",
+    "hints": [
+      "Use href=\"tel:1234567890\"."
+    ],
+    "validation": {
+      "checkType": "html",
+      "testCases": [
+        {
+          "description": "Should contain phone dialer link tel:1234567890",
+          "testRegex": "<a\\s+href=[\"']tel:1234567890[\"']>\\s*Call\\s+Support\\s*</a>"
+        }
+      ]
+    }
+  },
+  {
+    "id": "html5-42",
+    "level": 42,
+    "levelId": 42,
+    "tier": "Apprentice",
+    "title": "Figures",
+    "conceptText": "### 1. The Concept (The \"Why\")\nThe `<figure>` tag acts as a semantic box layout wrapping photos, illustrations, charts, or code snippets to separate them from main text streams.",
+    "codeExample": "```html\n<figure>\n  <img src=\"chart.png\" alt=\"Stats\" />\n</figure>\n```",
+    "missionText": "### 2. Your Mission\nWrap an image tag (sourcing \"logo.png\") completely inside a figure element inside the container.",
+    "starterCode": "<!-- Level 42 -->\n<div id=\"element-container\">\n  \n</div>",
+    "hints": [
+      "Nest <img src=\"logo.png\" /> inside <figure></figure> tags."
+    ],
+    "validation": {
+      "checkType": "html",
+      "testCases": [
+        {
+          "description": "Should contain figure tag with img tag inside",
+          "testRegex": "<figure>\\s*<img\\s+[^>]*src=[\"']logo\\.png[\"'].*</figure>"
+        }
+      ]
+    }
+  },
+  {
+    "id": "html5-43",
+    "level": 43,
+    "levelId": 43,
+    "tier": "Apprentice",
+    "title": "Figure Captions",
+    "conceptText": "### 1. The Concept (The \"Why\")\nThe `<figcaption>` element places semantic subtitle captions directly under figure graphics or code layout blocks.",
+    "codeExample": "```html\n<figure>\n  <img src=\"chart.png\" alt=\"Stats\" />\n  <figcaption>Fig 1. Sales Chart</figcaption>\n</figure>\n```",
+    "missionText": "### 2. Your Mission\nAdd a caption saying \"Figure 1: Site Analytics\" inside your figure (below the logo.png image) inside the container.",
+    "starterCode": "<!-- Level 43 -->\n<div id=\"element-container\">\n  <figure>\n    <img src=\"logo.png\" alt=\"Analytics logo\" />\n    \n  </figure>\n</div>",
+    "hints": [
+      "Write <figcaption>Figure 1: Site Analytics</figcaption> inside the figure block."
+    ],
+    "validation": {
+      "checkType": "html",
+      "testCases": [
+        {
+          "description": "Should contain figcaption tag with analytics caption text",
+          "testRegex": "<figcaption>\\s*Figure\\s+1:\\s+Site\\s+Analytics\\s*</figcaption>"
+        }
+      ]
+    }
+  },
+  {
+    "id": "html5-44",
+    "level": 44,
+    "levelId": 44,
+    "tier": "Apprentice",
+    "title": "File Download Trigger",
+    "conceptText": "### 1. The Concept (The \"Why\")\nThe `download` attribute on a link forces browser programs to prompt a file download rather than opening a page file layout.",
+    "codeExample": "```html\n<a href=\"manual.pdf\" download>Download PDF</a>\n```",
+    "missionText": "### 2. Your Mission\nCreate a link to \"report.pdf\" that downloads explicitly when clicked. The link label should say \"Get Report\".",
+    "starterCode": "<!-- Level 44 -->\n<div id=\"element-container\">\n  \n</div>",
+    "hints": [
+      "Use <a href=\"report.pdf\" download>Get Report</a>."
+    ],
+    "validation": {
+      "checkType": "html",
+      "testCases": [
+        {
+          "description": "Should contain download attribute",
+          "testRegex": "<a\\s+[^>]*download[^>]*href=[\"']report\\.pdf[\"']"
+        }
+      ]
+    }
+  },
+  {
+    "id": "html5-45",
+    "level": 45,
+    "levelId": 45,
+    "tier": "Apprentice",
+    "title": "Asset Integration Review",
+    "conceptText": "### 1. The Concept (The \"Why\")\nLet's review the asset features we learned. Combining figures, images, relative links, alt descriptions, and captions.",
+    "codeExample": "```html\n<figure>\n  <a href=\"dest.html\">\n    <img src=\"img.jpg\" alt=\"Description\" />\n  </a>\n  <figcaption>Caption text</figcaption>\n</figure>\n```",
+    "missionText": "### 2. Your Mission\nBuild a figure with an image (logo.png, alt description \"Company Logo\") that links to an external site (\"https://example.com\"), complete with a caption \"Fig 1\" inside the container.",
+    "starterCode": "<!-- Level 45 -->\n<div id=\"element-container\">\n  \n</div>",
+    "hints": [
+      "Nest the link inside figure, then nest image inside link, and add figcaption next to link."
+    ],
+    "validation": {
+      "checkType": "html",
+      "testCases": [
+        {
+          "description": "Should structure figure, link, image, and figcaption correctly",
+          "testRegex": "<figure>\\s*<a\\s+href=[\"']https://example\\.com[\"']>\\s*<img\\s+[^>]*src=[\"']logo\\.png[\"'][^>]*alt=[\"']Company\\s+Logo[\"'].*</a>\\s*<figcaption>\\s*Fig\\s+1\\s*</figcaption>\\s*</figure>"
+        }
+      ]
+    }
+  },
+  {
+    "id": "html5-46",
+    "level": 46,
+    "levelId": 46,
+    "tier": "Apprentice",
+    "title": "Table Foundation",
+    "conceptText": "### 1. The Concept (The \"Why\")\nThe `<table>` element acts as the primary wrapper structure housing columns and rows of dataset records.",
+    "codeExample": "```html\n<table>\n  <!-- rows go here -->\n</table>\n```",
+    "missionText": "### 2. Your Mission\nOpen and close a basic empty table container inside the container.",
+    "starterCode": "<!-- Level 46 -->\n<div id=\"element-container\">\n  \n</div>",
+    "hints": [
+      "Write <table></table>."
+    ],
+    "validation": {
+      "checkType": "html",
+      "testCases": [
+        {
+          "description": "Should contain table tag",
+          "testRegex": "<table>\\s*</table>"
+        }
+      ]
+    }
+  },
+  {
+    "id": "html5-47",
+    "level": 47,
+    "levelId": 47,
+    "tier": "Apprentice",
+    "title": "Table Rows",
+    "conceptText": "### 1. The Concept (The \"Why\")\nThe `<tr>` element defines a horizontal row of cells inside a table.",
+    "codeExample": "```html\n<table>\n  <tr></tr>\n</table>\n```",
+    "missionText": "### 2. Your Mission\nBuild a table framework containing exactly two rows inside the container.",
+    "starterCode": "<!-- Level 47 -->\n<div id=\"element-container\">\n  \n</div>",
+    "hints": [
+      "Nest two <tr></tr> blocks inside <table></table>."
+    ],
+    "validation": {
+      "checkType": "html",
+      "testCases": [
+        {
+          "description": "Should contain table with two rows",
+          "testRegex": "<table>\\s*(<tr>\\s*</tr>\\s*){2}</table>"
+        }
+      ]
+    }
+  },
+  {
+    "id": "html5-48",
+    "level": 48,
+    "levelId": 48,
+    "tier": "Apprentice",
+    "title": "Table Data Cells",
+    "conceptText": "### 1. The Concept (The \"Why\")\nThe `<td>` element defines standard data cells containing actual numbers or text values inside a table row.",
+    "codeExample": "```html\n<tr>\n  <td>John</td>\n  <td>Doe</td>\n</tr>\n```",
+    "missionText": "### 2. Your Mission\nCreate a single row containing two data cells: \"John\" and \"Doe\" inside the container. (Do not forget the parent table tag).",
+    "starterCode": "<!-- Level 48 -->\n<div id=\"element-container\">\n  \n</div>",
+    "hints": [
+      "Inside table and tr, add <td>John</td> and <td>Doe</td>."
+    ],
+    "validation": {
+      "checkType": "html",
+      "testCases": [
+        {
+          "description": "Should contain tr with two td cells John and Doe",
+          "testRegex": "<tr>\\s*<td>\\s*John\\s*</td>\\s*<td>\\s*Doe\\s*</td>\\s*</tr>"
+        }
+      ]
+    }
+  },
+  {
+    "id": "html5-49",
+    "level": 49,
+    "levelId": 49,
+    "tier": "Apprentice",
+    "title": "Table Header Cells",
+    "conceptText": "### 1. The Concept (The \"Why\")\nThe `<th>` element defines column descriptors or titles. The browser centers and bolds this text by default.",
+    "codeExample": "```html\n<tr>\n  <th>First Name</th>\n  <th>Last Name</th>\n</tr>\n```",
+    "missionText": "### 2. Your Mission\nCreate a top row using two header cells labeled \"First Name\" and \"Last Name\" inside the container.",
+    "starterCode": "<!-- Level 49 -->\n<div id=\"element-container\">\n  \n</div>",
+    "hints": [
+      "Inside table and tr, add <th>First Name</th> and <th>Last Name</th>."
+    ],
+    "validation": {
+      "checkType": "html",
+      "testCases": [
+        {
+          "description": "Should contain tr with th header cells",
+          "testRegex": "<tr>\\s*<th>\\s*First\\s+Name\\s*</th>\\s*<th>\\s*Last\\s+Name\\s*</th>\\s*</tr>"
+        }
+      ]
+    }
+  },
+  {
+    "id": "html5-50",
+    "level": 50,
+    "levelId": 50,
+    "tier": "Apprentice",
+    "title": "Basic Table Assembly",
+    "conceptText": "### 1. The Concept (The \"Why\")\nNow, compile a complete basic table combining header cells (`<th>`) on the top row, and standard data cells (`<td>`) on subsequent rows.",
+    "codeExample": "```html\n<table>\n  <tr><th>Item</th></tr>\n  <tr><td>Book</td></tr>\n</table>\n```",
+    "missionText": "### 2. Your Mission\nBuild a 2x2 table showing headers (Item, Price) on row 1, and one row of data (Book, $10) on row 2 inside the container.",
+    "starterCode": "<!-- Level 50 -->\n<div id=\"element-container\">\n  \n</div>",
+    "hints": [
+      "Use <table>. Add first <tr> with two <th>. Add second <tr> with two <td>."
+    ],
+    "validation": {
+      "checkType": "html",
+      "testCases": [
+        {
+          "description": "Should structure a 2x2 table with header row and data row",
+          "testRegex": "<table>\\s*<tr>\\s*<th>\\s*Item\\s*</th>\\s*<th>\\s*Price\\s*</th>\\s*</tr>\\s*<tr>\\s*<td>\\s*Book\\s*</td>\\s*<td>\\s*\\$10\\s*</td>\\s*</tr>\\s*</table>"
+        }
+      ]
+    }
+  },
+  {
+    "id": "html5-51",
+    "level": 51,
+    "levelId": 51,
+    "tier": "Mage",
+    "title": "Column Spanning",
+    "conceptText": "### 1. The Concept (The \"Why\")\nThe `colspan` attribute allows a single table cell to stretch horizontally across multiple columns.",
+    "codeExample": "```html\n<td colspan=\"2\">Spans two columns</td>\n```",
+    "missionText": "### 2. Your Mission\nMake a `<td>` span across 3 columns with the text \"Merged\" inside a row inside the container.",
+    "starterCode": "<!-- Level 51 -->\n<div id=\"element-container\">\n  <table>\n    <tr>\n      \n    </tr>\n  </table>\n</div>",
+    "hints": [
+      "Use <td colspan=\"3\">Merged</td>."
+    ],
+    "validation": {
+      "checkType": "html",
+      "testCases": [
+        {
+          "description": "Should contain td with colspan 3 and text Merged",
+          "testRegex": "<td\\s+colspan=[\"']3[\"']>\\s*Merged\\s*</td>"
+        }
+      ]
+    }
+  },
+  {
+    "id": "html5-52",
+    "level": 52,
+    "levelId": 52,
+    "tier": "Mage",
+    "title": "Row Spanning",
+    "conceptText": "### 1. The Concept (The \"Why\")\nThe `rowspan` attribute allows a single table cell to stretch vertically down across multiple rows.",
+    "codeExample": "```html\n<th rowspan=\"2\">Spans two rows</th>\n```",
+    "missionText": "### 2. Your Mission\nMake a `<th>` span down across 2 rows inside a table inside the container.",
+    "starterCode": "<!-- Level 52 -->\n<div id=\"element-container\">\n  <table>\n    <tr>\n      \n    </tr>\n    <tr>\n      \n    </tr>\n  </table>\n</div>",
+    "hints": [
+      "Use <th rowspan=\"2\">Your header</th>."
+    ],
+    "validation": {
+      "checkType": "html",
+      "testCases": [
+        {
+          "description": "Should contain th with rowspan 2",
+          "testRegex": "<th\\s+rowspan=[\"']2[\"']>"
+        }
+      ]
+    }
+  },
+  {
+    "id": "html5-53",
+    "level": 53,
+    "levelId": 53,
+    "tier": "Mage",
+    "title": "Table Captions",
+    "conceptText": "### 1. The Concept (The \"Why\")\nThe `<caption>` element sets a visible semantic title directly associated with a table. It must be placed immediately after the opening `<table>` tag.",
+    "codeExample": "```html\n<table>\n  <caption>Employee Directory</caption>\n  <tr>...</tr>\n</table>\n```",
+    "missionText": "### 2. Your Mission\nAdd a caption stating \"Employee Directory\" immediately inside a table element inside the container.",
+    "starterCode": "<!-- Level 53 -->\n<div id=\"element-container\">\n  \n</div>",
+    "hints": [
+      "Nest <caption>Employee Directory</caption> immediately inside the table tag."
+    ],
+    "validation": {
+      "checkType": "html",
+      "testCases": [
+        {
+          "description": "Should contain table with caption Employee Directory",
+          "testRegex": "<table>\\s*<caption>\\s*Employee\\s+Directory\\s*</caption>"
+        }
+      ]
+    }
+  },
+  {
+    "id": "html5-54",
+    "level": 54,
+    "levelId": 54,
+    "tier": "Mage",
+    "title": "Table Header Groups",
+    "conceptText": "### 1. The Concept (The \"Why\")\nThe `<thead>` tag groups the header rows of a table, helping with page layout styling and print behavior.",
+    "codeExample": "```html\n<table>\n  <thead>\n    <tr><th>Label</th></tr>\n  </thead>\n</table>\n```",
+    "missionText": "### 2. Your Mission\nWrap the header row of a table inside an explicit `<thead>` block inside the container.",
+    "starterCode": "<!-- Level 54 -->\n<div id=\"element-container\">\n  <table>\n    \n      <tr>\n        <th>ID</th>\n      </tr>\n    \n  </table>\n</div>",
+    "hints": [
+      "Surround the <tr> header row with <thead> and </thead>."
+    ],
+    "validation": {
+      "checkType": "html",
+      "testCases": [
+        {
+          "description": "Should contain thead tag around tr",
+          "testRegex": "<thead>\\s*<tr>\\s*<th>\\s*ID\\s*</th>\\s*</tr>\\s*</thead>"
+        }
+      ]
+    }
+  },
+  {
+    "id": "html5-55",
+    "level": 55,
+    "levelId": 55,
+    "tier": "Mage",
+    "title": "Table Body Sections",
+    "conceptText": "### 1. The Concept (The \"Why\")\nThe `<tbody>` tag encapsulates the main body data rows of a table separate from headers or footers.",
+    "codeExample": "```html\n<table>\n  <tbody>\n    <tr><td>Data</td></tr>\n  </tbody>\n</table>\n```",
+    "missionText": "### 2. Your Mission\nWrap two data rows cleanly inside a `<tbody>` container inside the table inside the container.",
+    "starterCode": "<!-- Level 55 -->\n<div id=\"element-container\">\n  <table>\n    \n  </table>\n</div>",
+    "hints": [
+      "Add <tbody> containing two <tr><td>Data</td></tr> blocks inside your table."
+    ],
+    "validation": {
+      "checkType": "html",
+      "testCases": [
+        {
+          "description": "Should contain tbody enclosing two tr rows",
+          "testRegex": "<tbody>\\s*(<tr>\\s*<td>.*</td>\\s*</tr>\\s*){2}</tbody>"
+        }
+      ]
+    }
+  },
+  {
+    "id": "html5-56",
+    "level": 56,
+    "levelId": 56,
+    "tier": "Mage",
+    "title": "Table Footers",
+    "conceptText": "### 1. The Concept (The \"Why\")\nThe `<tfoot>` tag groups summary, total, or calculations rows at the bottom of tables.",
+    "codeExample": "```html\n<tfoot>\n  <tr><td>Total: $100</td></tr>\n</tfoot>\n```",
+    "missionText": "### 2. Your Mission\nCreate a table footer row displaying a \"Total: $100\" cell inside the container.",
+    "starterCode": "<!-- Level 56 -->\n<div id=\"element-container\">\n  <table>\n    \n  </table>\n</div>",
+    "hints": [
+      "Add <tfoot><tr><td>Total: $100</td></tr></tfoot> inside the table."
+    ],
+    "validation": {
+      "checkType": "html",
+      "testCases": [
+        {
+          "description": "Should contain tfoot tag enclosing row with total cell",
+          "testRegex": "<tfoot>\\s*<tr>\\s*<td>\\s*Total:\\s*\\$100\\s*</td>\\s*</tr>\\s*</tfoot>"
+        }
+      ]
+    }
+  },
+  {
+    "id": "html5-57",
+    "level": 57,
+    "levelId": 57,
+    "tier": "Mage",
+    "title": "Column Groups",
+    "conceptText": "### 1. The Concept (The \"Why\")\nThe `<colgroup>` element groups full columns together for styling purposes, enabling shared classes or widths.",
+    "codeExample": "```html\n<table>\n  <colgroup>\n    <!-- column tracks -->\n  </colgroup>\n</table>\n```",
+    "missionText": "### 2. Your Mission\nAdd a colgroup element containing two column tracks (using empty tags or elements) above your rows inside a table inside the container.",
+    "starterCode": "<!-- Level 57 -->\n<div id=\"element-container\">\n  <table>\n    \n  </table>\n</div>",
+    "hints": [
+      "Nest <colgroup></colgroup> inside table before rows."
+    ],
+    "validation": {
+      "checkType": "html",
+      "testCases": [
+        {
+          "description": "Should contain colgroup tag",
+          "testRegex": "<colgroup[\\s>]"
+        }
+      ]
+    }
+  },
+  {
+    "id": "html5-58",
+    "level": 58,
+    "levelId": 58,
+    "tier": "Mage",
+    "title": "Column Track Styling",
+    "conceptText": "### 1. The Concept (The \"Why\")\nInside a `<colgroup>`, the self-closing `<col>` tag specifies properties (like background color or span) for individual vertical column tracks.",
+    "codeExample": "```html\n<colgroup>\n  <col span=\"2\" class=\"highlight\" />\n</colgroup>\n```",
+    "missionText": "### 2. Your Mission\nCreate a col group with an explicit self-closing `<col>` element inside the table inside the container.",
+    "starterCode": "<!-- Level 58 -->\n<div id=\"element-container\">\n  <table>\n    \n  </table>\n</div>",
+    "hints": [
+      "Write <colgroup><col /></colgroup> inside the table."
+    ],
+    "validation": {
+      "checkType": "html",
+      "testCases": [
+        {
+          "description": "Should contain colgroup with col tag inside",
+          "testRegex": "<colgroup>\\s*<col\\s*/?>\\s*</colgroup>"
+        }
+      ]
+    }
+  },
+  {
+    "id": "html5-59",
+    "level": 59,
+    "levelId": 59,
+    "tier": "Mage",
+    "title": "Complex Structure",
+    "conceptText": "### 1. The Concept (The \"Why\")\nLet's assemble a complete semantically divided table using `<caption>`, `<thead>`, `<tbody>`, and `<tfoot>` in order.",
+    "codeExample": "```html\n<table>\n  <caption>Info</caption>\n  <thead>...</thead>\n  <tbody>...</tbody>\n  <tfoot>...</tfoot>\n</table>\n```",
+    "missionText": "### 2. Your Mission\nWrite a structured table complete with caption, thead, tbody, and tfoot blocks in order inside the container.",
+    "starterCode": "<!-- Level 59 -->\n<div id=\"element-container\">\n  \n</div>",
+    "hints": [
+      "Verify the tags caption, thead, tbody, and tfoot exist and close cleanly in order inside table."
+    ],
+    "validation": {
+      "checkType": "html",
+      "testCases": [
+        {
+          "description": "Should contain caption, thead, tbody, and tfoot elements structured in correct order inside table",
+          "testRegex": "<table>\\s*<caption>.*</caption>\\s*<thead>.*</thead>\\s*<tbody>.*</tbody>\\s*<tfoot>.*</tfoot>\\s*</table>"
+        }
+      ]
+    }
+  },
+  {
+    "id": "html5-60",
+    "level": 60,
+    "levelId": 60,
+    "tier": "Mage",
+    "title": "Structural Data Review",
+    "conceptText": "### 1. The Concept (The \"Why\")\nReview data architecture table structures by combining cell spanning and layout divisions.",
+    "codeExample": "```html\n<tr>\n  <td colspan=\"2\">Total</td>\n</tr>\n```",
+    "missionText": "### 2. Your Mission\nCreate a complete 2-column billing table showing headers (Product, Price), 1 product item row (Widget, $50), and a footer row total utilizing a colspan of 2 (Total: $50) inside the container.",
+    "starterCode": "<!-- Level 60 -->\n<div id=\"element-container\">\n  \n</div>",
+    "hints": [
+      "Nest the rows within details, using th for headers, td for data, and tfoot td with colspan='2' for the total."
+    ],
+    "validation": {
+      "checkType": "html",
+      "testCases": [
+        {
+          "description": "Should structure 2-column table with product row and total colspan row",
+          "testRegex": "<table>\\s*<thead>\\s*<tr>\\s*<th>\\s*Product\\s*</th>\\s*<th>\\s*Price\\s*</th>\\s*</tr>\\s*</thead>\\s*<tbody>\\s*<tr>\\s*<td>\\s*Widget\\s*</td>\\s*<td>\\s*\\$50\\s*</td>\\s*</tr>\\s*</tbody>\\s*<tfoot>\\s*<tr>\\s*<td\\s+colspan=[\"']2[\"']>\\s*Total:\\s*\\$50\\s*</td>\\s*</tr>\\s*</tfoot>\\s*</table>"
+        }
+      ]
+    }
+  },
+  {
+    "id": "html5-61",
+    "level": 61,
+    "levelId": 61,
+    "tier": "Mage",
+    "title": "Form Container",
+    "conceptText": "### 1. The Concept (The \"Why\")\nThe `<form>` element acts as a container block to collect and structure interactive user input fields before submitting them to a server.",
+    "codeExample": "```html\n<form>\n  <!-- inputs -->\n</form>\n```",
+    "missionText": "### 2. Your Mission\nOpen and close a basic form container tag inside the container.",
+    "starterCode": "<!-- Level 61 -->\n<div id=\"element-container\">\n  \n</div>",
+    "hints": [
+      "Write <form></form>."
+    ],
+    "validation": {
+      "checkType": "html",
+      "testCases": [
+        {
+          "description": "Should contain form tag",
+          "testRegex": "<form>\\s*</form>"
+        }
+      ]
+    }
+  },
+  {
+    "id": "html5-62",
+    "level": 62,
+    "levelId": 62,
+    "tier": "Mage",
+    "title": "Text Inputs",
+    "conceptText": "### 1. The Concept (The \"Why\")\nThe `<input type=\"text\">` field creates a single-line text box for capture of standard string names or usernames.",
+    "codeExample": "```html\n<input type=\"text\" />\n```",
+    "missionText": "### 2. Your Mission\nCreate a standard text input field inside a form inside the container.",
+    "starterCode": "<!-- Level 62 -->\n<div id=\"element-container\">\n  <form>\n    \n  </form>\n</div>",
+    "hints": [
+      "Use <input type=\"text\" />."
+    ],
+    "validation": {
+      "checkType": "html",
+      "testCases": [
+        {
+          "description": "Should contain text input tag",
+          "testRegex": "<input\\s+[^>]*type=[\"']text[\"']\\s*/?>"
+        }
+      ]
+    }
+  },
+  {
+    "id": "html5-63",
+    "level": 63,
+    "levelId": 63,
+    "tier": "Mage",
+    "title": "Input Placeholders",
+    "conceptText": "### 1. The Concept (The \"Why\")\nThe `placeholder` attribute specifies a short hint that describes the expected value of an input field, disappearing once typing begins.",
+    "codeExample": "```html\n<input type=\"text\" placeholder=\"Your name\" />\n```",
+    "missionText": "### 2. Your Mission\nAdd a placeholder saying \"Enter username...\" to a text input inside the container.",
+    "starterCode": "<!-- Level 63 -->\n<div id=\"element-container\">\n  <input type=\"text\" />\n</div>",
+    "hints": [
+      "Add placeholder=\"Enter username...\" inside the input element."
+    ],
+    "validation": {
+      "checkType": "html",
+      "testCases": [
+        {
+          "description": "Should set placeholder text to 'Enter username...'",
+          "testRegex": "placeholder=[\"']Enter\\s+username\\.\\.\\.[\"']"
+        }
+      ]
+    }
+  },
+  {
+    "id": "html5-64",
+    "level": 64,
+    "levelId": 64,
+    "tier": "Mage",
+    "title": "Input Labels",
+    "conceptText": "### 1. The Concept (The \"Why\")\nThe `<label>` tag defines text descriptions for fields. Connecting them using matching `for` and `id` attributes links the label text to the input field, enhancing accessibility.",
+    "codeExample": "```html\n<label for=\"name\">Name</label>\n<input type=\"text\" id=\"name\" />\n```",
+    "missionText": "### 2. Your Mission\nCreate a label text \"Username:\" bound securely to a text input using id=\"user\" inside the container.",
+    "starterCode": "<!-- Level 64 -->\n<div id=\"element-container\">\n  \n</div>",
+    "hints": [
+      "Use <label for=\"user\">Username:</label> and <input type=\"text\" id=\"user\" />."
+    ],
+    "validation": {
+      "checkType": "html",
+      "testCases": [
+        {
+          "description": "Should contain label with for='user' and matching input id",
+          "testRegex": "<label\\s+for=[\"']user[\"']>\\s*Username:\\s*</label>\\s*<input\\s+[^>]*id=[\"']user[\"']"
+        }
+      ]
+    }
+  },
+  {
+    "id": "html5-65",
+    "level": 65,
+    "levelId": 65,
+    "tier": "Mage",
+    "title": "Password Input Masking",
+    "conceptText": "### 1. The Concept (The \"Why\")\nThe `<input type=\"password\">` obscures text characters automatically, securing passwords during entry.",
+    "codeExample": "```html\n<input type=\"password\" id=\"pass\" />\n```",
+    "missionText": "### 2. Your Mission\nCreate a password entry field with id=\"pwd\" and an attached label container with text \"Password:\" inside the container.",
+    "starterCode": "<!-- Level 65 -->\n<div id=\"element-container\">\n  \n</div>",
+    "hints": [
+      "Use <label for=\"pwd\">Password:</label> and <input type=\"password\" id=\"pwd\" />."
+    ],
+    "validation": {
+      "checkType": "html",
+      "testCases": [
+        {
+          "description": "Should connect label and password input correctly",
+          "testRegex": "<label\\s+for=[\"']pwd[\"']>\\s*Password:\\s*</label>\\s*<input\\s+[^>]*type=[\"']password[\"'][^>]*id=[\"']pwd[\"']"
+        }
+      ]
+    }
+  },
+  {
+    "id": "html5-66",
+    "level": 66,
+    "levelId": 66,
+    "tier": "Mage",
+    "title": "Form Action Buttons",
+    "conceptText": "### 1. The Concept (The \"Why\")\nThe `<button type=\"submit\">` tag submits form inputs to the destination server handler when clicked.",
+    "codeExample": "```html\n<button type=\"submit\">Submit</button>\n```",
+    "missionText": "### 2. Your Mission\nCreate a form button displaying the explicit text \"Register Now\" inside a form inside the container.",
+    "starterCode": "<!-- Level 66 -->\n<div id=\"element-container\">\n  <form>\n    \n  </form>\n</div>",
+    "hints": [
+      "Write <button type=\"submit\">Register Now</button>."
+    ],
+    "validation": {
+      "checkType": "html",
+      "testCases": [
+        {
+          "description": "Should contain button of submit type with text Register Now",
+          "testRegex": "<button\\s+type=[\"']submit[\"']>\\s*Register\\s+Now\\s*</button>"
+        }
+      ]
+    }
+  },
+  {
+    "id": "html5-67",
+    "level": 67,
+    "levelId": 67,
+    "tier": "Mage",
+    "title": "Radio Single-Select",
+    "conceptText": "### 1. The Concept (The \"Why\")\nRadio buttons (`<input type=\"radio\">`) let users choose exactly one option from a group. They must share the same `name` attribute to restrict selection to a single option.",
+    "codeExample": "```html\n<input type=\"radio\" name=\"opt\" value=\"A\" />\n<input type=\"radio\" name=\"opt\" value=\"B\" />\n```",
+    "missionText": "### 2. Your Mission\nCreate two radio buttons for choices \"Yes\" and \"No\" sharing the name \"agree\" inside the container.",
+    "starterCode": "<!-- Level 67 -->\n<div id=\"element-container\">\n  \n</div>",
+    "hints": [
+      "Create <input type=\"radio\" name=\"agree\" value=\"yes\" /> and <input type=\"radio\" name=\"agree\" value=\"no\" />."
+    ],
+    "validation": {
+      "checkType": "html",
+      "testCases": [
+        {
+          "description": "Should contain two radio inputs with name agree",
+          "testRegex": "(<input\\s+[^>]*type=[\"']radio[\"'][^>]*name=[\"']agree[\"'][^>]*>\\s*.*\\s*){2}"
+        }
+      ]
+    }
+  },
+  {
+    "id": "html5-68",
+    "level": 68,
+    "levelId": 68,
+    "tier": "Mage",
+    "title": "Checkbox Selects",
+    "conceptText": "### 1. The Concept (The \"Why\")\nCheckboxes (`<input type=\"checkbox\">`) allow users to select multiple options or toggle single settings (like opt-ins).",
+    "codeExample": "```html\n<input type=\"checkbox\" id=\"terms\" />\n<label for=\"terms\">Accept terms</label>\n```",
+    "missionText": "### 2. Your Mission\nCreate a checkbox input bound to a label showing \"Subscribe to newsletter\" (use id=\"sub\") inside the container.",
+    "starterCode": "<!-- Level 68 -->\n<div id=\"element-container\">\n  \n</div>",
+    "hints": [
+      "Connect checkbox input (id=\"sub\") and label (for=\"sub\")."
+    ],
+    "validation": {
+      "checkType": "html",
+      "testCases": [
+        {
+          "description": "Should connect label and checkbox input for newsletter",
+          "testRegex": "<input\\s+[^>]*type=[\"']checkbox[\"'][^>]*id=[\"']sub[\"']>\\s*<label\\s+for=[\"']sub[\"']>\\s*Subscribe\\s+to\\s+newsletter\\s*</label>"
+        }
+      ]
+    }
+  },
+  {
+    "id": "html5-69",
+    "level": 69,
+    "levelId": 69,
+    "tier": "Mage",
+    "title": "Text Areas",
+    "conceptText": "### 1. The Concept (The \"Why\")\nThe `<textarea>` tag defines a multi-line text input block, suitable for long descriptions, comments, or bios.",
+    "codeExample": "```html\n<textarea rows=\"5\" cols=\"30\">Preset text</textarea>\n```",
+    "missionText": "### 2. Your Mission\nCreate a multi-line text input block with 4 rows for a user \"Bio\" inside the container. Set its rows attribute to 4 and id=\"bio\".",
+    "starterCode": "<!-- Level 69 -->\n<div id=\"element-container\">\n  \n</div>",
+    "hints": [
+      "Use <textarea rows=\"4\" id=\"bio\"></textarea>."
+    ],
+    "validation": {
+      "checkType": "html",
+      "testCases": [
+        {
+          "description": "Should contain textarea with rows='4' and id='bio'",
+          "testRegex": "<textarea\\s+[^>]*rows=[\"']4[\"'][^>]*id=[\"']bio[\"']"
+        }
+      ]
+    }
+  },
+  {
+    "id": "html5-70",
+    "level": 70,
+    "levelId": 70,
+    "tier": "Mage",
+    "title": "Dropdown Selectors",
+    "conceptText": "### 1. The Concept (The \"Why\")\nThe `<select>` element creates a dropdown list containing selectable `<option>` menu items.",
+    "codeExample": "```html\n<select>\n  <option value=\"1\">Option One</option>\n</select>\n```",
+    "missionText": "### 2. Your Mission\nCreate a dropdown menu listing two options: \"Admin\" and \"User\" inside the container.",
+    "starterCode": "<!-- Level 70 -->\n<div id=\"element-container\">\n  \n</div>",
+    "hints": [
+      "Create <select> enclosing two <option> tags."
+    ],
+    "validation": {
+      "checkType": "html",
+      "testCases": [
+        {
+          "description": "Should contain select with two options Admin and User",
+          "testRegex": "<select>\\s*(<option[^>]*>\\s*(Admin|User)\\s*</option>\\s*){2}</select>"
+        }
+      ]
+    }
+  },
+  {
+    "id": "html5-71",
+    "level": 71,
+    "levelId": 71,
+    "tier": "Mage",
+    "title": "Option Grouping",
+    "conceptText": "### 1. The Concept (The \"Why\")\nThe `<optgroup>` tag groups related choices in dropdown selectors, separating options under descriptive headings.",
+    "codeExample": "```html\n<select>\n  <optgroup label=\"Fruit\">\n    <option>Apple</option>\n  </optgroup>\n</select>\n```",
+    "missionText": "### 2. Your Mission\nGroup dropdown choices under an optgroup labeled \"Vehicles\" inside a select block inside the container.",
+    "starterCode": "<!-- Level 71 -->\n<div id=\"element-container\">\n  <select>\n    \n  </select>\n</div>",
+    "hints": [
+      "Nest <optgroup label=\"Vehicles\"><option>Car</option></optgroup> inside select."
+    ],
+    "validation": {
+      "checkType": "html",
+      "testCases": [
+        {
+          "description": "Should contain optgroup with label Vehicles",
+          "testRegex": "<optgroup\\s+label=[\"']Vehicles[\"']>"
+        }
+      ]
+    }
+  },
+  {
+    "id": "html5-72",
+    "level": 72,
+    "levelId": 72,
+    "tier": "Mage",
+    "title": "File Upload Fields",
+    "conceptText": "### 1. The Concept (The \"Why\")\nThe `<input type=\"file\">` field lets users select and attach files from their local system storage for upload.",
+    "codeExample": "```html\n<input type=\"file\" />\n```",
+    "missionText": "### 2. Your Mission\nCreate an input field tailored explicitly for loading up image assets inside the container. (Use accept=\"image/*\" or similar target properties if desired, but prioritize type=\"file\").",
+    "starterCode": "<!-- Level 72 -->\n<div id=\"element-container\">\n  \n</div>",
+    "hints": [
+      "Write <input type=\"file\" />."
+    ],
+    "validation": {
+      "checkType": "html",
+      "testCases": [
+        {
+          "description": "Should contain file type input",
+          "testRegex": "<input\\s+[^>]*type=[\"']file[\"']"
+        }
+      ]
+    }
+  },
+  {
+    "id": "html5-73",
+    "level": 73,
+    "levelId": 73,
+    "tier": "Mage",
+    "title": "Hidden Form State",
+    "conceptText": "### 1. The Concept (The \"Why\")\nThe `<input type=\"hidden\">` field stores backend state tokens or user IDs that are completely hidden from the visual interface.",
+    "codeExample": "```html\n<input type=\"hidden\" name=\"token\" value=\"abc\" />\n```",
+    "missionText": "### 2. Your Mission\nCreate a hidden token field with name=\"userID\" value=\"123\" inside the container.",
+    "starterCode": "<!-- Level 73 -->\n<div id=\"element-container\">\n  \n</div>",
+    "hints": [
+      "Use <input type=\"hidden\" name=\"userID\" value=\"123\" />."
+    ],
+    "validation": {
+      "checkType": "html",
+      "testCases": [
+        {
+          "description": "Should contain hidden type input with name userID and value 123",
+          "testRegex": "<input\\s+[^>]*type=[\"']hidden[\"'][^>]*name=[\"']userID[\"'][^>]*value=[\"']123[\"']"
+        }
+      ]
+    }
+  },
+  {
+    "id": "html5-74",
+    "level": 74,
+    "levelId": 74,
+    "tier": "Mage",
+    "title": "Field Enforcement",
+    "conceptText": "### 1. The Concept (The \"Why\")\nThe `required` boolean attribute stops users from submitting a form if the field is empty, enforcing data validation in the browser.",
+    "codeExample": "```html\n<input type=\"text\" required />\n```",
+    "missionText": "### 2. Your Mission\nCreate an email type input field flagged as absolutely required inside the container.",
+    "starterCode": "<!-- Level 74 -->\n<div id=\"element-container\">\n  \n</div>",
+    "hints": [
+      "Use <input type=\"email\" required />."
+    ],
+    "validation": {
+      "checkType": "html",
+      "testCases": [
+        {
+          "description": "Should contain email input flagged as required",
+          "testRegex": "<input\\s+[^>]*type=[\"']email[\"'][^>]*required"
+        }
+      ]
+    }
+  },
+  {
+    "id": "html5-75",
+    "level": 75,
+    "levelId": 75,
+    "tier": "Mage",
+    "title": "Input Boundary Validation",
+    "conceptText": "### 1. The Concept (The \"Why\")\nAttributes like `min`, `max`, and `maxlength` restrict numeric ranges or text string lengths in form fields.",
+    "codeExample": "```html\n<input type=\"number\" min=\"1\" max=\"100\" />\n```",
+    "missionText": "### 2. Your Mission\nCreate a number field restricting inputs strictly between 1 and 10 inside the container.",
+    "starterCode": "<!-- Level 75 -->\n<div id=\"element-container\">\n  \n</div>",
+    "hints": [
+      "Use <input type=\"number\" min=\"1\" max=\"10\" />."
+    ],
+    "validation": {
+      "checkType": "html",
+      "testCases": [
+        {
+          "description": "Should contain number input with min 1 and max 10",
+          "testRegex": "<input\\s+[^>]*type=[\"']number[\"'][^>]*min=[\"']1[\"'][^>]*max=[\"']10[\"']"
+        }
+      ]
+    }
+  },
+  {
+    "id": "html5-76",
+    "level": 76,
+    "levelId": 76,
+    "tier": "Mage",
+    "title": "Page Headers",
+    "conceptText": "### 1. The Concept (The \"Why\")\nThe `<header>` semantic element designates introductory container space, wrapping logos, site names, navigation bars, or header tags.",
+    "codeExample": "```html\n<header>\n  <h1>My Site</h1>\n</header>\n```",
+    "missionText": "### 2. Your Mission\nCreate a top header block containing your site's main h1 title (Welcome to Portfolio) inside the container.",
+    "starterCode": "<!-- Level 76 -->\n<div id=\"element-container\">\n  \n</div>",
+    "hints": [
+      "Nest <h1>Welcome to Portfolio</h1> inside <header></header>."
+    ],
+    "validation": {
+      "checkType": "html",
+      "testCases": [
+        {
+          "description": "Should contain header tag enclosing h1 heading",
+          "testRegex": "<header>\\s*<h1[\\s>].*Welcome.*</h1>\\s*</header>"
+        }
+      ]
+    }
+  },
+  {
+    "id": "html5-77",
+    "level": 77,
+    "levelId": 77,
+    "tier": "Mage",
+    "title": "Navigation Areas",
+    "conceptText": "### 1. The Concept (The \"Why\")\nThe `<nav>` semantic tag isolates menu links, outlining structural pathways throughout site directories.",
+    "codeExample": "```html\n<nav>\n  <a href=\"/\">Home</a>\n  <a href=\"/about\">About</a>\n</nav>\n```",
+    "missionText": "### 2. Your Mission\nWrap a list of three menu anchor links neatly inside a nav element inside the container.",
+    "starterCode": "<!-- Level 77 -->\n<div id=\"element-container\">\n  \n</div>",
+    "hints": [
+      "Nest three anchor links (e.g. Home, Portfolio, Contact) inside <nav></nav>."
+    ],
+    "validation": {
+      "checkType": "html",
+      "testCases": [
+        {
+          "description": "Should contain nav tag enclosing three anchor links",
+          "testRegex": "<nav>\\s*(<a\\s+[^>]*>.*</a>\\s*){3}</nav>"
+        }
+      ]
+    }
+  },
+  {
+    "id": "html5-78",
+    "level": 78,
+    "levelId": 78,
+    "tier": "Mage",
+    "title": "Main Body Content",
+    "conceptText": "### 1. The Concept (The \"Why\")\nThe `<main>` semantic container isolates the single, primary core topic unique to this active web document view. There should only be one `<main>` element per page.",
+    "codeExample": "```html\n<main>\n  <p>Primary page content goes here.</p>\n</main>\n```",
+    "missionText": "### 2. Your Mission\nEstablish the single primary `<main></main>` body track block inside the container.",
+    "starterCode": "<!-- Level 78 -->\n<div id=\"element-container\">\n  \n</div>",
+    "hints": [
+      "Write <main></main> inside the container."
+    ],
+    "validation": {
+      "checkType": "html",
+      "testCases": [
+        {
+          "description": "Should contain main tag",
+          "testRegex": "<main>\\s*</main>"
+        }
+      ]
+    }
+  },
+  {
+    "id": "html5-79",
+    "level": 79,
+    "levelId": 79,
+    "tier": "Mage",
+    "title": "Theme Sections",
+    "conceptText": "### 1. The Concept (The \"Why\")\nThe `<section>` element groups related thematic elements together (such as chapters, tabs, or introduction sections), typically containing a heading tag.",
+    "codeExample": "```html\n<section>\n  <h2>Services</h2>\n  <p>We build websites.</p>\n</section>\n```",
+    "missionText": "### 2. Your Mission\nCreate a section element housing an h2 titled \"Our Services\" inside the container.",
+    "starterCode": "<!-- Level 79 -->\n<div id=\"element-container\">\n  \n</div>",
+    "hints": [
+      "Nest <h2>Our Services</h2> inside <section></section>."
+    ],
+    "validation": {
+      "checkType": "html",
+      "testCases": [
+        {
+          "description": "Should contain section with h2 titled Our Services",
+          "testRegex": "<section>\\s*<h2>\\s*Our\\s+Services\\s*</h2>\\s*</section>"
+        }
+      ]
+    }
+  },
+  {
+    "id": "html5-80",
+    "level": 80,
+    "levelId": 80,
+    "tier": "Mage",
+    "title": "Articles",
+    "conceptText": "### 1. The Concept (The \"Why\")\nThe `<article>` tag encapsulates fully independent, self-contained layout blocks intended for independent syndication (e.g. blog posts, forum replies, news stories).",
+    "codeExample": "```html\n<article>\n  <h2>News Title</h2>\n  <p>Story description text.</p>\n</article>\n```",
+    "missionText": "### 2. Your Mission\nCreate an article block wrapping a title (h2) and paragraph blog post inside the container.",
+    "starterCode": "<!-- Level 80 -->\n<div id=\"element-container\">\n  \n</div>",
+    "hints": [
+      "Nest an <h2> heading and <p> paragraph inside <article></article>."
+    ],
+    "validation": {
+      "checkType": "html",
+      "testCases": [
+        {
+          "description": "Should contain article tag wrapping h2 and p tags",
+          "testRegex": "<article>\\s*<h2[\\s>].*</h2>\\s*<p[\\s>].*</p>\\s*</article>"
+        }
+      ]
+    }
+  },
+  {
+    "id": "html5-81",
+    "level": 81,
+    "levelId": 81,
+    "tier": "Mage",
+    "title": "Sidebars & Callouts",
+    "conceptText": "### 1. The Concept (The \"Why\")\nThe `<aside>` semantic element groups auxiliary sidebar links, callout quote details, or advertisement blocks tangential to the primary main layout stream.",
+    "codeExample": "```html\n<aside>\n  <h4>Quick Links</h4>\n  <p>Related pages.</p>\n</aside>\n```",
+    "missionText": "### 2. Your Mission\nCreate an aside box displaying \"Related Links\" inside the container.",
+    "starterCode": "<!-- Level 81 -->\n<div id=\"element-container\">\n  \n</div>",
+    "hints": [
+      "Write <aside>Related Links</aside>."
+    ],
+    "validation": {
+      "checkType": "html",
+      "testCases": [
+        {
+          "description": "Should contain aside tag",
+          "testRegex": "<aside>\\s*Related\\s+Links\\s*</aside>"
+        }
+      ]
+    }
+  },
+  {
+    "id": "html5-82",
+    "level": 82,
+    "levelId": 82,
+    "tier": "Mage",
+    "title": "Page Footers",
+    "conceptText": "### 1. The Concept (The \"Why\")\nThe `<footer>` semantic element bounds copyright warnings, terms of use links, address blocks, and metadata at the bottom of pages.",
+    "codeExample": "```html\n<footer>\n  <p>&copy; 2026 Developer</p>\n</footer>\n```",
+    "missionText": "### 2. Your Mission\nCreate a site footer containing a copyright notice paragraph inside the container.",
+    "starterCode": "<!-- Level 82 -->\n<div id=\"element-container\">\n  \n</div>",
+    "hints": [
+      "Nest <p>&copy; 2026</p> or similar notice inside <footer></footer>."
+    ],
+    "validation": {
+      "checkType": "html",
+      "testCases": [
+        {
+          "description": "Should contain footer tag wrapping paragraph",
+          "testRegex": "<footer>\\s*<p>.*</p>\\s*</footer>"
+        }
+      ]
+    }
+  },
+  {
+    "id": "html5-83",
+    "level": 83,
+    "levelId": 83,
+    "tier": "Mage",
+    "title": "Generic Block Divs",
+    "conceptText": "### 1. The Concept (The \"Why\")\nThe `<div>` (division) is a generic block container tag. It has no semantic meaning but is used to group items for layout styling.",
+    "codeExample": "```html\n<div class=\"box\">\n  <p>Inside box</p>\n</div>\n```",
+    "missionText": "### 2. Your Mission\nWrap two paragraphs inside a generic division container inside the container.",
+    "starterCode": "<!-- Level 83 -->\n<div id=\"element-container\">\n  \n</div>",
+    "hints": [
+      "Create a <div> block enclosing two separate <p> paragraphs."
+    ],
+    "validation": {
+      "checkType": "html",
+      "testCases": [
+        {
+          "description": "Should contain div wrapping two paragraphs",
+          "testRegex": "<div>\\s*(<p>.*</p>\\s*){2}</div>"
+        }
+      ]
+    }
+  },
+  {
+    "id": "html5-84",
+    "level": 84,
+    "levelId": 84,
+    "tier": "Mage",
+    "title": "Generic Inline Spans",
+    "conceptText": "### 1. The Concept (The \"Why\")\nThe `<span>` element is a generic inline container used to style small sections of text or word fragments without starting a new line.",
+    "codeExample": "```html\n<p>This is <span class=\"highlight\">colored</span> text.</p>\n```",
+    "missionText": "### 2. Your Mission\nWrap a single word inside a paragraph with a span tag inside the container.",
+    "starterCode": "<!-- Level 84 -->\n<div id=\"element-container\">\n  <p>Wrap the middle word inside a span tag.</p>\n</div>",
+    "hints": [
+      "Select 'middle' or another word, and wrap it in <span>middle</span>."
+    ],
+    "validation": {
+      "checkType": "html",
+      "testCases": [
+        {
+          "description": "Should contain a span tag within a paragraph",
+          "testRegex": "<p>.*<span>.*</span>.*</p>"
+        }
+      ]
+    }
+  },
+  {
+    "id": "html5-85",
+    "level": 85,
+    "levelId": 85,
+    "tier": "Mage",
+    "title": "Audio Embeds",
+    "conceptText": "### 1. The Concept (The \"Why\")\nThe `<audio>` element embeds sound files. The `controls` attribute displays play/pause controls in the browser.",
+    "codeExample": "```html\n<audio src=\"song.mp3\" controls></audio>\n```",
+    "missionText": "### 2. Your Mission\nEmbed an audio track sourcing \"podcast.mp3\" showing user control buttons inside the container.",
+    "starterCode": "<!-- Level 85 -->\n<div id=\"element-container\">\n  \n</div>",
+    "hints": [
+      "Use <audio src=\"podcast.mp3\" controls></audio>."
+    ],
+    "validation": {
+      "checkType": "html",
+      "testCases": [
+        {
+          "description": "Should contain audio tag with src podcast.mp3 and controls attribute",
+          "testRegex": "<audio\\s+[^>]*src=[\"']podcast\\.mp3[\"'][^>]*controls"
+        }
+      ]
+    }
+  },
+  {
+    "id": "html5-86",
+    "level": 86,
+    "levelId": 86,
+    "tier": "Mage",
+    "title": "Video Elements",
+    "conceptText": "### 1. The Concept (The \"Why\")\nThe `<video>` element embeds movie clips. We can configure size boundary options and include standard play controls.",
+    "codeExample": "```html\n<video src=\"clip.mp4\" width=\"320\" height=\"240\" controls></video>\n```",
+    "missionText": "### 2. Your Mission\nEmbed a movie asset sourcing \"clip.mp4\" displaying user control options inside the container.",
+    "starterCode": "<!-- Level 86 -->\n<div id=\"element-container\">\n  \n</div>",
+    "hints": [
+      "Use <video src=\"clip.mp4\" controls></video>."
+    ],
+    "validation": {
+      "checkType": "html",
+      "testCases": [
+        {
+          "description": "Should contain video tag with src clip.mp4 and controls attribute",
+          "testRegex": "<video\\s+[^>]*src=[\"']clip\\.mp4[\"'][^>]*controls"
+        }
+      ]
+    }
+  },
+  {
+    "id": "html5-87",
+    "level": 87,
+    "levelId": 87,
+    "tier": "Mage",
+    "title": "Media Subtitles",
+    "conceptText": "### 1. The Concept (The \"Why\")\nThe `<track>` tag nests inside `<video>` or `<audio>` elements to map WebVTT subtitle track files to playback media, facilitating accessibility.",
+    "codeExample": "```html\n<video src=\"clip.mp4\" controls>\n  <track src=\"subs.vtt\" kind=\"subtitles\" srclang=\"en\" label=\"English\" />\n</video>\n```",
+    "missionText": "### 2. Your Mission\nNest a subtitles track sourcing \"sub.vtt\" directly inside a video container inside the container.",
+    "starterCode": "<!-- Level 87 -->\n<div id=\"element-container\">\n  <video src=\"clip.mp4\" controls>\n    \n  </video>\n</div>",
+    "hints": [
+      "Add <track src=\"sub.vtt\" kind=\"subtitles\" srclang=\"en\" label=\"English\" /> inside video."
+    ],
+    "validation": {
+      "checkType": "html",
+      "testCases": [
+        {
+          "description": "Should contain track tag with src sub.vtt and kind subtitles",
+          "testRegex": "<track\\s+[^>]*src=[\"']sub\\.vtt[\"'][^>]*kind=[\"']subtitles[\"']"
+        }
+      ]
+    }
+  },
+  {
+    "id": "html5-88",
+    "level": 88,
+    "levelId": 88,
+    "tier": "Mage",
+    "title": "Inline Frames",
+    "conceptText": "### 1. The Concept (The \"Why\")\nAn `<iframe>` (inline frame) nests another web document inside the active page view.",
+    "codeExample": "```html\n<iframe src=\"https://example.com\" width=\"400\" height=\"300\"></iframe>\n```",
+    "missionText": "### 2. Your Mission\nEmbed an iframe pointing out to \"https://example.com\" inside the container.",
+    "starterCode": "<!-- Level 88 -->\n<div id=\"element-container\">\n  \n</div>",
+    "hints": [
+      "Use <iframe src=\"https://example.com\"></iframe>."
+    ],
+    "validation": {
+      "checkType": "html",
+      "testCases": [
+        {
+          "description": "Should contain iframe tag with src pointing to example.com",
+          "testRegex": "<iframe\\s+[^>]*src=[\"']https://example\\.com[\"']"
+        }
+      ]
+    }
+  },
+  {
+    "id": "html5-89",
+    "level": 89,
+    "levelId": 89,
+    "tier": "Mage",
+    "title": "Interactive Details",
+    "conceptText": "### 1. The Concept (The \"Why\")\nThe `<details>` tag builds native accordion folders that open on user mouse clicks. The `<summary>` tag specifies the visible toggle handle.",
+    "codeExample": "```html\n<details>\n  <summary>Click here</summary>\n  <p>Hidden content revealed!</p>\n</details>\n```",
+    "missionText": "### 2. Your Mission\nCreate an FAQ block where clicking \"View Answer\" expands hidden text inside the container.",
+    "starterCode": "<!-- Level 89 -->\n<div id=\"element-container\">\n  \n</div>",
+    "hints": [
+      "Nest <summary>View Answer</summary> and some paragraph text inside a <details> container."
+    ],
+    "validation": {
+      "checkType": "html",
+      "testCases": [
+        {
+          "description": "Should contain details and summary tags with View Answer text",
+          "testRegex": "<details>\\s*<summary>\\s*View\\s+Answer\\s*</summary>\\s*.*\\s*</details>"
+        }
+      ]
+    }
+  },
+  {
+    "id": "html5-90",
+    "level": 90,
+    "levelId": 90,
+    "tier": "Mage",
+    "title": "Semantic Layout Compilation",
+    "conceptText": "### 1. The Concept (The \"Why\")\nLet's assemble a complete, organized layout combining header, navigation, main sections, and footers in logical order.",
+    "codeExample": "```html\n<header>Header</header>\n<nav>Menu</nav>\n<main>Main Body</main>\n<footer>Footer</footer>\n```",
+    "missionText": "### 2. Your Mission\nBuild a semantic architecture arranging a header, nav, main (with nested section), and footer in order inside the container.",
+    "starterCode": "<!-- Level 90 -->\n<div id=\"element-container\">\n  \n</div>",
+    "hints": [
+      "Place header, nav, main, and footer blocks sequentially. Nest section inside main."
+    ],
+    "validation": {
+      "checkType": "html",
+      "testCases": [
+        {
+          "description": "Should arrange layout tags sequentially in order",
+          "testRegex": "<header>.*</header>\\s*<nav>.*</nav>\\s*<main>\\s*<section>.*</section>\\s*</main>\\s*<footer>.*</footer>"
+        }
+      ]
+    }
+  },
+  {
+    "id": "html5-91",
+    "level": 91,
+    "levelId": 91,
+    "tier": "Mage",
+    "title": "Charset Meta",
+    "conceptText": "### 1. The Concept (The \"Why\")\nThe `<meta charset=\"UTF-8\">` declaration inside the `<head>` is critical to instruct browsers to decode page text characters using international UTF-8 encoding standard rules.",
+    "codeExample": "```html\n<head>\n  <meta charset=\"UTF-8\" />\n</head>\n```",
+    "missionText": "### 2. Your Mission\nAdd a meta tag declaring UTF-8 encoding inside a document head inside the container.",
+    "starterCode": "<!-- Level 91 -->\n<div id=\"element-container\">\n  <head>\n    \n  </head>\n</div>",
+    "hints": [
+      "Use <meta charset=\"UTF-8\" />."
+    ],
+    "validation": {
+      "checkType": "html",
+      "testCases": [
+        {
+          "description": "Should contain meta charset tag inside head",
+          "testRegex": "<head>\\s*<meta\\s+charset=[\"']UTF-8[\"']\\s*/?>\\s*</head>"
+        }
+      ]
+    }
+  },
+  {
+    "id": "html5-92",
+    "level": 92,
+    "levelId": 92,
+    "tier": "Mage",
+    "title": "Viewport Optimization",
+    "conceptText": "### 1. The Concept (The \"Why\")\nThe responsive viewport meta tag ensures page layouts scale correctly on mobile devices by mapping the layout size to the screen width.",
+    "codeExample": "```html\n<meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\" />\n```",
+    "missionText": "### 2. Your Mission\nWrite the standard meta tag for viewport scale optimization inside a head block inside the container.",
+    "starterCode": "<!-- Level 92 -->\n<div id=\"element-container\">\n  <head>\n    \n  </head>\n</div>",
+    "hints": [
+      "Add <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\" />."
+    ],
+    "validation": {
+      "checkType": "html",
+      "testCases": [
+        {
+          "description": "Should contain standard viewport meta tag inside head",
+          "testRegex": "<meta\\s+name=[\"']viewport[\"']\\s+content=[\"']width=device-width,\\s*initial-scale=1\\.0[\"']"
+        }
+      ]
+    }
+  },
+  {
+    "id": "html5-93",
+    "level": 93,
+    "levelId": 93,
+    "tier": "Mage",
+    "title": "Search Descriptions",
+    "conceptText": "### 1. The Concept (The \"Why\")\nThe `<meta name=\"description\">` tag provides page summary blurbs displayed under link titles in search engine result list pages.",
+    "codeExample": "```html\n<meta name=\"description\" content=\"Detailed page description.\" />\n```",
+    "missionText": "### 2. Your Mission\nAdd a meta description tag stating \"Professional web developer portfolio\" inside the container.",
+    "starterCode": "<!-- Level 93 -->\n<div id=\"element-container\">\n  <head>\n    \n  </head>\n</div>",
+    "hints": [
+      "Use <meta name=\"description\" content=\"Professional web developer portfolio\" />."
+    ],
+    "validation": {
+      "checkType": "html",
+      "testCases": [
+        {
+          "description": "Should contain meta description with targeted content text",
+          "testRegex": "<meta\\s+name=[\"']description[\"']\\s+content=[\"']Professional\\s+web\\s+developer\\s+portfolio[\"']"
+        }
+      ]
+    }
+  },
+  {
+    "id": "html5-94",
+    "level": 94,
+    "levelId": 94,
+    "tier": "Mage",
+    "title": "External Stylesheet Links",
+    "conceptText": "### 1. The Concept (The \"Why\")\nThe `<link rel=\"stylesheet\">` tag imports styling parameters from independent external CSS files into pages.",
+    "codeExample": "```html\n<link rel=\"stylesheet\" href=\"style.css\" />\n```",
+    "missionText": "### 2. Your Mission\nWire up an external style file named \"styles.css\" inside a head block inside the container.",
+    "starterCode": "<!-- Level 94 -->\n<div id=\"element-container\">\n  <head>\n    \n  </head>\n</div>",
+    "hints": [
+      "Use <link rel=\"stylesheet\" href=\"styles.css\" /> inside head."
+    ],
+    "validation": {
+      "checkType": "html",
+      "testCases": [
+        {
+          "description": "Should contain link tag referencing styles.css stylesheet",
+          "testRegex": "<link\\s+[^>]*rel=[\"']stylesheet[\"'][^>]*href=[\"']styles\\.css[\"']"
+        }
+      ]
+    }
+  },
+  {
+    "id": "html5-95",
+    "level": 95,
+    "levelId": 95,
+    "tier": "Mage",
+    "title": "External Script Assets",
+    "conceptText": "### 1. The Concept (The \"Why\")\nThe `<script src=\"...\">` tag loads and executes logic behaviors from separate JavaScript files. It is usually placed at the bottom of the body.",
+    "codeExample": "```html\n<body>\n  ...\n  <script src=\"script.js\"></script>\n</body>\n```",
+    "missionText": "### 2. Your Mission\nAttach an external script source named \"app.js\" right before your body close inside the container.",
+    "starterCode": "<!-- Level 95 -->\n<div id=\"element-container\">\n  <body>\n    \n  </body>\n</div>",
+    "hints": [
+      "Add <script src=\"app.js\"></script> inside body."
+    ],
+    "validation": {
+      "checkType": "html",
+      "testCases": [
+        {
+          "description": "Should contain script tag pointing to app.js inside body",
+          "testRegex": "<body>\\s*<script\\s+src=[\"']app\\.js[\"']>\\s*</script>\\s*</body>"
+        }
+      ]
+    }
+  },
+  {
+    "id": "html5-96",
+    "level": 96,
+    "levelId": 96,
+    "tier": "Mage",
+    "title": "Tab Favicons",
+    "conceptText": "### 1. The Concept (The \"Why\")\nFavicons are tiny site icons loaded onto browser page tabs. We link them using a link element flagged with rel=\"icon\".",
+    "codeExample": "```html\n<link rel=\"icon\" type=\"image/x-icon\" href=\"favicon.ico\" />\n```",
+    "missionText": "### 2. Your Mission\nAdd a link tag establishing \"favicon.ico\" as the tab icon inside the head tag inside the container.",
+    "starterCode": "<!-- Level 96 -->\n<div id=\"element-container\">\n  <head>\n    \n  </head>\n</div>",
+    "hints": [
+      "Use <link rel=\"icon\" href=\"favicon.ico\" />."
+    ],
+    "validation": {
+      "checkType": "html",
+      "testCases": [
+        {
+          "description": "Should contain link tag referencing favicon.ico icon",
+          "testRegex": "<link\\s+[^>]*rel=[\"']icon[\"'][^>]*href=[\"']favicon\\.ico[\"']"
+        }
+      ]
+    }
+  },
+  {
+    "id": "html5-97",
+    "level": 97,
+    "levelId": 97,
+    "tier": "Mage",
+    "title": "Accessibility Roles",
+    "conceptText": "### 1. The Concept (The \"Why\")\nARIA roles define the purpose of generic elements, aiding screen readers. For instance, `role=\"search\"` on a form clearly specifies a search function.",
+    "codeExample": "```html\n<form role=\"search\">\n  <input type=\"search\" />\n</form>\n```",
+    "missionText": "### 2. Your Mission\nAssign role=\"search\" directly onto a generic layout form tag inside the container.",
+    "starterCode": "<!-- Level 97 -->\n<div id=\"element-container\">\n  <form>\n    \n  </form>\n</div>",
+    "hints": [
+      "Add role=\"search\" attribute to form."
+    ],
+    "validation": {
+      "checkType": "html",
+      "testCases": [
+        {
+          "description": "Should assign role='search' to form",
+          "testRegex": "<form\\s+[^>]*role=[\"']search[\"']"
+        }
+      ]
+    }
+  },
+  {
+    "id": "html5-98",
+    "level": 98,
+    "levelId": 98,
+    "tier": "Mage",
+    "title": "Auto-complete Lists",
+    "conceptText": "### 1. The Concept (The \"Why\")\nThe `<datalist>` element structures pre-defined lists of suggestions that users see in dropdown form inputs while typing.",
+    "codeExample": "```html\n<input list=\"browsers\" />\n<datalist id=\"browsers\">\n  <option value=\"Chrome\">\n  <option value=\"Firefox\">\n</datalist>\n```",
+    "missionText": "### 2. Your Mission\nWire an input with a list attribute to a datalist containing two options inside the container. The input list attribute and datalist id must match.",
+    "starterCode": "<!-- Level 98 -->\n<div id=\"element-container\">\n  \n</div>",
+    "hints": [
+      "Create <input list=\"colors\" /> and <datalist id=\"colors\"><option value=\"Red\"><option value=\"Blue\"></datalist>."
+    ],
+    "validation": {
+      "checkType": "html",
+      "testCases": [
+        {
+          "description": "Should connect input list to datalist id and include options",
+          "testRegex": "<input\\s+list=[\"'](\\w+)[\"']/?>\\s*<datalist\\s+id=[\"']\\1[\"']>\\s*(<option[^>]*>\\s*){2}\\s*</datalist>"
+        }
+      ]
+    }
+  },
+  {
+    "id": "html5-99",
+    "level": 99,
+    "levelId": 99,
+    "tier": "Mage",
+    "title": "Code Cleanliness",
+    "conceptText": "### 1. The Concept (The \"Why\")\nClean indentations make code easy to read and debug. Nested tags should always be indented relative to their parent container.",
+    "codeExample": "```html\n<main>\n  <h1>Title</h1>\n  <p>Paragraph</p>\n</main>\n```",
+    "missionText": "### 2. Your Mission\nCleanly indent an h1 title and two paragraphs nested inside a main container block inside the container.",
+    "starterCode": "<!-- Level 99 -->\n<div id=\"element-container\">\n  \n</div>",
+    "hints": [
+      "Nest <h1> and two <p> blocks inside <main> and use spaces/tabs to indent them clearly."
+    ],
+    "validation": {
+      "checkType": "html",
+      "testCases": [
+        {
+          "description": "Should contain main tag with nested h1 and two p tags",
+          "testRegex": "<main>\\s+<h1>.*</h1>\\s+<p>.*</p>\\s+<p>.*</p>\\s+</main>"
+        }
+      ]
+    }
+  },
+  {
+    "id": "html5-100",
+    "level": 100,
+    "levelId": 100,
+    "tier": "Mage",
+    "title": "Ultimate Professional Capstone",
+    "conceptText": "### 1. The Concept (The \"Why\")\nCongratulations! You've reached the Module 7 Capstone. Let's combine standard professional structures into a complete, flawless page.",
+    "codeExample": "```html\n<!DOCTYPE html>\n<html>\n  <head>\n    <meta charset=\"UTF-8\" />\n    <title>Title</title>\n  </head>\n  <body>\n    <!-- components -->\n  </body>\n</html>\n```",
+    "missionText": "### 2. Your Mission\nBuild an advanced professional setup containing viewport metadata, a linked style sheet (style.css), a navigation header, an article section, a contact form (with username input and submit button), and a semantic footer inside the container.",
+    "starterCode": "<!-- Level 100 -->\n<div id=\"element-container\">\n  \n</div>",
+    "hints": [
+      "Scaffold doctype, html, head (with meta viewport, title, and link stylesheet) and body (with header, nav, article, form, and footer tags)."
+    ],
+    "validation": {
+      "checkType": "html",
+      "testCases": [
+        {
+          "description": "Should contain standard page head metadata",
+          "testRegex": "<head>.*<meta\\s+name=[\"']viewport[\"'].*<link\\s+[^>]*rel=[\"']stylesheet[\"'][^>]*href=[\"']style\\.css[\"'].*</head>"
+        },
+        {
+          "description": "Should contain semantic header, nav, article, form, and footer tags nested inside body",
+          "testRegex": "<body>\\s*<header>.*</header>\\s*<nav>.*</nav>\\s*<article>.*</article>\\s*<form>.*<input.*<button.*</form>\\s*<footer>.*</footer>\\s*</body>"
         }
       ]
     }
@@ -400,8 +2432,8 @@ const GAME_SYLLABUS: Record<string, string[]> = {
  * Maps level L and step index to completely different, progressive categories of missions.
  */
 export function generateLevel(gameId: string, level: number): LevelData {
-  // Use handcrafted HTML5 levels 1-5 for initial onboarding
-  if (gameId === "html5" && level <= 5) {
+  // Use handcrafted HTML5 levels 1-100 for initial onboarding
+  if (gameId === "html5" && level <= 100) {
     return HTML5_INITIAL_LEVELS[level - 1];
   }
 
