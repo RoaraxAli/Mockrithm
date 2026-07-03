@@ -2434,7 +2434,15 @@ const GAME_SYLLABUS: Record<string, string[]> = {
 export function generateLevel(gameId: string, level: number): LevelData {
   // Use handcrafted HTML5 levels 1-100 for initial onboarding
   if (gameId === "html5" && level <= 100) {
-    return HTML5_INITIAL_LEVELS[level - 1];
+    // Note: The handcrafted array starts at level 6.
+    // If level is 1 to 5, we fallback safely to index 0, or shift offset.
+    const targetIdx = Math.max(0, level - 6);
+    const lvlData = HTML5_INITIAL_LEVELS[targetIdx];
+    return {
+      ...lvlData,
+      level: level,
+      levelId: level
+    };
   }
 
   const game = GAMES_LIST.find(g => g.id === gameId);
