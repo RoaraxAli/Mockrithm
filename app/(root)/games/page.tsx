@@ -1128,7 +1128,8 @@ export default function GamesPage() {
               const prereqs = activeGame.prerequisites;
               const prereqGames = GAMES_LIST.filter(g => prereqs.includes(g.id));
               const missingPrereqs = prereqGames.filter(g => !(progress[g.id]?.completedLevel > 0));
-              const pct = Math.round((gameProg.completedLevel / 500) * 100);
+              const maxLvl = activeGame.id === "html5" ? 100 : 500;
+              const pct = Math.min(Math.round((gameProg.completedLevel / maxLvl) * 100), 100);
               const tier = getTierName(gameProg.completedLevel);
 
               const tierData = [
@@ -1148,8 +1149,8 @@ export default function GamesPage() {
                       <ArrowLeft className="size-4" /> All Games
                     </button>
                     <div className="flex items-center gap-3">
-                      <div className={`p-2.5 rounded-xl bg-gradient-to-br ${activeGame.gradient} border border-white/5`}>
-                        <TechIcon name={activeGame.iconName} className="size-5 text-white" />
+                      <div className="p-1">
+                        <TechIcon name={activeGame.iconName} className="size-10 object-contain" />
                       </div>
                       <div>
                         <h1 className="text-2xl font-black uppercase font-mono tracking-tight">{activeGame.name}</h1>
@@ -1159,7 +1160,7 @@ export default function GamesPage() {
                     <button
                       onClick={() => {
                         playSound("click");
-                        setCurrentLevelNum(Math.max(1, gameProg.completedLevel + 1 > 500 ? 500 : gameProg.completedLevel + 1));
+                        setCurrentLevelNum(Math.max(1, gameProg.completedLevel + 1 > maxLvl ? maxLvl : gameProg.completedLevel + 1));
                         setGameView("game-runner");
                       }}
                       className="px-6 py-3 bg-white text-black hover:bg-zinc-200 rounded-xl font-bold text-sm uppercase tracking-wider transition-all cursor-pointer flex items-center gap-2">
@@ -1186,7 +1187,7 @@ export default function GamesPage() {
                           <div className="bg-black/60 border border-zinc-900/60 rounded-xl p-3 col-span-2">
                             <span className="text-[8px] font-mono font-bold text-zinc-600 uppercase block">Status</span>
                             <span className="text-sm font-black font-mono text-white">
-                              {gameProg.completedLevel >= (activeGame.id === "html5" ? 100 : 500) ? "🌟 Finished (Badge Earned)" : "In Progress"}
+                              {gameProg.completedLevel >= maxLvl ? "🌟 Finished (Badge Earned)" : "In Progress"}
                             </span>
                           </div>
                         </div>
@@ -1273,7 +1274,7 @@ export default function GamesPage() {
                           })}
                         </div>
                         <button
-                          onClick={() => { playSound("click"); setCurrentLevelNum(Math.max(1, Math.min(maxUnlockedLevel, gameProg.completedLevel + 1))); setGameView("game-runner"); }}
+                          onClick={() => { playSound("click"); setCurrentLevelNum(Math.max(1, Math.min(gameProg.completedLevel + 1 > maxLvl ? maxLvl : gameProg.completedLevel + 1, maxLvl))); setGameView("game-runner"); }}
                           className="w-full py-3 bg-white text-black hover:bg-zinc-200 rounded-xl font-bold text-sm uppercase tracking-wider transition-all cursor-pointer flex items-center justify-center gap-2 mt-2">
                           <Play className="size-4 fill-current" />
                           {gameProg.completedLevel === 0 ? `Start at Level 1` : `Continue from Level ${gameProg.completedLevel + 1}`}
@@ -1286,186 +1287,207 @@ export default function GamesPage() {
             })()}
 
             {/* ── VIEW: GAME RUNNER ── */}
-            {gameView === "game-runner" && activeGame && (
-              <div className="flex flex-col gap-6">
-                <div className="flex items-center justify-between border-b border-zinc-900 pb-4">
-                  <button onClick={() => { playSound("click"); setGameView("game-detail"); }}
-                    className="flex items-center gap-2 text-xs font-bold text-zinc-400 hover:text-white uppercase tracking-wider transition-colors cursor-pointer bg-zinc-900 px-4 py-2 border border-zinc-800 rounded-xl">
-                    <ArrowLeft className="size-4" /> Back to {activeGame.name}
-                  </button>
-                  <div className="flex items-center gap-3">
-                    <div className={`p-2.5 rounded-xl bg-gradient-to-br ${activeGame.gradient} border border-white/5`}>
-                      <TechIcon name={activeGame.iconName} className="size-4 text-white" />
+            {gameView === "game-runner" && activeGame && (() => {
+              const maxLvl = activeGame.id === "html5" ? 100 : 500;
+              return (
+                <div className="flex flex-col gap-6">
+                  <div className="flex items-center justify-between border-b border-zinc-900 pb-4">
+                    <button onClick={() => { playSound("click"); setGameView("game-detail"); }}
+                      className="flex items-center gap-2 text-xs font-bold text-zinc-400 hover:text-white uppercase tracking-wider transition-colors cursor-pointer bg-zinc-900 px-4 py-2 border border-zinc-800 rounded-xl">
+                      <ArrowLeft className="size-4" /> Back to {activeGame.name}
+                    </button>
+                    <div className="flex items-center gap-3">
+                      <div className="p-1">
+                        <TechIcon name={activeGame.iconName} className="size-8 object-contain" />
+                      </div>
+                      <div>
+                        <h2 className="text-sm font-bold uppercase tracking-wider text-white leading-tight">{activeGame.name}</h2>
+                        <p className="text-[9px] text-zinc-500 uppercase tracking-widest font-semibold">{activeGame.theme}</p>
+                      </div>
                     </div>
-                    <div>
-                      <h2 className="text-sm font-bold uppercase tracking-wider text-white leading-tight">{activeGame.name}</h2>
-                      <p className="text-[9px] text-zinc-500 uppercase tracking-widest font-semibold">{activeGame.theme}</p>
+                    <div className="flex items-center gap-2 font-mono">
+                      <button onClick={handlePrevLevel} disabled={currentLevelNum === 1}
+                        className="px-2.5 py-1.5 rounded-lg bg-zinc-950 border border-zinc-900 hover:border-zinc-700 text-zinc-400 hover:text-white transition-all cursor-pointer disabled:opacity-30 disabled:pointer-events-none text-xs">◀</button>
+                      <div className="flex items-center gap-1 bg-zinc-950 border border-zinc-900 px-3 py-1.5 rounded-lg text-xs font-mono font-bold">
+                        LEVEL
+                        <input type="number" min={1} max={maxLvl} value={currentLevelNum}
+                          onChange={e => handleSelectLevel(parseInt(e.target.value, 10))}
+                          className="w-10 bg-transparent text-center focus:outline-none border-b border-zinc-800 focus:border-white text-white font-bold" />
+                        / {maxLvl}
+                      </div>
+                      <button onClick={handleNextLevel} disabled={currentLevelNum === maxLvl || !canGoNext}
+                        className="px-2.5 py-1.5 rounded-lg bg-zinc-950 border border-zinc-900 hover:border-zinc-700 text-zinc-400 hover:text-white transition-all cursor-pointer disabled:opacity-30 disabled:pointer-events-none text-xs">▶</button>
                     </div>
                   </div>
-                  <div className="flex items-center gap-2 font-mono">
-                    <button onClick={handlePrevLevel} disabled={currentLevelNum === 1}
-                      className="px-2.5 py-1.5 rounded-lg bg-zinc-950 border border-zinc-900 hover:border-zinc-700 text-zinc-400 hover:text-white transition-all cursor-pointer disabled:opacity-30 disabled:pointer-events-none text-xs">◀</button>
-                    <div className="flex items-center gap-1 bg-zinc-950 border border-zinc-900 px-3 py-1.5 rounded-lg text-xs font-mono font-bold">
-                      LEVEL
-                      <input type="number" min={1} max={500} value={currentLevelNum}
-                        onChange={e => handleSelectLevel(parseInt(e.target.value, 10))}
-                        className="w-10 bg-transparent text-center focus:outline-none border-b border-zinc-800 focus:border-white text-white font-bold" />
-                      / 500
-                    </div>
-                    <button onClick={handleNextLevel} disabled={currentLevelNum === 500 || !canGoNext}
-                      className="px-2.5 py-1.5 rounded-lg bg-zinc-950 border border-zinc-900 hover:border-zinc-700 text-zinc-400 hover:text-white transition-all cursor-pointer disabled:opacity-30 disabled:pointer-events-none text-xs">▶</button>
-                  </div>
-                </div>
 
-                <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-stretch">
-                  {/* Left panel: lesson + hints */}
-                  <div className="lg:col-span-4 flex flex-col gap-5 max-h-[85vh] overflow-y-auto pr-1">
-                    {/* Prerequisite notice */}
-                    {activeGame.prerequisites.length > 0 && !activeGame.prerequisites.every(p => (progress[p]?.completedLevel || 0) > 0) && (
-                      <div className="bg-amber-500/10 border border-amber-500/20 rounded-2xl p-4 flex flex-col gap-1.5">
-                        <div className="flex items-center gap-2 text-amber-400">
-                          <AlertCircle className="size-4 shrink-0" />
-                          <span className="text-[10px] font-mono font-black uppercase tracking-wider">Recommended First</span>
-                        </div>
-                        <p className="text-[10.5px] text-zinc-400 leading-relaxed">
-                          Complete <strong className="text-white">{GAMES_LIST.filter(g => activeGame.prerequisites.includes(g.id) && !(progress[g.id]?.completedLevel > 0)).map(g => g.name).join(", ")}</strong> before this game for the best experience.
-                        </p>
-                      </div>
-                    )}
-
-                    <div className="bg-zinc-950/40 border border-zinc-900 rounded-2xl p-6 flex flex-col gap-4">
-                      <div className="flex justify-between items-center">
-                        <span className="text-[10px] font-mono text-zinc-500 font-bold">+100 XP</span>
-                      </div>
-                      <h3 className="text-lg font-black tracking-wide text-white uppercase leading-tight font-mono">{activeLevelData?.title}</h3>
-                      <div className="h-[1px] bg-zinc-900 my-1" />
-                      <div className="space-y-1">{renderMarkdown(activeLevelData?.conceptText || "")}</div>
-                      {activeLevelData?.codeExample && (
-                        <div className="mt-2">
-                          <h4 className="text-xs font-black tracking-wider text-white uppercase mb-2 font-mono">Example</h4>
-                          {renderCodeExample(activeLevelData.codeExample)}
+                  <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-stretch">
+                    {/* Left panel: lesson + hints */}
+                    <div className="lg:col-span-4 flex flex-col gap-5 max-h-[85vh] overflow-y-auto pr-1">
+                      {/* Prerequisite notice */}
+                      {activeGame.prerequisites.length > 0 && !activeGame.prerequisites.every(p => (progress[p]?.completedLevel || 0) > 0) && (
+                        <div className="bg-amber-500/10 border border-amber-500/20 rounded-2xl p-4 flex flex-col gap-1.5">
+                          <div className="flex items-center gap-2 text-amber-400">
+                            <AlertCircle className="size-4 shrink-0" />
+                            <span className="text-[10px] font-mono font-black uppercase tracking-wider">Recommended First</span>
+                          </div>
+                          <p className="text-[10.5px] text-zinc-400 leading-relaxed">
+                            Complete <strong className="text-white">{GAMES_LIST.filter(g => activeGame.prerequisites.includes(g.id) && !(progress[g.id]?.completedLevel > 0)).map(g => g.name).join(", ")}</strong> before this game for the best experience.
+                          </p>
                         </div>
                       )}
-                      <div className="space-y-1 border-t border-zinc-900 pt-4 mt-2">{renderMarkdown(activeLevelData?.missionText || "")}</div>
-                      <div className="border-t border-zinc-900 pt-4 mt-2">
-                        <h4 className="text-xs font-black tracking-wider text-white uppercase mb-2 font-mono">Tests</h4>
-                        <ul className="space-y-1.5">
-                          {activeLevelData?.validation.testCases.map((tc, idx) => (
-                            <li key={idx} className="text-[10.5px] text-zinc-500 flex items-start gap-2">
-                              <span className="text-zinc-600">•</span><span>{tc.description || tc.name}</span>
-                            </li>
-                          ))}
-                        </ul>
-                      </div>
-                      <div className="mt-2 border-t border-zinc-900 pt-4">
-                        <button onClick={() => { playSound("click"); setShowHint(!showHint); }}
-                          className="text-[10px] font-mono font-bold text-zinc-500 hover:text-white flex items-center gap-1 transition-colors cursor-pointer uppercase">
-                          <HelpCircle className="size-4" /> {showHint ? "Hide Hint" : "Show Hint"}
-                        </button>
-                        <AnimatePresence>
-                          {showHint && activeLevelData?.hints && (
-                            <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }} exit={{ opacity: 0, height: 0 }}
-                              className="mt-3 bg-zinc-955 border border-zinc-900 rounded-xl p-3 text-[10.5px] text-zinc-400 leading-relaxed">
-                              <ul className="list-disc pl-4 space-y-1.5">{activeLevelData.hints.map((h, i) => <li key={i}>{h}</li>)}</ul>
-                            </motion.div>
-                          )}
-                        </AnimatePresence>
+
+                      <div className="bg-zinc-950/40 border border-zinc-900 rounded-2xl p-6 flex flex-col gap-4">
+                        <div className="flex justify-between items-center">
+                          <span className="text-[10px] font-mono text-zinc-500 font-bold">+100 XP</span>
+                        </div>
+                        <h3 className="text-lg font-black tracking-wide text-white uppercase leading-tight font-mono">{activeLevelData?.title}</h3>
+                        <div className="h-[1px] bg-zinc-900 my-1" />
+                        <div className="space-y-1">{renderMarkdown(activeLevelData?.conceptText || "")}</div>
+                        {activeLevelData?.codeExample && (
+                          <div className="mt-2">
+                            <h4 className="text-xs font-black tracking-wider text-white uppercase mb-2 font-mono">Example</h4>
+                            {renderCodeExample(activeLevelData.codeExample)}
+                          </div>
+                        )}
+                        <div className="space-y-1 border-t border-zinc-900 pt-4 mt-2">{renderMarkdown(activeLevelData?.missionText || "")}</div>
+                        <div className="border-t border-zinc-900 pt-4 mt-2">
+                          <h4 className="text-xs font-black tracking-wider text-white uppercase mb-2 font-mono">Tests</h4>
+                          <ul className="space-y-1.5">
+                            {activeLevelData?.validation.testCases.map((tc, idx) => (
+                              <li key={idx} className="text-[10.5px] text-zinc-500 flex items-start gap-2">
+                                <span className="text-zinc-600">•</span><span>{tc.description || tc.name}</span>
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                        <div className="mt-2 border-t border-zinc-900 pt-4">
+                          <button onClick={() => { playSound("click"); setShowHint(!showHint); }}
+                            className="text-[10px] font-mono font-bold text-zinc-500 hover:text-white flex items-center gap-1 transition-colors cursor-pointer uppercase">
+                            <HelpCircle className="size-3.5" /> {showHint ? "Hide Hint" : "Show Hint"}
+                          </button>
+                          <AnimatePresence>
+                            {showHint && (
+                              <motion.div initial={{ opacity: 0, y: -5 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -5 }}
+                                className="bg-zinc-900/60 border border-zinc-800 rounded-xl p-3.5 mt-3 text-[10.5px] text-zinc-400 font-mono leading-relaxed space-y-1.5">
+                                {activeLevelData?.hints.map((hint, i) => (
+                                  <p key={i}>• {hint}</p>
+                                ))}
+                              </motion.div>
+                            )}
+                          </AnimatePresence>
+                        </div>
                       </div>
                     </div>
 
-                    {/* Sandbox Output */}
-                    <div className="bg-zinc-950/40 border border-zinc-900 rounded-2xl p-6 flex flex-col gap-4">
-                      <h4 className="text-[10px] font-mono font-bold text-zinc-400 uppercase tracking-widest">Live Output</h4>
-                      <div className="min-h-48 bg-black border border-zinc-900 rounded-xl overflow-hidden relative flex flex-col justify-center items-center p-3 text-center">
-                        {(activeLevelData?.validation.checkType === "html" || activeLevelData?.validation.checkType === "css") && (
-                          <div className="w-full h-48 bg-white rounded-lg overflow-hidden">
-                            <iframe title="Preview" srcDoc={`<html><head><style>body{font-family:sans-serif;margin:15px;color:#333;}${activeLevelData.validation.checkType === "css" ? editorCode : ""}</style></head><body>${activeLevelData.validation.checkType === "html" ? editorCode : '<div class="visual-box">Visual Target</div>'}</body></html>`}
-                              className="w-full h-full border-none bg-white" />
+                    {/* Right panel: editor + output terminal */}
+                    <div className="lg:col-span-8 flex flex-col gap-5 min-h-[60vh] max-h-[85vh]">
+                      <div className="flex-1 flex flex-col bg-zinc-950 border border-zinc-900 rounded-2xl overflow-hidden shadow-2xl relative">
+                        <div className="flex justify-between items-center bg-zinc-950 border-b border-zinc-900 px-4 py-2">
+                          <span className="text-[10px] font-mono font-black text-zinc-500 uppercase tracking-widest flex items-center gap-1.5">
+                            <Code2 className="size-3.5" /> Workspace Terminal
+                          </span>
+                          <button onClick={() => { playSound("click"); setEditorCode(activeLevelData?.starterCode || ""); }}
+                            className="text-[9px] font-mono text-zinc-500 hover:text-white flex items-center gap-1 transition-colors cursor-pointer uppercase font-bold">
+                            <RotateCcw className="size-3" /> Reset Starter Code
+                          </button>
+                        </div>
+                        <div className="flex-1 min-h-[350px]">
+                          <Editor
+                            height="100%"
+                            language={
+                              activeGame.id === "html5" || activeGame.id === "tailwind" ? "html" :
+                              activeGame.id === "css3" ? "css" :
+                              activeGame.id === "javascript" || activeGame.id === "nodejs" ? "javascript" :
+                              activeGame.id === "typescript" ? "typescript" :
+                              activeGame.id === "python" || activeGame.id === "django" || activeGame.id === "cybersecurity" ? "python" :
+                              activeGame.id === "sql" ? "sql" :
+                              activeGame.id === "git" ? "shell" :
+                              "html"
+                            }
+                            theme="vs-dark"
+                            value={editorCode}
+                            onChange={(val) => setEditorCode(val || "")}
+                            options={{
+                              fontSize: 11,
+                              minimap: { enabled: false },
+                              lineNumbers: "on",
+                              roundedSelection: true,
+                              scrollBeyondLastLine: false,
+                              readOnly: activeGame.id === "git",
+                              fontFamily: "var(--font-geist-mono), monospace",
+                              padding: { top: 12 }
+                            }}
+                          />
+                        </div>
+                      </div>
+
+                      {/* Output terminal */}
+                      <div className="bg-zinc-950 border border-zinc-900 rounded-2xl p-5 flex flex-col gap-3 min-h-[180px] shadow-2xl">
+                        <div className="flex justify-between items-center border-b border-zinc-900 pb-2">
+                          <span className="text-[9px] font-mono text-zinc-500 uppercase tracking-widest font-bold">Output / Test Results</span>
+                          <div className="flex gap-2">
+                            {evaluationSuccess === true && <span className="text-[9px] font-mono bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 px-2 py-0.5 rounded-full uppercase font-bold">All Tests Passed</span>}
+                            {evaluationSuccess === false && <span className="text-[9px] font-mono bg-red-500/10 border border-red-500/20 text-red-400 px-2 py-0.5 rounded-full uppercase font-bold">Tests Failed</span>}
                           </div>
-                        )}
-                        {activeLevelData?.validation.checkType === "sql" && (
-                          <div className="w-full h-48 overflow-auto text-left font-mono text-[9.5px]">
-                            <table className="w-full border-collapse">
-                              <thead><tr className="border-b border-zinc-800 bg-zinc-955">
-                                {["id","name","level","class"].map(h => <th key={h} className="p-2 text-zinc-500 font-bold font-mono">{h}</th>)}
-                              </tr></thead>
-                              <tbody>{sqlTableData.map(row => <tr key={row.id} className="border-b border-zinc-900 hover:bg-zinc-900/40">
-                                <td className="p-2 text-white font-bold">{row.id}</td>
-                                <td className="p-2 text-zinc-300">{row.name}</td>
-                                <td className="p-2 text-emerald-400">{row.level}</td>
-                                <td className="p-2 text-zinc-400">{row.class}</td>
-                              </tr>)}</tbody>
+                        </div>
+
+                        {/* Custom visual previews or log feeds */}
+                        {activeGame.id === "sql" && (
+                          <div className="flex-1 overflow-x-auto text-[10px] font-mono bg-black/40 border border-zinc-900 rounded-xl p-3">
+                            <div className="text-[9px] font-bold text-zinc-500 mb-2 uppercase tracking-wide">Target Data Grid</div>
+                            <table className="w-full text-left">
+                              <thead>
+                                <tr className="border-b border-zinc-900">
+                                  {["id","name","level","class"].map(h => <th key={h} className="p-2 text-zinc-500 font-bold font-mono">{h}</th>)}
+                                </tr>
+                              </thead>
+                              <tbody>
+                                {sqlTableData.map(r => (
+                                  <tr key={r.id} className="border-b border-zinc-900/40 text-zinc-400">
+                                    <td className="p-2">{r.id}</td><td className="p-2 font-bold">{r.name}</td><td className="p-2">{r.level}</td><td className="p-2 text-zinc-500">{r.class}</td>
+                                  </tr>
+                                ))}
+                              </tbody>
                             </table>
                           </div>
                         )}
-                        {activeLevelData?.validation.checkType === "git" && (
-                          <div className="w-full h-48 flex flex-col font-mono text-[9px] text-left">
-                            <div className="flex-1 overflow-y-auto space-y-1 bg-black p-3 border border-zinc-900 rounded-lg max-h-32 font-mono">
-                              {gitTerminalLogs.map((l, i) => <div key={i} className="whitespace-pre-wrap">{l}</div>)}
+
+                        {activeGame.id === "git" && (
+                          <div className="flex-1 flex flex-col gap-2 bg-black/60 border border-zinc-900 rounded-xl p-3 font-mono text-[10px]">
+                            <div className="flex-1 overflow-y-auto max-h-[120px] text-zinc-400 space-y-1">
+                              {gitTerminalLogs.map((log, i) => <div key={i}>{log}</div>)}
                             </div>
-                            <form onSubmit={handleGitCommandSubmit} className="mt-2 flex gap-2">
+                            <form onSubmit={handleExecuteGitCommand} className="flex gap-2 border-t border-zinc-900 pt-2">
                               <span className="text-zinc-500 font-bold select-none pt-1.5">$</span>
                               <input type="text" value={gitCommandInput} onChange={e => setGitCommandInput(e.target.value)}
-                                placeholder="git command..." className="flex-1 bg-zinc-950 border border-zinc-900 rounded-lg px-3 py-1.5 focus:outline-none focus:border-zinc-600 text-white text-[10px]" />
+                                placeholder="Type git command... (e.g. 'git init', 'git add .', 'git commit -m ...')"
+                                className="flex-1 bg-transparent border-none text-white focus:outline-none placeholder-zinc-700 font-mono" />
                             </form>
                           </div>
                         )}
-                        {!["html","css","sql","git"].includes(activeLevelData?.validation.checkType || "") && (
-                          <div className="flex flex-col items-center gap-2">
-                            <Code2 className="size-8 text-zinc-600 animate-pulse" />
-                            <span className="text-[10px] font-mono text-zinc-500 uppercase tracking-widest font-bold">Standard Console</span>
+
+                        {activeGame.id !== "sql" && activeGame.id !== "git" && (
+                          <div className="flex-1 overflow-y-auto max-h-[140px] text-[10px] font-mono text-zinc-500 space-y-1">
+                            {evalLogs.length === 0 ? (
+                              <div className="text-zinc-700 italic">No output logged yet. Run your code to trigger unit tests.</div>
+                            ) : (
+                              evalLogs.map((log, i) => <div key={i} className="text-zinc-400">{log}</div>)
+                            )}
                           </div>
                         )}
-                      </div>
-                    </div>
-                  </div>
 
-                  {/* Editor + console */}
-                  <div className="lg:col-span-8 flex flex-col gap-5">
-                    <div className="bg-zinc-950/40 border border-zinc-900 rounded-2xl overflow-hidden flex flex-col">
-                      <div className="flex items-center justify-between px-6 py-4 bg-zinc-950/80 border-b border-zinc-900">
-                        <span className="text-[10px] font-mono font-bold text-zinc-400 uppercase tracking-widest">Code Editor</span>
-                        <button onClick={() => { playSound("click"); setEditorCode(activeLevelData?.starterCode || ""); }}
-                          className="p-1.5 rounded-lg bg-zinc-900 border border-zinc-800 text-zinc-400 hover:text-white transition-all cursor-pointer">
-                          <RotateCcw className="size-4" />
-                        </button>
-                      </div>
-                      <div className="h-96 w-full">
-                        <Editor height="100%"
-                          defaultLanguage={activeGame.id === "html5" || activeGame.id === "tailwind" ? "html" : activeGame.id === "css3" ? "css" : activeGame.id === "typescript" ? "typescript" : activeGame.id === "python" || activeGame.id === "django" ? "python" : activeGame.id === "sql" ? "sql" : "javascript"}
-                          theme="vs-dark" value={editorCode} onChange={val => setEditorCode(val || "")}
-                          options={{ minimap: { enabled: false }, fontSize: 12.5, fontFamily: "var(--font-mono), monospace", padding: { top: 15, bottom: 15 }, lineNumbers: "on", tabSize: 2 }} />
-                      </div>
-                    </div>
-
-                    <div className="bg-zinc-950/40 border border-zinc-900 rounded-2xl p-6 flex flex-col gap-4">
-                      <div className="flex items-center justify-between">
-                        <h4 className="text-[10px] font-mono font-bold text-zinc-400 uppercase tracking-widest">Test Output</h4>
-                        {evaluationSuccess === true && <span className="text-[9px] font-mono bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 px-2 py-0.5 rounded-full uppercase font-bold">All Tests Passed</span>}
-                        {evaluationSuccess === false && <span className="text-[9px] font-mono bg-red-500/10 border border-red-500/20 text-red-400 px-2 py-0.5 rounded-full uppercase font-bold">Tests Failed</span>}
-                      </div>
-                      <div className="h-28 overflow-y-auto bg-black border border-zinc-900 rounded-xl p-4 font-mono text-[10.5px] leading-relaxed flex flex-col gap-1.5">
-                        {evalLogs.length > 0 ? evalLogs.map((log, idx) => (
-                          <div key={idx} className={log.startsWith("✔️") ? "text-emerald-400 font-bold" : log.startsWith("❌") ? "text-red-400 font-bold" : "text-zinc-400"}>{log}</div>
-                        )) : <div className="text-zinc-600 italic">Run your code to see results here.</div>}
-                      </div>
-                      <div className="flex gap-4">
-                        <button onClick={evaluateCode}
-                          className="flex-1 py-3 bg-white text-black hover:bg-zinc-200 text-xs font-bold uppercase tracking-widest rounded-xl transition-all cursor-pointer flex items-center justify-center gap-1.5 border border-white">
-                          <Zap className="size-4 fill-current" /> Run Code
-                        </button>
-                        {evaluationSuccess === true && (
-                          <button onClick={handleNextLevel}
-                            className="flex-1 py-3 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold uppercase tracking-widest rounded-xl transition-all cursor-pointer flex items-center justify-center gap-1.5 border border-emerald-600">
-                            <CheckCircle className="size-4" /> Next Level →
+                        <div className="flex gap-3 mt-1">
+                          <button onClick={handleRunEvaluation}
+                            className="flex-1 py-3 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold uppercase tracking-widest rounded-xl transition-all cursor-pointer flex items-center justify-center gap-1.5 border border-emerald-600 shadow-lg shadow-emerald-950/20">
+                            🚀 Run Code & Verify
                           </button>
-                        )}
+                        </div>
                       </div>
                     </div>
                   </div>
                 </div>
-              </div>
-            )}
+              );
+            })()}
 
             {/* ── VIEW: DASHBOARD (game list) ── */}
             {gameView === "dashboard" && (
@@ -1481,7 +1503,8 @@ export default function GamesPage() {
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                   {GAMES_LIST.map(game => {
                     const gameProg = progress[game.id] || { completedLevel: 0, xp: 0 };
-                    const pct = Math.round((gameProg.completedLevel / 500) * 100);
+                    const maxLvl = game.id === "html5" ? 100 : 500;
+                    const pct = Math.min(Math.round((gameProg.completedLevel / maxLvl) * 100), 100);
                     const prereqsMissing = game.prerequisites.length > 0 && !game.prerequisites.every(p => (progress[p]?.completedLevel || 0) > 0);
 
                     return (
@@ -1491,8 +1514,8 @@ export default function GamesPage() {
                         <div className={`absolute top-0 right-0 w-24 h-24 bg-gradient-to-br ${game.gradient} opacity-5 group-hover/card:opacity-10 blur-xl rounded-full transition-all`} />
                         <div>
                           <div className="flex justify-between items-start mb-4">
-                            <div className={`p-3 rounded-xl bg-gradient-to-br ${game.gradient} border border-white/5`}>
-                              <TechIcon name={game.iconName} className="size-5 text-white" />
+                            <div className="p-1">
+                              <TechIcon name={game.iconName} className="size-8 object-contain" />
                             </div>
                             {prereqsMissing ? (
                               <span className="text-[9px] font-mono bg-amber-500/10 border border-amber-500/20 text-amber-400 px-2 py-0.5 rounded-full uppercase font-bold">
@@ -1508,7 +1531,7 @@ export default function GamesPage() {
                         </div>
                         <div className="mt-4 space-y-1.5">
                           <div className="flex justify-between text-[9px] font-mono font-bold text-zinc-500">
-                            <span>LEVEL {gameProg.completedLevel}/500</span><span>{pct}%</span>
+                            <span>LEVEL {gameProg.completedLevel}/{maxLvl}</span><span>{pct}%</span>
                           </div>
                           <div className="w-full h-1 bg-zinc-900 rounded-full overflow-hidden">
                             <div className={`h-full bg-gradient-to-r ${game.gradient}`} style={{ width: `${pct}%` }} />
@@ -1599,14 +1622,15 @@ export default function GamesPage() {
                 <FileCode className="size-4" /> Language Progress
               </h3>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-                {GAMES_LIST.map(game => {
+                 {GAMES_LIST.map(game => {
                   const gp = progress[game.id] || { completedLevel: 0, xp: 0 };
-                  const pct = Math.round((gp.completedLevel / 500) * 100);
+                  const maxLvl = game.id === "html5" ? 100 : 500;
+                  const pct = Math.min(Math.round((gp.completedLevel / maxLvl) * 100), 100);
                   return (
                     <div key={game.id} className={`p-5 rounded-2xl border bg-zinc-950/20 flex flex-col justify-between h-32 relative overflow-hidden transition-all ${gp.completedLevel > 0 ? "border-zinc-800" : "border-zinc-905 opacity-60"}`}>
                       <div className="flex items-center gap-3">
-                        <div className={`p-2.5 rounded-xl bg-gradient-to-br ${game.gradient} border border-white/5`}>
-                          <TechIcon name={game.iconName} className="size-4 text-white" />
+                        <div className="p-1">
+                          <TechIcon name={game.iconName} className="size-8 object-contain" />
                         </div>
                         <div>
                           <h4 className="text-xs font-bold text-white uppercase font-mono">{game.name}</h4>
@@ -1615,7 +1639,7 @@ export default function GamesPage() {
                       </div>
                       <div className="space-y-1.5 mt-3">
                         <div className="flex justify-between text-[8px] font-mono text-zinc-500 font-bold">
-                          <span>LEVEL {gp.completedLevel}/500</span><span>{pct}%</span>
+                          <span>LEVEL {gp.completedLevel}/{maxLvl}</span><span>{pct}%</span>
                         </div>
                         <div className="w-full h-1 bg-zinc-900 rounded-full overflow-hidden">
                           <div className={`h-full bg-gradient-to-r ${game.gradient}`} style={{ width: `${pct}%` }} />
@@ -1646,8 +1670,8 @@ export default function GamesPage() {
                 return (
                   <div key={game.id} className={`p-6 rounded-2xl border flex flex-col justify-between h-48 relative overflow-hidden transition-all ${isCompleted ? "bg-zinc-900 border-amber-500/40 shadow-lg shadow-amber-500/5" : isStarted ? "bg-zinc-900/60 border-zinc-800" : "bg-zinc-950/20 border-zinc-905 opacity-30"}`}>
                     <div className="flex items-center gap-3">
-                      <div className={`p-3 rounded-xl bg-gradient-to-br ${isStarted ? game.gradient : "from-zinc-900 to-zinc-950"} border border-white/5`}>
-                        <TechIcon name={game.iconName} className="size-5 text-white" />
+                      <div className="p-1">
+                        <TechIcon name={game.iconName} className="size-8 object-contain" />
                       </div>
                       <div>
                         <h4 className="text-xs font-bold text-white uppercase font-mono">{game.name}</h4>
