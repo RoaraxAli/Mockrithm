@@ -2434,15 +2434,84 @@ const GAME_SYLLABUS: Record<string, string[]> = {
 export function generateLevel(gameId: string, level: number): LevelData {
   // Use handcrafted HTML5 levels 1-100 for initial onboarding
   if (gameId === "html5" && level <= 100) {
-    // Note: The handcrafted array starts at level 6.
-    // If level is 1 to 5, we fallback safely to index 0, or shift offset.
-    const targetIdx = Math.max(0, level - 6);
-    const lvlData = HTML5_INITIAL_LEVELS[targetIdx];
-    return {
-      ...lvlData,
-      level: level,
-      levelId: level
-    };
+    if (level >= 1 && level <= 5) {
+      // Generate levels 1 to 5 syllabus blueprints dynamically
+      let title = "";
+      let conceptText = "";
+      let codeExample = "";
+      let missionText = "";
+      let starterCode = "";
+      let hints: string[] = [];
+      let testRegex = "";
+      let desc = "";
+
+      if (level === 1) {
+        title = "Paragraphs";
+        conceptText = "### 1. The Concept (The \"Why\")\nThe `<p>` tag is used to define a paragraph. It structures standard body text blocks on the page, automatically adding space above and below.";
+        codeExample = "```html\n<p>Hello World</p>\n```";
+        missionText = "### 2. Your Mission\nWrap the phrase **`\"Hello World\"`** in a paragraph tag.";
+        starterCode = "<!-- Level 1 -->\n<div id=\"element-container\">\n  \n</div>";
+        hints = ["Write '<p>Hello World</p>' inside the container."];
+        testRegex = "<p>\\s*Hello\\s+World\\s*</p>";
+        desc = "Should contain <p>Hello World</p>";
+      } else if (level === 2) {
+        title = "Heading 1";
+        conceptText = "### 1. The Concept (The \"Why\")\nThe `<h1>` tag defines the primary, most important heading on a page. There should typically only be one main `<h1>` per page.";
+        codeExample = "```html\n<h1>Welcome to My Site</h1>\n```";
+        missionText = "### 2. Your Mission\nCreate a primary heading that says **`\"Welcome to My Site\"`**.";
+        starterCode = "<!-- Level 2 -->\n<div id=\"element-container\">\n  \n</div>";
+        hints = ["Write '<h1>Welcome to My Site</h1>' inside the container."];
+        testRegex = "<h1>\\s*Welcome\\s+to\\s+My\\s+Site\\s*</h1>";
+        desc = "Should contain <h1>Welcome to My Site</h1>";
+      } else if (level === 3) {
+        title = "Heading Hierarchy";
+        conceptText = "### 1. The Concept (The \"Why\")\nHTML provides six levels of headings (`<h1>` through `<h6>`) to organize content hierarchy. `<h2>` is used for secondary sections.";
+        codeExample = "```html\n<h2>About Me</h2>\n```";
+        missionText = "### 2. Your Mission\nCreate a secondary heading (h2) that says **`\"About Me\"`**.";
+        starterCode = "<!-- Level 3 -->\n<div id=\"element-container\">\n  \n</div>";
+        hints = ["Write '<h2>About Me</h2>' inside the container."];
+        testRegex = "<h2>\\s*About\\s+Me\\s*</h2>";
+        desc = "Should contain <h2>About Me</h2>";
+      } else if (level === 4) {
+        title = "Line Breaks";
+        conceptText = "### 1. The Concept (The \"Why\")\nThe `<br>` tag inserts a single line break without starting a new paragraph. It is a self-closing (void) element.";
+        codeExample = "```html\nLine One<br>Line Two\n```";
+        missionText = "### 2. Your Mission\nWrite a paragraph with a line break `<br>` separating **`\"Line One\"`** and **`\"Line Two\"`**.";
+        starterCode = "<!-- Level 4 -->\n<div id=\"element-container\">\n  <p>\n    \n  </p>\n</div>";
+        hints = ["Add '<br>' between 'Line One' and 'Line Two' inside the paragraph."];
+        testRegex = "<p>[\\s\\S]*Line\\s+One<br/?>Line\\s+Two[\\s\\S]*</p>";
+        desc = "Paragraph contains Line One and Line Two separated by a line break";
+      } else if (level === 5) {
+        title = "Horizontal Rules";
+        conceptText = "### 1. The Concept (The \"Why\")\nThe `<hr>` tag defines a thematic break or divider line in an HTML page. Like `<br>`, it is self-closing and creates a visible separator.";
+        codeExample = "```html\n<h1>Title</h1>\n<hr>\n<p>Content</p>\n```";
+        missionText = "### 2. Your Mission\nPlace a horizontal rule `<hr>` divider between a primary heading and a paragraph.";
+        starterCode = "<!-- Level 5 -->\n<div id=\"element-container\">\n  <h1>Title</h1>\n  \n  <p>Content</p>\n</div>";
+        hints = ["Add '<hr>' in the empty space between the heading and the paragraph."];
+        testRegex = "<h1>.*</h1>\\s*<hr/?>\\s*<p>.*</p>";
+        desc = "Has a horizontal rule <hr> between heading 1 and paragraph";
+      }
+
+      return {
+        id: `html5-${level}`,
+        level,
+        levelId: level,
+        tier: "Apprentice",
+        title,
+        conceptText,
+        codeExample,
+        missionText,
+        starterCode,
+        hints,
+        validation: {
+          checkType: "html",
+          testCases: [{ description: desc, testRegex }]
+        }
+      };
+    }
+
+    // Handcrafted HTML5 Initial levels 6 to 100
+    return HTML5_INITIAL_LEVELS[level - 6];
   }
 
   const game = GAMES_LIST.find(g => g.id === gameId);
