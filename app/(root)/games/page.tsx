@@ -1178,7 +1178,9 @@ function GamesPageContent() {
       )}
 
       {/* === RIGHT CONTENT === */}
-      <div className="flex-1 flex flex-col h-full overflow-y-auto relative z-10 p-8">
+      <div className={`flex-1 flex flex-col h-full relative z-10 p-8 ${
+        activeTab === "dashboard" && gameView === "game-runner" ? "overflow-hidden" : "overflow-y-auto"
+      }`}>
 
         {/* ─── TAB: PLAY / DASHBOARD ─── */}
         {activeTab === "dashboard" && (
@@ -1373,109 +1375,119 @@ function GamesPageContent() {
                     </div>
                   </div>
 
-                  <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-stretch">
-                    {/* Left panel: lesson + hints */}
-                    <div className="lg:col-span-4 flex flex-col gap-5 max-h-[85vh] overflow-y-auto pr-1">
-                      {/* Prerequisite notice */}
-                      {activeGame.prerequisites.length > 0 && !activeGame.prerequisites.every(p => (progress[p]?.completedLevel || 0) > 0) && (
-                        <div className="bg-amber-500/10 border border-amber-500/20 rounded-2xl p-4 flex flex-col gap-1.5">
-                          <div className="flex items-center gap-2 text-amber-400">
-                            <AlertCircle className="size-4 shrink-0" />
-                            <span className="text-[10px] font-mono font-black uppercase tracking-wider">Recommended First</span>
-                          </div>
-                          <p className="text-[10.5px] text-zinc-400 leading-relaxed">
-                            Complete <strong className="text-white">{GAMES_LIST.filter(g => activeGame.prerequisites.includes(g.id) && !(progress[g.id]?.completedLevel > 0)).map(g => g.name).join(", ")}</strong> before this game for the best experience.
-                          </p>
+                  <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-stretch flex-1 min-h-0 select-none">
+                    {/* Column 1: Info and instructions */}
+                    <div className="flex flex-col bg-zinc-950/40 border border-zinc-900 rounded-2xl p-6 overflow-y-auto max-h-[calc(100vh-140px)] gap-4 select-text">
+                      <div className="flex justify-between items-center">
+                        <span className="text-[10px] font-mono text-zinc-500 font-bold">+100 XP</span>
+                      </div>
+                      <h3 className="text-lg font-black tracking-wide text-white uppercase leading-tight font-mono">{activeLevelData?.title}</h3>
+                      <div className="h-[1px] bg-zinc-900 my-1" />
+                      <div className="space-y-1">{renderMarkdown(activeLevelData?.conceptText || "")}</div>
+                      {activeLevelData?.codeExample && (
+                        <div className="mt-2">
+                          <h4 className="text-xs font-black tracking-wider text-white uppercase mb-2 font-mono">Example</h4>
+                          {renderCodeExample(activeLevelData.codeExample)}
                         </div>
                       )}
-
-                      <div className="bg-zinc-950/40 border border-zinc-900 rounded-2xl p-6 flex flex-col gap-4">
-                        <div className="flex justify-between items-center">
-                          <span className="text-[10px] font-mono text-zinc-500 font-bold">+100 XP</span>
-                        </div>
-                        <h3 className="text-lg font-black tracking-wide text-white uppercase leading-tight font-mono">{activeLevelData?.title}</h3>
-                        <div className="h-[1px] bg-zinc-900 my-1" />
-                        <div className="space-y-1">{renderMarkdown(activeLevelData?.conceptText || "")}</div>
-                        {activeLevelData?.codeExample && (
-                          <div className="mt-2">
-                            <h4 className="text-xs font-black tracking-wider text-white uppercase mb-2 font-mono">Example</h4>
-                            {renderCodeExample(activeLevelData.codeExample)}
-                          </div>
-                        )}
-                        <div className="space-y-1 border-t border-zinc-900 pt-4 mt-2">{renderMarkdown(activeLevelData?.missionText || "")}</div>
-                        <div className="border-t border-zinc-900 pt-4 mt-2">
-                          <h4 className="text-xs font-black tracking-wider text-white uppercase mb-2 font-mono">Tests</h4>
-                          <ul className="space-y-1.5">
-                            {activeLevelData?.validation.testCases.map((tc, idx) => (
-                              <li key={idx} className="text-[10.5px] text-zinc-500 flex items-start gap-2">
-                                <span className="text-zinc-600">•</span><span>{tc.description || tc.name}</span>
-                              </li>
-                            ))}
-                          </ul>
-                        </div>
-                        <div className="mt-2 border-t border-zinc-900 pt-4">
-                          <button onClick={() => { playSound("click"); setShowHint(!showHint); }}
-                            className="text-[10px] font-mono font-bold text-zinc-500 hover:text-white flex items-center gap-1 transition-colors cursor-pointer uppercase">
-                            <HelpCircle className="size-3.5" /> {showHint ? "Hide Hint" : "Show Hint"}
-                          </button>
-                          <AnimatePresence>
-                            {showHint && (
-                              <motion.div initial={{ opacity: 0, y: -5 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -5 }}
-                                className="bg-zinc-900/60 border border-zinc-800 rounded-xl p-3.5 mt-3 text-[10.5px] text-zinc-400 font-mono leading-relaxed space-y-1.5">
-                                {activeLevelData?.hints.map((hint, i) => (
-                                  <p key={i}>• {hint}</p>
-                                ))}
-                              </motion.div>
-                            )}
-                          </AnimatePresence>
-                        </div>
+                      <div className="space-y-1 border-t border-zinc-900 pt-4 mt-2">{renderMarkdown(activeLevelData?.missionText || "")}</div>
+                      <div className="border-t border-zinc-900 pt-4 mt-2">
+                        <h4 className="text-xs font-black tracking-wider text-white uppercase mb-2 font-mono">Tests</h4>
+                        <ul className="space-y-1.5">
+                          {activeLevelData?.validation.testCases.map((tc, idx) => (
+                            <li key={idx} className="text-[10.5px] text-zinc-500 flex items-start gap-2">
+                              <span className="text-zinc-600">•</span><span>{tc.description || tc.name}</span>
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                      <div className="mt-2 border-t border-zinc-900 pt-4">
+                        <button onClick={() => { playSound("click"); setShowHint(!showHint); }}
+                          className="text-[10px] font-mono font-bold text-zinc-500 hover:text-white flex items-center gap-1 transition-colors cursor-pointer uppercase">
+                          <HelpCircle className="size-3.5" /> {showHint ? "Hide Hint" : "Show Hint"}
+                        </button>
+                        <AnimatePresence>
+                          {showHint && (
+                            <motion.div initial={{ opacity: 0, y: -5 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -5 }}
+                              className="bg-zinc-900/60 border border-zinc-800 rounded-xl p-3.5 mt-3 text-[10.5px] text-zinc-400 font-mono leading-relaxed space-y-1.5">
+                              {activeLevelData?.hints.map((hint, i) => (
+                                <p key={i}>• {hint}</p>
+                              ))}
+                            </motion.div>
+                          )}
+                        </AnimatePresence>
                       </div>
                     </div>
 
-                    {/* Right panel: editor + output terminal */}
-                    <div className="lg:col-span-8 flex flex-col gap-5 min-h-[60vh] max-h-[85vh]">
-                      <div className="flex-1 flex flex-col bg-zinc-950 border border-zinc-900 rounded-2xl overflow-hidden shadow-2xl relative">
-                        <div className="flex justify-between items-center bg-zinc-950 border-b border-zinc-900 px-4 py-2">
-                          <span className="text-[10px] font-mono font-black text-zinc-500 uppercase tracking-widest flex items-center gap-1.5">
-                            <Code2 className="size-3.5" /> Workspace Terminal
-                          </span>
-                          <button onClick={() => { playSound("click"); setEditorCode(activeLevelData?.starterCode || ""); }}
-                            className="text-[9px] font-mono text-zinc-500 hover:text-white flex items-center gap-1 transition-colors cursor-pointer uppercase font-bold">
-                            <RotateCcw className="size-3" /> Reset Starter Code
-                          </button>
+                    {/* Column 2: Code Editor */}
+                    <div className="flex flex-col bg-zinc-950 border border-zinc-900 rounded-2xl overflow-hidden shadow-2xl relative max-h-[calc(100vh-140px)]">
+                      <div className="flex justify-between items-center bg-zinc-950 border-b border-zinc-900 px-4 py-2 select-none">
+                        <span className="text-[10px] font-mono font-black text-zinc-500 uppercase tracking-widest flex items-center gap-1.5">
+                          <Code2 className="size-3.5" /> Workspace Editor
+                        </span>
+                        <button onClick={() => { playSound("click"); setEditorCode(activeLevelData?.starterCode || ""); }}
+                          className="text-[9px] font-mono text-zinc-500 hover:text-white flex items-center gap-1 transition-colors cursor-pointer uppercase font-bold">
+                          <RotateCcw className="size-3" /> Reset Code
+                        </button>
+                      </div>
+                      <div className="flex-1 min-h-0 select-text">
+                        <Editor
+                          height="100%"
+                          language={
+                            activeGame.id === "html5" || activeGame.id === "tailwind" ? "html" :
+                            activeGame.id === "css3" ? "css" :
+                            activeGame.id === "javascript" || activeGame.id === "nodejs" ? "javascript" :
+                            activeGame.id === "typescript" ? "typescript" :
+                            activeGame.id === "python" ? "python" :
+                            activeGame.id === "git" ? "shell" :
+                            "html"
+                          }
+                          theme="vs-dark"
+                          value={editorCode}
+                          onChange={(val) => setEditorCode(val || "")}
+                          options={{
+                            fontSize: 11,
+                            minimap: { enabled: false },
+                            lineNumbers: "on",
+                            roundedSelection: true,
+                            scrollBeyondLastLine: false,
+                            readOnly: activeGame.id === "git",
+                            fontFamily: "var(--font-geist-mono), monospace",
+                            padding: { top: 12 }
+                          }}
+                        />
+                      </div>
+                      <div className="p-4 border-t border-zinc-900 bg-zinc-950 flex gap-3 select-none">
+                        <button onClick={evaluateCode}
+                          className="flex-1 py-3 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold uppercase tracking-widest rounded-xl transition-all cursor-pointer flex items-center justify-center gap-1.5 border border-emerald-600 shadow-lg shadow-emerald-950/20">
+                          🚀 Run Code & Verify
+                        </button>
+                      </div>
+                    </div>
+
+                    {/* Column 3: Preview Output & Results */}
+                    <div className="flex flex-col gap-4 max-h-[calc(100vh-140px)] min-h-0">
+                      {/* Live preview component */}
+                      <div className="flex-1 bg-white rounded-2xl overflow-hidden shadow-2xl min-h-0 flex flex-col border border-zinc-900">
+                        <div className="bg-zinc-950 border-b border-zinc-900 px-4 py-2 text-[10px] font-mono font-black text-zinc-500 uppercase tracking-widest flex items-center justify-between select-none">
+                          <span>Live Render Preview</span>
+                          <span className="text-[8px] px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 font-bold">Active</span>
                         </div>
-                        <div className="flex-1 min-h-[350px]">
-                          <Editor
-                            height="100%"
-                            language={
-                              activeGame.id === "html5" || activeGame.id === "tailwind" ? "html" :
-                              activeGame.id === "css3" ? "css" :
-                              activeGame.id === "javascript" || activeGame.id === "nodejs" ? "javascript" :
-                              activeGame.id === "typescript" ? "typescript" :
-                              activeGame.id === "python" ? "python" :
-                              activeGame.id === "git" ? "shell" :
-                              "html"
-                            }
-                            theme="vs-dark"
-                            value={editorCode}
-                            onChange={(val) => setEditorCode(val || "")}
-                            options={{
-                              fontSize: 11,
-                              minimap: { enabled: false },
-                              lineNumbers: "on",
-                              roundedSelection: true,
-                              scrollBeyondLastLine: false,
-                              readOnly: activeGame.id === "git",
-                              fontFamily: "var(--font-geist-mono), monospace",
-                              padding: { top: 12 }
-                            }}
-                          />
-                        </div>
+                        <iframe
+                          title="live-render-preview"
+                          srcDoc={
+                            activeGame.id === "html5" || activeGame.id === "tailwind" ? editorCode :
+                            activeGame.id === "css3" ? `<style>${editorCode}</style><div style="padding: 20px; color: black; font-family: sans-serif;"><h3>CSS Sandbox Live Preview</h3><div class="visual-box" style="margin-top: 10px; width: 100px; height: 100px; background: grey; border: 1px solid black; display: flex; align-items: center; justify-content: center; font-size: 10px;">Styled Box</div></div>` :
+                            `<div style="padding: 20px; color: black; font-family: sans-serif;"><h3>Sandbox Live Preview</h3><p style="font-size: 11px;">Active language: <strong>${activeGame.name}</strong></p></div>`
+                          }
+                          className="w-full flex-1 bg-white border-none"
+                          sandbox="allow-scripts"
+                        />
                       </div>
 
-                      {/* Output terminal */}
-                      <div className="bg-zinc-950 border border-zinc-900 rounded-2xl p-5 flex flex-col gap-3 min-h-[180px] shadow-2xl">
-                        <div className="flex justify-between items-center border-b border-zinc-900 pb-2">
+                      {/* Test logs & results terminal */}
+                      <div className="h-[180px] shrink-0 bg-zinc-950 border border-zinc-900 rounded-2xl p-5 flex flex-col gap-3 overflow-y-auto shadow-2xl">
+                        <div className="flex justify-between items-center border-b border-zinc-900 pb-2 select-none">
                           <span className="text-[9px] font-mono text-zinc-500 uppercase tracking-widest font-bold">Output / Test Results</span>
                           <div className="flex gap-2">
                             {evaluationSuccess === true && <span className="text-[9px] font-mono bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 px-2 py-0.5 rounded-full uppercase font-bold">All Tests Passed</span>}
@@ -1483,24 +1495,20 @@ function GamesPageContent() {
                           </div>
                         </div>
 
-                        {/* Custom visual previews or log feeds */}
-
-                        {activeGame.id === "git" && (
+                        {activeGame.id === "git" ? (
                           <div className="flex-1 flex flex-col gap-2 bg-black/60 border border-zinc-900 rounded-xl p-3 font-mono text-[10px]">
-                            <div className="flex-1 overflow-y-auto max-h-[120px] text-zinc-400 space-y-1">
+                            <div className="flex-1 overflow-y-auto max-h-[80px] text-zinc-400 space-y-1 select-text">
                               {gitTerminalLogs.map((log, i) => <div key={i}>{log}</div>)}
                             </div>
-                            <form onSubmit={handleExecuteGitCommand} className="flex gap-2 border-t border-zinc-900 pt-2">
+                            <form onSubmit={handleExecuteGitCommand} className="flex gap-2 border-t border-zinc-900 pt-2 select-none">
                               <span className="text-zinc-500 font-bold select-none pt-1.5">$</span>
                               <input type="text" value={gitCommandInput} onChange={e => setGitCommandInput(e.target.value)}
-                                placeholder="Type git command... (e.g. 'git init', 'git add .', 'git commit -m ...')"
+                                placeholder="Type git command..."
                                 className="flex-1 bg-transparent border-none text-white focus:outline-none placeholder-zinc-700 font-mono" />
                             </form>
                           </div>
-                        )}
-
-                        {activeGame.id !== "git" && (
-                          <div className="flex-1 overflow-y-auto max-h-[140px] text-[10px] font-mono text-zinc-500 space-y-1">
+                        ) : (
+                          <div className="flex-1 overflow-y-auto max-h-[110px] text-[10px] font-mono text-zinc-500 space-y-1 select-text">
                             {evalLogs.length === 0 ? (
                               <div className="text-zinc-700 italic">No output logged yet. Run your code to trigger unit tests.</div>
                             ) : (
@@ -1508,13 +1516,6 @@ function GamesPageContent() {
                             )}
                           </div>
                         )}
-
-                        <div className="flex gap-3 mt-1">
-                          <button onClick={evaluateCode}
-                            className="flex-1 py-3 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold uppercase tracking-widest rounded-xl transition-all cursor-pointer flex items-center justify-center gap-1.5 border border-emerald-600 shadow-lg shadow-emerald-950/20">
-                            🚀 Run Code & Verify
-                          </button>
-                        </div>
                       </div>
                     </div>
                   </div>

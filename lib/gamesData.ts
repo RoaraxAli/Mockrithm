@@ -123,6 +123,245 @@ export const GAMES_LIST: GameInfo[] = [
 
 
 // Handcrafted Codédex blueprints for initial sequence (HTML5 Game target)
+
+const HTML5_EARLY_LEVELS: LevelData[] = [
+  {
+    id: "html5-1",
+    level: 1,
+    levelId: 1,
+    tier: "Apprentice",
+    title: "Doctype",
+    conceptText: "### Concept\nThe <!DOCTYPE html> declaration is placed at the very start of your document to tell the browser that the page is a modern HTML5 document.",
+    codeExample: "```html\n<!DOCTYPE html>\n```",
+    missionText: "### Mission\nWrite the modern HTML5 doctype declaration at the beginning of the file.",
+    starterCode: "<!-- Level 1 -->\n",
+    hints: ["Write '<!DOCTYPE html>' exactly."],
+    validation: {
+      checkType: "html",
+      testCases: [
+        {
+          description: "Create the HTML5 doctype declaration",
+          testRegex: "<!DOCTYPE\\s+html>"
+        }
+      ]
+    }
+  },
+  {
+    id: "html5-2",
+    level: 2,
+    levelId: 2,
+    tier: "Apprentice",
+    title: "Root Element",
+    conceptText: "### Concept\nThe <html> tag acts as the root container element of any HTML document. Everything else on the page goes inside it.",
+    codeExample: "```html\n<html>\n  <!-- other elements -->\n</html>\n```",
+    missionText: "### Mission\nWrite opening <html> and closing </html> tags.",
+    starterCode: "<!-- Level 2 -->\n",
+    hints: ["Write opening <html> and closing </html> tags."],
+    validation: {
+      checkType: "html",
+      testCases: [
+        {
+          description: "Create the html root element",
+          testRegex: "<html>\\s*</html>"
+        }
+      ]
+    }
+  },
+  {
+    id: "html5-3",
+    level: 3,
+    levelId: 3,
+    tier: "Apprentice",
+    title: "Document Head",
+    conceptText: "### Concept\nThe <head> tag acts as a container for metadata about the document, such as character sets, stylesheets, and scripts, which are invisible to visitors.",
+    codeExample: "```html\n<head>\n  <!-- metadata -->\n</head>\n```",
+    missionText: "### Mission\nCreate a basic <head></head> structural block.",
+    starterCode: "<!-- Level 3 -->\n",
+    hints: ["Add opening <head> and closing </head> tags."],
+    validation: {
+      checkType: "html",
+      testCases: [
+        {
+          description: "Create a head element",
+          testRegex: "<head>\\s*</head>"
+        }
+      ]
+    }
+  },
+  {
+    id: "html5-4",
+    level: 4,
+    levelId: 4,
+    tier: "Apprentice",
+    title: "Document Body",
+    conceptText: "### Concept\nThe <body> tag contains all the visible elements that appear on the screen, such as headers, text, images, and lists.",
+    codeExample: "```html\n<body>\n  <h1>Hello Web!</h1>\n</body>\n```",
+    missionText: "### Mission\nCreate a basic <body></body> structural block.",
+    starterCode: "<!-- Level 4 -->\n",
+    hints: ["Add opening <body> and closing </body> tags."],
+    validation: {
+      checkType: "html",
+      testCases: [
+        {
+          description: "Create a body element",
+          testRegex: "<body>\\s*</body>"
+        }
+      ]
+    }
+  },
+  {
+    id: "html5-5",
+    level: 5,
+    levelId: 5,
+    tier: "Apprentice",
+    title: "Full Scaffold",
+    conceptText: "### Concept\nA standard HTML document structure combines the DOCTYPE declaration, followed by the <html> block containing the <head> and <body> blocks.",
+    codeExample: "```html\n<!DOCTYPE html>\n<html>\n  <head></head>\n  <body></body>\n</html>\n```",
+    missionText: "### Mission\nWrite a complete basic HTML document skeleton.",
+    starterCode: "<!-- Level 5 -->\n",
+    hints: ["Combine <!DOCTYPE html>, <html>, <head>, and <body> in order."],
+    validation: {
+      checkType: "html",
+      testCases: [
+        {
+          description: "Create a complete HTML structure",
+          testRegex: "<!DOCTYPE\\s+html>\\s*<html>\\s*<head>\\s*</head>\\s*<body>\\s*</body>\\s*</html>"
+        }
+      ]
+    }
+  },
+  {
+    id: "html5-6",
+    level: 6,
+    levelId: 6,
+    tier: "Apprentice",
+    title: "Document Title",
+    conceptText: "### Concept\nThe <title> element goes inside the <head> section and sets the name that appears on the browser tab.",
+    codeExample: "```html\n<head>\n  <title>My Portfolio</title>\n</head>\n```",
+    missionText: "### Mission\nCreate a head block containing a title set to 'My Portfolio'.",
+    starterCode: "<!-- Level 6 -->\n",
+    hints: ["Nest <title>My Portfolio</title> inside a <head> block."],
+    validation: {
+      checkType: "html",
+      testCases: [
+        {
+          description: "Create a head element with title nested inside",
+          testRegex: "<head[\\s>]"
+        },
+        {
+          description: "Set title text to 'My Portfolio'",
+          testRegex: "<title>\\s*My\\s+Portfolio\\s*</title>"
+        }
+      ]
+    }
+  },
+  {
+    id: "html5-7",
+    level: 7,
+    levelId: 7,
+    tier: "Apprentice",
+    title: "Heading 1",
+    conceptText: "### Concept\nThe <h1> tag defines the primary heading of your page. It is usually the largest title on the screen.",
+    codeExample: "```html\n<h1>Welcome to My Site</h1>\n```",
+    missionText: "### Mission\nCreate a primary heading (h1) that reads 'Welcome to My Site'.",
+    starterCode: "<!-- Level 7 -->\n",
+    hints: ["Write '<h1>Welcome to My Site</h1>'."],
+    validation: {
+      checkType: "html",
+      testCases: [
+        {
+          description: "Create an h1 element with welcome text",
+          testRegex: "<h1>\\s*Welcome\\s+to\\s+My\\s+Site\\s*</h1>"
+        }
+      ]
+    }
+  },
+  {
+    id: "html5-8",
+    level: 8,
+    levelId: 8,
+    tier: "Apprentice",
+    title: "Paragraphs",
+    conceptText: "### Concept\nThe <p> tag is used to wrap blocks of text. It automatically adds spacing before and after the paragraph to stack paragraphs cleanly.",
+    codeExample: "```html\n<p>Hello World</p>\n```",
+    missionText: "### Mission\nWrap 'Hello World' in a paragraph (p) tag.",
+    starterCode: "<!-- Level 8 -->\n",
+    hints: ["Write '<p>Hello World</p>'."],
+    validation: {
+      checkType: "html",
+      testCases: [
+        {
+          description: "Create a p tag with Hello World text",
+          testRegex: "<p>\\s*Hello\\s+World\\s*</p>"
+        }
+      ]
+    }
+  },
+  {
+    id: "html5-9",
+    level: 9,
+    levelId: 9,
+    tier: "Apprentice",
+    title: "Heading Hierarchy",
+    conceptText: "### Concept\nHTML supports headings from <h1> to <h6> to build content hierarchy. Subheadings like <h2> mark sub-sections of a page.",
+    codeExample: "```html\n<h2>About Me</h2>\n```",
+    missionText: "### Mission\nCreate an h2 heading tag that reads 'About Me'.",
+    starterCode: "<!-- Level 9 -->\n",
+    hints: ["Write '<h2>About Me</h2>'."],
+    validation: {
+      checkType: "html",
+      testCases: [
+        {
+          description: "Create an h2 element with About Me text",
+          testRegex: "<h2>\\s*About\\s+Me\\s*</h2>"
+        }
+      ]
+    }
+  },
+  {
+    id: "html5-10",
+    level: 10,
+    levelId: 10,
+    tier: "Apprentice",
+    title: "Line Breaks",
+    conceptText: "### Concept\nNormally, HTML collapses multiple spaces and line breaks. The <br> tag is a self-closing element that forces a line break.",
+    codeExample: "```html\nLine One<br>Line Two\n```",
+    missionText: "### Mission\nWrite a paragraph containing 'Line One' and 'Line Two' separated by a <br> tag.",
+    starterCode: "<!-- Level 10 -->\n<p>\n  Line One\n  Line Two\n</p>",
+    hints: ["Add '<br>' between 'Line One' and 'Line Two' inside the paragraph."],
+    validation: {
+      checkType: "html",
+      testCases: [
+        {
+          description: "Separate text with a line break",
+          testRegex: "<p>[\\s\\S]*Line\\s+One<br/?>Line\\s+Two[\\s\\S]*</p>"
+        }
+      ]
+    }
+  },
+  {
+    id: "html5-11",
+    level: 11,
+    levelId: 11,
+    tier: "Apprentice",
+    title: "Horizontal Rules",
+    conceptText: "### Concept\nThe <hr> tag is a self-closing element that displays a horizontal dividing line, useful for separating sections.",
+    codeExample: "```html\n<h1>Title</h1>\n<hr>\n<p>Content</p>\n```",
+    missionText: "### Mission\nPlace an hr divider between the primary h1 heading and the paragraph.",
+    starterCode: "<!-- Level 11 -->\n<h1>Title</h1>\n\n<p>Content</p>",
+    hints: ["Add '<hr>' in the empty space between the heading and the paragraph."],
+    validation: {
+      checkType: "html",
+      testCases: [
+        {
+          description: "Add a horizontal rule between heading and paragraph",
+          testRegex: "<h1>.*</h1>\\s*<hr/?>\\s*<p>.*</p>"
+        }
+      ]
+    }
+  }
+];
+
 const HTML5_INITIAL_LEVELS: LevelData[] = [
   {
     "id": "html5-6",
@@ -133,7 +372,7 @@ const HTML5_INITIAL_LEVELS: LevelData[] = [
     "conceptText": "### 1. The Concept (The \"Why\")\nThe `<html>` tag is the root container element of any HTML document. Everything else on the page goes inside it.",
     "codeExample": "```html\n<html>\n  <!-- other elements -->\n</html>\n```",
     "missionText": "### 2. Your Mission\nWrap an empty set of `<html>` tags around nothing yet inside the container.",
-    "starterCode": "<!-- Level 6 -->\n<div id=\"element-container\">\n  \n</div>",
+    "starterCode": "<!-- Level 6 -->\n",
     "hints": [
       "Add opening <html> and closing </html> tags."
     ],
@@ -156,7 +395,7 @@ const HTML5_INITIAL_LEVELS: LevelData[] = [
     "conceptText": "### 1. The Concept (The \"Why\")\nThe `<head>` tag acts as a container for metadata about the document, such as character sets, stylesheets, and scripts, which are invisible to visitors.",
     "codeExample": "```html\n<head>\n  <!-- metadata -->\n</head>\n```",
     "missionText": "### 2. Your Mission\nCreate a basic `<head></head>` structural block inside the container.",
-    "starterCode": "<!-- Level 7 -->\n<div id=\"element-container\">\n  \n</div>",
+    "starterCode": "<!-- Level 7 -->\n",
     "hints": [
       "Add opening <head> and closing </head> tags."
     ],
@@ -179,7 +418,7 @@ const HTML5_INITIAL_LEVELS: LevelData[] = [
     "conceptText": "### 1. The Concept (The \"Why\")\nThe `<body>` tag contains all the visible elements that appear on the screen, such as headers, text, images, and lists.",
     "codeExample": "```html\n<body>\n  <h1>Hello Web!</h1>\n</body>\n```",
     "missionText": "### 2. Your Mission\nCreate a basic `<body></body>` structural block inside the container.",
-    "starterCode": "<!-- Level 8 -->\n<div id=\"element-container\">\n  \n</div>",
+    "starterCode": "<!-- Level 8 -->\n",
     "hints": [
       "Add opening <body> and closing </body> tags."
     ],
@@ -202,7 +441,7 @@ const HTML5_INITIAL_LEVELS: LevelData[] = [
     "conceptText": "### 1. The Concept (The \"Why\")\nThe `<!DOCTYPE html>` declaration is mandatory at the very start of your document to tell the browser it is a modern HTML5 page.",
     "codeExample": "```html\n<!DOCTYPE html>\n```",
     "missionText": "### 2. Your Mission\nWrite just the modern HTML5 doctype declaration line inside the container.",
-    "starterCode": "<!-- Level 9 -->\n<div id=\"element-container\">\n  \n</div>",
+    "starterCode": "<!-- Level 9 -->\n",
     "hints": [
       "Write '<!DOCTYPE html>' exactly."
     ],
@@ -225,7 +464,7 @@ const HTML5_INITIAL_LEVELS: LevelData[] = [
     "conceptText": "### 1. The Concept (The \"Why\")\nA standard HTML document structure combines the DOCTYPE declaration, followed by the `<html>` block containing the `<head>` and `<body>` blocks.",
     "codeExample": "```html\n<!DOCTYPE html>\n<html>\n  <head></head>\n  <body></body>\n</html>\n```",
     "missionText": "### 2. Your Mission\nWrite a complete, empty basic HTML document skeleton inside the container.",
-    "starterCode": "<!-- Level 10 -->\n<div id=\"element-container\">\n  \n</div>",
+    "starterCode": "<!-- Level 10 -->\n",
     "hints": [
       "Combine <!DOCTYPE html>, <html>, <head>, and <body> in order."
     ],
@@ -248,7 +487,7 @@ const HTML5_INITIAL_LEVELS: LevelData[] = [
     "conceptText": "### 1. The Concept (The \"Why\")\nThe `<title>` element goes inside the `<head>` section and sets the name that appears on the browser tab.",
     "codeExample": "```html\n<head>\n  <title>My Cool Page</title>\n</head>\n```",
     "missionText": "### 2. Your Mission\nCreate a head block containing a title set to \"My Portfolio\" inside the container.",
-    "starterCode": "<!-- Level 11 -->\n<div id=\"element-container\">\n  \n</div>",
+    "starterCode": "<!-- Level 11 -->\n",
     "hints": [
       "Nest <title>My Portfolio</title> inside a <head> block."
     ],
@@ -279,7 +518,7 @@ const HTML5_INITIAL_LEVELS: LevelData[] = [
     "conceptText": "### 1. The Concept (The \"Why\")\nNormally, HTML collapses multiple spaces and line breaks. The `<pre>` tag preserves exact spaces, tabs, and line breaks as typed.",
     "codeExample": "```html\n<pre>\n  Line One\n    Line Two (indented)\n</pre>\n```",
     "missionText": "### 2. Your Mission\nWrap a multi-line ASCII art character or spaced text in a pre tag inside the container. It should contain at least one line break inside the pre tag.",
-    "starterCode": "<!-- Level 12 -->\n<div id=\"element-container\">\n  \n</div>",
+    "starterCode": "<!-- Level 12 -->\n",
     "hints": [
       "Create a <pre> tag.",
       "Add multiple lines or custom spacing inside, then close with </pre>."
@@ -305,9 +544,9 @@ const HTML5_INITIAL_LEVELS: LevelData[] = [
     "tier": "Apprentice",
     "title": "Elements Nesting",
     "conceptText": "### 1. The Concept (The \"Why\")\nHTML tags must close in the reverse order they were opened. This is called nesting. For example, `<body><p>Text</p></body>`.",
-    "codeExample": "```html\n<div>\n  <p>Nested text</p>\n</div>\n```",
+    "codeExample": "```html\n<div>\n  <p>Nested text</p>\n```",
     "missionText": "### 2. Your Mission\nNest a paragraph inside a body tag correctly inside the container.",
-    "starterCode": "<!-- Level 13 -->\n<div id=\"element-container\">\n  \n</div>",
+    "starterCode": "<!-- Level 13 -->\n",
     "hints": [
       "Open <body>, then open <p>, add some text, close </p>, and then close </body>."
     ],
@@ -330,7 +569,7 @@ const HTML5_INITIAL_LEVELS: LevelData[] = [
     "conceptText": "### 1. The Concept (The \"Why\")\nHTML comments are used to leave notes in the code that are completely ignored by the browser and won't show up on the page.",
     "codeExample": "```html\n<!-- This is a comment -->\n```",
     "missionText": "### 2. Your Mission\nWrite an HTML comment that says \"Main content starts here\" inside the container.",
-    "starterCode": "<!-- Level 14 -->\n<div id=\"element-container\">\n  \n</div>",
+    "starterCode": "<!-- Level 14 -->\n",
     "hints": [
       "Use <!-- to open a comment and --> to close it."
     ],
@@ -353,7 +592,7 @@ const HTML5_INITIAL_LEVELS: LevelData[] = [
     "conceptText": "### 1. The Concept (The \"Why\")\nLet's review the fundamental structure elements we have learned in Module 1. We'll build a simple web page structure.",
     "codeExample": "```html\n<!DOCTYPE html>\n<html>\n  <!-- Combine elements -->\n</html>\n```",
     "missionText": "### 2. Your Mission\nBuild a full webpage skeleton with a title (My Page), an h1 (Welcome), a divider line, and a paragraph inside the container.",
-    "starterCode": "<!-- Level 15 -->\n<div id=\"element-container\">\n  \n</div>",
+    "starterCode": "<!-- Level 15 -->\n",
     "hints": [
       "Nest head and body within html.",
       "Add title inside head, and h1, hr, p inside body."
@@ -381,7 +620,7 @@ const HTML5_INITIAL_LEVELS: LevelData[] = [
     "conceptText": "### 1. The Concept (The \"Why\")\nThe `<strong>` element marks text that has strong importance or urgency, displaying it in bold.",
     "codeExample": "```html\n<p>This is <strong>critical</strong> to understand.</p>\n```",
     "missionText": "### 2. Your Mission\nMake the word \"Warning\" strong within a sentence inside the container.",
-    "starterCode": "<!-- Level 16 -->\n<div id=\"element-container\">\n  \n</div>",
+    "starterCode": "<!-- Level 16 -->\n",
     "hints": [
       "Wrap 'Warning' inside <strong> and </strong>."
     ],
@@ -404,7 +643,7 @@ const HTML5_INITIAL_LEVELS: LevelData[] = [
     "conceptText": "### 1. The Concept (The \"Why\")\nThe `<em>` element italicizes text to show conversational emphasis or stress.",
     "codeExample": "```html\n<p>You <em>must</em> save your progress.</p>\n```",
     "missionText": "### 2. Your Mission\nMake the word \"must\" emphasized within a sentence inside the container.",
-    "starterCode": "<!-- Level 17 -->\n<div id=\"element-container\">\n  \n</div>",
+    "starterCode": "<!-- Level 17 -->\n",
     "hints": [
       "Wrap 'must' inside <em> and </em>."
     ],
@@ -427,7 +666,7 @@ const HTML5_INITIAL_LEVELS: LevelData[] = [
     "conceptText": "### 1. The Concept (The \"Why\")\nThe `<mark>` element highlights text, typically with a yellow background, to indicate relevance in a context.",
     "codeExample": "```html\n<p>Check the <mark>important terms</mark> here.</p>\n```",
     "missionText": "### 2. Your Mission\nHighlight the phrase \"Special Offer\" inside a paragraph inside the container.",
-    "starterCode": "<!-- Level 18 -->\n<div id=\"element-container\">\n  \n</div>",
+    "starterCode": "<!-- Level 18 -->\n",
     "hints": [
       "Use <mark>Special Offer</mark> nested inside <p>."
     ],
@@ -450,7 +689,7 @@ const HTML5_INITIAL_LEVELS: LevelData[] = [
     "conceptText": "### 1. The Concept (The \"Why\")\nThe `<del>` tag represents deleted or removed text, drawing a line (strikethrough) over it.",
     "codeExample": "```html\n<p>Old pricing: <del>$99</del></p>\n```",
     "missionText": "### 2. Your Mission\nShow an old price of \"$50\" marked as deleted inside the container.",
-    "starterCode": "<!-- Level 19 -->\n<div id=\"element-container\">\n  \n</div>",
+    "starterCode": "<!-- Level 19 -->\n",
     "hints": [
       "Wrap '$50' in <del> and </del> tags."
     ],
@@ -473,7 +712,7 @@ const HTML5_INITIAL_LEVELS: LevelData[] = [
     "conceptText": "### 1. The Concept (The \"Why\")\nThe `<ins>` tag represents inserted or added text, rendering it with an underline. It is often paired with `<del>`.",
     "codeExample": "```html\n<p><del>Old</del> <ins>New</ins></p>\n```",
     "missionText": "### 2. Your Mission\nShow a new price of \"$30\" marked as inserted next to a deleted price of \"$50\" inside the container.",
-    "starterCode": "<!-- Level 20 -->\n<div id=\"element-container\">\n  \n</div>",
+    "starterCode": "<!-- Level 20 -->\n",
     "hints": [
       "Put <del>$50</del> followed by <ins>$30</ins>."
     ],
@@ -496,7 +735,7 @@ const HTML5_INITIAL_LEVELS: LevelData[] = [
     "conceptText": "### 1. The Concept (The \"Why\")\nThe `<sub>` tag lowers text to a subscript position, useful for chemical equations or formulas.",
     "codeExample": "```html\n<p>CO<sub>2</sub> represents Carbon Dioxide.</p>\n```",
     "missionText": "### 2. Your Mission\nWrite the chemical formula for water (H2O) using subscript for the \"2\" inside the container.",
-    "starterCode": "<!-- Level 21 -->\n<div id=\"element-container\">\n  \n</div>",
+    "starterCode": "<!-- Level 21 -->\n",
     "hints": [
       "Format it as H<sub>2</sub>O."
     ],
@@ -519,7 +758,7 @@ const HTML5_INITIAL_LEVELS: LevelData[] = [
     "conceptText": "### 1. The Concept (The \"Why\")\nThe `<sup>` tag raises text to a superscript position, useful for math exponents or calendar dates.",
     "codeExample": "```html\n<p>2<sup>3</sup> equals 8.</p>\n```",
     "missionText": "### 2. Your Mission\nWrite \"October 4th\" using superscript for the \"th\" inside the container.",
-    "starterCode": "<!-- Level 22 -->\n<div id=\"element-container\">\n  \n</div>",
+    "starterCode": "<!-- Level 22 -->\n",
     "hints": [
       "Format it as October 4<sup>th</sup>."
     ],
@@ -542,7 +781,7 @@ const HTML5_INITIAL_LEVELS: LevelData[] = [
     "conceptText": "### 1. The Concept (The \"Why\")\nThe `<q>` tag defines an inline, short quote. Browsers normally insert quotation marks around the text automatically.",
     "codeExample": "```html\n<p>She said, <q>This is great!</q></p>\n```",
     "missionText": "### 2. Your Mission\nQuote someone saying \"Keep coding\" using the inline quote tag inside the container.",
-    "starterCode": "<!-- Level 23 -->\n<div id=\"element-container\">\n  \n</div>",
+    "starterCode": "<!-- Level 23 -->\n",
     "hints": [
       "Wrap 'Keep coding' in a <q> tag."
     ],
@@ -565,7 +804,7 @@ const HTML5_INITIAL_LEVELS: LevelData[] = [
     "conceptText": "### 1. The Concept (The \"Why\")\nFor long, standalone quotes cited from other sources, we use the `<blockquote>` tag, which usually indents the block of text.",
     "codeExample": "```html\n<blockquote>\n  This is a long quote that spans multiple lines.\n</blockquote>\n```",
     "missionText": "### 2. Your Mission\nCreate a standalone blockquote containing a famous inspirational phrase (e.g. \"To be or not to be\") inside the container.",
-    "starterCode": "<!-- Level 24 -->\n<div id=\"element-container\">\n  \n</div>",
+    "starterCode": "<!-- Level 24 -->\n",
     "hints": [
       "Write <blockquote>Your quote here</blockquote>."
     ],
@@ -588,7 +827,7 @@ const HTML5_INITIAL_LEVELS: LevelData[] = [
     "conceptText": "### 1. The Concept (The \"Why\")\nThe `<abbr>` element represents an abbreviation or acronym. It uses a `title` attribute to show the full version on hover.",
     "codeExample": "```html\n<abbr title=\"World Wide Web\">WWW</abbr>\n```",
     "missionText": "### 2. Your Mission\nCreate an abbreviation for \"HTML\" with the title \"HyperText Markup Language\" inside the container.",
-    "starterCode": "<!-- Level 25 -->\n<div id=\"element-container\">\n  \n</div>",
+    "starterCode": "<!-- Level 25 -->\n",
     "hints": [
       "Use <abbr title=\"HyperText Markup Language\">HTML</abbr>."
     ],
@@ -611,7 +850,7 @@ const HTML5_INITIAL_LEVELS: LevelData[] = [
     "conceptText": "### 1. The Concept (The \"Why\")\nTo render snippets of inline computer code in a monospace font, we wrap them in the `<code>` tag.",
     "codeExample": "```html\n<p>Define a variable with <code>let x = 10;</code>.</p>\n```",
     "missionText": "### 2. Your Mission\nWrap the text \"var x = 5\" in a code tag inside a sentence inside the container.",
-    "starterCode": "<!-- Level 26 -->\n<div id=\"element-container\">\n  \n</div>",
+    "starterCode": "<!-- Level 26 -->\n",
     "hints": [
       "Wrap 'var x = 5' inside <code> and </code>."
     ],
@@ -634,7 +873,7 @@ const HTML5_INITIAL_LEVELS: LevelData[] = [
     "conceptText": "### 1. The Concept (The \"Why\")\nTo present items in no specific sequence, we use unordered lists (`<ul>`), wrapping each point in a list item (`<li>`) tag.",
     "codeExample": "```html\n<ul>\n  <li>First item</li>\n  <li>Second item</li>\n</ul>\n```",
     "missionText": "### 2. Your Mission\nCreate a bulleted list containing three grocery items (e.g. Milk, Bread, Eggs) inside the container.",
-    "starterCode": "<!-- Level 27 -->\n<div id=\"element-container\">\n  \n</div>",
+    "starterCode": "<!-- Level 27 -->\n",
     "hints": [
       "Use <ul> opening and closing tags, with three <li> elements nested inside."
     ],
@@ -661,7 +900,7 @@ const HTML5_INITIAL_LEVELS: LevelData[] = [
     "conceptText": "### 1. The Concept (The \"Why\")\nFor sequential guides, we use ordered lists (`<ol>`), which automatically number each nested list item (`<li>`).",
     "codeExample": "```html\n<ol>\n  <li>Step One</li>\n  <li>Step Two</li>\n</ol>\n```",
     "missionText": "### 2. Your Mission\nCreate a numbered list showing a 3-step setup guide inside the container.",
-    "starterCode": "<!-- Level 28 -->\n<div id=\"element-container\">\n  \n</div>",
+    "starterCode": "<!-- Level 28 -->\n",
     "hints": [
       "Use <ol> tags containing three <li> elements."
     ],
@@ -688,7 +927,7 @@ const HTML5_INITIAL_LEVELS: LevelData[] = [
     "conceptText": "### 1. The Concept (The \"Why\")\nDescription lists (`<dl>`) organize terms (`<dt>`) and their matching descriptions or definitions (`<dd>`).",
     "codeExample": "```html\n<dl>\n  <dt>Term</dt>\n  <dd>Definition</dd>\n</dl>\n```",
     "missionText": "### 2. Your Mission\nDefine the term \"CSS\" as \"Cascading Style Sheets\" using a description list inside the container.",
-    "starterCode": "<!-- Level 29 -->\n<div id=\"element-container\">\n  \n</div>",
+    "starterCode": "<!-- Level 29 -->\n",
     "hints": [
       "Nest <dt>CSS</dt> and <dd>Cascading Style Sheets</dd> inside a <dl> block."
     ],
@@ -719,7 +958,7 @@ const HTML5_INITIAL_LEVELS: LevelData[] = [
     "conceptText": "### 1. The Concept (The \"Why\")\nLists can be nested within list items to build hierarchical menu layouts or outlines.",
     "codeExample": "```html\n<ul>\n  <li>Main Item\n    <ul>\n      <li>Sub-item</li>\n    </ul>\n  </li>\n</ul>\n```",
     "missionText": "### 2. Your Mission\nCreate a numbered list (ol) with 2 items, where item #2 contains a 2-item bulleted sub-list (ul) inside the container.",
-    "starterCode": "<!-- Level 30 -->\n<div id=\"element-container\">\n  \n</div>",
+    "starterCode": "<!-- Level 30 -->\n",
     "hints": [
       "Create <ol> with two <li> items. Inside the second <li>, add a complete <ul> list."
     ],
@@ -746,7 +985,7 @@ const HTML5_INITIAL_LEVELS: LevelData[] = [
     "conceptText": "### 1. The Concept (The \"Why\")\nLinks are created using the anchor `<a>` tag. The `href` attribute specifies the URL target.",
     "codeExample": "```html\n<a href=\"https://example.com\">Visit site</a>\n```",
     "missionText": "### 2. Your Mission\nLink the text \"Google\" to \"https://www.google.com\" inside the container.",
-    "starterCode": "<!-- Level 31 -->\n<div id=\"element-container\">\n  \n</div>",
+    "starterCode": "<!-- Level 31 -->\n",
     "hints": [
       "Use <a href=\"https://www.google.com\">Google</a>."
     ],
@@ -769,7 +1008,7 @@ const HTML5_INITIAL_LEVELS: LevelData[] = [
     "conceptText": "### 1. The Concept (The \"Why\")\nAn absolute URL contains the complete address of a web resource, including the protocol (http:// or https://), pointing to external sites.",
     "codeExample": "```html\n<a href=\"https://www.example.com\">External Link</a>\n```",
     "missionText": "### 2. Your Mission\nLink to \"https://www.wikipedia.org\" with the text \"Wikipedia\" inside the container.",
-    "starterCode": "<!-- Level 32 -->\n<div id=\"element-container\">\n  \n</div>",
+    "starterCode": "<!-- Level 32 -->\n",
     "hints": [
       "Use href=\"https://www.wikipedia.org\"."
     ],
@@ -792,7 +1031,7 @@ const HTML5_INITIAL_LEVELS: LevelData[] = [
     "conceptText": "### 1. The Concept (The \"Why\")\nRelative paths link to pages residing on the same host or relative to the current file directory, omitting protocols and domains.",
     "codeExample": "```html\n<a href=\"contact.html\">Contact Us</a>\n```",
     "missionText": "### 2. Your Mission\nLink to a local file named \"about.html\" using the text \"About Us\" inside the container.",
-    "starterCode": "<!-- Level 33 -->\n<div id=\"element-container\">\n  \n</div>",
+    "starterCode": "<!-- Level 33 -->\n",
     "hints": [
       "Set href=\"about.html\" and link text to 'About Us'."
     ],
@@ -815,7 +1054,7 @@ const HTML5_INITIAL_LEVELS: LevelData[] = [
     "conceptText": "### 1. The Concept (The \"Why\")\nAdding `target=\"_blank\"` inside link tags forces the browser to open the target destination in a new window or tab.",
     "codeExample": "```html\n<a href=\"https://example.com\" target=\"_blank\">Open new tab</a>\n```",
     "missionText": "### 2. Your Mission\nMake an external link to Google (\"https://www.google.com\" with text \"Google\") open safely in a brand new tab.",
-    "starterCode": "<!-- Level 34 -->\n<div id=\"element-container\">\n  \n</div>",
+    "starterCode": "<!-- Level 34 -->\n",
     "hints": [
       "Add target=\"_blank\" inside your anchor tag attributes."
     ],
@@ -838,7 +1077,7 @@ const HTML5_INITIAL_LEVELS: LevelData[] = [
     "conceptText": "### 1. The Concept (The \"Why\")\nTo link to specific elements on the same page, we set the `href` attribute to point to the `id` selector of the target section (e.g. `#footer`).",
     "codeExample": "```html\n<a href=\"#about\">Jump to About</a>\n...\n<section id=\"about\">About Details</section>\n```",
     "missionText": "### 2. Your Mission\nCreate a link that jumps down to an element with id=\"contact\" inside the container. The link text should say \"Jump to Contact\".",
-    "starterCode": "<!-- Level 35 -->\n<div id=\"element-container\">\n  \n</div>",
+    "starterCode": "<!-- Level 35 -->\n",
     "hints": [
       "Use <a href=\"#contact\">Jump to Contact</a>."
     ],
@@ -861,7 +1100,7 @@ const HTML5_INITIAL_LEVELS: LevelData[] = [
     "conceptText": "### 1. The Concept (The \"Why\")\nThe self-closing `<img>` tag embeds images on web pages using the `src` attribute to reference image files.",
     "codeExample": "```html\n<img src=\"pic.jpg\" />\n```",
     "missionText": "### 2. Your Mission\nEmbed an image using the source path \"logo.png\" inside the container.",
-    "starterCode": "<!-- Level 36 -->\n<div id=\"element-container\">\n  \n</div>",
+    "starterCode": "<!-- Level 36 -->\n",
     "hints": [
       "Use <img src=\"logo.png\" />."
     ],
@@ -884,7 +1123,7 @@ const HTML5_INITIAL_LEVELS: LevelData[] = [
     "conceptText": "### 1. The Concept (The \"Why\")\nThe `alt` attribute describes the content of an image. It is critical for web accessibility, allowing screen readers to describe images, and displays text if images fail to load.",
     "codeExample": "```html\n<img src=\"logo.png\" alt=\"Company Logo\" />\n```",
     "missionText": "### 2. Your Mission\nAdd descriptive alt text \"Company Logo\" to your \"logo.png\" image inside the container.",
-    "starterCode": "<!-- Level 37 -->\n<div id=\"element-container\">\n  \n</div>",
+    "starterCode": "<!-- Level 37 -->\n",
     "hints": [
       "Add alt=\"Company Logo\" attribute inside the img element."
     ],
@@ -907,7 +1146,7 @@ const HTML5_INITIAL_LEVELS: LevelData[] = [
     "conceptText": "### 1. The Concept (The \"Why\")\nWe can set pixel width and height boundaries directly on images using `width` and `height` attributes inside the tag.",
     "codeExample": "```html\n<img src=\"logo.png\" width=\"300\" height=\"200\" />\n```",
     "missionText": "### 2. Your Mission\nForce an image \"logo.png\" to display at exactly 200 pixels wide and 100 pixels tall inside the container.",
-    "starterCode": "<!-- Level 38 -->\n<div id=\"element-container\">\n  \n</div>",
+    "starterCode": "<!-- Level 38 -->\n",
     "hints": [
       "Specify width=\"200\" height=\"100\" attributes on the img element."
     ],
@@ -934,7 +1173,7 @@ const HTML5_INITIAL_LEVELS: LevelData[] = [
     "conceptText": "### 1. The Concept (The \"Why\")\nTo make an image a clickable link, we nest the `<img>` tag inside an `<a>` anchor tag container.",
     "codeExample": "```html\n<a href=\"index.html\">\n  <img src=\"home.png\" alt=\"Home\" />\n</a>\n```",
     "missionText": "### 2. Your Mission\nMake a \"home.png\" image click through to navigate to \"index.html\" inside the container.",
-    "starterCode": "<!-- Level 39 -->\n<div id=\"element-container\">\n  \n</div>",
+    "starterCode": "<!-- Level 39 -->\n",
     "hints": [
       "Nest <img src=\"home.png\" /> inside <a href=\"index.html\">."
     ],
@@ -957,7 +1196,7 @@ const HTML5_INITIAL_LEVELS: LevelData[] = [
     "conceptText": "### 1. The Concept (The \"Why\")\nUsing `mailto:` inside the link `href` attribute triggers the user's default email client, pre-filling the email address.",
     "codeExample": "```html\n<a href=\"mailto:hello@example.com\">Contact Us</a>\n```",
     "missionText": "### 2. Your Mission\nCreate a link labeled \"Email Me\" that points to \"test@example.com\" inside the container.",
-    "starterCode": "<!-- Level 40 -->\n<div id=\"element-container\">\n  \n</div>",
+    "starterCode": "<!-- Level 40 -->\n",
     "hints": [
       "Use <a href=\"mailto:test@example.com\">Email Me</a>."
     ],
@@ -980,7 +1219,7 @@ const HTML5_INITIAL_LEVELS: LevelData[] = [
     "conceptText": "### 1. The Concept (The \"Why\")\nThe `tel:` protocol creates direct dialing links, allowing mobile visitors to easily place telephone calls directly.",
     "codeExample": "```html\n<a href=\"tel:+1234567890\">Call Us</a>\n```",
     "missionText": "### 2. Your Mission\nCreate a link labeled \"Call Support\" pointing to phone number \"1234567890\" inside the container.",
-    "starterCode": "<!-- Level 41 -->\n<div id=\"element-container\">\n  \n</div>",
+    "starterCode": "<!-- Level 41 -->\n",
     "hints": [
       "Use href=\"tel:1234567890\"."
     ],
@@ -1003,7 +1242,7 @@ const HTML5_INITIAL_LEVELS: LevelData[] = [
     "conceptText": "### 1. The Concept (The \"Why\")\nThe `<figure>` tag acts as a semantic box layout wrapping photos, illustrations, charts, or code snippets to separate them from main text streams.",
     "codeExample": "```html\n<figure>\n  <img src=\"chart.png\" alt=\"Stats\" />\n</figure>\n```",
     "missionText": "### 2. Your Mission\nWrap an image tag (sourcing \"logo.png\") completely inside a figure element inside the container.",
-    "starterCode": "<!-- Level 42 -->\n<div id=\"element-container\">\n  \n</div>",
+    "starterCode": "<!-- Level 42 -->\n",
     "hints": [
       "Nest <img src=\"logo.png\" /> inside <figure></figure> tags."
     ],
@@ -1026,7 +1265,7 @@ const HTML5_INITIAL_LEVELS: LevelData[] = [
     "conceptText": "### 1. The Concept (The \"Why\")\nThe `<figcaption>` element places semantic subtitle captions directly under figure graphics or code layout blocks.",
     "codeExample": "```html\n<figure>\n  <img src=\"chart.png\" alt=\"Stats\" />\n  <figcaption>Fig 1. Sales Chart</figcaption>\n</figure>\n```",
     "missionText": "### 2. Your Mission\nAdd a caption saying \"Figure 1: Site Analytics\" inside your figure (below the logo.png image) inside the container.",
-    "starterCode": "<!-- Level 43 -->\n<div id=\"element-container\">\n  <figure>\n    <img src=\"logo.png\" alt=\"Analytics logo\" />\n    \n  </figure>\n</div>",
+    "starterCode": "<!-- Level 43 -->\n<figure>\n    <img src=\"logo.png\" alt=\"Analytics logo\" />\n    \n  </figure>",
     "hints": [
       "Write <figcaption>Figure 1: Site Analytics</figcaption> inside the figure block."
     ],
@@ -1049,7 +1288,7 @@ const HTML5_INITIAL_LEVELS: LevelData[] = [
     "conceptText": "### 1. The Concept (The \"Why\")\nThe `download` attribute on a link forces browser programs to prompt a file download rather than opening a page file layout.",
     "codeExample": "```html\n<a href=\"manual.pdf\" download>Download PDF</a>\n```",
     "missionText": "### 2. Your Mission\nCreate a link to \"report.pdf\" that downloads explicitly when clicked. The link label should say \"Get Report\".",
-    "starterCode": "<!-- Level 44 -->\n<div id=\"element-container\">\n  \n</div>",
+    "starterCode": "<!-- Level 44 -->\n",
     "hints": [
       "Use <a href=\"report.pdf\" download>Get Report</a>."
     ],
@@ -1072,7 +1311,7 @@ const HTML5_INITIAL_LEVELS: LevelData[] = [
     "conceptText": "### 1. The Concept (The \"Why\")\nLet's review the asset features we learned. Combining figures, images, relative links, alt descriptions, and captions.",
     "codeExample": "```html\n<figure>\n  <a href=\"dest.html\">\n    <img src=\"img.jpg\" alt=\"Description\" />\n  </a>\n  <figcaption>Caption text</figcaption>\n</figure>\n```",
     "missionText": "### 2. Your Mission\nBuild a figure with an image (logo.png, alt description \"Company Logo\") that links to an external site (\"https://example.com\"), complete with a caption \"Fig 1\" inside the container.",
-    "starterCode": "<!-- Level 45 -->\n<div id=\"element-container\">\n  \n</div>",
+    "starterCode": "<!-- Level 45 -->\n",
     "hints": [
       "Nest the link inside figure, then nest image inside link, and add figcaption next to link."
     ],
@@ -1095,7 +1334,7 @@ const HTML5_INITIAL_LEVELS: LevelData[] = [
     "conceptText": "### 1. The Concept (The \"Why\")\nThe `<table>` element acts as the primary wrapper structure housing columns and rows of dataset records.",
     "codeExample": "```html\n<table>\n  <!-- rows go here -->\n</table>\n```",
     "missionText": "### 2. Your Mission\nOpen and close a basic empty table container inside the container.",
-    "starterCode": "<!-- Level 46 -->\n<div id=\"element-container\">\n  \n</div>",
+    "starterCode": "<!-- Level 46 -->\n",
     "hints": [
       "Write <table></table>."
     ],
@@ -1118,7 +1357,7 @@ const HTML5_INITIAL_LEVELS: LevelData[] = [
     "conceptText": "### 1. The Concept (The \"Why\")\nThe `<tr>` element defines a horizontal row of cells inside a table.",
     "codeExample": "```html\n<table>\n  <tr></tr>\n</table>\n```",
     "missionText": "### 2. Your Mission\nBuild a table framework containing exactly two rows inside the container.",
-    "starterCode": "<!-- Level 47 -->\n<div id=\"element-container\">\n  \n</div>",
+    "starterCode": "<!-- Level 47 -->\n",
     "hints": [
       "Nest two <tr></tr> blocks inside <table></table>."
     ],
@@ -1141,7 +1380,7 @@ const HTML5_INITIAL_LEVELS: LevelData[] = [
     "conceptText": "### 1. The Concept (The \"Why\")\nThe `<td>` element defines standard data cells containing actual numbers or text values inside a table row.",
     "codeExample": "```html\n<tr>\n  <td>John</td>\n  <td>Doe</td>\n</tr>\n```",
     "missionText": "### 2. Your Mission\nCreate a single row containing two data cells: \"John\" and \"Doe\" inside the container. (Do not forget the parent table tag).",
-    "starterCode": "<!-- Level 48 -->\n<div id=\"element-container\">\n  \n</div>",
+    "starterCode": "<!-- Level 48 -->\n",
     "hints": [
       "Inside table and tr, add <td>John</td> and <td>Doe</td>."
     ],
@@ -1164,7 +1403,7 @@ const HTML5_INITIAL_LEVELS: LevelData[] = [
     "conceptText": "### 1. The Concept (The \"Why\")\nThe `<th>` element defines column descriptors or titles. The browser centers and bolds this text by default.",
     "codeExample": "```html\n<tr>\n  <th>First Name</th>\n  <th>Last Name</th>\n</tr>\n```",
     "missionText": "### 2. Your Mission\nCreate a top row using two header cells labeled \"First Name\" and \"Last Name\" inside the container.",
-    "starterCode": "<!-- Level 49 -->\n<div id=\"element-container\">\n  \n</div>",
+    "starterCode": "<!-- Level 49 -->\n",
     "hints": [
       "Inside table and tr, add <th>First Name</th> and <th>Last Name</th>."
     ],
@@ -1187,7 +1426,7 @@ const HTML5_INITIAL_LEVELS: LevelData[] = [
     "conceptText": "### 1. The Concept (The \"Why\")\nNow, compile a complete basic table combining header cells (`<th>`) on the top row, and standard data cells (`<td>`) on subsequent rows.",
     "codeExample": "```html\n<table>\n  <tr><th>Item</th></tr>\n  <tr><td>Book</td></tr>\n</table>\n```",
     "missionText": "### 2. Your Mission\nBuild a 2x2 table showing headers (Item, Price) on row 1, and one row of data (Book, $10) on row 2 inside the container.",
-    "starterCode": "<!-- Level 50 -->\n<div id=\"element-container\">\n  \n</div>",
+    "starterCode": "<!-- Level 50 -->\n",
     "hints": [
       "Use <table>. Add first <tr> with two <th>. Add second <tr> with two <td>."
     ],
@@ -1210,7 +1449,7 @@ const HTML5_INITIAL_LEVELS: LevelData[] = [
     "conceptText": "### 1. The Concept (The \"Why\")\nThe `colspan` attribute allows a single table cell to stretch horizontally across multiple columns.",
     "codeExample": "```html\n<td colspan=\"2\">Spans two columns</td>\n```",
     "missionText": "### 2. Your Mission\nMake a `<td>` span across 3 columns with the text \"Merged\" inside a row inside the container.",
-    "starterCode": "<!-- Level 51 -->\n<div id=\"element-container\">\n  <table>\n    <tr>\n      \n    </tr>\n  </table>\n</div>",
+    "starterCode": "<!-- Level 51 -->\n<table>\n    <tr>\n      \n    </tr>\n  </table>",
     "hints": [
       "Use <td colspan=\"3\">Merged</td>."
     ],
@@ -1233,7 +1472,7 @@ const HTML5_INITIAL_LEVELS: LevelData[] = [
     "conceptText": "### 1. The Concept (The \"Why\")\nThe `rowspan` attribute allows a single table cell to stretch vertically down across multiple rows.",
     "codeExample": "```html\n<th rowspan=\"2\">Spans two rows</th>\n```",
     "missionText": "### 2. Your Mission\nMake a `<th>` span down across 2 rows inside a table inside the container.",
-    "starterCode": "<!-- Level 52 -->\n<div id=\"element-container\">\n  <table>\n    <tr>\n      \n    </tr>\n    <tr>\n      \n    </tr>\n  </table>\n</div>",
+    "starterCode": "<!-- Level 52 -->\n<table>\n    <tr>\n      \n    </tr>\n    <tr>\n      \n    </tr>\n  </table>",
     "hints": [
       "Use <th rowspan=\"2\">Your header</th>."
     ],
@@ -1256,7 +1495,7 @@ const HTML5_INITIAL_LEVELS: LevelData[] = [
     "conceptText": "### 1. The Concept (The \"Why\")\nThe `<caption>` element sets a visible semantic title directly associated with a table. It must be placed immediately after the opening `<table>` tag.",
     "codeExample": "```html\n<table>\n  <caption>Employee Directory</caption>\n  <tr>...</tr>\n</table>\n```",
     "missionText": "### 2. Your Mission\nAdd a caption stating \"Employee Directory\" immediately inside a table element inside the container.",
-    "starterCode": "<!-- Level 53 -->\n<div id=\"element-container\">\n  \n</div>",
+    "starterCode": "<!-- Level 53 -->\n",
     "hints": [
       "Nest <caption>Employee Directory</caption> immediately inside the table tag."
     ],
@@ -1279,7 +1518,7 @@ const HTML5_INITIAL_LEVELS: LevelData[] = [
     "conceptText": "### 1. The Concept (The \"Why\")\nThe `<thead>` tag groups the header rows of a table, helping with page layout styling and print behavior.",
     "codeExample": "```html\n<table>\n  <thead>\n    <tr><th>Label</th></tr>\n  </thead>\n</table>\n```",
     "missionText": "### 2. Your Mission\nWrap the header row of a table inside an explicit `<thead>` block inside the container.",
-    "starterCode": "<!-- Level 54 -->\n<div id=\"element-container\">\n  <table>\n    \n      <tr>\n        <th>ID</th>\n      </tr>\n    \n  </table>\n</div>",
+    "starterCode": "<!-- Level 54 -->\n<table>\n    \n      <tr>\n        <th>ID</th>\n      </tr>\n    \n  </table>",
     "hints": [
       "Surround the <tr> header row with <thead> and </thead>."
     ],
@@ -1302,7 +1541,7 @@ const HTML5_INITIAL_LEVELS: LevelData[] = [
     "conceptText": "### 1. The Concept (The \"Why\")\nThe `<tbody>` tag encapsulates the main body data rows of a table separate from headers or footers.",
     "codeExample": "```html\n<table>\n  <tbody>\n    <tr><td>Data</td></tr>\n  </tbody>\n</table>\n```",
     "missionText": "### 2. Your Mission\nWrap two data rows cleanly inside a `<tbody>` container inside the table inside the container.",
-    "starterCode": "<!-- Level 55 -->\n<div id=\"element-container\">\n  <table>\n    \n  </table>\n</div>",
+    "starterCode": "<!-- Level 55 -->\n<table>\n    \n  </table>",
     "hints": [
       "Add <tbody> containing two <tr><td>Data</td></tr> blocks inside your table."
     ],
@@ -1325,7 +1564,7 @@ const HTML5_INITIAL_LEVELS: LevelData[] = [
     "conceptText": "### 1. The Concept (The \"Why\")\nThe `<tfoot>` tag groups summary, total, or calculations rows at the bottom of tables.",
     "codeExample": "```html\n<tfoot>\n  <tr><td>Total: $100</td></tr>\n</tfoot>\n```",
     "missionText": "### 2. Your Mission\nCreate a table footer row displaying a \"Total: $100\" cell inside the container.",
-    "starterCode": "<!-- Level 56 -->\n<div id=\"element-container\">\n  <table>\n    \n  </table>\n</div>",
+    "starterCode": "<!-- Level 56 -->\n<table>\n    \n  </table>",
     "hints": [
       "Add <tfoot><tr><td>Total: $100</td></tr></tfoot> inside the table."
     ],
@@ -1348,7 +1587,7 @@ const HTML5_INITIAL_LEVELS: LevelData[] = [
     "conceptText": "### 1. The Concept (The \"Why\")\nThe `<colgroup>` element groups full columns together for styling purposes, enabling shared classes or widths.",
     "codeExample": "```html\n<table>\n  <colgroup>\n    <!-- column tracks -->\n  </colgroup>\n</table>\n```",
     "missionText": "### 2. Your Mission\nAdd a colgroup element containing two column tracks (using empty tags or elements) above your rows inside a table inside the container.",
-    "starterCode": "<!-- Level 57 -->\n<div id=\"element-container\">\n  <table>\n    \n  </table>\n</div>",
+    "starterCode": "<!-- Level 57 -->\n<table>\n    \n  </table>",
     "hints": [
       "Nest <colgroup></colgroup> inside table before rows."
     ],
@@ -1371,7 +1610,7 @@ const HTML5_INITIAL_LEVELS: LevelData[] = [
     "conceptText": "### 1. The Concept (The \"Why\")\nInside a `<colgroup>`, the self-closing `<col>` tag specifies properties (like background color or span) for individual vertical column tracks.",
     "codeExample": "```html\n<colgroup>\n  <col span=\"2\" class=\"highlight\" />\n</colgroup>\n```",
     "missionText": "### 2. Your Mission\nCreate a col group with an explicit self-closing `<col>` element inside the table inside the container.",
-    "starterCode": "<!-- Level 58 -->\n<div id=\"element-container\">\n  <table>\n    \n  </table>\n</div>",
+    "starterCode": "<!-- Level 58 -->\n<table>\n    \n  </table>",
     "hints": [
       "Write <colgroup><col /></colgroup> inside the table."
     ],
@@ -1394,7 +1633,7 @@ const HTML5_INITIAL_LEVELS: LevelData[] = [
     "conceptText": "### 1. The Concept (The \"Why\")\nLet's assemble a complete semantically divided table using `<caption>`, `<thead>`, `<tbody>`, and `<tfoot>` in order.",
     "codeExample": "```html\n<table>\n  <caption>Info</caption>\n  <thead>...</thead>\n  <tbody>...</tbody>\n  <tfoot>...</tfoot>\n</table>\n```",
     "missionText": "### 2. Your Mission\nWrite a structured table complete with caption, thead, tbody, and tfoot blocks in order inside the container.",
-    "starterCode": "<!-- Level 59 -->\n<div id=\"element-container\">\n  \n</div>",
+    "starterCode": "<!-- Level 59 -->\n",
     "hints": [
       "Verify the tags caption, thead, tbody, and tfoot exist and close cleanly in order inside table."
     ],
@@ -1417,7 +1656,7 @@ const HTML5_INITIAL_LEVELS: LevelData[] = [
     "conceptText": "### 1. The Concept (The \"Why\")\nReview data architecture table structures by combining cell spanning and layout divisions.",
     "codeExample": "```html\n<tr>\n  <td colspan=\"2\">Total</td>\n</tr>\n```",
     "missionText": "### 2. Your Mission\nCreate a complete 2-column billing table showing headers (Product, Price), 1 product item row (Widget, $50), and a footer row total utilizing a colspan of 2 (Total: $50) inside the container.",
-    "starterCode": "<!-- Level 60 -->\n<div id=\"element-container\">\n  \n</div>",
+    "starterCode": "<!-- Level 60 -->\n",
     "hints": [
       "Nest the rows within details, using th for headers, td for data, and tfoot td with colspan='2' for the total."
     ],
@@ -1440,7 +1679,7 @@ const HTML5_INITIAL_LEVELS: LevelData[] = [
     "conceptText": "### 1. The Concept (The \"Why\")\nThe `<form>` element acts as a container block to collect and structure interactive user input fields before submitting them to a server.",
     "codeExample": "```html\n<form>\n  <!-- inputs -->\n</form>\n```",
     "missionText": "### 2. Your Mission\nOpen and close a basic form container tag inside the container.",
-    "starterCode": "<!-- Level 61 -->\n<div id=\"element-container\">\n  \n</div>",
+    "starterCode": "<!-- Level 61 -->\n",
     "hints": [
       "Write <form></form>."
     ],
@@ -1463,7 +1702,7 @@ const HTML5_INITIAL_LEVELS: LevelData[] = [
     "conceptText": "### 1. The Concept (The \"Why\")\nThe `<input type=\"text\">` field creates a single-line text box for capture of standard string names or usernames.",
     "codeExample": "```html\n<input type=\"text\" />\n```",
     "missionText": "### 2. Your Mission\nCreate a standard text input field inside a form inside the container.",
-    "starterCode": "<!-- Level 62 -->\n<div id=\"element-container\">\n  <form>\n    \n  </form>\n</div>",
+    "starterCode": "<!-- Level 62 -->\n<form>\n    \n  </form>",
     "hints": [
       "Use <input type=\"text\" />."
     ],
@@ -1486,7 +1725,7 @@ const HTML5_INITIAL_LEVELS: LevelData[] = [
     "conceptText": "### 1. The Concept (The \"Why\")\nThe `placeholder` attribute specifies a short hint that describes the expected value of an input field, disappearing once typing begins.",
     "codeExample": "```html\n<input type=\"text\" placeholder=\"Your name\" />\n```",
     "missionText": "### 2. Your Mission\nAdd a placeholder saying \"Enter username...\" to a text input inside the container.",
-    "starterCode": "<!-- Level 63 -->\n<div id=\"element-container\">\n  <input type=\"text\" />\n</div>",
+    "starterCode": "<!-- Level 63 -->\n<input type=\"text\" />",
     "hints": [
       "Add placeholder=\"Enter username...\" inside the input element."
     ],
@@ -1509,7 +1748,7 @@ const HTML5_INITIAL_LEVELS: LevelData[] = [
     "conceptText": "### 1. The Concept (The \"Why\")\nThe `<label>` tag defines text descriptions for fields. Connecting them using matching `for` and `id` attributes links the label text to the input field, enhancing accessibility.",
     "codeExample": "```html\n<label for=\"name\">Name</label>\n<input type=\"text\" id=\"name\" />\n```",
     "missionText": "### 2. Your Mission\nCreate a label text \"Username:\" bound securely to a text input using id=\"user\" inside the container.",
-    "starterCode": "<!-- Level 64 -->\n<div id=\"element-container\">\n  \n</div>",
+    "starterCode": "<!-- Level 64 -->\n",
     "hints": [
       "Use <label for=\"user\">Username:</label> and <input type=\"text\" id=\"user\" />."
     ],
@@ -1532,7 +1771,7 @@ const HTML5_INITIAL_LEVELS: LevelData[] = [
     "conceptText": "### 1. The Concept (The \"Why\")\nThe `<input type=\"password\">` obscures text characters automatically, securing passwords during entry.",
     "codeExample": "```html\n<input type=\"password\" id=\"pass\" />\n```",
     "missionText": "### 2. Your Mission\nCreate a password entry field with id=\"pwd\" and an attached label container with text \"Password:\" inside the container.",
-    "starterCode": "<!-- Level 65 -->\n<div id=\"element-container\">\n  \n</div>",
+    "starterCode": "<!-- Level 65 -->\n",
     "hints": [
       "Use <label for=\"pwd\">Password:</label> and <input type=\"password\" id=\"pwd\" />."
     ],
@@ -1555,7 +1794,7 @@ const HTML5_INITIAL_LEVELS: LevelData[] = [
     "conceptText": "### 1. The Concept (The \"Why\")\nThe `<button type=\"submit\">` tag submits form inputs to the destination server handler when clicked.",
     "codeExample": "```html\n<button type=\"submit\">Submit</button>\n```",
     "missionText": "### 2. Your Mission\nCreate a form button displaying the explicit text \"Register Now\" inside a form inside the container.",
-    "starterCode": "<!-- Level 66 -->\n<div id=\"element-container\">\n  <form>\n    \n  </form>\n</div>",
+    "starterCode": "<!-- Level 66 -->\n<form>\n    \n  </form>",
     "hints": [
       "Write <button type=\"submit\">Register Now</button>."
     ],
@@ -1578,7 +1817,7 @@ const HTML5_INITIAL_LEVELS: LevelData[] = [
     "conceptText": "### 1. The Concept (The \"Why\")\nRadio buttons (`<input type=\"radio\">`) let users choose exactly one option from a group. They must share the same `name` attribute to restrict selection to a single option.",
     "codeExample": "```html\n<input type=\"radio\" name=\"opt\" value=\"A\" />\n<input type=\"radio\" name=\"opt\" value=\"B\" />\n```",
     "missionText": "### 2. Your Mission\nCreate two radio buttons for choices \"Yes\" and \"No\" sharing the name \"agree\" inside the container.",
-    "starterCode": "<!-- Level 67 -->\n<div id=\"element-container\">\n  \n</div>",
+    "starterCode": "<!-- Level 67 -->\n",
     "hints": [
       "Create <input type=\"radio\" name=\"agree\" value=\"yes\" /> and <input type=\"radio\" name=\"agree\" value=\"no\" />."
     ],
@@ -1601,7 +1840,7 @@ const HTML5_INITIAL_LEVELS: LevelData[] = [
     "conceptText": "### 1. The Concept (The \"Why\")\nCheckboxes (`<input type=\"checkbox\">`) allow users to select multiple options or toggle single settings (like opt-ins).",
     "codeExample": "```html\n<input type=\"checkbox\" id=\"terms\" />\n<label for=\"terms\">Accept terms</label>\n```",
     "missionText": "### 2. Your Mission\nCreate a checkbox input bound to a label showing \"Subscribe to newsletter\" (use id=\"sub\") inside the container.",
-    "starterCode": "<!-- Level 68 -->\n<div id=\"element-container\">\n  \n</div>",
+    "starterCode": "<!-- Level 68 -->\n",
     "hints": [
       "Connect checkbox input (id=\"sub\") and label (for=\"sub\")."
     ],
@@ -1624,7 +1863,7 @@ const HTML5_INITIAL_LEVELS: LevelData[] = [
     "conceptText": "### 1. The Concept (The \"Why\")\nThe `<textarea>` tag defines a multi-line text input block, suitable for long descriptions, comments, or bios.",
     "codeExample": "```html\n<textarea rows=\"5\" cols=\"30\">Preset text</textarea>\n```",
     "missionText": "### 2. Your Mission\nCreate a multi-line text input block with 4 rows for a user \"Bio\" inside the container. Set its rows attribute to 4 and id=\"bio\".",
-    "starterCode": "<!-- Level 69 -->\n<div id=\"element-container\">\n  \n</div>",
+    "starterCode": "<!-- Level 69 -->\n",
     "hints": [
       "Use <textarea rows=\"4\" id=\"bio\"></textarea>."
     ],
@@ -1647,7 +1886,7 @@ const HTML5_INITIAL_LEVELS: LevelData[] = [
     "conceptText": "### 1. The Concept (The \"Why\")\nThe `<select>` element creates a dropdown list containing selectable `<option>` menu items.",
     "codeExample": "```html\n<select>\n  <option value=\"1\">Option One</option>\n</select>\n```",
     "missionText": "### 2. Your Mission\nCreate a dropdown menu listing two options: \"Admin\" and \"User\" inside the container.",
-    "starterCode": "<!-- Level 70 -->\n<div id=\"element-container\">\n  \n</div>",
+    "starterCode": "<!-- Level 70 -->\n",
     "hints": [
       "Create <select> enclosing two <option> tags."
     ],
@@ -1670,7 +1909,7 @@ const HTML5_INITIAL_LEVELS: LevelData[] = [
     "conceptText": "### 1. The Concept (The \"Why\")\nThe `<optgroup>` tag groups related choices in dropdown selectors, separating options under descriptive headings.",
     "codeExample": "```html\n<select>\n  <optgroup label=\"Fruit\">\n    <option>Apple</option>\n  </optgroup>\n</select>\n```",
     "missionText": "### 2. Your Mission\nGroup dropdown choices under an optgroup labeled \"Vehicles\" inside a select block inside the container.",
-    "starterCode": "<!-- Level 71 -->\n<div id=\"element-container\">\n  <select>\n    \n  </select>\n</div>",
+    "starterCode": "<!-- Level 71 -->\n<select>\n    \n  </select>",
     "hints": [
       "Nest <optgroup label=\"Vehicles\"><option>Car</option></optgroup> inside select."
     ],
@@ -1693,7 +1932,7 @@ const HTML5_INITIAL_LEVELS: LevelData[] = [
     "conceptText": "### 1. The Concept (The \"Why\")\nThe `<input type=\"file\">` field lets users select and attach files from their local system storage for upload.",
     "codeExample": "```html\n<input type=\"file\" />\n```",
     "missionText": "### 2. Your Mission\nCreate an input field tailored explicitly for loading up image assets inside the container. (Use accept=\"image/*\" or similar target properties if desired, but prioritize type=\"file\").",
-    "starterCode": "<!-- Level 72 -->\n<div id=\"element-container\">\n  \n</div>",
+    "starterCode": "<!-- Level 72 -->\n",
     "hints": [
       "Write <input type=\"file\" />."
     ],
@@ -1716,7 +1955,7 @@ const HTML5_INITIAL_LEVELS: LevelData[] = [
     "conceptText": "### 1. The Concept (The \"Why\")\nThe `<input type=\"hidden\">` field stores backend state tokens or user IDs that are completely hidden from the visual interface.",
     "codeExample": "```html\n<input type=\"hidden\" name=\"token\" value=\"abc\" />\n```",
     "missionText": "### 2. Your Mission\nCreate a hidden token field with name=\"userID\" value=\"123\" inside the container.",
-    "starterCode": "<!-- Level 73 -->\n<div id=\"element-container\">\n  \n</div>",
+    "starterCode": "<!-- Level 73 -->\n",
     "hints": [
       "Use <input type=\"hidden\" name=\"userID\" value=\"123\" />."
     ],
@@ -1739,7 +1978,7 @@ const HTML5_INITIAL_LEVELS: LevelData[] = [
     "conceptText": "### 1. The Concept (The \"Why\")\nThe `required` boolean attribute stops users from submitting a form if the field is empty, enforcing data validation in the browser.",
     "codeExample": "```html\n<input type=\"text\" required />\n```",
     "missionText": "### 2. Your Mission\nCreate an email type input field flagged as absolutely required inside the container.",
-    "starterCode": "<!-- Level 74 -->\n<div id=\"element-container\">\n  \n</div>",
+    "starterCode": "<!-- Level 74 -->\n",
     "hints": [
       "Use <input type=\"email\" required />."
     ],
@@ -1762,7 +2001,7 @@ const HTML5_INITIAL_LEVELS: LevelData[] = [
     "conceptText": "### 1. The Concept (The \"Why\")\nAttributes like `min`, `max`, and `maxlength` restrict numeric ranges or text string lengths in form fields.",
     "codeExample": "```html\n<input type=\"number\" min=\"1\" max=\"100\" />\n```",
     "missionText": "### 2. Your Mission\nCreate a number field restricting inputs strictly between 1 and 10 inside the container.",
-    "starterCode": "<!-- Level 75 -->\n<div id=\"element-container\">\n  \n</div>",
+    "starterCode": "<!-- Level 75 -->\n",
     "hints": [
       "Use <input type=\"number\" min=\"1\" max=\"10\" />."
     ],
@@ -1785,7 +2024,7 @@ const HTML5_INITIAL_LEVELS: LevelData[] = [
     "conceptText": "### 1. The Concept (The \"Why\")\nThe `<header>` semantic element designates introductory container space, wrapping logos, site names, navigation bars, or header tags.",
     "codeExample": "```html\n<header>\n  <h1>My Site</h1>\n</header>\n```",
     "missionText": "### 2. Your Mission\nCreate a top header block containing your site's main h1 title (Welcome to Portfolio) inside the container.",
-    "starterCode": "<!-- Level 76 -->\n<div id=\"element-container\">\n  \n</div>",
+    "starterCode": "<!-- Level 76 -->\n",
     "hints": [
       "Nest <h1>Welcome to Portfolio</h1> inside <header></header>."
     ],
@@ -1808,7 +2047,7 @@ const HTML5_INITIAL_LEVELS: LevelData[] = [
     "conceptText": "### 1. The Concept (The \"Why\")\nThe `<nav>` semantic tag isolates menu links, outlining structural pathways throughout site directories.",
     "codeExample": "```html\n<nav>\n  <a href=\"/\">Home</a>\n  <a href=\"/about\">About</a>\n</nav>\n```",
     "missionText": "### 2. Your Mission\nWrap a list of three menu anchor links neatly inside a nav element inside the container.",
-    "starterCode": "<!-- Level 77 -->\n<div id=\"element-container\">\n  \n</div>",
+    "starterCode": "<!-- Level 77 -->\n",
     "hints": [
       "Nest three anchor links (e.g. Home, Portfolio, Contact) inside <nav></nav>."
     ],
@@ -1831,7 +2070,7 @@ const HTML5_INITIAL_LEVELS: LevelData[] = [
     "conceptText": "### 1. The Concept (The \"Why\")\nThe `<main>` semantic container isolates the single, primary core topic unique to this active web document view. There should only be one `<main>` element per page.",
     "codeExample": "```html\n<main>\n  <p>Primary page content goes here.</p>\n</main>\n```",
     "missionText": "### 2. Your Mission\nEstablish the single primary `<main></main>` body track block inside the container.",
-    "starterCode": "<!-- Level 78 -->\n<div id=\"element-container\">\n  \n</div>",
+    "starterCode": "<!-- Level 78 -->\n",
     "hints": [
       "Write <main></main> inside the container."
     ],
@@ -1854,7 +2093,7 @@ const HTML5_INITIAL_LEVELS: LevelData[] = [
     "conceptText": "### 1. The Concept (The \"Why\")\nThe `<section>` element groups related thematic elements together (such as chapters, tabs, or introduction sections), typically containing a heading tag.",
     "codeExample": "```html\n<section>\n  <h2>Services</h2>\n  <p>We build websites.</p>\n</section>\n```",
     "missionText": "### 2. Your Mission\nCreate a section element housing an h2 titled \"Our Services\" inside the container.",
-    "starterCode": "<!-- Level 79 -->\n<div id=\"element-container\">\n  \n</div>",
+    "starterCode": "<!-- Level 79 -->\n",
     "hints": [
       "Nest <h2>Our Services</h2> inside <section></section>."
     ],
@@ -1877,7 +2116,7 @@ const HTML5_INITIAL_LEVELS: LevelData[] = [
     "conceptText": "### 1. The Concept (The \"Why\")\nThe `<article>` tag encapsulates fully independent, self-contained layout blocks intended for independent syndication (e.g. blog posts, forum replies, news stories).",
     "codeExample": "```html\n<article>\n  <h2>News Title</h2>\n  <p>Story description text.</p>\n</article>\n```",
     "missionText": "### 2. Your Mission\nCreate an article block wrapping a title (h2) and paragraph blog post inside the container.",
-    "starterCode": "<!-- Level 80 -->\n<div id=\"element-container\">\n  \n</div>",
+    "starterCode": "<!-- Level 80 -->\n",
     "hints": [
       "Nest an <h2> heading and <p> paragraph inside <article></article>."
     ],
@@ -1900,7 +2139,7 @@ const HTML5_INITIAL_LEVELS: LevelData[] = [
     "conceptText": "### 1. The Concept (The \"Why\")\nThe `<aside>` semantic element groups auxiliary sidebar links, callout quote details, or advertisement blocks tangential to the primary main layout stream.",
     "codeExample": "```html\n<aside>\n  <h4>Quick Links</h4>\n  <p>Related pages.</p>\n</aside>\n```",
     "missionText": "### 2. Your Mission\nCreate an aside box displaying \"Related Links\" inside the container.",
-    "starterCode": "<!-- Level 81 -->\n<div id=\"element-container\">\n  \n</div>",
+    "starterCode": "<!-- Level 81 -->\n",
     "hints": [
       "Write <aside>Related Links</aside>."
     ],
@@ -1923,7 +2162,7 @@ const HTML5_INITIAL_LEVELS: LevelData[] = [
     "conceptText": "### 1. The Concept (The \"Why\")\nThe `<footer>` semantic element bounds copyright warnings, terms of use links, address blocks, and metadata at the bottom of pages.",
     "codeExample": "```html\n<footer>\n  <p>&copy; 2026 Developer</p>\n</footer>\n```",
     "missionText": "### 2. Your Mission\nCreate a site footer containing a copyright notice paragraph inside the container.",
-    "starterCode": "<!-- Level 82 -->\n<div id=\"element-container\">\n  \n</div>",
+    "starterCode": "<!-- Level 82 -->\n",
     "hints": [
       "Nest <p>&copy; 2026</p> or similar notice inside <footer></footer>."
     ],
@@ -1944,9 +2183,9 @@ const HTML5_INITIAL_LEVELS: LevelData[] = [
     "tier": "Mage",
     "title": "Generic Block Divs",
     "conceptText": "### 1. The Concept (The \"Why\")\nThe `<div>` (division) is a generic block container tag. It has no semantic meaning but is used to group items for layout styling.",
-    "codeExample": "```html\n<div class=\"box\">\n  <p>Inside box</p>\n</div>\n```",
+    "codeExample": "```html\n<div class=\"box\">\n  <p>Inside box</p>\n```",
     "missionText": "### 2. Your Mission\nWrap two paragraphs inside a generic division container inside the container.",
-    "starterCode": "<!-- Level 83 -->\n<div id=\"element-container\">\n  \n</div>",
+    "starterCode": "<!-- Level 83 -->\n",
     "hints": [
       "Create a <div> block enclosing two separate <p> paragraphs."
     ],
@@ -1969,7 +2208,7 @@ const HTML5_INITIAL_LEVELS: LevelData[] = [
     "conceptText": "### 1. The Concept (The \"Why\")\nThe `<span>` element is a generic inline container used to style small sections of text or word fragments without starting a new line.",
     "codeExample": "```html\n<p>This is <span class=\"highlight\">colored</span> text.</p>\n```",
     "missionText": "### 2. Your Mission\nWrap a single word inside a paragraph with a span tag inside the container.",
-    "starterCode": "<!-- Level 84 -->\n<div id=\"element-container\">\n  <p>Wrap the middle word inside a span tag.</p>\n</div>",
+    "starterCode": "<!-- Level 84 -->\n<p>Wrap the middle word inside a span tag.</p>",
     "hints": [
       "Select 'middle' or another word, and wrap it in <span>middle</span>."
     ],
@@ -1992,7 +2231,7 @@ const HTML5_INITIAL_LEVELS: LevelData[] = [
     "conceptText": "### 1. The Concept (The \"Why\")\nThe `<audio>` element embeds sound files. The `controls` attribute displays play/pause controls in the browser.",
     "codeExample": "```html\n<audio src=\"song.mp3\" controls></audio>\n```",
     "missionText": "### 2. Your Mission\nEmbed an audio track sourcing \"podcast.mp3\" showing user control buttons inside the container.",
-    "starterCode": "<!-- Level 85 -->\n<div id=\"element-container\">\n  \n</div>",
+    "starterCode": "<!-- Level 85 -->\n",
     "hints": [
       "Use <audio src=\"podcast.mp3\" controls></audio>."
     ],
@@ -2015,7 +2254,7 @@ const HTML5_INITIAL_LEVELS: LevelData[] = [
     "conceptText": "### 1. The Concept (The \"Why\")\nThe `<video>` element embeds movie clips. We can configure size boundary options and include standard play controls.",
     "codeExample": "```html\n<video src=\"clip.mp4\" width=\"320\" height=\"240\" controls></video>\n```",
     "missionText": "### 2. Your Mission\nEmbed a movie asset sourcing \"clip.mp4\" displaying user control options inside the container.",
-    "starterCode": "<!-- Level 86 -->\n<div id=\"element-container\">\n  \n</div>",
+    "starterCode": "<!-- Level 86 -->\n",
     "hints": [
       "Use <video src=\"clip.mp4\" controls></video>."
     ],
@@ -2038,7 +2277,7 @@ const HTML5_INITIAL_LEVELS: LevelData[] = [
     "conceptText": "### 1. The Concept (The \"Why\")\nThe `<track>` tag nests inside `<video>` or `<audio>` elements to map WebVTT subtitle track files to playback media, facilitating accessibility.",
     "codeExample": "```html\n<video src=\"clip.mp4\" controls>\n  <track src=\"subs.vtt\" kind=\"subtitles\" srclang=\"en\" label=\"English\" />\n</video>\n```",
     "missionText": "### 2. Your Mission\nNest a subtitles track sourcing \"sub.vtt\" directly inside a video container inside the container.",
-    "starterCode": "<!-- Level 87 -->\n<div id=\"element-container\">\n  <video src=\"clip.mp4\" controls>\n    \n  </video>\n</div>",
+    "starterCode": "<!-- Level 87 -->\n<video src=\"clip.mp4\" controls>\n    \n  </video>",
     "hints": [
       "Add <track src=\"sub.vtt\" kind=\"subtitles\" srclang=\"en\" label=\"English\" /> inside video."
     ],
@@ -2061,7 +2300,7 @@ const HTML5_INITIAL_LEVELS: LevelData[] = [
     "conceptText": "### 1. The Concept (The \"Why\")\nAn `<iframe>` (inline frame) nests another web document inside the active page view.",
     "codeExample": "```html\n<iframe src=\"https://example.com\" width=\"400\" height=\"300\"></iframe>\n```",
     "missionText": "### 2. Your Mission\nEmbed an iframe pointing out to \"https://example.com\" inside the container.",
-    "starterCode": "<!-- Level 88 -->\n<div id=\"element-container\">\n  \n</div>",
+    "starterCode": "<!-- Level 88 -->\n",
     "hints": [
       "Use <iframe src=\"https://example.com\"></iframe>."
     ],
@@ -2084,7 +2323,7 @@ const HTML5_INITIAL_LEVELS: LevelData[] = [
     "conceptText": "### 1. The Concept (The \"Why\")\nThe `<details>` tag builds native accordion folders that open on user mouse clicks. The `<summary>` tag specifies the visible toggle handle.",
     "codeExample": "```html\n<details>\n  <summary>Click here</summary>\n  <p>Hidden content revealed!</p>\n</details>\n```",
     "missionText": "### 2. Your Mission\nCreate an FAQ block where clicking \"View Answer\" expands hidden text inside the container.",
-    "starterCode": "<!-- Level 89 -->\n<div id=\"element-container\">\n  \n</div>",
+    "starterCode": "<!-- Level 89 -->\n",
     "hints": [
       "Nest <summary>View Answer</summary> and some paragraph text inside a <details> container."
     ],
@@ -2107,7 +2346,7 @@ const HTML5_INITIAL_LEVELS: LevelData[] = [
     "conceptText": "### 1. The Concept (The \"Why\")\nLet's assemble a complete, organized layout combining header, navigation, main sections, and footers in logical order.",
     "codeExample": "```html\n<header>Header</header>\n<nav>Menu</nav>\n<main>Main Body</main>\n<footer>Footer</footer>\n```",
     "missionText": "### 2. Your Mission\nBuild a semantic architecture arranging a header, nav, main (with nested section), and footer in order inside the container.",
-    "starterCode": "<!-- Level 90 -->\n<div id=\"element-container\">\n  \n</div>",
+    "starterCode": "<!-- Level 90 -->\n",
     "hints": [
       "Place header, nav, main, and footer blocks sequentially. Nest section inside main."
     ],
@@ -2130,7 +2369,7 @@ const HTML5_INITIAL_LEVELS: LevelData[] = [
     "conceptText": "### 1. The Concept (The \"Why\")\nThe `<meta charset=\"UTF-8\">` declaration inside the `<head>` is critical to instruct browsers to decode page text characters using international UTF-8 encoding standard rules.",
     "codeExample": "```html\n<head>\n  <meta charset=\"UTF-8\" />\n</head>\n```",
     "missionText": "### 2. Your Mission\nAdd a meta tag declaring UTF-8 encoding inside a document head inside the container.",
-    "starterCode": "<!-- Level 91 -->\n<div id=\"element-container\">\n  <head>\n    \n  </head>\n</div>",
+    "starterCode": "<!-- Level 91 -->\n<head>\n    \n  </head>",
     "hints": [
       "Use <meta charset=\"UTF-8\" />."
     ],
@@ -2153,7 +2392,7 @@ const HTML5_INITIAL_LEVELS: LevelData[] = [
     "conceptText": "### 1. The Concept (The \"Why\")\nThe responsive viewport meta tag ensures page layouts scale correctly on mobile devices by mapping the layout size to the screen width.",
     "codeExample": "```html\n<meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\" />\n```",
     "missionText": "### 2. Your Mission\nWrite the standard meta tag for viewport scale optimization inside a head block inside the container.",
-    "starterCode": "<!-- Level 92 -->\n<div id=\"element-container\">\n  <head>\n    \n  </head>\n</div>",
+    "starterCode": "<!-- Level 92 -->\n<head>\n    \n  </head>",
     "hints": [
       "Add <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\" />."
     ],
@@ -2176,7 +2415,7 @@ const HTML5_INITIAL_LEVELS: LevelData[] = [
     "conceptText": "### 1. The Concept (The \"Why\")\nThe `<meta name=\"description\">` tag provides page summary blurbs displayed under link titles in search engine result list pages.",
     "codeExample": "```html\n<meta name=\"description\" content=\"Detailed page description.\" />\n```",
     "missionText": "### 2. Your Mission\nAdd a meta description tag stating \"Professional web developer portfolio\" inside the container.",
-    "starterCode": "<!-- Level 93 -->\n<div id=\"element-container\">\n  <head>\n    \n  </head>\n</div>",
+    "starterCode": "<!-- Level 93 -->\n<head>\n    \n  </head>",
     "hints": [
       "Use <meta name=\"description\" content=\"Professional web developer portfolio\" />."
     ],
@@ -2199,7 +2438,7 @@ const HTML5_INITIAL_LEVELS: LevelData[] = [
     "conceptText": "### 1. The Concept (The \"Why\")\nThe `<link rel=\"stylesheet\">` tag imports styling parameters from independent external CSS files into pages.",
     "codeExample": "```html\n<link rel=\"stylesheet\" href=\"style.css\" />\n```",
     "missionText": "### 2. Your Mission\nWire up an external style file named \"styles.css\" inside a head block inside the container.",
-    "starterCode": "<!-- Level 94 -->\n<div id=\"element-container\">\n  <head>\n    \n  </head>\n</div>",
+    "starterCode": "<!-- Level 94 -->\n<head>\n    \n  </head>",
     "hints": [
       "Use <link rel=\"stylesheet\" href=\"styles.css\" /> inside head."
     ],
@@ -2222,7 +2461,7 @@ const HTML5_INITIAL_LEVELS: LevelData[] = [
     "conceptText": "### 1. The Concept (The \"Why\")\nThe `<script src=\"...\">` tag loads and executes logic behaviors from separate JavaScript files. It is usually placed at the bottom of the body.",
     "codeExample": "```html\n<body>\n  ...\n  <script src=\"script.js\"></script>\n</body>\n```",
     "missionText": "### 2. Your Mission\nAttach an external script source named \"app.js\" right before your body close inside the container.",
-    "starterCode": "<!-- Level 95 -->\n<div id=\"element-container\">\n  <body>\n    \n  </body>\n</div>",
+    "starterCode": "<!-- Level 95 -->\n<body>\n    \n  </body>",
     "hints": [
       "Add <script src=\"app.js\"></script> inside body."
     ],
@@ -2245,7 +2484,7 @@ const HTML5_INITIAL_LEVELS: LevelData[] = [
     "conceptText": "### 1. The Concept (The \"Why\")\nFavicons are tiny site icons loaded onto browser page tabs. We link them using a link element flagged with rel=\"icon\".",
     "codeExample": "```html\n<link rel=\"icon\" type=\"image/x-icon\" href=\"favicon.ico\" />\n```",
     "missionText": "### 2. Your Mission\nAdd a link tag establishing \"favicon.ico\" as the tab icon inside the head tag inside the container.",
-    "starterCode": "<!-- Level 96 -->\n<div id=\"element-container\">\n  <head>\n    \n  </head>\n</div>",
+    "starterCode": "<!-- Level 96 -->\n<head>\n    \n  </head>",
     "hints": [
       "Use <link rel=\"icon\" href=\"favicon.ico\" />."
     ],
@@ -2268,7 +2507,7 @@ const HTML5_INITIAL_LEVELS: LevelData[] = [
     "conceptText": "### 1. The Concept (The \"Why\")\nARIA roles define the purpose of generic elements, aiding screen readers. For instance, `role=\"search\"` on a form clearly specifies a search function.",
     "codeExample": "```html\n<form role=\"search\">\n  <input type=\"search\" />\n</form>\n```",
     "missionText": "### 2. Your Mission\nAssign role=\"search\" directly onto a generic layout form tag inside the container.",
-    "starterCode": "<!-- Level 97 -->\n<div id=\"element-container\">\n  <form>\n    \n  </form>\n</div>",
+    "starterCode": "<!-- Level 97 -->\n<form>\n    \n  </form>",
     "hints": [
       "Add role=\"search\" attribute to form."
     ],
@@ -2291,7 +2530,7 @@ const HTML5_INITIAL_LEVELS: LevelData[] = [
     "conceptText": "### 1. The Concept (The \"Why\")\nThe `<datalist>` element structures pre-defined lists of suggestions that users see in dropdown form inputs while typing.",
     "codeExample": "```html\n<input list=\"browsers\" />\n<datalist id=\"browsers\">\n  <option value=\"Chrome\">\n  <option value=\"Firefox\">\n</datalist>\n```",
     "missionText": "### 2. Your Mission\nWire an input with a list attribute to a datalist containing two options inside the container. The input list attribute and datalist id must match.",
-    "starterCode": "<!-- Level 98 -->\n<div id=\"element-container\">\n  \n</div>",
+    "starterCode": "<!-- Level 98 -->\n",
     "hints": [
       "Create <input list=\"colors\" /> and <datalist id=\"colors\"><option value=\"Red\"><option value=\"Blue\"></datalist>."
     ],
@@ -2314,7 +2553,7 @@ const HTML5_INITIAL_LEVELS: LevelData[] = [
     "conceptText": "### 1. The Concept (The \"Why\")\nClean indentations make code easy to read and debug. Nested tags should always be indented relative to their parent container.",
     "codeExample": "```html\n<main>\n  <h1>Title</h1>\n  <p>Paragraph</p>\n</main>\n```",
     "missionText": "### 2. Your Mission\nCleanly indent an h1 title and two paragraphs nested inside a main container block inside the container.",
-    "starterCode": "<!-- Level 99 -->\n<div id=\"element-container\">\n  \n</div>",
+    "starterCode": "<!-- Level 99 -->\n",
     "hints": [
       "Nest <h1> and two <p> blocks inside <main> and use spaces/tabs to indent them clearly."
     ],
@@ -2337,7 +2576,7 @@ const HTML5_INITIAL_LEVELS: LevelData[] = [
     "conceptText": "### 1. The Concept (The \"Why\")\nCongratulations! You've reached the Module 7 Capstone. Let's combine standard professional structures into a complete, flawless page.",
     "codeExample": "```html\n<!DOCTYPE html>\n<html>\n  <head>\n    <meta charset=\"UTF-8\" />\n    <title>Title</title>\n  </head>\n  <body>\n    <!-- components -->\n  </body>\n</html>\n```",
     "missionText": "### 2. Your Mission\nBuild an advanced professional setup containing viewport metadata, a linked style sheet (style.css), a navigation header, an article section, a contact form (with username input and submit button), and a semantic footer inside the container.",
-    "starterCode": "<!-- Level 100 -->\n<div id=\"element-container\">\n  \n</div>",
+    "starterCode": "<!-- Level 100 -->\n",
     "hints": [
       "Scaffold doctype, html, head (with meta viewport, title, and link stylesheet) and body (with header, nav, article, form, and footer tags)."
     ],
@@ -2377,88 +2616,10 @@ const GAME_SYLLABUS: Record<string, string[]> = {
 export function generateLevel(gameId: string, level: number): LevelData {
   // Use handcrafted HTML5 levels 1-100 for initial onboarding
   if (gameId === "html5" && level <= 100) {
-    if (level >= 1 && level <= 5) {
-      // Generate levels 1 to 5 syllabus blueprints dynamically
-      let title = "";
-      let conceptText = "";
-      let codeExample = "";
-      let missionText = "";
-      let starterCode = "";
-      let hints: string[] = [];
-      let testRegex = "";
-      let desc = "";
-
-      if (level === 1) {
-        title = "Paragraphs";
-        conceptText = `### 1. 🏗️ THE 3D OBJECT ANALOGY
-Think of the \`<p>\` tag as a **cargo box container**. It wraps around your cargo (text) to stack it neatly on the warehouse floor, giving it top and bottom buffer zones so other items don't crush it.`;
-        codeExample = "### 2. 🛠️ MATERIAL ANATOMY\n```html\n<p>Hello World</p>\n```\n* `<p>`: Left steel clamp (Opening Tag)\n* `Hello World`: The raw structural material inside\n* `</p>`: Right steel clamp (Closing Tag)";
-        missionText = "### 3. 👁️ VISUAL SCREEN RENDER\nWrapping your text instantly drops a rectangular concrete container box onto the stage ground with the label **\"Hello World\"** glowing on the front panel.\n\n### 4. 🎯 CONSTRUCTION MISSION\nWrap \"Hello World\" in a paragraph tag to drop your first box.";
-        starterCode = "<!-- Level 1 -->\n<div id=\"element-container\">\n  \n</div>";
-        hints = ["Write '<p>Hello World</p>' inside the container."];
-        testRegex = "<p>\\s*Hello\\s+World\\s*</p>";
-        desc = "Should contain <p>Hello World</p>";
-      } else if (level === 2) {
-        title = "Heading 1";
-        conceptText = `### 1. 🏗️ THE 3D OBJECT ANALOGY
-Think of the \`<h1>\` tag as a **massive, glowing neon sign** mounted above your construction rig. It marks the main branding of the entire structure.`;
-        codeExample = "### 2. 🛠️ MATERIAL ANATOMY\n```html\n<h1>Welcome to My Site</h1>\n```\n* `<h1>`: Left brackets anchoring the neon light bars\n* `Welcome to My Site`: Text letters energized with power\n* `</h1>`: Right brackets closing the electrical circuit";
-        missionText = "### 3. 👁️ VISUAL SCREEN RENDER\nInstantly drops a massive, steel-framed glowing neon sign onto the scaffolding above, reading **\"Welcome to My Site\"**.\n\n### 4. 🎯 CONSTRUCTION MISSION\nCode a primary heading (h1) that reads \"Welcome to My Site\".";
-        starterCode = "<!-- Level 2 -->\n<div id=\"element-container\">\n  \n</div>";
-        hints = ["Write '<h1>Welcome to My Site</h1>' inside the container."];
-        testRegex = "<h1>\\s*Welcome\\s+to\\s+My\\s+Site\\s*</h1>";
-        desc = "Should contain <h1>Welcome to My Site</h1>";
-      } else if (level === 3) {
-        title = "Heading Hierarchy";
-        conceptText = `### 1. 🏗️ THE 3D OBJECT ANALOGY
-Think of subheadings (\`<h2>\` through \`<h6>\`) as **directional street signs** scaled down for sub-sections and pathways of your building.`;
-        codeExample = "### 2. 🛠️ MATERIAL ANATOMY\n```html\n<h2>About Me</h2>\n```\n* `<h2>`: Level 2 bracket clamps holding the panel\n* `About Me`: The location info labeled on the face\n* `</h2>`: End brackets locking the sign onto the pole";
-        missionText = "### 3. 👁️ VISUAL SCREEN RENDER\nA medium-sized secondary directional street sign snaps onto the pole right beneath your main neon sign, displaying **\"About Me\"**.\n\n### 4. 🎯 CONSTRUCTION MISSION\nCode an h2 heading tag that reads \"About Me\".";
-        starterCode = "<!-- Level 3 -->\n<div id=\"element-container\">\n  \n</div>";
-        hints = ["Write '<h2>About Me</h2>' inside the container."];
-        testRegex = "<h2>\\s*About\\s+Me\\s*</h2>";
-        desc = "Should contain <h2>About Me</h2>";
-      } else if (level === 4) {
-        title = "Line Breaks";
-        conceptText = `### 1. 🏗️ THE 3D OBJECT ANALOGY
-Think of the \`<br>\` tag as a **physical trapdoor** that instantly drops the remaining elements on a line down to the conveyor belt layer directly below.`;
-        codeExample = "### 2. 🛠️ MATERIAL ANATOMY\n```html\nLine One<br>Line Two\n```\n* `Line One`: Materials loaded on the upper conveyor\n* `<br>`: The self-closing trapdoor node (no closing tag needed!)\n* `Line Two`: Materials dropped to the lower level";
-        missionText = "### 3. 👁️ VISUAL SCREEN RENDER\nSplits the text row in half, dropping \"Line Two\" onto a lower, secondary conveyor belt shelf.\n\n### 4. 🎯 CONSTRUCTION MISSION\nWrite a paragraph with a br separating \"Line One\" and \"Line Two\".";
-        starterCode = "<!-- Level 4 -->\n<div id=\"element-container\">\n  <p>\n    \n  </p>\n</div>";
-        hints = ["Add '<br>' between 'Line One' and 'Line Two' inside the paragraph."];
-        testRegex = "<p>[\\s\\S]*Line\\s+One<br/?>Line\\s+Two[\\s\\S]*</p>";
-        desc = "Paragraph contains Line One and Line Two separated by a line break";
-      } else if (level === 5) {
-        title = "Horizontal Rules";
-        conceptText = `### 1. 🏗️ THE 3D OBJECT ANALOGY
-Think of the \`<hr>\` tag as a **glowing laser-beam divider wall** that slides out to physically divide two rooms.`;
-        codeExample = "### 2. 🛠️ MATERIAL ANATOMY\n```html\n<h1>Title</h1>\n<hr>\n<p>Content</p>\n```\n* `<hr>`: The self-closing laser emitter unit (does not need a closing tag!)";
-        missionText = "### 3. 👁️ VISUAL SCREEN RENDER\nA glowing, red horizontal laser divider wall fires up across the room, separating the header panel above from the content container below.\n\n### 4. 🎯 CONSTRUCTION MISSION\nPlace an hr divider between the primary h1 heading sign and the paragraph box.";
-        starterCode = "<!-- Level 5 -->\n<div id=\"element-container\">\n  <h1>Title</h1>\n  \n  <p>Content</p>\n</div>";
-        hints = ["Add '<hr>' in the empty space between the heading and the paragraph."];
-        testRegex = "<h1>.*</h1>\\s*<hr/?>\\s*<p>.*</p>";
-        desc = "Has a horizontal rule <hr> between heading 1 and paragraph";
-      }
-
-      return {
-        id: `html5-${level}`,
-        level,
-        levelId: level,
-        tier: "Apprentice",
-        title,
-        conceptText,
-        codeExample,
-        missionText,
-        starterCode,
-        hints,
-        validation: {
-          checkType: "html",
-          testCases: [{ description: desc, testRegex }]
-        }
-      };
+    if (level >= 1 && level <= 11) {
+      return HTML5_EARLY_LEVELS[level - 1];
     }
-
-    // Handcrafted HTML5 Initial levels 6 to 100
+    // Handcrafted HTML5 Initial levels 12 to 100
     return HTML5_INITIAL_LEVELS[level - 6];
   }
 
@@ -2494,7 +2655,7 @@ Think of the \`<hr>\` tag as a **glowing laser-beam divider wall** that slides o
         conceptText = `### 1. The Concept (The "Why")\nHTML headings structure key headers. Today we explore **${concept}** (Part ${stepIndex + 1}) using size \`<h${headingSize}>\` tags.`;
         codeExample = `\`\`\`html\n<h${headingSize}>Content Header</h${headingSize}>\n\`\`\``;
         missionText = `### 2. Your Mission\nWrite a heading tag **\`<h${headingSize}>\`** containing the exact text **\`"Heading Level ${level}"\`** inside the container.`;
-        starterCode = `<div id="element-container">\n  \n</div>`;
+        starterCode = `<div id="element-container">\n  `;
         hints = [`Write '<h${headingSize}>Heading Level ${level}</h${headingSize}>'`];
         testCases = [
           { description: `Contains <h${headingSize}> tag`, testRegex: `<h${headingSize}[\\s>]` },
@@ -2505,7 +2666,7 @@ Think of the \`<hr>\` tag as a **glowing laser-beam divider wall** that slides o
         conceptText = `### 1. The Concept (The "Why")\nParagraph tags structure paragraph blocks. We check **${concept}** (Part ${stepIndex + 1}).`;
         codeExample = `\`\`\`html\n<p>Body copy lines</p>\n\`\`\``;
         missionText = `### 2. Your Mission\nCreate a paragraph element **\`<p>\`** containing the phrase **\`"Active parameter index is ${level}"\`**.`;
-        starterCode = `<div id="element-container">\n  \n</div>`;
+        starterCode = `<div id="element-container">\n  `;
         hints = [`Use <p> tags enclosing 'Active parameter index is ${level}'.`];
         testCases = [
           { description: "Contains a <p> tag", testRegex: "<p[\\s>]" },
@@ -2516,7 +2677,7 @@ Think of the \`<hr>\` tag as a **glowing laser-beam divider wall** that slides o
         conceptText = `### 1. The Concept (The "Why")\nAnchors link URL paths together. We explore **${concept}** (Part ${stepIndex + 1}).`;
         codeExample = `\`\`\`html\n<a href="/target">Label</a>\n\`\`\``;
         missionText = `### 2. Your Mission\nAdd an anchor tag linking to **\`"https://mockrithm.me/level/${level}"\`** with the click label **\`"Proceed ${level}"\`**.`;
-        starterCode = `<div id="element-container">\n  \n</div>`;
+        starterCode = `<div id="element-container">\n  `;
         hints = [`Write '<a href="https://mockrithm.me/level/${level}">Proceed ${level}</a>'`];
         testCases = [
           { description: "Contains an anchor tag", testRegex: "<a[\\s>]" },
@@ -2528,7 +2689,7 @@ Think of the \`<hr>\` tag as a **glowing laser-beam divider wall** that slides o
         conceptText = `### 1. The Concept (The "Why")\nHTML list structures bundle points together. We examine **${concept}** (Part ${stepIndex + 1}).`;
         codeExample = `\`\`\`html\n<ul>\n  <li>Item</li>\n</ul>\n\`\`\``;
         missionText = `### 2. Your Mission\nConstruct an unordered list **\`<ul>\`** containing a list item **\`<li>\`** displaying the text **\`"Syllabus Item ${level}"\`**.`;
-        starterCode = `<div id="element-container">\n  \n</div>`;
+        starterCode = `<div id="element-container">\n  `;
         hints = ["Nest <li> inside <ul>."];
         testCases = [
           { description: "Contains a ul tag", testRegex: "<ul[\\s>]" },
@@ -2540,7 +2701,7 @@ Think of the \`<hr>\` tag as a **glowing laser-beam divider wall** that slides o
         conceptText = `### 1. The Concept (The "Why")\nDiv tags define document modules. We review **${concept}** (Part ${stepIndex + 1}).`;
         codeExample = `\`\`\`html\n<div id="wrapper">Block</div>\n\`\`\``;
         missionText = `### 2. Your Mission\nCreate a child div inside the container setting its id attribute to exactly **\`"portal-node-${level}"\`** containing the text **\`"Online"\`**.`;
-        starterCode = `<div id="element-container">\n  \n</div>`;
+        starterCode = `<div id="element-container">\n  `;
         hints = [`Write '<div id="portal-node-${level}">Online</div>'`];
         testCases = [
           { description: `Has div with id="portal-node-${level}"`, testRegex: `id=["']portal-node-${level}["']` },
@@ -2990,7 +3151,7 @@ Think of the \`<hr>\` tag as a **glowing laser-beam divider wall** that slides o
         conceptText = `### 1. The Concept (The "Why")\nTailwind layout utilities style margins. We examine **${concept}** (Part ${stepIndex + 1}).`;
         codeExample = `\`\`\`html\n<div class="p-${pad}">Card</div>\n\`\`\``;
         missionText = `### 2. Your Mission\nWrite a div container applying Tailwind padding class **\`p-${pad}\`** around the text "Card".`;
-        starterCode = `<div id="element-container">\n  \n</div>`;
+        starterCode = `<div id="element-container">\n  `;
         hints = [`Write '<div class="p-${pad}">Card</div>'`];
         testCases = [
           { description: `Applies padding class p-${pad}`, testRegex: `class=["'][^"']*p-${pad}[^"']*["']` }
@@ -3000,7 +3161,7 @@ Think of the \`<hr>\` tag as a **glowing laser-beam divider wall** that slides o
         conceptText = `### 1. The Concept (The "Why")\nTailwind widths configure element scaling. We check **${concept}** (Part ${stepIndex + 1}).`;
         codeExample = `\`\`\`html\n<div class="w-full">Width scale</div>\n\`\`\``;
         missionText = `### 2. Your Mission\nApply class utility **\`w-1/2\`** (half width) to a div container inside the wrapper.`;
-        starterCode = `<div id="element-container">\n  \n</div>`;
+        starterCode = `<div id="element-container">\n  `;
         hints = ["Use class='w-1/2' inside the tags."];
         testCases = [
           { description: "Applies width class w-1/2", testRegex: "class=[\"'][^\"]*w-1/2[^\"]*[\"']" }
