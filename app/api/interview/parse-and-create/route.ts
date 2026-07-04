@@ -3,18 +3,13 @@ import { db } from "@/firebase/admin";
 import { getRandomInterviewCover } from "@/lib/utils";
 import { getCurrentUser } from "@/lib/actions/auth.action";
 import { interviewLanguages } from "@/constants";
+import { fetchGroq } from "@/lib/apiKeyManager";
 
 async function groqChatCompletion(messages: any[], jsonMode = false) {
-  const apiKey = process.env.GROQ_API_KEY;
-  if (!apiKey) {
-    throw new Error("GROQ_API_KEY is not configured.");
-  }
-
-  const response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+  const response = await fetchGroq("/chat/completions", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
-      "Authorization": `Bearer ${apiKey}`
     },
     body: JSON.stringify({
       model: process.env.GROQ_LLM_MODEL || "llama-3.3-70b-versatile",

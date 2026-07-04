@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { getCurrentUser } from "@/lib/actions/auth.action";
 import { interviewLanguages } from "@/constants";
+import { fetchGroq } from "@/lib/apiKeyManager";
 
 export async function POST(request: Request) {
   const user = await getCurrentUser();
@@ -53,30 +54,18 @@ export async function POST(request: Request) {
     }
 
     // Groq TTS path (English and Arabic)
-    const apiKey1 = process.env.GROQ_API_KEY;
-    const apiKey2 = process.env.GROQ_API_KEY_2;
-    
-    // Randomly assign one of the active API keys to spread quota load
-    const activeKeys = [apiKey1, apiKey2].filter(Boolean);
-    if (activeKeys.length === 0) {
-      return NextResponse.json({ error: "No GROQ_API_KEY configured on the server." }, { status: 400 });
-    }
-    const apiKey = activeKeys[Math.floor(Math.random() * activeKeys.length)];
-
     const voiceName = voice || "troy";
     const arabicVoices = ["abdullah", "aisha", "fahad", "sultan", "lulwa", "noura"];
     const model = arabicVoices.includes(voiceName.toLowerCase())
       ? "canopylabs/orpheus-arabic-saudi"
       : "canopylabs/orpheus-v1-english";
 
-    console.log(`[TTS Route] Active API key selected (truncated): ...${apiKey.slice(-6)}`);
     console.log(`[TTS Route] Parameters - Voice: ${voiceName}, Model: ${model}, Language: ${language}`);
 
-    let response = await fetch("https://api.groq.com/openai/v1/audio/speech", {
+    const response = await fetchGroq("/audio/speech", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${apiKey}`,
       },
       body: JSON.stringify({
         model: model,
@@ -85,27 +74,6 @@ export async function POST(request: Request) {
         response_format: "wav",
       }),
     });
-
-    // If selected key rate-limits with 429, immediately try the other key as fallback
-    if (response.status === 429 && activeKeys.length > 1) {
-      const alternateKey = activeKeys.find(key => key !== apiKey);
-      if (alternateKey) {
-        console.warn(`[TTS Route] Selected key got 429. Falling back to alternative API key...`);
-        response = await fetch("https://api.groq.com/openai/v1/audio/speech", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${alternateKey}`,
-          },
-          body: JSON.stringify({
-            model: model,
-            input: text,
-            voice: voiceName,
-            response_format: "wav",
-          }),
-        });
-      }
-    }
 
     if (!response.ok) {
       const errText = await response.text();

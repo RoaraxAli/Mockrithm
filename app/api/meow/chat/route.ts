@@ -1,15 +1,11 @@
 import { NextResponse } from "next/server";
 import { getCurrentUser } from "@/lib/actions/auth.action";
+import { fetchGroq } from "@/lib/apiKeyManager";
 
 export async function POST(request: Request) {
   const user = await getCurrentUser();
   if (!user) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  }
-
-  const apiKey = process.env.GROQ_API_KEY;
-  if (!apiKey) {
-    return NextResponse.json({ error: "GROQ_API_KEY is not configured." }, { status: 400 });
   }
 
   try {
@@ -20,11 +16,10 @@ export async function POST(request: Request) {
       stream: body.stream !== false,
     };
 
-    const response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+    const response = await fetchGroq("/chat/completions", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${apiKey}`,
       },
       body: JSON.stringify(groqPayload),
     });
