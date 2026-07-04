@@ -164,13 +164,16 @@ export async function POST(request: Request) {
           
           CRITICAL:
           - ${languageInstruction}
+          - Create a modern, practical example. For coding roles, ask the candidate to write code from scratch or fix a broken snippet (e.g., implementing React state counter, correcting a function bug, handling async APIs, etc.).
+          - Do NOT provide the full solution in the template. The template should only have a broken/buggy code snippet or an empty template skeleton to complete, with clear comments explaining what to do.
+          - Example: If React, ask them to implement a Counter component using useState, leaving the function body/handlers blank for them to write.
           
           You must return ONLY a JSON object conforming to this schema:
           {
             "title": "challenge/drafting/solving title",
             "description": "challenge description and instructions for the candidate",
-            "templateCode": "starter text, equations, or code template for the candidate to build upon",
-            "language": "language name in lowercase (e.g. javascript, python, markdown, text, latex - default is 'text')"
+            "templateCode": "starter text, equations, or code template/buggy snippet for the candidate to build upon",
+            "language": "language name in lowercase (e.g. javascript, typescript, python, markdown, text, latex - default is 'text')"
           }
         `;
         const codingResponseText = await groqChatCompletion([
@@ -193,14 +196,15 @@ export async function POST(request: Request) {
 
     // 5. Generate unique dynamic first welcome greeting
     const welcomePrompt = `
-      Create a unique first greeting from an AI interviewer named Alex.
+      You are an AI interviewer named Alex. The candidate has already been introduced to the interview details and is ready to begin.
       Candidate Name: ${userName}
       Job Role: ${setup.role} (${setup.level})
       
       Guidelines:
       - ${languageInstruction}
-      - Warmly welcome the candidate, use their name, and tell them you are ready to start the interview.
-      - Keep it short, engaging, and professional. 2 sentences maximum. No markdown.
+      - Do NOT greet, introduce yourself again, or say hello. Confirm that the interview is beginning in one direct sentence.
+      - Keep it extremely short: 1 sentence maximum. No markdown.
+      - Example: "Great, let's start the ${setup.role} interview. Here is your first question:"
     `;
 
     console.log("[DEBUG] Generating welcome message using Groq...");

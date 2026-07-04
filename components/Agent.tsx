@@ -108,7 +108,7 @@ const Agent = ({
 
   // Meow Engine Configuration States
   const [selectedVoice, setSelectedVoice] = useState<string>("groq-autumn");
-  const [selectedModel, setSelectedModel] = useState<string>("llama-3.1-8b-instant");
+  const [selectedModel, setSelectedModel] = useState<string>("llama3-8b-8192");
   const [showSettings, setShowSettings] = useState(false);
 
   // Interview Language (selected before the session starts)
@@ -215,7 +215,7 @@ const Agent = ({
     setIsCodingStuck(false);
   };
 
-  // Check coding activity stuck status (10-second check)
+  // Check coding activity stuck status (60-second check, visual indicator only to prevent AI interrupting voice chat)
   useEffect(() => {
     if (callStatus !== CallStatus.ACTIVE || !codingProblem || !showSandbox) return;
 
@@ -225,12 +225,10 @@ const Agent = ({
 
     const interval = setInterval(() => {
       const msSinceLastType = Date.now() - lastCodeTypedRef.current;
-      if (msSinceLastType > 10000) { // 10 seconds of inactivity
+      if (msSinceLastType > 60000) { // 60 seconds of inactivity
         setIsCodingStuck(true);
-        // Proactively help the user
-        triggerAutomaticHint();
       }
-    }, 2000);
+    }, 5000);
 
     return () => clearInterval(interval);
   }, [callStatus, codingProblem, showSandbox]);
@@ -444,7 +442,7 @@ const Agent = ({
 
   const speakSentence = (text: string): Promise<void> => {
     return new Promise((resolve) => {
-      const cleanText = text.replace(/\[END_CALL\]/gi, "").replace(/\[SHOW_SANDBOX\]/gi, "").replace(/[*#_`~[\]]/g, "").trim();
+      const cleanText = text.replace(/\[END[-_ ]?CALL\]/gi, "").replace(/\[SHOW[-_ ]?SANDBOX\]/gi, "").replace(/[*#_`~[\]]/g, "").trim();
       console.log(`[Agent.tsx] speakSentence called. Raw: "${text}", Cleaned: "${cleanText}"`);
       if (!cleanText) {
         console.log("[Agent.tsx] Empty text, resolving speakSentence immediately.");
@@ -549,7 +547,7 @@ const Agent = ({
   };
 
   const queueSpeechChunk = (text: string) => {
-    const cleanText = text.replace(/\[END_CALL\]/gi, "").replace(/\[SHOW_SANDBOX\]/gi, "").replace(/[*#_`~[\]]/g, "").trim();
+    const cleanText = text.replace(/\[END[-_ ]?CALL\]/gi, "").replace(/\[SHOW[-_ ]?SANDBOX\]/gi, "").replace(/[*#_`~[\]]/g, "").trim();
     if (!cleanText) {
       if (effectiveVoice === "local") {
         if (streamCompletedRef.current && localSpeechFinishedCountRef.current === localSpeechQueueCountRef.current) {
@@ -576,13 +574,13 @@ const Agent = ({
   const handleNewStreamToken = (token: string) => {
     accumulatedTextRef.current += token;
 
-    if (/\[SHOW_SANDBOX\]/i.test(accumulatedTextRef.current)) {
+    if (/\[SHOW[-_ ]?SANDBOX\]/i.test(accumulatedTextRef.current)) {
       setShowSandbox(true);
     }
 
     const displayClean = accumulatedTextRef.current
-      .replace(/\[SHOW_SANDBOX\]/gi, "")
-      .replace(/\[END_CALL\]/gi, "")
+      .replace(/\[SHOW[-_ ]?SANDBOX\]/gi, "")
+      .replace(/\[END[-_ ]?CALL\]/gi, "")
       .trim();
     setLastMessage(displayClean);
 
@@ -596,8 +594,8 @@ const Agent = ({
       if (chunkText.length > 0) {
         sentenceBufferRef.current = sentenceBufferRef.current.substring(puncIndex + 1);
         const cleanChunk = chunkText
-          .replace(/\[SHOW_SANDBOX\]/gi, "")
-          .replace(/\[END_CALL\]/gi, "")
+          .replace(/\[SHOW[-_ ]?SANDBOX\]/gi, "")
+          .replace(/\[END[-_ ]?CALL\]/gi, "")
           .trim();
         queueSpeechChunk(cleanChunk);
       }
@@ -620,6 +618,7 @@ const Agent = ({
 
     console.log("[Agent.tsx] Initializing new SpeechRecognition instance...");
     const rec = new SpeechRecognition();
+    recognitionRef.current = rec; // Set immediately to ignore obsolete instances
     rec.continuous = false;    // Disabled to let natural single utterances finish and fire immediately
     rec.interimResults = true; // Show real-time transcription while speaking
     rec.lang = languageRef.current;
@@ -634,6 +633,7 @@ const Agent = ({
     // submitted exactly once and a duplicate "Listening... Speak now" never
     // appears from a glitch-triggered restart.
     const submitCapturedSpeech = (text: string) => {
+      if (recognitionRef.current !== rec) return; // Discard obsolete instances
       if (!isCallActiveRef.current || isProcessingRef.current) return;
       if (submittedThisTurnRef.current) {
         console.log("[Agent.tsx] Speech already submitted this turn. Ignoring duplicate.");
@@ -661,6 +661,10 @@ const Agent = ({
     };
 
     rec.onerror = (event: any) => {
+      if (recognitionRef.current !== rec) {
+        console.log("[Agent.tsx] Obsolete recognition instance error. Discarding event.");
+        return;
+      }
       console.error("[Agent.tsx] SpeechRecognition error event captured:", event.error);
       if (event.error === "not-allowed") {
         console.error("[Agent.tsx] Microphone access blocked or not allowed.");
@@ -691,6 +695,10 @@ const Agent = ({
     };
 
     rec.onresult = (event: any) => {
+      if (recognitionRef.current !== rec) {
+        console.log("[Agent.tsx] Obsolete recognition result discarded.");
+        return;
+      }
       if (!isCallActiveRef.current || isProcessingRef.current || submittedThisTurnRef.current) {
         console.log("[Agent.tsx] Result discarded: call inactive, process busy, or already submitted.");
         return;
@@ -736,6 +744,10 @@ const Agent = ({
 
     rec.onend = () => {
       console.log("[Agent.tsx] SpeechRecognition session ended.");
+      if (recognitionRef.current !== rec) {
+        console.log("[Agent.tsx] Obsolete recognition instance ended. Discarding event.");
+        return;
+      }
       isListeningRef.current = false;
       if (silenceTimerRef.current) {
         clearTimeout(silenceTimerRef.current);
@@ -932,7 +944,7 @@ ${
 ${code}
 \`\`\`
 - If the candidate gets stuck, provide a Socratic hint to help them think in the right direction. Do NOT give them the full solution.
-- CRITICAL: The sandbox is hidden from the candidate initially. When you are ready for them to write/code/solve the challenge, you MUST output the exact tag '[SHOW_SANDBOX]' in your response. Do not output this tag before you introduce the problem.`
+- CRITICAL: The sandbox is hidden from the candidate initially. You MUST ONLY output the exact tag '[SHOW_SANDBOX]' when you transition to the final coding question (Question 3: ${questionsRef.current[2] || "the coding challenge"}). DO NOT output '[SHOW_SANDBOX]' on any previous questions.`
     : ""
 }`;
       } else {
@@ -1829,7 +1841,7 @@ ${code}
                       onChange={(e) => setSelectedModel(e.target.value)}
                       className="bg-zinc-950 text-zinc-100 text-xs rounded-xl p-3 border border-zinc-900 focus:border-zinc-700 focus:ring-1 focus:ring-zinc-800 outline-none cursor-pointer hover:bg-zinc-900 transition-all font-semibold"
                     >
-                      <option value="llama-3.1-8b-instant">Llama 3.1 8B (Fast & Recommended)</option>
+                      <option value="llama3-8b-8192">Llama 3 8B (Fast & Recommended)</option>
                       <option value="llama-3.3-70b-versatile">Llama 3.3 70B (High Quality)</option>
                     </select>
                   </div>
