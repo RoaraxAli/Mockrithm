@@ -15,7 +15,7 @@ import {
   MapPin, ChevronDown, Music, Volume2, VolumeX, List, Star
 } from "lucide-react";
 import { toast } from "sonner";
-import { GAMES_LIST, generateLevel, getTierName, LevelData, GameInfo } from "@/lib/gamesData";
+import { GAMES_LIST, generateLevel, LevelData, GameInfo } from "@/lib/gamesData";
 import {
   getUserGamesProgress, updateUserGamesProgress, saveUserLocation,
   saveUserSoundPreference, claimAchievementPersistent, addFriendPersistent,
@@ -494,13 +494,12 @@ function GamesPageContent() {
       setShowHint(false);
       setEvalLogs([]);
       setEvaluationSuccess(null);
-      if (activeGame.id === "sql") resetSqlMockTable();
-      else if (activeGame.id === "git") resetGitMockRepo();
+      if (activeGame.id === "git") resetGitMockRepo();
     }
   }, [activeGame, currentLevelNum, gameView]);
 
   const gameProgressObj = activeGame ? (progress[activeGame.id] || { completedLevel: 0, xp: 0 }) : { completedLevel: 0, xp: 0 };
-  const gameMaxLvl = activeGame?.id === "html5" ? 100 : 500;
+  const gameMaxLvl = 100;
   const maxUnlockedLevel = gameProgressObj.completedLevel + 1 > gameMaxLvl ? gameMaxLvl : gameProgressObj.completedLevel + 1;
   const canGoNext = currentLevelNum < maxUnlockedLevel || evaluationSuccess === true;
 
@@ -645,18 +644,15 @@ function GamesPageContent() {
     const anyPlayed = playList.some(k => progress[k]?.completedLevel > 0);
     const anyTen = playList.some(k => progress[k]?.completedLevel >= 10);
     const anyCent = playList.some(k => progress[k]?.completedLevel >= 100);
-    const anyHalf = playList.some(k => progress[k]?.completedLevel >= 250);
-    const anyApex = playList.some(k => progress[k]?.completedLevel >= 500);
     const unlockedBadges = playList.filter(k => progress[k]?.completedLevel > 0).length;
 
     list.push({ id: "first_syntax", title: "First Syntax", desc: "Clear Level 1 on any game.", target: "Level 1", current: anyPlayed ? 1 : 0, max: 1, completed: anyPlayed, xp: 50 });
     list.push({ id: "first_rank", title: "First Rank Up", desc: "Reach Level 10 on any game.", target: "Level 10", current: anyTen ? 10 : 0, max: 10, completed: anyTen, xp: 100 });
     list.push({ id: "century_club", title: "Century Club", desc: "Reach Level 100 on any game.", target: "Level 100", current: anyCent ? 100 : 0, max: 100, completed: anyCent, xp: 250 });
-    list.push({ id: "halfway_there", title: "Halfway There", desc: "Reach Level 250 on any game.", target: "Level 250", current: anyHalf ? 250 : 0, max: 250, completed: anyHalf, xp: 400 });
-    list.push({ id: "apex_dev", title: "Apex Developer", desc: "Complete all 500 levels on any game.", target: "Level 500", current: anyApex ? 500 : 0, max: 500, completed: anyApex, xp: 600 });
+    list.push({ id: "apex_dev", title: "Apex Developer", desc: "Complete all 100 levels on any game.", target: "Level 100", current: anyCent ? 100 : 0, max: 100, completed: anyCent, xp: 600 });
     list.push({ id: "poly_1", title: "Polyglot I", desc: "Unlock 3 different badges.", target: "3 badges", current: Math.min(unlockedBadges, 3), max: 3, completed: unlockedBadges >= 3, xp: 150 });
     list.push({ id: "poly_2", title: "Polyglot II", desc: "Unlock 6 different badges.", target: "6 badges", current: Math.min(unlockedBadges, 6), max: 6, completed: unlockedBadges >= 6, xp: 300 });
-    list.push({ id: "poly_3", title: "Polyglot III", desc: "Unlock all 10 badges.", target: "10 badges", current: Math.min(unlockedBadges, 10), max: 10, completed: unlockedBadges >= 10, xp: 500 });
+    list.push({ id: "poly_3", title: "Polyglot III", desc: "Unlock all 9 badges.", target: "9 badges", current: Math.min(unlockedBadges, 9), max: 9, completed: unlockedBadges >= 9, xp: 500 });
     list.push({ id: "legend", title: "Getting Started", desc: "Claim 5 achievements.", target: "5 claimed", current: Math.min(claimedAchievements.length, 5), max: 5, completed: claimedAchievements.length >= 5, xp: 200 });
     list.push({ id: "god", title: "Achievement Hunter", desc: "Claim 20 achievements.", target: "20 claimed", current: Math.min(claimedAchievements.length, 20), max: 20, completed: claimedAchievements.length >= 20, xp: 500 });
     list.push({ id: "social_1", title: "First Contact", desc: "Add 1 friend.", target: "1 friend", current: Math.min(friendsList.length, 1), max: 1, completed: friendsList.length >= 1, xp: 50 });
@@ -668,10 +664,7 @@ function GamesPageContent() {
         { lvl: 5, xp: 50, key: "novice", label: "Novice" },
         { lvl: 25, xp: 100, key: "apprentice", label: "Apprentice" },
         { lvl: 50, xp: 150, key: "acolyte", label: "Acolyte" },
-        { lvl: 100, xp: 200, key: "expert", label: "Expert" },
-        { lvl: 200, xp: 300, key: "master", label: "Master" },
-        { lvl: 350, xp: 400, key: "grandmaster", label: "Grandmaster" },
-        { lvl: 500, xp: 500, key: "conqueror", label: "Conqueror" }
+        { lvl: 100, xp: 200, key: "expert", label: "Expert" }
       ].forEach(t => {
         list.push({
           id: `${game.id}_${t.key}`, title: `${t.label}: ${game.name}`,
@@ -1197,17 +1190,8 @@ function GamesPageContent() {
               const prereqs = activeGame.prerequisites;
               const prereqGames = GAMES_LIST.filter(g => prereqs.includes(g.id));
               const missingPrereqs = prereqGames.filter(g => !(progress[g.id]?.completedLevel > 0));
-              const maxLvl = activeGame.id === "html5" ? 100 : 500;
+              const maxLvl = 100;
               const pct = Math.min(Math.round((gameProg.completedLevel / maxLvl) * 100), 100);
-              const tier = getTierName(gameProg.completedLevel);
-
-              const tierData = [
-                { tier: "Apprentice", range: "1–100", color: "from-amber-600 to-orange-500" },
-                { tier: "Mage", range: "101–200", color: "from-cyan-600 to-teal-500" },
-                { tier: "Knight", range: "201–300", color: "from-yellow-500 to-amber-600" },
-                { tier: "Warlord", range: "301–400", color: "from-purple-600 to-fuchsia-500" },
-                { tier: "Grandmaster", range: "401–500", color: "from-red-600 to-rose-700" }
-              ];
 
               return (
                 <div className="flex flex-col gap-6">
@@ -1314,10 +1298,10 @@ function GamesPageContent() {
                       <div className="bg-zinc-950/40 border border-zinc-900 rounded-2xl p-6 flex flex-col gap-4">
                         <div className="flex items-center justify-between">
                           <h3 className="text-xs font-black uppercase tracking-widest text-zinc-400 font-mono">Levels</h3>
-                          <span className="text-[9px] font-mono text-zinc-500 uppercase">Showing first 50 levels</span>
+                          <span className="text-[9px] font-mono text-zinc-500 uppercase">Showing all 100 levels</span>
                         </div>
                         <div className="grid grid-cols-10 gap-1.5">
-                          {Array.from({ length: 50 }, (_, i) => {
+                          {Array.from({ length: 100 }, (_, i) => {
                             const lvl = i + 1;
                             const isCompleted = gameProg.completedLevel >= lvl;
                             const isNext = gameProg.completedLevel + 1 === lvl;
@@ -1357,7 +1341,7 @@ function GamesPageContent() {
 
             {/* ── VIEW: GAME RUNNER ── */}
             {gameView === "game-runner" && activeGame && (() => {
-              const maxLvl = activeGame.id === "html5" ? 100 : 500;
+              const maxLvl = 100;
               return (
                 <div className="flex flex-col gap-6">
                   <div className="flex items-center justify-between border-b border-zinc-900 pb-4">
@@ -1468,8 +1452,7 @@ function GamesPageContent() {
                               activeGame.id === "css3" ? "css" :
                               activeGame.id === "javascript" || activeGame.id === "nodejs" ? "javascript" :
                               activeGame.id === "typescript" ? "typescript" :
-                              activeGame.id === "python" || activeGame.id === "django" || activeGame.id === "cybersecurity" ? "python" :
-                              activeGame.id === "sql" ? "sql" :
+                              activeGame.id === "python" ? "python" :
                               activeGame.id === "git" ? "shell" :
                               "html"
                             }
@@ -1501,25 +1484,6 @@ function GamesPageContent() {
                         </div>
 
                         {/* Custom visual previews or log feeds */}
-                        {activeGame.id === "sql" && (
-                          <div className="flex-1 overflow-x-auto text-[10px] font-mono bg-black/40 border border-zinc-900 rounded-xl p-3">
-                            <div className="text-[9px] font-bold text-zinc-500 mb-2 uppercase tracking-wide">Target Data Grid</div>
-                            <table className="w-full text-left">
-                              <thead>
-                                <tr className="border-b border-zinc-900">
-                                  {["id","name","level","class"].map(h => <th key={h} className="p-2 text-zinc-500 font-bold font-mono">{h}</th>)}
-                                </tr>
-                              </thead>
-                              <tbody>
-                                {sqlTableData.map(r => (
-                                  <tr key={r.id} className="border-b border-zinc-900/40 text-zinc-400">
-                                    <td className="p-2">{r.id}</td><td className="p-2 font-bold">{r.name}</td><td className="p-2">{r.level}</td><td className="p-2 text-zinc-500">{r.class}</td>
-                                  </tr>
-                                ))}
-                              </tbody>
-                            </table>
-                          </div>
-                        )}
 
                         {activeGame.id === "git" && (
                           <div className="flex-1 flex flex-col gap-2 bg-black/60 border border-zinc-900 rounded-xl p-3 font-mono text-[10px]">
@@ -1535,7 +1499,7 @@ function GamesPageContent() {
                           </div>
                         )}
 
-                        {activeGame.id !== "sql" && activeGame.id !== "git" && (
+                        {activeGame.id !== "git" && (
                           <div className="flex-1 overflow-y-auto max-h-[140px] text-[10px] font-mono text-zinc-500 space-y-1">
                             {evalLogs.length === 0 ? (
                               <div className="text-zinc-700 italic">No output logged yet. Run your code to trigger unit tests.</div>
@@ -1572,7 +1536,7 @@ function GamesPageContent() {
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                   {GAMES_LIST.map(game => {
                     const gameProg = progress[game.id] || { completedLevel: 0, xp: 0 };
-                    const maxLvl = game.id === "html5" ? 100 : 500;
+                    const maxLvl = 100;
                     const pct = Math.min(Math.round((gameProg.completedLevel / maxLvl) * 100), 100);
                     const prereqsMissing = game.prerequisites.length > 0 && !game.prerequisites.every(p => (progress[p]?.completedLevel || 0) > 0);
 
@@ -1637,7 +1601,7 @@ function GamesPageContent() {
                 <div className="absolute -bottom-2 -right-2 flex flex-wrap gap-1 max-w-[120px] bg-zinc-950/80 p-1.5 rounded-xl border border-zinc-800 backdrop-blur-md shadow-lg">
                   {GAMES_LIST.filter(game => {
                     const gp = progress[game.id] || { completedLevel: 0 };
-                    const maxLvl = game.id === "html5" ? 100 : 500;
+                    const maxLvl = 100;
                     return gp.completedLevel >= maxLvl;
                   }).map(game => (
                     <div key={game.id} className="size-6 p-1 bg-zinc-900 border border-zinc-800 rounded-lg" title={`${game.name} Completed`}>
@@ -1646,7 +1610,7 @@ function GamesPageContent() {
                   ))}
                   {GAMES_LIST.filter(game => {
                     const gp = progress[game.id] || { completedLevel: 0 };
-                    const maxLvl = game.id === "html5" ? 100 : 500;
+                    const maxLvl = 100;
                     return gp.completedLevel >= maxLvl;
                   }).length === 0 && (
                     <div className="size-6 bg-zinc-900 border border-zinc-800 rounded-lg flex items-center justify-center text-[10px] text-zinc-500 font-mono" title="No completed games yet">
@@ -1693,7 +1657,7 @@ function GamesPageContent() {
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
                  {GAMES_LIST.map(game => {
                   const gp = progress[game.id] || { completedLevel: 0, xp: 0 };
-                  const maxLvl = game.id === "html5" ? 100 : 500;
+                  const maxLvl = 100;
                   const pct = Math.min(Math.round((gp.completedLevel / maxLvl) * 100), 100);
                   return (
                     <div key={game.id} className={`p-5 rounded-2xl border bg-zinc-950/20 flex flex-col justify-between h-32 relative overflow-hidden transition-all ${gp.completedLevel > 0 ? "border-zinc-800" : "border-zinc-905 opacity-60"}`}>
@@ -1732,7 +1696,7 @@ function GamesPageContent() {
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
               {GAMES_LIST.map(game => {
                 const gp = progress[game.id] || { completedLevel: 0, xp: 0 };
-                const maxLvl = game.id === "html5" ? 100 : 500;
+                const maxLvl = 100;
                 const isCompleted = gp.completedLevel >= maxLvl;
                 const isStarted = gp.completedLevel > 0;
                 const pct = Math.min(Math.round((gp.completedLevel / maxLvl) * 100), 100);

@@ -36,7 +36,7 @@ export interface LevelData {
   };
 }
 
-// 14 Games Definition
+// 9 Games Definition
 export const GAMES_LIST: GameInfo[] = [
   {
     id: "html5",
@@ -75,15 +75,6 @@ export const GAMES_LIST: GameInfo[] = [
     prerequisites: ["javascript"]
   },
   {
-    id: "reactjs",
-    name: "ReactJS",
-    theme: "Virtual DOM Sorcerer",
-    iconName: "Layers",
-    description: "Weave component arrays and manage state portals. Optimize virtual render reconciliations.",
-    gradient: "from-sky-500 to-teal-500",
-    prerequisites: ["html5", "css3", "javascript"]
-  },
-  {
     id: "nodejs",
     name: "NodeJS",
     theme: "Server Core Overlord",
@@ -99,7 +90,7 @@ export const GAMES_LIST: GameInfo[] = [
     iconName: "Sparkles",
     description: "Bridge client portals and server bastions. Orchestrate Server Actions, SSR, and edge optimizations.",
     gradient: "from-zinc-700 to-zinc-900",
-    prerequisites: ["reactjs", "nodejs"]
+    prerequisites: ["nodejs"]
   },
   {
     id: "python",
@@ -111,24 +102,6 @@ export const GAMES_LIST: GameInfo[] = [
     prerequisites: []
   },
   {
-    id: "sql",
-    name: "SQL & Databases",
-    theme: "Database Dungeon Crawler",
-    iconName: "Database",
-    description: "Descend into relational storage dungeons. Query keys, structure joins, and index transaction speeds.",
-    gradient: "from-purple-600 to-indigo-600",
-    prerequisites: []
-  },
-  {
-    id: "django",
-    name: "Django & FastAPI",
-    theme: "REST Citadel",
-    iconName: "Server",
-    description: "Fortify endpoint barriers and design database migrations. Build secure REST and Async APIs.",
-    gradient: "from-teal-600 to-green-700",
-    prerequisites: ["python", "sql"]
-  },
-  {
     id: "git",
     name: "Git & GitHub",
     theme: "Timeline Weaver",
@@ -138,15 +111,6 @@ export const GAMES_LIST: GameInfo[] = [
     prerequisites: ["html5"]
   },
   {
-    id: "docker",
-    name: "Docker & DevOps",
-    theme: "Container Helmsman",
-    iconName: "Container",
-    description: "Encapsulate applications in container fleets. Build multi-stage Dockerfiles and deploy CI/CD.",
-    gradient: "from-blue-500 to-cyan-500",
-    prerequisites: ["nodejs"]
-  },
-  {
     id: "tailwind",
     name: "Tailwind CSS",
     theme: "Utility Ninja",
@@ -154,25 +118,9 @@ export const GAMES_LIST: GameInfo[] = [
     description: "Style interfaces at lightning speed using CSS utility spells. Master configurations and responsiveness.",
     gradient: "from-cyan-500 to-teal-400",
     prerequisites: ["css3"]
-  },
-  {
-    id: "cybersecurity",
-    name: "Cyber Security",
-    theme: "Net Defender",
-    iconName: "ShieldAlert",
-    description: "Infiltrate vulnerable targets and defend servers. Crack hashes, inject SQL, and secure endpoints.",
-    gradient: "from-red-700 to-rose-950",
-    prerequisites: ["javascript", "sql", "nodejs"]
   }
 ];
 
-export function getTierName(level: number): "Apprentice" | "Mage" | "Knight" | "Warlord" | "Grandmaster" {
-  if (level <= 100) return "Apprentice";
-  if (level <= 200) return "Mage";
-  if (level <= 300) return "Knight";
-  if (level <= 400) return "Warlord";
-  return "Grandmaster";
-}
 
 // Handcrafted Codédex blueprints for initial sequence (HTML5 Game target)
 const HTML5_INITIAL_LEVELS: LevelData[] = [
@@ -2415,16 +2363,11 @@ const GAME_SYLLABUS: Record<string, string[]> = {
   css3: ["Color properties", "Box Model spacing", "Borders & Shadows", "Fonts & Alignment", "Flexbox Axes", "Flexbox Axes Alignments", "CSS Positioning", "Keyframe Animations", "Transitions speed", "CSS Transforms", "Gradients patterns", "Grid layout columns", "Will-Change render", "CSS custom properties", "Container queries"],
   javascript: ["Variables let-const", "Arithmetic modifiers", "Conditional blocks", "While loop cycles", "Array manipulation", "Arrow function expressions", "Scope resolutions", "Array mapping", "Array filtering", "Promises & async", "DOM events listeners", "Closures scopes", "Prototype inheritances", "Debounce utilities", "AST compilations"],
   typescript: ["Primitive variables typing", "Tuple structures", "Interface models", "Type alias sets", "Union intersections", "Access parameters modifiers", "Generics declarations", "Generic constraint criteria", "Utility Partial and Pick", "Mapped typing parameters", "Discriminated unions"],
-  reactjs: ["JSX structures", "Component properties", "UseState variables", "Conditional tags", "UseEffect data updates", "UseRef tags selection", "Context providers", "UseReducer structures", "UseCallback cache functions", "UseMemo cache values", "Zustand global stores"],
   nodejs: ["Process args parsing", "Path resolutions", "FS file writing", "FS file reading", "Event Emitter listeners", "HTTP server routing", "Express server setup", "Express middleware logic", "JWT token signatures", "Node worker threads"],
   nextjs: ["App router paths", "Link navigation next/link", "Image tag next/image", "Page dynamic route layout", "RSC Server actions", "UseActionState hooks", "Route API handlers", "NextAuth configurations", "Sitemaps indexing", "Caching segment options"],
   python: ["Indentation values print", "Conditional expressions", "Def parameter functions", "List dict items", "List comprehensions", "Lambda declarations", "Classes instances init", "Yield generator loops", "Asyncio tasks loops", "Metaclasses overrides"],
-  sql: ["Select query columns", "Where filter values", "Order by sorting", "Inner join relations", "Group by aggregates", "Having query limits", "Subqueries select parameters", "Triggers actions events", "Transactions logs commit", "Explain plan indexes"],
-  django: ["Startproject structures", "FastAPI path variables", "FastAPI request query items", "Pydantic validator schemas", "Django ORM filtering", "FastAPI async endpoints", "FastAPI Dependency injections", "Celery task pipelines", "DRF serializers mapping", "Async database postgres"],
   git: ["Git init configuration", "Git status stages", "Git add workspace", "Git commit hashes", "Git log timeline", "Git branch creations", "Git merge timelines", "Git rebase paths", "Git stash temporary status", "Git reflog recovery"],
-  docker: ["Docker version listings", "Docker run hello", "Docker ps statuses", "Dockerfile FROM images", "Dockerfile WORKDIR targets", "Dockerfile COPY files", "Docker Volume bounds", "Docker Compose configuration", "Multi-stage builds reduce", "K8s service pods"],
-  tailwind: ["Text sizes text-lg", "Margin and paddings", "Background colors bg-zinc", "Borders rounded utilities", "Flex grid responsive sm", "Hover states hover:bg", "Transitions durations", "Custom extend spacing", "Arbitrary colors extends", "Tailwind plugins writes"],
-  cybersecurity: ["HTTP status codes", "Base64 decodings", "MD5 hashing check", "SQL Injection bypasses", "Cross Site Scripting XSS", "CSRF token checks", "JWT none algorithm cracking", "Command Injection terminal", "SSRF server-side requests", "Privilege escalations audits"]
+  tailwind: ["Text sizes text-lg", "Margin and paddings", "Background colors bg-zinc", "Borders rounded utilities", "Flex grid responsive sm", "Hover states hover:bg", "Transitions durations", "Custom extend spacing", "Arbitrary colors extends", "Tailwind plugins writes"]
 };
 
 /**
@@ -2522,7 +2465,7 @@ Think of the \`<hr>\` tag as a **glowing laser-beam divider wall** that slides o
   const game = GAMES_LIST.find(g => g.id === gameId);
   if (!game) throw new Error(`Game ${gameId} not found`);
 
-  const tier = getTierName(level);
+  const tier = "Apprentice";
   const topics = GAME_SYLLABUS[gameId] || ["General Foundations"];
   const topicIndex = Math.floor((level - 1) / 10) % topics.length;
   const stepIndex = (level - 1) % 10;
