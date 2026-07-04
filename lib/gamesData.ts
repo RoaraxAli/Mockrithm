@@ -260,18 +260,18 @@ const HTML5_EARLY_LEVELS: LevelData[] = [
     level: 7,
     levelId: 7,
     tier: "Apprentice",
-    title: "Heading 1",
-    conceptText: "### Concept\nThe <h1> tag defines the primary heading of your page. It is usually the largest title on the screen.",
-    codeExample: "```html\n<h1>Welcome to My Site</h1>\n```",
-    missionText: "### Mission\nCreate a primary heading (h1) that reads 'Welcome to My Site'.",
+    title: "Paragraphs",
+    conceptText: "### Concept\nThe <p> tag is used to wrap blocks of text. It automatically adds spacing before and after the paragraph to stack paragraphs cleanly.",
+    codeExample: "\`\`\`html\n<p>Hello World</p>\n\`\`\`",
+    missionText: "### Mission\nWrap 'Hello World' in a paragraph (p) tag.",
     starterCode: "<!-- Level 7 -->\n",
-    hints: ["Write '<h1>Welcome to My Site</h1>'."],
+    hints: ["Write '<p>Hello World</p>'."],
     validation: {
       checkType: "html",
       testCases: [
         {
-          description: "Create an h1 element with welcome text",
-          testRegex: "<h1>\\s*Welcome\\s+to\\s+My\\s+Site\\s*</h1>"
+          description: "Create a p tag with Hello World text",
+          testRegex: "<p>\\s*Hello\\s+World\\s*</p>"
         }
       ]
     }
@@ -281,18 +281,18 @@ const HTML5_EARLY_LEVELS: LevelData[] = [
     level: 8,
     levelId: 8,
     tier: "Apprentice",
-    title: "Paragraphs",
-    conceptText: "### Concept\nThe <p> tag is used to wrap blocks of text. It automatically adds spacing before and after the paragraph to stack paragraphs cleanly.",
-    codeExample: "```html\n<p>Hello World</p>\n```",
-    missionText: "### Mission\nWrap 'Hello World' in a paragraph (p) tag.",
+    title: "Heading 1",
+    conceptText: "### Concept\nThe <h1> tag defines the primary heading of your page. It is usually the largest title on the screen.",
+    codeExample: "\`\`\`html\n<h1>Welcome to My Site</h1>\n\`\`\`",
+    missionText: "### Mission\nCreate a primary heading (h1) that reads 'Welcome to My Site'.",
     starterCode: "<!-- Level 8 -->\n",
-    hints: ["Write '<p>Hello World</p>'."],
+    hints: ["Write '<h1>Welcome to My Site</h1>'."],
     validation: {
       checkType: "html",
       testCases: [
         {
-          description: "Create a p tag with Hello World text",
-          testRegex: "<p>\\s*Hello\\s+World\\s*</p>"
+          description: "Create an h1 element with welcome text",
+          testRegex: "<h1>\\s*Welcome\\s+to\\s+My\\s+Site\\s*</h1>"
         }
       ]
     }
