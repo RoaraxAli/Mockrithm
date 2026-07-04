@@ -152,6 +152,11 @@ export async function fetchGroq(path: string, options: RequestInit = {}): Promis
       if (!response.ok) {
         const errText = await response.clone().text();
         console.warn(`[fetchGroq] Key error (status ${response.status}): ${errText}`);
+        if (response.status === 400 && errText.includes("model_terms_required")) {
+          apiKeyManager.blockKey(key, 600); // Block this key for 10 minutes
+          lastError = new Error(`Terms required for model for key ending in ...${key.slice(-6)}: ${errText}`);
+          continue;
+        }
         if (response.status >= 500) {
           apiKeyManager.blockKey(key, 15);
           lastError = new Error(`Groq Server Error (${response.status}): ${errText}`);
