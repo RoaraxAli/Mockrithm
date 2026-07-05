@@ -6,13 +6,6 @@ Mockrithm is a proprietary, enterprise-grade mock interview and interactive lear
 
 ---
 
-## 🔒 Security & Proprietary Prompts
-To secure our intellectual property, all core AI prompt systems (including syllabus, interview persona, STAR grading, and feedback compilation templates) are configured via environment variables:
-- These are kept completely out of the source code repository.
-- You can customize the prompts in production by setting the corresponding environment variables in the Vercel Project Settings panel.
-- If these environment variables are not defined, the system falls back to standard, out-of-the-box templates defined internally.
-
----
 
 ## 🛠️ Tech Stack
 
@@ -43,14 +36,6 @@ To secure our intellectual property, all core AI prompt systems (including sylla
    GROQ_API_KEY=your_primary_groq_api_key
    GROQ_API_KEY_2=your_secondary_groq_api_key
    GROQ_API_KEY_3=your_tertiary_groq_api_key
-   
-   # Optional prompt overrides (commercial templates)
-   PROMPT_INTERVIEW_PERSONA="Your custom interview system prompt..."
-   PROMPT_SETUP_PERSONA="Your custom setup session onboarding prompt..."
-   PROMPT_CHALLENGE_GENERATOR="Your custom coding sandbox challenge prompt..."
-   PROMPT_WELCOME_GENERATOR="Your custom greeting prompt..."
-   PROMPT_STAR_ANALYZER="Your custom response rating prompt..."
-   PROMPT_FEEDBACK_GENERATOR="Your custom grading feedback prompt..."
    ```
 
 ---
