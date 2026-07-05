@@ -32,7 +32,10 @@ async function groqGenerateObject(prompt: string) {
       messages: [
         {
           role: "system",
-          content: "You are an AI assistant. Return your response ONLY as a valid JSON object matching the requested schema. Do not output any markdown formatting, thoughts, or markdown codeblocks outside the JSON.",
+          content: (() => {
+            const { loadPromptTemplate } = require("@/lib/promptLoader");
+            return loadPromptTemplate("star_analyzer.txt");
+          })(),
         },
         {
           role: "user",

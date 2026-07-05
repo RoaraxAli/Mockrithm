@@ -1099,91 +1099,6 @@ const Agent = ({
       .catch((err) => console.error("Error analyzing STAR:", err));
 
     try {
-      let systemPrompt = "";
-      const langConfig = interviewLanguages.find((l) => l.code === languageRef.current);
-      const languageInstruction = `LANGUAGE REQUIREMENT: The candidate selected "${langConfig?.name || "English"}" (${languageRef.current}). You MUST speak, ask questions, and reply ONLY in this language for the entire session. Never switch to another language unless the candidate explicitly asks you to. Keep all text plain and natural in that language.`;
-      if (typeRef.current === "interview" && questionsRef.current) {
-        const formattedQuestions = questionsRef.current.map((q: string) => `- ${q}`).join("\n");
-        const candidateRoleName = roleRef.current || userResumeData?.targetRole || "Software Engineer";
-        const candidateSessionType = sessionTypeRef.current || "Interview";
-        const personaText = candidateRoleName.toLowerCase().includes("president")
-          ? "Your persona: A senior political debate moderator or veteran political journalist. Keep your tone formal, sharp, and demanding."
-          : candidateRoleName.toLowerCase().includes("joker") || candidateRoleName.toLowerCase().includes("comedian")
-          ? "Your persona: A comedy club owner, talent scout, or talk show host. Keep your tone conversational, witty, and responsive to humor."
-          : "Your persona: A professional interviewer conducting a real-time voice interview to assess their qualifications, motivation, and fit for the role.";
-
-        systemPrompt = `You are Alex, conducting a real-time voice evaluation or interview with a candidate.
-Role: ${candidateRoleName}
-Session Mode/Type: ${candidateSessionType}
-
-${personaText}
-
-${languageInstruction}
-
-Interview Guidelines:
-Follow this structured question flow:
-${formattedQuestions}
-
-CRITICAL RULES - CONVERSATIONAL FLOW & CONCISENESS:
-- DO NOT LECTURE ON CORRECT ANSWERS: If the candidate answers correctly or reasonably, do not explain the concept, define terms, or repeat the textbook answer back to them. Simply acknowledge briefly (e.g. "Got it.", "Makes sense.", "Solid explanation.") and transition immediately to the next question.
-- GENTLY CORRECT BIG BLUNDERS: If the candidate makes a major blunder or says something completely incorrect, gently correct them and guide them in the right direction in one short, polite sentence before transitioning.
-- NEVER SOLVE OR PROVIDE CODE SNIPPETS FOR THE CHALLENGE: When you transition to the coding challenge (Question 3), do NOT write the solution code, output code blocks/snippets, or give the answer. Keep the coding editor blank or only show their skeleton code in the workspace. Introduce the challenge task parameters and tell them to write it in the code editor, then wait for their code.
-- KEEP RESPONSES VERY SHORT: Keep your replies under 25 words maximum. No yapping or long paragraphs. Keep the pacing fast and conversational.
-- Write only plain, clean text. Do not use markdown like bold (**), italics (*), lists, or hashtags.
-- Never use emojis.
-- Conclude the interview properly when all questions are asked and answered.
-- When all questions are done OR when you receive a [SYSTEM: Time is up...] message, conclude the interview warmly. Thank the candidate, wish them luck, say goodbye, and ALWAYS append "[END_CALL]" at the very end so the system knows to close the session. Example: "Thanks so much for your time today — it was great chatting with you. Best of luck! [END_CALL]"
-
-${
-  codingProblemRef.current
-    ? `Sandbox/Workspace Info:
-- The candidate is working on the task/problem: "${codingProblemRef.current.title}".
-- Description: ${codingProblemRef.current.description}
-- Candidate's current draft/code is:
-\`\`\`${codingProblemRef.current.language}
-${code}
-\`\`\`
-- If the candidate gets stuck, provide a Socratic hint to help them think in the right direction. Do NOT give them the full solution.
-- CRITICAL: The sandbox is hidden from the candidate initially. You MUST ONLY output the exact tag '[SHOW_SANDBOX]' when you transition to the final coding question (Question 3: ${questionsRef.current[2] || "the coding challenge"}). DO NOT output '[SHOW_SANDBOX]' on any previous questions.`
-    : ""
-}`;
-      } else {
-        // Build context from the user's existing profile data
-        const profileRole = userResumeData?.targetRole || "";
-        const profileSummary = userResumeData?.resumeData?.parsedData?.basics?.summary || userResumeData?.resumeData?.summary || "";
-        const profileSkills = userResumeData?.resumeData?.parsedData?.skills || userResumeData?.resumeData?.fixedParsedData?.skills || [];
-        const skillsList = Array.isArray(profileSkills) ? profileSkills.slice(0, 6).join(", ") : "";
-
-        systemPrompt = `You are a professional interview assistant helping ${userName} configure their mock session.
-
-CANDIDATE PROFILE (already collected, do NOT ask about these again unless changing):
-- Name: ${userName}
-- Default Target Role: ${profileRole || "Software Engineer"}
-- Key Skills: ${skillsList || "JavaScript, React, Node.js"}
-- Profile Summary: ${profileSummary ? profileSummary.slice(0, 200) : "Experienced professional"}
-
-YOUR CONVERSATION FLOW:
-1. First, ask them if they want to practice their listed target role ("${profileRole || "Software Engineer"}") or something else.
-2. If they say they want to practice their target role:
-   - Suggest 2 to 4 custom session options/modes suited specifically to "${profileRole || "Software Engineer"}" (e.g. Technical, Behavioral, Live Coding Sandbox; or for President: Public Address, Crisis Management, Policy Memo Drafting; or for UI/UX Design: Portfolio Review, Design Challenge, Interaction Prototyping).
-   - Ask them to pick one.
-3. If they say they want to practice a different role (or name a different role):
-   - Ask what role they want to practice (if not already specified).
-   - Once they specify the new role, suggest 2 to 4 custom session options/modes suited to this new role.
-   - Ask them to pick one.
-
-RULES:
-- Keep every reply under 30 words.
-- Write only plain clean text. No markdown, no emojis, no symbols.
-- ${languageInstruction}
-- Once they choose/specify their choice and the role, confirm their choice and the chosen role in one short sentence, append "[END_CALL]" at the very end of your response, and end your response. The system will create the interview automatically.`;
-      }
-
-      const history = [
-        { role: "system", content: systemPrompt },
-        ...messagesRef.current,
-      ];
-
       setLastMessage("AI is thinking...");
       setIsSpeaking(true);
 
@@ -1194,7 +1109,18 @@ RULES:
         },
         body: JSON.stringify({
           model: selectedModel,
-          messages: history,
+          messages: messagesRef.current,
+          promptParams: {
+            type: typeRef.current,
+            role: roleRef.current,
+            sessionType: sessionTypeRef.current,
+            language: languageRef.current,
+            questions: questionsRef.current,
+            codingProblem: codingProblemRef.current,
+            code: code,
+            userName: userName,
+            userResumeData: userResumeData
+          },
           stream: true,
         }),
       });
