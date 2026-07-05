@@ -12,34 +12,6 @@ import AwwwardsShowcase from "./landing/AwwwardsShowcase";
 import AwwwardsKineticTypography from "./landing/AwwwardsKineticTypography";
 import ResourcesSection from "./landing/ResourcesSection";
 import PricingSection from "./landing/PricingSection";
-import CircularGallery from "./CircularGallery";
-
-const galleryItems = [
-  {
-    image: "https://picsum.photos/seed/code/800/600?grayscale",
-    text: "Software Engineer Interview"
-  },
-  {
-    image: "https://picsum.photos/seed/product/800/600?grayscale",
-    text: "Product Manager Sync"
-  },
-  {
-    image: "https://picsum.photos/seed/data/800/600?grayscale",
-    text: "Data Scientist Interview"
-  },
-  {
-    image: "https://picsum.photos/seed/ux/800/600?grayscale",
-    text: "UX Designer Review"
-  },
-  {
-    image: "https://picsum.photos/seed/system/800/600?grayscale",
-    text: "System Design Prep"
-  },
-  {
-    image: "https://picsum.photos/seed/behavioral/800/600?grayscale",
-    text: "Behavioral Mock Drill"
-  }
-];
 
 interface Article {
   id: string;
@@ -309,29 +281,6 @@ export default function MarketingLanding() {
       {/* Cinematic layout content */}
       <div ref={contentRef} className="relative z-10 w-full flex flex-col min-h-screen">
         <div className="section-zoom"><AwwwardsHero /></div>
-
-        <SectionDivider />
-        
-        {/* Interactive Visual Gallery */}
-        <div className="w-full flex flex-col items-center justify-center my-8 relative z-20">
-          <div className="flex items-center gap-4 mb-8">
-            <span className="w-8 h-px bg-zinc-800" />
-            <span className="text-[8px] font-black uppercase tracking-[0.35em] text-zinc-500 font-mono">Interactive Previews</span>
-            <span className="w-8 h-px bg-zinc-800" />
-          </div>
-          <div style={{ height: '600px', position: 'relative', width: '100%' }}>
-            <CircularGallery
-              items={galleryItems}
-              bend={1}
-              textColor="#ffffff"
-              borderRadius={0.05}
-              scrollEase={0.05}
-              font="bold 30px Orbitron"
-              fontUrl="https://fonts.googleapis.com/css2?family=Orbitron:wght@700&display=swap"
-              scrollSpeed={2}
-            />
-          </div>
-        </div>
 
         <SectionDivider />
         <AwwwardsShowcase />
