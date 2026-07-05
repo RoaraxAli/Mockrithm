@@ -58,8 +58,6 @@ export async function createFeedback(params: CreateFeedbackParams) {
       .join("");
 
     let object;
-    const { loadPromptTemplate } = require("@/lib/promptLoader");
-    const feedbackSchemaText = loadPromptTemplate("feedback_generator.txt");
     const promptText = `
         You are an AI interviewer evaluating a candidate's mock interview performance.
 
@@ -85,7 +83,7 @@ export async function createFeedback(params: CreateFeedbackParams) {
 
     try {
       console.log("[DEBUG] Calling primary Groq model for final feedback generation...");
-      const groqJson = await groqGenerateObject(promptText + `\n\nSchema format:\n` + feedbackSchemaText);
+      const groqJson = await groqGenerateObject(promptText + `\n\nSchema format:\n{\n  "totalScore": number,\n  "categoryScores": [\n    { "name": "Communication Skills", "score": number, "comment": "string" },\n    { "name": "Technical Knowledge", "score": number, "comment": "string" },\n    { "name": "Problem Solving", "score": number, "comment": "string" },\n    { "name": "Cultural Fit", "score": number, "comment": "string" },\n    { "name": "Confidence and Clarity", "score": number, "comment": "string" }\n  ],\n  "strengths": ["string"],\n  "areasForImprovement": ["string"],\n  "finalAssessment": "string"\n}`);
       
       const categories = [
         "Communication Skills",

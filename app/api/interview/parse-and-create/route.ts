@@ -153,15 +153,24 @@ export async function POST(request: Request) {
     if (setup.requiresSandbox) {
       console.log("[DEBUG] Sandbox/Workspace is required. Generating custom task...");
       try {
-        const { loadPromptTemplate, compilePrompt } = await import("@/lib/promptLoader");
-        const rawTemplate = loadPromptTemplate("challenge_generator.txt");
-        const codingPrompt = compilePrompt(rawTemplate, {
-          level: setup.level,
-          role: setup.role,
-          type: setup.type,
-          techstack: (setup.techstack || []).join(", ") || "General",
-          languageInstruction
-        });
+        const codingPrompt = `
+          Generate a written, coding, or mathematical challenge suitable for a ${setup.level}-level ${setup.role} for the session mode "${setup.type}".
+          Key topics/skills: ${(setup.techstack || []).join(", ") || "General"}.
+          
+          CRITICAL:
+          - ${languageInstruction}
+          - Create a modern, practical example. For coding roles, ask the candidate to write code from scratch or fix a broken snippet (e.g., implementing React state counter, correcting a function bug, handling async APIs, etc.).
+          - Do NOT provide the full solution in the template. The template should only have a broken/buggy code snippet or an empty template skeleton to complete, with clear comments explaining what to do.
+          - Example: If React, ask them to implement a Counter component using useState, leaving the function body/handlers blank for them to write.
+          
+          You must return ONLY a JSON object conforming to this schema:
+          {
+            "title": "challenge/drafting/solving title",
+            "description": "challenge description and instructions for the candidate",
+            "templateCode": "starter text, equations, or code template/buggy snippet for the candidate to build upon",
+            "language": "language name in lowercase (e.g. javascript, typescript, python, markdown, text, latex - default is 'text')"
+          }
+        `;
         const codingResponseText = await groqChatCompletion([
           { role: "system", content: "You only output a valid JSON coding or drafting challenge." },
           { role: "user", content: codingPrompt }
@@ -181,18 +190,21 @@ export async function POST(request: Request) {
     }
 
     // 5. Generate unique dynamic first welcome greeting
+    const welcomePrompt = `
+      You are an AI interviewer named Alex. The candidate has already been introduced to the interview details and is ready to begin.
+      Candidate Name: ${userName}
+      Job Role: ${setup.role} (${setup.level})
+      
+      Guidelines:
+      - ${languageInstruction}
+      - Do NOT greet, introduce yourself again, or say hello. Confirm that the interview is beginning in one direct sentence.
+      - Keep it extremely short: 1 sentence maximum. No markdown.
+      - Example: "Great, let's start the ${setup.role} interview. Here is your first question:"
+    `;
+
+    console.log("[DEBUG] Generating welcome message using Groq...");
     let firstMessage = "Hello! Ready to start.";
     try {
-      const { loadPromptTemplate, compilePrompt } = await import("@/lib/promptLoader");
-      const rawWelcomeTemplate = loadPromptTemplate("welcome_generator.txt");
-      const welcomePrompt = compilePrompt(rawWelcomeTemplate, {
-        userName,
-        role: setup.role,
-        level: setup.level,
-        languageInstruction
-      });
-
-      console.log("[DEBUG] Generating welcome message using Groq...");
       firstMessage = await groqChatCompletion([
         { role: "user", content: welcomePrompt }
       ]);
