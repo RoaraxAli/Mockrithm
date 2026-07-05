@@ -608,12 +608,23 @@ export default function AwwwardsShowcase() {
       >
         {FEATURES.map((feat, i) => {
           const Visual = VISUALS[i];
+          
+          // Dynamic glow and border colors for each feature tier
+          const colorProfiles = [
+            { border: "border-emerald-500/10 lg:border-emerald-500/20", glow: "shadow-[0_0_60px_rgba(16,185,129,0.04)]", badge: "bg-emerald-950/30 text-emerald-400 border-emerald-500/20", status: "[ ONLINE // OK ]" },
+            { border: "border-violet-500/10 lg:border-violet-500/20", glow: "shadow-[0_0_60px_rgba(139,92,246,0.04)]", badge: "bg-violet-950/30 text-violet-400 border-violet-500/20", status: "[ COMPILING // OK ]" },
+            { border: "border-indigo-500/10 lg:border-indigo-500/20", glow: "shadow-[0_0_60px_rgba(99,102,241,0.04)]", badge: "bg-indigo-950/30 text-indigo-400 border-indigo-500/20", status: "[ STREAMING // ACTIVE ]" },
+            { border: "border-blue-500/10 lg:border-blue-500/20", glow: "shadow-[0_0_60px_rgba(59,130,246,0.04)]", badge: "bg-blue-950/30 text-blue-400 border-blue-500/20", status: "[ READY // CALIBRATED ]" },
+            { border: "border-zinc-500/10 lg:border-zinc-500/20", glow: "shadow-[0_0_60px_rgba(255,255,255,0.02)]", badge: "bg-zinc-950/30 text-zinc-300 border-zinc-500/20", status: "[ DISPATCHED // READY ]" },
+          ];
+          const profile = colorProfiles[i] || colorProfiles[0];
+
           return (
             <section
               key={i}
               data-stage={i}
-              className={`feature-stage w-full flex flex-col items-center justify-center px-6 py-8 lg:py-0 overflow-hidden ${
-                isDesktop ? "absolute inset-0 h-[100svh]" : "relative min-h-[70vh] border-b border-white/5 last:border-0"
+              className={`feature-stage w-full flex flex-col items-center justify-center px-6 py-12 lg:py-0 overflow-hidden transition-all duration-700 ${
+                isDesktop ? "absolute inset-0 h-[100svh]" : "relative min-h-[85vh] border-b border-white/5 last:border-0"
               }`}
               style={
                 isDesktop 
@@ -623,9 +634,9 @@ export default function AwwwardsShowcase() {
             >
               {/* Giant background number watermark */}
               <span
-                className="stage-num absolute pointer-events-none select-none font-black leading-none tracking-tighter text-zinc-600/[0.03] z-0"
+                className="stage-num absolute pointer-events-none select-none font-black leading-none tracking-tighter text-white/[0.015] z-0 transition-opacity duration-500"
                 style={{
-                  fontSize: "28vw",
+                  fontSize: "32vw",
                   top: "50%",
                   left: "50%",
                   transform: "translate(-50%, -50%)",
@@ -635,39 +646,57 @@ export default function AwwwardsShowcase() {
                 {feat.num}
               </span>
 
-              <div className="relative z-10 w-full max-w-6xl grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-24 items-center">
+              {/* HUD Frame Container */}
+              <div className={`relative z-10 w-full max-w-6xl p-8 lg:p-12 rounded-3xl border ${profile.border} ${profile.glow} bg-zinc-950/15 backdrop-blur-md overflow-hidden grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-24 items-center`}>
+                
+                {/* Tech Crosshair node markers */}
+                <div className="absolute top-3 left-3 text-[10px] font-mono text-zinc-800 font-bold pointer-events-none select-none">+</div>
+                <div className="absolute top-3 right-3 text-[10px] font-mono text-zinc-800 font-bold pointer-events-none select-none">+</div>
+                <div className="absolute bottom-3 left-3 text-[10px] font-mono text-zinc-800 font-bold pointer-events-none select-none">+</div>
+                <div className="absolute bottom-3 right-3 text-[10px] font-mono text-zinc-800 font-bold pointer-events-none select-none">+</div>
+                
+                {/* Grid Scanline watermark overlay inside frame */}
+                <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.003)_1px,transparent_1px)] bg-[size:100%_4px] pointer-events-none select-none" />
+
                 {/* Text column */}
-                <div className="flex flex-col gap-6 lg:items-start items-center text-center lg:text-left">
-                  <span className="stage-subtitle text-[9px] font-black uppercase tracking-[0.3em] text-zinc-600">
-                    Feature {feat.num} // {feat.subtitle}
-                  </span>
+                <div className="flex flex-col gap-6 lg:items-start items-center text-center lg:text-left z-10">
+                  <div className="flex items-center gap-2">
+                    <span className={`text-[8px] font-black tracking-widest px-2 py-0.5 border rounded font-mono ${profile.badge}`}>
+                      {profile.status}
+                    </span>
+                    <span className="text-[9px] font-black uppercase tracking-[0.25em] text-zinc-550">
+                      FEAT // {feat.num}
+                    </span>
+                  </div>
 
                   {/* Title with char-split clip reveal */}
-                  <h3 className="stage-title-wrap text-3xl sm:text-4xl lg:text-5xl xl:text-6xl font-black uppercase tracking-tight leading-[0.95] overflow-hidden">
-                    <span className="flex flex-wrap gap-x-2.5 justify-center lg:justify-start">
+                  <h3 className="stage-title-wrap text-4xl sm:text-5xl lg:text-6xl font-black uppercase tracking-tight leading-[0.9] text-white">
+                    <span className="flex flex-wrap gap-x-3.5 justify-center lg:justify-start">
                       {feat.title.split(" ").map((word, wi) => (
                         <span key={wi} className="inline-flex overflow-hidden">
                           {word.split("").map((char, ci) => (
-                            <span key={ci} className="stage-char inline-block text-zinc-200">{char}</span>
+                            <span key={ci} className="stage-char inline-block text-white transition-transform duration-500">{char}</span>
                           ))}
                         </span>
                       ))}
                     </span>
                   </h3>
 
-                  {/* Bullets */}
-                  <ul className="space-y-3.5 pt-1 list-none flex flex-col lg:items-start items-center">
+                  {/* Telemetry Bullets list */}
+                  <ul className="space-y-4 pt-2 list-none flex flex-col lg:items-start items-center">
                     {feat.points.map((pt, pIdx) => {
                       const [head, desc] = pt.split(":");
                       return (
                         <li
                           key={pIdx}
-                          className="stage-bullet flex items-start gap-3 text-[13px] text-zinc-500 font-medium list-none max-w-md text-left"
+                          className="stage-bullet flex items-start gap-3.5 text-[12px] md:text-[13px] text-zinc-400 font-semibold list-none max-w-lg text-left"
                           style={{ willChange: "transform, opacity" }}
                         >
-                          <Check className="size-3.5 text-zinc-500 shrink-0 mt-0.5" />
+                          <span className="size-5 rounded-full border border-white/5 bg-zinc-950 flex items-center justify-center text-[7px] font-mono text-zinc-500 font-bold shrink-0 mt-0.5 shadow-inner">
+                            {pIdx + 1}
+                          </span>
                           <span className="leading-relaxed">
-                            <strong className="text-zinc-300 font-bold">{head}</strong>: {desc}
+                            <strong className="text-zinc-200 font-black tracking-tight">{head}</strong>: {desc}
                           </span>
                         </li>
                       );
@@ -676,9 +705,14 @@ export default function AwwwardsShowcase() {
                 </div>
 
                 {/* Visual column */}
-                <div className="flex items-center justify-center lg:justify-end order-first lg:order-last">
-                  <Visual progress={isDesktop ? (stageProgress[i] ?? 0) : 1} />
+                <div className="flex items-center justify-center lg:justify-end order-first lg:order-last z-10">
+                  <div className="relative p-6 rounded-2xl border border-white/5 bg-zinc-950/20 shadow-2xl flex items-center justify-center min-h-[320px] w-full max-w-sm overflow-hidden">
+                    {/* Visual grid watermark */}
+                    <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.005)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.005)_1px,transparent_1px)] bg-[size:20px_20px] pointer-events-none" />
+                    <Visual progress={isDesktop ? (stageProgress[i] ?? 0) : 1} />
+                  </div>
                 </div>
+
               </div>
             </section>
           );
