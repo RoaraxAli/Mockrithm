@@ -9,7 +9,6 @@ import Lenis from "lenis";
 import AwwwardsCanvas from "./landing/AwwwardsCanvas";
 import AwwwardsHero from "./landing/AwwwardsHero";
 import AwwwardsShowcase from "./landing/AwwwardsShowcase";
-import AwwwardsKineticTypography from "./landing/AwwwardsKineticTypography";
 import ResourcesSection from "./landing/ResourcesSection";
 import PricingSection from "./landing/PricingSection";
 
@@ -286,8 +285,6 @@ export default function MarketingLanding() {
         <AwwwardsShowcase />
 
         <SectionDivider />
-        <div className="section-zoom"><AwwwardsKineticTypography /></div>
-
         <div className="section-zoom"><PricingSection /></div>
       </div>
 

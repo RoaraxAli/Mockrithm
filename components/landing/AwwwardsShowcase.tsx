@@ -349,6 +349,16 @@ export default function AwwwardsShowcase() {
   const [activeIndex, setActiveIndex] = useState(0);
   // Per-feature progress (0–1) driven by scroll so visuals animate in real time
   const [stageProgress, setStageProgress] = useState<number[]>(FEATURES.map(() => 0));
+  const [isDesktop, setIsDesktop] = useState(false);
+
+  useEffect(() => {
+    setIsDesktop(window.innerWidth >= 1024);
+    const handleResize = () => {
+      setIsDesktop(window.innerWidth >= 1024);
+    };
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
 
   useEffect(() => {
     if (typeof window === "undefined") return;
@@ -579,8 +589,8 @@ export default function AwwwardsShowcase() {
   return (
     <div
       ref={containerRef}
-      id="showcase-container"
-      className="relative w-full bg-transparent text-zinc-200 select-none z-10 overflow-hidden"
+      id="features"
+      className="relative w-full bg-transparent text-zinc-200 select-none z-10 overflow-hidden scroll-mt-24"
     >
       {/* Section label — shown once at top */}
       <div className="absolute top-0 left-0 right-0 flex items-center justify-center pt-6 lg:pt-8 z-20 pointer-events-none">
@@ -592,15 +602,24 @@ export default function AwwwardsShowcase() {
       </div>
 
       {/* Stacked stages container — pinned on desktop */}
-      <div ref={stagesContainerRef} className="relative h-[100svh] w-full">
+      <div 
+        ref={stagesContainerRef} 
+        className={isDesktop ? "relative h-[100svh] w-full" : "relative w-full flex flex-col gap-24 py-20"}
+      >
         {FEATURES.map((feat, i) => {
           const Visual = VISUALS[i];
           return (
             <section
               key={i}
               data-stage={i}
-              className="feature-stage absolute inset-0 w-full h-[100svh] flex flex-col items-center justify-center px-6 py-28 lg:py-0 overflow-hidden"
-              style={{ opacity: i === 0 ? 1 : 0, pointerEvents: i === 0 ? "auto" : "none" }}
+              className={`feature-stage w-full flex flex-col items-center justify-center px-6 py-8 lg:py-0 overflow-hidden ${
+                isDesktop ? "absolute inset-0 h-[100svh]" : "relative min-h-[70vh] border-b border-white/5 last:border-0"
+              }`}
+              style={
+                isDesktop 
+                  ? { opacity: i === 0 ? 1 : 0, pointerEvents: i === 0 ? "auto" : "none" }
+                  : { opacity: 1, pointerEvents: "auto" }
+              }
             >
               {/* Giant background number watermark */}
               <span
@@ -658,15 +677,12 @@ export default function AwwwardsShowcase() {
 
                 {/* Visual column */}
                 <div className="flex items-center justify-center lg:justify-end order-first lg:order-last">
-                  <Visual progress={stageProgress[i] ?? 0} />
+                  <Visual progress={isDesktop ? (stageProgress[i] ?? 0) : 1} />
                 </div>
               </div>
             </section>
           );
         })}
-
-        {/* On mobile: natural document flow */}
-        <div className="lg:hidden" style={{ height: `${FEATURES.length * 100}vh` }} />
       </div>
 
 

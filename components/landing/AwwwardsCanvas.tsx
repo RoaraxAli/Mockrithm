@@ -252,7 +252,7 @@ export default function AwwwardsCanvas() {
       const elapsedTime = clock.getElapsedTime();
 
       // Calculate showcase element progress for flight
-      const showcaseElement = document.getElementById("showcase-container");
+      const showcaseElement = document.getElementById("features");
       let showcaseProgress = 0;
       if (showcaseElement) {
         const rect = showcaseElement.getBoundingClientRect();
