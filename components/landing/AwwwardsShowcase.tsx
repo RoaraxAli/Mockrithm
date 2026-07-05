@@ -608,16 +608,6 @@ export default function AwwwardsShowcase() {
       >
         {FEATURES.map((feat, i) => {
           const Visual = VISUALS[i];
-          
-          // Dynamic glow and border colors for each feature tier
-          const colorProfiles = [
-            { border: "border-emerald-500/10 lg:border-emerald-500/20", glow: "shadow-[0_0_60px_rgba(16,185,129,0.04)]", badge: "bg-emerald-950/30 text-emerald-400 border-emerald-500/20", status: "[ ONLINE // OK ]" },
-            { border: "border-violet-500/10 lg:border-violet-500/20", glow: "shadow-[0_0_60px_rgba(139,92,246,0.04)]", badge: "bg-violet-950/30 text-violet-400 border-violet-500/20", status: "[ COMPILING // OK ]" },
-            { border: "border-indigo-500/10 lg:border-indigo-500/20", glow: "shadow-[0_0_60px_rgba(99,102,241,0.04)]", badge: "bg-indigo-950/30 text-indigo-400 border-indigo-500/20", status: "[ STREAMING // ACTIVE ]" },
-            { border: "border-blue-500/10 lg:border-blue-500/20", glow: "shadow-[0_0_60px_rgba(59,130,246,0.04)]", badge: "bg-blue-950/30 text-blue-400 border-blue-500/20", status: "[ READY // CALIBRATED ]" },
-            { border: "border-zinc-500/10 lg:border-zinc-500/20", glow: "shadow-[0_0_60px_rgba(255,255,255,0.02)]", badge: "bg-zinc-950/30 text-zinc-300 border-zinc-500/20", status: "[ DISPATCHED // READY ]" },
-          ];
-          const profile = colorProfiles[i] || colorProfiles[0];
 
           return (
             <section
@@ -647,7 +637,7 @@ export default function AwwwardsShowcase() {
               </span>
 
               {/* HUD Frame Container */}
-              <div className={`relative z-10 w-full max-w-6xl p-8 lg:p-12 rounded-3xl border ${profile.border} ${profile.glow} bg-zinc-950/15 backdrop-blur-md overflow-hidden grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-24 items-center`}>
+              <div className="relative z-10 w-full max-w-6xl p-8 lg:p-12 rounded-3xl border border-white/10 bg-zinc-950/20 backdrop-blur-xl overflow-hidden grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-24 items-center shadow-[0_25px_60px_rgba(0,0,0,0.8)]">
                 
                 {/* Tech Crosshair node markers */}
                 <div className="absolute top-3 left-3 text-[10px] font-mono text-zinc-800 font-bold pointer-events-none select-none">+</div>
@@ -661,8 +651,8 @@ export default function AwwwardsShowcase() {
                 {/* Text column */}
                 <div className="flex flex-col gap-6 lg:items-start items-center text-center lg:text-left z-10">
                   <div className="flex items-center gap-2">
-                    <span className={`text-[8px] font-black tracking-widest px-2 py-0.5 border rounded font-mono ${profile.badge}`}>
-                      {profile.status}
+                    <span className="text-[8px] font-black tracking-widest px-2.5 py-0.5 border border-white/10 rounded-full bg-white/5 text-zinc-400 font-mono">
+                      CORE // SYSTEM
                     </span>
                     <span className="text-[9px] font-black uppercase tracking-[0.25em] text-zinc-550">
                       FEAT // {feat.num}
