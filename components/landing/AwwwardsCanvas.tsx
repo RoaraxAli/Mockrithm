@@ -164,8 +164,8 @@ export default function AwwwardsCanvas() {
     const camera = new THREE.PerspectiveCamera(45, startW / startH, 0.1, 120);
     camera.position.z = 7;
 
-    // 2. HERO morphing centerpiece
-    const centerpieceGeometry = new THREE.TorusKnotGeometry(1.2, 0.45, 120, 12); // Reduced subdivisions for speed
+    // 2. HERO morphing centerpiece: cybernetic holographic globe
+    const centerpieceGeometry = new THREE.SphereGeometry(1.4, 28, 28);
     const centerpieceMaterial = new THREE.ShaderMaterial({
       vertexShader,
       fragmentShader,
