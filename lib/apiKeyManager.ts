@@ -146,11 +146,17 @@ class ApiKeyManager {
   public async refreshAllLimits() {
     for (const keyInfo of this.keys) {
       try {
-        const response = await fetch("https://api.groq.com/openai/v1/models", {
-          method: "GET",
+        const response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+          method: "POST",
           headers: {
+            "Content-Type": "application/json",
             "Authorization": `Bearer ${keyInfo.key}`,
-          }
+          },
+          body: JSON.stringify({
+            model: "llama-3.1-8b-instant",
+            messages: [{ role: "user", content: "Hi" }],
+            max_tokens: 1
+          })
         });
         
         if (response.ok) {
