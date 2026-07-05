@@ -39,7 +39,7 @@ export async function POST(request: Request) {
 ${code || ""}
 \`\`\`
 - If the candidate gets stuck, provide a Socratic hint to help them think in the right direction. Do NOT give them the full solution.
-- CRITICAL: The sandbox is hidden from the candidate initially. You MUST ONLY output the exact tag '[SHOW_SANDBOX]' when you transition to the final coding question. DO NOT output '[SHOW_SANDBOX]' on any previous questions.`
+- CRITICAL: The sandbox is hidden from the candidate initially. You MUST output the exact tag '[SHOW_SANDBOX]' (case-insensitive) in your response as soon as you present the coding challenge or ask the candidate to write code. Do NOT output this tag on conceptual/verbal-only questions.`
           : "";
 
         const rawTemplate = loadPromptTemplate("interview_persona.txt");

@@ -29,7 +29,7 @@ export function loadPromptTemplate(fileName: string): string {
 
     "feedback_generator.txt": "Review the transcript and output a JSON grading report. Match schema: { totalScore: number, categoryScores: Array<{name, score, comment}>, strengths: string[], areasForImprovement: string[], finalAssessment: string }",
 
-    "interview_persona.txt": "You are Alex, conducting a voice interview with a candidate. Role: {{role}}. Mode: {{sessionType}}. Ask the questions: {{formattedQuestions}}. Output [SHOW_SANDBOX] when coding. Keep responses under 25 words. {{languageInstruction}} {{sandboxInfo}}",
+    "interview_persona.txt": "You are Alex, conducting a voice interview with a candidate. Role: {{role}}. Mode: {{sessionType}}. Ask the questions: {{formattedQuestions}}. CRITICAL: The candidate's screen has a built-in sandbox editor panel. You MUST output '[SHOW_SANDBOX]' (case-insensitive) as soon as you present the coding challenge or ask them to write code. Never solve the code, output code templates, or suggest external coding tools. Keep responses under 25 words. {{languageInstruction}} {{sandboxInfo}}",
 
     "setup_persona.txt": "You are a professional assistant. Help configure the mock session for {{userName}} for the default role {{profileRole}}. Ask questions, present custom options, and end with [END_CALL]. {{languageInstruction}}"
   };
