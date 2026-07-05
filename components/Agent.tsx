@@ -111,8 +111,8 @@ const Agent = ({
   const [selectedVoice, setSelectedVoice] = useState<string>("groq-autumn");
   const [selectedModel, setSelectedModel] = useState<string>("llama-3.1-8b-instant");
   const [showSettings, setShowSettings] = useState(false);
-  const [selectedStt, setSelectedStt] = useState<"browser" | "whisper-v3" | "whisper-turbo">("browser");
-  const selectedSttRef = useRef<string>("browser");
+  const [selectedStt, setSelectedStt] = useState<"browser" | "whisper-v3" | "whisper-turbo">("whisper-turbo");
+  const selectedSttRef = useRef<string>("whisper-turbo");
   useEffect(() => {
     selectedSttRef.current = selectedStt;
     if (callStatus === CallStatus.ACTIVE) {
@@ -616,6 +616,11 @@ const Agent = ({
 
   // Speech Recognition (STT) Setup
   const startSpeechRecognition = () => {
+    if (isSpeaking || isSpeakingActiveRef.current || audioRef.current) {
+      console.log("[Agent.tsx] Speech recognition deferred because AI is speaking.");
+      return;
+    }
+
     if (selectedSttRef.current !== "browser") {
       startWhisperRecording();
       return;
@@ -821,10 +826,9 @@ const Agent = ({
 
   // Start Whisper Microphone Recording and Client VAD
   const startWhisperRecording = async () => {
-    if (isListeningRef.current) {
-      console.log("[Agent.tsx] Whisper already listening. Skipping duplicate start.");
-      return;
-    }
+    // 1. Clean up any existing microphone session first to prevent leaks
+    stopWhisperRecordingOnly();
+
     isListeningRef.current = true;
     submittedThisTurnRef.current = false;
     audioChunksRef.current = [];
@@ -908,6 +912,7 @@ const Agent = ({
   };
 
   const stopWhisperRecordingOnly = () => {
+    isListeningRef.current = false;
     if (vadIntervalRef.current) {
       clearInterval(vadIntervalRef.current);
       vadIntervalRef.current = null;
