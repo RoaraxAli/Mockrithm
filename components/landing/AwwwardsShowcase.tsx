@@ -618,7 +618,7 @@ export default function AwwwardsShowcase() {
               }`}
               style={
                 isDesktop 
-                  ? { opacity: i === 0 ? 1 : 0, pointerEvents: i === 0 ? "auto" : "none" }
+                  ? { opacity: i === activeIndex ? 1 : 0, pointerEvents: i === activeIndex ? "auto" : "none" }
                   : { opacity: 1, pointerEvents: "auto" }
               }
             >

@@ -186,8 +186,8 @@ export default function AwwwardsCanvas() {
     const centerpiecePoints = new THREE.Points(centerpieceGeometry, centerpieceMaterial);
     scene.add(centerpiecePoints);
 
-    // Set count to 3000 on desktop, 1000 on mobile to balance aesthetics and speed
-    const particleCount = isMobile ? 1000 : 3000;
+    // Set count to 5000 on desktop, 1500 on mobile for dense starry field
+    const particleCount = isMobile ? 1500 : 5000;
     const particlePositions = new Float32Array(particleCount * 3);
 
     for (let i = 0; i < particleCount; i++) {
@@ -220,12 +220,12 @@ export default function AwwwardsCanvas() {
     };
 
     const particleMaterial = new THREE.PointsMaterial({
-      size: 0.08,
+      size: 0.22,
       map: createParticleTexture(),
       transparent: true,
       blending: THREE.AdditiveBlending,
       depthWrite: false,
-      opacity: 0.3,
+      opacity: 0.8,
     });
 
     const particles = new THREE.Points(particleGeometry, particleMaterial);
@@ -312,7 +312,7 @@ export default function AwwwardsCanvas() {
       particles.rotation.z = elapsedTime * 0.005;
 
       // Fade out background particles based on progress
-      const particleAlpha = Math.max(0, Math.min(0.3, 0.3 * (1 - explosionProgress)));
+      const particleAlpha = Math.max(0, Math.min(0.85, 0.85 * (1 - explosionProgress)));
       particleMaterial.opacity = particleAlpha;
 
       // Visibility controls
