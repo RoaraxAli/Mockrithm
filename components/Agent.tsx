@@ -883,6 +883,7 @@ const Agent = ({
 
         let lastSpeechTime = 0;
         let hasSpoken = false;
+        let consecutiveSpeechFrames = 0; // count consecutive intervals of voice activity
 
         const checkAudio = () => {
           if (!isListeningRef.current || submittedThisTurnRef.current) return;
@@ -894,17 +895,22 @@ const Agent = ({
           }
           const rms = Math.sqrt(sumSquares / bufferLength);
 
-          // Voice threshold detection
-          if (rms > 0.015) {
-            lastSpeechTime = Date.now();
-            if (!hasSpoken) {
-              hasSpoken = true;
-              console.log("[Agent.tsx] User speech activity detected.");
+          // Voice threshold detection (increased to 0.025 for better noise immunity)
+          if (rms > 0.025) {
+            consecutiveSpeechFrames++;
+            if (consecutiveSpeechFrames >= 3) { // Require ~300ms of sustained volume
+              lastSpeechTime = Date.now();
+              if (!hasSpoken) {
+                hasSpoken = true;
+                console.log("[Agent.tsx] User speech activity detected (sustained).");
+              }
             }
+          } else {
+            consecutiveSpeechFrames = 0; // Reset counter on silence
           }
 
-          // If user spoke and now we have 1.2s of silence, transcribe and submit
-          if (hasSpoken && Date.now() - lastSpeechTime > 1200) {
+          // If user spoke and now we have 1.5s of silence, transcribe and submit
+          if (hasSpoken && Date.now() - lastSpeechTime > 1500) {
             console.log("[Agent.tsx] VAD: Silence detected. Initiating transcription...");
             stopWhisperRecordingAndTranscribe();
           }
