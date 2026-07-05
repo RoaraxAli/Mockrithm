@@ -2,10 +2,6 @@
 
 import { useEffect, useRef } from "react";
 import * as THREE from "three";
-import { EffectComposer } from "three/examples/jsm/postprocessing/EffectComposer.js";
-import { RenderPass } from "three/examples/jsm/postprocessing/RenderPass.js";
-import { UnrealBloomPass } from "three/examples/jsm/postprocessing/UnrealBloomPass.js";
-import { OutputPass } from "three/examples/jsm/postprocessing/OutputPass.js";
 
 // Custom vertex shader for morphing noise deformation + scroll-linked explosion displacement
 const vertexShader = `
@@ -146,23 +142,22 @@ export default function AwwwardsCanvas() {
     if (typeof window === "undefined" || !canvasRef.current || !containerRef.current) return;
 
     const isMobile = window.matchMedia("(max-width: 768px)").matches;
-
     const container = containerRef.current;
     const canvas = canvasRef.current;
 
     // 1. THREE.JS SCENE SETUP
     const renderer = new THREE.WebGLRenderer({
       canvas,
-      antialias: !isMobile,
+      antialias: false, // Turn off antialiasing for maximum GPU efficiency
       alpha: true,
       powerPreference: "high-performance",
     });
-    const startW = typeof window !== "undefined" ? window.innerWidth : 800;
-    const startH = typeof window !== "undefined" ? window.innerHeight : 600;
+    const startW = window.innerWidth;
+    const startH = window.innerHeight;
 
     renderer.setSize(startW, startH);
-    // Cap pixel ratio at 2 for performance
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    // Cap pixel ratio at 1.0 for lag-free performance on lower-end devices
+    renderer.setPixelRatio(1.0);
 
     const scene = new THREE.Scene();
 
@@ -170,7 +165,7 @@ export default function AwwwardsCanvas() {
     camera.position.z = 7;
 
     // 2. HERO morphing centerpiece
-    const centerpieceGeometry = new THREE.TorusKnotGeometry(1.2, 0.45, 180, 18);
+    const centerpieceGeometry = new THREE.TorusKnotGeometry(1.2, 0.45, 120, 12); // Reduced subdivisions for speed
     const centerpieceMaterial = new THREE.ShaderMaterial({
       vertexShader,
       fragmentShader,
@@ -188,18 +183,13 @@ export default function AwwwardsCanvas() {
     const centerpieceMesh = new THREE.Mesh(centerpieceGeometry, centerpieceMaterial);
     scene.add(centerpieceMesh);
 
-    // Add particle representation of centerpiece that shatters
     const centerpiecePoints = new THREE.Points(centerpieceGeometry, centerpieceMaterial);
     scene.add(centerpiecePoints);
 
-
-
-    // 3. BACKGROUND ORBITING PARTICLES
-    // Reduce particle count by 60% on mobile
-    const particleCount = isMobile ? 7200 : 18000;
+    // 3. BACKGROUND ORBITING PARTICLES (Highly Optimized)
+    // Decreased count dramatically: 1200 on desktop, 400 on mobile
+    const particleCount = isMobile ? 400 : 1200;
     const particlePositions = new Float32Array(particleCount * 3);
-    const particleSpeeds = new Float32Array(particleCount);
-    const particleAngles = new Float32Array(particleCount * 3); // theta, phi, radius
 
     for (let i = 0; i < particleCount; i++) {
       const theta = Math.random() * Math.PI * 2;
@@ -209,20 +199,10 @@ export default function AwwwardsCanvas() {
       particlePositions[i * 3] = Math.sin(phi) * Math.cos(theta) * radius;
       particlePositions[i * 3 + 1] = Math.sin(phi) * Math.sin(theta) * radius;
       particlePositions[i * 3 + 2] = Math.cos(phi) * radius;
-
-      particleSpeeds[i] = 0.04 + Math.random() * 0.12;
-      particleAngles[i * 3] = theta;
-      particleAngles[i * 3 + 1] = phi;
-      particleAngles[i * 3 + 2] = radius;
     }
 
     const particleGeometry = new THREE.BufferGeometry();
     particleGeometry.setAttribute("position", new THREE.BufferAttribute(particlePositions, 3));
-
-    // Line segment geometry (velocity stretch): pairs of points
-    const lineGeometry = new THREE.BufferGeometry();
-    const linePositions = new Float32Array(particleCount * 2 * 3); // 2 verts per particle
-    lineGeometry.setAttribute("position", new THREE.BufferAttribute(linePositions, 3));
 
     const createParticleTexture = () => {
       const pCanvas = document.createElement("canvas");
@@ -241,87 +221,37 @@ export default function AwwwardsCanvas() {
     };
 
     const particleMaterial = new THREE.PointsMaterial({
-      size: 0.04,
+      size: 0.08,
       map: createParticleTexture(),
       transparent: true,
       blending: THREE.AdditiveBlending,
       depthWrite: false,
-      opacity: 0.5,
-    });
-
-    const lineMaterial = new THREE.LineBasicMaterial({
-      color: 0xffffff,
-      transparent: true,
-      opacity: 0.35,
-      blending: THREE.AdditiveBlending,
-      depthWrite: false,
+      opacity: 0.3,
     });
 
     const particles = new THREE.Points(particleGeometry, particleMaterial);
     scene.add(particles);
 
-    const particleLines = new THREE.LineSegments(lineGeometry, lineMaterial);
-    particleLines.visible = false;
-    scene.add(particleLines);
-
-    // 4. MOUSE POSITION INTERACTION WITH SPRING physics + force field
+    // 4. MOUSE POSITION PARALLAX SETUP
     let mouse = { x: 0, y: 0, targetX: 0, targetY: 0 };
-    let mouseWorld = new THREE.Vector3(-999, -999, -999);
 
     const handleMouseMove = (e: MouseEvent) => {
       const mx = (e.clientX / window.innerWidth) * 2 - 1;
       const my = -(e.clientY / window.innerHeight) * 2 + 1;
       mouse.targetX = mx * 2.0;
       mouse.targetY = my * 1.5;
-      mouseWorld.set(mx * 5, my * 4, 2);
     };
 
     window.addEventListener("mousemove", handleMouseMove);
 
-    // 5. POST-PROCESSING (bloom) — desktop only
-    let composer: EffectComposer | null = null;
-    let bloomPass: UnrealBloomPass | null = null;
-    if (!isMobile) {
-      composer = new EffectComposer(renderer);
-      composer.addPass(new RenderPass(scene, camera));
-      bloomPass = new UnrealBloomPass(
-        new THREE.Vector2(startW, startH),
-        0.45, // strength
-        0.4, // radius
-        0.35 // threshold
-      );
-      composer.addPass(bloomPass);
-      composer.addPass(new OutputPass());
-      composer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-      composer.setSize(startW, startH);
-    }
-
-    // 6. ANIMATION TICK LOOP
+    // 5. ANIMATION TICK LOOP
     const clock = new THREE.Clock();
     let animationFrameId: number;
-    let lastScrollY = 0;
-    let scrollVelocity = 0;
-    let targetScrollVelocity = 0;
-
-    const handleScroll = () => {
-      const currentScrollY = window.scrollY;
-      targetScrollVelocity = currentScrollY - lastScrollY;
-      lastScrollY = currentScrollY;
-    };
-    window.addEventListener("scroll", handleScroll);
-
-    const scratchVec = new THREE.Vector3();
-    const scratchVec2 = new THREE.Vector3();
 
     const tick = () => {
-      clock.getDelta();
       const elapsedTime = clock.getElapsedTime();
 
-      // 1. Calculate overall scroll progress of the page
-      const scrollHeight = document.documentElement.scrollHeight - window.innerHeight;
-      const scrollProgress = scrollHeight > 0 ? window.scrollY / scrollHeight : 0;
-
-      // 2. Calculate local scroll progress of showcase section to sync camera flight
+      // Calculate showcase element progress for flight
       const showcaseElement = document.getElementById("showcase-container");
       let showcaseProgress = 0;
       if (showcaseElement) {
@@ -332,18 +262,9 @@ export default function AwwwardsCanvas() {
         showcaseProgress = Math.max(0, Math.min(1, currentDist / totalDist));
       }
 
-      // Sync scroll velocity damping (momentum feel)
-      scrollVelocity += (targetScrollVelocity - scrollVelocity) * 0.08;
-      targetScrollVelocity *= 0.92; // Decay over time
-      const normalizedVelocity = Math.min(Math.abs(scrollVelocity) / 40, 1);
-
-      // Calculate hero scroll progress (0 to 1 across the full hero section viewport)
       const heroScrollProgress = Math.max(0, Math.min(1, window.scrollY / window.innerHeight));
-
-      // Calculate feature 01 scroll progress (showcaseProgress 0.0 to 0.2 represents Feature 01)
       const featureOneProgress = Math.max(0, Math.min(1, showcaseProgress / 0.2));
 
-      // Combined progress: Hero section covers 0 to 0.5, Feature 01 covers 0.5 to 1.0
       let explosionProgress = 0;
       if (showcaseProgress > 0) {
         explosionProgress = 0.5 + featureOneProgress * 0.5;
@@ -355,10 +276,9 @@ export default function AwwwardsCanvas() {
       centerpieceMaterial.uniforms.uTime.value = elapsedTime;
       centerpieceMaterial.uniforms.uScrollProgress.value = explosionProgress;
 
-      // Explode centerpiece rapidly based on explosion progress (breaking animation)
       let explosionForce = 0;
       if (explosionProgress > 0.0) {
-        explosionForce = explosionProgress * 30.0; // Extra violent explosion force to break it completely
+        explosionForce = explosionProgress * 30.0;
       }
       centerpieceMaterial.uniforms.uExplosionForce.value = explosionForce;
 
@@ -371,8 +291,8 @@ export default function AwwwardsCanvas() {
       }
 
       // Parallax mouse follow for centerpiece
-      mouse.x += (mouse.targetX - mouse.x) * 0.035;
-      mouse.y += (mouse.targetY - mouse.y) * 0.035;
+      mouse.x += (mouse.targetX - mouse.x) * 0.04;
+      mouse.y += (mouse.targetY - mouse.y) * 0.04;
       centerpieceMesh.position.x = mouse.x * 0.35;
       centerpieceMesh.position.y = mouse.y * 0.35;
       if (centerpiecePoints) {
@@ -380,9 +300,7 @@ export default function AwwwardsCanvas() {
         centerpiecePoints.position.y = centerpieceMesh.position.y;
       }
 
-
-
-      // 3. Move camera Z along gallery line based on showcaseProgress
+      // Move camera Z along gallery line based on showcaseProgress
       const targetCameraZ = 7 - showcaseProgress * 52;
       camera.position.z += (targetCameraZ - camera.position.z) * 0.08;
 
@@ -390,105 +308,35 @@ export default function AwwwardsCanvas() {
       camera.position.x = mouse.x * 0.15;
       camera.position.y = mouse.y * 0.15;
 
-      // Orbiting particles positions calculation + mouse force field
-      const positionsAttr = particleGeometry.getAttribute("position") as THREE.BufferAttribute;
-      const positions = positionsAttr.array as Float32Array;
-      const linePositionsAttr = lineGeometry.getAttribute("position") as THREE.BufferAttribute;
-      const linePositions = linePositionsAttr.array as Float32Array;
+      // Rotate background particles globally (No expensive per-particle math or buffer re-uploads!)
+      particles.rotation.y = elapsedTime * 0.015;
+      particles.rotation.z = elapsedTime * 0.005;
 
-      const forceRadius = 2.6;
-      const forceStrength = 1.4;
-
-      for (let i = 0; i < particleCount; i++) {
-        const theta = particleAngles[i * 3] + elapsedTime * particleSpeeds[i] * 0.1;
-        const phi = particleAngles[i * 3 + 1];
-
-        // Explode particles on scroll progress
-        const radius = particleAngles[i * 3 + 2] * (1.0 + explosionProgress * 3.5);
-
-        let px = Math.sin(phi) * Math.cos(theta) * radius + mouse.x * 0.15;
-        let py = Math.sin(phi) * Math.sin(theta) * radius + mouse.y * 0.15;
-        let pz = Math.cos(phi) * radius;
-
-        // Mouse force field: push particles away from cursor within radius
-        scratchVec.set(px, py, pz);
-        const distToMouse = scratchVec.distanceTo(mouseWorld);
-        if (distToMouse < forceRadius) {
-          const force = (1 - distToMouse / forceRadius) * forceStrength;
-          scratchVec2.copy(scratchVec).sub(mouseWorld).normalize().multiplyScalar(force);
-          px += scratchVec2.x;
-          py += scratchVec2.y;
-          pz += scratchVec2.z;
-        }
-
-        positions[i * 3] = px;
-        positions[i * 3 + 1] = py;
-        positions[i * 3 + 2] = pz;
-
-        // Build line segments for velocity stretch
-        const stretchLen = 0.04 + normalizedVelocity * 0.6;
-        linePositions[i * 6] = px;
-        linePositions[i * 6 + 1] = py;
-        linePositions[i * 6 + 2] = pz;
-        linePositions[i * 6 + 3] = px;
-        linePositions[i * 6 + 4] = py + stretchLen;
-        linePositions[i * 6 + 5] = pz;
-      }
-      positionsAttr.needsUpdate = true;
-      linePositionsAttr.needsUpdate = true;
-
-      // Toggle points vs lines based on scroll velocity
-      const useLines = normalizedVelocity > 0.25;
-      particles.visible = !useLines;
-      particleLines.visible = useLines;
-
-      // Fade out background particles
-      const particleAlpha = Math.max(0, Math.min(0.5, 0.5 * (1 - explosionProgress)));
+      // Fade out background particles based on progress
+      const particleAlpha = Math.max(0, Math.min(0.3, 0.3 * (1 - explosionProgress)));
       particleMaterial.opacity = particleAlpha;
-      lineMaterial.opacity = particleAlpha * 0.7;
-
-      // Scale centerpiece and satellites down
-      const heroScale = 1 - explosionProgress;
-
 
       // Visibility controls
       const isModelVisible = explosionProgress < 0.99;
       centerpieceMesh.visible = isModelVisible;
       if (centerpiecePoints) centerpiecePoints.visible = isModelVisible;
+      particles.visible = isModelVisible;
 
-      if (!isModelVisible) {
-        particles.visible = false;
-        particleLines.visible = false;
-      }
+      // Render the scene directly without post-processing bloom pass for 60fps performance
+      renderer.render(scene, camera);
 
-      // Particle orbit rotations
-      particles.rotation.y = elapsedTime * 0.01;
-      particles.rotation.z = elapsedTime * 0.003;
-      particleLines.rotation.y = particles.rotation.y;
-      particleLines.rotation.z = particles.rotation.z;
-
-      // Render via composer (bloom) on desktop, plain render on mobile
-      if (composer) {
-        composer.render();
-      } else {
-        renderer.render(scene, camera);
-      }
       animationFrameId = requestAnimationFrame(tick);
     };
 
     tick();
 
-    // 7. RESIZE HANDLER
+    // 6. RESIZE HANDLER
     const handleResize = () => {
       const w = window.innerWidth;
       const h = window.innerHeight;
       camera.aspect = w / h;
       camera.updateProjectionMatrix();
       renderer.setSize(w, h);
-      if (composer) {
-        composer.setSize(w, h);
-        if (bloomPass) bloomPass.setSize(w, h);
-      }
     };
 
     window.addEventListener("resize", handleResize);
@@ -497,17 +345,12 @@ export default function AwwwardsCanvas() {
     return () => {
       cancelAnimationFrame(animationFrameId);
       window.removeEventListener("mousemove", handleMouseMove);
-      window.removeEventListener("scroll", handleScroll);
       window.removeEventListener("resize", handleResize);
-      if (composer) composer.dispose();
       renderer.dispose();
       centerpieceGeometry.dispose();
       centerpieceMaterial.dispose();
-
       particleGeometry.dispose();
       particleMaterial.dispose();
-      lineGeometry.dispose();
-      lineMaterial.dispose();
     };
   }, []);
 
