@@ -110,6 +110,11 @@ const Agent = ({
   const [selectedVoice, setSelectedVoice] = useState<string>("groq-autumn");
   const [selectedModel, setSelectedModel] = useState<string>("llama-3.1-8b-instant");
   const [showSettings, setShowSettings] = useState(false);
+  const [selectedStt, setSelectedStt] = useState<"browser" | "whisper-v3" | "whisper-turbo">("browser");
+  const selectedSttRef = useRef<string>("browser");
+  useEffect(() => {
+    selectedSttRef.current = selectedStt;
+  }, [selectedStt]);
 
   // Interview Language (selected before the session starts)
   const [selectedLanguage, setSelectedLanguage] = useState<string>("en-US");
@@ -179,6 +184,14 @@ const Agent = ({
   const submittedThisTurnRef = useRef<boolean>(false); // true once this turn's speech has been captured
   const messagesRef = useRef<SavedMessage[]>([]);
   const submittedTextRef = useRef<string>(""); // track last submitted text to prevent duplicate processing
+
+  // Whisper Speech-to-Text Refs
+  const mediaRecorderRef = useRef<any>(null);
+  const audioStreamRef = useRef<MediaStream | null>(null);
+  const audioChunksRef = useRef<Blob[]>([]);
+  const audioContextRef = useRef<AudioContext | null>(null);
+  const analyserRef = useRef<AnalyserNode | null>(null);
+  const vadIntervalRef = useRef<NodeJS.Timeout | null>(null);
 
   // Derive the effective TTS voice. All languages now have neural TTS
   // (Groq for English/Arabic, edge-tts for everything else). The local
@@ -604,6 +617,11 @@ const Agent = ({
 
   // Speech Recognition (STT) Setup
   const startSpeechRecognition = () => {
+    if (selectedSttRef.current !== "browser") {
+      startWhisperRecording();
+      return;
+    }
+
     if (!SpeechRecognition) {
       console.error("[Agent.tsx] SpeechRecognition API is not supported in this browser.");
       return;
@@ -793,6 +811,166 @@ const Agent = ({
       console.error("[Agent.tsx] Exception starting SpeechRecognition:", e);
       isListeningRef.current = false;
     }
+  };
+
+  // Start Whisper Microphone Recording and Client VAD
+  const startWhisperRecording = async () => {
+    if (isListeningRef.current) {
+      console.log("[Agent.tsx] Whisper already listening. Skipping duplicate start.");
+      return;
+    }
+    isListeningRef.current = true;
+    submittedThisTurnRef.current = false;
+    audioChunksRef.current = [];
+
+    console.log("[Agent.tsx] Starting Whisper microphone recording...");
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      audioStreamRef.current = stream;
+
+      const mediaRecorder = new MediaRecorder(stream, { mimeType: "audio/webm" });
+      mediaRecorderRef.current = mediaRecorder;
+
+      mediaRecorder.ondataavailable = (event: any) => {
+        if (event.data && event.data.size > 0) {
+          audioChunksRef.current.push(event.data);
+        }
+      };
+
+      mediaRecorder.start(250); // Capture chunks every 250ms
+      turnStartRef.current = Date.now();
+
+      // Set up Audio Context for Volume Detection
+      const AudioContextClass = window.AudioContext || (window as any).webkitAudioContext;
+      if (AudioContextClass) {
+        const audioCtx = new AudioContextClass();
+        audioContextRef.current = audioCtx;
+
+        const source = audioCtx.createMediaStreamSource(stream);
+        const analyser = audioCtx.createAnalyser();
+        analyser.fftSize = 512;
+        analyserRef.current = analyser;
+        source.connect(analyser);
+
+        const bufferLength = analyser.fftSize;
+        const dataArray = new Float32Array(bufferLength);
+
+        let lastSpeechTime = 0;
+        let hasSpoken = false;
+
+        const checkAudio = () => {
+          if (!isListeningRef.current || submittedThisTurnRef.current) return;
+
+          analyser.getFloatTimeDomainData(dataArray);
+          let sumSquares = 0.0;
+          for (let i = 0; i < bufferLength; i++) {
+            sumSquares += dataArray[i] * dataArray[i];
+          }
+          const rms = Math.sqrt(sumSquares / bufferLength);
+
+          // Voice threshold detection
+          if (rms > 0.015) {
+            lastSpeechTime = Date.now();
+            if (!hasSpoken) {
+              hasSpoken = true;
+              console.log("[Agent.tsx] User speech activity detected.");
+            }
+          }
+
+          // If user spoke and now we have 1.2s of silence, transcribe and submit
+          if (hasSpoken && Date.now() - lastSpeechTime > 1200) {
+            console.log("[Agent.tsx] VAD: Silence detected. Initiating transcription...");
+            stopWhisperRecordingAndTranscribe();
+          }
+        };
+
+        vadIntervalRef.current = setInterval(checkAudio, 100);
+      } else {
+        console.warn("[Agent.tsx] Web Audio API is not supported. Streaming media recorder only.");
+      }
+
+    } catch (err) {
+      console.error("[Agent.tsx] Failed to initialize microphone for Whisper:", err);
+      isListeningRef.current = false;
+    }
+  };
+
+  const stopWhisperRecordingOnly = () => {
+    if (vadIntervalRef.current) {
+      clearInterval(vadIntervalRef.current);
+      vadIntervalRef.current = null;
+    }
+    if (mediaRecorderRef.current && mediaRecorderRef.current.state !== "inactive") {
+      try {
+        mediaRecorderRef.current.stop();
+      } catch (e) {}
+    }
+    if (audioStreamRef.current) {
+      audioStreamRef.current.getTracks().forEach(track => track.stop());
+      audioStreamRef.current = null;
+    }
+    if (audioContextRef.current) {
+      try {
+        audioContextRef.current.close();
+      } catch (e) {}
+      audioContextRef.current = null;
+    }
+  };
+
+  const stopWhisperRecordingAndTranscribe = async () => {
+    if (submittedThisTurnRef.current) return;
+    submittedThisTurnRef.current = true;
+    isListeningRef.current = false;
+    isProcessingRef.current = true;
+
+    setLastMessage("Transcribing audio...");
+    stopWhisperRecordingOnly();
+
+    setTimeout(async () => {
+      if (audioChunksRef.current.length === 0) {
+        console.warn("[Agent.tsx] No audio chunks captured.");
+        isProcessingRef.current = false;
+        resumeListeningAfterSpeech();
+        return;
+      }
+
+      const audioBlob = new Blob(audioChunksRef.current, { type: "audio/webm" });
+      const formData = new FormData();
+      formData.append("file", audioBlob);
+      const modelId = selectedSttRef.current === "whisper-v3" ? "whisper-large-v3" : "whisper-large-v3-turbo";
+      formData.append("model", modelId);
+      formData.append("language", languageRef.current);
+
+      try {
+        const res = await fetch("/api/meow/stt", {
+          method: "POST",
+          body: formData,
+        });
+
+        if (!res.ok) {
+          throw new Error(`STT API responded with status ${res.status}`);
+        }
+
+        const data = await res.json();
+        const text = data.text || "";
+        console.log(`[Agent.tsx] Whisper transcription success: "${text}"`);
+        
+        if (text.trim().length > 1) {
+          handleSpeechCompleted(text);
+        } else {
+          console.log("[Agent.tsx] Whisper transcript empty. Resetting listening.");
+          isProcessingRef.current = false;
+          resumeListeningAfterSpeech();
+        }
+      } catch (err: any) {
+        console.error("[Agent.tsx] Whisper transcription failed:", err);
+        setLastMessage("Transcription failed. Try again.");
+        isProcessingRef.current = false;
+        setTimeout(() => {
+          resumeListeningAfterSpeech();
+        }, 1500);
+      }
+    }, 150);
   };
 
 
@@ -1464,6 +1642,7 @@ ${code}
     setTimerSecondsLeft(null);
 
     stopTTSPlayback();
+    stopWhisperRecordingOnly();
 
     try {
       if (recognitionRef.current) {
@@ -1830,7 +2009,7 @@ ${code}
                   animate={{ opacity: 1, height: "auto" }}
                   exit={{ opacity: 0, height: 0 }}
                   transition={{ duration: 0.3 }}
-                  className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-2 border-t border-zinc-900 pt-4 overflow-hidden"
+                  className="grid grid-cols-1 sm:grid-cols-3 gap-4 mt-2 border-t border-zinc-900 pt-4 overflow-hidden"
                 >
                   <div className="flex flex-col gap-2">
                     <label className="text-[10px] text-zinc-500 font-semibold uppercase tracking-wider flex items-center gap-1.5">
@@ -1875,6 +2054,21 @@ ${code}
                         </>
                       )}
                       <option value="local">Local Browser Synthesis</option>
+                    </select>
+                  </div>
+
+                  <div className="flex flex-col gap-2">
+                    <label className="text-[10px] text-zinc-500 font-semibold uppercase tracking-wider flex items-center gap-1.5">
+                      <Mic className="size-3.5 text-zinc-400" /> Speech-to-Text (STT)
+                    </label>
+                    <select
+                      value={selectedStt}
+                      onChange={(e) => setSelectedStt(e.target.value as any)}
+                      className="bg-zinc-950 text-zinc-100 text-xs rounded-xl p-3 border border-zinc-900 focus:border-zinc-700 focus:ring-1 focus:ring-zinc-800 outline-none cursor-pointer hover:bg-zinc-900 transition-all font-semibold"
+                    >
+                      <option value="browser">Browser Web Speech (Free)</option>
+                      <option value="whisper-turbo">Whisper Large V3 Turbo (Fast)</option>
+                      <option value="whisper-v3">Whisper Large V3 (Accurate)</option>
                     </select>
                   </div>
                 </motion.div>
