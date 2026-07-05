@@ -961,6 +961,15 @@ const Agent = ({
       }
 
       const audioBlob = new Blob(audioChunksRef.current, { type: "audio/webm" });
+      
+      // If the audio file is extremely small (empty headers/noise under 4KB), skip transcription to avoid 400 errors
+      if (audioBlob.size < 4000) {
+        console.warn(`[Agent.tsx] Audio blob size too small (${audioBlob.size} bytes). Skipping transcription.`);
+        isProcessingRef.current = false;
+        resumeListeningAfterSpeech();
+        return;
+      }
+
       const formData = new FormData();
       formData.append("file", audioBlob);
       const modelId = selectedSttRef.current === "whisper-v3" ? "whisper-large-v3" : "whisper-large-v3-turbo";
@@ -974,23 +983,29 @@ const Agent = ({
         });
 
         if (!res.ok) {
-          throw new Error(`STT API responded with status ${res.status}`);
+          const errBody = await res.json().catch(() => ({}));
+          console.error("[Agent.tsx] STT Error payload details:", errBody);
+          throw new Error(`STT API responded with status ${res.status}: ${JSON.stringify(errBody)}`);
         }
 
         const data = await res.json();
         const text = data.text || "";
         console.log(`[Agent.tsx] Whisper transcription success: "${text}"`);
         
-        if (text.trim().length > 1) {
+        // Clean and check for common Whisper silence hallucinations
+        const cleaned = text.trim().toLowerCase().replace(/[.,\/#!$%\^&\*;:{}=\-_`~()]/g, "");
+        const hallucinations = ["thank you", "thank you very much", "thanks for watching", "you", "bye", "go", "thank you.", "thank you very much.", "thanks for watching."];
+        
+        if (text.trim().length > 1 && !hallucinations.includes(cleaned)) {
           handleSpeechCompleted(text);
         } else {
-          console.log("[Agent.tsx] Whisper transcript empty. Resetting listening.");
+          console.log("[Agent.tsx] Whisper transcript empty or hallucination. Resetting listening.");
           isProcessingRef.current = false;
           resumeListeningAfterSpeech();
         }
       } catch (err: any) {
         console.error("[Agent.tsx] Whisper transcription failed:", err);
-        setLastMessage("Transcription failed. Try again.");
+        setLastMessage("Transcription failed. Reconnecting microphone...");
         isProcessingRef.current = false;
         setTimeout(() => {
           resumeListeningAfterSpeech();

@@ -34,6 +34,11 @@ export async function POST(request: Request) {
     if (!response.ok) {
       const errText = await response.text();
       console.error(`[STT Route] Groq transcription error (status ${response.status}):`, errText);
+      
+      // Handle too short/invalid audio files gracefully by returning an empty string
+      if (response.status === 400 || errText.includes("too short") || errText.includes("Minimum audio length")) {
+        return NextResponse.json({ text: "" });
+      }
       return NextResponse.json({ error: errText }, { status: response.status });
     }
 
