@@ -82,7 +82,7 @@ class ApiKeyManager {
     }
   }
 
-  public updateLimits(key: string, headers: Headers) {
+  public updateLimits(key: string, headers: Headers, isAudio = false) {
     const info = this.keys.find(k => k.key === key);
     if (!info) return;
 
@@ -92,31 +92,6 @@ class ApiKeyManager {
     const limitRequests = headers.get("x-ratelimit-limit-requests");
     const resetTokens = headers.get("x-ratelimit-reset-tokens");
     const resetRequests = headers.get("x-ratelimit-reset-requests");
-
-    // Whisper STT audio limits
-    const remainingAudios = headers.get("x-ratelimit-remaining-audios");
-    const limitAudios = headers.get("x-ratelimit-limit-audios");
-    const resetAudios = headers.get("x-ratelimit-reset-audios");
-
-    if (remainingTokens !== null) {
-      info.remainingTokens = parseInt(remainingTokens, 10);
-    }
-    if (remainingRequests !== null) {
-      info.remainingRequests = parseInt(remainingRequests, 10);
-    }
-    if (limitTokens !== null) {
-      info.limitTokens = parseInt(limitTokens, 10);
-    }
-    if (limitRequests !== null) {
-      info.limitRequests = parseInt(limitRequests, 10);
-    }
-
-    if (remainingAudios !== null) {
-      info.remainingAudios = parseInt(remainingAudios, 10);
-    }
-    if (limitAudios !== null) {
-      info.limitAudios = parseInt(limitAudios, 10);
-    }
 
     const parseResetTime = (timeStr: string | null): number => {
       if (!timeStr) return 0;
@@ -132,14 +107,35 @@ class ApiKeyManager {
       return ms;
     };
 
-    if (resetTokens) {
-      info.resetTokensAt = Date.now() + parseResetTime(resetTokens);
-    }
-    if (resetRequests) {
-      info.resetRequestsAt = Date.now() + parseResetTime(resetRequests);
-    }
-    if (resetAudios) {
-      info.resetAudiosAt = Date.now() + parseResetTime(resetAudios);
+    if (isAudio) {
+      if (remainingRequests !== null) {
+        info.remainingAudios = parseInt(remainingRequests, 10);
+      }
+      if (limitRequests !== null) {
+        info.limitAudios = parseInt(limitRequests, 10);
+      }
+      if (resetRequests) {
+        info.resetAudiosAt = Date.now() + parseResetTime(resetRequests);
+      }
+    } else {
+      if (remainingTokens !== null) {
+        info.remainingTokens = parseInt(remainingTokens, 10);
+      }
+      if (remainingRequests !== null) {
+        info.remainingRequests = parseInt(remainingRequests, 10);
+      }
+      if (limitTokens !== null) {
+        info.limitTokens = parseInt(limitTokens, 10);
+      }
+      if (limitRequests !== null) {
+        info.limitRequests = parseInt(limitRequests, 10);
+      }
+      if (resetTokens) {
+        info.resetTokensAt = Date.now() + parseResetTime(resetTokens);
+      }
+      if (resetRequests) {
+        info.resetRequestsAt = Date.now() + parseResetTime(resetRequests);
+      }
     }
   }
 
@@ -222,7 +218,8 @@ export async function fetchGroq(path: string, options: RequestInit = {}): Promis
       });
 
       // Update remaining tokens/requests metrics from headers
-      apiKeyManager.updateLimits(key, response.headers);
+      const isAudio = path.includes("/audio/") || path.includes("transcriptions");
+      apiKeyManager.updateLimits(key, response.headers, isAudio);
 
       if (response.status === 429) {
         const retryAfter = response.headers.get("retry-after");
