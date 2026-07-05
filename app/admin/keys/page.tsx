@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Key, RefreshCw, AlertTriangle, CheckCircle, Clock } from "lucide-react";
+import { Key, RefreshCw, AlertTriangle, CheckCircle, Clock, Mic } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 interface KeyStatus {
@@ -9,9 +9,14 @@ interface KeyStatus {
   maskedKey: string;
   remainingTokens: number;
   remainingRequests: number;
+  limitTokens: number;
+  limitRequests: number;
   resetTokensAt: number;
   resetRequestsAt: number;
   blockedUntil: number;
+  remainingAudios: number;
+  limitAudios: number;
+  resetAudiosAt: number;
 }
 
 export default function ApiKeysTelemetryPage() {
@@ -116,9 +121,9 @@ export default function ApiKeysTelemetryPage() {
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {keys.map((key, index) => {
-            const now = Date.now();
-            const tokenPercent = Math.max(0, Math.min(100, (key.remainingTokens / 100000) * 100));
-            const reqPercent = Math.max(0, Math.min(100, (key.remainingRequests / 1000) * 100));
+            const tokenPercent = Math.max(0, Math.min(100, (key.remainingTokens / (key.limitTokens || 1)) * 100));
+            const reqPercent = Math.max(0, Math.min(100, (key.remainingRequests / (key.limitRequests || 1)) * 100));
+            const audioPercent = Math.max(0, Math.min(100, (key.remainingAudios / (key.limitAudios || 1)) * 100));
 
             return (
               <div
@@ -145,7 +150,7 @@ export default function ApiKeysTelemetryPage() {
                     <div className="flex justify-between text-[9px] font-bold uppercase tracking-wider text-zinc-400">
                       <span>Tokens remaining</span>
                       <span className="font-mono text-zinc-200">
-                        {key.remainingTokens.toLocaleString()} / 100K
+                        {key.remainingTokens.toLocaleString()} / {(key.limitTokens || 100000).toLocaleString()}
                       </span>
                     </div>
                     <div className="h-2 bg-zinc-900 rounded-full overflow-hidden">
@@ -167,7 +172,7 @@ export default function ApiKeysTelemetryPage() {
                     <div className="flex justify-between text-[9px] font-bold uppercase tracking-wider text-zinc-400">
                       <span>Requests Remaining</span>
                       <span className="font-mono text-zinc-200">
-                        {key.remainingRequests} / 1,000
+                        {key.remainingRequests.toLocaleString()} / {(key.limitRequests || 1000).toLocaleString()}
                       </span>
                     </div>
                     <div className="h-2 bg-zinc-900 rounded-full overflow-hidden">
@@ -183,26 +188,61 @@ export default function ApiKeysTelemetryPage() {
                       />
                     </div>
                   </div>
+
+                  {/* Whisper Audio Gauge */}
+                  <div className="flex flex-col gap-1.5 border-t border-zinc-900 pt-3 mt-1">
+                    <div className="flex justify-between text-[9px] font-bold uppercase tracking-wider text-zinc-400 items-center">
+                      <span className="flex items-center gap-1">
+                        <Mic className="size-3 text-violet-400" />
+                        Whisper Audio Transcriptions (RPM)
+                      </span>
+                      <span className="font-mono text-zinc-200">
+                        {key.remainingAudios} / {key.limitAudios} RPM
+                      </span>
+                    </div>
+                    <div className="h-2 bg-zinc-900 rounded-full overflow-hidden">
+                      <div
+                        className={`h-full rounded-full transition-all duration-500 ${
+                          audioPercent > 50
+                            ? "bg-cyan-500"
+                            : audioPercent > 20
+                            ? "bg-amber-500"
+                            : "bg-rose-500"
+                        }`}
+                        style={{ width: `${audioPercent}%` }}
+                      />
+                    </div>
+                  </div>
                 </div>
 
                 {/* Time reset counters */}
-                <div className="grid grid-cols-2 gap-4 text-zinc-400 text-[10px] font-bold uppercase">
-                  <div className="flex items-center gap-2 bg-zinc-950/20 border border-zinc-900 p-3 rounded-xl">
+                <div className="grid grid-cols-3 gap-3 text-zinc-400 text-[9px] font-bold uppercase">
+                  <div className="flex items-center gap-1.5 bg-zinc-950/20 border border-zinc-900 p-2.5 rounded-xl">
                     <Clock className="size-3.5 text-zinc-500 shrink-0" />
                     <div className="flex flex-col">
-                      <span className="text-[8px] text-zinc-500">Tokens Reset In</span>
+                      <span className="text-[7px] text-zinc-500">Tokens Reset</span>
                       <span className="font-mono text-zinc-300 mt-0.5">
                         {getRelativeTime(key.resetTokensAt)}
                       </span>
                     </div>
                   </div>
 
-                  <div className="flex items-center gap-2 bg-zinc-950/20 border border-zinc-900 p-3 rounded-xl">
+                  <div className="flex items-center gap-1.5 bg-zinc-950/20 border border-zinc-900 p-2.5 rounded-xl">
                     <Clock className="size-3.5 text-zinc-500 shrink-0" />
                     <div className="flex flex-col">
-                      <span className="text-[8px] text-zinc-500">Requests Reset In</span>
+                      <span className="text-[7px] text-zinc-500">Requests Reset</span>
                       <span className="font-mono text-zinc-300 mt-0.5">
                         {getRelativeTime(key.resetRequestsAt)}
+                      </span>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-1.5 bg-zinc-950/20 border border-zinc-900 p-2.5 rounded-xl">
+                    <Clock className="size-3.5 text-zinc-500 shrink-0" />
+                    <div className="flex flex-col">
+                      <span className="text-[7px] text-zinc-500">Whisper Reset</span>
+                      <span className="font-mono text-zinc-300 mt-0.5">
+                        {getRelativeTime(key.resetAudiosAt)}
                       </span>
                     </div>
                   </div>

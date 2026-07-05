@@ -2,9 +2,16 @@ interface ApiKeyInfo {
   key: string;
   remainingTokens: number;
   remainingRequests: number;
+  limitTokens: number;
+  limitRequests: number;
   resetTokensAt: number; // timestamp in ms
   resetRequestsAt: number; // timestamp in ms
   blockedUntil: number; // timestamp in ms
+  
+  // Whisper specific metrics
+  remainingAudios: number;
+  limitAudios: number;
+  resetAudiosAt: number; // timestamp in ms
 }
 
 class ApiKeyManager {
@@ -30,9 +37,14 @@ class ApiKeyManager {
       key: k,
       remainingTokens: 100000,
       remainingRequests: 1000,
+      limitTokens: 100000,
+      limitRequests: 1000,
       resetTokensAt: 0,
       resetRequestsAt: 0,
-      blockedUntil: 0
+      blockedUntil: 0,
+      remainingAudios: 100,
+      limitAudios: 100,
+      resetAudiosAt: 0
     }));
 
     console.log(`[ApiKeyManager] Initialized with ${this.keys.length} active API keys.`);
@@ -76,14 +88,34 @@ class ApiKeyManager {
 
     const remainingTokens = headers.get("x-ratelimit-remaining-tokens");
     const remainingRequests = headers.get("x-ratelimit-remaining-requests");
+    const limitTokens = headers.get("x-ratelimit-limit-tokens");
+    const limitRequests = headers.get("x-ratelimit-limit-requests");
     const resetTokens = headers.get("x-ratelimit-reset-tokens");
     const resetRequests = headers.get("x-ratelimit-reset-requests");
+
+    // Whisper STT audio limits
+    const remainingAudios = headers.get("x-ratelimit-remaining-audios");
+    const limitAudios = headers.get("x-ratelimit-limit-audios");
+    const resetAudios = headers.get("x-ratelimit-reset-audios");
 
     if (remainingTokens !== null) {
       info.remainingTokens = parseInt(remainingTokens, 10);
     }
     if (remainingRequests !== null) {
       info.remainingRequests = parseInt(remainingRequests, 10);
+    }
+    if (limitTokens !== null) {
+      info.limitTokens = parseInt(limitTokens, 10);
+    }
+    if (limitRequests !== null) {
+      info.limitRequests = parseInt(limitRequests, 10);
+    }
+
+    if (remainingAudios !== null) {
+      info.remainingAudios = parseInt(remainingAudios, 10);
+    }
+    if (limitAudios !== null) {
+      info.limitAudios = parseInt(limitAudios, 10);
     }
 
     const parseResetTime = (timeStr: string | null): number => {
@@ -105,6 +137,9 @@ class ApiKeyManager {
     }
     if (resetRequests) {
       info.resetRequestsAt = Date.now() + parseResetTime(resetRequests);
+    }
+    if (resetAudios) {
+      info.resetAudiosAt = Date.now() + parseResetTime(resetAudios);
     }
   }
 
@@ -139,9 +174,14 @@ class ApiKeyManager {
         maskedKey: masked,
         remainingTokens: k.remainingTokens,
         remainingRequests: k.remainingRequests,
+        limitTokens: k.limitTokens,
+        limitRequests: k.limitRequests,
         resetTokensAt: k.resetTokensAt,
         resetRequestsAt: k.resetRequestsAt,
-        blockedUntil: k.blockedUntil
+        blockedUntil: k.blockedUntil,
+        remainingAudios: k.remainingAudios,
+        limitAudios: k.limitAudios,
+        resetAudiosAt: k.resetAudiosAt
       };
     });
   }
