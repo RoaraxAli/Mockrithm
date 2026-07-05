@@ -2,16 +2,15 @@
 
 import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
-import { Check, Crown, Zap, ArrowRight } from "lucide-react";
+import { Check, Crown, Zap, Sparkles, ArrowRight, HelpCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { getAuthRedirectUrl } from "@/lib/utils/auth";
 
 export default function PricingSection() {
   const [isAnnual, setIsAnnual] = useState(false);
-  const springTransition = { type: "spring", stiffness: 90, damping: 18 };
   const headingRef = useRef<HTMLHeadingElement>(null);
 
   useEffect(() => {
@@ -27,7 +26,7 @@ export default function PricingSection() {
         opacity: 0,
         duration: 0.9,
         ease: "power4.out",
-        stagger: 0.03,
+        stagger: 0.02,
         scrollTrigger: {
           trigger: headingRef.current,
           start: "top 85%",
@@ -47,9 +46,9 @@ export default function PricingSection() {
   const headingWords = [
     { text: "Pricing", tone: "text-white" },
     { text: "built", tone: "text-white" },
-    { text: "for", tone: "text-zinc-500" },
-    { text: "serious", tone: "text-zinc-500" },
-    { text: "applicants.", tone: "text-zinc-500" },
+    { text: "for", tone: "text-zinc-550" },
+    { text: "serious", tone: "text-zinc-550" },
+    { text: "applicants.", tone: "text-zinc-550" },
   ];
 
   const pricingDetails = {
@@ -63,26 +62,28 @@ export default function PricingSection() {
     { feature: "Mock Evaluation Sessions", free: "1 Session", premium: "Unlimited", pro: "Unlimited" },
     { feature: "ATS Optimized Templates", free: "1 Template", premium: "6 Templates", pro: "All Templates" },
     { feature: "Real-Time HTML Editor", free: false, premium: true, pro: true },
-    { feature: "Vocal Filler word tracker", free: "Basic (Counts)", premium: "Complete (Timestamps)", pro: "Interactive feedback" },
+    { feature: "Vocal Filler Word Tracker", free: "Basic (Counts)", premium: "Complete (Timestamps)", pro: "Interactive Feedback" },
     { feature: "Advanced System Design Engine", free: false, premium: false, pro: "Full Access" },
-    { feature: "Custom Job Description sync", free: false, premium: false, pro: "Unlimited" },
-    { feature: "Priority AI queue access", free: false, premium: true, pro: "Instant routing" },
-    { feature: "1-on-1 team sharing metrics", free: false, premium: false, pro: "Supported" },
+    { feature: "Custom Job Description Sync", free: false, premium: false, pro: "Unlimited" },
+    { feature: "Priority AI Queue Access", free: false, premium: true, pro: "Instant Routing" },
+    { feature: "1-on-1 Sharing Metrics", free: false, premium: false, pro: "Supported" },
   ];
 
   return (
-    <section id="pricing" className="pt-4 pb-28 relative scroll-mt-16 z-10 text-white bg-transparent">
-      {/* Background gradients */}
-      <div className="absolute bottom-1/4 right-1/3 w-[600px] h-[600px] bg-[radial-gradient(circle,rgba(255,255,255,0.015)_0%,rgba(0,0,0,0)_70%)] pointer-events-none z-0" />
+    <section id="pricing" className="py-24 relative scroll-mt-16 z-10 text-white bg-transparent">
+      {/* Cinematic ambient background glow */}
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[400px] bg-[radial-gradient(circle,rgba(255,255,255,0.01)_0%,rgba(0,0,0,0)_60%)] pointer-events-none z-0" />
 
       <div className="max-w-6xl mx-auto px-6 relative z-10">
 
-        {/* Heading with split-text reveal */}
-        <div className="text-center mb-12 pt-8">
-          <span className="text-xs font-black tracking-[0.2em] text-zinc-400 uppercase">Flexible Access Tiers</span>
+        {/* Heading Segment */}
+        <div className="text-center mb-12">
+          <div className="inline-flex items-center gap-1.5 bg-zinc-950/60 border border-white/5 px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-[0.2em] text-zinc-400 font-mono mb-4">
+            <Sparkles className="size-3 text-white" /> Access Tiers
+          </div>
           <h2
             ref={headingRef}
-            className="mt-4 text-3xl sm:text-5xl lg:text-6xl font-black tracking-tight leading-none flex flex-wrap justify-center gap-x-4"
+            className="text-4xl sm:text-6xl font-black tracking-tight leading-[1.05] flex flex-wrap justify-center gap-x-3 uppercase"
           >
             {headingWords.map((word, wi) => (
               <span key={wi} className="inline-flex overflow-hidden">
@@ -96,214 +97,276 @@ export default function PricingSection() {
           </h2>
         </div>
 
-        {/* Centered Billing Toggle Switch */}
-        <div className="flex flex-col items-center mb-10">
-          <div className="inline-flex items-center gap-3 bg-zinc-950/60 p-1.5 rounded-full border border-white/5 shadow-2xl backdrop-blur-md">
+        {/* Premium Billing Switcher */}
+        <div className="flex flex-col items-center mb-16">
+          <div className="relative p-1 bg-zinc-950/80 border border-white/5 rounded-full flex items-center shadow-[0_15px_30px_rgba(0,0,0,0.8)] backdrop-blur-md">
             <button
               onClick={() => setIsAnnual(false)}
-              className={`px-5 py-2 rounded-full text-xs font-bold transition-all cursor-pointer ${
-                !isAnnual 
-                  ? "bg-white text-black font-black shadow-lg" 
-                  : "text-zinc-400 hover:text-white"
+              className={`relative z-10 px-6 py-2.5 rounded-full text-[10px] font-black uppercase tracking-widest transition-all cursor-pointer ${
+                !isAnnual ? "text-black" : "text-zinc-400 hover:text-white"
               }`}
             >
-              Monthly Billing
+              Monthly
             </button>
             <button
               onClick={() => setIsAnnual(true)}
-              className={`px-5 py-2 rounded-full text-xs font-bold transition-all cursor-pointer flex items-center gap-1.5 ${
-                isAnnual 
-                  ? "bg-white text-black font-black shadow-lg" 
-                  : "text-zinc-400 hover:text-white"
+              className={`relative z-10 px-6 py-2.5 rounded-full text-[10px] font-black uppercase tracking-widest transition-all cursor-pointer flex items-center gap-1.5 ${
+                isAnnual ? "text-black" : "text-zinc-400 hover:text-white"
               }`}
             >
-              Annual Billing
-              <span className="text-[9px] font-black bg-white/10 border border-white/20 text-zinc-300 px-2 py-0.5 rounded-full">
+              Annual
+              <span className={`text-[8px] font-black px-2 py-0.5 rounded-full transition-colors ${isAnnual ? "bg-black/10 border border-black/10 text-black" : "bg-white/5 border border-white/10 text-zinc-300"}`}>
                 Save 20%
               </span>
             </button>
+
+            {/* Slider pill overlay */}
+            <motion.div 
+              layout
+              transition={{ type: "spring", stiffness: 380, damping: 30 }}
+              className="absolute top-1 bottom-1 left-1 bg-white rounded-full"
+              style={{
+                width: isAnnual ? "130px" : "90px",
+                x: isAnnual ? "94px" : "0px",
+              }}
+            />
           </div>
         </div>
 
-        {/* Pricing Cards Grid (Staggered layout to break standard grids) */}
-        <div className="flex max-md:flex-col gap-8 md:gap-6 items-stretch mb-28 pt-8">
+        {/* 3-Column Plan Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 items-stretch mb-24">
           
-          {/* Freemium Plan */}
+          {/* Card 1: Developer Basic */}
           <motion.div 
-            initial={{ opacity: 0, y: 40, scale: 0.96 }}
-            whileInView={{ opacity: 1, y: 0, scale: 1 }}
-            viewport={{ once: true, margin: "-100px" }}
-            transition={{ type: "spring", stiffness: 80, damping: 18 }}
-            className="flex md:-translate-y-6 md:flex-1 w-full"
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            className="flex flex-col h-full"
           >
-            <div
-              className="border border-white/5 bg-zinc-950/20 backdrop-blur-md rounded-2xl p-8 flex flex-col justify-between hover:border-zinc-750 transition-all duration-300 relative pricing-card shadow-2xl w-full"
-              style={{ willChange: "transform" }}
-            >
+            <div className="relative flex flex-col justify-between p-8 rounded-2xl border border-white/5 bg-zinc-950/20 backdrop-blur-md hover:border-white/15 transition-all duration-300 h-full shadow-2xl group">
               <div>
-                <span className="text-[9px] font-bold text-zinc-400 uppercase tracking-widest bg-zinc-900 border border-white/5 px-3 py-1 rounded-full">
-                  Freemium Plan
+                <span className="text-[8px] font-black text-zinc-450 uppercase tracking-[0.25em] font-mono border-b border-white/5 pb-1">
+                  Tier // 01
                 </span>
-                <h4 className="text-4xl font-black text-white mt-6">$0.00</h4>
-                <p className="text-xs text-zinc-400 mt-2 leading-relaxed font-medium">
-                  Standard practice evaluation to test the voice engine framework.
+                <h3 className="text-lg font-black uppercase mt-4 text-white">Developer Basic</h3>
+                
+                <div className="mt-6 flex items-baseline gap-1">
+                  <span className="text-4xl font-black text-white">$0.00</span>
+                  <span className="text-[10px] font-bold text-zinc-550">/ month</span>
+                </div>
+                <p className="text-[11px] text-zinc-400 mt-3 leading-relaxed font-semibold">
+                  Standard access to evaluate key voice engines and sandbox interfaces.
                 </p>
-                <ul className="space-y-3.5 mt-8 text-[11px] text-zinc-300 font-medium border-t border-white/5 pt-6 list-none">
-                  <li className="flex items-center gap-2.5 list-none">
-                    <Check className="size-3.5 text-zinc-550 shrink-0" />
+
+                <ul className="space-y-4 mt-8 border-t border-white/5 pt-6 text-[10px] font-bold uppercase tracking-wider text-zinc-300">
+                  <li className="flex items-center gap-2.5">
+                    <Check className="size-3.5 text-zinc-450 shrink-0" />
                     <span>1 AI Voice Practice Session</span>
                   </li>
-                  <li className="flex items-center gap-2.5 list-none">
-                    <Check className="size-3.5 text-zinc-550 shrink-0" />
-                    <span>1 Basic ATS Resume Template</span>
+                  <li className="flex items-center gap-2.5">
+                    <Check className="size-3.5 text-zinc-450 shrink-0" />
+                    <span>1 ATS Resume Template</span>
                   </li>
-                  <li className="flex items-center gap-2.5 list-none">
-                    <Check className="size-3.5 text-zinc-550 shrink-0" />
-                    <span>Vocal Filler words overview</span>
+                  <li className="flex items-center gap-2.5 text-zinc-500">
+                    <Check className="size-3.5 text-zinc-700 shrink-0" />
+                    <span>Filler words count only</span>
                   </li>
                 </ul>
               </div>
-              <Button asChild variant="outline" className="mt-8 border-white/10 text-zinc-300 hover:text-white bg-zinc-900/40 hover:bg-zinc-900/80 backdrop-blur-md rounded-xl w-full text-xs font-bold py-2.5 cursor-pointer transition-all duration-200">
-                <Link href={getAuthRedirectUrl("sign-in")}>Start Free Trial</Link>
+
+              <Button asChild variant="outline" className="mt-8 h-10 border-white/10 text-zinc-300 hover:text-white bg-zinc-900/20 hover:bg-zinc-900/60 rounded-full w-full text-[9px] font-black uppercase tracking-widest cursor-pointer transition-all duration-200">
+                <Link href={getAuthRedirectUrl("sign-in")}>Start Free Session</Link>
               </Button>
             </div>
           </motion.div>
 
-          {/* Premium Plan */}
+          {/* Card 2: Mockrithm Unlimited (Featured) */}
           <motion.div 
-            initial={{ opacity: 0, y: 40, scale: 0.96 }}
-            whileInView={{ opacity: 1, y: 0, scale: 1 }}
-            viewport={{ once: true, margin: "-100px" }}
-            transition={{ type: "spring", stiffness: 80, damping: 18, delay: 0.08 }}
-            className="flex md:flex-1 w-full"
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            className="flex flex-col h-full relative"
           >
-            <div
-              className="border border-white/10 bg-white/[0.015] backdrop-blur-md rounded-2xl p-8 flex flex-col justify-between hover:border-white/20 transition-all duration-300 relative overflow-hidden pricing-card shadow-2xl w-full"
-              style={{ willChange: "transform" }}
-            >
-              {/* Ambient inner glow */}
-              <div className="absolute -top-12 left-1/2 -translate-x-1/2 w-48 h-20 bg-white/5 blur-[40px] rounded-full pointer-events-none" />
+            {/* Glowing neon halo overlay */}
+            <div className="absolute inset-0 bg-white/[0.01] rounded-2xl blur-md pointer-events-none" />
+            <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-transparent via-white/50 to-transparent rounded-t-2xl z-40" />
+
+            <div className="relative flex flex-col justify-between p-8 rounded-2xl border border-white/20 bg-white/[0.02] backdrop-blur-md hover:border-white/30 transition-all duration-300 h-full shadow-[0_20px_50px_rgba(0,0,0,0.8)] z-30 group">
+              
+              {/* Highlight ribbon */}
+              <div className="absolute -top-3.5 right-6 bg-white text-black text-[8px] font-black uppercase tracking-[0.2em] px-3 py-1 rounded-full shadow-[0_0_15px_rgba(255,255,255,0.4)] flex items-center gap-1">
+                <Crown className="size-3 fill-black text-black" /> Popular
+              </div>
+
               <div>
-                <div className="flex justify-between items-start mb-4">
-                  <span className="text-[9px] font-bold text-zinc-300 uppercase tracking-widest bg-white/5 border border-white/20 px-3 py-1 rounded-full flex items-center gap-1">
-                    <Crown className="size-3 fill-white text-white" /> Recommended
-                  </span>
-                  <span className="text-[9px] font-black uppercase bg-white text-black px-2.5 py-0.5 rounded-full shadow-[0_0_10px_rgba(255,255,255,0.3)]">
-                    Popular
-                  </span>
+                <span className="text-[8px] font-black text-zinc-300 uppercase tracking-[0.25em] font-mono border-b border-white/10 pb-1">
+                  Tier // 02
+                </span>
+                <h3 className="text-lg font-black uppercase mt-4 text-white flex items-center gap-1.5">
+                  Mockrithm Unlimited
+                </h3>
+
+                <div className="mt-6">
+                  <div className="flex items-baseline gap-1">
+                    <span className="text-4xl font-black text-white">${pricingDetails.premium.monthly}.00</span>
+                    <span className="text-[10px] font-bold text-zinc-400">/ month</span>
+                  </div>
+                  <AnimatePresence mode="wait">
+                    <motion.p 
+                      key={isAnnual ? "ann" : "mon"}
+                      initial={{ opacity: 0, y: -5 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: 5 }}
+                      className="text-[9px] text-zinc-450 font-black uppercase tracking-wider mt-1"
+                    >
+                      {isAnnual ? `Billed annually at $${pricingDetails.premium.total}.00/yr` : "Billed monthly"}
+                    </motion.p>
+                  </AnimatePresence>
                 </div>
-                <div className="flex items-baseline gap-1">
-                  <h4 className="text-4xl font-black text-white">${pricingDetails.premium.monthly}.00</h4>
-                  <span className="text-xs text-zinc-400 font-bold">/ month</span>
-                </div>
-                <p className="text-[10px] text-zinc-455 font-bold uppercase mt-1">
-                  {isAnnual ? `Billed annually at $${pricingDetails.premium.total}.00/yr` : "Billed monthly"}
+                
+                <p className="text-[11px] text-zinc-300 mt-3 leading-relaxed font-semibold">
+                  Complete prep suite with unlimited speech assessments, dynamic ATS templates, and logs.
                 </p>
-                <p className="text-xs text-zinc-300 mt-3 leading-relaxed font-medium">
-                  Complete practice with advanced analytics, custom resumes, and full session transcription logs.
-                </p>
-                <ul className="space-y-3.5 mt-8 text-[11px] text-white font-medium border-t border-white/10 pt-6 list-none">
-                  <li className="flex items-center gap-2.5 list-none">
+
+                <ul className="space-y-4 mt-8 border-t border-white/10 pt-6 text-[10px] font-bold uppercase tracking-wider text-white">
+                  <li className="flex items-center gap-2.5">
                     <Check className="size-3.5 text-white shrink-0" />
                     <span>Unlimited AI Voice Interviews</span>
                   </li>
-                  <li className="flex items-center gap-2.5 list-none">
+                  <li className="flex items-center gap-2.5">
                     <Check className="size-3.5 text-white shrink-0" />
                     <span>6 Premium ATS Resume Templates</span>
                   </li>
-                  <li className="flex items-center gap-2.5 list-none">
+                  <li className="flex items-center gap-2.5">
                     <Check className="size-3.5 text-white shrink-0" />
-                    <span>Full Real-Time Resume HTML Editing</span>
+                    <span>Real-Time Resume HTML Editor</span>
                   </li>
                 </ul>
               </div>
-              <Button asChild className="mt-8 bg-white hover:bg-zinc-200 text-black rounded-xl w-full text-xs font-black py-2.5 cursor-pointer flex justify-center items-center gap-1.5 shadow-lg shadow-white/5 hover:scale-[1.02] active:scale-[0.98] transition-transform duration-200">
-                <Link href={getAuthRedirectUrl("sign-up")}>
+
+              <Button asChild className="mt-8 h-10 bg-white hover:bg-zinc-200 text-black rounded-full w-full text-[9px] font-black uppercase tracking-widest cursor-pointer flex justify-center items-center gap-1.5 shadow-[0_4px_15px_-3px_rgba(255,255,255,0.4)] hover:scale-[1.02] active:scale-[0.98] transition-transform duration-200">
+                <Link href={getAuthRedirectUrl("sign-up")} className="flex items-center justify-center gap-1">
                   Start Prep <ArrowRight className="size-3.5 text-black" />
                 </Link>
               </Button>
             </div>
           </motion.div>
 
-          {/* Pro Plan */}
+          {/* Card 3: Elite Strategist */}
           <motion.div 
-            initial={{ opacity: 0, y: 40, scale: 0.96 }}
-            whileInView={{ opacity: 1, y: 0, scale: 1 }}
-            viewport={{ once: true, margin: "-100px" }}
-            transition={{ type: "spring", stiffness: 80, damping: 18, delay: 0.16 }}
-            className="flex md:translate-y-6 md:flex-1 w-full"
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            className="flex flex-col h-full"
           >
-            <div
-              className="border border-white/5 bg-zinc-950/20 backdrop-blur-md rounded-2xl p-8 flex flex-col justify-between hover:border-zinc-750 transition-all duration-300 relative pricing-card shadow-2xl w-full"
-              style={{ willChange: "transform" }}
-            >
+            <div className="relative flex flex-col justify-between p-8 rounded-2xl border border-white/5 bg-zinc-950/20 backdrop-blur-md hover:border-white/15 transition-all duration-300 h-full shadow-2xl group">
               <div>
-                <span className="text-[9px] font-bold text-zinc-400 uppercase tracking-widest bg-zinc-900 border border-white/5 px-3 py-1 rounded-full flex items-center gap-1">
-                  <Zap className="size-3 text-white" /> Pro Plan
+                <span className="text-[8px] font-black text-zinc-450 uppercase tracking-[0.25em] font-mono border-b border-white/5 pb-1">
+                  Tier // 03
                 </span>
-                <div className="flex items-baseline gap-1 mt-6">
-                  <h4 className="text-4xl font-black text-white">${pricingDetails.pro.monthly}.00</h4>
-                  <span className="text-xs text-zinc-400 font-bold">/ month</span>
+                <h3 className="text-lg font-black uppercase mt-4 text-white flex items-center gap-1.5">
+                  Elite Strategist
+                </h3>
+
+                <div className="mt-6">
+                  <div className="flex items-baseline gap-1">
+                    <span className="text-4xl font-black text-white">${pricingDetails.pro.monthly}.00</span>
+                    <span className="text-[10px] font-bold text-zinc-400">/ month</span>
+                  </div>
+                  <AnimatePresence mode="wait">
+                    <motion.p 
+                      key={isAnnual ? "ann" : "mon"}
+                      initial={{ opacity: 0, y: -5 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: 5 }}
+                      className="text-[9px] text-zinc-450 font-black uppercase tracking-wider mt-1"
+                    >
+                      {isAnnual ? `Billed annually at $${pricingDetails.pro.total}.00/yr` : "Billed monthly"}
+                    </motion.p>
+                  </AnimatePresence>
                 </div>
-                <p className="text-[10px] text-zinc-400 font-bold uppercase mt-1">
-                  {isAnnual ? `Billed annually at $${pricingDetails.pro.total}.00/yr` : "Billed monthly"}
+
+                <p className="text-[11px] text-zinc-400 mt-3 leading-relaxed font-semibold">
+                  For senior candidates requiring custom job syncs and full system design simulation modules.
                 </p>
-                <p className="text-xs text-zinc-400 mt-3 leading-relaxed font-medium">
-                  Designed for serious tech applicants seeking advanced system design and team-level diagnostic reviews.
-                </p>
-                <ul className="space-y-3.5 mt-8 text-[11px] text-zinc-350 font-medium border-t border-white/5 pt-6 list-none">
-                  <li className="flex items-center gap-2.5 list-none">
-                    <Check className="size-3.5 text-zinc-400 shrink-0" />
-                    <span>Everything in Premium</span>
+
+                <ul className="space-y-4 mt-8 border-t border-white/5 pt-6 text-[10px] font-bold uppercase tracking-wider text-zinc-300">
+                  <li className="flex items-center gap-2.5">
+                    <Check className="size-3.5 text-zinc-450 shrink-0" />
+                    <span>Everything in Unlimited</span>
                   </li>
-                  <li className="flex items-center gap-2.5 list-none">
-                    <Check className="size-3.5 text-zinc-400 shrink-0" />
-                    <span>System Design Interactive Simulator</span>
+                  <li className="flex items-center gap-2.5">
+                    <Check className="size-3.5 text-zinc-450 shrink-0" />
+                    <span>System Design Interactive module</span>
                   </li>
-                  <li className="flex items-center gap-2.5 list-none">
-                    <Check className="size-3.5 text-zinc-400 shrink-0" />
-                    <span>Custom Job Description parsing</span>
+                  <li className="flex items-center gap-2.5">
+                    <Check className="size-3.5 text-zinc-450 shrink-0" />
+                    <span>Custom Job Description Sync</span>
                   </li>
                 </ul>
               </div>
-              <Button asChild variant="outline" className="mt-8 border-white/10 text-zinc-300 hover:text-white bg-zinc-900/40 hover:bg-zinc-900/80 backdrop-blur-md rounded-xl w-full text-xs font-bold py-2.5 cursor-pointer transition-all duration-200">
+
+              <Button asChild variant="outline" className="mt-8 h-10 border-white/10 text-zinc-300 hover:text-white bg-zinc-900/20 hover:bg-zinc-900/60 rounded-full w-full text-[9px] font-black uppercase tracking-widest cursor-pointer transition-all duration-200">
                 <Link href={getAuthRedirectUrl("sign-up")}>Get Started Pro</Link>
               </Button>
             </div>
           </motion.div>
         </div>
 
-        {/* Benefit Comparison Table */}
+        {/* Dynamic Comparison Matrix Grid */}
         <motion.div 
-          initial={{ opacity: 0, y: 40, scale: 0.98 }}
-          whileInView={{ opacity: 1, y: 0, scale: 1 }}
-          viewport={{ once: true, margin: "-80px" }}
-          transition={{ type: "spring", stiffness: 70, damping: 20 }}
+          initial={{ opacity: 0, y: 30 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
           className="border border-white/5 rounded-2xl overflow-hidden bg-zinc-950/20 backdrop-blur-md shadow-2xl"
         >
-          <h3 className="text-sm font-black text-white text-center py-4 bg-zinc-950/60 uppercase tracking-widest border-b border-white/5">Compare Benefits</h3>
+          <div className="flex items-center justify-between px-6 py-4 bg-zinc-950/60 border-b border-white/5">
+            <h4 className="text-[10px] font-black text-white uppercase tracking-[0.25em] font-mono">Comparison Matrix</h4>
+            <div className="flex items-center gap-1.5 text-[8px] font-bold text-zinc-550 uppercase tracking-widest">
+              <HelpCircle className="size-3.5 text-zinc-600" /> Hover features for details
+            </div>
+          </div>
+
           <div className="overflow-x-auto">
-            <table className="w-full text-left border-collapse text-xs min-w-[600px]">
+            <table className="w-full text-left border-collapse text-[10px] min-w-[600px] uppercase font-bold tracking-wider">
               <thead>
-                <tr className="border-b border-white/5 bg-zinc-950/40 font-bold uppercase text-zinc-400 tracking-wider">
-                  <th className="p-4">Feature Details</th>
-                  <th className="p-4 text-center">Freemium</th>
-                  <th className="p-4 text-center text-zinc-400">Premium</th>
-                  <th className="p-4 text-center">Pro</th>
+                <tr className="border-b border-white/5 bg-zinc-950/40 text-zinc-400">
+                  <th className="p-4 w-2/5 font-black">Feature Parameter</th>
+                  <th className="p-4 text-center font-black">Developer</th>
+                  <th className="p-4 text-center font-black text-white">Unlimited</th>
+                  <th className="p-4 text-center font-black">Elite</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-white/5 font-medium">
+              <tbody className="divide-y divide-white/5 text-zinc-300">
                 {comparison.map((row, idx) => (
-                  <tr key={idx} className="hover:bg-white/[0.01] transition-colors duration-150">
-                    <td className="p-4 text-zinc-300 font-semibold">{row.feature}</td>
-                    <td className="p-4 text-center text-zinc-400">
-                      {typeof row.free === "boolean" ? (row.free ? "✓" : "✕") : row.free}
+                  <tr key={idx} className="hover:bg-white/[0.015] transition-colors duration-150">
+                    <td className="p-4 font-semibold text-zinc-400 font-mona-sans normal-case">{row.feature}</td>
+                    
+                    {/* Free column */}
+                    <td className="p-4 text-center">
+                      {typeof row.free === "boolean" ? (
+                        row.free ? <Check className="size-4 mx-auto text-emerald-400" /> : <span className="text-zinc-700 block font-black">─</span>
+                      ) : (
+                        <span className="text-[9px] text-zinc-450 font-black">{row.free}</span>
+                      )}
                     </td>
-                    <td className="p-4 text-center text-white">
-                      {typeof row.premium === "boolean" ? (row.premium ? "✓" : "✕") : row.premium}
+
+                    {/* Premium/Unlimited column */}
+                    <td className="p-4 text-center text-white bg-white/[0.005]">
+                      {typeof row.premium === "boolean" ? (
+                        row.premium ? <Check className="size-4 mx-auto text-emerald-400" /> : <span className="text-zinc-700 block font-black">─</span>
+                      ) : (
+                        <span className="text-[9px] text-white font-black">{row.premium}</span>
+                      )}
                     </td>
-                    <td className="p-4 text-center text-white font-bold">
-                      {typeof row.pro === "boolean" ? (row.pro ? "✓" : "✕") : row.pro}
+
+                    {/* Pro/Elite column */}
+                    <td className="p-4 text-center">
+                      {typeof row.pro === "boolean" ? (
+                        row.pro ? <Check className="size-4 mx-auto text-emerald-400" /> : <span className="text-zinc-700 block font-black">─</span>
+                      ) : (
+                        <span className="text-[9px] text-white font-black">{row.pro}</span>
+                      )}
                     </td>
                   </tr>
                 ))}
@@ -311,6 +374,7 @@ export default function PricingSection() {
             </table>
           </div>
         </motion.div>
+
       </div>
     </section>
   );
