@@ -66,6 +66,7 @@ const Agent = ({
   const [activeFeedbackId, setActiveFeedbackId] = useState<string | null>(propFeedbackId || null);
   const [activeRole, setActiveRole] = useState<string>(propRole || "");
   const [activeSessionType, setActiveSessionType] = useState<string>(propSessionType || "");
+  const [activeFirstMessage, setActiveFirstMessage] = useState<string>(firstMessage || "");
 
   const typeRef = useRef(activeType);
   const questionsRef = useRef(activeQuestions);
@@ -322,28 +323,7 @@ const Agent = ({
     };
 
     const handleSaveConversationSetup = async (messages: SavedMessage[]) => {
-      try {
-        const res = await fetch("/api/interview/parse-and-create", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            messages: messages
-              .filter((m) => !m.content.startsWith("[SYSTEM:"))
-              .map((m) => ({ role: m.role, content: m.content })),
-            userid: userId,
-            userResumeData: userResumeData,
-            language: selectedLanguage,
-          }),
-        });
-        const data = await res.json();
-        if (data.success && data.interviewId) {
-          router.push(`/interview/${data.interviewId}`);
-          return;
-        }
-      } catch (err) {
-        console.error("Failed to parse and create interview:", err);
-      }
-      router.push("/");
+      await transitionToInterview();
     };
 
     if (callStatus === CallStatus.FINISHED) {
@@ -1480,7 +1460,7 @@ ${code}
     }
   }
 
-  const transitionToInterview = async () => {
+  async function transitionToInterview() {
     console.log("[Agent.tsx] transitionToInterview triggered.");
     isProcessingRef.current = true;
     setIsSpeaking(true);
@@ -1521,23 +1501,28 @@ ${code}
         setActiveRole(data.role || "");
         setActiveSessionType(data.type || "");
 
+        setActiveFirstMessage(data.firstMessage || "");
+
         const welcome = data.firstMessage || "Okay, let's start the interview.";
         setLastMessage(welcome);
 
         // Reset the message history to start the interview cleanly
         setMessages([{ role: "assistant", content: welcome }]);
 
+        // Force call to be active
+        isCallActiveRef.current = true;
+        setCallStatus(CallStatus.ACTIVE);
+        setIsSpeaking(true);
+
         // Speak the welcome greeting
         await speakSentence(welcome);
 
-        if (isCallActiveRef.current) {
-          setIsSpeaking(false);
-          submittedTextRef.current = "";
-          submittedThisTurnRef.current = false;
-          isListeningRef.current = false;
-          setLastMessage("Listening... Speak now");
-          startSpeechRecognition();
-        }
+        setIsSpeaking(false);
+        submittedTextRef.current = "";
+        submittedThisTurnRef.current = false;
+        isListeningRef.current = false;
+        setLastMessage("Listening... Speak now");
+        startSpeechRecognition();
       } else {
         console.error("[Agent.tsx] API success is false or missing interviewId:", data);
         throw new Error("Failed to parse and create interview");
@@ -1636,7 +1621,7 @@ ${code}
     }
 
     // Dynamic Custom Welcome Greeting seeding
-    let welcomeMsg = firstMessage || interviewer.firstMessage || "Hello! Thank you for taking the time to speak with me today.";
+    let welcomeMsg = activeFirstMessage || firstMessage || interviewer.firstMessage || "Hello! Thank you for taking the time to speak with me today.";
     if (type === "generate") {
       const profileRole = userResumeData?.targetRole || "Software Engineer";
       if (selectedLanguage === "ur-PK") {
