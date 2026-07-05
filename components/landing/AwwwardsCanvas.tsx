@@ -113,18 +113,18 @@ const fragmentShader = `
       vec3 normal = normalize(vNormal);
       vec3 viewDir = normalize(vViewPosition);
 
-      // Fresnel edge lighting
-      float fresnel = pow(1.0 - max(0.0, dot(normal, viewDir)), 3.0);
+      // Fresnel edge lighting with a stronger glow
+      float fresnel = pow(1.0 - max(0.0, dot(normal, viewDir)), 2.5);
 
       // Cinematic monochrome colors
-      vec3 edgeColor = vec3(1.0, 1.0, 1.0); // Pure White edges
-      vec3 baseColor = vec3(0.03, 0.03, 0.03); // Near black core
+      vec3 edgeColor = vec3(1.2, 1.2, 1.2); // Over-bright edges for glow effect
+      vec3 baseColor = vec3(0.02, 0.02, 0.02); // Deeper black core
 
-      vec3 finalColor = mix(baseColor, edgeColor, fresnel * 1.1 + 0.02);
+      vec3 finalColor = mix(baseColor, edgeColor, fresnel * 1.4);
 
-      // Highlight peaks using noise values
-      if (vNoise > 0.3) {
-          finalColor += vec3(0.08) * (vNoise - 0.3);
+      // Add a subtle noise-based inner glow
+      if (vNoise > 0.0) {
+          finalColor += vec3(0.12) * vNoise;
       }
 
       // Fade out centerpiece completely during transition
@@ -186,8 +186,8 @@ export default function AwwwardsCanvas() {
     const centerpiecePoints = new THREE.Points(centerpieceGeometry, centerpieceMaterial);
     scene.add(centerpiecePoints);
 
-    // Set count to 5000 on desktop, 1500 on mobile for dense starry field
-    const particleCount = isMobile ? 1500 : 5000;
+    // Set count to 3000 on desktop, 1000 on mobile to balance aesthetics and speed
+    const particleCount = isMobile ? 1000 : 3000;
     const particlePositions = new Float32Array(particleCount * 3);
 
     for (let i = 0; i < particleCount; i++) {
@@ -310,6 +310,9 @@ export default function AwwwardsCanvas() {
       // Rotate background particles globally (No expensive per-particle math or buffer re-uploads!)
       particles.rotation.y = elapsedTime * 0.015;
       particles.rotation.z = elapsedTime * 0.005;
+
+      // Animate background particles moving upward as we scroll back to Hero
+      particles.position.y = -explosionProgress * 18.0;
 
       // Fade out background particles based on progress
       const particleAlpha = Math.max(0, Math.min(0.85, 0.85 * (1 - explosionProgress)));
