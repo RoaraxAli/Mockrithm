@@ -603,6 +603,11 @@ const Agent = ({
 
     if (/\[SHOW[-_ ]?SANDBOX\]/i.test(accumulatedTextRef.current)) {
       setShowSandbox(true);
+      if (recognitionRef.current) {
+        try {
+          recognitionRef.current.stop();
+        } catch (e) {}
+      }
     }
 
     const displayClean = accumulatedTextRef.current
@@ -1129,8 +1134,10 @@ CRITICAL SANDBOX WORKSPACE RULE:
 - The candidate's screen has a built-in interactive live coding editor sandbox panel.
 - Whenever you ask a question that requires writing code, or transition to the coding challenge, you MUST output the exact tag '[SHOW_SANDBOX]' (case-insensitive) in your response. This will automatically open the code editor workspace on their screen.
 - Never solve the challenge, write solution code, output templates, or suggest external coding tools (like CodeSandbox or JSFiddle). Simply present the task, output '[SHOW_SANDBOX]', and wait for them to write the solution inside their editor workspace.
+- CODE EVALUATION RULE: When the candidate submits or asks you to check their code, evaluate it objectively. If the code is correct, functional, and satisfies the requirements of the challenge, acknowledge it immediately (e.g. "Excellent work, that solution is correct!"), do NOT invent imaginary bugs or nitpick style, and conclude the interview by thanking them and appending '[END_CALL]'. Only point out errors if there is a genuine syntax/logic bug in their implementation.
 
 CRITICAL RULES - CONVERSATIONAL FLOW & CONCISENESS:
+- DO NOT VERBALLY READ OUT THE LONG CHALLENGE INSTRUCTIONS OR CODE: When you transition to the coding challenge, simply introduce it briefly in one sentence (under 15 words) and output '[SHOW_SANDBOX]'. The candidate will read the details in the workspace on their screen. Never output code blocks, templates, or instructions in your speech.
 - DO NOT LECTURE ON CORRECT ANSWERS: If the candidate answers correctly or reasonably, do not explain the concept, define terms, or repeat the textbook answer back to them. Simply acknowledge briefly (e.g. "Got it.", "Makes sense.", "Solid explanation.") and transition immediately to the next question.
 - GENTLY CORRECT BIG BLUNDERS: If the candidate makes a major blunder or says something completely incorrect, gently correct them and guide them in the right direction in one short, polite sentence before transitioning.
 - KEEP RESPONSES VERY SHORT: Keep your replies under 25 words maximum. No yapping or long paragraphs. Keep the pacing fast and conversational.
@@ -1344,8 +1351,10 @@ CRITICAL SANDBOX WORKSPACE RULE:
 - The candidate's screen has a built-in interactive live coding editor sandbox panel.
 - Whenever you ask a question that requires writing code, or transition to the coding challenge, you MUST output the exact tag '[SHOW_SANDBOX]' (case-insensitive) in your response. This will automatically open the code editor workspace on their screen.
 - Never solve the challenge, write solution code, output templates, or suggest external coding tools (like CodeSandbox or JSFiddle). Simply present the task, output '[SHOW_SANDBOX]', and wait for them to write the solution inside their editor workspace.
+- CODE EVALUATION RULE: When the candidate submits or asks you to check their code, evaluate it objectively. If the code is correct, functional, and satisfies the requirements of the challenge, acknowledge it immediately (e.g. "Excellent work, that solution is correct!"), do NOT invent imaginary bugs or nitpick style, and conclude the interview by thanking them and appending '[END_CALL]'. Only point out errors if there is a genuine syntax/logic bug in their implementation.
 
 CRITICAL RULES - CONVERSATIONAL FLOW & CONCISENESS:
+- DO NOT VERBALLY READ OUT THE LONG CHALLENGE INSTRUCTIONS OR CODE: When you transition to the coding challenge, simply introduce it briefly in one sentence (under 15 words) and output '[SHOW_SANDBOX]'. The candidate will read the details in the workspace on their screen. Never output code blocks, templates, or instructions in your speech.
 - DO NOT LECTURE ON CORRECT ANSWERS: If the candidate answers correctly or reasonably, do not explain the concept, define terms, or repeat the textbook answer back to them. Simply acknowledge briefly (e.g. "Got it.", "Makes sense.", "Solid explanation.") and transition immediately to the next question.
 - GENTLY CORRECT BIG BLUNDERS: If the candidate makes a major blunder or says something completely incorrect, gently correct them and guide them in the right direction in one short, polite sentence before transitioning.
 - KEEP RESPONSES VERY SHORT: Keep your replies under 25 words maximum. No yapping or long paragraphs. Keep the pacing fast and conversational.
@@ -1559,8 +1568,12 @@ ${code}
         submittedTextRef.current = ""; // reset so next answer isn't blocked
         submittedThisTurnRef.current = false;
         isListeningRef.current = false;
-        setLastMessage("Listening... Speak now");
-        startSpeechRecognition();
+        if (showSandbox) {
+          setLastMessage("Sandbox Active. Voice disabled — use sandbox buttons or submit when done.");
+        } else {
+          setLastMessage("Listening... Speak now");
+          startSpeechRecognition();
+        }
       }
     }
   };
