@@ -27,6 +27,9 @@ export default async function Home() {
   }
 
   if (user) {
+    if (user.role?.toLowerCase() === "admin") {
+      redirect("/admin");
+    }
     if (!user.onboarded) {
       redirect("/onboarding");
     }

@@ -107,6 +107,22 @@ class ApiKeyManager {
       info.resetRequestsAt = Date.now() + parseResetTime(resetRequests);
     }
   }
+
+  public getKeysStatus() {
+    return this.keys.map((k, index) => {
+      const name = index === 0 ? "GROQ_API_KEY" : `GROQ_API_KEY_${index + 1}`;
+      const masked = k.key.length > 10 ? `${k.key.slice(0, 7)}...${k.key.slice(-6)}` : k.key;
+      return {
+        name,
+        maskedKey: masked,
+        remainingTokens: k.remainingTokens,
+        remainingRequests: k.remainingRequests,
+        resetTokensAt: k.resetTokensAt,
+        resetRequestsAt: k.resetRequestsAt,
+        blockedUntil: k.blockedUntil
+      };
+    });
+  }
 }
 
 export const apiKeyManager = new ApiKeyManager();
