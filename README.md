@@ -26,17 +26,6 @@ Mockrithm is a proprietary, enterprise-grade mock interview and interactive lear
 - Node.js (v18+)
 - npm (or yarn)
 
-### Configuration
-1. Initialize a `.env` file at the root of the project with required keys:
-   ```env
-   FIREBASE_PROJECT_ID=your_firebase_project_id
-   FIREBASE_PRIVATE_KEY="-----BEGIN PRIVATE KEY-----...-----END PRIVATE KEY-----"
-   FIREBASE_CLIENT_EMAIL=your_service_account_email
-   
-   GROQ_API_KEY=your_primary_groq_api_key
-   GROQ_API_KEY_2=your_secondary_groq_api_key
-   GROQ_API_KEY_3=your_tertiary_groq_api_key
-   ```
 
 ---
 
