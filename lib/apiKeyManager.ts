@@ -140,9 +140,19 @@ class ApiKeyManager {
   }
 
   public async refreshAllLimits() {
+    // Generate a valid 0.1-second silent WAV file buffer to query Whisper transcriptions limits
+    const silentHeader = Buffer.from([
+      0x52, 0x49, 0x46, 0x46, 0x44, 0x03, 0x00, 0x00, 0x57, 0x41, 0x56, 0x45, 0x66, 0x6d, 0x74, 0x20,
+      0x10, 0x00, 0x00, 0x00, 0x01, 0x00, 0x01, 0x00, 0x40, 0x1f, 0x00, 0x00, 0x40, 0x1f, 0x00, 0x00,
+      0x01, 0x00, 0x08, 0x00, 0x64, 0x61, 0x74, 0x61, 0x20, 0x03, 0x00, 0x00
+    ]);
+    const silence = Buffer.alloc(800, 128);
+    const silentWav = Buffer.concat([silentHeader, silence]);
+
     for (const keyInfo of this.keys) {
       try {
-        const response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+        // 1. Refresh chat completion limits
+        const chatResponse = await fetch("https://api.groq.com/openai/v1/chat/completions", {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
@@ -155,11 +165,30 @@ class ApiKeyManager {
           })
         });
         
-        if (response.ok) {
-          this.updateLimits(keyInfo.key, response.headers);
+        if (chatResponse.ok) {
+          this.updateLimits(keyInfo.key, chatResponse.headers, false);
         } else {
-          // If the key is invalid or unauthorized, block it
-          this.blockKey(keyInfo.key, 3600); // block for 1 hour
+          this.blockKey(keyInfo.key, 3600); // block invalid keys for 1 hour
+          continue;
+        }
+
+        // 2. Refresh Whisper audio transcription limits
+        const audioFormData = new FormData();
+        const blob = new Blob([silentWav], { type: "audio/wav" });
+        audioFormData.append("file", blob, "silent.wav");
+        audioFormData.append("model", "whisper-large-v3-turbo");
+        audioFormData.append("language", "en");
+
+        const audioResponse = await fetch("https://api.groq.com/openai/v1/audio/transcriptions", {
+          method: "POST",
+          headers: {
+            "Authorization": `Bearer ${keyInfo.key}`,
+          },
+          body: audioFormData
+        });
+
+        if (audioResponse.ok) {
+          this.updateLimits(keyInfo.key, audioResponse.headers, true);
         }
       } catch (err) {
         console.error(`[ApiKeyManager] Failed to refresh limits for key:`, err);
