@@ -1081,7 +1081,8 @@ const Agent = ({
 
     // Append user message to history
     const userMsg: SavedMessage = { role: "user", content: cleanedText };
-    setMessages((prev) => [...prev, userMsg]);
+    const nextMessages = [...messagesRef.current, userMsg];
+    setMessages(nextMessages);
     setIsSpeaking(false);
 
     // Call STAR framework analysis API in parallel
@@ -1109,7 +1110,7 @@ const Agent = ({
         },
         body: JSON.stringify({
           model: selectedModel,
-          messages: messagesRef.current,
+          messages: nextMessages,
           promptParams: {
             type: typeRef.current,
             role: roleRef.current,
@@ -1232,64 +1233,13 @@ const Agent = ({
       : `[SYSTEM: The candidate has been inactive/stuck on the coding sandbox for 10 seconds. Proactively help them with a brief, warm Socratic hint based on their current code: "${code}". Keep it under 25 words.]`;
 
     const systemCue: SavedMessage = { role: "user", content: hintPrompt };
-    setMessages((prev) => [...prev, systemCue]);
+    const nextMessages = [...messagesRef.current, systemCue];
+    setMessages(nextMessages);
     setIsSpeaking(false);
     setLastMessage("AI is thinking...");
     setIsSpeaking(true);
 
     try {
-      const candidateRoleName = roleRef.current || userResumeData?.targetRole || "Software Engineer";
-      const candidateSessionType = sessionTypeRef.current || "Interview";
-      const langConfig = interviewLanguages.find((l) => l.code === languageRef.current);
-      const languageInstruction = `LANGUAGE REQUIREMENT: The candidate selected "${langConfig?.name || "English"}" (${languageRef.current}). You MUST reply ONLY in this language.`;
-      const personaText = candidateRoleName.toLowerCase().includes("president")
-        ? "Your persona: A senior political debate moderator or veteran political journalist. Keep your tone formal, sharp, and demanding."
-        : candidateRoleName.toLowerCase().includes("joker") || candidateRoleName.toLowerCase().includes("comedian")
-        ? "Your persona: A comedy club owner, talent scout, or talk show host. Keep your tone conversational, witty, and responsive to humor."
-        : "Your persona: A professional interviewer conducting a real-time voice interview to assess their qualifications, motivation, and fit for the role.";
-
-      const formattedQuestions = questionsRef.current.map((q: string) => `- ${q}`).join("\n");
-      
-      const systemPrompt = `You are Alex, conducting a real-time voice evaluation or interview with a candidate.
-Role: ${candidateRoleName}
-Session Mode/Type: ${candidateSessionType}
-
-${personaText}
-
-${languageInstruction}
-
-Interview Guidelines:
-Follow this structured question flow:
-${formattedQuestions}
-
-CRITICAL RULES - CONVERSATIONAL FLOW & CONCISENESS:
-- DO NOT LECTURE ON CORRECT ANSWERS: If the candidate answers correctly or reasonably, do not explain the concept, define terms, or repeat the textbook answer back to them. Simply acknowledge briefly (e.g. "Got it.", "Makes sense.", "Solid explanation.") and transition immediately to the next question.
-- GENTLY CORRECT BIG BLUNDERS: If the candidate makes a major blunder or says something completely incorrect, gently correct them and guide them in the right direction in one short, polite sentence before transitioning.
-- KEEP RESPONSES VERY SHORT: Keep your replies under 25 words maximum. No yapping or long paragraphs. Keep the pacing fast and conversational.
-- Write only plain, clean text. Do not use markdown like bold (**), italics (*), lists, or hashtags.
-- Never use emojis.
-- Conclude the interview properly when all questions are asked and answered.
-- When all questions are done OR when you receive a [SYSTEM: Time is up...] message, conclude the interview warmly. Thank the candidate, wish them luck, say goodbye, and ALWAYS append "[END_CALL]" at the very end so the system knows to close the session.
-
-${
-  codingProblemRef.current
-    ? `Sandbox/Workspace Info:
-- The candidate is working on the task/problem: "${codingProblemRef.current.title}".
-- Description: ${codingProblemRef.current.description}
-- Candidate's current draft/code is:
-\`\`\`${codingProblemRef.current.language}
-${code}
-\`\`\`
-- If the candidate gets stuck, provide a Socratic hint to help them think in the right direction. Do NOT give them the full solution.
-- CRITICAL: The sandbox is hidden from the candidate initially. When you are ready for them to write/code/solve the challenge, you MUST output the exact tag '[SHOW_SANDBOX]' in your response. Do not output this tag before you introduce the problem.`
-    : ""
-}`;
-
-      const history = [
-        { role: "system", content: systemPrompt },
-        ...messagesRef.current,
-      ];
-
       const response = await fetch("/api/meow/chat", {
         method: "POST",
         headers: {
@@ -1297,7 +1247,18 @@ ${code}
         },
         body: JSON.stringify({
           model: selectedModel,
-          messages: history,
+          messages: nextMessages,
+          promptParams: {
+            type: typeRef.current,
+            role: roleRef.current,
+            sessionType: sessionTypeRef.current,
+            language: languageRef.current,
+            questions: questionsRef.current,
+            codingProblem: codingProblemRef.current,
+            code: code,
+            userName: userName,
+            userResumeData: userResumeData
+          },
           stream: true,
         }),
       });
