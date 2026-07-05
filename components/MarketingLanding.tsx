@@ -87,6 +87,37 @@ export default function MarketingLanding() {
     loadBlogs();
   }, []);
 
+  // Refresh ScrollTrigger when dynamic blogs finish loading and rendering
+  useEffect(() => {
+    if (!loadingBlogs) {
+      const timer = setTimeout(() => {
+        ScrollTrigger.refresh();
+      }, 300);
+      return () => clearTimeout(timer);
+    }
+  }, [loadingBlogs]);
+
+  // Robust window load and fallback triggers to refresh ScrollTrigger once the DOM layout is 100% stable
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    
+    const handleLoad = () => {
+      ScrollTrigger.refresh();
+    };
+    
+    window.addEventListener("load", handleLoad);
+    
+    // Fallback: refresh after 1.5 seconds to guarantee layout alignment
+    const timer = setTimeout(() => {
+      ScrollTrigger.refresh();
+    }, 1500);
+
+    return () => {
+      window.removeEventListener("load", handleLoad);
+      clearTimeout(timer);
+    };
+  }, []);
+
   // Initialize Lenis smooth scroll + GSAP velocity animations
   useEffect(() => {
     if (typeof window === "undefined") return;
