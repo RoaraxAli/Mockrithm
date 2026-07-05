@@ -216,7 +216,7 @@ export default function MarketingLanding() {
             scrollTrigger: {
               trigger: section,
               start: "top bottom",
-              end: "top center",
+              end: "top 75%",
               scrub: 0.1,
             },
           }
@@ -284,7 +284,6 @@ export default function MarketingLanding() {
         <SectionDivider />
         <AwwwardsShowcase />
 
-        <SectionDivider />
         <div className="section-zoom"><PricingSection /></div>
       </div>
 

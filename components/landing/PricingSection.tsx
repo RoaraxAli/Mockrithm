@@ -70,7 +70,7 @@ export default function PricingSection() {
   ];
 
   return (
-    <section id="pricing" className="py-24 relative scroll-mt-16 z-10 text-white bg-transparent">
+    <section id="pricing" className="pt-12 pb-24 relative scroll-mt-16 z-10 text-white bg-transparent">
       {/* Cinematic ambient background glow */}
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[400px] bg-[radial-gradient(circle,rgba(255,255,255,0.01)_0%,rgba(0,0,0,0)_60%)] pointer-events-none z-0" />
 
