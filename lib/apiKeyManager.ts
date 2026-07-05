@@ -108,6 +108,28 @@ class ApiKeyManager {
     }
   }
 
+  public async refreshAllLimits() {
+    for (const keyInfo of this.keys) {
+      try {
+        const response = await fetch("https://api.groq.com/openai/v1/models", {
+          method: "GET",
+          headers: {
+            "Authorization": `Bearer ${keyInfo.key}`,
+          }
+        });
+        
+        if (response.ok) {
+          this.updateLimits(keyInfo.key, response.headers);
+        } else {
+          // If the key is invalid or unauthorized, block it
+          this.blockKey(keyInfo.key, 3600); // block for 1 hour
+        }
+      } catch (err) {
+        console.error(`[ApiKeyManager] Failed to refresh limits for key:`, err);
+      }
+    }
+  }
+
   public getKeysStatus() {
     return this.keys.map((k, index) => {
       const name = index === 0 ? "GROQ_API_KEY" : `GROQ_API_KEY_${index + 1}`;

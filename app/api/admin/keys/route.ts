@@ -11,6 +11,7 @@ export async function GET() {
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
 
+    await apiKeyManager.refreshAllLimits();
     const statuses = apiKeyManager.getKeysStatus();
     return NextResponse.json(statuses);
   } catch (error: any) {
