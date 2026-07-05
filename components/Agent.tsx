@@ -114,7 +114,21 @@ const Agent = ({
   const selectedSttRef = useRef<string>("browser");
   useEffect(() => {
     selectedSttRef.current = selectedStt;
-  }, [selectedStt]);
+    if (callStatus === CallStatus.ACTIVE) {
+      console.log(`[Agent.tsx] STT Engine changed to ${selectedStt}. Reinitializing...`);
+      try {
+        if (recognitionRef.current) {
+          recognitionRef.current.abort();
+        }
+      } catch (e) {}
+      stopWhisperRecordingOnly();
+      isListeningRef.current = false;
+      submittedThisTurnRef.current = false;
+      if (!isProcessingRef.current && !isSpeakingActiveRef.current) {
+        startSpeechRecognition();
+      }
+    }
+  }, [selectedStt, callStatus]);
 
   // Interview Language (selected before the session starts)
   const [selectedLanguage, setSelectedLanguage] = useState<string>("en-US");
@@ -651,10 +665,17 @@ const Agent = ({
     // submitted exactly once and a duplicate "Listening... Speak now" never
     // appears from a glitch-triggered restart.
     const submitCapturedSpeech = (text: string) => {
-      if (recognitionRef.current !== rec) return; // Discard obsolete instances
-      if (!isCallActiveRef.current || isProcessingRef.current) return;
+      console.log(`[Agent.tsx - STT SUBMIT] submitCapturedSpeech called. Text: "${text}". isProcessingRef=${isProcessingRef.current}, recognitionRefMatches=${recognitionRef.current === rec}, submittedThisTurnRef=${submittedThisTurnRef.current}`);
+      if (recognitionRef.current !== rec) {
+        console.warn("[Agent.tsx - STT SUBMIT DISCARD] Obsolete instance mismatch.");
+        return;
+      }
+      if (!isCallActiveRef.current || isProcessingRef.current) {
+        console.warn(`[Agent.tsx - STT SUBMIT DISCARD] Call inactive or process busy. isCallActive=${isCallActiveRef.current}, isProcessing=${isProcessingRef.current}`);
+        return;
+      }
       if (submittedThisTurnRef.current) {
-        console.log("[Agent.tsx] Speech already submitted this turn. Ignoring duplicate.");
+        console.warn("[Agent.tsx - STT SUBMIT DISCARD] Speech already submitted this turn.");
         return;
       }
       submittedThisTurnRef.current = true;
@@ -671,7 +692,7 @@ const Agent = ({
     };
 
     rec.onstart = () => {
-      console.log("[Agent.tsx] SpeechRecognition session started. Listening for user input...");
+      console.log(`[Agent.tsx - STT START] SpeechRecognition session started. isListeningRef=${isListeningRef.current}, isProcessingRef=${isProcessingRef.current}, submittedThisTurnRef=${submittedThisTurnRef.current}`);
       isListeningRef.current = true;
       sessionFinal = "";
       sessionInterim = "";
