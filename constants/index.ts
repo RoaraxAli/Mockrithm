@@ -101,12 +101,12 @@ export const mappings = {
 // `ttsProvider` = "groq" uses the Groq Orpheus API; "edge" uses Microsoft Edge neural TTS (free, no API key).
 // `edgeVoice` = the default Microsoft Edge neural voice name for this language.
 export const interviewLanguages: { code: string; name: string; neuralTTS: boolean; ttsProvider: "groq" | "edge"; edgeVoice: string }[] = [
-  { code: "en-US", name: "English", neuralTTS: true, ttsProvider: "groq", edgeVoice: "en-US-AndrewNeural" },
+  { code: "en-US", name: "English", neuralTTS: true, ttsProvider: "edge", edgeVoice: "en-US-JennyNeural" },
   { code: "ur-PK", name: "Urdu (اردو)", neuralTTS: true, ttsProvider: "edge", edgeVoice: "ur-PK-AsadNeural" },
   { code: "es-ES", name: "Spanish (Español)", neuralTTS: true, ttsProvider: "edge", edgeVoice: "es-ES-AlvaroNeural" },
   { code: "fr-FR", name: "French (Français)", neuralTTS: true, ttsProvider: "edge", edgeVoice: "fr-FR-HenriNeural" },
   { code: "zh-CN", name: "Chinese (中文)", neuralTTS: true, ttsProvider: "edge", edgeVoice: "zh-CN-YunxiNeural" },
-  { code: "ar-SA", name: "Arabic (العربية)", neuralTTS: true, ttsProvider: "groq", edgeVoice: "ar-SA-HamedNeural" },
+  { code: "ar-SA", name: "Arabic (العربية)", neuralTTS: true, ttsProvider: "edge", edgeVoice: "ar-SA-HamedNeural" },
   { code: "hi-IN", name: "Hindi (हिन्दी)", neuralTTS: true, ttsProvider: "edge", edgeVoice: "hi-IN-MadhurNeural" },
   { code: "de-DE", name: "German (Deutsch)", neuralTTS: true, ttsProvider: "edge", edgeVoice: "de-DE-ConradNeural" },
   { code: "pt-BR", name: "Portuguese (Português)", neuralTTS: true, ttsProvider: "edge", edgeVoice: "pt-BR-AntonioNeural" },
