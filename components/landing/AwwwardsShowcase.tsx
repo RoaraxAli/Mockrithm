@@ -467,12 +467,8 @@ export default function AwwwardsShowcase() {
       }
     }, containerRef);
 
-    const onResize = () => ScrollTrigger.refresh();
-    window.addEventListener("resize", onResize);
-
     return () => {
       ctx.revert();
-      window.removeEventListener("resize", onResize);
     };
   }, []);
 

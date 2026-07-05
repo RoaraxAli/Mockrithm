@@ -165,7 +165,7 @@ export default function AwwwardsCanvas() {
     camera.position.z = 7;
 
     // 2. HERO morphing centerpiece: cybernetic holographic globe
-    const centerpieceGeometry = new THREE.SphereGeometry(1.4, 28, 28);
+    const centerpieceGeometry = new THREE.SphereGeometry(1.4, 18, 18);
     const centerpieceMaterial = new THREE.ShaderMaterial({
       vertexShader,
       fragmentShader,
