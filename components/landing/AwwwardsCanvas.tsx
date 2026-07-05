@@ -186,8 +186,8 @@ export default function AwwwardsCanvas() {
     const centerpiecePoints = new THREE.Points(centerpieceGeometry, centerpieceMaterial);
     scene.add(centerpiecePoints);
 
-    // Set count to 3000 on desktop, 1000 on mobile to balance aesthetics and speed
-    const particleCount = isMobile ? 1000 : 3000;
+    // Set count to 1000 on desktop, 350 on mobile to balance aesthetics and speed
+    const particleCount = isMobile ? 350 : 1000;
     const particlePositions = new Float32Array(particleCount * 3);
 
     for (let i = 0; i < particleCount; i++) {
