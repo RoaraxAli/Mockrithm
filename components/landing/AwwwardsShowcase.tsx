@@ -60,79 +60,44 @@ const FEATURES = [
   },
 ] as const;
 
-// Curated theme configs per feature stage
-const FEATURE_THEMES = [
-  {
-    accent: "text-purple-400",
-    glowColor: "rgba(168, 85, 247, 0.08)",
-    badge: "CORE // VOICE SIMULATOR",
-    tag: "bg-purple-500/10 text-purple-400 border-purple-500/20",
-  },
-  {
-    accent: "text-cyan-400",
-    glowColor: "rgba(34, 211, 238, 0.08)",
-    badge: "ATS // RESUME PARSER",
-    tag: "bg-cyan-500/10 text-cyan-400 border-cyan-500/20",
-  },
-  {
-    accent: "text-pink-400",
-    glowColor: "rgba(236, 72, 153, 0.08)",
-    badge: "METRICS // TELEMETRY",
-    tag: "bg-pink-500/10 text-pink-400 border-pink-500/20",
-  },
-  {
-    accent: "text-zinc-300",
-    glowColor: "rgba(228, 228, 231, 0.08)",
-    badge: "ARCHIVE // RESOURCE LAB",
-    tag: "bg-zinc-500/10 text-zinc-300 border-zinc-500/20",
-  },
-  {
-    accent: "text-amber-400",
-    glowColor: "rgba(251, 191, 36, 0.08)",
-    badge: "ACCESS // MEMBERSHIPS",
-    tag: "bg-amber-500/10 text-amber-400 border-amber-500/20",
-  },
-];
-
 /* ------------------------------------------------------------------ */
-/* Per-feature animated visual mockups (scroll-reactive)              */
+/* Per-feature animated visual mockups (scroll-reactive, Monochrome)  */
 /* ------------------------------------------------------------------ */
 
 /** Feature 1 — waveform + mic */
 function WaveformVisual({ progress }: { progress: number }) {
   const bars = Array.from({ length: 32 });
   return (
-    <div className="feature-visual relative flex flex-col items-center justify-center gap-8 w-full max-w-md">
+    <div className="feature-visual relative flex flex-col items-center justify-center gap-8 w-full max-w-xs">
       <div className="relative flex items-center justify-center">
-        <span className="absolute size-24 rounded-full border border-purple-500/20 animate-ping-slow" />
-        <span className="absolute size-36 rounded-full border border-purple-500/10" />
-        <span className="absolute size-48 rounded-full border border-purple-500/5" />
-        <svg viewBox="0 0 24 24" className="size-12 text-purple-400" fill="none" stroke="currentColor" strokeWidth="1.5">
+        <span className="absolute size-20 rounded-full border border-white/10 animate-ping-slow" />
+        <span className="absolute size-30 rounded-full border border-white/5" />
+        <svg viewBox="0 0 24 24" className="size-11 text-white" fill="none" stroke="currentColor" strokeWidth="1.5">
           <rect x="9" y="3" width="6" height="11" rx="3" />
           <path d="M5 11a7 7 0 0 0 14 0M12 18v3" strokeLinecap="round" />
         </svg>
       </div>
-      <div className="flex items-end justify-center gap-[3px] h-24 w-full px-4">
+      <div className="flex items-end justify-center gap-[3px] h-20 w-full px-2">
         {bars.map((_, i) => {
           const seed = Math.sin(i * 1.3 + progress * 12) * 0.5 + 0.5;
           const h = 12 + seed * 80 * (0.3 + progress * 0.7);
           return (
             <span
               key={i}
-              className="w-[2.5px] rounded-full transition-all duration-700"
+              className="w-[2px] rounded-full transition-all duration-700"
               style={{
                 height: `${h}%`,
                 background: seed > 0.7
-                  ? "rgba(167, 139, 250, 0.85)"
-                  : "rgba(167, 139, 250, 0.25)",
+                  ? "rgba(255, 255, 255, 0.85)"
+                  : "rgba(255, 255, 255, 0.2)",
               }}
             />
           );
         })}
       </div>
-      <div className="flex items-center gap-3 text-[8px] font-mono font-bold uppercase tracking-[0.3em] text-purple-500/80">
-        <span className="size-1.5 rounded-full bg-purple-500 animate-pulse" />
-        <span>Live Audio Pipeline</span>
+      <div className="flex items-center gap-2 text-[8px] font-mono font-bold uppercase tracking-[0.25em] text-zinc-550">
+        <span className="size-1 rounded-full bg-white animate-pulse" />
+        <span>Audio Stream</span>
       </div>
     </div>
   );
@@ -151,36 +116,36 @@ function DocumentVisual({ progress }: { progress: number }) {
     { w: "45%" },
   ];
   return (
-    <div className="feature-visual relative w-full max-w-sm">
-      <div className="relative rounded-xl border border-cyan-500/25 bg-black/80 backdrop-blur-md overflow-hidden shadow-2xl">
-        <div className="flex items-center gap-1.5 border-b border-white/5 px-4 py-2.5 bg-zinc-950/40">
-          <span className="size-2 rounded-full bg-rose-500/40" />
-          <span className="size-2 rounded-full bg-amber-500/40" />
-          <span className="size-2 rounded-full bg-emerald-500/40" />
-          <span className="ml-3 text-[8px] font-mono tracking-[0.2em] text-cyan-400/80 font-bold uppercase">resume.ats</span>
+    <div className="feature-visual relative w-full max-w-xs">
+      <div className="relative rounded-xl border border-white/10 bg-black/85 overflow-hidden shadow-2xl">
+        <div className="flex items-center gap-1.5 border-b border-white/5 px-4 py-2.5 bg-zinc-950/50">
+          <span className="size-1.5 rounded-full bg-white/20" />
+          <span className="size-1.5 rounded-full bg-white/15" />
+          <span className="size-1.5 rounded-full bg-white/10" />
+          <span className="ml-3 text-[8px] font-mono tracking-[0.2em] text-zinc-400 font-bold uppercase">resume.ats</span>
         </div>
-        <div className="relative p-6 space-y-3.5 min-h-[200px]">
+        <div className="relative p-5 space-y-3 min-h-[170px]">
           <span
-            className="pointer-events-none absolute left-0 right-0 h-[1.5px] bg-gradient-to-r from-transparent via-cyan-400 to-transparent shadow-[0_0_16px_rgba(34,211,238,0.6)]"
+            className="pointer-events-none absolute left-0 right-0 h-[1.5px] bg-gradient-to-r from-transparent via-white/50 to-transparent shadow-[0_0_12px_rgba(255,255,255,0.4)]"
             style={{ top: `${8 + progress * 84}%` }}
           />
-          <div className="flex items-center gap-2 border-b border-white/5 pb-3">
-            <span className="h-2 w-[30%] rounded-full bg-cyan-500/20" />
-            <span className="h-2 w-[20%] rounded-full bg-cyan-500/10" />
+          <div className="flex items-center gap-2 border-b border-white/5 pb-2.5">
+            <span className="h-1.5 w-[30%] rounded-full bg-white/25" />
+            <span className="h-1.5 w-[20%] rounded-full bg-white/10" />
           </div>
           {lines.map((l, i) => (
             <div key={i} className="flex items-center gap-2">
-              <span className={`h-1.5 rounded-full transition-all duration-105 ${l.strong ? "bg-cyan-500/40" : "bg-zinc-800"}`} style={{ width: l.w }} />
+              <span className={`h-1 rounded-full transition-all duration-105 ${l.strong ? "bg-white/30" : "bg-zinc-800"}`} style={{ width: l.w }} />
             </div>
           ))}
         </div>
-        <div className="flex items-center justify-between border-t border-white/5 px-4 py-2.5 bg-zinc-950/40">
-          <span className="text-[8px] font-mono tracking-[0.2em] text-zinc-500 uppercase">ATS MATCH</span>
+        <div className="flex items-center justify-between border-t border-white/5 px-4 py-2 bg-zinc-950/50">
+          <span className="text-[7.5px] font-mono tracking-[0.2em] text-zinc-550 uppercase">MATCH INDEX</span>
           <div className="flex items-center gap-2">
-            <div className="w-16 h-1 rounded-full bg-white/5 overflow-hidden">
-              <div className="h-full bg-cyan-400 rounded-full" style={{ width: `${60 + progress * 40}%`, transition: "width 100ms linear" }} />
+            <div className="w-12 h-0.5 bg-white/5 overflow-hidden">
+              <div className="h-full bg-white" style={{ width: `${60 + progress * 40}%`, transition: "width 100ms linear" }} />
             </div>
-            <span className="text-[9px] font-mono font-bold text-cyan-400">{Math.round(60 + progress * 40)}%</span>
+            <span className="text-[8.5px] font-mono font-bold text-white">{Math.round(60 + progress * 40)}%</span>
           </div>
         </div>
       </div>
@@ -190,19 +155,19 @@ function DocumentVisual({ progress }: { progress: number }) {
 
 /** Feature 3 — rings + bar chart */
 function AnalyticsVisual({ progress }: { progress: number }) {
-  const Ring = ({ value, label, size = 70 }: { value: number; label: string; size?: number }) => {
+  const Ring = ({ value, label, size = 64 }: { value: number; label: string; size?: number }) => {
     const r = (size - 6) / 2;
     const c = 2 * Math.PI * r;
     const dash = c * value;
     return (
-      <div className="flex flex-col items-center gap-1.5 bg-black/40 border border-white/5 rounded-xl p-3 flex-1 min-w-[75px] backdrop-blur-sm shadow-md">
+      <div className="flex flex-col items-center gap-1 bg-black/40 border border-white/5 rounded-xl p-2.5 flex-1 min-w-[70px] shadow-sm">
         <svg width={size} height={size} className="-rotate-90">
-          <circle cx={size / 2} cy={size / 2} r={r} stroke="rgba(255,255,255,0.03)" strokeWidth="2" fill="none" />
-          <circle cx={size / 2} cy={size / 2} r={r} stroke="#f472b6" strokeWidth="2" fill="none" strokeLinecap="round"
+          <circle cx={size / 2} cy={size / 2} r={r} stroke="rgba(255,255,255,0.03)" strokeWidth="1.5" fill="none" />
+          <circle cx={size / 2} cy={size / 2} r={r} stroke="#ffffff" strokeWidth="1.5" fill="none" strokeLinecap="round"
             strokeDasharray={`${dash} ${c}`} style={{ transition: "stroke-dasharray 150ms ease-out" }} />
         </svg>
-        <span className="text-[7.5px] font-black uppercase tracking-[0.2em] text-zinc-500">{label}</span>
-        <span className="text-[10px] font-mono font-bold text-pink-400">{Math.round(value * 100)}%</span>
+        <span className="text-[7px] font-black uppercase tracking-[0.15em] text-zinc-500">{label}</span>
+        <span className="text-[9px] font-mono font-bold text-white">{Math.round(value * 100)}%</span>
       </div>
     );
   };
@@ -213,43 +178,37 @@ function AnalyticsVisual({ progress }: { progress: number }) {
   });
 
   return (
-    <div className="feature-visual relative w-full max-w-sm rounded-xl border border-pink-500/25 bg-black/85 backdrop-blur-md overflow-hidden shadow-2xl p-5 space-y-5">
-      {/* Tab bar header */}
-      <div className="flex items-center justify-between border-b border-white/5 pb-3">
-        <div className="flex items-center gap-2">
-          <span className="size-2 rounded-full bg-pink-500 animate-pulse" />
-          <span className="text-[8px] font-mono tracking-[0.2em] text-pink-400/80 font-bold uppercase">telemetry.metrics</span>
+    <div className="feature-visual relative w-full max-w-sm rounded-xl border border-white/10 bg-black/85 p-5 space-y-4 shadow-xl">
+      <div className="flex items-center justify-between border-b border-white/5 pb-2.5">
+        <div className="flex items-center gap-1.5">
+          <span className="size-1.5 rounded-full bg-white animate-pulse" />
+          <span className="text-[7.5px] font-mono tracking-[0.2em] text-zinc-400 font-bold uppercase">telemetry.log</span>
         </div>
-        <span className="text-[7px] font-mono text-zinc-600">ID // 982-AC</span>
+        <span className="text-[6.5px] font-mono text-zinc-600">ID // 982-AC</span>
       </div>
 
-      {/* Ring charts container */}
-      <div className="flex items-center justify-between gap-3">
+      <div className="flex items-center justify-between gap-2.5">
         <Ring value={Math.min(0.92, 0.15 + progress * 0.77)} label="Clarity" />
         <Ring value={Math.min(0.85, 0.1 + progress * 0.75)} label="Pacing" />
         <Ring value={Math.min(0.78, 0.05 + progress * 0.73)} label="STAR" />
       </div>
 
-      {/* Animated Telemetry Graph */}
-      <div className="border border-white/5 rounded-xl p-3.5 bg-black/50 space-y-2.5">
+      <div className="border border-white/5 rounded-xl p-3 bg-black/50 space-y-2">
         <div className="flex items-center justify-between text-[7px] font-mono tracking-widest text-zinc-500 uppercase">
-          <span>Speech Pacing Rate</span>
-          <span className="text-pink-400 font-bold">WPM: {Math.round(110 + progress * 40)}</span>
+          <span>Cadence telemetry</span>
+          <span className="text-white font-bold">WPM: {Math.round(110 + progress * 40)}</span>
         </div>
-        <div className="h-16 w-full flex items-end justify-between relative border-b border-white/5 pb-1">
-          {/* Subtle grid lines */}
-          <div className="absolute inset-x-0 top-1/3 h-px bg-white/2 pointer-events-none" />
-          <div className="absolute inset-x-0 top-2/3 h-px bg-white/2 pointer-events-none" />
-          
+        <div className="h-12 w-full flex items-end justify-between relative border-b border-white/5 pb-0.5">
+          <div className="absolute inset-x-0 top-1/2 h-px bg-white/2 pointer-events-none" />
           {chartPoints.map((h, i) => (
             <div
               key={i}
               className="flex-1 mx-[1px] rounded-t-sm"
               style={{
                 height: `${h}%`,
-                opacity: 0.25 + (i / 15) * 0.5,
+                opacity: 0.2 + (i / 15) * 0.6,
                 transition: "height 120ms ease-out",
-                backgroundColor: i === 12 ? "#f472b6" : "rgba(244,114,182,0.3)"
+                backgroundColor: i === 12 ? "#ffffff" : "rgba(255,255,255,0.25)"
               }}
             />
           ))}
@@ -283,7 +242,7 @@ function ResourcesVisual({ progress }: { progress: number }) {
   ];
 
   return (
-    <div className="feature-visual relative h-80 w-full max-w-sm flex items-center justify-center select-none">
+    <div className="feature-visual relative h-72 w-full max-w-sm flex items-center justify-center select-none">
       {cards.map((c, i) => {
         const spreadProgress = Math.min(1, progress * 1.5);
         const translateX = (i - 1) * 35 * spreadProgress;
@@ -294,7 +253,7 @@ function ResourcesVisual({ progress }: { progress: number }) {
         return (
           <div
             key={i}
-            className="absolute w-64 h-36 rounded-xl border bg-black/90 backdrop-blur-lg shadow-2xl p-4 flex flex-col justify-between transition-all duration-300"
+            className="absolute w-60 h-32 rounded-xl border bg-black/90 shadow-2xl p-4 flex flex-col justify-between transition-all duration-300"
             style={{
               transform: `translateX(-50%) translateY(-50%) translate(${translateX}px, ${translateY}px) scale(${scale}) rotate(${rotate}deg)`,
               left: "50%",
@@ -302,25 +261,22 @@ function ResourcesVisual({ progress }: { progress: number }) {
               opacity: 0.3 + (i * 0.35) + (spreadProgress * 0.1),
               zIndex: i,
               borderColor: `rgba(255,255,255,${0.03 + (i * 0.04)})`,
-              boxShadow: "0 20px 45px -15px rgba(0,0,0,0.8)",
+              boxShadow: "0 20px 40px -15px rgba(0,0,0,0.8)",
             }}
           >
-            {/* Card header */}
             <div className="flex items-center justify-between">
-              <span className="text-[7px] font-mono font-bold tracking-[0.25em] text-zinc-400 uppercase border border-white/8 px-1.5 py-0.5 rounded-md bg-white/2">
+              <span className="text-[6.5px] font-mono font-bold tracking-[0.2em] text-zinc-400 uppercase border border-white/5 px-1.5 py-0.5 rounded-md bg-white/5">
                 {c.tag}
               </span>
-              <span className="text-[6.5px] font-mono text-zinc-500">{c.time}</span>
+              <span className="text-[6.5px] font-mono text-zinc-550">{c.time}</span>
             </div>
 
-            {/* Card title */}
-            <p className="text-[10px] font-bold text-zinc-200 tracking-tight leading-snug my-2 pr-2">
+            <p className="text-[9.5px] font-bold text-zinc-200 tracking-tight leading-snug my-1.5 pr-2">
               {c.title}
             </p>
 
-            {/* Card footer */}
-            <div className="flex items-center justify-between border-t border-white/5 pt-2.5">
-              <span className="text-[7px] font-mono font-bold text-zinc-500 uppercase">By {c.author}</span>
+            <div className="flex items-center justify-between border-t border-white/5 pt-2">
+              <span className="text-[6.5px] font-mono font-bold text-zinc-500 uppercase">By {c.author}</span>
               <svg viewBox="0 0 24 24" className="size-2 text-zinc-400" fill="none" stroke="currentColor" strokeWidth="2">
                 <path d="M5 12h14M12 5l7 7-7 7" strokeLinecap="round" strokeLinejoin="round" />
               </svg>
@@ -340,36 +296,36 @@ function TiersVisual({ progress }: { progress: number }) {
     { name: "Pro", desc: "System design sim", active: progress > 0.6, icon: "●" },
   ];
   return (
-    <div className="feature-visual flex flex-col items-center gap-4 w-full max-w-xs select-none">
+    <div className="feature-visual flex flex-col items-center gap-3 w-full max-w-xs select-none">
       {tiers.map((t, i) => (
         <div
           key={t.name}
-          className="w-full rounded-xl border bg-black/70 backdrop-blur-md px-6 py-4 shadow-2xl flex items-center justify-between transition-all duration-700"
+          className="w-full rounded-xl border bg-black/70 px-5 py-3 shadow-2xl flex items-center justify-between transition-all duration-700"
           style={{
-            transform: `translateY(${t.active ? 0 : 30}px) rotateX(${t.active ? 0 : 60}deg)`,
+            transform: `translateY(${t.active ? 0 : 25}px) rotateX(${t.active ? 0 : 60}deg)`,
             opacity: t.active ? 1 : 0,
             transitionDelay: `${i * 100}ms`,
             transformOrigin: "center bottom",
-            borderColor: t.active ? "rgba(251,191,36,0.3)" : "rgba(255,255,255,0.03)",
+            borderColor: t.active ? "rgba(255,255,255,0.2)" : "rgba(255,255,255,0.03)",
           }}
         >
-          <div className="flex items-center gap-4">
-            <span className={`text-sm ${t.active ? "text-amber-400" : "text-zinc-600"}`}>{t.icon}</span>
+          <div className="flex items-center gap-3.5">
+            <span className={`text-xs ${t.active ? "text-white" : "text-zinc-650"}`}>{t.icon}</span>
             <div>
-              <span className={`text-[10px] font-black uppercase tracking-[0.15em] block ${t.active ? "text-amber-400" : "text-zinc-400"}`}>{t.name}</span>
-              <span className="text-[7px] font-bold uppercase tracking-[0.2em] text-zinc-500">{t.desc}</span>
+              <span className={`text-[9.5px] font-black uppercase tracking-[0.15em] block ${t.active ? "text-white" : "text-zinc-450"}`}>{t.name}</span>
+              <span className="text-[6.5px] font-bold uppercase tracking-[0.2em] text-zinc-550">{t.desc}</span>
             </div>
           </div>
           <span 
-            className="size-2 rounded-full transition-all duration-500" 
+            className="size-1.5 rounded-full transition-all duration-500" 
             style={{ 
-              backgroundColor: t.active ? "#fbbf24" : "rgba(255,255,255,0.1)",
-              boxShadow: t.active ? "0 0 8px rgba(251,191,36,0.6)" : "none" 
+              backgroundColor: t.active ? "#ffffff" : "rgba(255,255,255,0.1)",
+              boxShadow: t.active ? "0 0 6px rgba(255,255,255,0.4)" : "none" 
             }} 
           />
         </div>
       ))}
-      <div className="w-px h-6 bg-amber-500/20" style={{ opacity: progress > 0.6 ? 1 : 0, transition: "opacity 400ms" }} />
+      <div className="w-px h-5 bg-white/10" style={{ opacity: progress > 0.6 ? 1 : 0, transition: "opacity 400ms" }} />
     </div>
   );
 }
@@ -555,7 +511,6 @@ export default function AwwwardsShowcase() {
             clipPath: "inset(0 0% 0 0)",
             opacity: 1,
             duration: 0.5,
-            ease: "power2.out",
             overwrite: "auto",
           });
         }
@@ -620,7 +575,7 @@ export default function AwwwardsShowcase() {
       <div className="absolute top-0 left-0 right-0 flex items-center justify-center pt-6 lg:pt-8 z-20 pointer-events-none">
         <div className="flex items-center gap-4">
           <span className="w-12 h-px bg-zinc-800" />
-          <span className="text-[8px] font-black uppercase tracking-[0.35em] text-zinc-600">Platform Features</span>
+          <span className="text-[8px] font-black uppercase tracking-[0.35em] text-zinc-650">Platform Features</span>
           <span className="w-12 h-px bg-zinc-800" />
         </div>
       </div>
@@ -628,18 +583,17 @@ export default function AwwwardsShowcase() {
       {/* Stacked stages container — pinned on desktop */}
       <div 
         ref={stagesContainerRef} 
-        className={isDesktop ? "relative h-[100svh] w-full" : "relative w-full flex flex-col gap-24 py-20"}
+        className={isDesktop ? "relative h-[100svh] w-full" : "relative w-full flex flex-col gap-20 py-16"}
       >
         {FEATURES.map((feat, i) => {
           const Visual = VISUALS[i];
-          const theme = FEATURE_THEMES[i];
 
           return (
             <section
               key={i}
               data-stage={i}
-              className={`feature-stage w-full flex flex-col items-center justify-center px-6 py-12 lg:py-0 overflow-hidden transition-all duration-700 ${
-                isDesktop ? "absolute inset-0 h-[100svh]" : "relative min-h-[85vh] border-b border-white/5 last:border-0"
+              className={`feature-stage w-full flex flex-col items-center justify-center px-4 py-8 lg:py-0 overflow-hidden transition-all duration-700 ${
+                isDesktop ? "absolute inset-0 h-[100svh]" : "relative min-h-[75vh] border-b border-white/5 last:border-0"
               }`}
               style={
                 isDesktop 
@@ -649,7 +603,7 @@ export default function AwwwardsShowcase() {
             >
               {/* Giant background number watermark */}
               <span
-                className="stage-num absolute pointer-events-none select-none font-black leading-none tracking-tighter text-white/[0.015] z-0 transition-opacity duration-500"
+                className="stage-num absolute pointer-events-none select-none font-black leading-none tracking-tighter text-white/[0.012] z-0 transition-opacity duration-500"
                 style={{
                   fontSize: "32vw",
                   top: "50%",
@@ -661,46 +615,39 @@ export default function AwwwardsShowcase() {
                 {feat.num}
               </span>
 
-              {/* HUD Frame Container */}
+              {/* HUD Frame Container - Borderless and clean on mobile */}
               <div 
-                className="relative z-10 w-full max-w-6xl p-8 lg:p-12 rounded-3xl border bg-zinc-950/20 backdrop-blur-xl overflow-hidden grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-24 items-center shadow-[0_25px_60px_rgba(0,0,0,0.8)] transition-all duration-500"
+                className="relative z-10 w-full max-w-5xl p-5 sm:p-10 rounded-3xl sm:border border-white/5 sm:bg-zinc-950/20 backdrop-blur-2xl overflow-hidden grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-20 items-center sm:shadow-[0_20px_50px_rgba(0,0,0,0.8)] transition-all duration-500"
                 style={{
-                  borderColor: i === activeIndex
-                    ? (i === 0 ? "rgba(168,85,247,0.25)" : i === 1 ? "rgba(34,211,238,0.25)" : i === 2 ? "rgba(236,72,153,0.25)" : i === 3 ? "rgba(255,255,255,0.2)" : "rgba(251,191,36,0.25)")
-                    : "rgba(255,255,255,0.06)"
+                  borderColor: i === activeIndex ? "rgba(255,255,255,0.12)" : "rgba(255,255,255,0.05)"
                 }}
               >
                 {/* Tech Crosshair node markers */}
-                <div className="absolute top-3 left-3 text-[10px] font-mono text-zinc-800 font-bold pointer-events-none select-none">+</div>
-                <div className="absolute top-3 right-3 text-[10px] font-mono text-zinc-800 font-bold pointer-events-none select-none">+</div>
-                <div className="absolute bottom-3 left-3 text-[10px] font-mono text-zinc-800 font-bold pointer-events-none select-none">+</div>
-                <div className="absolute bottom-3 right-3 text-[10px] font-mono text-zinc-800 font-bold pointer-events-none select-none">+</div>
+                <div className="absolute top-3 left-3 text-[10px] font-mono text-zinc-800 font-bold pointer-events-none select-none hidden sm:block">+</div>
+                <div className="absolute top-3 right-3 text-[10px] font-mono text-zinc-800 font-bold pointer-events-none select-none hidden sm:block">+</div>
+                <div className="absolute bottom-3 left-3 text-[10px] font-mono text-zinc-800 font-bold pointer-events-none select-none hidden sm:block">+</div>
+                <div className="absolute bottom-3 right-3 text-[10px] font-mono text-zinc-800 font-bold pointer-events-none select-none hidden sm:block">+</div>
                 
                 {/* Grid Scanline watermark overlay inside frame */}
-                <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.003)_1px,transparent_1px)] bg-[size:100%_4px] pointer-events-none select-none" />
+                <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.002)_1px,transparent_1px)] bg-[size:100%_4px] pointer-events-none select-none" />
 
                 {/* Subtle dynamic ambient glow inside the card */}
-                <div 
-                  className="absolute -right-20 -bottom-20 w-80 h-80 rounded-full blur-[120px] pointer-events-none transition-all duration-500"
-                  style={{
-                    backgroundColor: i === activeIndex ? theme.glowColor : "transparent"
-                  }}
-                />
+                <div className="absolute -right-20 -bottom-20 w-80 h-80 rounded-full blur-[130px] pointer-events-none bg-white/[0.015] transition-all duration-500" />
 
                 {/* Text column */}
-                <div className="flex flex-col gap-6 lg:items-start items-center text-center lg:text-left z-10">
+                <div className="flex flex-col gap-5 lg:items-start items-center text-center lg:text-left z-10">
                   <div className="flex items-center gap-2">
-                    <span className={`text-[8px] font-black tracking-widest px-2.5 py-0.5 border rounded-full font-mono transition-all duration-500 ${theme.tag}`}>
-                      {theme.badge}
-                    </span>
-                    <span className="text-[9px] font-black uppercase tracking-[0.25em] text-zinc-550">
+                    <span className="text-[7.5px] font-mono font-bold tracking-widest px-2.5 py-0.5 border rounded-full transition-all duration-500 bg-white/5 text-zinc-300 border-white/10">
                       FEAT // {feat.num}
+                    </span>
+                    <span className="text-[7.5px] font-black uppercase tracking-[0.25em] text-zinc-550">
+                      PLATFORM CAPABILITY
                     </span>
                   </div>
 
                   {/* Title with char-split clip reveal */}
-                  <h3 className="stage-title-wrap text-4xl sm:text-5xl lg:text-6xl font-black uppercase tracking-tight leading-[0.9] text-white">
-                    <span className="flex flex-wrap gap-x-3.5 justify-center lg:justify-start">
+                  <h3 className="stage-title-wrap text-3xl sm:text-4xl lg:text-5xl font-black uppercase tracking-tight leading-[0.95] text-white">
+                    <span className="flex flex-wrap gap-x-3 justify-center lg:justify-start">
                       {feat.title.split(" ").map((word, wi) => (
                         <span key={wi} className="inline-flex overflow-hidden">
                           {word.split("").map((char, ci) => (
@@ -712,25 +659,17 @@ export default function AwwwardsShowcase() {
                   </h3>
 
                   {/* Telemetry Bullets list */}
-                  <ul className="space-y-4 pt-2 list-none flex flex-col lg:items-start items-center">
+                  <ul className="space-y-3.5 pt-1.5 list-none flex flex-col lg:items-start items-center">
                     {feat.points.map((pt, pIdx) => {
                       const [head, desc] = pt.split(":");
                       return (
                         <li
                           key={pIdx}
-                          className="stage-bullet flex items-start gap-3.5 text-[12px] md:text-[13px] text-zinc-400 font-semibold list-none max-w-lg text-left"
+                          className="stage-bullet flex items-start gap-3 text-[11.5px] md:text-[12px] text-zinc-400 font-semibold list-none max-w-lg text-left"
                           style={{ willChange: "transform, opacity" }}
                         >
                           <span 
-                            className="size-5 rounded-full border bg-zinc-950 flex items-center justify-center text-[8px] font-mono font-bold shrink-0 mt-0.5 shadow-inner transition-all duration-500"
-                            style={{
-                              borderColor: i === activeIndex
-                                ? (i === 0 ? "rgba(168,85,247,0.3)" : i === 1 ? "rgba(34,211,238,0.3)" : i === 2 ? "rgba(236,72,153,0.3)" : i === 3 ? "rgba(255,255,255,0.3)" : "rgba(251,191,36,0.3)")
-                                : "rgba(255,255,255,0.05)",
-                              color: i === activeIndex
-                                ? (i === 0 ? "#c084fc" : i === 1 ? "#22d3ee" : i === 2 ? "#f472b6" : i === 3 ? "#e4e4e7" : "#fbbf24")
-                                : "rgba(255,255,255,0.3)"
-                            }}
+                            className="size-4.5 rounded-full border bg-zinc-950 flex items-center justify-center text-[7.5px] font-mono font-bold shrink-0 mt-0.5 shadow-inner transition-all duration-500 border-white/10 text-white"
                           >
                             {pIdx + 1}
                           </span>
@@ -743,18 +682,11 @@ export default function AwwwardsShowcase() {
                   </ul>
                 </div>
 
-                {/* Visual column */}
-                <div className="flex items-center justify-center lg:justify-end order-first lg:order-last z-10">
-                  <div 
-                    className="relative p-6 rounded-2xl border bg-zinc-950/20 shadow-2xl flex items-center justify-center min-h-[320px] w-full max-w-sm overflow-hidden transition-all duration-500"
-                    style={{
-                      borderColor: i === activeIndex
-                        ? (i === 0 ? "rgba(168,85,247,0.2)" : i === 1 ? "rgba(34,211,238,0.2)" : i === 2 ? "rgba(236,72,153,0.2)" : i === 3 ? "rgba(255,255,255,0.15)" : "rgba(251,191,36,0.2)")
-                        : "rgba(255,255,255,0.05)"
-                    }}
-                  >
+                {/* Visual column - Floating cleanly with no nested box borders */}
+                <div className="flex items-center justify-center lg:justify-end order-last z-10 w-full">
+                  <div className="relative flex items-center justify-center min-h-[220px] md:min-h-[280px] w-full max-w-xs overflow-hidden">
                     {/* Visual grid watermark */}
-                    <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.005)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.005)_1px,transparent_1px)] bg-[size:20px_20px] pointer-events-none" />
+                    <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.003)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.003)_1px,transparent_1px)] bg-[size:20px_20px] pointer-events-none" />
                     <Visual progress={isDesktop ? (stageProgress[i] ?? 0) : 1} />
                   </div>
                 </div>
@@ -789,16 +721,12 @@ export default function AwwwardsShowcase() {
               style={{
                 width: i === activeIndex ? 6 : 4,
                 height: i === activeIndex ? 6 : 4,
-                backgroundColor: i === activeIndex
-                  ? (i === 0 ? "#a78bfa" : i === 1 ? "#22d3ee" : i === 2 ? "#f472b6" : i === 3 ? "#e4e4e7" : "#fbbf24")
-                  : "rgba(255,255,255,0.15)",
-                boxShadow: i === activeIndex 
-                  ? (i === 0 ? "0 0 10px rgba(168,85,247,0.5)" : i === 1 ? "0 0 10px rgba(34,211,238,0.5)" : i === 2 ? "0 0 10px rgba(236,72,153,0.5)" : i === 3 ? "0 0 10px rgba(228,228,231,0.5)" : "0 0 10px rgba(251,191,36,0.5)")
-                  : "none",
+                backgroundColor: i === activeIndex ? "#ffffff" : "rgba(255,255,255,0.15)",
+                boxShadow: i === activeIndex ? "0 0 8px rgba(255,255,255,0.4)" : "none",
               }}
             />
             {/* Tooltip on hover */}
-            <span className="absolute right-5 whitespace-nowrap text-[8.5px] font-mono font-bold uppercase tracking-[0.2em] text-zinc-500 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none">
+            <span className="absolute right-5 whitespace-nowrap text-[8.5px] font-mono font-bold uppercase tracking-[0.2em] text-zinc-550 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none">
               {feat.title}
             </span>
           </button>
