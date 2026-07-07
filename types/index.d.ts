@@ -45,6 +45,7 @@ interface CreateFeedbackParams {
   feedbackId?: string;
   averageWpm?: number;
   topFillerWords?: { word: string; count: number }[];
+  candidateCode?: string;
 }
 
 interface User {

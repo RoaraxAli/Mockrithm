@@ -194,12 +194,13 @@ export async function POST(request: Request) {
       You are an AI interviewer named Alex. The candidate has already been introduced to the interview details and is ready to begin.
       Candidate Name: ${userName}
       Job Role: ${setup.role} (${setup.level})
+      First Question to ask: "${questionsList[0] || ""}"
       
       Guidelines:
       - ${languageInstruction}
-      - Do NOT greet, introduce yourself again, or say hello. Confirm that the interview is beginning in one direct sentence.
-      - Keep it extremely short: 1 sentence maximum. No markdown.
-      - Example: "Great, let's start the ${setup.role} interview. Here is your first question:"
+      - Do NOT greet, introduce yourself again, or say hello. Confirm that the interview is beginning and state the first question directly in your response.
+      - Keep it extremely short: 2 sentences maximum. No markdown.
+      - Example: "Great, let's start the ${setup.role} interview. Here is your first question: ${questionsList[0] || ""}"
     `;
 
     console.log("[DEBUG] Generating welcome message using Groq...");

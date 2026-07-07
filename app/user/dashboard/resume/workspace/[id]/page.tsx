@@ -19,7 +19,7 @@ export default async function WorkspacePage({ params }: { params: Promise<{ id: 
   }
 
   return (
-    <div className="w-full h-screen overflow-hidden bg-slate-950 flex flex-col">
+    <div className="dark bg-slate-950 text-slate-100 w-full h-screen overflow-hidden flex flex-col">
       <ResumeWorkspace initialResume={resume} />
     </div>
   );

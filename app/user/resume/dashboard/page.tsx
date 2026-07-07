@@ -24,7 +24,7 @@ export default async function ResumeDashboardPage() {
 
   // Dashboard Mode
   return (
-    <div className="flex h-screen bg-transparent">
+    <div className="dark bg-zinc-950 text-zinc-100 flex h-screen min-h-screen">
       <Sidebar />
       <main className="flex-1 overflow-y-auto bg-transparent">
         <div className="p-8 max-w-6xl mx-auto w-full font-mona-sans animate-fadeIn">

@@ -262,18 +262,29 @@ export default function AwwwardsCanvas() {
       }
 
       const heroScrollProgress = Math.max(0, Math.min(1, window.scrollY / window.innerHeight));
-      const featureOneProgress = Math.max(0, Math.min(1, showcaseProgress / 0.2));
 
+      // Calculate explosion progress (scale/displace particles)
       let explosionProgress = 0;
       if (showcaseProgress > 0) {
-        explosionProgress = 0.5 + featureOneProgress * 0.5;
+        // Explode quickly in the first part of features scroll (0 to 0.15 progress)
+        const featureExplosion = Math.max(0, Math.min(1, showcaseProgress / 0.15));
+        explosionProgress = 0.5 + featureExplosion * 0.45; // Caps at 0.95
       } else {
         explosionProgress = heroScrollProgress * 0.5;
       }
 
+      // Opacity / Fade-out calculation:
+      // We want the 3D elements to stay visible throughout features 1 to 5,
+      // and then fade out to 0 between showcaseProgress = 0.85 and 0.95 (after feature 5 ends).
+      let fadeOutAlpha = 1.0;
+      if (showcaseProgress > 0.85) {
+        fadeOutAlpha = Math.max(0, Math.min(1, 1 - (showcaseProgress - 0.85) / 0.1));
+      }
+
       // Update centerpiece uniforms
       centerpieceMaterial.uniforms.uTime.value = elapsedTime;
-      centerpieceMaterial.uniforms.uScrollProgress.value = explosionProgress;
+      // uScrollProgress controls fragment shader alpha (1 - uScrollProgress)
+      centerpieceMaterial.uniforms.uScrollProgress.value = 1.0 - fadeOutAlpha;
 
       let explosionForce = 0;
       if (explosionProgress > 0.0) {
@@ -299,27 +310,37 @@ export default function AwwwardsCanvas() {
         centerpiecePoints.position.y = centerpieceMesh.position.y;
       }
 
-      // Move camera Z along gallery line based on showcaseProgress
-      const targetCameraZ = 7 - showcaseProgress * 52;
+      // Camera Z position target:
+      // Hero: Z = 7.
+      // Features: Camera moves closer to Z = 3.2 (making the exploded centerpiece look huge and fill the background).
+      // At the end of features, camera stays zoomed.
+      let targetCameraZ = 7;
+      if (showcaseProgress > 0) {
+        const zoomInProgress = Math.max(0, Math.min(1, showcaseProgress / 0.15));
+        targetCameraZ = 7 - zoomInProgress * 3.8; // Zooms in from 7 to 3.2
+      } else {
+        targetCameraZ = 7 - heroScrollProgress * 2.0; // Subtle drift on hero scroll
+      }
       camera.position.z += (targetCameraZ - camera.position.z) * 0.08;
 
       // Camera subtle parallax on mouse move
       camera.position.x = mouse.x * 0.15;
       camera.position.y = mouse.y * 0.15;
 
-      // Rotate background particles globally (No expensive per-particle math or buffer re-uploads!)
+      // Rotate background particles globally
       particles.rotation.y = elapsedTime * 0.015;
       particles.rotation.z = elapsedTime * 0.005;
 
-      // Animate background particles moving upward as we scroll back to Hero
+      // Position of background particles
       particles.position.y = -explosionProgress * 18.0;
 
-      // Fade out background particles based on progress
-      const particleAlpha = Math.max(0, Math.min(0.85, 0.85 * (1 - explosionProgress)));
+      // Fade out background particles based on progress and fadeOutAlpha
+      const baseAlpha = showcaseProgress > 0 ? 1.0 : (1.0 - heroScrollProgress * 0.5);
+      const particleAlpha = Math.max(0, Math.min(0.85, 0.85 * baseAlpha * fadeOutAlpha));
       particleMaterial.opacity = particleAlpha;
 
-      // Visibility controls
-      const isModelVisible = explosionProgress < 0.99;
+      // Visibility controls: keep elements visible until the end of features section
+      const isModelVisible = showcaseProgress < 0.96;
       centerpieceMesh.visible = isModelVisible;
       if (centerpiecePoints) centerpiecePoints.visible = isModelVisible;
       particles.visible = isModelVisible;

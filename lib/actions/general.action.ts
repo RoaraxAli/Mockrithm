@@ -44,7 +44,7 @@ async function groqGenerateObject(prompt: string) {
 }
 
 export async function createFeedback(params: CreateFeedbackParams) {
-  const { interviewId, userId, transcript, feedbackId, averageWpm, topFillerWords } = params;
+  const { interviewId, userId, transcript, feedbackId, averageWpm, topFillerWords, candidateCode } = params;
   const userSnap = await db.collection("users").doc(userId).get();
   const userData = userSnap.data();
 
@@ -57,6 +57,10 @@ export async function createFeedback(params: CreateFeedbackParams) {
           `- ${sentence.role}: ${sentence.content}\n`
       )
       .join("");
+
+    const codeContext = candidateCode
+      ? `\n\nCandidate's Final Code Written in Sandbox Editor:\n\`\`\`\n${candidateCode}\n\`\`\`\n`
+      : "";
 
     let object;
     const promptText = `
@@ -74,37 +78,26 @@ export async function createFeedback(params: CreateFeedbackParams) {
           - "score": (numeric score 0 to 100)
           - "comment": (short justification comment for the score, explaining why they got the score and how they can improve)
         - Scores must be from 0 to 100.
+        - GRADING MODERATION RULES:
+          - Be professional, constructive, and positive. Write encouraging feedback.
+          - DO NOT penalize the candidate's "Technical Knowledge" or "Problem Solving" scores heavily if their verbal answers are brief/concise, as long as they are technically correct and accurate.
+          - DO NOT tank the candidate's scores under 60% solely because they omitted quantitative metrics (STAR results). Instead, grade their logic/flow fairly and suggest adding metrics under areas for improvement.
+          - EVALUATE THE SANDBOX CODE: If candidate code is provided below, you MUST review it. Acknowledge and grade their written code for "Technical Knowledge" and "Problem Solving". If their code is correct, give them a high score (e.g. 85-98) even if they did not speak much about it in the transcript.
         - If candidate does not answer, says "I don’t know", or microphone is not connected (no audio detected/purposely bad answers), assign a score of 0 (or very low score) for the affected category and explain it in the comment (e.g., "No audio detected or answer was missing"). Do not crash.
-        - Do not invent or assume answers not present in the transcript.
-        - Be professional, direct, and constructive in feedback.
+        - Do not invent or assume answers not present in the transcript or candidate code.
 
         Interview Transcript:
         ${formattedTranscript}
+        ${codeContext}
       `;
 
     try {
       console.log("[DEBUG] Calling primary Groq model for final feedback generation...");
       const groqJson = await groqGenerateObject(promptText + `\n\nSchema format:\n{\n  "totalScore": number,\n  "categoryScores": [\n    { "name": "Communication Skills", "score": number, "comment": "string" },\n    { "name": "Technical Knowledge", "score": number, "comment": "string" },\n    { "name": "Problem Solving", "score": number, "comment": "string" },\n    { "name": "Cultural Fit", "score": number, "comment": "string" },\n    { "name": "Confidence and Clarity", "score": number, "comment": "string" }\n  ],\n  "strengths": ["string"],\n  "areasForImprovement": ["string"],\n  "finalAssessment": "string"\n}`);
       
-      const categories = [
-        "Communication Skills",
-        "Technical Knowledge",
-        "Problem Solving",
-        "Cultural Fit",
-        "Confidence and Clarity"
-      ];
-      const categoryScores = categories.map((catName) => {
-        const found = groqJson.categoryScores?.find((c: any) => c.name === catName) || {};
-        return {
-          name: catName,
-          score: typeof found.score === "number" ? found.score : 70,
-          comment: found.comment || "No comment provided."
-        };
-      });
-
       object = {
         totalScore: typeof groqJson.totalScore === "number" ? groqJson.totalScore : 70,
-        categoryScores: categoryScores,
+        categoryScores: Array.isArray(groqJson.categoryScores) ? groqJson.categoryScores : [],
         strengths: Array.isArray(groqJson.strengths) ? groqJson.strengths : ["Good effort"],
         areasForImprovement: Array.isArray(groqJson.areasForImprovement) ? groqJson.areasForImprovement : ["Structure responses better"],
         finalAssessment: groqJson.finalAssessment || "Keep practicing."
@@ -150,19 +143,38 @@ export async function createFeedback(params: CreateFeedbackParams) {
       }
     }
 
+    const categories = [
+      "Communication Skills",
+      "Technical Knowledge",
+      "Problem Solving",
+      "Cultural Fit",
+      "Confidence and Clarity"
+    ];
+    const normalizedCategoryScores = categories.map((catName) => {
+      const found = object.categoryScores?.find((c: any) => 
+        c && typeof c.name === "string" && c.name.toLowerCase().includes(catName.toLowerCase().slice(0, 8))
+      ) || {};
+      return {
+        name: catName,
+        score: typeof found.score === "number" ? found.score : 75,
+        comment: found.comment || "No comment provided."
+      };
+    });
+
     const feedback = {
       interviewId,
       userId,
       candidateName, 
       email,         
-      totalScore: object.totalScore,
-      categoryScores: object.categoryScores,
-      strengths: object.strengths,
-      areasForImprovement: object.areasForImprovement,
-      finalAssessment: object.finalAssessment,
+      totalScore: typeof object.totalScore === "number" ? object.totalScore : 75,
+      categoryScores: normalizedCategoryScores,
+      strengths: Array.isArray(object.strengths) ? object.strengths : ["Good communication and approach."],
+      areasForImprovement: Array.isArray(object.areasForImprovement) ? object.areasForImprovement : ["Support answers with more detail."],
+      finalAssessment: object.finalAssessment || "Great effort during the mock session.",
       createdAt: new Date(),
       averageWpm: averageWpm || 0,
       topFillerWords: topFillerWords || [],
+      candidateCode: candidateCode || "",
     };
 
     let feedbackRef;

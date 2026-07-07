@@ -7,6 +7,7 @@ import {
 } from "@/lib/actions/general.action";
 import { Button } from "@/components/ui/button";
 import { getCurrentUser } from "@/lib/actions/auth.action";
+import { cn } from "@/lib/utils";
 
 const Feedback = async ({ params }: RouteParams) => {
   const { id } = await params;
@@ -85,6 +86,28 @@ const Feedback = async ({ params }: RouteParams) => {
         </p>
       </div>
 
+      {/* Submitted Sandbox Code Panel */}
+      {feedback?.candidateCode && (
+        <div className="p-7 backdrop-blur-xl bg-zinc-950/40 border border-zinc-900 rounded-2xl shadow-2xl relative overflow-hidden flex flex-col gap-4">
+          <div className="absolute top-0 left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-violet-500/20 to-transparent" />
+          <h3 className="text-xs font-bold text-zinc-400 uppercase tracking-wider flex items-center gap-2">
+            <svg className="size-4.5 text-violet-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" />
+            </svg>
+            Submitted Workspace Code
+          </h3>
+          <div className="rounded-xl border border-zinc-900 overflow-hidden shadow-inner bg-zinc-950/80">
+            <div className="flex px-4 py-2 border-b border-zinc-900 text-[10px] text-zinc-550 font-mono font-bold justify-between items-center bg-zinc-950/40">
+              <span>workspace_solution</span>
+              <span className="text-[8px] uppercase tracking-wider text-violet-400 bg-violet-500/10 px-2 py-0.5 rounded-full border border-violet-500/20">Saved</span>
+            </div>
+            <pre className="text-xs text-zinc-300 font-mono p-5 overflow-x-auto max-h-[320px] custom-scrollbar leading-relaxed">
+              <code>{feedback.candidateCode}</code>
+            </pre>
+          </div>
+        </div>
+      )}
+
       {/* Speech Pacing Speedometer & Filler Word Telemetry Dials */}
       <div className="grid grid-cols-1 md:grid-cols-12 gap-6 backdrop-blur-xl bg-zinc-950/40 p-7 border border-zinc-900 rounded-2xl shadow-2xl relative overflow-hidden">
         {/* Speech Pacing Speedometer */}
@@ -142,19 +165,17 @@ const Feedback = async ({ params }: RouteParams) => {
                     ? "Ideal Cadence"
                     : ((averageWpm >= 110 && averageWpm < 130) || (averageWpm > 150 && averageWpm <= 170))
                     ? "Acceptable Cadence"
-                    : "Unbalanced Speed"}
+                    : "Slow or Unbalanced Pace"}
                 </span>
               </span>
               <p className="text-[11px] text-zinc-400 leading-relaxed font-semibold">
                 {averageWpm < 110
-                  ? "Speaking pace is slow. Introduce momentum to present strong confidence."
+                  ? "Pacing is slower than standard conversational speed (110-150 WPM). Note: Silence margins at the end of speech turns can slightly lower calculated averages. Practice speaking with steady momentum."
                   : averageWpm >= 110 && averageWpm < 130
-                  ? "Measured, clear cadence. Increasing energy slightly could convey stronger confidence."
+                  ? "Measured, clear cadence. Practice speaking slightly faster to build dynamic conversational energy."
                   : averageWpm >= 130 && averageWpm <= 150
-                  ? "Optimal speaking rate. Pacing aligns perfectly with elite communication benchmarks under pressure."
-                  : averageWpm > 150 && averageWpm <= 170
-                  ? "Slightly accelerated. Integrate pauses between arguments to maximize impact."
-                  : "Rapid speaking pace. Deepen breathing cycles to throttle pacing."}
+                  ? "Optimal pace! Aligns perfectly with elite communication benchmarks under pressure."
+                  : "Rapid speaking pace. Deepen breathing cycles and pause between core arguments to maximize impact."}
               </p>
             </div>
           </div>
@@ -205,23 +226,45 @@ const Feedback = async ({ params }: RouteParams) => {
         </h2>
         
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          {feedback?.categoryScores?.map((category, index) => (
-            <div 
-              key={index} 
-              className="p-5 backdrop-blur-xl bg-zinc-950/20 border border-zinc-900 rounded-2xl flex flex-col gap-3.5 relative overflow-hidden transition-all duration-300 hover:border-violet-500/30 shadow-xl group"
-            >
-              <div className="flex justify-between items-center text-xs font-bold text-white uppercase tracking-wider">
-                <span className="truncate max-w-[190px]">{category.name}</span>
-                <span className="text-violet-400 bg-violet-500/10 border border-violet-500/20 px-2.5 py-0.5 rounded-full text-[9px] font-bold shadow-sm">
-                  {category.score} / 100
-                </span>
+          {feedback?.categoryScores?.map((category, index) => {
+            const isComm = category.name.toLowerCase().includes("comm");
+            const isTech = category.name.toLowerCase().includes("tech");
+            const isProb = category.name.toLowerCase().includes("prob");
+            const isCult = category.name.toLowerCase().includes("cult");
+
+            const borderClass = isComm ? "hover:border-violet-500/30" :
+                                isTech ? "hover:border-emerald-500/30" :
+                                isProb ? "hover:border-pink-500/30" :
+                                isCult ? "hover:border-cyan-500/30" :
+                                "hover:border-amber-500/30";
+
+            const badgeColor = isComm ? "text-violet-400 bg-violet-500/10 border-violet-500/20" :
+                               isTech ? "text-emerald-400 bg-emerald-500/10 border-emerald-500/20" :
+                               isProb ? "text-pink-400 bg-pink-500/10 border-pink-500/20" :
+                               isCult ? "text-cyan-400 bg-cyan-500/10 border-cyan-500/20" :
+                               "text-amber-400 bg-amber-500/10 border-amber-500/20";
+
+            return (
+              <div 
+                key={index} 
+                className={cn(
+                  "p-5 backdrop-blur-xl bg-zinc-950/20 border border-zinc-900 rounded-2xl flex flex-col gap-3.5 relative overflow-hidden transition-all duration-300 shadow-xl group",
+                  borderClass
+                )}
+              >
+                <div className="flex justify-between items-center text-xs font-bold text-white uppercase tracking-wider">
+                  <span className="truncate max-w-[190px]">{category.name}</span>
+                  <span className={cn("px-2.5 py-0.5 rounded-full text-[9px] font-bold shadow-sm border", badgeColor)}>
+                    {category.score} / 100
+                  </span>
+                </div>
+                
+                <p className="text-[11px] text-zinc-400 leading-relaxed font-semibold bg-zinc-950/60 p-3 rounded-xl border border-zinc-900/60">
+                  {category.comment}
+                </p>
               </div>
-              
-              <p className="text-[11px] text-zinc-400 leading-relaxed font-semibold bg-zinc-950/60 p-3 rounded-xl border border-zinc-900/60">
-                {category.comment}
-              </p>
-            </div>
-          ))}
+            );
+          })}
         </div>
       </div>
 

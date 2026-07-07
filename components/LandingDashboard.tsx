@@ -241,13 +241,13 @@ export default function LandingDashboard({
         const y = chartHeight - paddingY - (data.score * (chartHeight - paddingY * 2)) / 100;
         return { x, y, score: data.score, role: data.role, date: data.date };
       });
-      chartPath = `M ${chartPoints[0].x} ${chartPoints[0].y} ` + chartPoints.slice(1).map(p => `L ${p.x} ${p.y}`).join(" ");
+chartPath = `M ${chartPoints[0].x} ${chartPoints[0].y} ` + chartPoints.slice(1).map(p => `L ${p.x} ${p.y}`).join(" ");
       chartArea = `${chartPath} L ${chartPoints[chartPoints.length - 1].x} ${chartHeight - paddingY} L ${chartPoints[0].x} ${chartHeight - paddingY} Z`;
     }
   }
 
   return (
-    <div className="w-full flex flex-col font-mona-sans relative z-10 select-none pb-12">
+    <div className="dark bg-zinc-950 text-zinc-50 w-full flex flex-col font-mona-sans relative z-10 select-none pb-12 min-h-screen">
       <SessionTracker userId={clientUser?.id || null} />
       
       {/* Background patterns */}

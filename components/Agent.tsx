@@ -8,6 +8,7 @@ import {
   Code, Sparkles, CheckCircle2, AlertTriangle, Lightbulb, Play, User, Languages
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import Editor from "@monaco-editor/react";
 
 import { cn } from "@/lib/utils";
 import { interviewer, interviewLanguages } from "@/constants";
@@ -147,6 +148,10 @@ const Agent = ({
 
   // Live Coding States
   const [code, setCode] = useState(codingProblem?.templateCode || "");
+  const codeRef = useRef(code);
+  useEffect(() => {
+    codeRef.current = code;
+  }, [code]);
   useEffect(() => {
     if (codingProblem?.templateCode) {
       setCode(codingProblem.templateCode);
@@ -312,6 +317,7 @@ const Agent = ({
         feedbackId: feedbackId || undefined,
         averageWpm,
         topFillerWords,
+        candidateCode: codingProblemRef.current ? codeRef.current : undefined
       });
 
       if (success && id) {
@@ -1294,6 +1300,15 @@ RULES:
     handleSpeechCompleted(isWritten 
       ? "I am stuck on this draft. Can you give me a Socratic hint about my current text?" 
       : "I am stuck on this coding problem. Can you give me a Socratic hint about my current code?");
+  };
+
+  const checkSolutionAndProceed = () => {
+    if (callStatus !== CallStatus.ACTIVE || isProcessingRef.current) return;
+    const isWritten = codingProblemRef.current?.language === "text" || codingProblemRef.current?.language === "markdown";
+    const proceedPrompt = isWritten
+      ? `[SYSTEM: The candidate has completed their text. Please evaluate their draft: "${codeRef.current}". If it satisfies the requirements, state that, provide brief feedback, and transition immediately to the next question in your interview flow. Only thank the candidate and append [END_CALL] if all interview questions are completed or time is up. If something is missing, explain it and ask them to refine it.]`
+      : `[SYSTEM: The candidate has completed their code. Please evaluate their solution code: "${codeRef.current}". If the solution is correct, functional, and satisfies the challenge, state that the solution is correct, provide brief feedback, and transition immediately to the next question in your interview flow. Only thank the candidate and append [END_CALL] if all interview questions are completed or time is up. If there are bugs, specify them clearly and help them debug it.]`;
+    handleSpeechCompleted(proceedPrompt);
   };
 
   async function triggerAutomaticHint() {
@@ -2420,18 +2435,7 @@ ${code}
                 </span>
               </div>
 
-              {/* Problem Statement Display */}
-              <div className="flex flex-col gap-1.5 bg-zinc-950/40 border border-zinc-900 p-3.5 rounded-xl max-h-[100px] overflow-y-auto custom-scrollbar relative">
-                <h4 className="text-xs font-bold text-white flex items-center gap-2">
-                  <Lightbulb className="size-4 text-amber-400 shrink-0" />
-                  {codingProblem.title}
-                </h4>
-                <p className="text-[11px] text-zinc-400 whitespace-pre-line leading-relaxed font-semibold mt-0.5">
-                  {codingProblem.description}
-                </p>
-              </div>
-
-              {/* Premium Code Textarea */}
+              {/* Premium Code Editor via Monaco Editor */}
               <div className="flex flex-col gap-0 relative">
                 {/* IDE Top Window Bar */}
                 <div className="flex px-4 py-2.5 border border-zinc-900 rounded-t-xl text-[9px] text-zinc-500 font-semibold flex-row justify-between items-center bg-zinc-950/60 shadow-md">
@@ -2450,23 +2454,29 @@ ${code}
                   </span>
                 </div>
 
-                {/* Gutter + TextArea Container */}
-                <div className="relative flex items-stretch border border-t-0 border-zinc-900 rounded-b-xl overflow-hidden bg-zinc-950/10 shadow-[inset_0_4px_16px_rgba(0,0,0,0.4)]">
-                  {/* Gutter Line Numbers Simulation */}
-                  <div className="w-9 bg-zinc-950/40 border-r border-zinc-900/60 font-mono text-[10px] text-zinc-650 py-3.5 select-none flex flex-col items-center gap-1.5 leading-relaxed text-right pr-2">
-                    {Array.from({ length: 11 }).map((_, i) => (
-                      <div key={i}>{String(i + 1).padStart(2, "0")}</div>
-                    ))}
-                  </div>
-
-                  <textarea
+                {/* Monaco Editor Container */}
+                <div className="relative border border-t-0 border-zinc-900 rounded-b-xl overflow-hidden bg-zinc-950/10 shadow-[inset_0_4px_16px_rgba(0,0,0,0.4)] min-h-[400px]">
+                  <Editor
+                    height="400px"
+                    theme="vs-dark"
+                    language={
+                      codingProblem.language === "python" ? "python" : 
+                      codingProblem.language === "javascript" || codingProblem.language === "typescript" ? "typescript" :
+                      codingProblem.language === "markdown" ? "markdown" : "text"
+                    }
                     value={code}
-                    onChange={(e) => handleCodeChange(e.target.value)}
-                    placeholder={codingProblem.language === "text" || codingProblem.language === "markdown" 
-                      ? "Draft your response here... Alex will observe your inputs." 
-                      : "// Implement your algorithm here... Alex will observe your code logic."}
-                    className="font-mono bg-transparent text-zinc-205 text-xs py-3.5 px-4 w-full h-[190px] outline-none focus:ring-0 resize-none leading-relaxed"
-                    disabled={callStatus !== CallStatus.ACTIVE}
+                    onChange={(val) => handleCodeChange(val || "")}
+                    options={{
+                      minimap: { enabled: false },
+                      fontSize: 12,
+                      lineNumbers: "on",
+                      roundedSelection: false,
+                      scrollBeyondLastLine: false,
+                      readOnly: callStatus !== CallStatus.ACTIVE,
+                      theme: "vs-dark",
+                      fontFamily: "var(--font-jetbrains-mono), monospace",
+                      wordWrap: "on"
+                    }}
                   />
                 </div>
 
@@ -2477,7 +2487,7 @@ ${code}
                       initial={{ opacity: 0, y: 10 }}
                       animate={{ opacity: 1, y: 0 }}
                       exit={{ opacity: 0, y: 10 }}
-                      className="absolute bottom-4 left-4 right-4 bg-zinc-950 border border-violet-500/20 text-violet-400 rounded-xl p-3 flex gap-3 items-center justify-between shadow-2xl backdrop-blur-xl"
+                      className="absolute bottom-4 left-4 right-4 bg-zinc-950 border border-violet-500/20 text-violet-400 rounded-xl p-3 flex gap-3 items-center justify-between shadow-2xl backdrop-blur-xl z-20"
                     >
                       <div className="flex gap-2.5 items-center">
                         <div className="p-1.5 bg-violet-500/10 rounded-lg border border-violet-500/20 animate-pulse">
@@ -2500,15 +2510,22 @@ ${code}
                 </AnimatePresence>
               </div>
 
-              {/* Hint control trigger */}
+              {/* Sandbox Controls Row */}
               {callStatus === CallStatus.ACTIVE && (
-                <div className="flex justify-end">
+                <div className="flex justify-end gap-3 mt-2">
                   <Button
                     variant="outline"
                     onClick={requestSocraticHint}
                     className="text-[9px] font-bold uppercase tracking-widest px-4 py-2 h-9 border border-zinc-900 text-zinc-500 hover:bg-zinc-900 hover:text-white hover:border-violet-500/30 transition-all rounded-lg cursor-pointer"
                   >
                     <Sparkles className="size-3.5 text-violet-400" /> {t("req_hint")}
+                  </Button>
+
+                  <Button
+                    onClick={checkSolutionAndProceed}
+                    className="text-[9px] font-bold uppercase tracking-widest px-4 py-2 h-9 bg-violet-600 text-white hover:bg-violet-500 border border-violet-500/30 transition-all rounded-lg cursor-pointer shadow-lg active:scale-95 flex items-center gap-1.5"
+                  >
+                    <CheckCircle2 className="size-3.5 text-white" /> Check Code & Proceed
                   </Button>
                 </div>
               )}
