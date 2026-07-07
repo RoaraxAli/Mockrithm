@@ -29,7 +29,7 @@ async function groqChatCompletion(messages: any[], jsonMode = false) {
 
 export async function POST(request: Request) {
   try {
-    const { messages, userid, userResumeData, language } = await request.json();
+    const { messages, userid, userResumeData, language, duration } = await request.json();
     console.log("[DEBUG] /api/interview/parse-and-create received payload:");
     console.log(`- User ID: ${userid}`);
     console.log(`- Language: ${language || "en-US"}`);
@@ -227,6 +227,7 @@ export async function POST(request: Request) {
       createdAt: new Date().toISOString(),
       firstMessage: firstMessage.trim() || "Hello! Ready to start.",
       codingProblem: codingProblem,
+      duration: duration || "medium",
     };
 
     console.log("[DEBUG] Saving generated interview details to Firestore collection 'interviews'...");

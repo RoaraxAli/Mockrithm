@@ -153,8 +153,10 @@ const Agent = ({
     codeRef.current = code;
   }, [code]);
   useEffect(() => {
-    if (codingProblem?.templateCode) {
-      setCode(codingProblem.templateCode);
+    if (codingProblem) {
+      setCode(codingProblem.templateCode || "");
+    } else {
+      setCode("");
     }
   }, [codingProblem]);
   const [isCodingStuck, setIsCodingStuck] = useState(false);
@@ -177,6 +179,7 @@ const Agent = ({
     like: 0,
     um: 0,
     uh: 0,
+    hmm: 0,
     so: 0,
     actually: 0,
     basically: 0,
@@ -413,6 +416,16 @@ const Agent = ({
     return new Promise((resolve) => {
       if (typeof window !== "undefined" && "speechSynthesis" in window) {
         window.speechSynthesis.cancel();
+        
+        // Stop any active HTML5 audio element playback first
+        if (audioRef.current) {
+          try {
+            audioRef.current.pause();
+            audioRef.current.currentTime = 0;
+          } catch (e) {}
+          audioRef.current = null;
+        }
+
         const utterance = new SpeechSynthesisUtterance(text);
         utterance.lang = languageRef.current;
         utterance.rate = 1.05;
@@ -498,6 +511,11 @@ const Agent = ({
             resolve();
             return;
           }
+          
+          if (typeof window !== "undefined" && "speechSynthesis" in window) {
+            window.speechSynthesis.cancel();
+          }
+
           const audioUrl = URL.createObjectURL(blob);
           const audio = new Audio(audioUrl);
           audioRef.current = audio;
@@ -1021,35 +1039,53 @@ const Agent = ({
     isProcessingRef.current = true;
     submittedTextRef.current = text;
 
-    // Verbal Pacing & Analytics Calculation
-    if (turnStartRef.current) {
-      const durationMs = Date.now() - turnStartRef.current;
-      const durationMin = durationMs / 1000 / 60;
-      const words = text.split(/\s+/).filter(Boolean);
-      if (durationMin > 0.05 && words.length > 2) {
-        const wpm = words.length / durationMin;
-        userWPMsRef.current.push(wpm);
+    const isSystemPrompt = text.startsWith("[SYSTEM:");
+    if (!isSystemPrompt) {
+      // Verbal Pacing & Analytics Calculation
+      if (turnStartRef.current) {
+        const durationMs = Date.now() - turnStartRef.current;
+        const durationMin = durationMs / 1000 / 60;
+        const words = text.split(/\s+/).filter(Boolean);
+        if (durationMin > 0.05 && words.length > 2) {
+          const wpm = words.length / durationMin;
+          userWPMsRef.current.push(wpm);
+        }
+        turnStartRef.current = null;
       }
+
+      // Clean speech of Urdu filler words (ام, امم, etc.) to keep transcripts clean
+      let cleanedSpeechText = text;
+      if (languageRef.current === "ur-PK") {
+        cleanedSpeechText = cleanedSpeechText
+          .replace(/\b(امم|ام|آں|اہ|اہہ|اہہہ)\b/g, "")
+          .replace(/\s+/g, " ")
+          .trim();
+      }
+
+      // Accumulate and count filler words
+      const wordsList = cleanedSpeechText.toLowerCase().split(/\s+/);
+      wordsList.forEach((w) => {
+        const cleanW = w.replace(/[.,\/#!$%\^&\*;:{}=\-_`~()]/g, "").trim();
+        if (!cleanW) return;
+
+        // Normalize common filler word variations
+        let normalizedW = cleanW;
+        if (/^um+$/i.test(cleanW)) {
+          normalizedW = "um";
+        } else if (/^(uh+|ah+|eh+)$/i.test(cleanW)) {
+          normalizedW = "uh";
+        } else if (/^hm+$/i.test(cleanW)) {
+          normalizedW = "hmm";
+        }
+
+        if (normalizedW in fillerCountsRef.current) {
+          fillerCountsRef.current[normalizedW]++;
+        }
+      });
+    } else {
+      // Clear start timer on system action turns so they do not contaminate vocal metrics
       turnStartRef.current = null;
     }
-
-    // Clean speech of Urdu filler words (ام, امم, etc.) to keep transcripts clean
-    let cleanedSpeechText = text;
-    if (languageRef.current === "ur-PK") {
-      cleanedSpeechText = cleanedSpeechText
-        .replace(/\b(امم|ام|آں|اہ|اہہ|اہہہ)\b/g, "")
-        .replace(/\s+/g, " ")
-        .trim();
-    }
-
-    // Accumulate and count filler words
-    const wordsList = cleanedSpeechText.toLowerCase().split(/\s+/);
-    wordsList.forEach((w) => {
-      const cleanW = w.replace(/[.,\/#!$%\^&\*;:{}=\-_`~()]/g, "");
-      if (cleanW in fillerCountsRef.current) {
-        fillerCountsRef.current[cleanW]++;
-      }
-    });
 
     if (silenceTimerRef.current) {
       clearTimeout(silenceTimerRef.current);
@@ -1183,6 +1219,7 @@ CANDIDATE PROFILE (already collected, do NOT ask about these again unless changi
 - Default Target Role: ${profileRole || "Software Engineer"}
 - Key Skills: ${skillsList || "JavaScript, React, Node.js"}
 - Profile Summary: ${profileSummary ? profileSummary.slice(0, 200) : "Experienced professional"}
+- Selected Session Duration Limit: ${selectedDuration === "brief" ? "5 minutes" : selectedDuration === "medium" ? "10 minutes" : "unlimited / no time limit"} (Do NOT recommend or mention a 30-minute coding challenge duration limit, explicitly say they will have ${selectedDuration === "brief" ? "5 minutes" : selectedDuration === "medium" ? "10 minutes" : "unlimited time"} to complete the task).
 
 YOUR CONVERSATION FLOW:
 1. First, ask them if they want to practice their listed target role ("${profileRole || "Software Engineer"}") or something else.
@@ -1492,6 +1529,7 @@ ${code}
         userid: userId,
         userResumeData: userResumeData,
         language: selectedLanguage,
+        duration: selectedDuration,
       };
       console.log("[Agent.tsx] POST payload to /api/interview/parse-and-create:", payload);
 
@@ -2005,7 +2043,7 @@ ${code}
                 <span className="text-zinc-600 mr-1.5">{t("language")}:</span>
                 <span className="text-sky-300 font-bold">{currentLangConfig.name.split(" (")[0]}</span>
               </div>
-               {timerSecondsLeft !== null && (
+               {timerSecondsLeft !== null ? (
                 <div className={cn(
                   "flex items-center gap-1.5 font-mono font-black px-3 py-1 rounded-full border transition-all duration-500",
                   timerSecondsLeft <= 60
@@ -2015,6 +2053,18 @@ ${code}
                     : "text-emerald-400 border-emerald-500/30 bg-emerald-500/10"
                 )}>
                   {String(Math.floor(timerSecondsLeft / 60)).padStart(2, "0")}:{String(timerSecondsLeft % 60).padStart(2, "0")}
+                </div>
+              ) : (
+                <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-1.5 font-mono font-black px-3 py-1 rounded-full border border-zinc-800 bg-zinc-900 text-zinc-300 text-[8.5px] uppercase tracking-wider">
+                    Unlimited
+                  </div>
+                  <button
+                    onClick={() => handleDisconnect()}
+                    className="px-2.5 py-1 rounded-full bg-rose-950/40 hover:bg-rose-900/60 border border-rose-900 text-rose-300 hover:text-rose-200 text-[8.5px] font-bold uppercase tracking-wider transition-all duration-300 cursor-pointer animate-pulse"
+                  >
+                    Finish Session
+                  </button>
                 </div>
               )}
               <div>
@@ -2275,7 +2325,7 @@ ${code}
                     <div className="flex justify-between text-[8px] font-bold text-zinc-500 border-t border-zinc-900/60 pt-1.5 mt-0.5">
                       <span>{t("fillers")}:</span>
                       <span className="text-amber-400">
-                        Like ({fillerLike}) / Um ({fillerUm}) / Uh ({fillerUh})
+                        Like ({fillerLike}) / Um ({fillerUm}) / Uh ({fillerUh}) / Hmm ({fillerCountsRef.current?.hmm || 0})
                       </span>
                     </div>
                   </div>
