@@ -130,7 +130,7 @@ export default function AwwwardsHero() {
         {/* Right Column: Interactive Real-time Telemetry Dashboard (5 Columns) */}
         <motion.div 
           variants={itemVariants}
-          className="lg:col-span-5 flex justify-center lg:justify-end"
+          className="hidden lg:flex lg:col-span-5 justify-center lg:justify-end"
         >
           {/* Glassmorphic Cyber-Widget */}
           <div className="relative w-full max-w-sm p-6 rounded-2xl border border-white/5 bg-zinc-950/20 backdrop-blur-xl shadow-[0_30px_70px_-15px_rgba(0,0,0,0.9)] overflow-hidden group">
