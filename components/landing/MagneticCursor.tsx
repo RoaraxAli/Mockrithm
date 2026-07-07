@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { motion, useMotionValue } from "framer-motion";
 import { gsap } from "gsap";
 import { usePathname } from "next/navigation";
+import { useUser } from "@clerk/nextjs";
 
 export default function MagneticCursor() {
   const [mounted, setMounted] = useState(false);
@@ -13,7 +14,8 @@ export default function MagneticCursor() {
 
   const cursorRef = useRef<HTMLDivElement>(null);
   const pathname = usePathname();
-  const isLandingPage = pathname === "/";
+  const { isSignedIn, isLoaded } = useUser();
+  const isLandingPage = pathname === "/" && (!isLoaded || !isSignedIn);
 
   // Motion values for instant cursor tracking (0ms delay)
   const cursorX = useMotionValue(-100);
