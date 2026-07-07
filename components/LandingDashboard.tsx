@@ -32,6 +32,7 @@ export default function LandingDashboard({
   const [clientUser, setClientUser] = useState<any>(user || null);
   const [authResolved, setAuthResolved] = useState(false);
   const [activeTip, setActiveTip] = useState(0);
+  const [greetingText, setGreetingText] = useState("Welcome back!");
 
   // Tips dataset for carousel
   const interviewTips = [
@@ -77,6 +78,21 @@ export default function LandingDashboard({
     }
     setAuthResolved(true);
   }, [isLoaded, isSignedIn, clerkUser, user]);
+
+  // Greeting logic with safety from hydration mismatches
+  useEffect(() => {
+    if (clientUser?.name) {
+      const name = clientUser.name.split(" ")[0];
+      const hrs = new Date().getHours();
+      let greet = "Welcome back";
+      if (hrs < 12) greet = "Good morning";
+      else if (hrs < 17) greet = "Good afternoon";
+      else greet = "Good evening";
+      setGreetingText(`${greet}, ${name}!`);
+    } else if (isLoaded && !isSignedIn) {
+      setGreetingText("Welcome!");
+    }
+  }, [clientUser, isLoaded, isSignedIn]);
 
   // 2. Load Dashboard Data (Interviews, Feedback, Resumes)
   useEffect(() => {
@@ -163,10 +179,20 @@ export default function LandingDashboard({
   userInterviews.forEach((i) => {
     const fb = i.feedback;
     if (fb && Array.isArray(fb.topFillerWords)) {
-      fb.topFillerWords.forEach((word: string) => {
-        const cleanWord = word.trim().toLowerCase();
-        if (cleanWord) {
-          fillerWordCounts[cleanWord] = (fillerWordCounts[cleanWord] || 0) + 1;
+      fb.topFillerWords.forEach((item: any) => {
+        if (item) {
+          let wordStr = "";
+          let countVal = 1;
+          if (typeof item === "string") {
+            wordStr = item;
+          } else if (typeof item === "object" && typeof item.word === "string") {
+            wordStr = item.word;
+            countVal = typeof item.count === "number" ? item.count : 1;
+          }
+          const cleanWord = wordStr.trim().toLowerCase();
+          if (cleanWord) {
+            fillerWordCounts[cleanWord] = (fillerWordCounts[cleanWord] || 0) + countVal;
+          }
         }
       });
     }
@@ -228,70 +254,81 @@ export default function LandingDashboard({
       <div className="absolute inset-0 premium-grid-dot pointer-events-none opacity-20 z-0" />
       <div className="absolute top-0 left-0 right-0 h-[600px] bg-gradient-to-b from-white/[0.005] to-transparent pointer-events-none z-0" />
 
-      {/* 1. Cockpit Header Banner */}
-      <section className="w-full mb-8 relative z-10">
-        <div className="relative p-6 sm:p-8 backdrop-blur-3xl bg-zinc-950/40 border border-white/5 shadow-2xl rounded-3xl overflow-hidden group flex flex-col md:flex-row items-center justify-between gap-6 transition-all duration-300 hover:border-white/10">
-          <div className="absolute top-0 left-0 w-[4px] h-full bg-gradient-to-b from-white to-zinc-900" />
-          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-white/[0.008] blur-[80px] rounded-full pointer-events-none" />
+      {/* 1. Immersive Premium SaaS Hero Header */}
+      <motion.section 
+        initial={{ opacity: 0, scale: 0.98 }}
+        animate={{ opacity: 1, scale: 1 }}
+        transition={{ duration: 0.8, ease: "easeOut" }}
+        className="relative w-full min-h-[55vh] flex flex-col justify-center border-b border-zinc-900 bg-zinc-950/10 overflow-hidden pb-12 pt-8"
+      >
+        {/* Subtle Ambient Radial Backlighting */}
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-white/[0.015] blur-[100px] rounded-full pointer-events-none" />
 
-          {/* Left Side: Greet, Status */}
-          <div className="flex flex-col gap-3 max-md:items-center max-md:text-center">
-            <div className="flex items-center gap-2 flex-wrap max-md:justify-center">
-              <span className="text-[9px] font-mono font-black tracking-widest uppercase text-zinc-400 bg-white/5 border border-white/10 px-3 py-1 rounded-full flex items-center gap-1.5 shadow-sm">
-                <span className="relative flex h-1.5 w-1.5">
-                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
-                  <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-emerald-400" />
-                </span>
-                COCKPIT COREGISTRY
-              </span>
-              
-              <span className="text-[9px] font-mono font-black tracking-widest uppercase text-white bg-gradient-to-r from-zinc-900 via-zinc-800 to-zinc-950 border border-white/10 px-3 py-1 rounded-full shadow-inner">
-                {clientUser?.role?.toLowerCase() === "admin" ? "ADMIN PRIVILEGES" : "PRO MEMBERSHIP"}
-              </span>
-            </div>
+        <div className="max-w-4xl mx-auto w-full px-6 sm:px-8 flex flex-col items-center text-center gap-6 z-10">
+          
+          {/* Status Badge */}
+          <motion.div 
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.2 }}
+            className="bg-zinc-900/50 border border-zinc-800/80 rounded-full px-4 py-1.5 flex items-center gap-2 shadow-sm"
+          >
+            <span className="relative flex h-2 w-2">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-white opacity-75" />
+              <span className="relative inline-flex rounded-full h-2 w-2 bg-white" />
+            </span>
+            <span className="text-[9px] font-bold tracking-widest text-zinc-400 uppercase flex items-center gap-1.5 font-mono">
+              <Cpu className="size-3.5 text-zinc-500" /> AI Voice Engine Active
+            </span>
+          </motion.div>
 
-            <div className="space-y-1">
-              <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-white uppercase">
-                {getGreeting()}, {clientUser?.name?.split(" ")[0] || "User"}!
-              </h1>
-              <p className="text-xs text-zinc-400 font-semibold tracking-wider uppercase">
-                Systems status optimal. Calibrate your speech profiles and analyze resume compatibility.
-              </p>
-            </div>
+          <h1 className="text-4xl sm:text-5xl lg:text-6xl font-black leading-[1.1] text-white tracking-tight uppercase">
+            {greetingText} <br/>
+            <span className="text-zinc-400">
+              Ready for calibration.
+            </span>
+          </h1>
+          
+          <p className="text-sm sm:text-base text-zinc-400 leading-relaxed max-w-2xl font-medium">
+            Conduct live, voice-driven mock interviews tailored to your experience. Improve delivery pacing, eliminate vocal fillers, and solve code challenges with real-time feedback.
+          </p>
 
-            {/* Simulated Live System Nodes Indicators */}
-            <div className="flex items-center gap-4 text-[9px] font-mono text-zinc-500 font-bold uppercase mt-1">
-              <div className="flex items-center gap-1.5">
-                <span className="size-1.5 rounded-full bg-emerald-500 animate-pulse" />
-                Auth: Online
-              </div>
-              <div className="flex items-center gap-1.5">
-                <span className="size-1.5 rounded-full bg-emerald-500 animate-pulse" />
-                DB: Synced
-              </div>
-              <div className="flex items-center gap-1.5">
-                <span className="size-1.5 rounded-full bg-emerald-500 animate-pulse" />
-                Speech: WebSocket Ready
-              </div>
-            </div>
-          </div>
-
-          {/* Right Side: Quick Action Presets */}
-          <div className="flex items-center gap-4 sm:shrink-0 max-md:w-full max-md:justify-center">
-            <Button asChild className="bg-white hover:bg-zinc-200 text-black font-black text-[10px] tracking-widest uppercase px-6 py-4.5 rounded-xl cursor-pointer h-12 transition-all duration-300 shadow-lg shadow-white/5 hover:scale-[1.02]">
-              <Link href="/interview" className="flex items-center gap-2">
+          <motion.div 
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.4 }}
+            className="flex gap-4 items-center justify-center max-sm:flex-col w-full max-w-md mt-2"
+          >
+            <Button asChild className="bg-white hover:bg-zinc-200 text-black font-bold text-xs px-6 py-2.5 rounded-full cursor-pointer h-11 w-full sm:w-48 transition-all duration-300 shadow-lg shadow-white/5 hover:scale-[1.02]">
+              <Link href="/interview" className="flex items-center justify-center gap-2">
                 <Play className="size-3.5 fill-black" /> Run Simulator
               </Link>
             </Button>
-            
-            <Button asChild variant="outline" className="border-white/5 hover:border-white/20 bg-zinc-900/30 text-zinc-300 hover:text-white font-black text-[10px] tracking-widest uppercase px-6 py-4.5 rounded-xl cursor-pointer h-12 transition-all duration-300 hover:scale-[1.02]">
-              <Link href="/user/resume" className="flex items-center gap-2">
-                <FileText className="size-3.5" /> Resume Desk
+
+            <Button asChild variant="outline" className="border-white/5 hover:border-white/20 bg-zinc-900/30 text-zinc-300 hover:text-white font-bold text-xs px-6 py-2.5 rounded-full cursor-pointer h-11 w-full sm:w-48 transition-all duration-300 hover:scale-[1.02]">
+              <Link href="/user/resume" className="flex items-center justify-center gap-2">
+                Resume Desk {"→"}
               </Link>
             </Button>
+          </motion.div>
+
+          {/* Simulated Live System Nodes Indicators */}
+          <div className="flex items-center gap-4 text-[9px] font-mono text-zinc-550 font-bold uppercase mt-2">
+            <div className="flex items-center gap-1.5">
+              <span className="size-1.5 rounded-full bg-emerald-500 animate-pulse" />
+              Auth: Online
+            </div>
+            <div className="flex items-center gap-1.5">
+              <span className="size-1.5 rounded-full bg-emerald-500 animate-pulse" />
+              DB: Synced
+            </div>
+            <div className="flex items-center gap-1.5">
+              <span className="size-1.5 rounded-full bg-emerald-500 animate-pulse" />
+              Speech: WebSocket Ready
+            </div>
           </div>
         </div>
-      </section>
+      </motion.section>
 
       {/* 2. Top Metrics Bento Grid */}
       <section className="grid grid-cols-1 sm:grid-cols-3 gap-6 mb-8 relative z-10">
