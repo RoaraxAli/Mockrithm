@@ -142,12 +142,16 @@ const Agent = ({
   // Interview Duration Selection
   const [showDurationModal, setShowDurationModal] = useState(false);
   const [selectedDuration, setSelectedDuration] = useState<"brief" | "medium" | "lengthy" | null>(null);
+  const selectedDurationRef = useRef<"brief" | "medium" | "lengthy" | null>(null);
+  useEffect(() => {
+    selectedDurationRef.current = selectedDuration;
+  }, [selectedDuration]);
   const [timerSecondsLeft, setTimerSecondsLeft] = useState<number | null>(null);
   const timerIntervalRef = useRef<NodeJS.Timeout | null>(null);
   const isTimerEndingRef = useRef(false);
 
   // Live Coding States
-  const [code, setCode] = useState(codingProblem?.templateCode || "");
+  const [code, setCode] = useState("");
   const codeRef = useRef(code);
   useEffect(() => {
     codeRef.current = code;
@@ -155,7 +159,7 @@ const Agent = ({
   const [showSandbox, setShowSandbox] = useState(!!propCodingProblem);
   useEffect(() => {
     if (codingProblem) {
-      setCode(codingProblem.templateCode || "");
+      setCode("");
       setShowSandbox(true);
     } else {
       setCode("");
@@ -177,6 +181,9 @@ const Agent = ({
 
   // Verbal & Pacing Analytics
   const userWPMsRef = useRef<number[]>([]);
+  // Live Coding tracking refs
+  const interviewCodesRef = useRef<Record<string, string>>({});
+  const hasSubmittedCurrentCodeRef = useRef(false);
   const fillerCountsRef = useRef<Record<string, number>>({
     like: 0,
     um: 0,
@@ -313,6 +320,18 @@ const Agent = ({
         .sort((a, b) => b.count - a.count)
         .slice(0, 3);
 
+      let candidateCodeData = "";
+      if (Object.keys(interviewCodesRef.current).length > 0) {
+        const currentCount = Object.keys(interviewCodesRef.current).length;
+        const lastSavedCode = interviewCodesRef.current[`Question ${currentCount}`];
+        if (codeRef.current && codeRef.current !== lastSavedCode) {
+          interviewCodesRef.current[`Question ${currentCount + 1}`] = codeRef.current;
+        }
+        candidateCodeData = JSON.stringify(interviewCodesRef.current);
+      } else {
+        candidateCodeData = codeRef.current || "";
+      }
+
       const { success, feedbackId: id } = await createFeedback({
         interviewId: interviewId!,
         userId: userId!,
@@ -322,7 +341,7 @@ const Agent = ({
         feedbackId: feedbackId || undefined,
         averageWpm,
         topFillerWords,
-        candidateCode: codingProblemRef.current ? codeRef.current : undefined
+        candidateCode: codingProblemRef.current ? candidateCodeData : undefined
       });
 
       if (success && id) {
@@ -338,7 +357,7 @@ const Agent = ({
     };
 
     if (callStatus === CallStatus.FINISHED) {
-      if (type === "generate") {
+      if (activeType === "generate") {
         handleSaveConversationSetup(messagesRef.current);
       } else {
         handleGenerateFeedback(messagesRef.current);
@@ -609,6 +628,10 @@ const Agent = ({
 
     if (/\[SHOW[-_ ]?SANDBOX\]/i.test(accumulatedTextRef.current)) {
       setShowSandbox(true);
+      if (hasSubmittedCurrentCodeRef.current) {
+        setCode("");
+        hasSubmittedCurrentCodeRef.current = false;
+      }
       if (recognitionRef.current) {
         try {
           recognitionRef.current.stop();
@@ -1063,27 +1086,6 @@ const Agent = ({
           .replace(/\s+/g, " ")
           .trim();
       }
-
-      // Accumulate and count filler words
-      const wordsList = cleanedSpeechText.toLowerCase().split(/\s+/);
-      wordsList.forEach((w) => {
-        const cleanW = w.replace(/[.,\/#!$%\^&\*;:{}=\-_`~()]/g, "").trim();
-        if (!cleanW) return;
-
-        // Normalize common filler word variations
-        let normalizedW = cleanW;
-        if (/^um+$/i.test(cleanW)) {
-          normalizedW = "um";
-        } else if (/^(uh+|ah+|eh+)$/i.test(cleanW)) {
-          normalizedW = "uh";
-        } else if (/^hm+$/i.test(cleanW)) {
-          normalizedW = "hmm";
-        }
-
-        if (normalizedW in fillerCountsRef.current) {
-          fillerCountsRef.current[normalizedW]++;
-        }
-      });
     } else {
       // Clear start timer on system action turns so they do not contaminate vocal metrics
       turnStartRef.current = null;
@@ -1204,7 +1206,7 @@ CRITICAL SANDBOX WORKSPACE RULE:
 - The candidate's screen has a built-in interactive live coding editor sandbox panel.
 - Whenever you ask a question that requires writing code, or transition to the coding challenge, you MUST output the exact tag '[SHOW_SANDBOX]' (case-insensitive) in your response. This will automatically open the code editor workspace on their screen.
 - Never solve the challenge, write solution code, output templates, or suggest external coding tools (like CodeSandbox or JSFiddle). Simply present the task, output '[SHOW_SANDBOX]', and wait for them to write the solution inside their editor workspace.
-- CODE EVALUATION RULE: When the candidate submits or asks you to check their code, evaluate it objectively. If the code is correct, functional, and satisfies the requirements of the challenge, acknowledge it immediately (e.g. "Excellent work, that solution is correct!"), do NOT invent imaginary bugs or nitpick style, and conclude the interview by thanking them and appending '[END_CALL]'. Only point out errors if there is a genuine syntax/logic bug in their implementation.
+- CODE EVALUATION & FOLLOW-UP RULE: When the candidate submits their code, evaluate it objectively. If it is correct and functional, acknowledge it (e.g., "Excellent work, that looks correct!"). Do NOT end the call or immediately jump to the next question. Instead, ask them a brief follow-up question specifically about what they wrote (e.g., "How would you handle edge cases here?", "What is the time complexity of your approach?", or "Why did you choose this API/method?"). Once they explain, transition to the next question in the interview flow. Only conclude the interview and append '[END_CALL]' when all questions in the structured flow have been completed.
 
 CRITICAL RULES - CONVERSATIONAL FLOW & CONCISENESS:
 - DO NOT VERBALLY READ OUT THE LONG CHALLENGE INSTRUCTIONS OR CODE: When you transition to the coding challenge, simply introduce it briefly in one sentence (under 15 words) and output '[SHOW_SANDBOX]'. The candidate will read the details in the workspace on their screen. Never output code blocks, templates, or instructions in your speech.
@@ -1241,7 +1243,7 @@ CANDIDATE PROFILE (already collected, do NOT ask about these again unless changi
 - Default Target Role: ${profileRole || "Software Engineer"}
 - Key Skills: ${skillsList || "JavaScript, React, Node.js"}
 - Profile Summary: ${profileSummary ? profileSummary.slice(0, 200) : "Experienced professional"}
-- Selected Session Duration Limit: ${selectedDuration === "brief" ? "5 minutes" : selectedDuration === "medium" ? "10 minutes" : "unlimited / no time limit"} (Do NOT recommend or mention a 30-minute coding challenge duration limit, explicitly say they will have ${selectedDuration === "brief" ? "5 minutes" : selectedDuration === "medium" ? "10 minutes" : "unlimited time"} to complete the task).
+- Selected Session Duration Limit: ${selectedDurationRef.current === "brief" ? "5 minutes" : selectedDuration === "medium" ? "10 minutes" : "unlimited / no time limit"} (Do NOT recommend or mention a 30-minute coding challenge duration limit, explicitly say they will have ${selectedDurationRef.current === "brief" ? "5 minutes" : selectedDuration === "medium" ? "10 minutes" : "unlimited time"} to complete the task).
 
 YOUR CONVERSATION FLOW:
 1. First, ask them if they want to practice their listed target role ("${profileRole || "Software Engineer"}") or something else.
@@ -1364,6 +1366,11 @@ RULES:
   const checkSolutionAndProceed = () => {
     if (callStatus !== CallStatus.ACTIVE || isProcessingRef.current) return;
     const isWritten = codingProblemRef.current?.language === "text" || codingProblemRef.current?.language === "markdown";
+    
+    const qKey = `Question ${Object.keys(interviewCodesRef.current).length + 1}`;
+    interviewCodesRef.current[qKey] = codeRef.current;
+    hasSubmittedCurrentCodeRef.current = true;
+    
     const proceedPrompt = isWritten
       ? `[SYSTEM: The candidate has completed their text. Please evaluate their draft: "${codeRef.current}". If it satisfies the requirements, state that, provide brief feedback, and transition immediately to the next question in your interview flow. Only thank the candidate and append [END_CALL] if all interview questions are completed or time is up. If something is missing, explain it and ask them to refine it.]`
       : `[SYSTEM: The candidate has completed their code. Please evaluate their solution code: "${codeRef.current}". If the solution is correct, functional, and satisfies the challenge, state that the solution is correct, provide brief feedback, and transition immediately to the next question in your interview flow. Only thank the candidate and append [END_CALL] if all interview questions are completed or time is up. If there are bugs, specify them clearly and help them debug it.]`;
@@ -1431,7 +1438,7 @@ CRITICAL SANDBOX WORKSPACE RULE:
 - The candidate's screen has a built-in interactive live coding editor sandbox panel.
 - Whenever you ask a question that requires writing code, or transition to the coding challenge, you MUST output the exact tag '[SHOW_SANDBOX]' (case-insensitive) in your response. This will automatically open the code editor workspace on their screen.
 - Never solve the challenge, write solution code, output templates, or suggest external coding tools (like CodeSandbox or JSFiddle). Simply present the task, output '[SHOW_SANDBOX]', and wait for them to write the solution inside their editor workspace.
-- CODE EVALUATION RULE: When the candidate submits or asks you to check their code, evaluate it objectively. If the code is correct, functional, and satisfies the requirements of the challenge, acknowledge it immediately (e.g. "Excellent work, that solution is correct!"), do NOT invent imaginary bugs or nitpick style, and conclude the interview by thanking them and appending '[END_CALL]'. Only point out errors if there is a genuine syntax/logic bug in their implementation.
+- CODE EVALUATION & FOLLOW-UP RULE: When the candidate submits their code, evaluate it objectively. If it is correct and functional, acknowledge it (e.g., "Excellent work, that looks correct!"). Do NOT end the call or immediately jump to the next question. Instead, ask them a brief follow-up question specifically about what they wrote (e.g., "How would you handle edge cases here?", "What is the time complexity of your approach?", or "Why did you choose this API/method?"). Once they explain, transition to the next question in the interview flow. Only conclude the interview and append '[END_CALL]' when all questions in the structured flow have been completed.
 
 CRITICAL RULES - CONVERSATIONAL FLOW & CONCISENESS:
 - DO NOT VERBALLY READ OUT THE LONG CHALLENGE INSTRUCTIONS OR CODE: When you transition to the coding challenge, simply introduce it briefly in one sentence (under 15 words) and output '[SHOW_SANDBOX]'. The candidate will read the details in the workspace on their screen. Never output code blocks, templates, or instructions in your speech.
@@ -2014,7 +2021,7 @@ ${code}
                       <div className="text-xs font-bold text-white uppercase tracking-wider group-hover:text-emerald-300 transition-colors">{t("brief")}</div>
                       <div className="text-[10px] text-zinc-500 mt-0.5">{t("brief_desc")}</div>
                     </div>
-                    <span className="text-[10px] font-bold text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-2.5 py-1 rounded-full">5 min</span>
+                    <span className="text-[10px] font-bold text-emerald-400 bg-zinc-300/10 border border-emerald-500/20 px-2.5 py-1 rounded-full">5 min</span>
                   </button>
                   <button
                     onClick={() => startCallWithDuration("medium")}
@@ -2034,7 +2041,7 @@ ${code}
                       <div className="text-xs font-bold text-white uppercase tracking-wider group-hover:text-violet-300 transition-colors">{t("lengthy")}</div>
                       <div className="text-[10px] text-zinc-500 mt-0.5">{t("lengthy_desc")}</div>
                     </div>
-                    <span className="text-[10px] font-bold text-violet-400 bg-violet-500/10 border border-violet-500/20 px-2.5 py-1 rounded-full">{t("no_limit")}</span>
+                    <span className="text-[10px] font-bold text-zinc-300 bg-zinc-900 border border-violet-500/20 px-2.5 py-1 rounded-full">{t("no_limit")}</span>
                   </button>
                 </div>
               </motion.div>
@@ -2072,7 +2079,7 @@ ${code}
                     ? "text-rose-400 border-rose-500/30 bg-rose-500/10 animate-pulse"
                     : timerSecondsLeft <= 120
                     ? "text-amber-400 border-amber-500/30 bg-amber-500/10"
-                    : "text-emerald-400 border-emerald-500/30 bg-emerald-500/10"
+                    : "text-emerald-400 border-emerald-500/30 bg-zinc-300/10"
                 )}>
                   {String(Math.floor(timerSecondsLeft / 60)).padStart(2, "0")}:{String(timerSecondsLeft % 60).padStart(2, "0")}
                 </div>
@@ -2237,7 +2244,7 @@ ${code}
                 className={cn(
                   "flex items-center justify-center flex-col gap-3.5 p-4 min-h-[175px] backdrop-blur-xl border rounded-xl flex-1 w-full shadow-2xl relative overflow-hidden transition-all duration-500",
                   callStatus === CallStatus.ACTIVE && isSpeaking
-                    ? "bg-black/85 border-emerald-500/30 shadow-[0_0_30px_rgba(16,185,129,0.05)]"
+                    ? "bg-black/85 border-zinc-700/80 shadow-[0_0_30px_rgba(255,255,255,0.02)]"
                     : "bg-black/40 border-zinc-800/80"
                 )}
               >
@@ -2246,13 +2253,13 @@ ${code}
                   <div className={cn(
                     "absolute inset-0 border rounded-full transition-all duration-1000",
                     callStatus === CallStatus.ACTIVE && isSpeaking 
-                      ? "border-emerald-500/20 scale-110 bg-emerald-500/5" 
+                      ? "border-zinc-700/20 scale-110 bg-white/5" 
                       : "border-zinc-800/20 scale-100 opacity-0"
                   )} />
                   <div className={cn(
                     "absolute inset-1.5 border rounded-full transition-all duration-1000",
                     callStatus === CallStatus.ACTIVE && isSpeaking 
-                      ? "border-emerald-500/10 scale-105 bg-emerald-500/5 animate-pulse" 
+                      ? "border-zinc-800 scale-105 bg-white/5 animate-pulse" 
                       : "border-zinc-800/10 scale-100 opacity-0"
                   )} />
                   
@@ -2260,11 +2267,11 @@ ${code}
                   <div className={cn(
                     "z-10 flex items-center justify-center rounded-full size-[48px] relative border transition-all duration-500 shadow-2xl bg-zinc-950",
                     callStatus === CallStatus.ACTIVE && isSpeaking 
-                      ? "border-emerald-400 scale-105 shadow-[0_0_15px_rgba(52,211,153,0.2)]" 
+                      ? "border-zinc-300 scale-105 shadow-[0_0_15px_rgba(255,255,255,0.1)]" 
                       : "border-zinc-800"
                   )}>
                     {/* Glowing core animation */}
-                    <svg className={cn("w-5 h-5", callStatus === CallStatus.ACTIVE && isSpeaking ? "text-emerald-400 animate-pulse" : "text-zinc-650")} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <svg className={cn("w-5 h-5", callStatus === CallStatus.ACTIVE && isSpeaking ? "text-white animate-pulse" : "text-zinc-650")} fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <circle cx="12" cy="12" r="9" strokeWidth="1.5" />
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z" />
                     </svg>
@@ -2282,10 +2289,10 @@ ${code}
                   <div className="flex flex-col items-center gap-2 w-full mt-0.5 font-mono">
                     {isSpeaking ? (
                       <div className="flex items-end justify-center gap-1 h-3.5">
-                        <div className="w-1 bg-emerald-400 rounded-full h-2 animate-[pulse_0.7s_infinite]" />
-                        <div className="w-1 bg-emerald-500 rounded-full h-3.5 animate-[pulse_1s_infinite] delay-100" />
-                        <div className="w-1 bg-emerald-400 rounded-full h-2.5 animate-[pulse_0.6s_infinite] delay-200" />
-                        <div className="w-1 bg-emerald-500 rounded-full h-1.5 animate-[pulse_0.8s_infinite] delay-150" />
+                        <div className="w-1 bg-white rounded-full h-2 animate-[pulse_0.7s_infinite]" />
+                        <div className="w-1 bg-zinc-300 rounded-full h-3.5 animate-[pulse_1s_infinite] delay-100" />
+                        <div className="w-1 bg-white rounded-full h-2.5 animate-[pulse_0.6s_infinite] delay-200" />
+                        <div className="w-1 bg-zinc-300 rounded-full h-1.5 animate-[pulse_0.8s_infinite] delay-150" />
                       </div>
                     ) : (
                       <div className="flex items-center gap-1 h-3.5 opacity-30">
@@ -2335,18 +2342,18 @@ ${code}
                   <div className="w-full flex flex-col gap-2 mt-1 bg-zinc-955/40 border border-zinc-900/60 p-2.5 rounded-xl font-mono">
                     <div className="flex justify-between items-center text-[9px] font-bold">
                       <span className="text-zinc-555 font-mono">speech_cadence</span>
-                      <span className="text-cyan-400">{currentAverageWpm} WPM</span>
+                      <span className="text-white">{currentAverageWpm} WPM</span>
                     </div>
                     <div className="w-full h-1 bg-zinc-900 rounded overflow-hidden">
                       <div 
-                        className="h-full bg-cyan-400 transition-all duration-500"
+                        className="h-full bg-white transition-all duration-500"
                         style={{ width: `${Math.min(100, (currentAverageWpm / 200) * 100)}%` }}
                       />
                     </div>
 
                     <div className="flex justify-between text-[8px] font-bold text-zinc-555 border-t border-zinc-900/60 pt-1.5 mt-0.5">
                       <span>fillers:</span>
-                      <span className="text-amber-505 font-mono">
+                      <span className="text-zinc-300 font-mono">
                         Like({fillerLike}) / Um({fillerUm}) / Uh({fillerUh})
                       </span>
                     </div>
@@ -2370,7 +2377,7 @@ ${code}
                     <span className="w-1.5 h-1.5 rounded-full bg-green-500/60" />
                     <span className="ml-1.5 text-zinc-400 font-bold">console_session_buffer</span>
                   </div>
-                  <span className="text-[8px] uppercase font-bold tracking-widest text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded border border-emerald-500/20 font-mono">
+                  <span className="text-[8px] uppercase font-bold tracking-widest text-emerald-400 bg-zinc-300/10 px-2 py-0.5 rounded border border-emerald-500/20 font-mono">
                     Active Log
                   </span>
                 </div>
@@ -2382,7 +2389,7 @@ ${code}
                     .map((m, idx) => {
                       const isUser = m.role === "user";
                       const promptChar = isUser ? "user@mockrithm:~$" : "alex@mockrithm:~$";
-                      const colorClass = isUser ? "text-cyan-400" : "text-emerald-400";
+                      const colorClass = isUser ? "text-white" : "text-emerald-400";
                       return (
                         <div key={idx} className="flex flex-col gap-0.5 font-mono">
                           <div className="flex items-center gap-1.5 text-[9px] font-bold text-zinc-500">
@@ -2398,7 +2405,7 @@ ${code}
                   {callStatus === CallStatus.ACTIVE && !isSpeaking && (
                     <div className="flex items-center gap-1.5 pl-3 font-mono">
                       <span className="text-zinc-555 text-[9px]">user@mockrithm:~$</span>
-                      <span className="w-1.5 h-3 bg-cyan-400 animate-[pulse_0.8s_infinite] inline-block" />
+                      <span className="w-1.5 h-3 bg-white animate-[pulse_0.8s_infinite] inline-block" />
                     </div>
                   )}
                 </div>
@@ -2414,10 +2421,10 @@ ${code}
               >
                 <div className="flex items-center justify-between border-b border-zinc-900 pb-2">
                   <h4 className="text-[10px] font-bold uppercase text-zinc-400 tracking-wider flex items-center gap-2">
-                    <Sparkles className="size-3.5 text-violet-400" />
+                    <Sparkles className="size-3.5 text-zinc-300" />
                     {activeSessionType ? `${activeSessionType} Evaluation` : t("analyzer")}
                   </h4>
-                  <span className="text-[8px] bg-violet-500/10 text-violet-400 font-bold px-2 py-0.5 rounded-full border border-violet-500/25 uppercase tracking-wider">
+                  <span className="text-[8px] bg-zinc-900 text-zinc-300 font-bold px-2 py-0.5 rounded-full border border-violet-500/25 uppercase tracking-wider">
                     {t("insights")}
                   </span>
                 </div>
@@ -2486,7 +2493,7 @@ ${code}
                 </AnimatePresence>
 
                 <div className="text-[10px] text-zinc-400 leading-relaxed bg-zinc-950/40 p-3 rounded-xl border border-zinc-900 font-semibold">
-                  <span className="text-violet-400 font-bold uppercase tracking-wider mr-2">{t("evaluation_insights")}:</span>
+                  <span className="text-zinc-300 font-bold uppercase tracking-wider mr-2">{t("evaluation_insights")}:</span>
                   {starChecklist.feedback === "Begin answering the behavioral questions to start analysis." ? t("default_feedback") : starChecklist.feedback}
                 </div>
               </motion.div>
@@ -2531,7 +2538,7 @@ ${code}
             >
               <div className="flex items-center justify-between border-b border-zinc-900 pb-2.5 font-mono">
                 <h3 className="text-[10px] font-bold text-zinc-400 tracking-wider uppercase flex items-center gap-2">
-                  <Code className="size-4.5 text-violet-400" />
+                  <Code className="size-4.5 text-zinc-300" />
                   {codingProblem.language === "latex" ? "LaTeX Equation Editor" : 
                    codingProblem.language === "markdown" ? "Markdown Essay Editor" : 
                    codingProblem.language === "text" ? "Writing Sandbox" : "Coding Workspace IDE"}
@@ -2548,7 +2555,7 @@ ${code}
                   <div className="flex items-center gap-2">
                     <span className="w-2 h-2 rounded-full bg-rose-500/40" />
                     <span className="w-2 h-2 rounded-full bg-amber-500/40" />
-                    <span className="w-2 h-2 rounded-full bg-emerald-500/40" />
+                    <span className="w-2 h-2 rounded-full bg-zinc-300/40" />
                     <span className="ml-2 text-zinc-400 font-bold">
                       {codingProblem.language === "python" ? "solution.py" : 
                        codingProblem.language === "javascript" || codingProblem.language === "typescript" ? "solution.ts" :
@@ -2561,15 +2568,15 @@ ${code}
                        codingProblem.language === "cpp" ? "main.cpp" : "draft.txt"}
                     </span>
                   </div>
-                  <span className="text-[8px] uppercase font-bold tracking-widest text-violet-400 bg-violet-500/10 px-2.5 py-0.5 rounded border border-violet-500/20 font-mono">
+                  <span className="text-[8px] uppercase font-bold tracking-widest text-zinc-300 bg-zinc-900 px-2.5 py-0.5 rounded border border-violet-500/20 font-mono">
                     {t("ready")}
                   </span>
                 </div>
 
                 {/* Monaco Editor Container */}
-                <div className="relative border border-t-0 border-zinc-900 rounded-b-xl overflow-hidden bg-zinc-955/10 shadow-[inset_0_4px_16px_rgba(0,0,0,0.4)] min-h-[400px]">
+                <div className="relative border border-t-0 border-zinc-900 rounded-b-xl overflow-hidden bg-zinc-955/10 shadow-[inset_0_4px_16px_rgba(0,0,0,0.4)] min-h-[650px]">
                   <Editor
-                    height="400px"
+                    height="650px"
                     theme="vs-dark"
                     language={
                       codingProblem.language === "python" ? "python" : 
@@ -2606,11 +2613,11 @@ ${code}
                       initial={{ opacity: 0, y: 10 }}
                       animate={{ opacity: 1, y: 0 }}
                       exit={{ opacity: 0, y: 10 }}
-                      className="absolute bottom-4 left-4 right-4 bg-zinc-950 border border-violet-500/20 text-violet-400 rounded-xl p-3 flex gap-3 items-center justify-between shadow-2xl backdrop-blur-xl z-20"
+                      className="absolute bottom-4 left-4 right-4 bg-zinc-950 border border-violet-500/20 text-zinc-300 rounded-xl p-3 flex gap-3 items-center justify-between shadow-2xl backdrop-blur-xl z-20"
                     >
                       <div className="flex gap-2.5 items-center">
-                        <div className="p-1.5 bg-violet-500/10 rounded-lg border border-violet-500/20 animate-pulse">
-                          <Lightbulb className="size-4 text-violet-400" />
+                        <div className="p-1.5 bg-zinc-900 rounded-lg border border-violet-500/20 animate-pulse">
+                          <Lightbulb className="size-4 text-zinc-300" />
                         </div>
                         <span className="font-semibold text-zinc-300">
                           {codingProblem.language === "text" || codingProblem.language === "markdown" 
@@ -2637,7 +2644,7 @@ ${code}
                     onClick={requestSocraticHint}
                     className="text-[9px] font-bold uppercase tracking-widest px-4 py-2 h-9 border border-zinc-900 text-zinc-500 hover:bg-zinc-900 hover:text-white hover:border-violet-500/30 transition-all rounded-lg cursor-pointer"
                   >
-                    <Sparkles className="size-3.5 text-violet-400" /> {t("req_hint")}
+                    <Sparkles className="size-3.5 text-zinc-300" /> {t("req_hint")}
                   </Button>
 
                   <Button
