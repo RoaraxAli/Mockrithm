@@ -304,7 +304,9 @@ const Agent = ({
     if (messages.length > 0) {
       const visibleMessages = messages.filter((m) => m.role !== "system");
       if (visibleMessages.length > 0) {
-        setLastMessage(visibleMessages[visibleMessages.length - 1].content);
+        const rawContent = visibleMessages[visibleMessages.length - 1].content;
+        const cleanContent = rawContent.split("[SYSTEM:")[0].trim();
+        setLastMessage(cleanContent);
       }
     }
 
