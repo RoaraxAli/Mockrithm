@@ -11,6 +11,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import SessionTracker from "@/components/SessionTracker";
+import InteractiveHeroBackground from "@/components/InteractiveHeroBackground";
 import { useUser } from "@clerk/nextjs";
 
 interface LandingDashboardProps {
@@ -261,26 +262,13 @@ chartPath = `M ${chartPoints[0].x} ${chartPoints[0].y} ` + chartPoints.slice(1).
         transition={{ duration: 0.8, ease: "easeOut" }}
         className="relative w-full min-h-[55vh] flex flex-col justify-center border-b border-zinc-900 bg-zinc-950/10 overflow-hidden pb-12 pt-8"
       >
+        <InteractiveHeroBackground />
         {/* Subtle Ambient Radial Backlighting */}
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-white/[0.015] blur-[100px] rounded-full pointer-events-none" />
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-white/[0.015] blur-[100px] rounded-full pointer-events-none z-0" />
 
         <div className="max-w-4xl mx-auto w-full px-6 sm:px-8 flex flex-col items-center text-center gap-6 z-10">
           
-          {/* Status Badge */}
-          <motion.div 
-            initial={{ opacity: 0, y: -10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.2 }}
-            className="bg-zinc-900/50 border border-zinc-800/80 rounded-full px-4 py-1.5 flex items-center gap-2 shadow-sm"
-          >
-            <span className="relative flex h-2 w-2">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-white opacity-75" />
-              <span className="relative inline-flex rounded-full h-2 w-2 bg-white" />
-            </span>
-            <span className="text-[9px] font-bold tracking-widest text-zinc-400 uppercase flex items-center gap-1.5 font-mono">
-              <Cpu className="size-3.5 text-zinc-500" /> AI Voice Engine Active
-            </span>
-          </motion.div>
+
 
           <h1 className="text-4xl sm:text-5xl lg:text-6xl font-black leading-[1.1] text-white tracking-tight uppercase">
             {greetingText} <br/>
@@ -312,21 +300,7 @@ chartPath = `M ${chartPoints[0].x} ${chartPoints[0].y} ` + chartPoints.slice(1).
             </Button>
           </motion.div>
 
-          {/* Simulated Live System Nodes Indicators */}
-          <div className="flex items-center gap-4 text-[9px] font-mono text-zinc-550 font-bold uppercase mt-2">
-            <div className="flex items-center gap-1.5">
-              <span className="size-1.5 rounded-full bg-emerald-500 animate-pulse" />
-              Auth: Online
-            </div>
-            <div className="flex items-center gap-1.5">
-              <span className="size-1.5 rounded-full bg-emerald-500 animate-pulse" />
-              DB: Synced
-            </div>
-            <div className="flex items-center gap-1.5">
-              <span className="size-1.5 rounded-full bg-emerald-500 animate-pulse" />
-              Speech: WebSocket Ready
-            </div>
-          </div>
+
         </div>
       </motion.section>
 
@@ -644,43 +618,7 @@ chartPath = `M ${chartPoints[0].x} ${chartPoints[0].y} ` + chartPoints.slice(1).
           {/* Right Column (Span 1): Sidebar Bento blocks */}
           <div className="flex flex-col gap-6">
             
-            {/* Quick Preset Simulator Launcher */}
-            <motion.div 
-              initial={{ opacity: 0, y: 25 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, margin: "-50px" }}
-              transition={{ duration: 0.6, delay: 0.15 }}
-              className="p-6 backdrop-blur-3xl bg-zinc-950/40 border border-white/5 rounded-2xl shadow-xl flex flex-col gap-4 group hover:border-white/10 transition-all duration-300"
-            >
-              <div className="border-b border-white/5 pb-3">
-                <h3 className="text-xs font-black uppercase tracking-widest text-white flex items-center gap-1.5">
-                  <Sliders className="size-4 text-zinc-400" /> Simulation presets
-                </h3>
-              </div>
 
-              <div className="flex flex-col gap-2">
-                {[
-                  { name: "Frontend Architect", type: "Technical", level: "Senior", bg: "from-zinc-900 to-zinc-950" },
-                  { name: "Backend Engineer", type: "System Design", level: "Senior", bg: "from-zinc-955 to-zinc-900" },
-                  { name: "Full-Stack Engineer", type: "Hybrid", level: "Lead", bg: "from-zinc-900 via-zinc-955 to-zinc-900" },
-                  { name: "STAR Behavioral", type: "Behavioral", level: "All Tiers", bg: "from-zinc-955 to-zinc-900" }
-                ].map((preset) => (
-                  <Link 
-                    key={preset.name}
-                    href={`/interview?role=${encodeURIComponent(preset.name)}&type=${preset.type}&experience=${preset.level}`}
-                    className="p-3 border border-white/5 bg-zinc-950/20 hover:bg-white/5 rounded-xl flex items-center justify-between group/preset transition-all duration-300"
-                  >
-                    <div className="flex flex-col gap-0.5">
-                      <span className="text-[10px] font-black text-white uppercase tracking-wider">{preset.name}</span>
-                      <span className="text-[7.5px] font-mono font-bold text-zinc-500 uppercase">{preset.type} • {preset.level}</span>
-                    </div>
-                    <div className="size-6 bg-white/5 group-hover/preset:bg-white text-zinc-500 group-hover/preset:text-black rounded-lg border border-white/5 flex items-center justify-center transition-all duration-300">
-                      <ChevronRight className="size-3.5" />
-                    </div>
-                  </Link>
-                ))}
-              </div>
-            </motion.div>
 
             {/* Interactive Guidance & Tips Carousel */}
             <motion.div 
