@@ -34,18 +34,7 @@ export async function GET(request: Request) {
       return NextResponse.redirect(`${origin}/payment/success?status=failure&error=missing_user_metadata`, 303);
     }
 
-    console.log(`Setting plan tier to premium for user: ${userId}`);
-
-    // Update user's plan in Firestore to premium
-    await db.collection("users").doc(userId).set(
-      {
-        tier: "premium",
-        premiumUpdatedAt: new Date(),
-        stripeSessionId: sessionId,
-        stripePaymentIntentId: (session.payment_intent as string) || "N/A",
-      },
-      { merge: true }
-    );
+    console.log(`User ${userId} checkout session validated via redirect.`);
 
     // Redirect back to client dashboard success page
     const origin = new URL(request.url).origin;

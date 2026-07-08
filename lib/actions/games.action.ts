@@ -134,7 +134,7 @@ export async function updateUserGamesProgress(
   userId: string,
   gameId: string,
   level: number,
-  xpToAdd: number,
+  xpToAdd?: number, // Ignored on server to prevent parameter manipulation
   clientName?: string,
   clientEmail?: string,
   clientImageUrl?: string
@@ -183,8 +183,10 @@ export async function updateUserGamesProgress(
       let newXp = gameData.xp;
       let newTotalXp = currentTotalXp;
       if (level > gameData.completedLevel) {
-        newXp += xpToAdd;
-        newTotalXp += xpToAdd;
+        // Enforce server-side verified XP reward of 100 XP per level completed
+        const verifiedXp = 100;
+        newXp += verifiedXp;
+        newTotalXp += verifiedXp;
       }
 
       const updatedProgress = {
@@ -249,10 +251,33 @@ export async function saveUserSoundPreference(userId: string, soundPreference: s
   }
 }
 
+function getVerifiedAchievementXp(achievementId: string): number {
+  if (achievementId.endsWith("_novice")) return 50;
+  if (achievementId.endsWith("_apprentice")) return 100;
+  if (achievementId.endsWith("_acolyte")) return 150;
+  if (achievementId.endsWith("_expert")) return 200;
+
+  const catalog: Record<string, number> = {
+    first_syntax: 50,
+    first_rank: 100,
+    century_club: 250,
+    apex_dev: 600,
+    poly_1: 150,
+    poly_2: 300,
+    poly_3: 500,
+    legend: 200,
+    god: 500,
+    social_1: 50,
+    social_2: 150
+  };
+  
+  return catalog[achievementId] || 0;
+}
+
 /**
  * Claim an achievement persistently in Firestore
  */
-export async function claimAchievementPersistent(userId: string, achievementId: string, xpReward: number) {
+export async function claimAchievementPersistent(userId: string, achievementId: string, xpReward?: number) {
   try {
     if (!userId) return { success: false, error: "Unauthenticated" };
     const userDocRef = db.collection("users").doc(userId);
@@ -269,9 +294,12 @@ export async function claimAchievementPersistent(userId: string, achievementId: 
         return;
       }
 
+      // Enforce server-side verified reward instead of relying on client parameter
+      const verifiedReward = getVerifiedAchievementXp(achievementId);
+
       transaction.update(userDocRef, {
         claimedAchievements: [...claimed, achievementId],
-        gamesXp: currentXp + xpReward,
+        gamesXp: currentXp + verifiedReward,
         updatedAt: new Date()
       });
     });

@@ -25,6 +25,9 @@ import {
 
 const Editor = dynamic(() => import("@monaco-editor/react"), { ssr: false });
 
+import GitGame from "@/components/games/GitGame";
+import LivePreview from "@/components/games/LivePreview";
+
 // --- Country → valid cities map for location validation ---
 const COUNTRY_CITIES: Record<string, string[]> = {
   "Pakistan": ["Karachi","Lahore","Islamabad","Rawalpindi","Faisalabad","Multan","Peshawar","Quetta","Sialkot","Hyderabad","Gujranwala","Bahawalpur","Sargodha","Sukkur","Larkana","Abbottabad","Mardan","Mingora","Dera Ghazi Khan","Sahiwal"],
@@ -1493,18 +1496,7 @@ function GamesPageContent() {
                     {/* Column 3: Preview Output & Results */}
                     <div className="flex flex-col gap-4 max-h-[calc(100vh-140px)] min-h-0">
                       {/* Live preview component */}
-                      <div className="flex-1 bg-white rounded-2xl overflow-hidden shadow-2xl min-h-0 flex flex-col border border-zinc-900">
-                        <div className="bg-zinc-950 border-b border-zinc-900 px-4 py-2 text-[10px] font-mono font-black text-zinc-500 uppercase tracking-widest flex items-center justify-between select-none">
-                          <span>Live Render Preview</span>
-                          <span className="text-[8px] px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 font-bold">Active</span>
-                        </div>
-                        <iframe
-                          title="live-render-preview"
-                          srcDoc={previewDoc}
-                          className="w-full flex-1 bg-white border-none"
-                          sandbox="allow-scripts"
-                        />
-                      </div>
+                      <LivePreview previewDoc={previewDoc} />
 
                       {/* Test logs & results terminal */}
                       <div className="h-[180px] shrink-0 bg-zinc-950 border border-zinc-900 rounded-2xl p-5 flex flex-col gap-3 overflow-y-auto shadow-2xl">
@@ -1517,17 +1509,12 @@ function GamesPageContent() {
                         </div>
 
                         {activeGame.id === "git" ? (
-                          <div className="flex-1 flex flex-col gap-2 bg-black/60 border border-zinc-900 rounded-xl p-3 font-mono text-[10px]">
-                            <div className="flex-1 overflow-y-auto max-h-[80px] text-zinc-400 space-y-1 select-text">
-                              {gitTerminalLogs.map((log, i) => <div key={i}>{log}</div>)}
-                            </div>
-                            <form onSubmit={handleExecuteGitCommand} className="flex gap-2 border-t border-zinc-900 pt-2 select-none">
-                              <span className="text-zinc-500 font-bold select-none pt-1.5">$</span>
-                              <input type="text" value={gitCommandInput} onChange={e => setGitCommandInput(e.target.value)}
-                                placeholder="Type git command..."
-                                className="flex-1 bg-transparent border-none text-white focus:outline-none placeholder-zinc-700 font-mono" />
-                            </form>
-                          </div>
+                          <GitGame 
+                            gitTerminalLogs={gitTerminalLogs}
+                            gitCommandInput={gitCommandInput}
+                            setGitCommandInput={setGitCommandInput}
+                            handleGitCommandSubmit={handleGitCommandSubmit}
+                          />
                         ) : (
                           <div className="flex-1 overflow-y-auto max-h-[110px] text-[10px] font-mono text-zinc-500 space-y-1 select-text">
                             {evalLogs.length === 0 ? (

@@ -9,7 +9,8 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const { amount = 10 } = await request.json().catch(() => ({}));
+    // Premium tier price is hardcoded to $10.00 (1000 cents) to prevent client pricing manipulation
+    const premiumAmountCents = 1000;
     const secretKey = process.env.STRIPE_SECRET_KEY;
 
     if (!secretKey) {
@@ -32,7 +33,7 @@ export async function POST(request: Request) {
               name: "Mockrithm Premium Tier",
               description: "Lifetime premium upgrade for ATS resume templates, unlimited real-time interviews, and advanced analytics.",
             },
-            unit_amount: Math.round(parseFloat(amount.toString()) * 100), // e.g. 10 * 100 = 1000 cents ($10.00)
+            unit_amount: premiumAmountCents,
           },
           quantity: 1,
         },

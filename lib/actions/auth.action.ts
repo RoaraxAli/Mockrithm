@@ -48,8 +48,8 @@ export const getCurrentUser = cache(async (): Promise<User | null> => {
       const email = clerkUser.emailAddresses[0]?.emailAddress || "";
       const name = clerkUser.fullName || clerkUser.firstName || email.split("@")[0] || "New User";
       const imageUrl = clerkUser.imageUrl || "";
-      const isAdmin = email === "ahmed@gmail.com";
-      const role = isAdmin ? "Admin" : "User";
+      // All new users default to 'User'. Admin status is promoted dynamically via admin panel or script.
+      const role = "User";
 
       const newUserData = {
         name,
