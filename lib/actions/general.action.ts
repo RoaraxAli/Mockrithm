@@ -58,6 +58,12 @@ export async function createFeedback(params: CreateFeedbackParams) {
       )
       .join("");
 
+    console.log("================= DIAGNOSTIC =================");
+    console.log("createFeedback called with transcript size:", transcript?.length);
+    console.log("formattedTranscript value:");
+    console.log(formattedTranscript);
+    console.log("==============================================");
+
     const codeContext = candidateCode
       ? `\n\nCandidate's Final Code Written in Sandbox Editor:\n\`\`\`\n${candidateCode}\n\`\`\`\n`
       : "";
@@ -186,6 +192,7 @@ export async function createFeedback(params: CreateFeedbackParams) {
       averageWpm: averageWpm || 0,
       topFillerWords: topFillerWords || [],
       candidateCode: candidateCode || "",
+      transcript: transcript || [],
     };
 
     let feedbackRef;

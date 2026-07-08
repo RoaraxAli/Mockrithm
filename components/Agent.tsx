@@ -338,8 +338,18 @@ const Agent = ({
         interviewId: interviewId!,
         userId: userId!,
         transcript: messages
-          .filter((m) => !m.content.startsWith("[SYSTEM:"))
-          .map((m) => ({ role: m.role, content: m.content })),
+          .map((m) => {
+            let textVal = m.content;
+            if (textVal.startsWith("[SYSTEM: The candidate has completed their code")) {
+              textVal = "[Candidate submitted code solution]";
+            } else if (textVal.startsWith("[SYSTEM: The candidate has completed their text")) {
+              textVal = "[Candidate submitted draft text]";
+            } else {
+              textVal = textVal.split("[SYSTEM:")[0].trim();
+            }
+            return { role: m.role, content: textVal };
+          })
+          .filter((m) => m.content.length > 0),
         feedbackId: feedbackId || undefined,
         averageWpm,
         topFillerWords,
