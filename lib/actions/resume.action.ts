@@ -50,7 +50,7 @@ export const getUserResumes = cache(async (userId: string): Promise<ResumeDocume
       .orderBy("createdAt", "desc")
       .get();
 
-    return snapshot.docs.map((doc) => ({
+    return snapshot.docs.map((doc: any) => ({
       id: doc.id,
       ...doc.data(),
     })) as ResumeDocument[];

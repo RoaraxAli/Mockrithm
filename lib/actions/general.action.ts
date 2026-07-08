@@ -255,7 +255,7 @@ export const getFeedbacksForUser = cache(async (userId: string): Promise<Feedbac
     .collection("interviewsfeedback")
     .where("userId", "==", userId)
     .get();
-  return querySnapshot.docs.map((doc) => {
+  return querySnapshot.docs.map((doc: any) => {
     const data = doc.data();
     return {
       id: doc.id,
@@ -282,7 +282,7 @@ export const getLatestInterviews = cache(async (
     .get();
 
   return interviews.docs
-    .map((doc) => {
+    .map((doc: any) => {
       const data = doc.data();
       return {
         id: doc.id,
@@ -309,7 +309,7 @@ export const getInterviewsByUserId = cache(async (
     .where("userId", "==", userId)
     .get();
 
-  const interviews = querySnapshot.docs.map((doc) => {
+  const interviews = querySnapshot.docs.map((doc: any) => {
     const data = doc.data();
     return {
       id: doc.id,

@@ -152,16 +152,18 @@ const Agent = ({
   useEffect(() => {
     codeRef.current = code;
   }, [code]);
+  const [showSandbox, setShowSandbox] = useState(!!propCodingProblem);
   useEffect(() => {
     if (codingProblem) {
       setCode(codingProblem.templateCode || "");
+      setShowSandbox(true);
     } else {
       setCode("");
+      setShowSandbox(false);
     }
   }, [codingProblem]);
   const [isCodingStuck, setIsCodingStuck] = useState(false);
   const lastCodeTypedRef = useRef<number>(Date.now());
-  const [showSandbox, setShowSandbox] = useState(false);
 
   // Behavioral STAR Framework States
   const [starChecklist, setStarChecklist] = useState<StarChecklist>({
@@ -337,9 +339,9 @@ const Agent = ({
 
     if (callStatus === CallStatus.FINISHED) {
       if (type === "generate") {
-        handleSaveConversationSetup(messages);
+        handleSaveConversationSetup(messagesRef.current);
       } else {
-        handleGenerateFeedback(messages);
+        handleGenerateFeedback(messagesRef.current);
       }
     }
   }, [messages, callStatus, feedbackId, interviewId, router, type, userId]);
@@ -2208,124 +2210,124 @@ ${code}
             (codingProblem && showSandbox) ? "lg:col-span-6" : "col-span-1"
           )}>
             
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 w-full items-stretch">
-              {/* AI Voice Interviewer Orb Card */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 w-full items-stretch font-mono animate-fadeIn">
+              {/* AI Voice Interviewer Orb Card - Terminal Style */}
               <motion.div 
                 whileHover={{ y: -1 }}
                 className={cn(
-                  "flex items-center justify-center flex-col gap-3.5 p-4 min-h-[175px] backdrop-blur-xl border rounded-2xl flex-1 w-full shadow-2xl relative overflow-hidden transition-all duration-500",
+                  "flex items-center justify-center flex-col gap-3.5 p-4 min-h-[175px] backdrop-blur-xl border rounded-xl flex-1 w-full shadow-2xl relative overflow-hidden transition-all duration-500",
                   callStatus === CallStatus.ACTIVE && isSpeaking
-                    ? "bg-zinc-950/60 border-zinc-700 shadow-[0_0_50px_rgba(255,255,255,0.03)]"
-                    : "bg-zinc-950/20 border-zinc-900"
+                    ? "bg-black/85 border-emerald-500/30 shadow-[0_0_30px_rgba(16,185,129,0.05)]"
+                    : "bg-black/40 border-zinc-800/80"
                 )}
               >
                 <div className="relative flex justify-center items-center h-16 w-16">
-                  {/* Modern circular breathing halo aura */}
+                  {/* Circular breathing halo aura */}
                   <div className={cn(
-                    "absolute inset-0 border border-zinc-700/10 rounded-full transition-all duration-1000",
-                    callStatus === CallStatus.ACTIVE && isSpeaking ? "scale-110 opacity-100 bg-white/5" : "scale-100 opacity-0"
+                    "absolute inset-0 border rounded-full transition-all duration-1000",
+                    callStatus === CallStatus.ACTIVE && isSpeaking 
+                      ? "border-emerald-500/20 scale-110 bg-emerald-500/5" 
+                      : "border-zinc-800/20 scale-100 opacity-0"
                   )} />
                   <div className={cn(
-                    "absolute inset-1.5 border border-zinc-700/10 rounded-full transition-all duration-1000",
-                    callStatus === CallStatus.ACTIVE && isSpeaking ? "scale-105 opacity-100 bg-white/5 animate-pulse" : "scale-100 opacity-0"
+                    "absolute inset-1.5 border rounded-full transition-all duration-1000",
+                    callStatus === CallStatus.ACTIVE && isSpeaking 
+                      ? "border-emerald-500/10 scale-105 bg-emerald-500/5 animate-pulse" 
+                      : "border-zinc-800/10 scale-100 opacity-0"
                   )} />
                   
                   {/* Voice core orb */}
                   <div className={cn(
                     "z-10 flex items-center justify-center rounded-full size-[48px] relative border transition-all duration-500 shadow-2xl bg-zinc-950",
                     callStatus === CallStatus.ACTIVE && isSpeaking 
-                      ? "border-white scale-105 shadow-[0_0_20px_rgba(255,255,255,0.1)]" 
+                      ? "border-emerald-400 scale-105 shadow-[0_0_15px_rgba(52,211,153,0.2)]" 
                       : "border-zinc-800"
                   )}>
                     {/* Glowing core animation */}
-                    <svg className={cn("w-5 h-5 text-white", callStatus === CallStatus.ACTIVE && isSpeaking ? "animate-pulse" : "opacity-60")} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <svg className={cn("w-5 h-5", callStatus === CallStatus.ACTIVE && isSpeaking ? "text-emerald-400 animate-pulse" : "text-zinc-650")} fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <circle cx="12" cy="12" r="9" strokeWidth="1.5" />
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z" />
                     </svg>
                   </div>
                 </div>
                 
-                <div className="text-center flex flex-col gap-0.5 items-center">
-                  <h3 className="text-xs font-bold text-white tracking-wider uppercase">Alex</h3>
-                  <span className="text-[8px] text-zinc-455 font-bold tracking-widest bg-zinc-900/60 border border-zinc-850 px-2 py-0.5 rounded-full uppercase">
-                    {t("title")}
+                <div className="text-center flex flex-col gap-1 items-center">
+                  <h3 className="text-xs font-bold text-white tracking-wider uppercase font-mono text-center">Alex</h3>
+                  <span className="text-[7.5px] text-zinc-400 font-bold tracking-widest bg-zinc-900/60 border border-zinc-855 px-2 py-0.5 rounded uppercase font-mono">
+                    console_node: active
                   </span>
                 </div>
 
                 {callStatus === CallStatus.ACTIVE && (
-                  <div className="flex flex-col items-center gap-2 w-full mt-0.5">
-                    {/* Subtle clean visualizer */}
+                  <div className="flex flex-col items-center gap-2 w-full mt-0.5 font-mono">
                     {isSpeaking ? (
                       <div className="flex items-end justify-center gap-1 h-3.5">
-                        <div className="w-1 bg-white rounded-full h-2 animate-[pulse_0.7s_infinite]" />
-                        <div className="w-1 bg-zinc-400 rounded-full h-3.5 animate-[pulse_1s_infinite] delay-100" />
-                        <div className="w-1 bg-zinc-350 rounded-full h-2.5 animate-[pulse_0.6s_infinite] delay-200" />
-                        <div className="w-1 bg-white rounded-full h-1.5 animate-[pulse_0.8s_infinite] delay-150" />
+                        <div className="w-1 bg-emerald-400 rounded-full h-2 animate-[pulse_0.7s_infinite]" />
+                        <div className="w-1 bg-emerald-500 rounded-full h-3.5 animate-[pulse_1s_infinite] delay-100" />
+                        <div className="w-1 bg-emerald-400 rounded-full h-2.5 animate-[pulse_0.6s_infinite] delay-200" />
+                        <div className="w-1 bg-emerald-500 rounded-full h-1.5 animate-[pulse_0.8s_infinite] delay-150" />
                       </div>
                     ) : (
-                      <div className="flex items-center gap-1 h-3.5 opacity-35">
-                        <span className="w-1 h-1 bg-zinc-650 rounded-full" />
-                        <span className="w-1 h-1 bg-zinc-650 rounded-full animate-ping" />
-                        <span className="w-1 h-1 bg-zinc-650 rounded-full" />
+                      <div className="flex items-center gap-1 h-3.5 opacity-30">
+                        <span className="w-1 h-1 bg-zinc-700 rounded-full animate-bounce" />
+                        <span className="w-1 h-1 bg-zinc-700 rounded-full animate-bounce delay-100" />
+                        <span className="w-1 h-1 bg-zinc-700 rounded-full animate-bounce delay-200" />
                       </div>
                     )}
                   </div>
                 )}
               </motion.div>
 
-              {/* Candidate Premium Profile Panel */}
+              {/* Candidate Premium Profile Panel - Terminal Style */}
               <motion.div 
                 whileHover={{ y: -1 }}
-                className="flex items-center justify-center flex-col gap-3.5 p-4 min-h-[175px] backdrop-blur-xl border border-zinc-900 bg-zinc-950/20 rounded-2xl flex-1 w-full shadow-2xl relative overflow-hidden transition-all duration-500 max-md:hidden"
+                className="flex items-center justify-center flex-col gap-3.5 p-4 min-h-[175px] backdrop-blur-xl border border-zinc-800/80 bg-black/40 rounded-xl flex-1 w-full shadow-2xl relative overflow-hidden transition-all duration-500 max-md:hidden animate-fadeIn"
               >
-                <div className="relative">
-                  <div className="absolute -inset-0.5 rounded-full bg-gradient-to-tr from-zinc-800 to-zinc-700 group-hover:from-violet-500 group-hover:to-cyan-400 p-[1px] transition-all duration-500" />
-                  <div className="relative w-11 h-11 rounded-full overflow-hidden bg-zinc-900">
+                <div className="relative font-mono">
+                  <div className="absolute -inset-0.5 rounded-full bg-zinc-800/50 p-[1px]" />
+                  <div className="relative w-11 h-11 rounded-full overflow-hidden bg-zinc-955 border border-zinc-800/60">
                     {profileImage ? (
                       <Image
                         src={profileImage}
                         alt={userName}
                         width={44}
                         height={44}
-                        className="rounded-full object-cover size-full"
+                        className="rounded-full object-cover size-full animate-fadeIn"
                       />
                     ) : (
-                      <div className="w-full h-full flex items-center justify-center bg-zinc-900 border border-zinc-850">
-                        <User className="w-5 h-5 text-zinc-550" />
+                      <div className="w-full h-full flex items-center justify-center bg-zinc-950">
+                        <User className="w-5 h-5 text-zinc-650" />
                       </div>
                     )}
                   </div>
                 </div>
                 
-                <div className="text-center flex flex-col gap-0.5 items-center w-full">
-                  <h3 className="text-xs font-bold text-white tracking-wide truncate max-w-[140px]">
+                <div className="text-center flex flex-col gap-1 items-center w-full font-mono">
+                  <h3 className="text-xs font-bold text-white tracking-wide truncate max-w-[140px] text-center">
                     {userName}
                   </h3>
-                  <span className="text-[8px] text-zinc-500 font-bold uppercase tracking-wider">
-                    {t("profile")}
+                  <span className="text-[7.5px] text-zinc-400 font-bold uppercase tracking-wider bg-zinc-900/60 border border-zinc-855 px-2 py-0.5 rounded">
+                    candidate_session
                   </span>
                 </div>
 
-                {/* Dynamic stats tracking */}
                 {callStatus === CallStatus.ACTIVE && (
-                  <div className="w-full flex flex-col gap-2 mt-1 bg-zinc-950/40 border border-zinc-900/60 p-2.5 rounded-xl">
+                  <div className="w-full flex flex-col gap-2 mt-1 bg-zinc-955/40 border border-zinc-900/60 p-2.5 rounded-xl font-mono">
                     <div className="flex justify-between items-center text-[9px] font-bold">
-                      <span className="text-zinc-500">{t("pace")}</span>
-                      <span className="text-emerald-400">{currentAverageWpm} WPM</span>
+                      <span className="text-zinc-555 font-mono">speech_cadence</span>
+                      <span className="text-cyan-400">{currentAverageWpm} WPM</span>
                     </div>
-                    {/* Speedometer line */}
-                    <div className="w-full h-1 bg-zinc-900 rounded-full overflow-hidden">
+                    <div className="w-full h-1 bg-zinc-900 rounded overflow-hidden">
                       <div 
-                        className="h-full bg-emerald-400 transition-all duration-500"
+                        className="h-full bg-cyan-400 transition-all duration-500"
                         style={{ width: `${Math.min(100, (currentAverageWpm / 200) * 100)}%` }}
                       />
                     </div>
 
-                    {/* Filler words indicator */}
-                    <div className="flex justify-between text-[8px] font-bold text-zinc-500 border-t border-zinc-900/60 pt-1.5 mt-0.5">
-                      <span>{t("fillers")}:</span>
-                      <span className="text-amber-400">
-                        Like ({fillerLike}) / Um ({fillerUm}) / Uh ({fillerUh}) / Hmm ({fillerCountsRef.current?.hmm || 0})
+                    <div className="flex justify-between text-[8px] font-bold text-zinc-555 border-t border-zinc-900/60 pt-1.5 mt-0.5">
+                      <span>fillers:</span>
+                      <span className="text-amber-505 font-mono">
+                        Like({fillerLike}) / Um({fillerUm}) / Uh({fillerUh})
                       </span>
                     </div>
                   </div>
@@ -2333,20 +2335,50 @@ ${code}
               </motion.div>
             </div>
 
-            {/* Premium Chat Bubble Transcript */}
+            {/* Retro-Modern Console Terminal Transcript Buffer */}
             {messages.length > 0 && (
               <motion.div 
                 initial={{ opacity: 0, y: 5 }}
                 animate={{ opacity: 1, y: 0 }}
-                className="border border-zinc-900 rounded-2xl w-full shadow-2xl relative overflow-hidden backdrop-blur-xl bg-zinc-950/30"
+                className="border border-zinc-800/80 rounded-xl w-full shadow-2xl relative overflow-hidden backdrop-blur-xl bg-black/60 font-mono text-[11px] leading-relaxed"
               >
-                <div className="rounded-2xl px-5 py-4 flex items-center justify-center bg-zinc-950/20">
-                  <p
-                    key={lastMessage}
-                    className="text-xs text-center text-zinc-300 font-semibold leading-relaxed animate-fadeIn"
-                  >
-                    "{lastMessage}"
-                  </p>
+                {/* Terminal Header Bar */}
+                <div className="flex px-4 py-2 border-b border-zinc-855 text-[9px] text-zinc-500 font-semibold justify-between items-center bg-zinc-955/60">
+                  <div className="flex items-center gap-1.5 font-mono">
+                    <span className="w-1.5 h-1.5 rounded-full bg-red-500/60" />
+                    <span className="w-1.5 h-1.5 rounded-full bg-yellow-500/60" />
+                    <span className="w-1.5 h-1.5 rounded-full bg-green-500/60" />
+                    <span className="ml-1.5 text-zinc-400 font-bold">console_session_buffer</span>
+                  </div>
+                  <span className="text-[8px] uppercase font-bold tracking-widest text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded border border-emerald-500/20 font-mono">
+                    Active Log
+                  </span>
+                </div>
+                
+                {/* Terminal Scroll Container */}
+                <div className="p-4 flex flex-col gap-2.5 max-h-[220px] overflow-y-auto custom-scrollbar select-text bg-black/40">
+                  {messages.map((m, idx) => {
+                    const isUser = m.role === "user";
+                    const promptChar = isUser ? "user@mockrithm:~$" : "alex@mockrithm:~$";
+                    const colorClass = isUser ? "text-cyan-400" : "text-emerald-400";
+                    return (
+                      <div key={idx} className="flex flex-col gap-0.5 font-mono">
+                        <div className="flex items-center gap-1.5 text-[9px] font-bold text-zinc-500">
+                          <span>{promptChar}</span>
+                        </div>
+                        <p className={cn("pl-3 font-semibold", colorClass)}>
+                          {m.content}
+                        </p>
+                      </div>
+                    );
+                  })}
+                  {/* Blinking CLI Cursor at the bottom if active */}
+                  {callStatus === CallStatus.ACTIVE && !isSpeaking && (
+                    <div className="flex items-center gap-1.5 pl-3 font-mono">
+                      <span className="text-zinc-555 text-[9px]">user@mockrithm:~$</span>
+                      <span className="w-1.5 h-3 bg-cyan-400 animate-[pulse_0.8s_infinite] inline-block" />
+                    </div>
+                  )}
                 </div>
               </motion.div>
             )}
@@ -2475,12 +2507,14 @@ ${code}
               transition={{ duration: 0.6, ease: "easeOut" }}
               className="lg:col-span-6 flex flex-col gap-3.5 p-4.5 backdrop-blur-2xl bg-zinc-950/20 rounded-2xl border border-zinc-900 shadow-2xl w-full relative overflow-hidden"
             >
-              <div className="flex items-center justify-between border-b border-zinc-900 pb-2.5">
+              <div className="flex items-center justify-between border-b border-zinc-900 pb-2.5 font-mono">
                 <h3 className="text-[10px] font-bold text-zinc-400 tracking-wider uppercase flex items-center gap-2">
                   <Code className="size-4.5 text-violet-400" />
-                  {codingProblem.language === "text" || codingProblem.language === "markdown" ? t("workspace_sandbox") : t("coding_sandbox")}
+                  {codingProblem.language === "latex" ? "LaTeX Equation Editor" : 
+                   codingProblem.language === "markdown" ? "Markdown Essay Editor" : 
+                   codingProblem.language === "text" ? "Writing Sandbox" : "Coding Workspace IDE"}
                 </h3>
-                <span className="bg-zinc-900 border border-zinc-850 text-zinc-300 font-mono text-[9px] px-3 py-1 rounded-full font-bold uppercase tracking-wider shadow-inner">
+                <span className="bg-zinc-900 border border-zinc-850 text-zinc-300 font-mono text-[9px] px-3 py-1 rounded font-bold uppercase tracking-wider shadow-inner">
                   {codingProblem.language.toUpperCase()}
                 </span>
               </div>
@@ -2496,23 +2530,36 @@ ${code}
                     <span className="ml-2 text-zinc-400 font-bold">
                       {codingProblem.language === "python" ? "solution.py" : 
                        codingProblem.language === "javascript" || codingProblem.language === "typescript" ? "solution.ts" :
-                       codingProblem.language === "markdown" ? "draft.md" : "draft.txt"}
+                       codingProblem.language === "markdown" ? "draft.md" : 
+                       codingProblem.language === "latex" ? "equation.tex" : 
+                       codingProblem.language === "html" ? "index.html" : 
+                       codingProblem.language === "css" ? "styles.css" : 
+                       codingProblem.language === "swift" ? "main.swift" : 
+                       codingProblem.language === "java" ? "Solution.java" : 
+                       codingProblem.language === "cpp" ? "main.cpp" : "draft.txt"}
                     </span>
                   </div>
-                  <span className="text-[8px] uppercase font-bold tracking-widest text-violet-400 bg-violet-500/10 px-2.5 py-0.5 rounded-full border border-violet-500/20">
+                  <span className="text-[8px] uppercase font-bold tracking-widest text-violet-400 bg-violet-500/10 px-2.5 py-0.5 rounded border border-violet-500/20 font-mono">
                     {t("ready")}
                   </span>
                 </div>
 
                 {/* Monaco Editor Container */}
-                <div className="relative border border-t-0 border-zinc-900 rounded-b-xl overflow-hidden bg-zinc-950/10 shadow-[inset_0_4px_16px_rgba(0,0,0,0.4)] min-h-[400px]">
+                <div className="relative border border-t-0 border-zinc-900 rounded-b-xl overflow-hidden bg-zinc-955/10 shadow-[inset_0_4px_16px_rgba(0,0,0,0.4)] min-h-[400px]">
                   <Editor
                     height="400px"
                     theme="vs-dark"
                     language={
                       codingProblem.language === "python" ? "python" : 
                       codingProblem.language === "javascript" || codingProblem.language === "typescript" ? "typescript" :
-                      codingProblem.language === "markdown" ? "markdown" : "text"
+                      codingProblem.language === "markdown" ? "markdown" : 
+                      codingProblem.language === "latex" ? "latex" : 
+                      codingProblem.language === "html" ? "html" :
+                      codingProblem.language === "css" ? "css" :
+                      codingProblem.language === "swift" ? "swift" :
+                      codingProblem.language === "java" || codingProblem.language === "kotlin" ? "java" :
+                      codingProblem.language === "cpp" || codingProblem.language === "c++" || codingProblem.language === "c" ? "cpp" :
+                      "text"
                     }
                     value={code}
                     onChange={(val) => handleCodeChange(val || "")}

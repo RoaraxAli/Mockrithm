@@ -74,8 +74,8 @@ export async function getAdminMetrics() {
 
     // Feedback metrics — combine both collections
     const [interviewFbTotal, supportFbTotal] = await Promise.all([
-      db.collection("interviewsfeedback").count().get().then((s) => s.data().count),
-      db.collection("feedback").count().get().then((s) => s.data().count),
+      db.collection("interviewsfeedback").count().get().then((s: any) => s.data().count),
+      db.collection("feedback").count().get().then((s: any) => s.data().count),
     ]);
     const feedbackTotal = interviewFbTotal + supportFbTotal;
 
@@ -149,7 +149,7 @@ export async function getRecentActivity() {
         ...doc.data(),
         createdAt: serializeDate(doc.data().createdAt),
       }))
-      .sort((a, b) => {
+      .sort((a: any, b: any) => {
         const aTime = a.createdAt ? new Date(a.createdAt).getTime() : 0;
         const bTime = b.createdAt ? new Date(b.createdAt).getTime() : 0;
         return bTime - aTime;
