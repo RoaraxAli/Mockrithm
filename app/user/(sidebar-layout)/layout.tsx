@@ -5,11 +5,14 @@ import { useState } from "react"
 import { Sidebar } from "@/app/user/components/Sidebar"
 import { Menu } from "lucide-react"
 
+import { redirect } from "next/navigation";
+
 export default function SidebarLayout({
   children,
 }: {
   children: React.ReactNode
 }) {
+  redirect("/");
   const [sidebarOpen, setSidebarOpen] = useState(false)
 
   return (

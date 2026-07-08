@@ -94,13 +94,13 @@ export async function createFeedback(params: CreateFeedbackParams) {
             - No answer, silent responses, or "I don't know": 0.
           - DO NOT penalize the candidate's "Technical Knowledge" or "Problem Solving" scores heavily if their verbal answers are brief/concise, as long as they are technically correct and accurate.
           - DO NOT tank the candidate's scores under 60% solely because they omitted quantitative metrics (STAR results). Instead, grade their logic/flow fairly and suggest adding metrics under areas for improvement.
-          - EVALUATE THE SANDBOX CODE: If candidate code is provided below, you MUST review it. Acknowledge and grade their written code for "Technical Knowledge" and "Problem Solving". If their code is correct, give them a high score (e.g. 85-98) even if they did not speak much about it in the transcript.
-        - If candidate does not answer, says "I don’t know", or microphone is not connected (no audio detected/purposely bad answers), assign a score of 0 for that category and explain it in the comment (e.g., "No audio detected or answer was missing"). Do not crash.
+        - If the candidate does not answer any questions verbally, says "I don’t know" throughout, or the microphone is not connected (no audio detected), AND they did not submit any code or text in the sandbox, then assign a score of 0 for that category.
+        - CRITICAL CODE GRADING RULE: If the candidate submitted code or text solutions in the sandbox (indicated by "[Candidate submitted code solution]" or "[Candidate submitted draft text]" in the transcript, and code is present in the "Candidate's Final Code" section below), you MUST evaluate their code/text. Assign a high score (e.g., 80-98) for "Technical Knowledge" and "Problem Solving" if their submitted code/text is correct and functional. Do NOT assign 0 for these categories simply because they submitted their answer via the editor rather than speaking it aloud.
         - Do not invent or assume answers not present in the transcript or candidate code.
 
         Interview Transcript:
-        \${formattedTranscript}
-        \${codeContext}
+        ${formattedTranscript}
+        ${codeContext}
       `;
 
     try {

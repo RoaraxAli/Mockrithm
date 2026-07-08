@@ -10,6 +10,24 @@ import MagicRings from "@/components/MagicRings"
 export default function MicCheckPage() {
   const { isLoaded, user } = useUser()
   
+  // STT Engine State
+  const [selectedStt, setSelectedStt] = useState<"browser" | "whisper-v3" | "whisper-turbo">("whisper-turbo");
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const saved = localStorage.getItem("selectedStt");
+      if (saved === "browser" || saved === "whisper-v3" || saved === "whisper-turbo") {
+        setSelectedStt(saved);
+      }
+    }
+  }, []);
+
+  const handleSttChange = (val: "browser" | "whisper-v3" | "whisper-turbo") => {
+    setSelectedStt(val);
+    if (typeof window !== "undefined") {
+      localStorage.setItem("selectedStt", val);
+    }
+  };
+
   // Audio state
   const [isActive, setIsActive] = useState(false)
   const [isLoopback, setIsLoopback] = useState(false)
@@ -285,14 +303,13 @@ export default function MicCheckPage() {
         </p>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-stretch mt-2">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-stretch mt-2">
         
         {/* Left Side: Level visualizer and MagicRings container */}
-        <div className="lg:col-span-7 flex flex-col gap-6 items-center">
+        <div className="flex flex-col gap-6 items-center w-full">
           
           <div 
-            className="w-full max-w-[600px] h-[400px] relative border border-zinc-900 bg-zinc-950/40 rounded-3xl overflow-hidden shadow-2xl flex flex-col justify-between p-8"
-            style={{ width: "100%", height: "400px" }}
+            className="w-full aspect-[4/3] min-h-[300px] max-h-[360px] md:h-[400px] relative border border-zinc-900 bg-zinc-950/40 rounded-3xl overflow-hidden shadow-2xl flex flex-col justify-between p-5 sm:p-8"
           >
             {/* Background Magic Rings */}
             <div className="absolute inset-0 z-0 opacity-60">
@@ -386,13 +403,13 @@ export default function MicCheckPage() {
           </div>
 
           {errorMsg && (
-            <div className="w-full max-w-[600px] p-4 border border-red-950 bg-red-950/20 rounded-2xl text-xs text-red-400 text-center font-semibold">
+            <div className="w-full max-w-full p-4 border border-red-950 bg-red-950/20 rounded-2xl text-xs text-red-400 text-center font-semibold">
               {errorMsg}
             </div>
           )}
 
           {/* Discord-style Loopback Toggle Switch Card */}
-          <div className="w-full max-w-[600px] p-6 backdrop-blur-xl bg-zinc-950/30 border border-zinc-900 rounded-2xl flex items-center justify-between gap-6">
+          <div className="w-full max-w-full p-6 backdrop-blur-xl bg-zinc-950/30 border border-zinc-900 rounded-2xl flex items-center justify-between gap-6">
             <div className="flex flex-col gap-1.5 flex-1">
               <span className="text-[10px] font-black uppercase tracking-wider text-white flex items-center gap-1.5">
                 {isLoopback ? <Volume2 className="size-4 text-purple-400" /> : <VolumeX className="size-4 text-zinc-500" />}
@@ -419,37 +436,44 @@ export default function MicCheckPage() {
         </div>
 
         {/* Right Side: Speech to text card */}
-        <div className="lg:col-span-5 flex flex-col">
+        <div className="flex flex-col w-full">
           
-          <div className="w-full h-full p-6 backdrop-blur-xl bg-zinc-950/30 border border-zinc-900 rounded-3xl flex flex-col justify-between gap-6 min-h-[480px]">
+          <div className="w-full h-full p-5 sm:p-6 backdrop-blur-xl bg-zinc-950/30 border border-zinc-900 rounded-3xl flex flex-col justify-between gap-6 min-h-[360px] md:min-h-[400px]">
             
             {/* Header info */}
-            <div className="flex items-center justify-between border-b border-zinc-900 pb-4">
+            <div className="flex items-center justify-between border-b border-zinc-900 pb-4 gap-4 flex-wrap">
               <div className="flex items-center gap-2">
                 <MessageSquare className="size-4.5 text-indigo-400" />
                 <div>
                   <span className="text-[10px] font-black uppercase tracking-widest text-zinc-200 block leading-tight">Transcription test</span>
-                  <span className="text-[8px] font-mono font-bold uppercase tracking-wider text-zinc-500">Live Web Speech API</span>
+                  <span className="text-[8.5px] font-mono font-bold uppercase tracking-wider text-zinc-500">Speech Engine Settings</span>
                 </div>
               </div>
               
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-3">
+                <div className="flex flex-col gap-0.5">
+                  <label className="text-[7.5px] font-mono font-bold uppercase tracking-wider text-zinc-550">Engine select</label>
+                  <select
+                    value={selectedStt}
+                    onChange={(e) => handleSttChange(e.target.value as any)}
+                    className="bg-zinc-900 border border-zinc-800 text-[9px] text-zinc-300 rounded px-2 py-0.5 font-mono font-bold outline-none focus:border-zinc-700 cursor-pointer"
+                  >
+                    <option value="whisper-turbo">Whisper Turbo</option>
+                    <option value="whisper-v3">Whisper V3</option>
+                    <option value="browser">Web Speech</option>
+                  </select>
+                </div>
+
                 {isListening && (
                   <span className="text-[8.5px] font-bold text-indigo-400 animate-pulse font-mono uppercase">
                     Listening...
-                  </span>
-                )}
-                
-                {useSimulation && (
-                  <span className="text-[8px] border border-indigo-900 bg-indigo-950/30 text-indigo-400 px-2 py-0.5 rounded font-mono font-bold uppercase">
-                    Simulated
                   </span>
                 )}
               </div>
             </div>
 
             {/* Transcript screen */}
-            <div className="flex-1 w-full bg-black/40 border border-zinc-900/60 rounded-2xl p-5 overflow-y-auto min-h-[260px] max-h-[320px] relative group">
+            <div className="flex-1 w-full bg-black/40 border border-zinc-900/60 rounded-2xl p-5 overflow-y-auto min-h-[180px] max-h-[240px] relative group">
               {transcript ? (
                 <p className="text-xs text-zinc-300 leading-relaxed font-semibold font-mono animate-fadeIn whitespace-pre-wrap">
                   {transcript}
