@@ -125,6 +125,7 @@ export async function POST(request: Request) {
       CRITICAL REQUIREMENTS:
       - ${languageInstruction}
       - Questions MUST be strictly relevant to the listed tech stack or core competencies: ${(setup.techstack || []).join(", ")}. Do NOT ask questions about other tools, languages, or frameworks not explicitly listed.
+      - CRITICAL FRONTEND REQUIREMENT: If the role is Frontend Engineer or includes "frontend" / "front-end", you MUST NOT ask any database, SQL, backend, or cloud systems questions. Only ask about HTML, CSS, JavaScript, React, and general Web APIs/browser concepts. Never ask SQL queries or database optimization questions.
       - Return ONLY a JSON object with a single "questions" key containing the array of questions. Example:
       {
         "questions": ["Question 1", "Question 2", "Question 3"]
@@ -156,6 +157,8 @@ export async function POST(request: Request) {
         const codingPrompt = `
           Generate a written, coding, or mathematical challenge suitable for a ${setup.level}-level ${setup.role} for the session mode "${setup.type}".
           Key topics/skills: ${(setup.techstack || []).join(", ") || "General"}.
+          
+          CRITICAL FRONTEND REQUIREMENT: If the role is Frontend Engineer or includes "frontend" / "front-end", you MUST NOT generate any database, SQL, backend, or cloud systems coding tasks. The task must focus entirely on client-side web technologies (HTML, CSS, JavaScript, React, UI components, state management, or browser APIs).
           
           CRITICAL:
           - ${languageInstruction}

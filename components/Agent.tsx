@@ -1165,7 +1165,7 @@ const Agent = ({
 
     // Append timer ending cue
     if (isTimerEndingRef.current && typeRef.current === "interview") {
-      cleanedText += "\n[SYSTEM: Time is up. Acknowledge the candidate's response, state that time is up, conclude the interview warmly, say goodbye, and ALWAYS append '[END_CALL]' at the very end.]";
+      cleanedText += "\n[SYSTEM: Time is up. Conclude the interview warmly, thank the candidate, and ALWAYS append '[END_CALL]' at the very end.]";
     }
 
     // Append user message to history
@@ -1218,7 +1218,7 @@ CRITICAL SANDBOX WORKSPACE RULE:
 - The candidate's screen has a built-in interactive live coding editor sandbox panel.
 - Whenever you ask a question that requires writing code, or transition to the coding challenge, you MUST output the exact tag '[SHOW_SANDBOX]' (case-insensitive) in your response. This will automatically open the code editor workspace on their screen.
 - Never solve the challenge, write solution code, output templates, or suggest external coding tools (like CodeSandbox or JSFiddle). Simply present the task, output '[SHOW_SANDBOX]', and wait for them to write the solution inside their editor workspace.
-- CODE EVALUATION & FOLLOW-UP RULE: When the candidate submits their code, evaluate it objectively. If it is correct and functional, acknowledge it (e.g., "Excellent work, that looks correct!"). Do NOT end the call or immediately jump to the next question. Instead, ask them a brief follow-up question specifically about what they wrote (e.g., "How would you handle edge cases here?", "What is the time complexity of your approach?", or "Why did you choose this API/method?"). Once they explain, transition to the next question in the interview flow. Only conclude the interview and append '[END_CALL]' when all questions in the structured flow have been completed.
+- CODE EVALUATION & INTERACTIVE DIALOGUE FLOW RULE: When the candidate submits code/text in the sandbox, do NOT immediately present the next question in your response. Instead, first evaluate the submitted solution briefly, then ask them a single follow-up question about their solution (e.g., asking why they chose a specific method, how they would optimize it, or what edge cases they considered). Wait for them to answer verbally. Once they explain verbally, you may ask a second verbal follow-up or transition to the next question in your structured flow by introducing the task and outputting '[SHOW_SANDBOX]'. Only conclude the interview and append '[END_CALL]' when all questions in the structured flow have been completed.
 
 CRITICAL RULES - CONVERSATIONAL FLOW & CONCISENESS:
 - DO NOT VERBALLY READ OUT THE LONG CHALLENGE INSTRUCTIONS OR CODE: When you transition to the coding challenge, simply introduce it briefly in one sentence (under 15 words) and output '[SHOW_SANDBOX]'. The candidate will read the details in the workspace on their screen. Never output code blocks, templates, or instructions in your speech.
@@ -1260,7 +1260,7 @@ CANDIDATE PROFILE (already collected, do NOT ask about these again unless changi
 YOUR CONVERSATION FLOW:
 1. First, ask them if they want to practice their listed target role ("${profileRole || "Software Engineer"}") or something else.
 2. If they say they want to practice their target role:
-   - Suggest 2 to 4 custom session options/modes suited specifically to "${profileRole || "Software Engineer"}" (e.g. Technical, Behavioral, Live Coding Sandbox; or for President: Public Address, Crisis Management, Policy Memo Drafting; or for UI/UX Design: Portfolio Review, Design Challenge, Interaction Prototyping).
+   - Suggest custom session options/modes suited specifically to the role. For Frontend Engineer or front-end roles, you MUST suggest exactly 3 options: "Technical", "Live Coding Sandbox", and "Code Review". Do NOT recommend or mention a "Design Challenge" option, as design challenges are not supported.
    - Ask them to pick one.
 3. If they say they want to practice a different role (or name a different role):
    - Ask what role they want to practice (if not already specified).
@@ -1384,8 +1384,14 @@ RULES:
     hasSubmittedCurrentCodeRef.current = true;
     
     const proceedPrompt = isWritten
-      ? `[SYSTEM: The candidate has completed their text. Please evaluate their draft: "${codeRef.current}". If it satisfies the requirements, state that, provide brief feedback, and transition immediately to the next question in your interview flow. Only thank the candidate and append [END_CALL] if all interview questions are completed or time is up. If something is missing, explain it and ask them to refine it.]`
-      : `[SYSTEM: The candidate has completed their code. Please evaluate their solution code: "${codeRef.current}". If the solution is correct, functional, and satisfies the challenge, state that the solution is correct, provide brief feedback, and transition immediately to the next question in your interview flow. Only thank the candidate and append [END_CALL] if all interview questions are completed or time is up. If there are bugs, specify them clearly and help them debug it.]`;
+      ? `[SYSTEM: The candidate has submitted their draft text: "${codeRef.current}". 
+1. Evaluate it objectively (if it is correct, state that briefly. Do not nitpick or force imaginary bugs).
+2. Ask the candidate a brief follow-up question about the text they wrote (e.g. asking them to explain their choice of words, their structure, or key ideas).
+3. Do NOT transition to the next question in the flow yet. You must wait for their verbal response first.]`
+      : `[SYSTEM: The candidate has submitted their code solution: "${codeRef.current}". 
+1. Evaluate it objectively (if it is correct, state that briefly. Do not nitpick or force imaginary bugs).
+2. Ask the candidate a brief follow-up question about the code they wrote (e.g. asking them to explain why they used a specific method, how they'd handle an edge case, or what the time/space complexity is).
+3. Do NOT transition to the next coding question in the flow yet. You must wait for their verbal response first.]`;
     handleSpeechCompleted(proceedPrompt);
   };
 
@@ -1450,7 +1456,7 @@ CRITICAL SANDBOX WORKSPACE RULE:
 - The candidate's screen has a built-in interactive live coding editor sandbox panel.
 - Whenever you ask a question that requires writing code, or transition to the coding challenge, you MUST output the exact tag '[SHOW_SANDBOX]' (case-insensitive) in your response. This will automatically open the code editor workspace on their screen.
 - Never solve the challenge, write solution code, output templates, or suggest external coding tools (like CodeSandbox or JSFiddle). Simply present the task, output '[SHOW_SANDBOX]', and wait for them to write the solution inside their editor workspace.
-- CODE EVALUATION & FOLLOW-UP RULE: When the candidate submits their code, evaluate it objectively. If it is correct and functional, acknowledge it (e.g., "Excellent work, that looks correct!"). Do NOT end the call or immediately jump to the next question. Instead, ask them a brief follow-up question specifically about what they wrote (e.g., "How would you handle edge cases here?", "What is the time complexity of your approach?", or "Why did you choose this API/method?"). Once they explain, transition to the next question in the interview flow. Only conclude the interview and append '[END_CALL]' when all questions in the structured flow have been completed.
+- CODE EVALUATION & INTERACTIVE DIALOGUE FLOW RULE: When the candidate submits code/text in the sandbox, do NOT immediately present the next question in your response. Instead, first evaluate the submitted solution briefly, then ask them a single follow-up question about their solution (e.g., asking why they chose a specific method, how they would optimize it, or what edge cases they considered). Wait for them to answer verbally. Once they explain verbally, you may ask a second verbal follow-up or transition to the next question in your structured flow by introducing the task and outputting '[SHOW_SANDBOX]'. Only conclude the interview and append '[END_CALL]' when all questions in the structured flow have been completed.
 
 CRITICAL RULES - CONVERSATIONAL FLOW & CONCISENESS:
 - DO NOT VERBALLY READ OUT THE LONG CHALLENGE INSTRUCTIONS OR CODE: When you transition to the coding challenge, simply introduce it briefly in one sentence (under 15 words) and output '[SHOW_SANDBOX]'. The candidate will read the details in the workspace on their screen. Never output code blocks, templates, or instructions in your speech.
@@ -2366,7 +2372,7 @@ ${code}
                     <div className="flex justify-between text-[8px] font-bold text-zinc-555 border-t border-zinc-900/60 pt-1.5 mt-0.5">
                       <span>fillers:</span>
                       <span className="text-zinc-300 font-mono">
-                        Like({fillerLike}) / Um({fillerUm}) / Uh({fillerUh})
+                        count({fillerLike + fillerUm + fillerUh})
                       </span>
                     </div>
                   </div>
