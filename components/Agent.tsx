@@ -1107,9 +1107,29 @@ const Agent = ({
     isSpeakingActiveRef.current = false;
     streamCompletedRef.current = false;
 
+    // Dedup consecutive repeating phrases/sentences (common in Whisper turbo silence hallucinations)
+    let dedupedText = cleanedSpeechText;
+    const parts = cleanedSpeechText.split(/(?<=[\.\!\?])\s+|(?<=\.\.\.)\s+/);
+    if (parts.length > 1) {
+      const uniqueParts: string[] = [];
+      parts.forEach((part) => {
+        const cleanPart = part.trim().toLowerCase().replace(/[.,\/#!$%\^&\*;:{}=\-_`~()]/g, "");
+        const lastAdded = uniqueParts[uniqueParts.length - 1];
+        const lastAddedClean = lastAdded ? lastAdded.trim().toLowerCase().replace(/[.,\/#!$%\^&\*;:{}=\-_`~()]/g, "") : "";
+        if (cleanPart && cleanPart !== lastAddedClean) {
+          uniqueParts.push(part);
+        }
+      });
+      if (uniqueParts.length > 0) {
+        dedupedText = uniqueParts.join(" ");
+      }
+    }
+
     // STT Corrections
-    let cleanedText = cleanedSpeechText;
+    let cleanedText = dedupedText;
     const sttCorrections: Record<string, string> = {
+      "practice for this whole": "practice for this role",
+      "practice for the whole": "practice for the role",
       "yo yo exercise": "UI UX design",
       "yo-yo exercise": "UI UX design",
       "yo yo design": "UI UX design",
