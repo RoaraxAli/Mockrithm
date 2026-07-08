@@ -83,7 +83,8 @@ export async function POST(request: Request) {
       CRITICAL INSTRUCTIONS:
       - Scan the Transcript first. If the candidate explicitly chose to practice a role DIFFERENT from their default targetRole (e.g. "Prime Minister of Pakistan", "Joker", etc.), you MUST override the role and use this new requested role.
       - If the role is changed/overridden from the default targetRole, DO NOT use the techstack/skills or resume details from the Resume/Profile Data (e.g. do not use JavaScript, React, Node.js for a Prime Minister or Joker). Instead, generate relevant competencies/skills for the new chosen role (e.g. for Prime Minister: "crisis leadership", "governance", "public policy", "foreign affairs"; for Joker: "stand-up comedy", "timing", "joke delivery", "crowd interaction").
-      - Only set "requiresSandbox" to true if the chosen option/mode explicitly involves a coding task, a mathematics problem-solving task, an essay-writing task, or a written drafting task (e.g. policy memo drafting, speech writing, script writing, solving math equations). If the chosen option is a verbal interview, Q&A session, verbal debate, or oral defense, "requiresSandbox" MUST be false.
+      - requiresSandbox MUST be false for conceptual, verbal, or conversational modes (e.g., "Technical", "Behavioral", "System Design", "Q&A", "Interview", "Verbal Q&A", "Discussion", or "Oral Defense"). These are purely conversational and do not need a workspace/sandbox.
+      - Only set "requiresSandbox" to true if the chosen option/mode explicitly involves hands-on writing, editing, or coding (e.g. "Live Coding Sandbox", "Code Review", "Coding Challenge", "Drafting Task", "Writing Sandbox", or solving equations in an editor).
       
       You must return ONLY a JSON object conforming exactly to this schema:
       {
@@ -165,6 +166,12 @@ export async function POST(request: Request) {
           - Create a modern, practical example. For coding roles, ask the candidate to write code from scratch or fix a broken snippet (e.g., implementing React state counter, correcting a function bug, handling async APIs, etc.).
           - Do NOT provide the full solution in the template. The template should only have a broken/buggy code snippet or an empty template skeleton to complete, with clear comments explaining what to do.
           - Example: If React, ask them to implement a Counter component using useState, leaving the function body/handlers blank for them to write.
+          
+          CRITICAL JSON ESCAPING RULES:
+          - You must output ONLY a valid JSON object matching the requested schema.
+          - Never use raw newlines inside any string property values (like description or templateCode). Instead, escape all newlines as "\\n" so that the output remains a single-line or properly escaped JSON.
+          - Never use triple quotes (like """ or ''') inside string property values.
+          - Escape all double-quotes inside string values as \\".
           
           You must return ONLY a JSON object conforming to this schema:
           {

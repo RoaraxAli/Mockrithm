@@ -1,66 +1,233 @@
-# 50-Role Interview Evaluation Test Report
+# Interactive Interview Engine Roles & Modes Test Report
 
-**Date:** 7/8/2026, 7:42:59 PM
-**Total Roles Tested:** 50
-**Successful Generations:** 50 (100%)
-**Failures:** 0
-**Average Duration:** 1.26 seconds per role
+**Date:** 7/8/2026, 9:51:33 PM
+**Total Test Cases Running:** 45
+**Successful Executions:** 45 / 45
+**Failures/Errors:** 0
 
-## Discovered Problems & Observations
+## Discovered Bugs & Issues Analysis
 
-*No major mapping issues or LLM crashes detected. The parser correctly set roles, inferred requireSandbox, and returned schema-conforming JSON.*
+*No prompt logic or constraint violations detected.*
 
-## Detailed Role Evaluations
+## Detailed Test Matrix Results
 
-| Role | Status | Duration | Requires Sandbox? | Sandbox Lang | Competencies | Sample Question |
-| --- | --- | --- | --- | --- | --- | --- |
-| **Frontend Engineer** | ✅ Success | 1.54s | Yes | `javascript` | javascript, react, html | Write a JavaScript function to reverse a string, then use it to display the reversed string in an HTML paragraph using React. |
-| **Backend Engineer** | ✅ Success | 1.31s | Yes | `javascript` | javascript, python, java | How do you handle errors and exceptions in a Node.js application using Express.js? |
-| **Fullstack Developer** | ✅ Success | 1.54s | Yes | `javascript` | javascript, react, nodejs | Write a JavaScript function to reverse a string, and then use it to display the reversed string in an HTML paragraph using React. |
-| **Devops Engineer** | ✅ Success | 1.53s | No | `text` | docker, kubernetes, jenkins | How do you implement continuous integration and continuous deployment (CI/CD) using Jenkins, Docker, and Kubernetes? |
-| **Cloud Architect** | ✅ Success | 1.74s | No | `text` | AWS, Azure, Google Cloud | Can you design a highly available and scalable architecture for a web application on AWS, utilizing Kubernetes and Docker for containerization and orchestration? |
-| **Cyber Security Analyst** | ✅ Success | 1.50s | No | `text` | network security, threat analysis, incident response | What measures would you take to detect and prevent a potential DDoS attack on a company's network infrastructure? |
-| **Data Scientist** | ✅ Success | 1.29s | Yes | `python` | python, r, machine learning | How would you implement a simple linear regression model in Python using scikit-learn to predict continuous outcomes? |
-| **Machine Learning Engineer** | ✅ Success | 1.75s | Yes | `python` | python, tensorflow, keras | How would you implement a neural network using TensorFlow and Keras to solve a classification problem, and what are the key differences between the two libraries? |
-| **Database Administrator** | ✅ Success | 1.26s | No | `text` | SQL, database design, data modeling | What is the difference between a clustered and non-clustered index in a relational database, and how would you decide which type to use in a given scenario? |
-| **System Administrator** | ✅ Success | 1.35s | No | `text` | linux, windows, networking | What is the difference between a static IP address and a dynamic IP address in a Linux environment, and how would you configure each? |
-| **Mobile App Developer (iOS)** | ✅ Success | 2.15s | Yes | `swift` | Swift, Objective-C, iOS SDK | What is the difference between Swift and Objective-C, and when would you choose to use each for an iOS app development project? |
-| **Mobile App Developer (Android)** | ✅ Success | 1.50s | Yes | `java` | java, kotlin, android studio | What is the difference between Java and Kotlin, and how would you decide which one to use for an Android app development project? |
-| **Game Developer** | ✅ Success | 0.99s | Yes | `javascript` | javascript, c++, java | How would you optimize the performance of a JavaScript-based game running on a low-end device? |
-| **Embedded Systems Engineer** | ✅ Success | 0.98s | No | `text` | C, C++, Microcontrollers | What is the difference between a microcontroller and a microprocessor, and how would you choose one for an embedded system project? |
-| **QA Automation Engineer** | ✅ Success | 1.70s | Yes | `java` | java, python, selenium | How would you implement a test automation framework using Java, Selenium, and TestNG for a web application? |
-| **Product Manager** | ✅ Success | 1.19s | No | `text` | strategic planning, market analysis, product development | What is your process for conducting market analysis and how do you incorporate the findings into your product development strategy? |
-| **UI/UX Designer** | ✅ Success | 0.73s | No | `text` | user research, wireframing, prototyping | Can you walk us through your process for conducting user research to inform your design decisions? |
-| **President of the United States** | ✅ Success | 1.38s | No | `text` | Leadership, Strategic Planning, Public Speaking | How would you handle a national crisis, such as a natural disaster or terrorist attack, and what steps would you take to ensure public safety and maintain stability? |
-| **Prime Minister of Pakistan** | ✅ Success | 1.31s | No | `text` | Leadership, Policy Development, Public Speaking | How would you handle a national crisis, such as a natural disaster or economic downturn, and what leadership qualities do you think are essential for a Prime Minister to possess in such situations? |
-| **Plumber** | ✅ Success | 0.76s | No | `text` | piping, welding, leak detection | What types of piping materials are you familiar with and how do you determine the appropriate material for a given project? |
-| **Electrician** | ✅ Success | 1.26s | No | `text` | electrical circuits, wiring, circuit analysis | What are the key differences between a series and parallel electrical circuit, and how would you apply this knowledge in a real-world scenario? |
-| **Carpenter** | ✅ Success | 1.09s | No | `text` | woodworking, carpentry tools, blueprint reading | What are the essential carpentry tools you use for woodworking, and how do you maintain them? |
-| **Maths Teacher** | ✅ Success | 1.04s | Yes | `latex` | algebra, geometry, calculus | How would you approach teaching algebraic equations to a class of students with varying skill levels? |
-| **English Literature Teacher** | ✅ Success | 1.18s | No | `text` | literary analysis, pedagogy, curriculum development | How would you approach teaching a complex literary text, such as a Shakespearean play, to a junior high school class? |
-| **History Teacher** | ✅ Success | 1.15s | No | `text` | lesson planning, curriculum development, classroom management | What inspired you to become a history teacher, and how do you plan to engage your students in the subject? |
-| **Physics Professor** | ✅ Success | 1.39s | No | `text` | classical mechanics, electromagnetism, thermodynamics | How would you derive the Lagrangian for a simple harmonic oscillator and explain its significance in classical mechanics? |
-| **Chemistry Teacher** | ✅ Success | 1.05s | No | `text` | chemistry principles, lesson planning, classroom management | What do you think are the most important chemistry principles for students to learn at the junior level, and how would you approach teaching them? |
-| **Essay Writer** | ✅ Success | 1.25s | Yes | `markdown` | writing, research, analysis | What steps do you take to ensure the clarity and coherence of your essay writing, particularly when addressing complex topics? |
-| **Creative Copywriter** | ✅ Success | 0.72s | No | `text` | writing, editing, branding | What inspired you to become a copywriter, and how do you stay up-to-date with industry trends? |
-| **Technical Writer** | ✅ Success | 1.14s | Yes | `markdown` | writing, editing, documentation | What steps do you take to ensure clarity and concision in your technical writing, particularly when drafting complex documentation? |
-| **Chef** | ✅ Success | 0.80s | No | `text` | culinary arts, food safety, menu planning | What inspired you to become a chef and what do you think are the most important qualities for a junior chef to have? |
-| **Astronaut** | ✅ Success | 1.31s | No | `text` | spacecraft operations, spacewalk procedures, astronautical engineering | What procedures would you follow during a spacewalk to ensure safe and efficient completion of tasks while minimizing the risk of space debris and other hazards? |
-| **Commercial Pilot** | ✅ Success | 1.07s | No | `text` | Aviation Regulations, Aircraft Systems, Weather Forecasting | What are the key differences between IFR and VFR flight regulations, and how would you apply them in a real-world scenario? |
-| **Lawyer (Criminal Defense)** | ✅ Success | 1.24s | No | `text` | court procedures, criminal law, evidence analysis | Can you describe a situation where you had to analyze complex evidence in a criminal case and how you presented your findings in court? |
-| **Doctor (General Practitioner)** | ✅ Success | 1.33s | No | `text` | patient assessment, diagnosis, treatment planning | What steps would you take to assess a patient's condition and develop an initial diagnosis? |
-| **Dentist** | ✅ Success | 1.11s | No | `text` | patient assessment, diagnosis, treatment planning | What steps would you take to assess a patient's oral health and create a personalized treatment plan? |
-| **Registered Nurse** | ✅ Success | 0.83s | No | `text` | patient assessment, medication administration, wound care | What steps would you take to conduct a thorough patient assessment, and how would you prioritize your findings? |
-| **Financial Analyst** | ✅ Success | 0.98s | No | `text` | financial modeling, data analysis, budgeting | What financial modeling techniques do you use to forecast revenue and expenses, and how do you ensure the accuracy of your models? |
-| **Investment Banker** | ✅ Success | 1.00s | No | `text` | financial modeling, valuation, mergers and acquisitions | What is your approach to building a financial model for a company, and how do you ensure its accuracy? |
-| **Accountant** | ✅ Success | 0.81s | No | `text` | financial analysis, budgeting, financial reporting | What steps would you take to conduct a financial analysis of a company, and what tools or software would you use? |
-| **Sales Representative** | ✅ Success | 0.75s | No | `text` | communication, negotiation, customer service | What do you think are the most important qualities for a sales representative to have, and how do you embody those qualities? |
-| **Marketing Manager** | ✅ Success | 1.11s | No | `text` | marketing strategy, brand management, digital marketing | What is your approach to developing a comprehensive marketing strategy, and how do you measure its success? |
-| **Customer Support Specialist** | ✅ Success | 0.70s | No | `text` | communication, problem-solving, customer service | What do you think are the most important qualities for a customer support specialist to have, and how do you embody those qualities? |
-| **Journalist** | ✅ Success | 0.79s | No | `text` | research, interviewing, writing | What steps do you take to ensure the accuracy of information when conducting research for a news article? |
-| **Novelist** | ✅ Success | 1.97s | Yes | `markdown` | creative writing, storytelling, character development | What inspires your creative writing process, and how do you develop a story from concept to written draft? |
-| **Screenwriter** | ✅ Success | 2.34s | Yes | `markdown` | script writing, storytelling, character development | What is your process for developing a compelling narrative arc in a screenplay, and how do you ensure that your story remains engaging from start to finish? |
-| **Film Director** | ✅ Success | 1.15s | No | `text` | storyboarding, screenwriting, film editing | What is your process for developing a story from concept to final screenplay, and how do you ensure that your vision is conveyed to the production team? |
-| **Musician / Songwriter** | ✅ Success | 1.10s | No | `text` | music composition, lyric writing, instrumentation | Can you describe your creative process when composing a new song, and how do you decide on the melody and chord progression? |
-| **Stand-up Comedian** | ✅ Success | 1.29s | No | `text` | public speaking, improvisation, storytelling | Can you describe a particularly challenging audience you've performed for and how you adapted your set to win them over? |
-| **Architect (Residential)** | ✅ Success | 2.31s | No | `text` | building design, construction planning, zoning regulations | What steps do you take to ensure that your building designs comply with local zoning regulations and sustainability principles? |
+| Role | Mode | Status | Duration | requiresSandbox? | Inferred Language | Questions | Validations |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| **Frontend Engineer** | Technical | ✅ Success | 3.47s | false | - | 5 | 0 |
+| **Frontend Engineer** | Live Coding Sandbox | ✅ Success | 3.94s | true | `javascript` | 5 | 0 |
+| **Frontend Engineer** | Code Review | ✅ Success | 1.05s | true | `javascript` | 5 | 0 |
+| **Backend Engineer** | Technical | ✅ Success | 3.29s | false | - | 5 | 0 |
+| **Backend Engineer** | Behavioral | ✅ Success | 3.62s | false | - | 5 | 0 |
+| **Backend Engineer** | Live Coding Sandbox | ✅ Success | 3.40s | true | `javascript` | 5 | 0 |
+| **Fullstack Developer** | Technical | ✅ Success | 0.62s | false | - | 5 | 0 |
+| **Fullstack Developer** | Live Coding Sandbox | ✅ Success | 0.39s | true | `javascript` | 5 | 0 |
+| **Fullstack Developer** | Code Review | ✅ Success | 3.56s | true | `javascript` | 5 | 0 |
+| **DevOps Engineer** | Technical | ✅ Success | 0.51s | false | - | 5 | 0 |
+| **DevOps Engineer** | Behavioral | ✅ Success | 0.21s | false | - | 5 | 0 |
+| **DevOps Engineer** | System Architecture | ✅ Success | 0.30s | false | - | 5 | 0 |
+| **Cloud Architect** | Technical | ✅ Success | 0.25s | false | - | 5 | 0 |
+| **Cloud Architect** | Behavioral | ✅ Success | 0.70s | false | - | 5 | 0 |
+| **Cloud Architect** | System Design | ✅ Success | 0.23s | false | - | 5 | 0 |
+| **Mobile App Developer (iOS)** | Technical | ✅ Success | 0.31s | false | - | 5 | 0 |
+| **Mobile App Developer (iOS)** | Live Coding Sandbox | ✅ Success | 0.75s | true | `javascript` | 5 | 0 |
+| **Mobile App Developer (iOS)** | Code Review | ✅ Success | 3.46s | true | `swift` | 5 | 0 |
+| **Mobile App Developer (Android)** | Technical | ✅ Success | 0.22s | false | - | 5 | 0 |
+| **Mobile App Developer (Android)** | Live Coding Sandbox | ✅ Success | 0.32s | true | `javascript` | 5 | 0 |
+| **Mobile App Developer (Android)** | Code Review | ✅ Success | 3.42s | true | `java` | 5 | 0 |
+| **QA Automation Engineer** | Technical | ✅ Success | 0.54s | false | - | 5 | 0 |
+| **QA Automation Engineer** | Behavioral | ✅ Success | 0.23s | false | - | 5 | 0 |
+| **QA Automation Engineer** | Live Coding Sandbox | ✅ Success | 0.35s | true | `javascript` | 5 | 0 |
+| **Embedded Systems Engineer** | Technical | ✅ Success | 3.32s | false | - | 5 | 0 |
+| **Embedded Systems Engineer** | Behavioral | ✅ Success | 3.38s | false | - | 5 | 0 |
+| **Embedded Systems Engineer** | Live Coding Sandbox | ✅ Success | 3.81s | true | `c` | 5 | 0 |
+| **Data Scientist** | Technical | ✅ Success | 0.60s | false | - | 5 | 0 |
+| **Data Scientist** | Behavioral | ✅ Success | 0.59s | false | - | 5 | 0 |
+| **Data Scientist** | Live Coding Sandbox | ✅ Success | 0.33s | true | `javascript` | 5 | 0 |
+| **Machine Learning Engineer** | Technical | ✅ Success | 0.75s | false | - | 5 | 0 |
+| **Machine Learning Engineer** | Behavioral | ✅ Success | 0.60s | false | - | 5 | 0 |
+| **Machine Learning Engineer** | Live Coding Sandbox | ✅ Success | 0.67s | true | `javascript` | 5 | 0 |
+| **Security Engineer** | Technical | ✅ Success | 3.65s | false | - | 5 | 0 |
+| **Security Engineer** | Behavioral | ✅ Success | 3.37s | false | - | 5 | 0 |
+| **Security Engineer** | Code Review | ✅ Success | 3.81s | true | `javascript` | 5 | 0 |
+| **Database Administrator** | Technical | ✅ Success | 0.70s | false | - | 5 | 0 |
+| **Database Administrator** | Behavioral | ✅ Success | 0.44s | false | - | 5 | 0 |
+| **Database Administrator** | Live Coding Sandbox | ✅ Success | 0.28s | true | `javascript` | 5 | 0 |
+| **Game Developer** | Technical | ✅ Success | 3.30s | false | - | 5 | 0 |
+| **Game Developer** | Behavioral | ✅ Success | 3.32s | false | - | 5 | 0 |
+| **Game Developer** | Live Coding Sandbox | ✅ Success | 3.38s | true | `javascript` | 5 | 0 |
+| **Systems Administrator** | Technical | ✅ Success | 0.64s | false | - | 5 | 0 |
+| **Systems Administrator** | Behavioral | ✅ Success | 1.25s | false | - | 5 | 0 |
+| **Systems Administrator** | Live Coding Sandbox | ✅ Success | 0.63s | true | `javascript` | 5 | 0 |
+
+## Sample Sandbox Challenges Generated
+
+### Frontend Engineer - Live Coding Sandbox
+**Challenge Title:** Implementing a To-Do List App with React
+**Description:**
+Create a simple To-Do List application using React. The app should allow users to add new tasks, display all tasks, and mark tasks as completed. You will be provided with a basic template. Your task is to fill in the missing code to make the application functional.
+Implement the necessary React state and event handlers to manage the tasks.
+
+**Template Code:**
+```javascript
+import React, { useState } from 'react';
+
+function TodoList() {
+  const [tasks, setTasks] = useState([]);
+  const [newTask, setNewTask] = useState("");
+
+  // Add event handler to add new tasks
+  const addTask = () => {
+    // Code to add a new task to the list
+  };
+
+  // Add event handler to mark a task as completed
+  const completeTask = (taskIndex) => {
+    // Code to mark a task as completed
+  };
+
+  return (
+    <div>
+      <input type="text" value={newTask} onChange={(e) => setNewTask(e.target.value)} />
+      <button onClick={addTask}>Add Task</button>
+      <ul>
+        {tasks.map((task, index) => (
+          <li key={index}>{task} <button onClick={() => completeTask(index)}>Complete</button></li>
+        ))}
+      </ul>
+    </div>
+  );
+}
+```
+
+### Frontend Engineer - Code Review
+**Challenge Title:** Implementing a To-Do List using React and JavaScript
+**Description:**
+Create a simple To-Do List application using React. The application should allow users to add new tasks, display all tasks, and remove tasks. You will be given a basic template to work with. Your task is to complete the application by implementing the necessary functions to handle adding, displaying, and removing tasks. Utilize React state management to keep track of tasks.
+
+**Template Code:**
+```javascript
+import React, { useState } from 'react';
+
+function ToDoList() {
+  const [tasks, setTasks] = useState([]);
+  const [newTask, setNewTask] = useState('');
+
+  // Implement the handleAddTask function to add new tasks
+  const handleAddTask = () => {
+    // Add your code here
+  };
+
+  // Implement the handleRemoveTask function to remove tasks
+  const handleRemoveTask = (taskIndex) => {
+    // Add your code here
+  };
+
+  return (
+    <div>
+      <input type="text" value={newTask} onChange={(e) => setNewTask(e.target.value)} />
+      <button onClick={handleAddTask}>Add Task</button>
+      <ul>
+        {tasks.map((task, index) => (
+          <li key={index}>{task} <button onClick={() => handleRemoveTask(index)}>Remove</button></li>
+        ))}
+      </ul>
+    </div>
+  );
+}
+
+export default ToDoList;
+```
+
+### Backend Engineer - Live Coding Sandbox
+**Challenge Title:** Implementing a Counter with React Hooks
+**Description:**
+Create a React component named Counter that displays a count and has two buttons to increment or decrement the count. Use the useState hook to manage the state. The Counter component should start with a count of 0. Implement the increment and decrement logic using React state management principles. Do not modify the HTML structure, only work with the JavaScript code.
+
+**Template Code:**
+```javascript
+import React, { useState } from 'react';
+
+function Counter() {
+  const [count, setCount] = useState(0);
+
+  const handleIncrement = () => {
+    // Implement increment logic here
+  };
+
+  const handleDecrement = () => {
+    // Implement decrement logic here
+  };
+
+  return (
+    <div>
+      <p>Count: {count}</p>
+      <button onClick={handleIncrement}>+</button>
+      <button onClick={handleDecrement}>-</button>
+    </div>
+  );
+}
+
+export default Counter;
+```
+
+### Fullstack Developer - Live Coding Sandbox
+**Challenge Title:** Implementing a React Counter Component
+**Description:**
+Create a Counter component using React's useState hook. The component should display the current count and have two buttons to increment and decrement the count. Leave the function body and event handlers blank for the candidate to write. The component should be a functional component and use the useState hook to manage its state.
+
+**Template Code:**
+```javascript
+import React, { useState } from 'react';
+
+const Counter = () => {
+  const [count, setCount] = useState(0);
+
+  const handleIncrement = () => {
+    // Implement increment logic here
+  };
+
+  const handleDecrement = () => {
+    // Implement decrement logic here
+  };
+
+  return (
+    <div>
+      <p>Count: {count}</p>
+      <button onClick={handleIncrement}>Increment</button>
+      <button onClick={handleDecrement}>Decrement</button>
+    </div>
+  );
+};
+```
+
+### Fullstack Developer - Code Review
+**Challenge Title:** Fixing a Broken React Counter Component
+**Description:**
+The given React component is supposed to be a simple counter, incrementing or decrementing a value based on button clicks. However, it has a bug that prevents it from working correctly. Your task is to identify the issue and fix the code so that the counter functions as expected.
+Please ensure you use React's useState hook to manage the state.
+
+**Template Code:**
+```javascript
+import React, { useState } from 'react';
+
+const Counter = () => {
+  const [count, setCount] = useState(0);
+  // Complete the handleClick functions to handle increment and decrement logic
+  const handleIncrement = () => {
+    
+  };
+  const handleDecrement = () => {
+    
+  };
+  return (
+    <div>
+      <p>Count: {count}</p>
+      <button onClick={handleIncrement}>+</button>
+      <button onClick={handleDecrement}>-</button>
+    </div>
+  );
+};
+
+export default Counter;
+```
+

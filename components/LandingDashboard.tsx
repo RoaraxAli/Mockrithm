@@ -220,7 +220,7 @@ export default function LandingDashboard({
       role: i.role
     }));
 
-  const chartWidth = 550;
+  const chartWidth = 850;
   const chartHeight = 180;
   const paddingX = 40;
   const paddingY = 25;
@@ -401,9 +401,8 @@ chartPath = `M ${chartPoints[0].x} ${chartPoints[0].y} ` + chartPoints.slice(1).
         {/* 3. Primary Bento Layout (Charts & Analytics Dashboard) */}
         <section className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           
-          {/* Left Column (Span 2): SVG Chart & Diagnostics */}
-          <div className="lg:col-span-2 flex flex-col gap-6">
-            
+          {/* Performance Progression SVG Chart (Full Width - Col Span 3) */}
+          <div className="lg:col-span-3">
             {/* Card 1: Performance Progression SVG Chart */}
             <motion.div 
               initial={{ opacity: 0, y: 25 }}
@@ -515,163 +514,155 @@ chartPath = `M ${chartPoints[0].x} ${chartPoints[0].y} ` + chartPoints.slice(1).
                 </div>
               )}
             </motion.div>
+          </div>
 
-            {/* Card 2: Conversational Telemetry (WPM & Filler Check) */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {/* Pacing Speedometer */}
-              <motion.div 
-                initial={{ opacity: 0, y: 25 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true, margin: "-50px" }}
-                transition={{ duration: 0.6, delay: 0.1 }}
-                className="p-6 backdrop-blur-3xl bg-zinc-950/40 border border-white/5 rounded-2xl shadow-xl flex flex-col justify-between group hover:border-white/10 transition-all duration-300"
-              >
-                <div className="flex items-center justify-between border-b border-white/5 pb-3 mb-4">
-                  <span className="text-[9px] font-mono font-black text-zinc-500 uppercase tracking-widest">Speaking Speed</span>
-                  <span className="text-[8px] bg-white/5 text-zinc-400 px-2 py-0.5 rounded font-mono font-bold">WPM Tracking</span>
-                </div>
+          {/* Speaking Speed Card */}
+          <motion.div 
+            initial={{ opacity: 0, y: 25 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, margin: "-50px" }}
+            transition={{ duration: 0.6, delay: 0.1 }}
+            className="p-6 backdrop-blur-3xl bg-zinc-950/40 border border-white/5 rounded-2xl shadow-xl flex flex-col justify-between group hover:border-white/10 transition-all duration-300"
+          >
+            <div className="flex items-center justify-between border-b border-white/5 pb-3 mb-4">
+              <span className="text-[9px] font-mono font-black text-zinc-500 uppercase tracking-widest">Speaking Speed</span>
+              <span className="text-[8px] bg-white/5 text-zinc-400 px-2 py-0.5 rounded font-mono font-bold">WPM Tracking</span>
+            </div>
 
-                <div className="flex flex-col gap-3 my-2">
-                  <div className="flex justify-between items-baseline">
-                    <span className="text-4xl font-black text-white font-mono">
-                      {averageWpm > 0 ? averageWpm : "N/A"}
-                    </span>
-                    <span className="text-[9px] text-zinc-500 font-bold uppercase tracking-wider">Words Per Min</span>
-                  </div>
+            <div className="flex flex-col gap-3 my-2">
+              <div className="flex justify-between items-baseline">
+                <span className="text-4xl font-black text-white font-mono">
+                  {averageWpm > 0 ? averageWpm : "N/A"}
+                </span>
+                <span className="text-[9px] text-zinc-500 font-bold uppercase tracking-wider">Words Per Min</span>
+              </div>
 
-                  {/* Speed Range indicator */}
-                  <div className="space-y-1.5">
-                    <div className="relative h-1.5 w-full bg-zinc-900 rounded-full overflow-hidden flex">
-                      <div className="h-full w-[35%] bg-yellow-500/20" />
-                      <div className="h-full w-[35%] bg-emerald-500/50" />
-                      <div className="h-full w-[30%] bg-red-500/20" />
+              {/* Speed Range indicator */}
+              <div className="space-y-1.5">
+                <div className="relative h-1.5 w-full bg-zinc-900 rounded-full overflow-hidden flex">
+                  <div className="h-full w-[35%] bg-yellow-500/20" />
+                  <div className="h-full w-[35%] bg-emerald-500/50" />
+                  <div className="h-full w-[30%] bg-red-500/20" />
 
-                      {/* Cursor */}
-                      {averageWpm > 0 && (
-                        <span 
-                          className="absolute top-0 bottom-0 w-[3px] bg-white shadow-xl -translate-x-1/2 transition-all duration-1000"
-                          style={{ left: `${Math.min(100, Math.max(0, (averageWpm / 220) * 100))}%` }}
-                        />
-                      )}
-                    </div>
-                    <div className="flex justify-between text-[7px] font-mono text-zinc-600 font-bold uppercase">
-                      <span>Slow (&lt;120)</span>
-                      <span className="text-emerald-400 font-black">Ideal (120-150)</span>
-                      <span>Fast (&gt;150)</span>
-                    </div>
-                  </div>
-                </div>
-
-                <p className="text-[9px] text-zinc-500 leading-relaxed font-semibold uppercase mt-2">
-                  {averageWpm >= 120 && averageWpm <= 150 
-                    ? "✓ Your speaking pace is ideal for corporate interviews." 
-                    : averageWpm > 0 
-                      ? "⚠ Calibration required. Slow down or accelerate to align target cadence."
-                      : "No vocal metrics saved. Perform a mock simulation to calibrate pace."}
-                </p>
-              </motion.div>
-
-              {/* Vocal Fillers Matrix */}
-              <motion.div 
-                initial={{ opacity: 0, y: 25 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true, margin: "-50px" }}
-                transition={{ duration: 0.6, delay: 0.2 }}
-                className="p-6 backdrop-blur-3xl bg-zinc-950/40 border border-white/5 rounded-2xl shadow-xl flex flex-col justify-between group hover:border-white/10 transition-all duration-300"
-              >
-                <div className="flex items-center justify-between border-b border-white/5 pb-3 mb-4">
-                  <span className="text-[9px] font-mono font-black text-zinc-500 uppercase tracking-widest">Filler Word Auditing</span>
-                  <span className="text-[8px] bg-white/5 text-zinc-400 px-2 py-0.5 rounded font-mono font-bold">Frequencies</span>
-                </div>
-
-                <div className="flex flex-col gap-2.5 my-1.5">
-                  {sortedFillerWords.length > 0 ? (
-                    sortedFillerWords.map(([word, count]) => (
-                      <div key={word} className="space-y-1">
-                        <div className="flex justify-between text-[9px] font-mono font-bold uppercase">
-                          <span className="text-white">&apos;{word}&apos;</span>
-                          <span className="text-zinc-500">{count} events</span>
-                        </div>
-                        <div className="h-1 w-full bg-zinc-900 rounded-full overflow-hidden">
-                          <div 
-                            className="h-full bg-white opacity-40 rounded-full"
-                            style={{ width: `${Math.min(100, (count / (totalInterviews * 4)) * 100)}%` }}
-                          />
-                        </div>
-                      </div>
-                    ))
-                  ) : (
-                    <div className="py-6 flex flex-col items-center justify-center text-center text-zinc-600 gap-1.5">
-                      <Sliders className="size-5 text-zinc-700" />
-                      <span className="text-[8px] font-mono font-bold uppercase">No vocal halts indexed</span>
-                    </div>
+                  {/* Cursor */}
+                  {averageWpm > 0 && (
+                    <span 
+                      className="absolute top-0 bottom-0 w-[3px] bg-white shadow-xl -translate-x-1/2 transition-all duration-1000"
+                      style={{ left: `${Math.min(100, Math.max(0, (averageWpm / 220) * 100))}%` }}
+                    />
                   )}
                 </div>
-
-                <p className="text-[9px] text-zinc-500 leading-relaxed font-semibold uppercase mt-2">
-                  Identify speech anomalies. Audits trigger automatically from transcribed recordings.
-                </p>
-              </motion.div>
+                <div className="flex justify-between text-[7px] font-mono text-zinc-600 font-bold uppercase">
+                  <span>Slow (&lt;120)</span>
+                  <span className="text-emerald-400 font-black">Ideal (120-150)</span>
+                  <span>Fast (&gt;150)</span>
+                </div>
+              </div>
             </div>
-          </div>
 
-          {/* Right Column (Span 1): Sidebar Bento blocks */}
-          <div className="flex flex-col gap-6">
-            
+            <p className="text-[9px] text-zinc-500 leading-relaxed font-semibold uppercase mt-2">
+              {averageWpm >= 120 && averageWpm <= 150 
+                ? "✓ Your speaking pace is ideal for corporate interviews." 
+                : averageWpm > 0 
+                  ? "⚠ Calibration required. Slow down or accelerate to align target cadence."
+                  : "No vocal metrics saved. Perform a mock simulation to calibrate pace."}
+            </p>
+          </motion.div>
 
+          {/* Vocal Fillers Matrix */}
+          <motion.div 
+            initial={{ opacity: 0, y: 25 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, margin: "-50px" }}
+            transition={{ duration: 0.6, delay: 0.2 }}
+            className="p-6 backdrop-blur-3xl bg-zinc-950/40 border border-white/5 rounded-2xl shadow-xl flex flex-col justify-between group hover:border-white/10 transition-all duration-300"
+          >
+            <div className="flex items-center justify-between border-b border-white/5 pb-3 mb-4">
+              <span className="text-[9px] font-mono font-black text-zinc-500 uppercase tracking-widest">Filler Word Auditing</span>
+              <span className="text-[8px] bg-white/5 text-zinc-400 px-2 py-0.5 rounded font-mono font-bold">Frequencies</span>
+            </div>
 
-            {/* Interactive Guidance & Tips Carousel */}
-            <motion.div 
-              initial={{ opacity: 0, y: 25 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, margin: "-50px" }}
-              transition={{ duration: 0.6, delay: 0.25 }}
-              className="p-6 backdrop-blur-3xl bg-zinc-950/40 border border-white/5 rounded-2xl shadow-xl flex flex-col justify-between min-h-[220px] relative group hover:border-white/10 transition-all duration-300"
-            >
-              <div className="flex items-center justify-between border-b border-white/5 pb-3">
-                <span className="text-[9px] font-mono font-black text-zinc-500 uppercase tracking-widest">Calibration Tip</span>
-                <span className="text-[8.5px] font-mono font-bold text-white flex items-center gap-1">
-                  <Sparkles className="size-3 text-zinc-400" /> AI Insights
-                </span>
-              </div>
+            <div className="flex flex-col gap-2.5 my-1.5">
+              {sortedFillerWords.length > 0 ? (
+                sortedFillerWords.map(([word, count]) => (
+                  <div key={word} className="space-y-1">
+                    <div className="flex justify-between text-[9px] font-mono font-bold uppercase">
+                      <span className="text-white">&apos;{word}&apos;</span>
+                      <span className="text-zinc-500">{count} events</span>
+                    </div>
+                    <div className="h-1 w-full bg-zinc-900 rounded-full overflow-hidden">
+                      <div 
+                        className="h-full bg-white opacity-40 rounded-full"
+                        style={{ width: `${Math.min(100, (count / (totalInterviews * 4)) * 100)}%` }}
+                      />
+                    </div>
+                  </div>
+                ))
+              ) : (
+                <div className="py-6 flex flex-col items-center justify-center text-center text-zinc-600 gap-1.5">
+                  <Sliders className="size-5 text-zinc-700" />
+                  <span className="text-[8px] font-mono font-bold uppercase">No vocal halts indexed</span>
+                </div>
+              )}
+            </div>
 
-              <div className="my-4 h-24 overflow-hidden relative">
-                <AnimatePresence mode="wait">
-                  <motion.div
-                    key={activeTip}
-                    initial={{ opacity: 0, x: 15 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    exit={{ opacity: 0, x: -15 }}
-                    transition={{ duration: 0.3 }}
-                    className="absolute inset-0 flex flex-col gap-1.5"
-                  >
-                    <span className="text-[7.5px] font-mono font-bold text-zinc-500 uppercase tracking-widest">
-                      {interviewTips[activeTip].tag}
-                    </span>
-                    <h4 className="text-[11px] font-black text-white uppercase tracking-wider">
-                      {interviewTips[activeTip].title}
-                    </h4>
-                    <p className="text-[9px] text-zinc-400 leading-relaxed font-semibold">
-                      {interviewTips[activeTip].text}
-                    </p>
-                  </motion.div>
-                </AnimatePresence>
-              </div>
+            <p className="text-[9px] text-zinc-500 leading-relaxed font-semibold uppercase mt-2">
+              Identify speech anomalies. Audits trigger automatically from transcribed recordings.
+            </p>
+          </motion.div>
 
-              <div className="flex gap-1.5 mt-2 justify-center">
-                {interviewTips.map((_, idx) => (
-                  <button
-                    key={idx}
-                    onClick={() => setActiveTip(idx)}
-                    className={cn(
-                      "size-1.5 rounded-full transition-all cursor-pointer",
-                      activeTip === idx ? "bg-white w-3" : "bg-zinc-800 hover:bg-zinc-700"
-                    )}
-                  />
-                ))}
-              </div>
-            </motion.div>
-          </div>
+          {/* Interactive Guidance & Tips Carousel (Calibration Tip) */}
+          <motion.div 
+            initial={{ opacity: 0, y: 25 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, margin: "-50px" }}
+            transition={{ duration: 0.6, delay: 0.25 }}
+            className="p-6 backdrop-blur-3xl bg-zinc-950/40 border border-white/5 rounded-2xl shadow-xl flex flex-col justify-between min-h-[220px] relative group hover:border-white/10 transition-all duration-300"
+          >
+            <div className="flex items-center justify-between border-b border-white/5 pb-3">
+              <span className="text-[9px] font-mono font-black text-zinc-500 uppercase tracking-widest">Calibration Tip</span>
+              <span className="text-[8.5px] font-mono font-bold text-white flex items-center gap-1">
+                <Sparkles className="size-3 text-zinc-400" /> AI Insights
+              </span>
+            </div>
+
+            <div className="my-4 h-24 overflow-hidden relative">
+              <AnimatePresence mode="wait">
+                <motion.div
+                  key={activeTip}
+                  initial={{ opacity: 0, x: 15 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  exit={{ opacity: 0, x: -15 }}
+                  transition={{ duration: 0.3 }}
+                  className="absolute inset-0 flex flex-col gap-1.5"
+                >
+                  <span className="text-[7.5px] font-mono font-bold text-zinc-500 uppercase tracking-widest">
+                    {interviewTips[activeTip].tag}
+                  </span>
+                  <h4 className="text-[11px] font-black text-white uppercase tracking-wider">
+                    {interviewTips[activeTip].title}
+                  </h4>
+                  <p className="text-[9px] text-zinc-400 leading-relaxed font-semibold">
+                    {interviewTips[activeTip].text}
+                  </p>
+                </motion.div>
+              </AnimatePresence>
+            </div>
+
+            <div className="flex gap-1.5 mt-2 justify-center">
+              {interviewTips.map((_, idx) => (
+                <button
+                  key={idx}
+                  onClick={() => setActiveTip(idx)}
+                  className={cn(
+                    "size-1.5 rounded-full transition-all cursor-pointer",
+                    activeTip === idx ? "bg-white w-3" : "bg-zinc-800 hover:bg-zinc-700"
+                  )}
+                />
+              ))}
+            </div>
+          </motion.div>
+
         </section>
 
         {/* 4. ATS Resume Workspace Bento Card with Scroll Reveal */}
