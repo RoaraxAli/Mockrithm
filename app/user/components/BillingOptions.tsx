@@ -44,8 +44,8 @@ export function BillingOptions({ user, onRefresh }: BillingOptionsProps) {
 
   // Pricing configuration
   const prices = {
-    premium: isAnnual ? { monthly: 8, total: 96, amount: 96 } : { monthly: 10, total: 10, amount: 10 },
-    pro: isAnnual ? { monthly: 20, total: 240, amount: 240 } : { monthly: 25, total: 25, amount: 25 },
+    premium: isAnnual ? { monthly: 12, total: 144, amount: 144 } : { monthly: 15, total: 15, amount: 15 },
+    pro: isAnnual ? { monthly: 24, total: 288, amount: 288 } : { monthly: 30, total: 30, amount: 30 },
   };
 
   const handlePay = async (plan: "premium" | "pro", amount: number) => {
@@ -106,8 +106,8 @@ export function BillingOptions({ user, onRefresh }: BillingOptionsProps) {
               {currentTier === "pro"
                 ? "You have full, unrestricted access to systems design, mock interviews, and advanced ATS tools."
                 : currentTier === "premium"
-                ? "You have active access to unlimited mock interviews, speech analysis, and standard templates."
-                : "Upgrade your account to unlock professional features and custom ATS templates."}
+                ? "You have active access to 70 mock interviews per month, speech analysis, and unlimited resume scans."
+                : "Your account is on the Free tier. Access up to 5 mock interviews and 5 ATS resume scans."}
             </p>
           </div>
           
@@ -162,16 +162,16 @@ export function BillingOptions({ user, onRefresh }: BillingOptionsProps) {
               </div>
               <h3 className="text-lg font-bold text-white">Premium Upgrade</h3>
               <p className="text-zinc-400 text-xs mt-2 leading-relaxed">
-                Unlock full, unrestricted access to the ATS resume builder and real-time voice interview models.
+                Unlock 70 high-fidelity voice interviews per month and unlimited ATS resume scans.
               </p>
               <ul className="space-y-2.5 mt-5 text-[11px] text-zinc-350">
                 <li className="flex items-center gap-2">
                   <Check className="size-3.5 text-zinc-400 shrink-0" />
-                  <span>Unlimited AI Voice Interviews</span>
+                  <span>70 AI Voice Interviews / month</span>
                 </li>
                 <li className="flex items-center gap-2">
                   <Check className="size-3.5 text-zinc-400 shrink-0" />
-                  <span>6 Premium ATS Resume Templates</span>
+                  <span>Unlimited ATS Resume Scans</span>
                 </li>
                 <li className="flex items-center gap-2">
                   <Check className="size-3.5 text-zinc-400 shrink-0" />

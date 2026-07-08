@@ -97,7 +97,7 @@ export async function createFeedback(params: CreateFeedbackParams) {
           - DO NOT penalize the candidate's "Technical Knowledge" or "Problem Solving" scores heavily if their verbal answers are brief/concise, as long as they are technically correct and accurate.
           - DO NOT tank the candidate's scores under 60% solely because they omitted quantitative metrics (STAR results). Instead, grade their logic/flow fairly and suggest adding metrics under areas for improvement.
         - If the candidate does not answer any questions verbally, says "I don’t know" throughout, or the microphone is not connected (no audio detected), AND they did not submit any code or text in the sandbox, then assign a score of 0 for that category.
-        - CRITICAL CODE GRADING RULE: If the candidate submitted code or text solutions in the sandbox (indicated by "[Candidate submitted code solution]" or "[Candidate submitted draft text]" in the transcript, and code is present in the "Candidate's Final Code" section below), you MUST evaluate their code/text. Assign a high score (e.g., 80-98) for "Technical Knowledge" and "Problem Solving" if their submitted code/text is correct and functional. Do NOT assign 0 for these categories simply because they submitted their answer via the editor rather than speaking it aloud.
+        - CONSTRUCTIVE STUDY GUIDES FOR STRUGGLES: If the candidate scores less than 50 in any category, or says "I don't know" repeatedly, you MUST generate a list of 3-4 actionable micro-learning bullet points explaining the core technical/communication concept they struggled with. Return this in the "studyGuide" array. If they did well, "studyGuide" can be empty.
         - Do not invent or assume answers not present in the transcript or candidate code.
 
         Interview Transcript:
@@ -107,14 +107,15 @@ export async function createFeedback(params: CreateFeedbackParams) {
 
     try {
       console.log("[DEBUG] Calling primary Groq model for final feedback generation...");
-      const groqJson = await groqGenerateObject(promptText + `\n\nSchema format:\n{\n  "totalScore": number,\n  "categoryScores": [\n    { "name": "Communication Skills", "score": number, "comment": "string" },\n    { "name": "Technical Knowledge", "score": number, "comment": "string" },\n    { "name": "Problem Solving", "score": number, "comment": "string" },\n    { "name": "Cultural Fit", "score": number, "comment": "string" },\n    { "name": "Confidence and Clarity", "score": number, "comment": "string" }\n  ],\n  "strengths": ["string"],\n  "areasForImprovement": ["string"],\n  "finalAssessment": "string"\n}`);
+      const groqJson = await groqGenerateObject(promptText + `\n\nSchema format:\n{\n  "totalScore": number,\n  "categoryScores": [\n    { "name": "Communication Skills", "score": number, "comment": "string" },\n    { "name": "Technical Knowledge", "score": number, "comment": "string" },\n    { "name": "Problem Solving", "score": number, "comment": "string" },\n    { "name": "Cultural Fit", "score": number, "comment": "string" },\n    { "name": "Confidence and Clarity", "score": number, "comment": "string" }\n  ],\n  "strengths": ["string"],\n  "areasForImprovement": ["string"],\n  "finalAssessment": "string",\n  "studyGuide": ["string"]\n}`);
       
       object = {
         totalScore: typeof groqJson.totalScore === "number" ? groqJson.totalScore : 70,
         categoryScores: Array.isArray(groqJson.categoryScores) ? groqJson.categoryScores : [],
         strengths: Array.isArray(groqJson.strengths) ? groqJson.strengths : ["Good effort"],
         areasForImprovement: Array.isArray(groqJson.areasForImprovement) ? groqJson.areasForImprovement : ["Structure responses better"],
-        finalAssessment: groqJson.finalAssessment || "Keep practicing."
+        finalAssessment: groqJson.finalAssessment || "Keep practicing.",
+        studyGuide: Array.isArray(groqJson.studyGuide) ? groqJson.studyGuide : []
       };
     } catch (err: any) {
       console.warn("Primary feedback model Groq failed, trying Gemini-2.0-flash-001...", err.message);
@@ -195,6 +196,7 @@ export async function createFeedback(params: CreateFeedbackParams) {
       topFillerWords: topFillerWords || [],
       candidateCode: candidateCode || "",
       transcript: transcript || [],
+      studyGuide: object.studyGuide || [],
     };
 
     let feedbackRef;

@@ -8,9 +8,9 @@ import {
   Code, Sparkles, CheckCircle2, AlertTriangle, Lightbulb, Play, User, Languages
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
-import Editor from "@monaco-editor/react";
-
 import { cn } from "@/lib/utils";
+import { InterviewTimer } from "@/components/interview/InterviewTimer";
+import { MonacoSandbox } from "@/components/interview/MonacoSandbox";
 import { interviewer, interviewLanguages } from "@/constants";
 import { createFeedback } from "@/lib/actions/general.action";
 import { Button } from "@/components/ui/button";
@@ -677,11 +677,6 @@ const Agent = ({
 
   // Speech Recognition (STT) Setup
   const startSpeechRecognition = () => {
-    if (isSpeaking || isSpeakingActiveRef.current || audioRef.current) {
-      console.log("[Agent.tsx] Speech recognition deferred because AI is speaking.");
-      return;
-    }
-
     if (selectedSttRef.current !== "browser") {
       startWhisperRecording();
       return;
@@ -821,14 +816,44 @@ const Agent = ({
       if (displayText.length > 0) {
         setLastMessage(displayText);
 
-        // Reset/start silence detection timer to submit speech when user pauses for 1.1s
+        // Duplex Interruption: If user starts speaking while AI is talking, pause AI instantly
+        if ((isSpeaking || audioRef.current) && displayText.split(/\s+/).length >= 2) {
+          console.log("[Agent.tsx] User interrupted AI. Pausing playback...");
+          if (audioRef.current) {
+            try { audioRef.current.pause(); } catch(e) {}
+          }
+          if (typeof window !== "undefined" && "speechSynthesis" in window) {
+            window.speechSynthesis.cancel();
+          }
+          setIsSpeaking(false);
+          isSpeakingActiveRef.current = false;
+        }
+
+        // Reset/start silence detection timer
         if (silenceTimerRef.current) {
           clearTimeout(silenceTimerRef.current);
         }
+
+        // 1. Context-Aware Dynamic Silence Threshold
+        let silenceThreshold = 1100; // default 1.1s
+        const isCodingActive = codingProblemRef.current && (Date.now() - lastCodeTypedRef.current < 25000);
+        if (isCodingActive) {
+          silenceThreshold = 15000; // 15 seconds when active in editor
+          console.log("[Agent.tsx] Active coding detected. Extending silence threshold to 15s.");
+        }
+
+        // 2. Filler Word Bridging
+        const textLower = displayText.toLowerCase().trim();
+        const endsWithFiller = /\b(um|uh|like|so|basically|well|wait|let me think|i mean|so basically|if i look at this)$/i.test(textLower);
+        if (endsWithFiller) {
+          silenceThreshold = Math.max(silenceThreshold, 5000); // 5 seconds grace period
+          console.log("[Agent.tsx] Filler word detected. Extending silence threshold to 5s.");
+        }
+
         silenceTimerRef.current = setTimeout(() => {
-          console.log("[Agent.tsx] Silence detected (1.1s). Submitting speech to AI...");
+          console.log(`[Agent.tsx] Silence detected (${silenceThreshold / 1000}s). Submitting speech to AI...`);
           submitCapturedSpeech(displayText);
-        }, 1100);
+        }, silenceThreshold);
       }
     };
 
@@ -1221,6 +1246,7 @@ CRITICAL SANDBOX WORKSPACE RULE:
 - CODE EVALUATION & INTERACTIVE DIALOGUE FLOW RULE: When the candidate submits code/text in the sandbox, do NOT immediately present the next question in your response. Instead, first evaluate the submitted solution briefly, then ask them a single follow-up question about their solution (e.g., asking why they chose a specific method, how they would optimize it, or what edge cases they considered). Wait for them to answer verbally. Once they explain verbally, you may ask a second verbal follow-up or transition to the next question in your structured flow by introducing the task and outputting '[SHOW_SANDBOX]'. Only conclude the interview and append '[END_CALL]' when all questions in the structured flow have been completed.
 
 CRITICAL RULES - CONVERSATIONAL FLOW & CONCISENESS:
+- SOCRATIC HINT / STUCK PIVOT: If the candidate says "I don't know", "I am stuck", or remains silent, do NOT fail them or jump to the next question. Give them a helpful, encouraging conceptual hint or ask a simpler sub-question to guide them. Encourage them to guess or reason it out.
 - DO NOT VERBALLY READ OUT THE LONG CHALLENGE INSTRUCTIONS OR CODE: When you transition to the coding challenge, simply introduce it briefly in one sentence (under 15 words) and output '[SHOW_SANDBOX]'. The candidate will read the details in the workspace on their screen. Never output code blocks, templates, or instructions in your speech.
 - DO NOT LECTURE ON CORRECT ANSWERS: If the candidate answers correctly or reasonably, do not explain the concept, define terms, or repeat the textbook answer back to them. Simply acknowledge briefly (e.g. "Got it.", "Makes sense.", "Solid explanation.") and transition immediately to the next question.
 - GENTLY CORRECT BIG BLUNDERS: If the candidate makes a major blunder or says something completely incorrect, gently correct them and guide them in the right direction in one short, polite sentence before transitioning.
@@ -1459,6 +1485,7 @@ CRITICAL SANDBOX WORKSPACE RULE:
 - CODE EVALUATION & INTERACTIVE DIALOGUE FLOW RULE: When the candidate submits code/text in the sandbox, do NOT immediately present the next question in your response. Instead, first evaluate the submitted solution briefly, then ask them a single follow-up question about their solution (e.g., asking why they chose a specific method, how they would optimize it, or what edge cases they considered). Wait for them to answer verbally. Once they explain verbally, you may ask a second verbal follow-up or transition to the next question in your structured flow by introducing the task and outputting '[SHOW_SANDBOX]'. Only conclude the interview and append '[END_CALL]' when all questions in the structured flow have been completed.
 
 CRITICAL RULES - CONVERSATIONAL FLOW & CONCISENESS:
+- SOCRATIC HINT / STUCK PIVOT: If the candidate says "I don't know", "I am stuck", or remains silent, do NOT fail them or jump to the next question. Give them a helpful, encouraging conceptual hint or ask a simpler sub-question to guide them. Encourage them to guess or reason it out.
 - DO NOT VERBALLY READ OUT THE LONG CHALLENGE INSTRUCTIONS OR CODE: When you transition to the coding challenge, simply introduce it briefly in one sentence (under 15 words) and output '[SHOW_SANDBOX]'. The candidate will read the details in the workspace on their screen. Never output code blocks, templates, or instructions in your speech.
 - DO NOT LECTURE ON CORRECT ANSWERS: If the candidate answers correctly or reasonably, do not explain the concept, define terms, or repeat the textbook answer back to them. Simply acknowledge briefly (e.g. "Got it.", "Makes sense.", "Solid explanation.") and transition immediately to the next question.
 - GENTLY CORRECT BIG BLUNDERS: If the candidate makes a major blunder or says something completely incorrect, gently correct them and guide them in the right direction in one short, polite sentence before transitioning.
@@ -1710,17 +1737,6 @@ ${code}
     // Start countdown timer if applicable
     if (durationSeconds !== null) {
       setTimerSecondsLeft(durationSeconds);
-      timerIntervalRef.current = setInterval(() => {
-        setTimerSecondsLeft((prev) => {
-          if (prev === null || prev <= 1) {
-            clearInterval(timerIntervalRef.current!);
-            timerIntervalRef.current = null;
-            isTimerEndingRef.current = true;
-            return 0;
-          }
-          return prev - 1;
-        });
-      }, 1000);
     } else {
       setTimerSecondsLeft(null);
     }
@@ -2090,30 +2106,22 @@ ${code}
                 <span className="text-zinc-600 mr-1.5">{t("language")}:</span>
                 <span className="text-sky-300 font-bold">{currentLangConfig.name.split(" (")[0]}</span>
               </div>
-               {timerSecondsLeft !== null ? (
-                <div className={cn(
-                  "flex items-center gap-1.5 font-mono font-black px-3 py-1 rounded-full border transition-all duration-500",
-                  timerSecondsLeft <= 60
-                    ? "text-rose-400 border-rose-500/30 bg-rose-500/10 animate-pulse"
-                    : timerSecondsLeft <= 120
-                    ? "text-amber-400 border-amber-500/30 bg-amber-500/10"
-                    : "text-emerald-400 border-emerald-500/30 bg-zinc-300/10"
-                )}>
-                  {String(Math.floor(timerSecondsLeft / 60)).padStart(2, "0")}:{String(timerSecondsLeft % 60).padStart(2, "0")}
-                </div>
-              ) : (
-                <div className="flex items-center gap-2">
-                  <div className="flex items-center gap-1.5 font-mono font-black px-3 py-1 rounded-full border border-zinc-800 bg-zinc-900 text-zinc-300 text-[8.5px] uppercase tracking-wider">
-                    Unlimited
-                  </div>
-                  <button
-                    onClick={() => handleDisconnect()}
-                    className="px-2.5 py-1 rounded-full bg-rose-950/40 hover:bg-rose-900/60 border border-rose-900 text-rose-300 hover:text-rose-200 text-[8.5px] font-bold uppercase tracking-wider transition-all duration-300 cursor-pointer animate-pulse"
-                  >
-                    Finish Session
-                  </button>
-                </div>
-              )}
+               <InterviewTimer
+                 initialSeconds={timerSecondsLeft}
+                 onTimeUp={() => {
+                   console.log("[Agent.tsx] Time is up! Finishing session...");
+                   isTimerEndingRef.current = true;
+                   handleDisconnect();
+                 }}
+               />
+               {timerSecondsLeft === null && (
+                 <button
+                   onClick={() => handleDisconnect()}
+                   className="px-2.5 py-1 rounded-full bg-rose-950/40 hover:bg-rose-900/60 border border-rose-900 text-rose-300 hover:text-rose-200 text-[8.5px] font-bold uppercase tracking-wider transition-all duration-300 cursor-pointer animate-pulse"
+                 >
+                   Finish Session
+                 </button>
+               )}
               <div>
                 <span className="text-zinc-600 mr-1.5">{t("connection")}:</span>
                 <span className="text-emerald-400 font-bold">{t("stable")}</span>
@@ -2562,34 +2570,11 @@ ${code}
 
                 {/* Monaco Editor Container */}
                 <div className="relative border border-t-0 border-zinc-900 rounded-b-xl overflow-hidden bg-zinc-955/10 shadow-[inset_0_4px_16px_rgba(0,0,0,0.4)] min-h-[650px]">
-                  <Editor
-                    height="650px"
-                    theme="vs-dark"
-                    language={
-                      codingProblem.language === "python" ? "python" : 
-                      codingProblem.language === "javascript" || codingProblem.language === "typescript" ? "typescript" :
-                      codingProblem.language === "markdown" ? "markdown" : 
-                      codingProblem.language === "latex" ? "latex" : 
-                      codingProblem.language === "html" ? "html" :
-                      codingProblem.language === "css" ? "css" :
-                      codingProblem.language === "swift" ? "swift" :
-                      codingProblem.language === "java" || codingProblem.language === "kotlin" ? "java" :
-                      codingProblem.language === "cpp" || codingProblem.language === "c++" || codingProblem.language === "c" ? "cpp" :
-                      "text"
-                    }
+                  <MonacoSandbox
+                    language={codingProblem.language}
                     value={code}
-                    onChange={(val) => handleCodeChange(val || "")}
-                    options={{
-                      minimap: { enabled: false },
-                      fontSize: 12,
-                      lineNumbers: "on",
-                      roundedSelection: false,
-                      scrollBeyondLastLine: false,
-                      readOnly: callStatus !== CallStatus.ACTIVE,
-                      theme: "vs-dark",
-                      fontFamily: "var(--font-jetbrains-mono), monospace",
-                      wordWrap: "on"
-                    }}
+                    onChange={(val) => handleCodeChange(val)}
+                    readOnly={callStatus !== CallStatus.ACTIVE}
                   />
                 </div>
 

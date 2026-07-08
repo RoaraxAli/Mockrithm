@@ -45,6 +45,26 @@ export async function POST(request: Request) {
     const userSnap = await db.collection("users").doc(userid).get();
     const userData = userSnap.data();
     const userName = userData?.name || "Candidate";
+    const userTier = userData?.tier || "freemium";
+
+    // Enforce limits (Free: 5 interviews max, Premium: 70 interviews max)
+    if (userTier === "freemium") {
+      const interviewsCount = await db.collection("interviews").where("userId", "==", userid).count().get();
+      if (interviewsCount.data().count >= 5) {
+        return NextResponse.json(
+          { error: "Limit reached: Free tier accounts are limited to 5 voice interviews. Please upgrade to Premium to continue." },
+          { status: 403 }
+        );
+      }
+    } else if (userTier === "premium") {
+      const interviewsCount = await db.collection("interviews").where("userId", "==", userid).count().get();
+      if (interviewsCount.data().count >= 70) {
+        return NextResponse.json(
+          { error: "Limit reached: Premium accounts are limited to 70 voice interviews. Please upgrade to Pro for unlimited sessions." },
+          { status: 403 }
+        );
+      }
+    }
 
     // Normalize techstack to array of strings
     const techArray = Array.isArray(techstack)

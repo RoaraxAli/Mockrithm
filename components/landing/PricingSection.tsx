@@ -52,15 +52,15 @@ export default function PricingSection() {
   ];
 
   const pricingDetails = {
-    premium: isAnnual ? { monthly: 8, total: 96 } : { monthly: 10, total: 10 },
-    pro: isAnnual ? { monthly: 20, total: 240 } : { monthly: 25, total: 25 },
+    premium: isAnnual ? { monthly: 12, total: 144 } : { monthly: 15, total: 15 },
+    pro: isAnnual ? { monthly: 24, total: 288 } : { monthly: 30, total: 30 },
   };
 
   const comparison = [
     { feature: "AI Voice Practice Engine", free: "Standard", premium: "Advanced", pro: "Ultra-Low Latency" },
     { feature: "Speech Pacing Telemetry", free: "Standard", premium: "Detailed Logs", pro: "Real-time Alerts" },
-    { feature: "Mock Evaluation Sessions", free: "1 Session", premium: "Unlimited", pro: "Unlimited" },
-    { feature: "ATS Optimized Templates", free: "1 Template", premium: "6 Templates", pro: "All Templates" },
+    { feature: "Mock Evaluation Sessions", free: "5 Sessions", premium: "70 Sessions", pro: "Unlimited" },
+    { feature: "ATS Resume Checks", free: "5 Checks", premium: "Unlimited", pro: "Unlimited" },
     { feature: "Real-Time HTML Editor", free: false, premium: true, pro: true },
     { feature: "Vocal Filler Word Tracker", free: "Basic (Counts)", premium: "Complete (Timestamps)", pro: "Interactive Feedback" },
     { feature: "Advanced System Design Engine", free: false, premium: false, pro: "Full Access" },
@@ -229,9 +229,9 @@ export default function PricingSection() {
                 </p>
 
                 <ul className="space-y-4 mt-8 border-t border-white/10 pt-6 text-[10px] font-bold uppercase tracking-wider text-white">
-                  <li className="flex items-center gap-2.5">
-                    <Check className="size-3.5 text-white shrink-0" />
-                    <span>Unlimited AI Voice Interviews</span>
+                  <li className="flex items-center gap-3">
+                    <Check className="size-4 text-emerald-400 shrink-0" />
+                    <span>70 AI Voice Interviews/mo</span>
                   </li>
                   <li className="flex items-center gap-2.5">
                     <Check className="size-3.5 text-white shrink-0" />

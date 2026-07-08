@@ -116,10 +116,11 @@ export default function PlanSelectionModal({
                     </li>
                     <li className="flex items-center gap-2">
                       <Check className="size-3.5 text-zinc-600 shrink-0" />
-                      <span>1 Mock Interview Practice</span>
+                      <span>5 Mock Interview Practices</span>
                     </li>
-                    <li className="flex items-center gap-2 text-zinc-600">
-                      <span>✕ No premium designs / templates</span>
+                    <li className="flex items-center gap-2">
+                      <Check className="size-3.5 text-zinc-600 shrink-0" />
+                      <span>5 ATS Resume Scans</span>
                     </li>
                   </ul>
                 </div>
@@ -141,20 +142,20 @@ export default function PlanSelectionModal({
                     <span className="text-[10px] font-bold tracking-widest text-black uppercase bg-white px-2.5 py-1 rounded-full flex items-center gap-1">
                       <Crown className="size-3 fill-black text-black" /> Premium
                     </span>
-                    <span className="text-[11px] font-bold text-white">$10.00 USD</span>
+                    <span className="text-[11px] font-bold text-white">$14.99 USD</span>
                   </div>
                   <h3 className="text-lg font-bold text-white">Premium Tier</h3>
                   <p className="text-zinc-400 text-xs mt-2 leading-relaxed">
-                    Complete, unlimited access to advanced ATS designs & real-time analytics.
+                    Complete, high-volume prep engine with smart telemetry and parsing.
                   </p>
                   <ul className="space-y-2.5 mt-5 text-[11px] text-white">
                     <li className="flex items-center gap-2">
                       <Check className="size-3.5 text-white shrink-0" />
-                      <span>Unlimited AI Voice Interviews</span>
+                      <span>70 AI Voice Interviews / month</span>
                     </li>
                     <li className="flex items-center gap-2">
                       <Check className="size-3.5 text-white shrink-0" />
-                      <span>6 Premium ATS Resume Templates</span>
+                      <span>Unlimited ATS Resume Scans</span>
                     </li>
                     <li className="flex items-center gap-2">
                       <Check className="size-3.5 text-white shrink-0" />
