@@ -78,17 +78,23 @@ export async function createFeedback(params: CreateFeedbackParams) {
           - "score": (numeric score 0 to 100)
           - "comment": (short justification comment for the score, explaining why they got the score and how they can improve)
         - Scores must be from 0 to 100.
-        - GRADING MODERATION RULES:
+        - GRADING MODERATION RULES (Be balanced: not very harsh, but not very lenient):
           - Be professional, constructive, and positive. Write encouraging feedback.
+          - Use this grading rubric for assigning scores to each category:
+            - Outstanding, correct, and comprehensive answers: 85-98.
+            - Solid, correct answers but lacking minor details or metrics: 70-84.
+            - Attempted answers that are weak, highly incomplete, or have major gaps: 45-69.
+            - Incorrect or completely irrelevant answers: 10-44.
+            - No answer, silent responses, or "I don't know": 0.
           - DO NOT penalize the candidate's "Technical Knowledge" or "Problem Solving" scores heavily if their verbal answers are brief/concise, as long as they are technically correct and accurate.
           - DO NOT tank the candidate's scores under 60% solely because they omitted quantitative metrics (STAR results). Instead, grade their logic/flow fairly and suggest adding metrics under areas for improvement.
           - EVALUATE THE SANDBOX CODE: If candidate code is provided below, you MUST review it. Acknowledge and grade their written code for "Technical Knowledge" and "Problem Solving". If their code is correct, give them a high score (e.g. 85-98) even if they did not speak much about it in the transcript.
-        - If candidate does not answer, says "I don’t know", or microphone is not connected (no audio detected/purposely bad answers), assign a score of 0 (or very low score) for the affected category and explain it in the comment (e.g., "No audio detected or answer was missing"). Do not crash.
+        - If candidate does not answer, says "I don’t know", or microphone is not connected (no audio detected/purposely bad answers), assign a score of 0 for that category and explain it in the comment (e.g., "No audio detected or answer was missing"). Do not crash.
         - Do not invent or assume answers not present in the transcript or candidate code.
 
         Interview Transcript:
-        ${formattedTranscript}
-        ${codeContext}
+        \${formattedTranscript}
+        \${codeContext}
       `;
 
     try {
@@ -161,12 +167,17 @@ export async function createFeedback(params: CreateFeedbackParams) {
       };
     });
 
+    // Calculate total score as the mathematical average of normalized category scores
+    const calculatedTotalScore = Math.round(
+      normalizedCategoryScores.reduce((acc, cat) => acc + cat.score, 0) / normalizedCategoryScores.length
+    );
+
     const feedback = {
       interviewId,
       userId,
       candidateName, 
       email,         
-      totalScore: typeof object.totalScore === "number" ? object.totalScore : 75,
+      totalScore: calculatedTotalScore,
       categoryScores: normalizedCategoryScores,
       strengths: Array.isArray(object.strengths) ? object.strengths : ["Good communication and approach."],
       areasForImprovement: Array.isArray(object.areasForImprovement) ? object.areasForImprovement : ["Support answers with more detail."],

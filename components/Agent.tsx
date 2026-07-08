@@ -1040,6 +1040,7 @@ const Agent = ({
     submittedTextRef.current = text;
 
     const isSystemPrompt = text.startsWith("[SYSTEM:");
+    let cleanedSpeechText = text;
     if (!isSystemPrompt) {
       // Verbal Pacing & Analytics Calculation
       if (turnStartRef.current) {
@@ -1054,7 +1055,6 @@ const Agent = ({
       }
 
       // Clean speech of Urdu filler words (ام, امم, etc.) to keep transcripts clean
-      let cleanedSpeechText = text;
       if (languageRef.current === "ur-PK") {
         cleanedSpeechText = cleanedSpeechText
           .replace(/\b(امم|ام|آں|اہ|اہہ|اہہہ)\b/g, "")
