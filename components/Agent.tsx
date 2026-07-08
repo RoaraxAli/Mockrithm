@@ -2377,21 +2377,23 @@ ${code}
                 
                 {/* Terminal Scroll Container */}
                 <div className="p-4 flex flex-col gap-2.5 max-h-[220px] overflow-y-auto custom-scrollbar select-text bg-black/40">
-                  {messages.map((m, idx) => {
-                    const isUser = m.role === "user";
-                    const promptChar = isUser ? "user@mockrithm:~$" : "alex@mockrithm:~$";
-                    const colorClass = isUser ? "text-cyan-400" : "text-emerald-400";
-                    return (
-                      <div key={idx} className="flex flex-col gap-0.5 font-mono">
-                        <div className="flex items-center gap-1.5 text-[9px] font-bold text-zinc-500">
-                          <span>{promptChar}</span>
+                  {messages
+                    .filter((m) => !m.content.startsWith("[SYSTEM:") && m.role !== "system")
+                    .map((m, idx) => {
+                      const isUser = m.role === "user";
+                      const promptChar = isUser ? "user@mockrithm:~$" : "alex@mockrithm:~$";
+                      const colorClass = isUser ? "text-cyan-400" : "text-emerald-400";
+                      return (
+                        <div key={idx} className="flex flex-col gap-0.5 font-mono">
+                          <div className="flex items-center gap-1.5 text-[9px] font-bold text-zinc-500">
+                            <span>{promptChar}</span>
+                          </div>
+                          <p className={cn("pl-3 font-semibold", colorClass)}>
+                            {m.content}
+                          </p>
                         </div>
-                        <p className={cn("pl-3 font-semibold", colorClass)}>
-                          {m.content}
-                        </p>
-                      </div>
-                    );
-                  })}
+                      );
+                    })}
                   {/* Blinking CLI Cursor at the bottom if active */}
                   {callStatus === CallStatus.ACTIVE && !isSpeaking && (
                     <div className="flex items-center gap-1.5 pl-3 font-mono">
