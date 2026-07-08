@@ -31,6 +31,15 @@ export async function POST(request: Request) {
       );
     }
 
+    // Prevent oversized payloads from being injected into the LLM prompt
+    const serialized = JSON.stringify(parsedData, null, 2);
+    if (serialized.length > 50000) {
+      return NextResponse.json(
+        { error: "Resume data exceeds maximum allowed size" },
+        { status: 400 }
+      );
+    }
+
     let object;
     const promptText = `
         You are an expert ATS (Applicant Tracking System) optimization bot and senior technical recruiter.

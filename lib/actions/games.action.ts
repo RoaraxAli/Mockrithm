@@ -1,6 +1,7 @@
 "use server";
 
 import { db } from "@/firebase/admin";
+import { assertOwnership } from "@/lib/actions/getAuthenticatedUserId";
 
 export interface GameProgress {
   completedLevel: number;
@@ -42,6 +43,7 @@ export async function getUserGamesProgress(
         locationSet: false
       };
     }
+    await assertOwnership(userId);
     const userDocRef = db.collection("users").doc(userId);
     let userDoc = await userDocRef.get();
 
@@ -143,6 +145,7 @@ export async function updateUserGamesProgress(
     if (!userId) {
       return { success: false, error: "User not authenticated" };
     }
+    await assertOwnership(userId);
 
     const userDocRef = db.collection("users").doc(userId);
 
@@ -227,6 +230,7 @@ export async function updateUserGamesProgress(
 export async function saveUserLocation(userId: string, country: string, city: string) {
   try {
     if (!userId) return { success: false };
+    await assertOwnership(userId);
     const userDocRef = db.collection("users").doc(userId);
     await userDocRef.set({ country, city, locationSet: true }, { merge: true });
     return { success: true };
@@ -242,6 +246,7 @@ export async function saveUserLocation(userId: string, country: string, city: st
 export async function saveUserSoundPreference(userId: string, soundPreference: string) {
   try {
     if (!userId) return { success: false };
+    await assertOwnership(userId);
     const userDocRef = db.collection("users").doc(userId);
     await userDocRef.set({ soundPreference }, { merge: true });
     return { success: true };
@@ -280,6 +285,7 @@ function getVerifiedAchievementXp(achievementId: string): number {
 export async function claimAchievementPersistent(userId: string, achievementId: string, xpReward?: number) {
   try {
     if (!userId) return { success: false, error: "Unauthenticated" };
+    await assertOwnership(userId);
     const userDocRef = db.collection("users").doc(userId);
 
     await db.runTransaction(async (transaction: any) => {
@@ -316,6 +322,7 @@ export async function claimAchievementPersistent(userId: string, achievementId: 
 export async function addFriendPersistent(userId: string, friendName: string) {
   try {
     if (!userId) return { success: false, error: "Unauthenticated" };
+    await assertOwnership(userId);
     const userDocRef = db.collection("users").doc(userId);
 
     const doc = await userDocRef.get();
@@ -379,6 +386,7 @@ export async function getLeaderboardUsers() {
 export async function sendFriendRequest(userId: string, senderName: string, receiverName: string) {
   try {
     if (!userId) return { success: false, error: "Unauthenticated" };
+    await assertOwnership(userId);
     if (senderName.toLowerCase() === receiverName.toLowerCase()) {
       return { success: false, error: "You cannot add yourself as a friend." };
     }
@@ -443,6 +451,7 @@ export async function sendFriendRequest(userId: string, senderName: string, rece
 export async function acceptFriendRequest(userId: string, currentUserName: string, requestId: string) {
   try {
     if (!userId) return { success: false, error: "Unauthenticated" };
+    await assertOwnership(userId);
     const reqRef = db.collection("friendRequests").doc(requestId);
     const reqSnap = await reqRef.get();
     if (!reqSnap.exists) return { success: false, error: "Request not found" };
@@ -491,6 +500,7 @@ export async function acceptFriendRequest(userId: string, currentUserName: strin
 export async function declineFriendRequest(userId: string, requestId: string) {
   try {
     if (!userId) return { success: false, error: "Unauthenticated" };
+    await assertOwnership(userId);
     await db.collection("friendRequests").doc(requestId).delete();
     return { success: true };
   } catch (e: any) {

@@ -3,6 +3,7 @@
 import { cache } from "react";
 import { db } from "@/firebase/admin";
 import { auth as clerkAuth, currentUser as clerkCurrentUser } from "@clerk/nextjs/server";
+import { assertOwnership } from "./getAuthenticatedUserId";
 
 export async function checkRateLimit() {
   return { isBanned: false };
@@ -183,3 +184,25 @@ export async function updateUserTier(userId: string, tier: "freemium" | "premium
     return { success: false, message: error.message };
   }
 }
+
+export async function deleteUserAccount(userId: string) {
+  try {
+    await assertOwnership(userId);
+    
+    // Clean up user subcollections securely on the server
+    const interviewsQuery = await db.collection("users").doc(userId).collection("interviews").get();
+    const batch = db.batch();
+    interviewsQuery.docs.forEach((doc) => {
+      batch.delete(doc.ref);
+    });
+    await batch.commit();
+
+    // Delete the root user record
+    await db.collection("users").doc(userId).delete();
+    return { success: true };
+  } catch (error: any) {
+    console.error("Failed to delete user account securely:", error);
+    return { success: false, message: error.message };
+  }
+}
+

@@ -1,15 +1,11 @@
 import { NextResponse } from "next/server";
 import { getCurrentUser } from "@/lib/actions/auth.action";
+import { apiKeyManager } from "@/lib/apiKeyManager";
 
 export async function POST(request: Request) {
   const user = await getCurrentUser();
   if (!user) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  }
-
-  const apiKey = process.env.GROQ_API_KEY;
-  if (!apiKey) {
-    return NextResponse.json({ error: "GROQ_API_KEY is not configured on the server." }, { status: 400 });
   }
 
   try {
@@ -20,57 +16,21 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Model name is required" }, { status: 400 });
     }
 
-    const isVoice = modelName.startsWith("canopylabs/");
-    let groqPath, groqPayload;
-
-    if (isVoice) {
-      groqPath = "/openai/v1/audio/speech";
-      groqPayload = {
-        model: modelName,
-        input: "a",
-        voice: body.voice || "troy",
-        response_format: "wav",
-      };
-    } else {
-      groqPath = "/openai/v1/chat/completions";
-      groqPayload = {
-        model: modelName,
-        messages: [{ role: "user", content: "h" }],
-        max_tokens: 1,
-        stream: false,
-      };
-    }
-
-    const response = await fetch(`https://api.groq.com${groqPath}`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${apiKey}`,
-      },
-      body: JSON.stringify(groqPayload),
-    });
-
-    const limitHeaders: Record<string, string | null> = {};
-    for (const [key, val] of response.headers.entries()) {
-      if (key.startsWith("x-ratelimit-") || key === "retry-after") {
-        limitHeaders[key] = val;
-      }
-    }
-
-    const resData = await response.text();
-    let errorObj = null;
-    if (!response.ok) {
-      try {
-        errorObj = JSON.parse(resData);
-      } catch (e) {
-        errorObj = { message: resData };
-      }
-    }
+    // Return cached metrics from the key manager instead of making a live API call.
+    // The apiKeyManager already tracks remaining tokens/requests from every real
+    // fetchGroq() call, so we can serve this data without wasting API quota.
+    const keysStatus = apiKeyManager.getKeysStatus();
+    const aggregated = {
+      "x-ratelimit-remaining-tokens": String(keysStatus.reduce((s, k) => s + k.remainingTokens, 0)),
+      "x-ratelimit-remaining-requests": String(keysStatus.reduce((s, k) => s + k.remainingRequests, 0)),
+      "x-ratelimit-limit-tokens": String(keysStatus.reduce((s, k) => s + k.limitTokens, 0)),
+      "x-ratelimit-limit-requests": String(keysStatus.reduce((s, k) => s + k.limitRequests, 0)),
+    };
 
     return NextResponse.json({
-      statusCode: response.status,
-      limits: limitHeaders,
-      error: errorObj,
+      statusCode: 200,
+      limits: aggregated,
+      error: null,
     });
   } catch (err: any) {
     return NextResponse.json({ error: err.message }, { status: 500 });

@@ -3,6 +3,7 @@
 import { cache } from "react";
 import { db } from "@/firebase/admin";
 import { ResumeDocument, ParsedResume, AtsScoreResult } from "@/types/resume";
+import { assertOwnership } from "@/lib/actions/getAuthenticatedUserId";
 
 export async function saveParsedResume(params: {
   userId: string;
@@ -13,6 +14,7 @@ export async function saveParsedResume(params: {
   country?: string;
 }): Promise<{ success: boolean; resumeId?: string; error?: string }> {
   try {
+    await assertOwnership(params.userId);
     const { userId, fileName, rawText, parsedData, atsAnalysis, country } = params;
 
     const resumeData: ResumeDocument = {
@@ -43,6 +45,7 @@ export async function saveParsedResume(params: {
 
 export const getUserResumes = cache(async (userId: string): Promise<ResumeDocument[]> => {
   try {
+    await assertOwnership(userId);
     const snapshot = await db
       .collection("users")
       .doc(userId)
@@ -62,6 +65,7 @@ export const getUserResumes = cache(async (userId: string): Promise<ResumeDocume
 
 export async function getResumeById(userId: string, resumeId: string): Promise<ResumeDocument | null> {
   try {
+    await assertOwnership(userId);
     const doc = await db
       .collection("users")
       .doc(userId)
@@ -82,6 +86,7 @@ export async function getResumeById(userId: string, resumeId: string): Promise<R
 
 export async function hasUploadedResume(userId: string): Promise<boolean> {
   try {
+    await assertOwnership(userId);
     const snapshot = await db
       .collection("users")
       .doc(userId)
@@ -104,6 +109,7 @@ export async function createResumeFromTemplate(
   fileName: string = "Untitled Resume"
 ): Promise<{ success: boolean; resumeId?: string; error?: string }> {
   try {
+    await assertOwnership(userId);
     const defaultProfile = SAMPLE_PROFILES[templateId] || {
       basics: { name: "", label: "", email: "", phone: "", summary: "" },
       work: [],
@@ -146,6 +152,7 @@ export async function updateResumeData(
   parsedData: ParsedResume
 ): Promise<{ success: boolean; error?: string }> {
   try {
+    await assertOwnership(userId);
     await db
       .collection("users")
       .doc(userId)
@@ -169,6 +176,7 @@ export async function saveAtsAnalysis(
   atsAnalysis: AtsScoreResult
 ): Promise<{ success: boolean; error?: string }> {
   try {
+    await assertOwnership(userId);
     await db
       .collection("users")
       .doc(userId)

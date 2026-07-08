@@ -1,17 +1,9 @@
 "use client";
 
 import Link from "next/link";
-import { useRouter } from "next/navigation";
-import { db } from "@/firebase/client";
-import { usePathname } from "next/navigation";
-import Image from "next/image";
-import {
-  doc,
-  deleteDoc,
-  collection,
-  getDocs,
-} from "firebase/firestore";
+import { useRouter, usePathname } from "next/navigation";
 import { useState, useEffect } from "react";
+import Image from "next/image";
 import { Show, useClerk, UserButton } from "@clerk/nextjs";
 import { getAuthRedirectUrl } from "@/lib/utils/auth";
 import { BillingOptions } from "@/app/user/components/BillingOptions";
@@ -92,12 +84,14 @@ const Navbar = ({ userId, userName, userRole }: NavbarProps) => {
     )
       return;
     try {
-      const interviewsRef = collection(db, "users", userId, "interviews");
-      const interviewDocs = await getDocs(interviewsRef);
-      await Promise.all(interviewDocs.docs.map((doc) => deleteDoc(doc.ref)));
-      await deleteDoc(doc(db, "users", userId));
-      await clerkSignOut();
-      window.location.href = "/sign-in";
+      const { deleteUserAccount } = await import("@/lib/actions/auth.action");
+      const res = await deleteUserAccount(userId);
+      if (res && res.success) {
+        await clerkSignOut();
+        window.location.href = "/sign-in";
+      } else {
+        alert("Failed to delete account securely.");
+      }
     } catch (error) {
       console.error("Account deletion failed:", error);
     }

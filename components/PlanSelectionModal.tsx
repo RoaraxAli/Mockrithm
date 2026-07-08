@@ -55,7 +55,7 @@ export default function PlanSelectionModal({
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          amount: 10.00, // Fixed USD 10.00 subscription amount
+          tier: "premium",
         }),
       });
 

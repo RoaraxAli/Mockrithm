@@ -7,10 +7,7 @@ const nextConfig: NextConfig = {
   typescript: {
     ignoreBuildErrors: true,
   },
-  // @ts-ignore
-  eslint: {
-    ignoreDuringBuilds: true,
-  },
+
   serverExternalPackages: ["pdf-parse", "msedge-tts"],
   images: {
     remotePatterns: [

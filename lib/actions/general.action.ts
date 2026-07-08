@@ -8,6 +8,7 @@ import { z } from "zod";
 import { db } from "@/firebase/admin";
 import { feedbackSchema } from "@/constants";
 import { fetchGroq } from "@/lib/apiKeyManager";
+import { assertOwnership } from "@/lib/actions/getAuthenticatedUserId";
 
 async function groqGenerateObject(prompt: string) {
   const response = await fetchGroq("/chat/completions", {
@@ -45,6 +46,7 @@ async function groqGenerateObject(prompt: string) {
 
 export async function createFeedback(params: CreateFeedbackParams) {
   const { interviewId, userId, transcript, feedbackId, averageWpm, topFillerWords, candidateCode } = params;
+  await assertOwnership(userId);
   const userSnap = await db.collection("users").doc(userId).get();
   const userData = userSnap.data();
 
@@ -139,17 +141,17 @@ export async function createFeedback(params: CreateFeedbackParams) {
         } catch (finalErr: any) {
           console.error("All AI feedback models failed. Creating emergency fallback report.", finalErr);
           object = {
-            totalScore: 75,
+            totalScore: 0,
             categoryScores: [
-              { name: "Communication Skills", score: 75, comment: "Completed the mock session successfully." },
-              { name: "Technical Knowledge", score: 75, comment: "Demonstrated solid foundational awareness." },
-              { name: "Problem Solving", score: 75, comment: "Approached tasks logically." },
-              { name: "Cultural Fit", score: 75, comment: "Good mock interview alignment." },
-              { name: "Confidence and Clarity", score: 75, comment: "Exhibited clear spoken expression." }
+              { name: "Communication Skills", score: 0, comment: "AI evaluation unavailable — please retry this interview." },
+              { name: "Technical Knowledge", score: 0, comment: "AI evaluation unavailable — please retry this interview." },
+              { name: "Problem Solving", score: 0, comment: "AI evaluation unavailable — please retry this interview." },
+              { name: "Cultural Fit", score: 0, comment: "AI evaluation unavailable — please retry this interview." },
+              { name: "Confidence and Clarity", score: 0, comment: "AI evaluation unavailable — please retry this interview." }
             ],
-            strengths: ["Completed the mock interview session"],
-            areasForImprovement: ["Structure answers more formally"],
-            finalAssessment: "Mock session finished successfully."
+            strengths: ["Session was recorded successfully"],
+            areasForImprovement: ["AI scoring service was temporarily unavailable. Please regenerate feedback."],
+            finalAssessment: "⚠️ Automatic scoring failed due to an AI service outage. Your interview transcript has been saved. You can regenerate this feedback from the interview detail page."
           };
         }
       }

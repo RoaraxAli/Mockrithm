@@ -13,6 +13,8 @@ import { cn } from "@/lib/utils";
 import SessionTracker from "@/components/SessionTracker";
 import InteractiveHeroBackground from "@/components/InteractiveHeroBackground";
 import { useUser } from "@clerk/nextjs";
+import { getFeedbacksForUser, getInterviewsByUserId } from "@/lib/actions/general.action";
+import { getUserResumes } from "@/lib/actions/resume.action";
 
 interface LandingDashboardProps {
   user?: any;
@@ -105,14 +107,12 @@ export default function LandingDashboard({
         // Fetch user feedback in a single batched query if user is logged in
         let feedbackMap = new Map();
         if (userId) {
-          const { getFeedbacksForUser } = await import("@/lib/actions/general.action");
           const userFeedbacks = await getFeedbacksForUser(userId) || [];
           feedbackMap = new Map(userFeedbacks.map((f) => [f.interviewId, f]));
         }
 
         const fetchUserInterviewsAction = async () => {
           if (!userId) return [];
-          const { getInterviewsByUserId } = await import("@/lib/actions/general.action");
           const rawUserInterviews = await getInterviewsByUserId(userId) || [];
           return rawUserInterviews.map((interview) => ({
             ...interview,
@@ -122,7 +122,6 @@ export default function LandingDashboard({
 
         const fetchResumesAction = async () => {
           if (!userId) return [];
-          const { getUserResumes } = await import("@/lib/actions/resume.action");
           return await getUserResumes(userId) || [];
         };
 

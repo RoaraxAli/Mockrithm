@@ -19,17 +19,17 @@ export async function POST(request: Request) {
 
     let event: Stripe.Event;
 
-    // Verify webhook signature if secret is configured
-    if (webhookSecret) {
-      try {
-        event = stripe.webhooks.constructEvent(body, signature, webhookSecret);
-      } catch (err: any) {
-        console.error(`[Stripe Webhook] Signature verification failed: ${err.message}`);
-        return NextResponse.json({ error: "Invalid signature" }, { status: 400 });
-      }
-    } else {
-      console.warn("[Stripe Webhook] STRIPE_WEBHOOK_SECRET is not configured. Skipping verification.");
-      event = JSON.parse(body);
+    // Verify webhook signature strictly
+    if (!webhookSecret) {
+      console.error("[Stripe Webhook] STRIPE_WEBHOOK_SECRET is not configured.");
+      return NextResponse.json({ error: "Webhook secret missing" }, { status: 500 });
+    }
+
+    try {
+      event = stripe.webhooks.constructEvent(body, signature, webhookSecret);
+    } catch (err: any) {
+      console.error(`[Stripe Webhook] Signature verification failed: ${err.message}`);
+      return NextResponse.json({ error: "Invalid signature" }, { status: 400 });
     }
 
     console.log(`[Stripe Webhook] Received event: ${event.type}`);
