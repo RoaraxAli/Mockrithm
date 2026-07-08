@@ -21,6 +21,16 @@ export default clerkMiddleware(async (auth, req) => {
     return NextResponse.next();
   }
 
+  // 🎮 Rewrite games.mockrithm.me subdomain requests to /games internally
+  if (host === "games.mockrithm.me" || host.includes("games.mockrithm.me")) {
+    if (url.pathname === "/") {
+      url.pathname = "/games";
+    } else if (!url.pathname.startsWith("/games")) {
+      url.pathname = `/games${url.pathname}`;
+    }
+    return NextResponse.rewrite(url);
+  }
+
   // 🔐 Redirect auth routes on apex domain to the accounts subdomain
   if (isAuthRoute(req) && (host === "mockrithm.me" || host === "www.mockrithm.me")) {
     const redirectUrl = `https://accounts.mockrithm.me${req.nextUrl.pathname}${req.nextUrl.search}`;
