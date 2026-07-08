@@ -2362,56 +2362,25 @@ ${code}
               </motion.div>
             </div>
 
-            {/* Retro-Modern Console Terminal Transcript Buffer */}
-            {messages.length > 0 && (
+            {/* Simple Stark Dialogue Transcript Box */}
+            {lastMessage && (
               <motion.div 
                 initial={{ opacity: 0, y: 5 }}
                 animate={{ opacity: 1, y: 0 }}
-                className="border border-zinc-800/80 rounded-xl w-full shadow-2xl relative overflow-hidden backdrop-blur-xl bg-black/60 font-mono text-[11px] leading-relaxed"
+                className="border border-zinc-800 rounded-xl w-full shadow-2xl relative overflow-hidden backdrop-blur-xl bg-black/60 p-6 text-center"
               >
-                {/* Terminal Header Bar */}
-                <div className="flex px-4 py-2 border-b border-zinc-855 text-[9px] text-zinc-500 font-semibold justify-between items-center bg-zinc-955/60">
-                  <div className="flex items-center gap-1.5 font-mono">
-                    <span className="w-1.5 h-1.5 rounded-full bg-red-500/60" />
-                    <span className="w-1.5 h-1.5 rounded-full bg-yellow-500/60" />
-                    <span className="w-1.5 h-1.5 rounded-full bg-green-500/60" />
-                    <span className="ml-1.5 text-zinc-400 font-bold">console_session_buffer</span>
-                  </div>
-                  <span className="text-[8px] uppercase font-bold tracking-widest text-emerald-400 bg-zinc-300/10 px-2 py-0.5 rounded border border-emerald-500/20 font-mono">
-                    Active Log
-                  </span>
+                <div className="text-[10px] uppercase font-bold tracking-widest text-zinc-500 mb-2 font-mono">
+                  {isSpeaking || callStatus !== CallStatus.ACTIVE ? "Interviewer" : "Candidate"}
                 </div>
-                
-                {/* Terminal Scroll Container */}
-                <div className="p-4 flex flex-col gap-2.5 max-h-[220px] overflow-y-auto custom-scrollbar select-text bg-black/40">
-                  {messages
-                    .filter((m) => !m.content.startsWith("[SYSTEM:") && m.role !== "system")
-                    .map((m, idx) => {
-                      const isUser = m.role === "user";
-                      const promptChar = isUser ? "user@mockrithm:~$" : "alex@mockrithm:~$";
-                      const colorClass = isUser ? "text-white" : "text-emerald-400";
-                      return (
-                        <div key={idx} className="flex flex-col gap-0.5 font-mono">
-                          <div className="flex items-center gap-1.5 text-[9px] font-bold text-zinc-500">
-                            <span>{promptChar}</span>
-                          </div>
-                          <p className={cn("pl-3 font-semibold", colorClass)}>
-                            {m.content}
-                          </p>
-                        </div>
-                      );
-                    })}
-                  {/* Blinking CLI Cursor at the bottom if active */}
-                  {callStatus === CallStatus.ACTIVE && !isSpeaking && (
-                    <div className="flex items-center gap-1.5 pl-3 font-mono">
-                      <span className="text-zinc-555 text-[9px]">user@mockrithm:~$</span>
-                      <span className="w-1.5 h-3 bg-white animate-[pulse_0.8s_infinite] inline-block" />
-                    </div>
-                  )}
-                </div>
+                <p
+                  key={lastMessage}
+                  className="text-sm text-white font-medium leading-relaxed max-w-xl mx-auto animate-fadeIn font-sans"
+                >
+                  "{lastMessage}"
+                </p>
               </motion.div>
             )}
-
+            
             {/* STAR Response Analyzer Board */}
             {callStatus === CallStatus.ACTIVE && (
               <motion.div 
