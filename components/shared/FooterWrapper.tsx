@@ -8,7 +8,6 @@ import Footer from "./Footer";
 const FooterWrapper = () => {
   const pathname = usePathname();
   const [isDocsSubdomain, setIsDocsSubdomain] = useState(false);
-  const [isGamesSubdomain, setIsGamesSubdomain] = useState(false);
   const { isSignedIn } = useUser();
 
   useEffect(() => {
@@ -17,13 +16,10 @@ const FooterWrapper = () => {
       if (hostname.startsWith("docs.")) {
         setIsDocsSubdomain(true);
       }
-      if (hostname.includes("games.mockrithm") || hostname.includes("games.localhost")) {
-        setIsGamesSubdomain(true);
-      }
     }
   }, []);
 
-  if (isDocsSubdomain || isGamesSubdomain) return null;
+  if (isDocsSubdomain) return null;
   if (!pathname) return null;
 
   // Hide on auth, admin, and active interview pages
@@ -41,7 +37,7 @@ const FooterWrapper = () => {
     return null;
   }
   
-  if (pathname.startsWith("/interview") || pathname.startsWith("/admin") || pathname.startsWith("/onboarding") || pathname.startsWith("/documentation") || pathname.startsWith("/games") || pathname.startsWith("/resume") || pathname.startsWith("/user/resume") || pathname.startsWith("/user/dashboard/resume/workspace")) {
+  if (pathname.startsWith("/interview") || pathname.startsWith("/admin") || pathname.startsWith("/onboarding") || pathname.startsWith("/documentation") || pathname.startsWith("/resume") || pathname.startsWith("/user/resume") || pathname.startsWith("/user/dashboard/resume/workspace")) {
     return null;
   }
 

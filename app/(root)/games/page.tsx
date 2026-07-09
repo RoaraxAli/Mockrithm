@@ -2620,10 +2620,7 @@ async def event_generator():
         </section>
       </main>
 
-      {/* Simple Footer */}
-      <footer className="border-t border-zinc-950 py-16 text-center text-[9px] uppercase font-bold tracking-[0.25em] text-zinc-650 relative z-10 font-mono">
-        © 2026 Mockrithm Games. All rights reserved.
-      </footer>
+
     </div>
   );
 }
