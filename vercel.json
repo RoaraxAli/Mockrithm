@@ -12,6 +12,17 @@
       "permanent": false
     },
     {
+      "source": "/games",
+      "has": [
+        {
+          "type": "host",
+          "value": "mockrithm.me"
+        }
+      ],
+      "destination": "https://games.mockrithm.me",
+      "permanent": false
+    },
+    {
       "source": "/blogs",
       "has": [
         {
@@ -64,6 +75,26 @@
         }
       ],
       "destination": "/documentation/:path*"
+    },
+    {
+      "source": "/",
+      "has": [
+        {
+          "type": "host",
+          "value": "games.mockrithm.me"
+        }
+      ],
+      "destination": "/games"
+    },
+    {
+      "source": "/:path*",
+      "has": [
+        {
+          "type": "host",
+          "value": "games.mockrithm.me"
+        }
+      ],
+      "destination": "/games/:path*"
     },
     {
       "source": "/",
