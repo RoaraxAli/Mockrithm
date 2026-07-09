@@ -1,226 +1,111 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
-import Link from "next/link";
-import { motion } from "framer-motion";
-import { Play, ShieldAlert, Cpu, Activity, BarChart2, MessageSquare, ArrowRight } from "lucide-react";
-import { Button } from "@/components/ui/button";
 import { getAuthRedirectUrl } from "@/lib/utils/auth";
-import { gsap } from "gsap";
-import { ScrollTrigger } from "gsap/ScrollTrigger";
+import Link from "next/link";
 
 export default function AwwwardsHero() {
-  const containerRef = useRef<HTMLDivElement>(null);
-  const [wpm, setWpm] = useState(135);
-  const [fillers, setFillers] = useState(1);
-
-  // Live telemetry simulator for the glassmorphic widget
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setWpm(Math.floor(130 + Math.random() * 12));
-      if (Math.random() > 0.8) {
-        setFillers((prev) => (prev < 3 ? prev + 1 : 0));
-      }
-    }, 2500);
-
-    return () => clearInterval(interval);
-  }, []);
-
-  useEffect(() => {
-    gsap.registerPlugin(ScrollTrigger);
-    
-    if (!containerRef.current) return;
-
-    const ctx = gsap.context(() => {
-      // Fade out all hero elements as we scroll down
-      gsap.to(".hero-fade-target", {
-        scrollTrigger: {
-          trigger: "#awwwards-hero",
-          start: "top top",
-          end: "bottom 30%",
-          scrub: true,
-        },
-        opacity: 0,
-        y: -40,
-        ease: "power2.inOut",
-      });
-    }, containerRef);
-
-    return () => ctx.revert();
-  }, []);
-
-  const containerVariants = {
-    hidden: {},
-    visible: {
-      transition: {
-        staggerChildren: 0.12,
-      }
-    }
+  const handleJourneyBegin = () => {
+    window.location.href = getAuthRedirectUrl("sign-up");
   };
 
-  const itemVariants = {
-    hidden: { opacity: 0, y: 30 },
-    visible: { 
-      opacity: 1, 
-      y: 0,
-      transition: { type: "spring", stiffness: 80, damping: 18 }
-    }
-  };
+  const navyThemeStyles = {
+    "--background": "201 100% 13%",
+    "--foreground": "0 0% 100%",
+    "--muted-foreground": "240 4% 66%",
+    "--primary": "0 0% 100%",
+    "--primary-foreground": "0 0% 4%",
+    "--secondary": "0 0% 10%",
+    "--muted": "0 0% 10%",
+    "--accent": "0 0% 10%",
+    "--border": "0 0% 18%",
+    "--input": "0 0% 18%",
+  } as React.CSSProperties;
 
   return (
-    <section
-      ref={containerRef}
+    <div
       id="awwwards-hero"
-      className="relative w-full min-h-screen flex flex-col justify-center px-8 md:px-16 py-20 overflow-hidden bg-transparent z-20"
+      className="relative w-full min-h-screen flex flex-col justify-between overflow-hidden select-none bg-[hsl(201,100%,13%)]"
+      style={navyThemeStyles}
     >
-      {/* Subtle Grid overlay background */}
-      <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.01)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.01)_1px,transparent_1px)] bg-[size:100px_100px] pointer-events-none" />
+      {/* Fullscreen Looping Background Video */}
+      <video
+        autoPlay
+        loop
+        muted
+        playsInline
+        className="absolute inset-0 w-full h-full object-cover z-0"
+        src="https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260314_131748_f2ca2a28-fed7-44c8-b9a9-bd9acdd5ec31.mp4"
+      />
 
-      {/* Main Grid Layout split (Asymmetrical) */}
-      <motion.div 
-        variants={containerVariants}
-        initial="hidden"
-        animate="visible"
-        className="hero-fade-target max-w-7xl mx-auto w-full grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-8 items-center z-30"
-      >
-        
-        {/* Left Column: Typographic Messaging (7 Columns) */}
-        <div className="lg:col-span-7 flex flex-col items-start text-left gap-6">
-          
+      {/* Navigation Bar */}
+      <nav className="relative z-10 w-full max-w-7xl mx-auto px-8 py-6 flex items-center justify-between font-sans">
+        {/* Logo */}
+        <span
+          className="text-3xl tracking-tight text-white select-none"
+          style={{ fontFamily: "'Instrument Serif', serif" }}
+        >
+          Velorah<sup className="text-xs">®</sup>
+        </span>
 
-
-          {/* Headline */}
-          <motion.div variants={itemVariants}>
-            <h1 className="font-sans font-black tracking-tight text-5xl sm:text-6xl md:text-7xl lg:text-8xl leading-[0.95] uppercase bg-clip-text text-transparent bg-gradient-to-br from-white via-zinc-100 to-zinc-650">
-              Practice <br />
-              <span className="text-zinc-550">Differently.</span>
-            </h1>
-          </motion.div>
-
-          {/* Descriptive Pitch */}
-          <motion.div variants={itemVariants} className="max-w-xl">
-            <p className="text-xs md:text-sm font-semibold text-zinc-450 leading-relaxed font-mona-sans">
-              Conduct dynamic, voice-driven mock interviews tailored specifically to your target roles. Track pacing stats, benchmark STAR structures, and analyze algorithmic output in real-time.
-            </p>
-          </motion.div>
-
-          {/* New Custom Cybernetic Buttons */}
-          <motion.div 
-            variants={itemVariants}
-            className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto mt-4"
-          >
-            {/* Primary Action capsule */}
-            <Link href={getAuthRedirectUrl("sign-up")} className="w-full sm:w-auto">
-              <Button className="w-full sm:w-48 h-12 bg-white hover:bg-zinc-100 text-black font-black text-[10px] uppercase tracking-[0.2em] rounded-full border border-white transition-all duration-300 shadow-[0_8px_20px_-8px_rgba(255,255,255,0.5)] flex items-center justify-center gap-2 hover:-translate-y-0.5 active:translate-y-0">
-                <Play className="size-3.5 fill-black" />
-                Launch Session
-              </Button>
-            </Link>
-
-            {/* Secondary Action outlined */}
-            <Link href={getAuthRedirectUrl("sign-in")} className="w-full sm:w-auto">
-              <Button variant="outline" className="w-full sm:w-48 h-12 border-white/10 hover:border-white/30 bg-zinc-950/30 hover:bg-zinc-900/30 backdrop-blur-md text-zinc-400 hover:text-white font-black text-[10px] uppercase tracking-[0.2em] rounded-full transition-all duration-300 flex items-center justify-center gap-2 hover:-translate-y-0.5 active:translate-y-0">
-                Access Portal
-                <ArrowRight className="size-3.5" />
-              </Button>
-            </Link>
-          </motion.div>
+        {/* Links */}
+        <div className="hidden md:flex items-center gap-8 text-sm font-medium">
+          <span className="text-white cursor-pointer transition-colors duration-200">
+            Home
+          </span>
+          <span className="text-[hsl(240,4%,66%)] hover:text-white cursor-pointer transition-colors duration-200">
+            Studio
+          </span>
+          <span className="text-[hsl(240,4%,66%)] hover:text-white cursor-pointer transition-colors duration-200">
+            About
+          </span>
+          <span className="text-[hsl(240,4%,66%)] hover:text-white cursor-pointer transition-colors duration-200">
+            Journal
+          </span>
+          <span className="text-[hsl(240,4%,66%)] hover:text-white cursor-pointer transition-colors duration-200">
+            Reach Us
+          </span>
         </div>
 
-        {/* Right Column: Interactive Real-time Telemetry Dashboard (5 Columns) */}
-        <motion.div 
-          variants={itemVariants}
-          className="hidden lg:flex lg:col-span-5 justify-center lg:justify-end"
+        {/* CTA */}
+        <button
+          onClick={handleJourneyBegin}
+          className="liquid-glass rounded-full px-6 py-2.5 text-sm text-white font-medium hover:scale-[1.03] transition-all duration-300 cursor-pointer shadow-lg active:scale-95 border-none outline-none"
         >
-          {/* Glassmorphic Cyber-Widget */}
-          <div className="relative w-full max-w-sm p-6 rounded-2xl border border-white/5 bg-zinc-950/20 backdrop-blur-xl shadow-[0_30px_70px_-15px_rgba(0,0,0,0.9)] overflow-hidden group">
-            {/* Corner glowing nodes */}
-            <div className="absolute top-0 right-0 w-24 h-24 bg-white/[0.01] rounded-full blur-2xl group-hover:bg-white/[0.03] transition-all duration-700" />
-            <div className="absolute -bottom-2 -left-2 w-1 h-1 bg-white/25 rounded-full" />
-            <div className="absolute -top-2 -right-2 w-1 h-1 bg-white/25 rounded-full" />
+          Begin Journey
+        </button>
+      </nav>
 
-            {/* Widget header */}
-            <div className="flex items-center justify-between border-b border-white/5 pb-4 mb-5">
-              <div className="flex items-center gap-2">
-                <Cpu className="size-4 text-zinc-400" />
-                <span className="text-[10px] font-black uppercase tracking-wider text-white font-mono">Telemetry // Star</span>
-              </div>
-              <span className="text-[8px] font-bold uppercase tracking-wider bg-emerald-950/40 text-emerald-400 border border-emerald-500/20 px-2 py-0.5 rounded">
-                Live Feed
-              </span>
-            </div>
-
-            {/* Simulated Live Audio Spectrum/Waveform */}
-            <div className="space-y-4">
-              <div className="flex items-center justify-between text-[8px] text-zinc-500 font-bold uppercase tracking-widest font-mono">
-                <span>Vocal Stream</span>
-                <span>Active</span>
-              </div>
-              
-              {/* Pulsing bars */}
-              <div className="h-10 flex items-end justify-between gap-1 px-1">
-                {[0.4, 0.7, 0.3, 0.9, 0.5, 0.8, 0.2, 0.6, 0.95, 0.45, 0.75, 0.35, 0.65, 0.85, 0.25, 0.55].map((val, idx) => (
-                  <motion.div 
-                    key={idx}
-                    animate={{ height: [`${val * 100}%`, `${Math.max(10, val * 100 - (Math.random() * 40))}%`, `${val * 100}%`] }}
-                    transition={{ repeat: Infinity, duration: 1 + Math.random(), ease: "easeInOut" }}
-                    className="w-full bg-gradient-to-t from-zinc-800 to-white/85 rounded-t-sm"
-                    style={{ height: `${val * 100}%` }}
-                  />
-                ))}
-              </div>
-
-              {/* Dynamic stats */}
-              <div className="grid grid-cols-2 gap-3 border-t border-white/5 pt-4">
-                <div className="bg-zinc-950/45 p-3 rounded-lg border border-white/5">
-                  <div className="flex items-center gap-1.5 text-[8px] font-bold text-zinc-500 uppercase tracking-widest font-mono mb-1">
-                    <Activity className="size-3 text-zinc-400" />
-                    Speed
-                  </div>
-                  <span className="text-sm font-black text-white font-mono">{wpm} <span className="text-[9px] text-zinc-500 font-bold">WPM</span></span>
-                </div>
-                <div className="bg-zinc-950/45 p-3 rounded-lg border border-white/5">
-                  <div className="flex items-center gap-1.5 text-[8px] font-bold text-zinc-500 uppercase tracking-widest font-mono mb-1">
-                    <ShieldAlert className="size-3 text-zinc-400" />
-                    Fillers
-                  </div>
-                  <span className="text-sm font-black text-white font-mono">{fillers} <span className="text-[9px] text-zinc-500 font-bold">UM/LIKE</span></span>
-                </div>
-              </div>
-
-              {/* STAR Framework checklist progress */}
-              <div className="space-y-2 pt-2">
-                <div className="flex items-center justify-between text-[8px] text-zinc-500 font-bold uppercase tracking-widest font-mono">
-                  <span>STAR Compliance</span>
-                  <span>78%</span>
-                </div>
-                <div className="w-full h-1 bg-zinc-900 rounded-full overflow-hidden">
-                  <div className="h-full bg-white/70 w-[78%] rounded-full shadow-[0_0_8px_rgba(255,255,255,0.4)]" />
-                </div>
-              </div>
-            </div>
-          </div>
-        </motion.div>
-      </motion.div>
-
-      {/* Downward indicator */}
-      <div className="hero-fade-target w-full flex justify-center z-40 mt-auto pt-16">
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 0.5 }}
-          transition={{ delay: 0.8, duration: 1 }}
-          className="flex flex-col items-center gap-2"
+      {/* Hero Content Section */}
+      <main className="relative z-10 flex-1 flex flex-col items-center justify-center text-center px-6 pt-32 pb-40 max-w-7xl mx-auto w-full">
+        {/* Headline */}
+        <h1
+          className="text-5xl sm:text-7xl md:text-8xl leading-[0.95] tracking-[-2.46px] max-w-7xl font-normal text-white animate-fade-rise"
+          style={{ fontFamily: "'Instrument Serif', serif" }}
         >
-          <span className="text-[7px] font-black uppercase tracking-[0.3em] text-zinc-500">SCROLL TO DISCOVER</span>
-          <div className="w-[1px] h-10 bg-gradient-to-b from-white via-zinc-800 to-transparent relative overflow-hidden">
-            <motion.div 
-              animate={{ y: ["-100%", "100%"] }}
-              transition={{ repeat: Infinity, duration: 1.5, ease: "easeInOut" }}
-              className="absolute left-0 top-0 w-full h-1/2 bg-white"
-            />
-          </div>
-        </motion.div>
-      </div>
-    </section>
+          Where{" "}
+          <em className="not-italic text-[hsl(240,4%,66%)] font-normal">
+            dreams
+          </em>{" "}
+          rise <br />
+          <em className="not-italic text-[hsl(240,4%,66%)] font-normal">
+            through the silence.
+          </em>
+        </h1>
+
+        {/* Subtext */}
+        <p className="text-[hsl(240,4%,66%)] text-base sm:text-lg max-w-2xl mt-8 leading-relaxed font-sans animate-fade-rise-delay">
+          We're designing tools for deep thinkers, bold creators, and quiet rebels.
+          Amid the chaos, we build digital spaces for sharp focus and inspired work.
+        </p>
+
+        {/* Big CTA */}
+        <button
+          onClick={handleJourneyBegin}
+          className="liquid-glass rounded-full px-14 py-5 text-base text-white font-medium mt-12 hover:scale-[1.03] transition-all duration-300 cursor-pointer shadow-xl active:scale-95 border-none outline-none animate-fade-rise-delay-2"
+        >
+          Begin Journey
+        </button>
+      </main>
+    </div>
   );
 }
