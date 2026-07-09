@@ -8,17 +8,22 @@ import Footer from "./Footer";
 const FooterWrapper = () => {
   const pathname = usePathname();
   const [isDocsSubdomain, setIsDocsSubdomain] = useState(false);
+  const [isGamesSubdomain, setIsGamesSubdomain] = useState(false);
   const { isSignedIn } = useUser();
 
   useEffect(() => {
     if (typeof window !== "undefined") {
-      if (window.location.hostname.startsWith("docs.")) {
+      const hostname = window.location.hostname;
+      if (hostname.startsWith("docs.")) {
         setIsDocsSubdomain(true);
+      }
+      if (hostname.includes("games.mockrithm") || hostname.includes("games.localhost")) {
+        setIsGamesSubdomain(true);
       }
     }
   }, []);
 
-  if (isDocsSubdomain) return null;
+  if (isDocsSubdomain || isGamesSubdomain) return null;
   if (!pathname) return null;
 
   // Hide on auth, admin, and active interview pages

@@ -43,6 +43,16 @@ const Navbar = ({ userId, userName, userRole }: NavbarProps) => {
   const { signOut: clerkSignOut } = useClerk();
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isGamesSubdomain, setIsGamesSubdomain] = useState(false);
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const hostname = window.location.hostname;
+      if (hostname.includes("games.mockrithm") || hostname.includes("games.localhost")) {
+        setIsGamesSubdomain(true);
+      }
+    }
+  }, []);
   const [isScrolled, setIsScrolled] = useState(false);
   const [isAdmin, setIsAdmin] = useState(userRole?.toLowerCase() === "admin");
 
@@ -109,7 +119,7 @@ const Navbar = ({ userId, userName, userRole }: NavbarProps) => {
         { href: "/documentation", label: "Documentation", icon: Info },
       ];
 
-  if (pathname.startsWith("/admin") || pathname.startsWith("/games") || pathname === "/games") return null;
+  if (isGamesSubdomain || pathname.startsWith("/admin") || pathname.startsWith("/games") || pathname === "/games") return null;
 
   return (
     <>

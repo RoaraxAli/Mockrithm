@@ -2215,79 +2215,222 @@ function GamesPageContent() {
 }
 
 function GamesLandingPage() {
-  const [activeTopic, setActiveTopic] = useState<"html" | "js" | "git" | "react">("html");
+  const [activeTopic, setActiveTopic] = useState<"html" | "css" | "js" | "ts" | "react" | "nextjs" | "node" | "git" | "sql" | "python">("html");
 
   const topics = {
     html: {
       title: "HTML5 Layout & Semantics",
-      description: "Master document structuring, semantic tags, accessibility, and modern search engine rules.",
+      tagline: "Build accessible, SEO-optimized markup structures.",
+      gradient: "from-orange-500/20 to-amber-500/20 text-orange-400",
+      accent: "#f97316",
       lessons: [
-        "Use <header>, <nav>, <main>, and <footer> to structure your page layout cleanly.",
-        "Prefer <button> over <div> for click triggers to maintain screen-reader accessibility.",
-        "Add descriptive alt text to images for optimal SEO and user experience."
+        "Structure clean document pipelines using semantic elements (<main>, <article>, <section>).",
+        "Maintain accessible elements (WAI-ARIA roles, focus management, semantic buttons).",
+        "Implement SEO metadata, microdata schemas, and dynamic social graph protocols."
       ],
-      code: `<!-- Accessible Semantic Structure -->
-<header>
-  <h1>Mockrithm DevGames</h1>
-</header>
-<main>
-  <article>
-    <h2>Mastering HTML5</h2>
-    <p>Always use semantic elements over standard divs.</p>
-  </article>
-</main>`
+      code: `<!-- Semantic HTML Document -->
+<article class="p-6 bg-zinc-900 rounded-xl">
+  <header class="mb-4">
+    <h2 class="text-lg font-bold">Semantic Layout</h2>
+    <p class="text-xs text-zinc-400">Written for SEO.</p>
+  </header>
+  <main class="space-y-4">
+    <p>Semantic tags improve ranking and accessibility.</p>
+  </main>
+</article>`
+    },
+    css: {
+      title: "CSS3 Layout, Grid & Animations",
+      tagline: "Architect scalable styling layouts and immersive micro-animations.",
+      gradient: "from-blue-500/20 to-cyan-500/20 text-blue-400",
+      accent: "#3b82f6",
+      lessons: [
+        "Design responsive grids using dynamic units (fr, minmax, autofit, clamp).",
+        "Implement GPU-accelerated Keyframe transitions for 60fps micro-interactions.",
+        "Author clean CSS variables, themes, utilities, and fluid typography scales."
+      ],
+      code: `/* Responsive Grid Layout & Animation */
+.container {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 1.5rem;
+}
+.card:hover {
+  transform: translateY(-4px);
+  transition: transform 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
+}`
     },
     js: {
-      title: "JavaScript & ES6+ Core Concepts",
-      description: "Dive into scopes, closures, asynchronous loops, promises, and performance metrics.",
+      title: "JavaScript & ES15+ Concepts",
+      tagline: "Master high-speed execution environments and asynchronous flows.",
+      gradient: "from-yellow-500/20 to-amber-500/20 text-yellow-400",
+      accent: "#eab308",
       lessons: [
-        "Understand lexical scoping and closures to manage private function scopes.",
-        "Master Promises, async/await, and event loops to handle high-performance concurrency.",
-        "Avoid memory leaks by managing event listeners and garbage-collection references."
+        "Utilize Event Loops, Microtasks, Macrotasks, and Call Stacks efficiently.",
+        "Design modular systems with Javascript closures, high-order helpers, and Currying.",
+        "Handle high-frequency async streams with Generators, Async Iterations, and Event emitters."
       ],
-      code: `// Async Fetching ES6 Pattern
-async function loadUserData(userId) {
-  try {
-    const res = await fetch(\`/api/user/\${userId}\`);
-    const data = await res.json();
-    return data;
-  } catch (err) {
-    console.error("Fetch failed:", err);
-  }
+      code: `// Async Pipeline Pattern
+const composeAsync = (...fns) => (x) => 
+  fns.reduce((v, f) => v.then(f), Promise.resolve(x));
+
+const fetchUser = async (id) => (await fetch(\`/users/\${id}\`)).json();
+const parseName = async (user) => user.name.toUpperCase();
+
+const getUserName = composeAsync(fetchUser, parseName);`
+    },
+    ts: {
+      title: "TypeScript Strict Systems",
+      tagline: "Secure compile-time type-safety with dynamic type models.",
+      gradient: "from-blue-600/20 to-indigo-500/20 text-blue-400",
+      accent: "#2563eb",
+      lessons: [
+        "Author advanced dynamic models using Generics, Mapped Types, and Conditional Types.",
+        "Implement discriminative union guards for strict runtime execution safety.",
+        "Configure strict tsconfig settings for robust code coverage."
+      ],
+      code: `// Dynamic Mapped API Model
+type ReadOnlyRecord<T> = {
+  readonly [K in keyof T]: T[K];
+};
+
+interface User {
+  id: string;
+  name: string;
+}
+
+const activeUser: ReadOnlyRecord<User> = {
+  id: "USR_1",
+  name: "Sarah Jenkins"
+};`
+    },
+    react: {
+      title: "React Core Render Optimization",
+      tagline: "Prevent virtual DOM redraws and master component hooks.",
+      gradient: "from-cyan-500/20 to-sky-500/20 text-cyan-400",
+      accent: "#06b6d4",
+      lessons: [
+        "Apply React memoization hooks (useMemo, useCallback) to balance heavy updates.",
+        "Optimize custom hooks to isolate states and maintain clean separation of concerns.",
+        "Design scalable contexts, custom reducers, and atomic rendering state engines."
+      ],
+      code: `// Custom Optimized Rendering Hook
+import { useState, useCallback, useTransition } from 'react';
+
+export function useBatchState(initialValue) {
+  const [value, setValue] = useState(initialValue);
+  const [isPending, startTransition] = useTransition();
+
+  const update = useCallback((next) => {
+    startTransition(() => setValue(next));
+  }, []);
+
+  return [value, update, isPending];
+}`
+    },
+    nextjs: {
+      title: "Next.js App Router & Server Actions",
+      tagline: "Architect blazing-fast fullstack rendering pipelines.",
+      gradient: "from-zinc-500/20 to-neutral-400/20 text-white",
+      accent: "#f4f4f5",
+      lessons: [
+        "Orchestrate Server Component data fetching with sub-second stream rendering.",
+        "Integrate Server Actions with optimistic UI updates and form validation workflows.",
+        "Utilize dynamic route segments, intercepting routes, and parallel slots."
+      ],
+      code: `// Next.js Server Action Endpoint
+"use server";
+
+import { revalidatePath } from 'next/cache';
+
+export async function submitTelemetry(payload: unknown) {
+  const response = await fetch('https://api.mockrithm/telemetry', {
+    method: 'POST',
+    body: JSON.stringify(payload)
+  });
+  revalidatePath('/dashboard');
+  return response.ok;
+}`
+    },
+    node: {
+      title: "Node.js Streams & Microservices",
+      tagline: "Build high-throughput backends and stream processing servers.",
+      gradient: "from-green-600/20 to-emerald-500/20 text-green-400",
+      accent: "#16a34a",
+      lessons: [
+        "Build scalable memory pipelines using Node streams, pipes, and buffers.",
+        "Handle file I/O operations asynchronously using the fs/promises module.",
+        "Implement fast TCP/HTTP microservices with cluster clustering algorithms."
+      ],
+      code: `// High-Performance Stream Pipeline
+import { createReadStream, createWriteStream } from 'fs';
+import { pipeline } from 'stream/promises';
+
+async function compressLogs(src, dest) {
+  const readStream = createReadStream(src);
+  const writeStream = createWriteStream(dest);
+  
+  // Pipeline handles error cleanup automatically
+  await pipeline(readStream, writeStream);
 }`
     },
     git: {
-      title: "Git Workflow & Tree Branching",
-      description: "Resolve complex merge conflicts, understand rebasing, and master head tracking.",
+      title: "Git Rebasing & Reflog Puzzles",
+      tagline: "Manage complex commit histories and solve detached HEAD states.",
+      gradient: "from-orange-600/20 to-red-500/20 text-orange-400",
+      accent: "#ea580c",
       lessons: [
-        "Use git rebase to maintain a linear and clean commits history before merging.",
-        "Understand detached HEAD states and how to recover lost commits via git reflog.",
-        "Stage and commit cleanly, separating architectural refactors from cosmetic styles."
+        "Apply interactive rebase tools (squash, reword, fixup) for linear git histories.",
+        "Debug detached HEAD branch pointers and restore deleted commits using git reflog.",
+        "Coordinate parallel workflows using git cherry-pick, stashing, and hook scripts."
       ],
-      code: `# Standard Interactive Rebase Flow
-git checkout feature-branch
-git fetch origin
-git rebase origin/main
-# Fix conflicts if any, then push
-git push origin feature-branch --force-with-lease`
+      code: `# Solve Detached HEAD State
+git reflog
+# Find commit hash (e.g. e4a2b10) before detach
+git checkout master
+git reset --hard e4a2b10
+# Recovered! Commit tree restored`
     },
-    react: {
-      title: "React Virtual DOM & State Hydration",
-      description: "Optimize component renders, utilize memoization, and master React hook rules.",
+    sql: {
+      title: "SQL Windows & Query Optimizers",
+      tagline: "Solve analytics queries and configure high-performance database indexes.",
+      gradient: "from-sky-600/20 to-blue-500/20 text-sky-400",
+      accent: "#0284c7",
       lessons: [
-        "Wrap heavy client components in React.memo to prevent unnecessary virtual DOM redraws.",
-        "Use useEffect cleanup functions to revoke object URLs, cancel subscriptions, and prevent leaks.",
-        "Handle declarative state cleanly without mutating state objects directly."
+        "Analyze metrics datasets using partition/row window aggregation functions.",
+        "Optimize complex execution trees with EXPLAIN ANALYZE statements.",
+        "Design B-Tree composite indexes, covering indexes, and partition layouts."
       ],
-      code: `// Optimized React Counter
-import React, { useState, useCallback } from 'react';
+      code: `-- Window Rank Partition Query
+SELECT 
+  employee_id, 
+  department, 
+  salary,
+  RANK() OVER (PARTITION BY department ORDER BY salary DESC) as rank
+FROM employees
+WHERE status = 'active';`
+    },
+    python: {
+      title: "Python Generators & FastAPIs",
+      tagline: "Leverage generators, context managers, and async REST routes.",
+      gradient: "from-indigo-600/20 to-purple-500/20 text-indigo-400",
+      accent: "#4f46e5",
+      lessons: [
+        "Optimize CPU-bound processes with yield generators and context managers.",
+        "Design validation models using pydantic static types and class inheritance.",
+        "Build async API routing pipelines with fast ASGI servers like Uvicorn."
+      ],
+      code: `# Async FastAPI Stream Endpoint
+from fastapi import FastAPI
+from fastapi.responses import StreamingResponse
+import asyncio
 
-export const Counter = React.memo(() => {
-  const [count, setCount] = useState(0);
-  const increment = useCallback(() => setCount(c => c + 1), []);
+app = FastAPI()
 
-  return <button onClick={increment}>Count: {count}</button>;
-});`
+async def event_generator():
+    for i in range(100):
+        yield f"data: Progress {i}\\n\\n"
+        await asyncio.sleep(0.1)`
     }
   };
 
@@ -2299,31 +2442,37 @@ export const Counter = React.memo(() => {
 
   return (
     <div className="min-h-screen bg-black text-white font-mona-sans relative overflow-x-hidden selection:bg-white selection:text-black">
-      {/* Background aesthetics */}
-      <div className="absolute inset-0 premium-grid-dot pointer-events-none opacity-20 z-0" />
-      <div className="absolute top-1/4 left-1/4 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-violet-600/5 blur-[150px] rounded-full pointer-events-none" />
-      <div className="absolute bottom-1/4 right-1/4 translate-x-1/2 translate-y-1/2 w-[600px] h-[600px] bg-sky-600/5 blur-[150px] rounded-full pointer-events-none" />
+      {/* Background visual components */}
+      <div className="absolute inset-0 premium-grid-dot pointer-events-none opacity-25 z-0" />
+      <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-purple-900/10 blur-[160px] rounded-full pointer-events-none transition-all duration-700" style={{ backgroundColor: `${selectedTopic.accent}15` }} />
+      <div className="absolute bottom-1/4 right-1/4 translate-x-1/2 translate-y-1/2 w-[600px] h-[600px] bg-blue-900/10 blur-[160px] rounded-full pointer-events-none" />
 
-      {/* Navigation */}
+      {/* Navigation Header */}
       <header className="relative z-10 border-b border-zinc-900 bg-zinc-950/60 backdrop-blur-md px-6 py-4 flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <div className="size-8 rounded-lg bg-white text-black flex items-center justify-center font-black font-mono text-sm tracking-tighter">
+          {/* Official Mockrithm Logo Symbol */}
+          <div className="size-8 rounded-lg bg-white text-black flex items-center justify-center font-black font-mono text-sm tracking-tighter shadow-md shadow-white/10">
             M
           </div>
-          <span className="text-sm font-black tracking-widest uppercase font-mono text-white">
-            Mockrithm <span className="text-zinc-500 text-[10px] font-bold">Games</span>
-          </span>
+          <div className="flex flex-col">
+            <span className="text-sm font-black tracking-widest uppercase font-mono text-white leading-none">
+              Mockrithm
+            </span>
+            <span className="text-[8px] font-bold text-zinc-500 uppercase tracking-widest mt-0.5">
+              interactive games
+            </span>
+          </div>
         </div>
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-6">
           <a
             href="https://mockrithm.me"
-            className="text-xs font-bold uppercase tracking-wider text-zinc-400 hover:text-white transition-all"
+            className="text-xs font-bold uppercase tracking-wider text-zinc-400 hover:text-white transition-all font-mono"
           >
             Core Platform
           </a>
           <button
             onClick={handleAuthRedirect}
-            className="px-4 py-2 bg-white text-black text-xs font-black uppercase tracking-wider rounded-lg border border-white hover:bg-zinc-200 transition-all cursor-pointer"
+            className="px-4.5 py-2.5 bg-white text-black text-xs font-black uppercase tracking-wider rounded-xl border border-white hover:bg-zinc-200 transition-all cursor-pointer shadow-lg shadow-white/5"
           >
             Start Playing
           </button>
@@ -2331,111 +2480,138 @@ export const Counter = React.memo(() => {
       </header>
 
       {/* Hero Section */}
-      <main className="max-w-5xl mx-auto px-6 pt-20 pb-28 relative z-10">
-        <div className="text-center mb-16">
-          <div className="inline-flex items-center gap-1.5 bg-zinc-900 border border-zinc-800 px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-[0.2em] text-zinc-400 font-mono mb-4">
-            <Sparkles className="size-3 text-white" /> Lead Generation Sandbox
+      <main className="max-w-5xl mx-auto px-6 pt-24 pb-28 relative z-10">
+        <div className="text-center mb-24">
+          <div className="inline-flex items-center gap-1.5 bg-zinc-900/80 border border-zinc-800 px-3.5 py-1.5 rounded-full text-[9px] font-black uppercase tracking-[0.2em] text-zinc-400 font-mono mb-6">
+            <Sparkles className="size-3 text-white animate-pulse" /> Awwwards Class Sandbox
           </div>
-          <h1 className="text-5xl md:text-7xl font-black uppercase tracking-tighter text-white font-mono">
-            Level Up Your <br />
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-violet-400 to-sky-400">Engineering skills</span>
+          <h1 className="text-5xl md:text-8xl font-black uppercase tracking-tighter text-white font-mono leading-none">
+            Code. Compile. <br />
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-400 via-indigo-400 to-sky-400">
+              Claim Your Role.
+            </span>
           </h1>
-          <p className="text-zinc-400 text-xs md:text-sm mt-6 max-w-xl mx-auto leading-relaxed">
-            Practice real developer skills interactively: parse HTML layout codes, resolve Git branches, debug Javascript algorithms, and verify React rendering behaviors.
+          <p className="text-zinc-400 text-xs md:text-sm mt-8 max-w-xl mx-auto leading-relaxed font-mono">
+            Practice real engineering skills on our interactive compiler sandboxes. Earn badges, scale the global leaderboards, and stand out to hiring managers.
           </p>
-          <div className="mt-8 flex justify-center gap-4">
+          <div className="mt-10 flex justify-center gap-4">
             <button
               onClick={handleAuthRedirect}
-              className="px-6 py-3.5 bg-white text-black text-xs font-black uppercase tracking-wider rounded-xl hover:bg-zinc-200 transition-all flex items-center gap-2 cursor-pointer shadow-lg shadow-white/5 border border-white"
+              className="px-6 py-4 bg-white text-black text-xs font-black uppercase tracking-wider rounded-xl hover:bg-zinc-200 transition-all flex items-center gap-2.5 cursor-pointer shadow-xl shadow-white/5 border border-white"
             >
-              Start Playing Now <ArrowRight className="size-4" />
+              Enter Game Hub <ArrowRight className="size-4" />
             </button>
             <a
               href="https://mockrithm.me"
-              className="px-6 py-3.5 bg-zinc-900/60 border border-zinc-800 text-white text-xs font-black uppercase tracking-wider rounded-xl hover:border-zinc-700 transition-all flex items-center gap-2"
+              className="px-6 py-4 bg-zinc-900/60 border border-zinc-800 text-white text-xs font-black uppercase tracking-wider rounded-xl hover:border-zinc-700 transition-all flex items-center gap-2 font-mono"
             >
-              Learn More
+              Main Platform
             </a>
           </div>
         </div>
 
-        {/* Lead Gen Core Product Callout */}
-        <section className="bg-gradient-to-r from-zinc-950 to-zinc-900/40 border border-zinc-850 rounded-2xl p-8 mb-16 relative overflow-hidden">
-          <div className="absolute top-0 right-0 w-64 h-64 bg-violet-500/10 blur-[80px] rounded-full pointer-events-none" />
-          <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 relative z-10">
-            <div className="space-y-2">
-              <span className="text-[9px] font-black tracking-widest text-emerald-400 uppercase bg-zinc-900 border border-emerald-500/20 px-2.5 py-1 rounded-full inline-flex items-center gap-1 font-mono">
-                <Trophy className="size-2.5" /> Core Feature
+        {/* Lead Gen Callout Card */}
+        <section className="bg-gradient-to-br from-zinc-950 via-zinc-950 to-zinc-900/60 border border-zinc-850 rounded-3xl p-8 md:p-10 mb-28 relative overflow-hidden shadow-2xl">
+          <div className="absolute top-0 right-0 w-80 h-80 bg-violet-600/10 blur-[90px] rounded-full pointer-events-none" />
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-8 relative z-10">
+            <div className="space-y-3">
+              <span className="text-[9px] font-black tracking-widest text-emerald-400 uppercase bg-zinc-900/80 border border-emerald-500/20 px-3 py-1 rounded-full inline-flex items-center gap-1.5 font-mono">
+                <Trophy className="size-2.5" /> Next Level Assessment
               </span>
-              <h2 className="text-lg font-black text-white uppercase font-mono">Duplex Voice-Activated AI Mock Interviews</h2>
-              <p className="text-zinc-400 text-xs leading-relaxed max-w-xl">
-                Ready to transition from code grids to live tech interviews? Prepare with our voice-driven interviewer model. Get instant performance telemetry, filler word counts, and customized study guides.
+              <h2 className="text-xl md:text-2xl font-black text-white uppercase font-mono tracking-tight">
+                Duplex Voice-Activated AI Mock Interviews
+              </h2>
+              <p className="text-zinc-400 text-xs leading-relaxed max-w-2xl font-mono">
+                Code sandbox is only half the battle. Practice duplex voice interviews with our AI interviewer model. Receive real-time assessment scores, detailed critiques on articulation, and tailor-made development checklists.
               </p>
             </div>
             <a
               href="https://mockrithm.me"
-              className="px-5 py-3.5 bg-white text-black hover:bg-zinc-200 text-xs font-black uppercase tracking-wider rounded-xl transition-all border border-white shrink-0 flex items-center justify-center gap-2 shadow-lg shadow-white/5"
+              className="px-6 py-4 bg-white text-black hover:bg-zinc-200 text-xs font-black uppercase tracking-wider rounded-xl transition-all border border-white shrink-0 flex items-center justify-center gap-2 shadow-xl shadow-white/5 font-mono"
             >
-              Practice Interviews <Gamepad2 className="size-4" />
+              Practice Now <Gamepad2 className="size-4" />
             </a>
           </div>
         </section>
 
-        {/* Syllabus Subpages/Tabs */}
-        <section className="space-y-6">
-          <div className="flex border-b border-zinc-900">
-            {(["html", "js", "git", "react"] as const).map((topicKey) => (
-              <button
-                key={topicKey}
-                onClick={() => setActiveTopic(topicKey)}
-                className={`pb-4 px-6 text-xs font-black uppercase tracking-wider font-mono border-b-2 transition-all cursor-pointer ${
-                  activeTopic === topicKey
-                    ? "border-white text-white"
-                    : "border-transparent text-zinc-500 hover:text-zinc-300"
-                }`}
-              >
-                {topicKey}
-              </button>
-            ))}
+        {/* Syllabus / 10 Topics Workspace */}
+        <section className="space-y-10 relative">
+          <div className="space-y-2 text-center md:text-left">
+            <span className="text-[9px] font-black tracking-widest text-indigo-400 uppercase font-mono">10 Modules Course Syllabus</span>
+            <h2 className="text-3xl font-black uppercase font-mono tracking-tight">Interactive Landing Sandboxes</h2>
+            <p className="text-xs text-zinc-500 font-mono">Select a topic below to inspect the curriculum lessons and practice code playground templates.</p>
           </div>
 
-          <div className="grid md:grid-cols-2 gap-8 items-start pt-4">
-            {/* Left side: Lesson Details */}
-            <div className="space-y-6">
-              <h3 className="text-2xl font-black text-white uppercase font-mono tracking-tight">
-                {selectedTopic.title}
-              </h3>
-              <p className="text-zinc-400 text-xs leading-relaxed">
-                {selectedTopic.description}
-              </p>
+          {/* 10 Sticky Topic Selector Badge Buttons */}
+          <div className="flex flex-wrap gap-2 border-b border-zinc-900 pb-6 scrollbar-hide overflow-x-auto">
+            {(Object.keys(topics) as Array<keyof typeof topics>).map((topicKey) => {
+              const active = activeTopic === topicKey;
+              return (
+                <button
+                  key={topicKey}
+                  onClick={() => { setActiveTopic(topicKey); }}
+                  className={`px-4.5 py-2.5 rounded-xl text-xs font-black uppercase tracking-wider font-mono transition-all border cursor-pointer ${
+                    active
+                      ? "bg-white text-black border-white shadow-lg"
+                      : "bg-zinc-950/60 border-zinc-900 text-zinc-500 hover:border-zinc-800 hover:text-zinc-300"
+                  }`}
+                >
+                  {topicKey}
+                </button>
+              );
+            })}
+          </div>
+
+          {/* Dynamic Content Grid */}
+          <div className="grid md:grid-cols-2 gap-10 items-start pt-4">
+            {/* Left Column: Syllabus Data */}
+            <div className="space-y-8">
+              <div className="space-y-3">
+                <span className={`inline-block px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-widest font-mono bg-gradient-to-r ${selectedTopic.gradient}`}>
+                  {activeTopic} module
+                </span>
+                <h3 className="text-3xl font-black text-white uppercase font-mono tracking-tighter">
+                  {selectedTopic.title}
+                </h3>
+                <p className="text-zinc-400 text-xs leading-relaxed font-mono">
+                  {selectedTopic.tagline}
+                </p>
+              </div>
+
+              {/* Lessons details */}
               <ul className="space-y-4">
                 {selectedTopic.lessons.map((lesson, idx) => (
                   <li key={idx} className="flex gap-3 items-start">
-                    <CheckCircle className="size-4 text-emerald-400 shrink-0 mt-0.5" />
-                    <span className="text-zinc-300 text-xs leading-relaxed">{lesson}</span>
+                    <div className="p-1 rounded bg-zinc-900 border border-zinc-800 text-emerald-400 mt-0.5 shrink-0">
+                      <CheckCircle className="size-3.5" />
+                    </div>
+                    <span className="text-zinc-300 text-xs leading-relaxed font-mono">{lesson}</span>
                   </li>
                 ))}
               </ul>
+
               <button
                 onClick={handleAuthRedirect}
-                className="inline-flex items-center gap-1 text-xs font-black uppercase tracking-wider text-white hover:text-zinc-300 transition-all font-mono"
+                className="inline-flex items-center gap-2 text-xs font-black uppercase tracking-wider text-white hover:text-zinc-300 transition-all font-mono border-b border-white pb-1"
               >
-                Try Interactive Practice Sandbox <ArrowRight className="size-3.5" />
+                Launch Sandbox Playground <ArrowRight className="size-4" />
               </button>
             </div>
 
-            {/* Right side: Mock Code IDE */}
-            <div className="flex flex-col border border-zinc-900 rounded-xl overflow-hidden shadow-2xl bg-zinc-950/40">
-              <div className="flex items-center justify-between px-4 py-2.5 border-b border-zinc-900 bg-zinc-950/80 text-[9px] text-zinc-500 font-mono font-bold uppercase tracking-wider">
+            {/* Right Column: Virtual Terminal Preview */}
+            <div className="flex flex-col border border-zinc-900 rounded-2xl overflow-hidden shadow-2xl bg-zinc-950/60">
+              <div className="flex items-center justify-between px-5 py-3 border-b border-zinc-900 bg-zinc-950/90 text-[9px] text-zinc-500 font-mono font-bold uppercase tracking-wider">
                 <div className="flex items-center gap-2">
-                  <span className="w-2 h-2 rounded-full bg-rose-500/40" />
-                  <span className="w-2 h-2 rounded-full bg-amber-500/40" />
-                  <span className="w-2 h-2 rounded-full bg-emerald-500/40" />
-                  <span className="ml-1 text-zinc-400">example.{activeTopic === "git" ? "sh" : activeTopic === "html" ? "html" : "ts"}</span>
+                  <span className="w-2.5 h-2.5 rounded-full bg-rose-500/50" />
+                  <span className="w-2.5 h-2.5 rounded-full bg-amber-500/50" />
+                  <span className="w-2.5 h-2.5 rounded-full bg-emerald-500/50" />
+                  <span className="ml-2 text-zinc-400 font-mono">
+                    playgrounds/sandbox.{activeTopic === "git" ? "sh" : activeTopic === "html" ? "html" : activeTopic === "css" ? "css" : activeTopic === "python" ? "py" : "ts"}
+                  </span>
                 </div>
-                <span>Preview Only</span>
+                <span className="font-mono text-zinc-600">Active Playground</span>
               </div>
-              <pre className="p-4 overflow-x-auto text-[10px] text-zinc-300 font-mono leading-relaxed bg-zinc-955/20 whitespace-pre">
+              <pre className="p-6 overflow-x-auto text-[11px] text-zinc-300 font-mono leading-relaxed bg-zinc-955/20 whitespace-pre">
                 <code>{selectedTopic.code}</code>
               </pre>
             </div>
@@ -2443,9 +2619,9 @@ export const Counter = React.memo(() => {
         </section>
       </main>
 
-      {/* Footer */}
-      <footer className="border-t border-zinc-950 py-12 text-center text-[10px] uppercase font-bold tracking-widest text-zinc-600 relative z-10 font-mono">
-        &copy; {new Date().getFullYear()} Mockrithm Games. All rights reserved.
+      {/* Simple Footer */}
+      <footer className="border-t border-zinc-950 py-16 text-center text-[9px] uppercase font-bold tracking-[0.25em] text-zinc-600 relative z-10 font-mono">
+        &copy; {new Date().getFullYear()} Mockrithm Games. Empowering developers worldwide.
       </footer>
     </div>
   );
