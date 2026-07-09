@@ -2449,17 +2449,18 @@ async def event_generator():
 
       {/* Navigation Header */}
       <header className="relative z-10 border-b border-zinc-900 bg-zinc-950/60 backdrop-blur-md px-6 py-4 flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          {/* Official Mockrithm Logo Symbol */}
-          <div className="size-8 rounded-lg bg-white text-black flex items-center justify-center font-black font-mono text-sm tracking-tighter shadow-md shadow-white/10">
-            M
-          </div>
-          <div className="flex flex-col">
+        <div className="flex items-center gap-3">
+          <img
+            src="/logo.svg"
+            alt="Mockrithm Logo"
+            className="w-8 h-8 brightness-0 invert opacity-80"
+          />
+          <div className="flex flex-col leading-tight">
             <span className="text-sm font-black tracking-widest uppercase font-mono text-white leading-none">
-              Mockrithm
+              MOCKRITHM
             </span>
-            <span className="text-[8px] font-bold text-zinc-500 uppercase tracking-widest mt-0.5">
-              interactive games
+            <span className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest mt-0.5">
+              GAMES
             </span>
           </div>
         </div>
@@ -2620,8 +2621,8 @@ async def event_generator():
       </main>
 
       {/* Simple Footer */}
-      <footer className="border-t border-zinc-950 py-16 text-center text-[9px] uppercase font-bold tracking-[0.25em] text-zinc-600 relative z-10 font-mono">
-        &copy; {new Date().getFullYear()} Mockrithm Games. Empowering developers worldwide.
+      <footer className="border-t border-zinc-950 py-16 text-center text-[9px] uppercase font-bold tracking-[0.25em] text-zinc-650 relative z-10 font-mono">
+        © 2026 Mockrithm Games. All rights reserved.
       </footer>
     </div>
   );
