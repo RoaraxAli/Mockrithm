@@ -198,7 +198,7 @@ export async function deleteUserAccount(userId: string) {
     // Clean up user subcollections securely on the server
     const interviewsQuery = await db.collection("users").doc(userId).collection("interviews").get();
     const batch = db.batch();
-    interviewsQuery.docs.forEach((doc) => {
+    interviewsQuery.docs.forEach((doc: any) => {
       batch.delete(doc.ref);
     });
     await batch.commit();

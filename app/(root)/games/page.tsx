@@ -322,6 +322,8 @@ function GamesPageContent() {
     }
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
   // Debounce check username uniqueness
   useEffect(() => {
     if (!usernameInput.trim()) {
