@@ -2214,8 +2214,8 @@ function GamesPageContent() {
   );
 }
 
-function GamesLandingPage() {
-  const [activeTopic, setActiveTopic] = useState<"html" | "css" | "js" | "ts" | "react" | "nextjs" | "node" | "git" | "sql" | "python">("html");
+export function GamesLandingPage({ initialTopic = "html" }: { initialTopic?: "html" | "css" | "js" | "ts" | "react" | "nextjs" | "node" | "git" | "sql" | "python" }) {
+  const [activeTopic, setActiveTopic] = useState(initialTopic);
 
   const topics = {
     html: {
