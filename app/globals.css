@@ -196,6 +196,23 @@
   body {
     @apply bg-background text-foreground;
     min-height: 100vh;
+    scrollbar-color: rgba(255,255,255,0.15) transparent;
+    scrollbar-width: thin;
+  }
+  /* Webkit scrollbar — blends with dark backgrounds */
+  ::-webkit-scrollbar {
+    width: 8px;
+    background: transparent;
+  }
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: rgba(255,255,255,0.12);
+    border-radius: 4px;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: rgba(255,255,255,0.25);
   }
   p {
     @apply text-muted-foreground;
