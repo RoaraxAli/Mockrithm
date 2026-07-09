@@ -9,6 +9,7 @@ import FooterWrapper from "@/components/shared/FooterWrapper";
 import MagneticCursor from "@/components/landing/MagneticCursor";
 import { getCurrentUser } from "@/lib/actions/auth.action";
 import { Analytics } from "@vercel/analytics/react";
+import { SpeedInsights } from "@vercel/speed-insights/next";
 
 import { RootProvider } from "fumadocs-ui/provider/next";
 import "fumadocs-ui/style.css";
@@ -104,6 +105,7 @@ export default async function RootLayout({
         >
           <Preloader />
           <Analytics />
+          <SpeedInsights />
           <MagneticCursor />
           <RootProvider>
             <AuthLayout initialUserId={user?.id} initialUserName={user?.name} initialUserRole={user?.role}>
