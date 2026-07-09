@@ -1,11 +1,8 @@
 "use client";
 
-import { getAuthRedirectUrl } from "@/lib/utils/auth";
-import Link from "next/link";
-
 export default function AwwwardsHero() {
   const handleJourneyBegin = () => {
-    window.location.href = getAuthRedirectUrl("sign-up");
+    window.location.href = "https://accounts.mockrithm.me/sign-up";
   };
 
   const navyThemeStyles = {
@@ -41,27 +38,28 @@ export default function AwwwardsHero() {
       <nav className="relative z-10 w-full max-w-7xl mx-auto px-8 py-6 flex items-center justify-between font-sans">
         {/* Logo */}
         <span
-          className="text-3xl tracking-tight text-white select-none"
+          className="text-3xl tracking-tight text-white select-none cursor-pointer"
           style={{ fontFamily: "'Instrument Serif', serif" }}
+          onClick={() => { window.location.href = "https://mockrithm.me"; }}
         >
-          Velorah<sup className="text-xs">®</sup>
+          Mockrithm<sup className="text-xs">®</sup>
         </span>
 
         {/* Links */}
         <div className="hidden md:flex items-center gap-8 text-sm font-medium">
-          <span className="text-white cursor-pointer transition-colors duration-200">
+          <span className="text-white cursor-pointer transition-colors duration-200" onClick={() => { window.location.href = "https://mockrithm.me"; }}>
             Home
           </span>
-          <span className="text-[hsl(240,4%,66%)] hover:text-white cursor-pointer transition-colors duration-200">
-            Studio
+          <span className="text-[hsl(240,4%,66%)] hover:text-white cursor-pointer transition-colors duration-200" onClick={() => { window.location.href = "https://games.mockrithm.me"; }}>
+            Games
           </span>
-          <span className="text-[hsl(240,4%,66%)] hover:text-white cursor-pointer transition-colors duration-200">
-            About
+          <span className="text-[hsl(240,4%,66%)] hover:text-white cursor-pointer transition-colors duration-200" onClick={() => { window.location.href = "https://docs.mockrithm.me"; }}>
+            Docs
           </span>
-          <span className="text-[hsl(240,4%,66%)] hover:text-white cursor-pointer transition-colors duration-200">
-            Journal
+          <span className="text-[hsl(240,4%,66%)] hover:text-white cursor-pointer transition-colors duration-200" onClick={() => { window.location.href = "https://mockrithm.me/blog"; }}>
+            Blog
           </span>
-          <span className="text-[hsl(240,4%,66%)] hover:text-white cursor-pointer transition-colors duration-200">
+          <span className="text-[hsl(240,4%,66%)] hover:text-white cursor-pointer transition-colors duration-200" onClick={() => { window.location.href = "https://mockrithm.me/contact"; }}>
             Reach Us
           </span>
         </div>
@@ -82,20 +80,20 @@ export default function AwwwardsHero() {
           className="text-5xl sm:text-7xl md:text-8xl leading-[0.95] tracking-[-2.46px] max-w-7xl font-normal text-white animate-fade-rise"
           style={{ fontFamily: "'Instrument Serif', serif" }}
         >
-          Where{" "}
+          Where{"  "}
           <em className="not-italic text-[hsl(240,4%,66%)] font-normal">
-            dreams
+            talent
           </em>{" "}
-          rise <br />
+          rises <br />
           <em className="not-italic text-[hsl(240,4%,66%)] font-normal">
-            through the silence.
+            through the practice.
           </em>
         </h1>
 
         {/* Subtext */}
         <p className="text-[hsl(240,4%,66%)] text-base sm:text-lg max-w-2xl mt-8 leading-relaxed font-sans animate-fade-rise-delay">
-          We're designing tools for deep thinkers, bold creators, and quiet rebels.
-          Amid the chaos, we build digital spaces for sharp focus and inspired work.
+          We're building tools for sharp developers, bold engineering leaders, and quiet builders.
+          Amid the noise, we construct private spaces for focused practice and real skill development.
         </p>
 
         {/* Big CTA */}
