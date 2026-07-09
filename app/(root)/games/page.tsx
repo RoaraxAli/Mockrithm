@@ -2221,6 +2221,8 @@ export function GamesLandingPage({ initialTopic = "html" }: { initialTopic?: "ht
     html: {
       title: "HTML Structure & Semantics",
       tagline: "Build structured, highly accessible, SEO-optimized markup under compilation constraints.",
+      heroTitle: <>Structure. Format. <br />Build the Web.</>,
+      heroDescription: "Attract top hiring managers by showcasing your semantic document structures and WAI-ARIA accessibility compliance on our live HTML compiler sandbox.",
       gradient: "from-zinc-800/30 to-zinc-900/30 text-zinc-300",
       accent: "#27272a",
       lessons: [
@@ -2245,6 +2247,8 @@ export function GamesLandingPage({ initialTopic = "html" }: { initialTopic?: "ht
     css: {
       title: "CSS Flexbox & Grid Master",
       tagline: "Architect scalable styling layouts and responsive design grids under execution pressure.",
+      heroTitle: <>Flex. Grid. <br />Master Layouts.</>,
+      heroDescription: "Troubleshoot complex fluid viewports, center grid divs, and configure GPU-accelerated keyframe layouts under strict execution deadlines.",
       gradient: "from-zinc-800/30 to-zinc-900/30 text-zinc-300",
       accent: "#27272a",
       lessons: [
@@ -2269,6 +2273,8 @@ export function GamesLandingPage({ initialTopic = "html" }: { initialTopic?: "ht
     js: {
       title: "JavaScript Event Loop Challenge",
       tagline: "Trace call stacks, microtasks, macro-queues, and multi-thread async loop pools.",
+      heroTitle: <>Trace. Loop. <br />Master Javascript.</>,
+      heroDescription: "Solve event loop microtask order, optimize recursive closures, and trace async promise chains under compile-time constraints.",
       gradient: "from-zinc-800/30 to-zinc-900/30 text-zinc-300",
       accent: "#27272a",
       lessons: [
@@ -2290,6 +2296,8 @@ console.log("End");`
     sql: {
       title: "SQL Query Master",
       tagline: "Optimize database schemas, indexes, and aggregation trees under runtime loads.",
+      heroTitle: <>Select. Query. <br />Scale Databases.</>,
+      heroDescription: "Write efficient window partition queries, analyze slow search plans with EXPLAIN ANALYZE, and secure B-tree index layouts.",
       gradient: "from-zinc-800/30 to-zinc-900/30 text-zinc-300",
       accent: "#27272a",
       lessons: [
@@ -2312,6 +2320,8 @@ WHERE status = 'active';`
     api: {
       title: "API Route Architect",
       tagline: "Design secure REST and GraphQL routes with type verification and validation protocols.",
+      heroTitle: <>Design. Router. <br />Architect APIs.</>,
+      heroDescription: "Build bulletproof REST routes, write strict Zod payload validation schemas, and prevent server crashes from invalid client input.",
       gradient: "from-zinc-800/30 to-zinc-900/30 text-zinc-300",
       accent: "#27272a",
       lessons: [
@@ -2340,6 +2350,8 @@ export async function POST(req: Request) {
     dsa: {
       title: "Data Structures Blitz",
       tagline: "Troubleshoot arrays, linked lists, and tree traversals in real-time.",
+      heroTitle: <>Traverse. Node. <br />Blitz Algorithms.</>,
+      heroDescription: "Navigate tree traversals, resolve linked list pointers, and determine Big O space-time complexities under live compiler execution.",
       gradient: "from-zinc-800/30 to-zinc-900/30 text-zinc-300",
       accent: "#27272a",
       lessons: [
@@ -2363,6 +2375,8 @@ function dfsInOrder(node: TreeNode | null): number[] {
     audio: {
       title: "Behavioral Audio Analyzer",
       tagline: "Simulate live interview voice tone, pacing metrics, and filler word detection.",
+      heroTitle: <>Listen. Speak. <br />Face the Machine.</>,
+      heroDescription: "Calibrate your vocal frequencies, control speaking pacing, and filter speech filler words with our real-time voice analyzer sandbox.",
       gradient: "from-zinc-800/30 to-zinc-900/30 text-zinc-300",
       accent: "#27272a",
       lessons: [
@@ -2389,6 +2403,8 @@ function analyzeAudioStream(chunks: Float32Array[]): SpeechMetrics {
     star: {
       title: "STAR Method Speed Run",
       tagline: "Synthesize Situation, Task, Action, and Result structures under time limits.",
+      heroTitle: <>Succeed. STAR. <br />Claim Your Role.</>,
+      heroDescription: "Synthesize high-impact Situation, Task, Action, and Result indicators quickly under strict grading rubrics to land top roles.",
       gradient: "from-zinc-800/30 to-zinc-900/30 text-zinc-300",
       accent: "#27272a",
       lessons: [
@@ -2409,6 +2425,8 @@ Restored availability with 0 data loss and 40% query latency improvement.`
     logic: {
       title: "Logic & Aptitude Sprint",
       tagline: "Isolate pattern variations and cognitive sequences under sandbox conditions.",
+      heroTitle: <>Reason. Logic. <br />Pass Aptitude.</>,
+      heroDescription: "Solve complex geometric progressions, identify logical sequence matrices, and trace boolean gates under testing conditions.",
       gradient: "from-zinc-800/30 to-zinc-900/30 text-zinc-300",
       accent: "#27272a",
       lessons: [
@@ -2431,6 +2449,8 @@ function findMissingNumber(sequence: number[]): number {
     react: {
       title: "React State Racer",
       tagline: "Isolate component states, custom hooks, and virtual DOM render pipelines.",
+      heroTitle: <>Render. Batch. <br />Racer States.</>,
+      heroDescription: "Optimize rendering hooks, prevent virtual DOM redraws, and manage custom batch transition hooks to keep UI components fast.",
       gradient: "from-zinc-800/30 to-zinc-900/30 text-zinc-300",
       accent: "#27272a",
       lessons: [
@@ -2456,6 +2476,8 @@ export const ListRenderer = React.memo(({ items }: { items: string[] }) => {
     python: {
       title: "Python Scripting Sprint",
       tagline: "Author high-speed script automations, context managers, and generator pipelines.",
+      heroTitle: <>Stream. Yield. <br />Python Scripts.</>,
+      heroDescription: "Build memory-efficient generators, write custom context managers, and run async ASGI uvicorn streaming routes.",
       gradient: "from-zinc-800/30 to-zinc-900/30 text-zinc-300",
       accent: "#27272a",
       lessons: [
@@ -2477,6 +2499,8 @@ async def chunk_loader(file_path: str) -> AsyncGenerator[bytes, None]:
     devops: {
       title: "DevOps Pipeline Fixer",
       tagline: "Identify compilation and deployment bottlenecks in CI/CD pipeline configurations.",
+      heroTitle: <>Build. Stage. <br />Fix the Pipeline.</>,
+      heroDescription: "Identify YAML syntax bottlenecks in GitHub Actions workflows and optimize Docker sizes using multi-stage instructions.",
       gradient: "from-zinc-800/30 to-zinc-900/30 text-zinc-300",
       accent: "#27272a",
       lessons: [
@@ -2503,6 +2527,8 @@ jobs:
     metrics: {
       title: "Product Metrics Tycoon",
       tagline: "Track conversion funnels, A/B telemetry, and product growth experiments.",
+      heroTitle: <>Funnel. Variant. <br />Growth Metric.</>,
+      heroDescription: "Calculate user acquisition costs, design statistical validation protocols for A/B testing variations, and track funnel retention scores.",
       gradient: "from-zinc-800/30 to-zinc-900/30 text-zinc-300",
       accent: "#27272a",
       lessons: [
@@ -2524,6 +2550,8 @@ function calculateConversionRate(data: Experiment[]): number {
     system: {
       title: "System Design Architect",
       tagline: "Model load balancers, database sharding, and edge caching policies.",
+      heroTitle: <>Route. Shard. <br />Scale Systems.</>,
+      heroDescription: "Design horizontal sharding routers, set caching rules with Redis, and configure low-latency round-robin load balancers.",
       gradient: "from-zinc-800/30 to-zinc-900/30 text-zinc-300",
       accent: "#27272a",
       lessons: [
@@ -2543,6 +2571,8 @@ function getDatabaseShardId(userId: string, totalShards: number): number {
     security: {
       title: "Cybersecurity Threat Hunter",
       tagline: "Detect system CVE vulnerabilities, SQL injections, and injection exploits.",
+      heroTitle: <>Sanitize. Patch. <br />Secure Server.</>,
+      heroDescription: "Prevent database leaks by sanitizing parameters, check query inputs for injection exploits, and defend routes from cross-site scripts.",
       gradient: "from-zinc-800/30 to-zinc-900/30 text-zinc-300",
       accent: "#27272a",
       lessons: [
@@ -2611,13 +2641,10 @@ function sanitizeInput(input: string): string {
             <Sparkles className="size-3 text-white animate-pulse" /> Awwwards Class Sandbox
           </div>
           <h1 className="text-5xl md:text-8xl font-black uppercase tracking-tighter text-white font-mono leading-none">
-            Code. Compile. <br />
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-white via-zinc-200 to-zinc-500">
-              Claim Your Role.
-            </span>
+            {selectedTopic.heroTitle}
           </h1>
           <p className="text-zinc-400 text-xs md:text-sm mt-8 max-w-xl mx-auto leading-relaxed font-mono">
-            Practice real engineering skills on our interactive compiler sandboxes. Earn badges, scale the global leaderboards, and stand out to hiring managers.
+            {selectedTopic.heroDescription}
           </p>
           <div className="mt-10 flex justify-center gap-4">
             <button
