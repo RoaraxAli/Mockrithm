@@ -6,7 +6,6 @@ import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import Lenis from "lenis";
 
-import AwwwardsCanvas from "./landing/AwwwardsCanvas";
 import AwwwardsHero from "./landing/AwwwardsHero";
 import AwwwardsShowcase from "./landing/AwwwardsShowcase";
 import ResourcesSection from "./landing/ResourcesSection";
@@ -271,33 +270,7 @@ export default function MarketingLanding() {
   }, []);
 
   return (
-    <div className="w-full flex flex-col font-mona-sans relative z-10 bg-black min-h-screen text-white overflow-x-hidden selection:bg-white selection:text-black">
-
-      {/* 3D WebGL centerpiece and gallery scene */}
-      <AwwwardsCanvas />
-
-      {/* Parallax depth layers (background) */}
-      <div className="parallax-layer-far fixed inset-0 pointer-events-none z-0" aria-hidden>
-        <div className="absolute inset-0 premium-grid-dot opacity-60" />
-      </div>
-      <div className="parallax-layer-mid fixed inset-0 pointer-events-none z-0" aria-hidden>
-        <div className="absolute top-0 left-1/4 w-[500px] h-[500px] bg-[radial-gradient(circle,rgba(255,255,255,0.03)_0%,rgba(0,0,0,0)_70%)]" />
-        <div className="absolute top-1/3 right-1/4 w-[600px] h-[600px] bg-[radial-gradient(circle,rgba(255,255,255,0.015)_0%,rgba(0,0,0,0)_70%)]" />
-        <div className="absolute bottom-1/4 left-1/3 w-[450px] h-[450px] bg-[radial-gradient(circle,rgba(255,255,255,0.02)_0%,rgba(0,0,0,0)_70%)]" />
-      </div>
-      <div className="parallax-layer-near fixed inset-0 pointer-events-none z-0" aria-hidden>
-        {Array.from({ length: 18 }).map((_, i) => (
-          <span
-            key={i}
-            className="absolute size-1 rounded-full bg-white/20"
-            style={{
-              left: `${(i * 53) % 100}%`,
-              top: `${(i * 37) % 100}%`,
-              opacity: 0.2 + ((i * 13) % 5) * 0.1,
-            }}
-          />
-        ))}
-      </div>
+    <div className="w-full flex flex-col font-mona-sans relative z-10 min-h-screen text-white overflow-x-hidden selection:bg-white selection:text-black">
 
       {/* Scroll progress bar (top of viewport) */}
       <div className="fixed top-0 left-0 right-0 h-[2px] z-[9998] pointer-events-none">
@@ -308,14 +281,16 @@ export default function MarketingLanding() {
         />
       </div>
 
-      {/* Cinematic layout content */}
+      {/* Layout content */}
       <div ref={contentRef} className="relative z-10 w-full flex flex-col min-h-screen">
         <AwwwardsHero />
 
-        <SectionDivider />
-        <AwwwardsShowcase />
+        <div className="bg-black">
+          <SectionDivider />
+          <AwwwardsShowcase />
 
-        <div className="section-zoom"><PricingSection /></div>
+          <div className="section-zoom"><PricingSection /></div>
+        </div>
       </div>
 
     </div>
