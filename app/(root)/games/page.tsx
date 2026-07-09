@@ -2214,40 +2214,43 @@ function GamesPageContent() {
   );
 }
 
-export function GamesLandingPage({ initialTopic = "html" }: { initialTopic?: "html" | "css" | "js" | "ts" | "react" | "nextjs" | "node" | "git" | "sql" | "python" }) {
+export function GamesLandingPage({ initialTopic = "html" }: { initialTopic?: "html" | "css" | "js" | "sql" | "api" | "dsa" | "audio" | "star" | "logic" | "react" | "python" | "devops" | "metrics" | "system" | "security" }) {
   const [activeTopic, setActiveTopic] = useState(initialTopic);
 
   const topics = {
     html: {
-      title: "HTML5 Layout & Semantics",
-      tagline: "Build accessible, SEO-optimized markup structures.",
+      title: "HTML Structure & Semantics",
+      tagline: "Build structured, highly accessible, SEO-optimized markup under compilation constraints.",
       gradient: "from-zinc-800/30 to-zinc-900/30 text-zinc-300",
       accent: "#27272a",
       lessons: [
-        "Structure clean document pipelines using semantic elements (<main>, <article>, <section>).",
+        "Structure clean document trees using layout elements (<main>, <article>, <nav>).",
         "Maintain accessible elements (WAI-ARIA roles, focus management, semantic buttons).",
         "Implement SEO metadata, microdata schemas, and dynamic social graph protocols."
       ],
-      code: `<!-- Accessible HTML Layout -->
+      code: `<!-- Semantic HTML Architecture -->
 <article class="p-6 bg-zinc-950/60 border border-zinc-900 rounded-xl">
   <header class="mb-4">
-    <h2 class="text-lg font-bold">Semantic Layout</h2>
-    <p class="text-xs text-zinc-400">Written for SEO.</p>
+    <h1 class="text-xl font-bold">Semantic Document Structure</h1>
+    <p class="text-xs text-zinc-400">Optimized for SEO crawlers and screen readers.</p>
   </header>
   <main class="space-y-4">
-    <p>Semantic tags improve ranking and accessibility.</p>
+    <section aria-labelledby="heading-details">
+      <h2 id="heading-details" class="text-sm font-semibold">Lessons</h2>
+      <p>Semantic tags improve accessibility ranking.</p>
+    </section>
   </main>
 </article>`
     },
     css: {
-      title: "CSS3 Layout, Grid & Animations",
-      tagline: "Architect scalable styling layouts and immersive micro-interactions.",
+      title: "CSS Flexbox & Grid Master",
+      tagline: "Architect scalable styling layouts and responsive design grids under execution pressure.",
       gradient: "from-zinc-800/30 to-zinc-900/30 text-zinc-300",
       accent: "#27272a",
       lessons: [
-        "Design responsive grids using dynamic units (fr, minmax, autofit, clamp).",
-        "Implement GPU-accelerated Keyframe transitions for 60fps micro-interactions.",
-        "Author clean CSS variables, themes, utilities, and fluid typography scales."
+        "Create fluid multi-dimensional grids using auto-fit, minmax, and clamp units.",
+        "Implement GPU-accelerated transition keyframes to guarantee 60fps micro-interactions.",
+        "Manage modular token scales with CSS variable definitions and responsive viewports."
       ],
       code: `/* Responsive Grid Layout & Animation */
 .container {
@@ -2255,182 +2258,303 @@ export function GamesLandingPage({ initialTopic = "html" }: { initialTopic?: "ht
   grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
   gap: 1.5rem;
 }
-.card:hover {
-  transform: translateY(-4px);
+.card {
+  transform: scale(1);
   transition: transform 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+.card:hover {
+  transform: translateY(-4px) scale(1.02);
 }`
     },
     js: {
-      title: "JavaScript & ES15+ Concepts",
-      tagline: "Master high-speed execution environments and asynchronous flows.",
+      title: "JavaScript Event Loop Challenge",
+      tagline: "Trace call stacks, microtasks, macro-queues, and multi-thread async loop pools.",
       gradient: "from-zinc-800/30 to-zinc-900/30 text-zinc-300",
       accent: "#27272a",
       lessons: [
-        "Utilize Event Loops, Microtasks, Macrotasks, and Call Stacks efficiently.",
-        "Design modular systems with Javascript closures, high-order helpers, and Currying.",
-        "Handle high-frequency async streams with Generators, Async Iterations, and Event emitters."
+        "Coordinate call stacks, microtask queues (Promises), and macrotasks (setTimeout).",
+        "Utilize high-order helpers, closures, lexical scopes, and function currying patterns.",
+        "Mitigate client execution blocking by offloading compute routines to web workers."
       ],
-      code: `// Async Pipeline Pattern
-const composeAsync = (...fns) => (x) => 
-  fns.reduce((v, f) => v.then(f), Promise.resolve(x));
+      code: `// Trace Asynchronous Execution Sequence
+console.log("Start");
 
-const fetchUser = async (id) => (await fetch(\`/users/\${id}\`)).json();
-const parseName = async (user) => user.name.toUpperCase();
+setTimeout(() => console.log("Timeout (Macrotask)"), 0);
 
-const getUserName = composeAsync(fetchUser, parseName);`
-    },
-    ts: {
-      title: "TypeScript Strict Systems",
-      tagline: "Secure compile-time type-safety with dynamic type models.",
-      gradient: "from-zinc-800/30 to-zinc-900/30 text-zinc-300",
-      accent: "#27272a",
-      lessons: [
-        "Author advanced dynamic models using Generics, Mapped Types, and Conditional Types.",
-        "Implement discriminative union guards for strict runtime execution safety.",
-        "Configure strict tsconfig settings for robust code coverage."
-      ],
-      code: `// Dynamic Mapped API Model
-type ReadOnlyRecord<T> = {
-  readonly [K in keyof T]: T[K];
-};
+Promise.resolve()
+  .then(() => console.log("Promise 1 (Microtask)"))
+  .then(() => console.log("Promise 2 (Microtask)"));
 
-interface User {
-  id: string;
-  name: string;
-}
-
-const activeUser: ReadOnlyRecord<User> = {
-  id: "USR_1",
-  name: "Sarah Jenkins"
-};`
-    },
-    react: {
-      title: "React Core Render Optimization",
-      tagline: "Prevent virtual DOM redraws and master component hooks.",
-      gradient: "from-zinc-800/30 to-zinc-900/30 text-zinc-300",
-      accent: "#27272a",
-      lessons: [
-        "Apply React memoization hooks (useMemo, useCallback) to balance heavy updates.",
-        "Optimize custom hooks to isolate states and maintain clean separation of concerns.",
-        "Design scalable contexts, custom reducers, and atomic rendering state engines."
-      ],
-      code: `// Custom Optimized Rendering Hook
-import { useState, useCallback, useTransition } from 'react';
-
-export function useBatchState(initialValue) {
-  const [value, setValue] = useState(initialValue);
-  const [isPending, startTransition] = useTransition();
-
-  const update = useCallback((next) => {
-    startTransition(() => setValue(next));
-  }, []);
-
-  return [value, update, isPending];
-}`
-    },
-    nextjs: {
-      title: "Next.js App Router & Server Actions",
-      tagline: "Architect blazing-fast fullstack rendering pipelines.",
-      gradient: "from-zinc-800/30 to-zinc-900/30 text-zinc-300",
-      accent: "#27272a",
-      lessons: [
-        "Orchestrate Server Component data fetching with sub-second stream rendering.",
-        "Integrate Server Actions with optimistic UI updates and form validation workflows.",
-        "Utilize dynamic route segments, intercepting routes, and parallel slots."
-      ],
-      code: `// Next.js Server Action Endpoint
-"use server";
-
-import { revalidatePath } from 'next/cache';
-
-export async function submitTelemetry(payload: unknown) {
-  const response = await fetch('https://api.mockrithm/telemetry', {
-    method: 'POST',
-    body: JSON.stringify(payload)
-  });
-  revalidatePath('/dashboard');
-  return response.ok;
-}`
-    },
-    node: {
-      title: "Node.js Streams & Microservices",
-      tagline: "Build high-throughput backends and stream processing servers.",
-      gradient: "from-zinc-800/30 to-zinc-900/30 text-zinc-300",
-      accent: "#27272a",
-      lessons: [
-        "Build scalable memory pipelines using Node streams, pipes, and buffers.",
-        "Handle file I/O operations asynchronously using the fs/promises module.",
-        "Implement fast TCP/HTTP microservices with cluster clustering algorithms."
-      ],
-      code: `// High-Performance Stream Pipeline
-import { createReadStream, createWriteStream } from 'fs';
-import { pipeline } from 'stream/promises';
-
-async function compressLogs(src, dest) {
-  const readStream = createReadStream(src);
-  const writeStream = createWriteStream(dest);
-  
-  // Pipeline handles error cleanup automatically
-  await pipeline(readStream, writeStream);
-}`
-    },
-    git: {
-      title: "Git Rebasing & Reflog Puzzles",
-      tagline: "Manage complex commit histories and solve detached HEAD states.",
-      gradient: "from-zinc-800/30 to-zinc-900/30 text-zinc-300",
-      accent: "#27272a",
-      lessons: [
-        "Apply interactive rebase tools (squash, reword, fixup) for linear git histories.",
-        "Debug detached HEAD branch pointers and restore deleted commits using git reflog.",
-        "Coordinate parallel workflows using git cherry-pick, stashing, and hook scripts."
-      ],
-      code: `# Solve Detached HEAD State
-git reflog
-# Find commit hash (e.g. e4a2b10) before detach
-git checkout master
-git reset --hard e4a2b10
-# Recovered! Commit tree restored`
+console.log("End");`
     },
     sql: {
-      title: "SQL Windows & Query Optimizers",
-      tagline: "Solve analytics queries and configure high-performance database indexes.",
+      title: "SQL Query Master",
+      tagline: "Optimize database schemas, indexes, and aggregation trees under runtime loads.",
       gradient: "from-zinc-800/30 to-zinc-900/30 text-zinc-300",
       accent: "#27272a",
       lessons: [
-        "Analyze metrics datasets using partition/row window aggregation functions.",
-        "Optimize complex execution trees with EXPLAIN ANALYZE statements.",
-        "Design B-Tree composite indexes, covering indexes, and partition layouts."
+        "Author clean partition/row aggregations using SQL window statements.",
+        "Optimize slow operations by tracing query parser steps with EXPLAIN ANALYZE.",
+        "Construct composite B-Tree indexes, covering indexes, and partition parameters."
       ],
-      code: `-- Window Rank Partition Query
+      code: `-- Partitioned Analytics Window Query
 SELECT 
   employee_id, 
   department, 
   salary,
-  RANK() OVER (PARTITION BY department ORDER BY salary DESC) as rank
+  RANK() OVER (
+    PARTITION BY department 
+    ORDER BY salary DESC
+  ) as salary_rank
 FROM employees
 WHERE status = 'active';`
     },
-    python: {
-      title: "Python Generators & FastAPIs",
-      tagline: "Leverage generators, context managers, and async REST routes.",
+    api: {
+      title: "API Route Architect",
+      tagline: "Design secure REST and GraphQL routes with type verification and validation protocols.",
       gradient: "from-zinc-800/30 to-zinc-900/30 text-zinc-300",
       accent: "#27272a",
       lessons: [
-        "Optimize CPU-bound processes with yield generators and context managers.",
-        "Design validation models using pydantic static types and class inheritance.",
-        "Build async API routing pipelines with fast ASGI servers like Uvicorn."
+        "Design scalable REST endpoints utilizing JSON payload mapping.",
+        "Verify requests using strict schema checkers (e.g. Zod validators).",
+        "Implement rate limit checks to mitigate denial-of-service threat vectors."
       ],
-      code: `# Async FastAPI Stream Endpoint
-from fastapi import FastAPI
-from fastapi.responses import StreamingResponse
+      code: `// Secure API Request Router
+import { z } from "zod";
+
+const telemetrySchema = z.object({
+  candidateId: z.string().uuid(),
+  score: z.number().min(0).max(100),
+  timestamp: z.string().datetime()
+});
+
+export async function POST(req: Request) {
+  const data = await req.json();
+  const parsed = telemetrySchema.safeParse(data);
+  if (!parsed.success) {
+    return new Response("Invalid request payload", { status: 400 });
+  }
+  return new Response("Telemetry recorded", { status: 200 });
+}`
+    },
+    dsa: {
+      title: "Data Structures Blitz",
+      tagline: "Troubleshoot arrays, linked lists, and tree traversals in real-time.",
+      gradient: "from-zinc-800/30 to-zinc-900/30 text-zinc-300",
+      accent: "#27272a",
+      lessons: [
+        "Master pointer manipulations in singly and doubly linked lists.",
+        "Perform depth-first and breadth-first search traversals on binary search trees.",
+        "Evaluate space-time complexities dynamically using Big O notation."
+      ],
+      code: `// Depth-First Binary Search Tree Traversal
+class TreeNode {
+  value: number;
+  left: TreeNode | null = null;
+  right: TreeNode | null = null;
+  constructor(val: number) { this.value = val; }
+}
+
+function dfsInOrder(node: TreeNode | null): number[] {
+  if (!node) return [];
+  return [...dfsInOrder(node.left), node.value, ...dfsInOrder(node.right)];
+}`
+    },
+    audio: {
+      title: "Behavioral Audio Analyzer",
+      tagline: "Simulate live interview voice tone, pacing metrics, and filler word detection.",
+      gradient: "from-zinc-800/30 to-zinc-900/30 text-zinc-300",
+      accent: "#27272a",
+      lessons: [
+        "Assess vocal pacing telemetry and isolate speech rate deviations.",
+        "Detect filler words ('um', 'like', 'ah') to optimize speech structure.",
+        "Calibrate tone frequencies for confident articulation vectors."
+      ],
+      code: `// Speech Telemetry Parsing Engine
+interface SpeechMetrics {
+  wordsPerMinute: number;
+  fillerWordCount: number;
+  confidenceScore: number;
+}
+
+function analyzeAudioStream(chunks: Float32Array[]): SpeechMetrics {
+  // Isolate pacing and pitch frequency variations
+  return {
+    wordsPerMinute: 135, // Optimal pacing range
+    fillerWordCount: 2,
+    confidenceScore: 92
+  };
+}`
+    },
+    star: {
+      title: "STAR Method Speed Run",
+      tagline: "Synthesize Situation, Task, Action, and Result structures under time limits.",
+      gradient: "from-zinc-800/30 to-zinc-900/30 text-zinc-300",
+      accent: "#27272a",
+      lessons: [
+        "Structure clean context timelines using Situation & Task components.",
+        "Articulate specific individual contributions inside Action variables.",
+        "Quantify business outcomes and performance metrics in the Result segment."
+      ],
+      code: `# STAR Framework Structuring Model
+## Situation:
+Heavy load spike crashed user dashboard database nodes.
+## Task:
+Re-establish write availability under 15 minutes.
+## Action:
+Implemented database read replicas and hot failovers.
+## Result:
+Restored availability with 0 data loss and 40% query latency improvement.`
+    },
+    logic: {
+      title: "Logic & Aptitude Sprint",
+      tagline: "Isolate pattern variations and cognitive sequences under sandbox conditions.",
+      gradient: "from-zinc-800/30 to-zinc-900/30 text-zinc-300",
+      accent: "#27272a",
+      lessons: [
+        "Solve matrix spatial arrangements and dimensional sequencing puzzles.",
+        "Trace boolean logical operations, gates, and algorithmic constraints.",
+        "Evaluate patterns to maximize performance on cognitive aptitude tests."
+      ],
+      code: `// Array Sequence Pattern Analyzer
+function findMissingNumber(sequence: number[]): number {
+  // Input: [2, 4, 8, 16, ?, 64] -> Geometric Progression
+  for (let i = 1; i < sequence.length; i++) {
+    const ratio = sequence[i] / sequence[i - 1];
+    if (ratio !== 2) {
+       return sequence[i - 1] * 2;
+    }
+  }
+  return -1;
+}`
+    },
+    react: {
+      title: "React State Racer",
+      tagline: "Isolate component states, custom hooks, and virtual DOM render pipelines.",
+      gradient: "from-zinc-800/30 to-zinc-900/30 text-zinc-300",
+      accent: "#27272a",
+      lessons: [
+        "Prevent component redraw cycles using hooks (useMemo, useCallback).",
+        "Isolate render changes inside lightweight custom state stores.",
+        "Coordinate server-side state hydration without causing component mismatch errors."
+      ],
+      code: `// Optimized React Rerender Pipeline
+import React, { useState, useCallback, useMemo } from 'react';
+
+export const ListRenderer = React.memo(({ items }: { items: string[] }) => {
+  const [filter, setFilter] = useState("");
+  
+  const filtered = useMemo(() => 
+    items.filter(item => item.includes(filter)), [items, filter]
+  );
+
+  const onClear = useCallback(() => setFilter(""), []);
+
+  return <input value={filter} onChange={e => setFilter(e.target.value)} />;
+});`
+    },
+    python: {
+      title: "Python Scripting Sprint",
+      tagline: "Author high-speed script automations, context managers, and generator pipelines.",
+      gradient: "from-zinc-800/30 to-zinc-900/30 text-zinc-300",
+      accent: "#27272a",
+      lessons: [
+        "Build scalable memory pipelines using yield generators and stream loaders.",
+        "Safeguard resource allocations utilizing python context manager classes.",
+        "Design fast data validation profiles with Pydantic class structures."
+      ],
+      code: `# Async Stream Generator Pipeline
 import asyncio
+from typing import AsyncGenerator
 
-app = FastAPI()
+async def chunk_loader(file_path: str) -> AsyncGenerator[bytes, None]:
+    # Stream read local log segments asynchronously
+    with open(file_path, 'rb') as f:
+        while chunk := f.read(1024):
+            yield chunk
+            await asyncio.sleep(0.01)`
+    },
+    devops: {
+      title: "DevOps Pipeline Fixer",
+      tagline: "Identify compilation and deployment bottlenecks in CI/CD pipeline configurations.",
+      gradient: "from-zinc-800/30 to-zinc-900/30 text-zinc-300",
+      accent: "#27272a",
+      lessons: [
+        "Configure automated build steps inside GitHub Actions workflow pipelines.",
+        "Optimize Docker image size footprints using multi-stage build instructions.",
+        "Secure secret strings and sensitive environment configuration variables."
+      ],
+      code: `# Broken Workflow Pipeline Configuration
+name: Release Pipeline
+on:
+  push:
+    branches: [main]
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build and Lint
+        run: |
+          npm ci
+          npm run lint
+          npm run build`
+    },
+    metrics: {
+      title: "Product Metrics Tycoon",
+      tagline: "Track conversion funnels, A/B telemetry, and product growth experiments.",
+      gradient: "from-zinc-800/30 to-zinc-900/30 text-zinc-300",
+      accent: "#27272a",
+      lessons: [
+        "Calculate user conversion steps and exit metrics inside marketing funnels.",
+        "Design statistical validation protocols for A/B testing variations.",
+        "Optimize acquisition costs and retention metrics using analytical triggers."
+      ],
+      code: `// A/B Test Variant Selector Engine
+interface Experiment {
+  variantId: "control" | "treatment";
+  converted: boolean;
+}
 
-async def event_generator():
-    for i in range(100):
-        yield f"data: Progress {i}\\n\\n"
-        await asyncio.sleep(0.1)`
+function calculateConversionRate(data: Experiment[]): number {
+  const converted = data.filter(d => d.converted).length;
+  return (converted / data.length) * 100;
+}`
+    },
+    system: {
+      title: "System Design Architect",
+      tagline: "Model load balancers, database sharding, and edge caching policies.",
+      gradient: "from-zinc-800/30 to-zinc-900/30 text-zinc-300",
+      accent: "#27272a",
+      lessons: [
+        "Design low-latency routing structures using load balancer algorithms.",
+        "Maximize cache hit metrics utilizing Redis memory store protocols.",
+        "Partition database writes using dynamic horizontal routing rules."
+      ],
+      code: `// Database Hash Sharding Algorithm
+function getDatabaseShardId(userId: string, totalShards: number): number {
+  let hash = 0;
+  for (let i = 0; i < userId.length; i++) {
+    hash = userId.charCodeAt(i) + ((hash << 5) - hash);
+  }
+  return Math.abs(hash) % totalShards;
+}`
+    },
+    security: {
+      title: "Cybersecurity Threat Hunter",
+      tagline: "Detect system CVE vulnerabilities, SQL injections, and injection exploits.",
+      gradient: "from-zinc-800/30 to-zinc-900/30 text-zinc-300",
+      accent: "#27272a",
+      lessons: [
+        "Isolate SQL injection threats by sanitizing query parameters.",
+        "Sanitize inputs to safeguard client rendering against XSS scripts.",
+        "Verify authentication state checking variables to block data leakage."
+      ],
+      code: `// SQL Query Parameter Sanitizer
+function sanitizeInput(input: string): string {
+  // Strip common SQL control characters and escaping patterns
+  return input.replace(/['";\\-]/g, "");
+}`
     }
   };
 

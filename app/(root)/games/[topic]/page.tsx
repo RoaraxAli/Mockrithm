@@ -1,7 +1,7 @@
 import { GamesLandingPage } from "../page";
 import { Metadata } from "next";
 
-type TopicType = "html" | "css" | "js" | "ts" | "react" | "nextjs" | "node" | "git" | "sql" | "python";
+type TopicType = "html" | "css" | "js" | "sql" | "api" | "dsa" | "audio" | "star" | "logic" | "react" | "python" | "devops" | "metrics" | "system" | "security";
 
 interface TopicPageProps {
   params: Promise<{
@@ -11,54 +11,79 @@ interface TopicPageProps {
 
 const topicsInfo: Record<TopicType, { title: string; description: string; keywords: string }> = {
   html: {
-    title: "Learn HTML5 Semantic Layouts - Mockrithm DevGames",
-    description: "Practice semantic layout architecture, WAI-ARIA validation, and clean document flow on our interactive sandbox game terminal.",
-    keywords: "html, html5, layouts, web development, sandbox compiler, mockrithm"
+    title: "Learn HTML Structure & Semantics - Mockrithm DevGames",
+    description: "Build clean, accessible DOM pipelines, check semantic layout nodes, and structure HTML trees under compiler constraints.",
+    keywords: "html, html5, semantics, web development, markup sandbox, mockrithm"
   },
   css: {
-    title: "Learn CSS3 Grids & Animations - Mockrithm DevGames",
-    description: "Design responsive grid elements and high-performance GPU animations on our live CSS compiler game sandbox.",
-    keywords: "css, css3, grid, layout, anims, keyframes, transitions, compiler, sandbox"
+    title: "Learn CSS Flexbox & Grid Master - Mockrithm DevGames",
+    description: "Architect fluid layouts and multi-dimensional responsive grids under execution time limits in our live CSS sandbox.",
+    keywords: "css, flexbox, grid, visual layout, responsive web design, keyframe compiler"
   },
   js: {
-    title: "Learn JavaScript Core Algorithms - Mockrithm DevGames",
-    description: "Master event loops, closures, generators, and async microtask queues on our interactive JS playground.",
-    keywords: "javascript, js, es6, es15, asynchronous, closures, event loop, algorithms, coding games"
-  },
-  ts: {
-    title: "Learn TypeScript Strict Compilation - Mockrithm DevGames",
-    description: "Secure type safety with generic mapping and strict tsconfig parameters in our interactive compiler terminal.",
-    keywords: "typescript, ts, strictly typed, generics, interfaces, compiler sandbox"
-  },
-  react: {
-    title: "Learn React Hooks & Render Optimization - Mockrithm DevGames",
-    description: "Optimize virtual DOM cycles, prevent unnecessary rerenders, and master custom React hook structures.",
-    keywords: "react, reactjs, state, hooks, virtual dom, render, optimization, sandbox"
-  },
-  nextjs: {
-    title: "Learn Next.js App Router & Server Actions - Mockrithm DevGames",
-    description: "Architect sub-second fullstack pipelines, server action validations, and server-side data models.",
-    keywords: "nextjs, app router, server action, SSR, server component, validation sandbox"
-  },
-  node: {
-    title: "Learn Node.js Stream Buffers & APIs - Mockrithm DevGames",
-    description: "Build high-throughput backends, cluster clustering, and data pipe streams in our Node terminal environment.",
-    keywords: "nodejs, node, backend, streams, buffers, clustering, APIs, coding games"
-  },
-  git: {
-    title: "Learn Git Rebasing & Reflogs - Mockrithm DevGames",
-    description: "Resolve tree branch conflicts, fix detached HEAD configurations, and restore commits using git reflog.",
-    keywords: "git, rebasing, git interactive, commit, branch merging, reflog, merge conflict sandbox"
+    title: "Learn JavaScript Event Loop Challenge - Mockrithm DevGames",
+    description: "Trace async call queues, microtask promises, call stack variations, and event emitter sequences interactively.",
+    keywords: "javascript, js, event loop, async, promise, microtask, closure sandbox"
   },
   sql: {
-    title: "Learn SQL Queries & Indexing - Mockrithm DevGames",
-    description: "Solve partition metrics windows, rank statements, and analyze database query plans interactively.",
-    keywords: "sql, window functions, query optimizer, indexing, database sandbox"
+    title: "Learn SQL Query Master - Mockrithm DevGames",
+    description: "Optimize execution trees with window partition rankings, composite database indexes, and EXPLAIN ANALYZE checks.",
+    keywords: "sql, query optimization, database index, window functions, analytics query sandbox"
+  },
+  api: {
+    title: "Learn API Route Architect - Mockrithm DevGames",
+    description: "Design robust REST and GraphQL routes, check schemas with Zod, and configure secure API servers interactively.",
+    keywords: "api design, rest api, graphql, zod validation, express backend sandbox"
+  },
+  dsa: {
+    title: "Learn Data Structures Blitz - Mockrithm DevGames",
+    description: "Solve binary search tree depth traversals, singly/doubly linked list pointer variations, and Big O space complexity games.",
+    keywords: "dsa, algorithms, linked lists, trees, binary search, big o notation compiler"
+  },
+  audio: {
+    title: "Learn Behavioral Audio Analyzer - Mockrithm DevGames",
+    description: "Isolate tone frequencies, speech rate deviations, and speech filler occurrences in our real-time voice assessment compiler.",
+    keywords: "audio analyzer, voice assessment, pitch analysis, filler words, speech simulator"
+  },
+  star: {
+    title: "Learn STAR Method Speed Run - Mockrithm DevGames",
+    description: "Synthesize behavioral answer components: Situation, Task, Action, and Result indicators quickly under validation check metrics.",
+    keywords: "star framework, behavioral interview, behavioral simulator, action result metrics"
+  },
+  logic: {
+    title: "Learn Logic & Aptitude Sprint - Mockrithm DevGames",
+    description: "Isolate pattern logic sequences, cognitive aptitude matrices, and boolean algebra structures interactively.",
+    keywords: "logic sprint, aptitude test, cognitive puzzles, pattern recognition sandbox"
+  },
+  react: {
+    title: "Learn React State Racer - Mockrithm DevGames",
+    description: "Prevent unnecessary virtual DOM redraw cycles, optimize custom state hooks, and compile memoized lists.",
+    keywords: "react state, custom hooks, useCallback, useMemo, rendering optimization sandbox"
   },
   python: {
-    title: "Learn Python Generators & FastAPIs - Mockrithm DevGames",
-    description: "Leverage generator context managers, async ASGI servers, and pydantic typing interactively.",
-    keywords: "python, generator, decorator, fastapi, asgi, coding sandbox"
+    title: "Learn Python Scripting Sprint - Mockrithm DevGames",
+    description: "Author yield generator loops, asynchronous async stream pipelines, and validate pydantic schemas under compiler constraints.",
+    keywords: "python, generator loop, async validation, fastapi uvicorn, scripting compiler"
+  },
+  devops: {
+    title: "Learn DevOps Pipeline Fixer - Mockrithm DevGames",
+    description: "Identify syntax gaps in YAML workflow scripts, optimize multi-stage Docker build files, and manage environment secrets.",
+    keywords: "devops, CI/CD pipeline, github actions, docker image, yaml configuration sandbox"
+  },
+  metrics: {
+    title: "Learn Product Metrics Tycoon - Mockrithm DevGames",
+    description: "Isolate marketing conversion steps, set up statistical A/B test variations, and evaluate retention scores.",
+    keywords: "product metrics, ab testing, user retention, growth marketing sandbox"
+  },
+  system: {
+    title: "Learn System Design Architect - Mockrithm DevGames",
+    description: "Design horizontal sharding systems, configure Redis caching strategies, and implement low-latency load balancers.",
+    keywords: "system design, load balancing, horizontal sharding, redis cache, scalability sandbox"
+  },
+  security: {
+    title: "Learn Cybersecurity Threat Hunter - Mockrithm DevGames",
+    description: "Isolate injection exploits, sanitize parameter variables, and protect applications from cross-site scripting vulnerabilities.",
+    keywords: "cybersecurity, threat hunting, sql injection, xss protection, input sanitizer sandbox"
   }
 };
 
@@ -98,13 +123,18 @@ export async function generateStaticParams() {
     { topic: "html" },
     { topic: "css" },
     { topic: "js" },
-    { topic: "ts" },
-    { topic: "react" },
-    { topic: "nextjs" },
-    { topic: "node" },
-    { topic: "git" },
     { topic: "sql" },
-    { topic: "python" }
+    { topic: "api" },
+    { topic: "dsa" },
+    { topic: "audio" },
+    { topic: "star" },
+    { topic: "logic" },
+    { topic: "react" },
+    { topic: "python" },
+    { topic: "devops" },
+    { topic: "metrics" },
+    { topic: "system" },
+    { topic: "security" }
   ];
 }
 
