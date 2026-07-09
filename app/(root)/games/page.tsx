@@ -2221,15 +2221,15 @@ function GamesLandingPage() {
     html: {
       title: "HTML5 Layout & Semantics",
       tagline: "Build accessible, SEO-optimized markup structures.",
-      gradient: "from-orange-500/20 to-amber-500/20 text-orange-400",
-      accent: "#f97316",
+      gradient: "from-zinc-800/30 to-zinc-900/30 text-zinc-300",
+      accent: "#27272a",
       lessons: [
         "Structure clean document pipelines using semantic elements (<main>, <article>, <section>).",
         "Maintain accessible elements (WAI-ARIA roles, focus management, semantic buttons).",
         "Implement SEO metadata, microdata schemas, and dynamic social graph protocols."
       ],
-      code: `<!-- Semantic HTML Document -->
-<article class="p-6 bg-zinc-900 rounded-xl">
+      code: `<!-- Accessible HTML Layout -->
+<article class="p-6 bg-zinc-950/60 border border-zinc-900 rounded-xl">
   <header class="mb-4">
     <h2 class="text-lg font-bold">Semantic Layout</h2>
     <p class="text-xs text-zinc-400">Written for SEO.</p>
@@ -2241,9 +2241,9 @@ function GamesLandingPage() {
     },
     css: {
       title: "CSS3 Layout, Grid & Animations",
-      tagline: "Architect scalable styling layouts and immersive micro-animations.",
-      gradient: "from-blue-500/20 to-cyan-500/20 text-blue-400",
-      accent: "#3b82f6",
+      tagline: "Architect scalable styling layouts and immersive micro-interactions.",
+      gradient: "from-zinc-800/30 to-zinc-900/30 text-zinc-300",
+      accent: "#27272a",
       lessons: [
         "Design responsive grids using dynamic units (fr, minmax, autofit, clamp).",
         "Implement GPU-accelerated Keyframe transitions for 60fps micro-interactions.",
@@ -2263,8 +2263,8 @@ function GamesLandingPage() {
     js: {
       title: "JavaScript & ES15+ Concepts",
       tagline: "Master high-speed execution environments and asynchronous flows.",
-      gradient: "from-yellow-500/20 to-amber-500/20 text-yellow-400",
-      accent: "#eab308",
+      gradient: "from-zinc-800/30 to-zinc-900/30 text-zinc-300",
+      accent: "#27272a",
       lessons: [
         "Utilize Event Loops, Microtasks, Macrotasks, and Call Stacks efficiently.",
         "Design modular systems with Javascript closures, high-order helpers, and Currying.",
@@ -2282,8 +2282,8 @@ const getUserName = composeAsync(fetchUser, parseName);`
     ts: {
       title: "TypeScript Strict Systems",
       tagline: "Secure compile-time type-safety with dynamic type models.",
-      gradient: "from-blue-600/20 to-indigo-500/20 text-blue-400",
-      accent: "#2563eb",
+      gradient: "from-zinc-800/30 to-zinc-900/30 text-zinc-300",
+      accent: "#27272a",
       lessons: [
         "Author advanced dynamic models using Generics, Mapped Types, and Conditional Types.",
         "Implement discriminative union guards for strict runtime execution safety.",
@@ -2307,8 +2307,8 @@ const activeUser: ReadOnlyRecord<User> = {
     react: {
       title: "React Core Render Optimization",
       tagline: "Prevent virtual DOM redraws and master component hooks.",
-      gradient: "from-cyan-500/20 to-sky-500/20 text-cyan-400",
-      accent: "#06b6d4",
+      gradient: "from-zinc-800/30 to-zinc-900/30 text-zinc-300",
+      accent: "#27272a",
       lessons: [
         "Apply React memoization hooks (useMemo, useCallback) to balance heavy updates.",
         "Optimize custom hooks to isolate states and maintain clean separation of concerns.",
@@ -2331,8 +2331,8 @@ export function useBatchState(initialValue) {
     nextjs: {
       title: "Next.js App Router & Server Actions",
       tagline: "Architect blazing-fast fullstack rendering pipelines.",
-      gradient: "from-zinc-500/20 to-neutral-400/20 text-white",
-      accent: "#f4f4f5",
+      gradient: "from-zinc-800/30 to-zinc-900/30 text-zinc-300",
+      accent: "#27272a",
       lessons: [
         "Orchestrate Server Component data fetching with sub-second stream rendering.",
         "Integrate Server Actions with optimistic UI updates and form validation workflows.",
@@ -2355,8 +2355,8 @@ export async function submitTelemetry(payload: unknown) {
     node: {
       title: "Node.js Streams & Microservices",
       tagline: "Build high-throughput backends and stream processing servers.",
-      gradient: "from-green-600/20 to-emerald-500/20 text-green-400",
-      accent: "#16a34a",
+      gradient: "from-zinc-800/30 to-zinc-900/30 text-zinc-300",
+      accent: "#27272a",
       lessons: [
         "Build scalable memory pipelines using Node streams, pipes, and buffers.",
         "Handle file I/O operations asynchronously using the fs/promises module.",
@@ -2377,8 +2377,8 @@ async function compressLogs(src, dest) {
     git: {
       title: "Git Rebasing & Reflog Puzzles",
       tagline: "Manage complex commit histories and solve detached HEAD states.",
-      gradient: "from-orange-600/20 to-red-500/20 text-orange-400",
-      accent: "#ea580c",
+      gradient: "from-zinc-800/30 to-zinc-900/30 text-zinc-300",
+      accent: "#27272a",
       lessons: [
         "Apply interactive rebase tools (squash, reword, fixup) for linear git histories.",
         "Debug detached HEAD branch pointers and restore deleted commits using git reflog.",
@@ -2394,8 +2394,8 @@ git reset --hard e4a2b10
     sql: {
       title: "SQL Windows & Query Optimizers",
       tagline: "Solve analytics queries and configure high-performance database indexes.",
-      gradient: "from-sky-600/20 to-blue-500/20 text-sky-400",
-      accent: "#0284c7",
+      gradient: "from-zinc-800/30 to-zinc-900/30 text-zinc-300",
+      accent: "#27272a",
       lessons: [
         "Analyze metrics datasets using partition/row window aggregation functions.",
         "Optimize complex execution trees with EXPLAIN ANALYZE statements.",
@@ -2413,8 +2413,8 @@ WHERE status = 'active';`
     python: {
       title: "Python Generators & FastAPIs",
       tagline: "Leverage generators, context managers, and async REST routes.",
-      gradient: "from-indigo-600/20 to-purple-500/20 text-indigo-400",
-      accent: "#4f46e5",
+      gradient: "from-zinc-800/30 to-zinc-900/30 text-zinc-300",
+      accent: "#27272a",
       lessons: [
         "Optimize CPU-bound processes with yield generators and context managers.",
         "Design validation models using pydantic static types and class inheritance.",
@@ -2444,8 +2444,8 @@ async def event_generator():
     <div className="min-h-screen bg-black text-white font-mona-sans relative overflow-x-hidden selection:bg-white selection:text-black">
       {/* Background visual components */}
       <div className="absolute inset-0 premium-grid-dot pointer-events-none opacity-25 z-0" />
-      <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-purple-900/10 blur-[160px] rounded-full pointer-events-none transition-all duration-700" style={{ backgroundColor: `${selectedTopic.accent}15` }} />
-      <div className="absolute bottom-1/4 right-1/4 translate-x-1/2 translate-y-1/2 w-[600px] h-[600px] bg-blue-900/10 blur-[160px] rounded-full pointer-events-none" />
+      <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-zinc-900/[0.04] blur-[160px] rounded-full pointer-events-none" />
+      <div className="absolute bottom-1/4 right-1/4 translate-x-1/2 translate-y-1/2 w-[600px] h-[600px] bg-zinc-900/[0.02] blur-[160px] rounded-full pointer-events-none" />
 
       {/* Navigation Header */}
       <header className="relative z-10 border-b border-zinc-900 bg-zinc-950/60 backdrop-blur-md px-6 py-4 flex items-center justify-between">
@@ -2488,7 +2488,7 @@ async def event_generator():
           </div>
           <h1 className="text-5xl md:text-8xl font-black uppercase tracking-tighter text-white font-mono leading-none">
             Code. Compile. <br />
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-400 via-indigo-400 to-sky-400">
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-white via-zinc-200 to-zinc-500">
               Claim Your Role.
             </span>
           </h1>
@@ -2513,7 +2513,7 @@ async def event_generator():
 
         {/* Lead Gen Callout Card */}
         <section className="bg-gradient-to-br from-zinc-950 via-zinc-950 to-zinc-900/60 border border-zinc-850 rounded-3xl p-8 md:p-10 mb-28 relative overflow-hidden shadow-2xl">
-          <div className="absolute top-0 right-0 w-80 h-80 bg-violet-600/10 blur-[90px] rounded-full pointer-events-none" />
+          <div className="absolute top-0 right-0 w-80 h-80 bg-zinc-800/10 blur-[90px] rounded-full pointer-events-none" />
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-8 relative z-10">
             <div className="space-y-3">
               <span className="text-[9px] font-black tracking-widest text-emerald-400 uppercase bg-zinc-900/80 border border-emerald-500/20 px-3 py-1 rounded-full inline-flex items-center gap-1.5 font-mono">
