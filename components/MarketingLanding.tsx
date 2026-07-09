@@ -310,7 +310,7 @@ export default function MarketingLanding() {
 
       {/* Cinematic layout content */}
       <div ref={contentRef} className="relative z-10 w-full flex flex-col min-h-screen">
-        <div className="section-zoom"><AwwwardsHero /></div>
+        <AwwwardsHero />
 
         <SectionDivider />
         <AwwwardsShowcase />

@@ -5,24 +5,10 @@ export default function AwwwardsHero() {
     window.location.href = "https://accounts.mockrithm.me/sign-up";
   };
 
-  const navyThemeStyles = {
-    "--background": "201 100% 13%",
-    "--foreground": "0 0% 100%",
-    "--muted-foreground": "240 4% 66%",
-    "--primary": "0 0% 100%",
-    "--primary-foreground": "0 0% 4%",
-    "--secondary": "0 0% 10%",
-    "--muted": "0 0% 10%",
-    "--accent": "0 0% 10%",
-    "--border": "0 0% 18%",
-    "--input": "0 0% 18%",
-  } as React.CSSProperties;
-
   return (
-    <div
+    <section
       id="awwwards-hero"
-      className="relative w-full min-h-screen flex flex-col justify-between overflow-hidden select-none bg-[hsl(201,100%,13%)]"
-      style={navyThemeStyles}
+      className="relative w-full h-screen flex flex-col overflow-hidden select-none"
     >
       {/* Fullscreen Looping Background Video */}
       <video
@@ -34,32 +20,35 @@ export default function AwwwardsHero() {
         src="https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260314_131748_f2ca2a28-fed7-44c8-b9a9-bd9acdd5ec31.mp4"
       />
 
+      {/* Dark overlay for text readability */}
+      <div className="absolute inset-0 bg-black/30 z-[1]" />
+
       {/* Navigation Bar */}
-      <nav className="relative z-10 w-full max-w-7xl mx-auto px-8 py-6 flex items-center justify-between font-sans">
+      <nav className="relative z-10 w-full max-w-7xl mx-auto px-6 md:px-8 py-5 flex items-center justify-between">
         {/* Logo */}
         <span
-          className="text-3xl tracking-tight text-white select-none cursor-pointer"
+          className="text-2xl md:text-3xl tracking-tight text-white select-none cursor-pointer"
           style={{ fontFamily: "'Instrument Serif', serif" }}
           onClick={() => { window.location.href = "https://mockrithm.me"; }}
         >
-          Mockrithm<sup className="text-xs">®</sup>
+          Mockrithm<sup className="text-[10px] align-super">®</sup>
         </span>
 
         {/* Links */}
-        <div className="hidden md:flex items-center gap-8 text-sm font-medium">
+        <div className="hidden md:flex items-center gap-8 text-sm font-medium" style={{ fontFamily: "'Inter', sans-serif" }}>
           <span className="text-white cursor-pointer transition-colors duration-200" onClick={() => { window.location.href = "https://mockrithm.me"; }}>
             Home
           </span>
-          <span className="text-[hsl(240,4%,66%)] hover:text-white cursor-pointer transition-colors duration-200" onClick={() => { window.location.href = "https://games.mockrithm.me"; }}>
+          <span className="text-white/60 hover:text-white cursor-pointer transition-colors duration-200" onClick={() => { window.location.href = "https://games.mockrithm.me"; }}>
             Games
           </span>
-          <span className="text-[hsl(240,4%,66%)] hover:text-white cursor-pointer transition-colors duration-200" onClick={() => { window.location.href = "https://docs.mockrithm.me"; }}>
+          <span className="text-white/60 hover:text-white cursor-pointer transition-colors duration-200" onClick={() => { window.location.href = "https://docs.mockrithm.me"; }}>
             Docs
           </span>
-          <span className="text-[hsl(240,4%,66%)] hover:text-white cursor-pointer transition-colors duration-200" onClick={() => { window.location.href = "https://mockrithm.me/blog"; }}>
+          <span className="text-white/60 hover:text-white cursor-pointer transition-colors duration-200" onClick={() => { window.location.href = "https://mockrithm.me/blog"; }}>
             Blog
           </span>
-          <span className="text-[hsl(240,4%,66%)] hover:text-white cursor-pointer transition-colors duration-200" onClick={() => { window.location.href = "https://mockrithm.me/contact"; }}>
+          <span className="text-white/60 hover:text-white cursor-pointer transition-colors duration-200" onClick={() => { window.location.href = "https://mockrithm.me/contact"; }}>
             Reach Us
           </span>
         </div>
@@ -67,43 +56,54 @@ export default function AwwwardsHero() {
         {/* CTA */}
         <button
           onClick={handleJourneyBegin}
-          className="liquid-glass rounded-full px-6 py-2.5 text-sm text-white font-medium hover:scale-[1.03] transition-all duration-300 cursor-pointer shadow-lg active:scale-95 border-none outline-none"
+          className="liquid-glass rounded-full px-5 py-2 text-sm text-white font-medium hover:scale-[1.03] transition-all duration-300 cursor-pointer shadow-lg active:scale-95 border-none outline-none"
+          style={{ fontFamily: "'Inter', sans-serif" }}
         >
           Begin Journey
         </button>
       </nav>
 
-      {/* Hero Content Section */}
-      <main className="relative z-10 flex-1 flex flex-col items-center justify-center text-center px-6 pt-32 pb-40 max-w-7xl mx-auto w-full">
+      {/* Hero Content Section — vertically centered in remaining space */}
+      <div className="relative z-10 flex-1 flex flex-col items-center justify-center text-center px-6 max-w-5xl mx-auto w-full">
         {/* Headline */}
         <h1
-          className="text-5xl sm:text-7xl md:text-8xl leading-[0.95] tracking-[-2.46px] max-w-7xl font-normal text-white animate-fade-rise"
+          className="text-5xl sm:text-7xl md:text-[5.5rem] leading-[1] tracking-[-2px] font-normal text-white animate-fade-rise"
           style={{ fontFamily: "'Instrument Serif', serif" }}
         >
-          Where{"  "}
-          <em className="not-italic text-[hsl(240,4%,66%)] font-normal">
-            talent
-          </em>{" "}
-          rises <br />
-          <em className="not-italic text-[hsl(240,4%,66%)] font-normal">
-            through the practice.
-          </em>
+          Where{" "}
+          <em className="not-italic text-white/60">talent</em>{" "}
+          rises <br className="hidden sm:block" />
+          <em className="not-italic text-white/60">through the practice.</em>
         </h1>
 
         {/* Subtext */}
-        <p className="text-[hsl(240,4%,66%)] text-base sm:text-lg max-w-2xl mt-8 leading-relaxed font-sans animate-fade-rise-delay">
-          We're building tools for sharp developers, bold engineering leaders, and quiet builders.
-          Amid the noise, we construct private spaces for focused practice and real skill development.
+        <p
+          className="text-white/60 text-base sm:text-lg max-w-2xl mt-6 leading-relaxed animate-fade-rise-delay"
+          style={{ fontFamily: "'Inter', sans-serif" }}
+        >
+          We build tools for sharp developers, bold engineering leaders, and quiet builders.
+          Amid the noise, we create private spaces for focused practice and real skill growth.
         </p>
 
         {/* Big CTA */}
         <button
           onClick={handleJourneyBegin}
-          className="liquid-glass rounded-full px-14 py-5 text-base text-white font-medium mt-12 hover:scale-[1.03] transition-all duration-300 cursor-pointer shadow-xl active:scale-95 border-none outline-none animate-fade-rise-delay-2"
+          className="liquid-glass rounded-full px-12 py-4 text-base text-white font-medium mt-10 hover:scale-[1.03] transition-all duration-300 cursor-pointer shadow-xl active:scale-95 border-none outline-none animate-fade-rise-delay-2"
+          style={{ fontFamily: "'Inter', sans-serif" }}
         >
           Begin Journey
         </button>
-      </main>
-    </div>
+      </div>
+
+      {/* Scroll indicator pinned to bottom */}
+      <div className="relative z-10 flex justify-center pb-8">
+        <div className="flex flex-col items-center gap-2 opacity-50">
+          <span className="text-[9px] font-bold uppercase tracking-[0.25em] text-white" style={{ fontFamily: "'Inter', sans-serif" }}>
+            Scroll to explore
+          </span>
+          <div className="w-[1px] h-8 bg-gradient-to-b from-white to-transparent" />
+        </div>
+      </div>
+    </section>
   );
 }

@@ -40,6 +40,7 @@ export default function AuthLayout({
     pathname.startsWith("/documentation") ||
     pathname.startsWith("/games") ||
     [
+      "/",
       "/sign-in",
       "/sign-up",
       "/forgot-password",
