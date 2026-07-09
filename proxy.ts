@@ -21,15 +21,8 @@ export default clerkMiddleware(async (auth, req) => {
     return NextResponse.next();
   }
 
-  // 🎮 Rewrite games.mockrithm.me subdomain requests to /games internally
+  // 🎮 Bypass and forward games subdomain requests (handled by vercel.json rewrites)
   if (host === "games.mockrithm.me" || host.includes("games.mockrithm.me")) {
-    if (url.pathname === "/") {
-      url.pathname = "/games";
-      return NextResponse.rewrite(url);
-    } else if (!url.pathname.startsWith("/games")) {
-      url.pathname = `/games${url.pathname}`;
-      return NextResponse.rewrite(url);
-    }
     return NextResponse.next();
   }
 
