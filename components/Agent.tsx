@@ -357,10 +357,18 @@ const Agent = ({
       });
 
       if (success && id) {
-        router.push(`/interview/${interviewId}/feedback`);
+        if (typeof window !== "undefined" && window.location.hostname.includes("games.mockrithm.me")) {
+          window.location.href = `https://mockrithm.me/interview/${interviewId}/feedback`;
+        } else {
+          router.push(`/interview/${interviewId}/feedback`);
+        }
       } else {
         console.log("Error saving feedback");
-        router.push("/");
+        if (typeof window !== "undefined" && window.location.hostname.includes("games.mockrithm.me")) {
+          window.location.href = "https://mockrithm.me/";
+        } else {
+          router.push("/");
+        }
       }
     };
 
@@ -640,6 +648,15 @@ const Agent = ({
 
     if (/\[SHOW[-_ ]?SANDBOX\]/i.test(accumulatedTextRef.current)) {
       setShowSandbox(true);
+      if (!codingProblemRef.current) {
+        const fallbackProblem = {
+          title: "Technical Sandbox Workspace",
+          description: "Write or edit your solution in the editor below. The interviewer will review your code in real-time.",
+          templateCode: `// Write your solution here\n`,
+          language: "javascript"
+        };
+        setActiveCodingProblem(fallbackProblem);
+      }
       if (hasSubmittedCurrentCodeRef.current) {
         setCode("");
         hasSubmittedCurrentCodeRef.current = false;
@@ -1297,7 +1314,7 @@ RULES:
 - Keep every reply under 30 words.
 - Write only plain clean text. No markdown, no emojis, no symbols.
 - ${languageInstruction}
-- Once they choose/specify their choice and the role, confirm their choice and the chosen role in one short sentence, append "[END_CALL]" at the very end of your response, and end your response. The system will create the interview automatically.`;
+- Do NOT append "[END_CALL]" when suggesting options. Only append "[END_CALL]" at the very end of your message AFTER the candidate has explicitly responded and selected one of the options (e.g., they picked "Technical", "Live Coding Sandbox", etc.). Once they make their final selection, confirm it in one short sentence and append "[END_CALL]" at the end.`;
       }
 
       setLastMessage("AI is thinking...");
@@ -2111,7 +2128,11 @@ ${code}
                  onTimeUp={() => {
                    console.log("[Agent.tsx] Time is up! Finishing session...");
                    isTimerEndingRef.current = true;
-                   handleDisconnect();
+                   if (typeRef.current === "interview") {
+                     handleSpeechCompleted("[SYSTEM: Time is up. Conclude the interview warmly, thank the candidate, and ALWAYS append '[END_CALL]' at the very end.]");
+                   } else {
+                     handleDisconnect();
+                   }
                  }}
                />
                {timerSecondsLeft === null && (
