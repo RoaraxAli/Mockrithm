@@ -109,7 +109,7 @@ const Navbar = ({ userId, userName, userRole }: NavbarProps) => {
         { href: "/documentation", label: "Documentation", icon: Info },
       ];
 
-  if (pathname.startsWith("/admin")) return null;
+  if (pathname.startsWith("/admin") || pathname.startsWith("/games") || pathname === "/games") return null;
 
   return (
     <>

@@ -9,10 +9,10 @@ import Link from "next/link";
 import {
   FileCode, Palette, Zap, Shield, Layers, Cpu, Sparkles, Compass,
   Database, Server, GitBranch, Terminal as TerminalIcon, Wind, ShieldAlert,
-  Play, Lock, CheckCircle, HelpCircle, ArrowLeft, Award, BookOpen,
+  Play, Lock, CheckCircle, HelpCircle, ArrowLeft, ArrowRight, Award, BookOpen,
   Code2, RotateCcw, AlertCircle, MessageSquare, Users, Trophy,
   Plus, Send, User as UserIcon, Activity, Phone, PhoneOff, Mic, MicOff,
-  MapPin, ChevronDown, Music, Volume2, VolumeX, List, Star
+  MapPin, ChevronDown, Music, Volume2, VolumeX, List, Star, Gamepad2
 } from "lucide-react";
 import { toast } from "sonner";
 import { GAMES_LIST, generateLevel, LevelData, GameInfo } from "@/lib/gamesData";
@@ -22,6 +22,7 @@ import {
   getLeaderboardUsers, GameProgress,
   sendFriendRequest, acceptFriendRequest, declineFriendRequest
 } from "@/lib/actions/games.action";
+import { checkUsernameUnique, updateUsername } from "@/lib/actions/username.action";
 
 const Editor = dynamic(() => import("@monaco-editor/react"), { ssr: false });
 
@@ -247,7 +248,16 @@ function GamesPageContent() {
   const [gitCommandInput, setGitCommandInput] = useState("");
   const [gitState, setGitState] = useState({ initialized: false, staged: [] as string[], committed: [] as string[], commits: [] as { id: string; message: string }[] });
 
-  const userNameDisplay = clerkUser?.username || clerkUser?.firstName || "User";
+  const [dbUsername, setDbUsername] = useState("");
+  const [showUsernameClaimModal, setShowUsernameClaimModal] = useState(false);
+  const [usernameInput, setUsernameInput] = useState("");
+  const [usernameAvailable, setUsernameAvailable] = useState<boolean | null>(null);
+  const [checkingUsername, setCheckingUsername] = useState(false);
+  const [usernameClaimError, setUsernameClaimError] = useState("");
+  const [usernameClaiming, setUsernameClaiming] = useState(false);
+
+  const finalUsername = dbUsername || clerkUser?.username || clerkUser?.firstName || "User";
+  const userNameDisplay = finalUsername;
   const userEmailDisplay = clerkUser?.primaryEmailAddress?.emailAddress || "guest@mockrithm.com";
   const userAvatarUrl = clerkUser?.imageUrl;
 
@@ -262,11 +272,16 @@ function GamesPageContent() {
             clerkUser.id, clerkUser.fullName || clerkUser.firstName || "",
             clerkUser.primaryEmailAddress?.emailAddress || "", clerkUser.imageUrl || ""
           );
-          setProgress(data.progress || {});
+           setProgress(data.progress || {});
           setTotalXp(data.totalXp || 0);
           setClaimedAchievements(data.claimedAchievements || []);
           setFriendsList(data.gamesFriends || []);
           setSoundPreference(data.soundPreference || "chime");
+          setDbUsername(data.username || "");
+          
+          if (data.usernameClaimed !== true) {
+            setShowUsernameClaimModal(true);
+          }
 
           if (data.locationSet && data.country) {
             setUserLocation({ country: data.country, city: data.city });
@@ -307,7 +322,48 @@ function GamesPageContent() {
     }
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, []);
+  // Debounce check username uniqueness
+  useEffect(() => {
+    if (!usernameInput.trim()) {
+      setUsernameAvailable(null);
+      return;
+    }
+    const timer = setTimeout(async () => {
+      setCheckingUsername(true);
+      try {
+        const res = await checkUsernameUnique(usernameInput);
+        setUsernameAvailable(res.isUnique);
+      } catch (err) {
+        setUsernameAvailable(false);
+      } finally {
+        setCheckingUsername(false);
+      }
+    }, 500);
+
+    return () => clearTimeout(timer);
+  }, [usernameInput]);
+
+  const handleClaimUsername = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!usernameInput.trim() || !usernameAvailable || checkingUsername || !clerkUser) return;
+
+    setUsernameClaiming(true);
+    setUsernameClaimError("");
+    try {
+      const res = await updateUsername(clerkUser.id, usernameInput);
+      if (res.success) {
+        toast.success("Unique username claimed successfully!");
+        setDbUsername(usernameInput.trim().toLowerCase());
+        setShowUsernameClaimModal(false);
+      } else {
+        setUsernameClaimError(res.error || "Failed to claim username.");
+      }
+    } catch (err: any) {
+      setUsernameClaimError(err.message || "Failed to claim username.");
+    } finally {
+      setUsernameClaiming(false);
+    }
+  };
 
   // --- Real-time Friends List Sync ---
   useEffect(() => {
@@ -380,7 +436,7 @@ function GamesPageContent() {
 
       const qRec = query(
         collection(db, "friendRequests"),
-        where("receiverName", "==", userNameDisplay),
+        where("receiverUsername", "==", userNameDisplay),
         where("status", "==", "pending")
       );
       const unsubRec = onSnapshot(qRec, (snapshot) => {
@@ -391,7 +447,7 @@ function GamesPageContent() {
 
       const qSent = query(
         collection(db, "friendRequests"),
-        where("senderName", "==", userNameDisplay),
+        where("senderUsername", "==", userNameDisplay),
         where("status", "==", "pending")
       );
       const unsubSent = onSnapshot(qSent, (snapshot) => {
@@ -1044,6 +1100,64 @@ function GamesPageContent() {
     <div className="flex h-screen bg-black text-white relative font-mona-sans overflow-hidden selection:bg-white selection:text-black">
       <div className="absolute inset-0 premium-grid-dot pointer-events-none opacity-20 z-0" />
 
+      {/* === UNIQUE USERNAME CLAIM MODAL === */}
+      <AnimatePresence>
+        {showUsernameClaimModal && (
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+            className="fixed inset-0 z-[101] bg-black/95 backdrop-blur flex items-center justify-center p-4">
+            <motion.div initial={{ scale: 0.95, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.95, opacity: 0 }}
+              className="bg-zinc-950 border border-zinc-800 rounded-3xl p-8 w-full max-w-md shadow-2xl">
+              <div className="flex items-center gap-3 mb-6">
+                <div className="p-3 rounded-2xl bg-zinc-900 border border-zinc-800">
+                  <UserIcon className="size-5 text-white" />
+                </div>
+                <div>
+                  <h2 className="text-lg font-black uppercase font-mono tracking-tight text-white">Claim Unique Username</h2>
+                  <p className="text-[10px] text-zinc-500 font-mono mt-0.5">Choose your unique handle to join chats and make friends.</p>
+                </div>
+              </div>
+
+              <form onSubmit={handleClaimUsername} className="flex flex-col gap-4">
+                <div>
+                  <label className="text-[10px] font-mono font-bold text-zinc-400 uppercase tracking-widest block mb-1.5">Username</label>
+                  <input
+                    type="text"
+                    value={usernameInput}
+                    onChange={e => {
+                      setUsernameInput(e.target.value.toLowerCase().replace(/[^a-z0-9_]/g, ""));
+                      setUsernameClaimError("");
+                    }}
+                    placeholder="e.g. tech_ninja"
+                    className="w-full bg-black border border-zinc-800 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-zinc-600 placeholder:text-zinc-700 font-mono"
+                  />
+                  {checkingUsername && (
+                    <span className="text-[9px] text-zinc-500 font-mono mt-1 block">Checking availability...</span>
+                  )}
+                  {!checkingUsername && usernameAvailable === true && (
+                    <span className="text-[9px] text-emerald-400 font-mono mt-1 block">✓ Username is available!</span>
+                  )}
+                  {!checkingUsername && usernameAvailable === false && (
+                    <span className="text-[9px] text-rose-500 font-mono mt-1 block">✗ Username is taken or invalid. Use alphanumeric & underscores (3-20 chars).</span>
+                  )}
+                </div>
+
+                {usernameClaimError && (
+                  <div className="bg-red-500/10 border border-red-500/20 rounded-xl p-3 flex items-start gap-2">
+                    <AlertCircle className="size-4 text-red-400 shrink-0 mt-0.5" />
+                    <p className="text-[11px] text-red-400 font-mono leading-relaxed">{usernameClaimError}</p>
+                  </div>
+                )}
+
+                <button type="submit" disabled={usernameClaiming || !usernameAvailable || checkingUsername}
+                  className="w-full py-3 bg-white text-black hover:bg-zinc-200 rounded-xl font-bold text-sm uppercase tracking-wider transition-all disabled:opacity-50 cursor-pointer">
+                  {usernameClaiming ? "Claiming..." : "Claim Username"}
+                </button>
+              </form>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       {/* === LOCATION ONBOARDING MODAL === */}
       <AnimatePresence>
         {showLocationModal && (
@@ -1540,6 +1654,22 @@ function GamesPageContent() {
                     <h1 className="text-4xl font-black tracking-tight leading-none uppercase font-mono">Pick a Game</h1>
                     <p className="text-xs text-zinc-400 max-w-xl">Choose a language to start learning. Complete levels to earn XP and unlock badges.</p>
                   </div>
+                </div>
+
+                <div className="bg-gradient-to-r from-zinc-950 to-zinc-900 border border-zinc-900 rounded-2xl p-6 mb-8 flex flex-col md:flex-row md:items-center justify-between gap-4">
+                  <div className="space-y-1">
+                    <span className="text-[9px] font-bold tracking-widest text-violet-400 uppercase font-mono bg-zinc-900 border border-violet-500/20 px-2 py-0.5 rounded-full inline-block">
+                      Need Mock Interview Practice?
+                    </span>
+                    <h3 className="text-sm font-black text-white uppercase font-mono">Unlock Your Career Potential</h3>
+                    <p className="text-[11px] text-zinc-400 leading-relaxed max-w-xl">
+                      Transition from coding puzzles to verbal technical mock interviews. Practice voice questions on system design, data structures, and resume tailoring.
+                    </p>
+                  </div>
+                  <a href="https://mockrithm.me" target="_blank" rel="noopener noreferrer"
+                    className="px-4 py-2.5 bg-white text-black hover:bg-zinc-200 text-xs font-black uppercase tracking-wider rounded-xl transition-all border border-white shrink-0 text-center">
+                    Try Voice Mock Interviews
+                  </a>
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -2082,7 +2212,258 @@ function GamesPageContent() {
   );
 }
 
+function GamesLandingPage() {
+  const [activeTopic, setActiveTopic] = useState<"html" | "js" | "git" | "react">("html");
+
+  const topics = {
+    html: {
+      title: "HTML5 Layout & Semantics",
+      description: "Master document structuring, semantic tags, accessibility, and modern search engine rules.",
+      lessons: [
+        "Use <header>, <nav>, <main>, and <footer> to structure your page layout cleanly.",
+        "Prefer <button> over <div> for click triggers to maintain screen-reader accessibility.",
+        "Add descriptive alt text to images for optimal SEO and user experience."
+      ],
+      code: `<!-- Accessible Semantic Structure -->
+<header>
+  <h1>Mockrithm DevGames</h1>
+</header>
+<main>
+  <article>
+    <h2>Mastering HTML5</h2>
+    <p>Always use semantic elements over standard divs.</p>
+  </article>
+</main>`
+    },
+    js: {
+      title: "JavaScript & ES6+ Core Concepts",
+      description: "Dive into scopes, closures, asynchronous loops, promises, and performance metrics.",
+      lessons: [
+        "Understand lexical scoping and closures to manage private function scopes.",
+        "Master Promises, async/await, and event loops to handle high-performance concurrency.",
+        "Avoid memory leaks by managing event listeners and garbage-collection references."
+      ],
+      code: `// Async Fetching ES6 Pattern
+async function loadUserData(userId) {
+  try {
+    const res = await fetch(\`/api/user/\${userId}\`);
+    const data = await res.json();
+    return data;
+  } catch (err) {
+    console.error("Fetch failed:", err);
+  }
+}`
+    },
+    git: {
+      title: "Git Workflow & Tree Branching",
+      description: "Resolve complex merge conflicts, understand rebasing, and master head tracking.",
+      lessons: [
+        "Use git rebase to maintain a linear and clean commits history before merging.",
+        "Understand detached HEAD states and how to recover lost commits via git reflog.",
+        "Stage and commit cleanly, separating architectural refactors from cosmetic styles."
+      ],
+      code: `# Standard Interactive Rebase Flow
+git checkout feature-branch
+git fetch origin
+git rebase origin/main
+# Fix conflicts if any, then push
+git push origin feature-branch --force-with-lease`
+    },
+    react: {
+      title: "React Virtual DOM & State Hydration",
+      description: "Optimize component renders, utilize memoization, and master React hook rules.",
+      lessons: [
+        "Wrap heavy client components in React.memo to prevent unnecessary virtual DOM redraws.",
+        "Use useEffect cleanup functions to revoke object URLs, cancel subscriptions, and prevent leaks.",
+        "Handle declarative state cleanly without mutating state objects directly."
+      ],
+      code: `// Optimized React Counter
+import React, { useState, useCallback } from 'react';
+
+export const Counter = React.memo(() => {
+  const [count, setCount] = useState(0);
+  const increment = useCallback(() => setCount(c => c + 1), []);
+
+  return <button onClick={increment}>Count: {count}</button>;
+});`
+    }
+  };
+
+  const handleAuthRedirect = () => {
+    window.location.href = "https://accounts.mockrithm.me/sign-in?redirect_url=https://games.mockrithm.me";
+  };
+
+  const selectedTopic = topics[activeTopic];
+
+  return (
+    <div className="min-h-screen bg-black text-white font-mona-sans relative overflow-x-hidden selection:bg-white selection:text-black">
+      {/* Background aesthetics */}
+      <div className="absolute inset-0 premium-grid-dot pointer-events-none opacity-20 z-0" />
+      <div className="absolute top-1/4 left-1/4 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-violet-600/5 blur-[150px] rounded-full pointer-events-none" />
+      <div className="absolute bottom-1/4 right-1/4 translate-x-1/2 translate-y-1/2 w-[600px] h-[600px] bg-sky-600/5 blur-[150px] rounded-full pointer-events-none" />
+
+      {/* Navigation */}
+      <header className="relative z-10 border-b border-zinc-900 bg-zinc-950/60 backdrop-blur-md px-6 py-4 flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          <div className="size-8 rounded-lg bg-white text-black flex items-center justify-center font-black font-mono text-sm tracking-tighter">
+            M
+          </div>
+          <span className="text-sm font-black tracking-widest uppercase font-mono text-white">
+            Mockrithm <span className="text-zinc-500 text-[10px] font-bold">Games</span>
+          </span>
+        </div>
+        <div className="flex items-center gap-4">
+          <a
+            href="https://mockrithm.me"
+            className="text-xs font-bold uppercase tracking-wider text-zinc-400 hover:text-white transition-all"
+          >
+            Core Platform
+          </a>
+          <button
+            onClick={handleAuthRedirect}
+            className="px-4 py-2 bg-white text-black text-xs font-black uppercase tracking-wider rounded-lg border border-white hover:bg-zinc-200 transition-all cursor-pointer"
+          >
+            Start Playing
+          </button>
+        </div>
+      </header>
+
+      {/* Hero Section */}
+      <main className="max-w-5xl mx-auto px-6 pt-20 pb-28 relative z-10">
+        <div className="text-center mb-16">
+          <div className="inline-flex items-center gap-1.5 bg-zinc-900 border border-zinc-800 px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-[0.2em] text-zinc-400 font-mono mb-4">
+            <Sparkles className="size-3 text-white" /> Lead Generation Sandbox
+          </div>
+          <h1 className="text-5xl md:text-7xl font-black uppercase tracking-tighter text-white font-mono">
+            Level Up Your <br />
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-violet-400 to-sky-400">Engineering skills</span>
+          </h1>
+          <p className="text-zinc-400 text-xs md:text-sm mt-6 max-w-xl mx-auto leading-relaxed">
+            Practice real developer skills interactively: parse HTML layout codes, resolve Git branches, debug Javascript algorithms, and verify React rendering behaviors.
+          </p>
+          <div className="mt-8 flex justify-center gap-4">
+            <button
+              onClick={handleAuthRedirect}
+              className="px-6 py-3.5 bg-white text-black text-xs font-black uppercase tracking-wider rounded-xl hover:bg-zinc-200 transition-all flex items-center gap-2 cursor-pointer shadow-lg shadow-white/5 border border-white"
+            >
+              Start Playing Now <ArrowRight className="size-4" />
+            </button>
+            <a
+              href="https://mockrithm.me"
+              className="px-6 py-3.5 bg-zinc-900/60 border border-zinc-800 text-white text-xs font-black uppercase tracking-wider rounded-xl hover:border-zinc-700 transition-all flex items-center gap-2"
+            >
+              Learn More
+            </a>
+          </div>
+        </div>
+
+        {/* Lead Gen Core Product Callout */}
+        <section className="bg-gradient-to-r from-zinc-950 to-zinc-900/40 border border-zinc-850 rounded-2xl p-8 mb-16 relative overflow-hidden">
+          <div className="absolute top-0 right-0 w-64 h-64 bg-violet-500/10 blur-[80px] rounded-full pointer-events-none" />
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 relative z-10">
+            <div className="space-y-2">
+              <span className="text-[9px] font-black tracking-widest text-emerald-400 uppercase bg-zinc-900 border border-emerald-500/20 px-2.5 py-1 rounded-full inline-flex items-center gap-1 font-mono">
+                <Trophy className="size-2.5" /> Core Feature
+              </span>
+              <h2 className="text-lg font-black text-white uppercase font-mono">Duplex Voice-Activated AI Mock Interviews</h2>
+              <p className="text-zinc-400 text-xs leading-relaxed max-w-xl">
+                Ready to transition from code grids to live tech interviews? Prepare with our voice-driven interviewer model. Get instant performance telemetry, filler word counts, and customized study guides.
+              </p>
+            </div>
+            <a
+              href="https://mockrithm.me"
+              className="px-5 py-3.5 bg-white text-black hover:bg-zinc-200 text-xs font-black uppercase tracking-wider rounded-xl transition-all border border-white shrink-0 flex items-center justify-center gap-2 shadow-lg shadow-white/5"
+            >
+              Practice Interviews <Gamepad2 className="size-4" />
+            </a>
+          </div>
+        </section>
+
+        {/* Syllabus Subpages/Tabs */}
+        <section className="space-y-6">
+          <div className="flex border-b border-zinc-900">
+            {(["html", "js", "git", "react"] as const).map((topicKey) => (
+              <button
+                key={topicKey}
+                onClick={() => setActiveTopic(topicKey)}
+                className={`pb-4 px-6 text-xs font-black uppercase tracking-wider font-mono border-b-2 transition-all cursor-pointer ${
+                  activeTopic === topicKey
+                    ? "border-white text-white"
+                    : "border-transparent text-zinc-500 hover:text-zinc-300"
+                }`}
+              >
+                {topicKey}
+              </button>
+            ))}
+          </div>
+
+          <div className="grid md:grid-cols-2 gap-8 items-start pt-4">
+            {/* Left side: Lesson Details */}
+            <div className="space-y-6">
+              <h3 className="text-2xl font-black text-white uppercase font-mono tracking-tight">
+                {selectedTopic.title}
+              </h3>
+              <p className="text-zinc-400 text-xs leading-relaxed">
+                {selectedTopic.description}
+              </p>
+              <ul className="space-y-4">
+                {selectedTopic.lessons.map((lesson, idx) => (
+                  <li key={idx} className="flex gap-3 items-start">
+                    <CheckCircle className="size-4 text-emerald-400 shrink-0 mt-0.5" />
+                    <span className="text-zinc-300 text-xs leading-relaxed">{lesson}</span>
+                  </li>
+                ))}
+              </ul>
+              <button
+                onClick={handleAuthRedirect}
+                className="inline-flex items-center gap-1 text-xs font-black uppercase tracking-wider text-white hover:text-zinc-300 transition-all font-mono"
+              >
+                Try Interactive Practice Sandbox <ArrowRight className="size-3.5" />
+              </button>
+            </div>
+
+            {/* Right side: Mock Code IDE */}
+            <div className="flex flex-col border border-zinc-900 rounded-xl overflow-hidden shadow-2xl bg-zinc-950/40">
+              <div className="flex items-center justify-between px-4 py-2.5 border-b border-zinc-900 bg-zinc-950/80 text-[9px] text-zinc-500 font-mono font-bold uppercase tracking-wider">
+                <div className="flex items-center gap-2">
+                  <span className="w-2 h-2 rounded-full bg-rose-500/40" />
+                  <span className="w-2 h-2 rounded-full bg-amber-500/40" />
+                  <span className="w-2 h-2 rounded-full bg-emerald-500/40" />
+                  <span className="ml-1 text-zinc-400">example.{activeTopic === "git" ? "sh" : activeTopic === "html" ? "html" : "ts"}</span>
+                </div>
+                <span>Preview Only</span>
+              </div>
+              <pre className="p-4 overflow-x-auto text-[10px] text-zinc-300 font-mono leading-relaxed bg-zinc-955/20 whitespace-pre">
+                <code>{selectedTopic.code}</code>
+              </pre>
+            </div>
+          </div>
+        </section>
+      </main>
+
+      {/* Footer */}
+      <footer className="border-t border-zinc-950 py-12 text-center text-[10px] uppercase font-bold tracking-widest text-zinc-600 relative z-10 font-mono">
+        &copy; {new Date().getFullYear()} Mockrithm Games. All rights reserved.
+      </footer>
+    </div>
+  );
+}
+
 export default function GamesPage() {
+  const { isLoaded, isSignedIn } = useUser();
+
+  if (!isLoaded) {
+    return (
+      <div className="min-h-screen bg-black text-white flex flex-col items-center justify-center font-mono">
+        <div className="text-zinc-500 animate-pulse text-xs uppercase tracking-widest">Loading Game Terminal...</div>
+      </div>
+    );
+  }
+
+  if (!isSignedIn) {
+    return <GamesLandingPage />;
+  }
+
   return (
     <React.Suspense fallback={
       <div className="min-h-screen bg-black text-white flex flex-col items-center justify-center font-mono">

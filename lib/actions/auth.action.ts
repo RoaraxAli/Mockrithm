@@ -49,14 +49,19 @@ export const getCurrentUser = cache(async (): Promise<User | null> => {
       const email = clerkUser.emailAddresses[0]?.emailAddress || "";
       const name = clerkUser.fullName || clerkUser.firstName || email.split("@")[0] || "New User";
       const imageUrl = clerkUser.imageUrl || "";
-      // All new users default to 'User'. Admin status is promoted dynamically via admin panel or script.
       const role = "User";
+
+      // Auto-generate a fallback unique username (e.g. user_1234)
+      const baseName = (clerkUser.username || email.split("@")[0] || "user").replace(/[^a-zA-Z0-9_]/g, "").slice(0, 15);
+      const randomSalt = Math.floor(Math.random() * 9000 + 1000);
+      const username = `${baseName}_${randomSalt}`.toLowerCase();
 
       const newUserData = {
         name,
         email,
         imageUrl,
         role,
+        username,
         createdAt: new Date(),
         status: "Active",
       };
@@ -79,18 +84,19 @@ export const getCurrentUser = cache(async (): Promise<User | null> => {
         const name = clerkUser.fullName || clerkUser.firstName || email.split("@")[0] || "New User";
         const imageUrl = clerkUser.imageUrl || "";
         
-        if (
-          rawData?.name !== name ||
-          rawData?.email !== email ||
-          rawData?.imageUrl !== imageUrl
-        ) {
+        let updates: any = {};
+        if (rawData?.name !== name) updates.name = name;
+        if (rawData?.email !== email) updates.email = email;
+        if (rawData?.imageUrl !== imageUrl) updates.imageUrl = imageUrl;
+        if (!rawData?.username) {
+          const baseName = (clerkUser.username || email.split("@")[0] || "user").replace(/[^a-zA-Z0-9_]/g, "").slice(0, 15);
+          const randomSalt = Math.floor(Math.random() * 9000 + 1000);
+          updates.username = `${baseName}_${randomSalt}`.toLowerCase();
+        }
+
+        if (Object.keys(updates).length > 0) {
           console.log("Syncing Clerk user details to Firestore for ID:", userId);
-          const updates = {
-            name,
-            email,
-            imageUrl,
-            updatedAt: new Date(),
-          };
+          updates.updatedAt = new Date();
           await userDocRef.set(updates, { merge: true });
           rawData = {
             ...rawData,

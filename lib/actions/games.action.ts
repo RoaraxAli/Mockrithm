@@ -18,6 +18,8 @@ export interface UserGamesProgress {
   gamesFriends: string[];
   soundPreference: string;
   locationSet: boolean;
+  username?: string;
+  usernameClaimed?: boolean;
 }
 
 /**
@@ -104,6 +106,9 @@ export async function getUserGamesProgress(
       }
     }
 
+    const username = data?.username || "";
+    const usernameClaimed = data?.usernameClaimed === true;
+
     return {
       progress: serializedProgress,
       totalXp,
@@ -112,7 +117,9 @@ export async function getUserGamesProgress(
       claimedAchievements,
       gamesFriends,
       soundPreference,
-      locationSet
+      locationSet,
+      username,
+      usernameClaimed
     };
   } catch (error: any) {
     console.error("Error fetching user games progress:", error);
@@ -380,38 +387,35 @@ export async function getLeaderboardUsers() {
   }
 }
 
-/**
- * Send a friend request
- */
-export async function sendFriendRequest(userId: string, senderName: string, receiverName: string) {
+export async function sendFriendRequest(userId: string, senderUsername: string, receiverUsername: string) {
   try {
     if (!userId) return { success: false, error: "Unauthenticated" };
     await assertOwnership(userId);
-    if (senderName.toLowerCase() === receiverName.toLowerCase()) {
+    if (senderUsername.toLowerCase() === receiverUsername.toLowerCase()) {
       return { success: false, error: "You cannot add yourself as a friend." };
     }
 
-    // Find receiver
-    const receiverQuery = await db.collection("users").where("name", "==", receiverName).get();
+    // Find receiver by username
+    const receiverQuery = await db.collection("users").where("username", "==", receiverUsername.trim().toLowerCase()).get();
     if (receiverQuery.empty) {
       return { success: false, error: "User not found in Mockrithm database." };
     }
     const receiverDoc = receiverQuery.docs[0];
-    const receiverNameExact = receiverDoc.data().name;
+    const receiverUsernameExact = receiverDoc.data().username;
     const receiverId = receiverDoc.id;
 
     // Check if already friends
     const senderDoc = await db.collection("users").doc(userId).get();
     const senderData = senderDoc.data() || {};
     const friends = senderData.gamesFriends || [];
-    if (friends.includes(receiverNameExact)) {
+    if (friends.includes(receiverUsernameExact)) {
       return { success: false, error: "Already in your friends list." };
     }
 
     // Check if request already exists
     const existingReq = await db.collection("friendRequests")
-      .where("senderName", "==", senderName)
-      .where("receiverName", "==", receiverNameExact)
+      .where("senderUsername", "==", senderUsername)
+      .where("receiverUsername", "==", receiverUsernameExact)
       .where("status", "==", "pending")
       .get();
     if (!existingReq.empty) {
@@ -420,8 +424,8 @@ export async function sendFriendRequest(userId: string, senderName: string, rece
 
     // Check if there is an incoming request from them instead
     const incomingReq = await db.collection("friendRequests")
-      .where("senderName", "==", receiverNameExact)
-      .where("receiverName", "==", senderName)
+      .where("senderUsername", "==", receiverUsernameExact)
+      .where("receiverUsername", "==", senderUsername)
       .where("status", "==", "pending")
       .get();
     if (!incomingReq.empty) {
@@ -431,9 +435,9 @@ export async function sendFriendRequest(userId: string, senderName: string, rece
     // Create the request
     await db.collection("friendRequests").add({
       senderId: userId,
-      senderName,
+      senderUsername,
       receiverId,
-      receiverName: receiverNameExact,
+      receiverUsername: receiverUsernameExact,
       status: "pending",
       createdAt: new Date()
     });
@@ -448,7 +452,7 @@ export async function sendFriendRequest(userId: string, senderName: string, rece
 /**
  * Accept a friend request
  */
-export async function acceptFriendRequest(userId: string, currentUserName: string, requestId: string) {
+export async function acceptFriendRequest(userId: string, currentUsername: string, requestId: string) {
   try {
     if (!userId) return { success: false, error: "Unauthenticated" };
     await assertOwnership(userId);
@@ -459,8 +463,8 @@ export async function acceptFriendRequest(userId: string, currentUserName: strin
     const reqData = reqSnap.data();
     if (reqData.status !== "pending") return { success: false, error: "Request is not pending" };
 
-    const senderName = reqData.senderName;
-    const receiverName = reqData.receiverName;
+    const senderUsername = reqData.senderUsername;
+    const receiverUsername = reqData.receiverUsername;
     const senderId = reqData.senderId;
     const receiverId = reqData.receiverId;
 
@@ -473,17 +477,17 @@ export async function acceptFriendRequest(userId: string, currentUserName: strin
 
     const senderDoc = await senderDocRef.get();
     const senderFriends = senderDoc.data()?.gamesFriends || [];
-    if (!senderFriends.includes(receiverName)) {
+    if (!senderFriends.includes(receiverUsername)) {
       await senderDocRef.update({
-        gamesFriends: [...senderFriends, receiverName]
+        gamesFriends: [...senderFriends, receiverUsername]
       });
     }
 
     const receiverDoc = await receiverDocRef.get();
     const receiverFriends = receiverDoc.data()?.gamesFriends || [];
-    if (!receiverFriends.includes(senderName)) {
+    if (!receiverFriends.includes(senderUsername)) {
       await receiverDocRef.update({
-        gamesFriends: [...receiverFriends, senderName]
+        gamesFriends: [...receiverFriends, senderUsername]
       });
     }
 
