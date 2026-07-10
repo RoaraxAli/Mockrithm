@@ -26,9 +26,14 @@ export default clerkMiddleware(async (auth, req) => {
     return NextResponse.next();
   }
 
+  console.log(`[Proxy Log] Host: ${host} | Path: ${req.nextUrl.pathname}`);
+
   // 📝 Bypass Clerk auth for resume subdomain requests (handled by vercel.json rewrites)
   if (host === "resume.mockrithm.me" || host.includes("resume.mockrithm.me")) {
-    return NextResponse.next();
+    // Log the protected state to see if it triggers the loop
+    const isProtected = isProtectedRoute(req);
+    console.log(`[Proxy Log Subdomain] Path: ${req.nextUrl.pathname} | isProtected: ${isProtected}`);
+    // Temporarily allow middleware to run so we can inspect session cookies
   }
 
   // 🔐 Redirect auth routes on apex domain to the accounts subdomain
@@ -38,6 +43,7 @@ export default clerkMiddleware(async (auth, req) => {
   }
 
   const { userId } = await auth()
+  console.log(`[Proxy Log Auth] Path: ${req.nextUrl.pathname} | userId: ${userId}`);
 
   if (isAuthRoute(req) && userId) {
     url.pathname = "/"
