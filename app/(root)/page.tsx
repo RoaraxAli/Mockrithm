@@ -4,6 +4,8 @@ import BlogsPage from "../blog/page";
 import LandingDashboard from "@/components/LandingDashboard";
 import { getCurrentUser } from "@/lib/actions/auth.action";
 import MarketingLandingWrapper from "@/components/MarketingLandingWrapper";
+import ResumeLandingPage from "./resume/page";
+import GamesLandingPage from "./games/page";
 
 export default async function Home() {
   const headerList = await headers();
@@ -16,6 +18,14 @@ export default async function Home() {
 
   if (host.startsWith("blog.")) {
     return <BlogsPage />;
+  }
+
+  if (host.startsWith("resume.")) {
+    return <ResumeLandingPage />;
+  }
+
+  if (host.startsWith("games.")) {
+    return <GamesLandingPage />;
   }
 
   if (host.startsWith("accounts.")) {
