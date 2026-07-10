@@ -28,7 +28,9 @@ export default clerkMiddleware(async (auth, req) => {
 
   // 📝 Bypass Clerk auth for resume subdomain requests (handled by vercel.json rewrites)
   if (host === "resume.mockrithm.me" || host.includes("resume.mockrithm.me")) {
-    return NextResponse.next();
+    if (!isProtectedRoute(req)) {
+      return NextResponse.next();
+    }
   }
 
   // 🔐 Redirect auth routes on apex domain to the accounts subdomain

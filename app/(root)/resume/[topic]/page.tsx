@@ -24,7 +24,7 @@ export default function ResumeTopicPage() {
   // Redirect if already logged in
   useEffect(() => {
     if (isLoaded && isSignedIn) {
-      window.location.href = "https://mockrithm.me/user/resume";
+      window.location.href = "/user/resume";
     }
   }, [isSignedIn, isLoaded]);
 
@@ -75,7 +75,7 @@ export default function ResumeTopicPage() {
 
           <button
             className="liquid-glass rounded-full px-5 py-2 text-sm text-white font-medium hover:scale-[1.03] transition-all duration-300 shadow-lg border-none outline-none cursor-pointer"
-            onClick={() => { window.location.href = "https://accounts.mockrithm.me/sign-up?redirect_url=https://mockrithm.me/user/resume"; }}
+            onClick={() => { window.location.href = "https://accounts.mockrithm.me/sign-up?redirect_url=https://resume.mockrithm.me/user/resume"; }}
           >
             Begin Journey
           </button>
@@ -101,7 +101,7 @@ export default function ResumeTopicPage() {
 
         <div className="mt-10 animate-fade-rise-delay-2">
           <button
-            onClick={() => { window.location.href = "https://accounts.mockrithm.me/sign-up?redirect_url=https://mockrithm.me/user/resume"; }}
+            onClick={() => { window.location.href = "https://accounts.mockrithm.me/sign-up?redirect_url=https://resume.mockrithm.me/user/resume"; }}
             className="liquid-glass rounded-full px-14 py-4.5 text-base text-white font-medium hover:scale-[1.03] transition-all duration-300 shadow-xl border-none outline-none cursor-pointer flex items-center gap-2"
           >
             {config.primaryCTA}

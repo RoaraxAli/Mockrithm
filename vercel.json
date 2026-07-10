@@ -128,6 +128,26 @@
       "destination": "/blogs/:path*"
     },
     {
+      "source": "/user/:path*",
+      "has": [
+        {
+          "type": "host",
+          "value": "resume.mockrithm.me"
+        }
+      ],
+      "destination": "/user/:path*"
+    },
+    {
+      "source": "/api/:path*",
+      "has": [
+        {
+          "type": "host",
+          "value": "resume.mockrithm.me"
+        }
+      ],
+      "destination": "/api/:path*"
+    },
+    {
       "source": "/",
       "has": [
         {

@@ -19,12 +19,12 @@ export default function ResumeLandingPage() {
   // Redirect if already logged in
   useEffect(() => {
     if (isLoaded && isSignedIn) {
-      window.location.href = "https://mockrithm.me/user/resume";
+      window.location.href = "/user/resume";
     }
   }, [isSignedIn, isLoaded]);
 
   const handleCTAClick = () => {
-    window.location.href = "https://accounts.mockrithm.me/sign-up?redirect_url=https://mockrithm.me/user/resume";
+    window.location.href = "https://accounts.mockrithm.me/sign-up?redirect_url=https://resume.mockrithm.me/user/resume";
   };
 
   const getResumeLink = (path: string) => {
