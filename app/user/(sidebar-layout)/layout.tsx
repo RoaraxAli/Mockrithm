@@ -12,7 +12,6 @@ export default function SidebarLayout({
 }: {
   children: React.ReactNode
 }) {
-  redirect("/");
   const [sidebarOpen, setSidebarOpen] = useState(false)
 
   return (
