@@ -6,7 +6,7 @@ import { RESUME_LANDING_LIST } from "@/lib/resumeData";
 
 export default function ResumeLandingPage() {
   const handleCTAClick = () => {
-    window.location.href = "https://accounts.mockrithm.me/sign-up";
+    window.location.href = "https://accounts.mockrithm.me/sign-up?redirect_url=https://mockrithm.me/user/resume";
   };
 
   const categories = Object.values(RESUME_LANDING_LIST).filter(
@@ -150,17 +150,6 @@ export default function ResumeLandingPage() {
           ))}
         </div>
       </section>
-
-      {/* Self-contained Local Footer */}
-      <footer className="w-full bg-black/40 border-t border-white/5 mt-auto py-8 text-center text-xs text-white/40 relative z-10">
-        <div className="max-w-7xl mx-auto px-6 flex flex-col sm:flex-row items-center justify-between gap-4">
-          <p>© 2026 Mockrithm Inc. All resume builders, scanners, and templates are subject to verification rules.</p>
-          <div className="flex gap-4">
-            <Link href="https://mockrithm.me/privacy-policy" className="hover:text-white transition-colors">Privacy</Link>
-            <Link href="https://mockrithm.me/terms" className="hover:text-white transition-colors">Terms</Link>
-          </div>
-        </div>
-      </footer>
     </div>
   );
 }
