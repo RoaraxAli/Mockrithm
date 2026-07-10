@@ -6,9 +6,19 @@ import { FileText, Plus, Activity, ArrowRight, Calendar } from "lucide-react";
 import WorkspaceGateway from "@/components/resume/WorkspaceGateway";
 import HeroSection from "@/components/resume/HeroSection";
 
+import { headers } from "next/headers";
+
 export default async function UserResumePage() {
+  const headerList = await headers();
+  const host = headerList.get("host") || "";
   const user = await getCurrentUser();
-  if (!user) redirect("/sign-in");
+  
+  if (!user) {
+    if (host.startsWith("resume.")) {
+      redirect("https://accounts.mockrithm.me/sign-in?redirect_url=https://resume.mockrithm.me/user/resume");
+    }
+    redirect("/sign-in");
+  }
 
   const resumes = await getUserResumes(user.id);
 

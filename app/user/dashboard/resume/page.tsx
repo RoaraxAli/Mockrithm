@@ -7,9 +7,19 @@ import WorkspaceGateway from "@/components/resume/WorkspaceGateway";
 import { Sidebar } from "@/app/user/components/Sidebar";
 import HeroSection from "@/components/resume/HeroSection";
 
+import { headers } from "next/headers";
+
 export default async function ResumeDashboardPage() {
+  const headerList = await headers();
+  const host = headerList.get("host") || "";
   const user = await getCurrentUser();
-  if (!user) redirect("/sign-in");
+  
+  if (!user) {
+    if (host.startsWith("resume.")) {
+      redirect("https://accounts.mockrithm.me/sign-in?redirect_url=https://resume.mockrithm.me/user/resume");
+    }
+    redirect("/sign-in");
+  }
 
   const resumes = await getUserResumes(user.id);
 
