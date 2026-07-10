@@ -21,10 +21,16 @@ export default async function Home() {
   }
 
   if (host.startsWith("resume.")) {
+    if (user) {
+      redirect("https://mockrithm.me/user/resume");
+    }
     return <ResumeLandingPage />;
   }
 
   if (host.startsWith("games.")) {
+    if (user) {
+      redirect("https://mockrithm.me/user");
+    }
     return <GamesLandingPage />;
   }
 

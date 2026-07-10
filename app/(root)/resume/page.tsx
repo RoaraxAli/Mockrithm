@@ -1,12 +1,37 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import Link from "next/link";
-import { ArrowRight, FileText, CheckCircle, Shield, Award, Layout, Zap, Database } from "lucide-react";
+import { useUser } from "@clerk/nextjs";
+import { ArrowRight, Layout, Zap, Database } from "lucide-react";
 import { RESUME_LANDING_LIST } from "@/lib/resumeData";
 
 export default function ResumeLandingPage() {
+  const { isSignedIn, isLoaded } = useUser();
+  const [isSubdomain, setIsSubdomain] = useState(false);
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      setIsSubdomain(window.location.hostname.startsWith("resume."));
+    }
+  }, []);
+
+  // Redirect if already logged in
+  useEffect(() => {
+    if (isLoaded && isSignedIn) {
+      window.location.href = "https://mockrithm.me/user/resume";
+    }
+  }, [isSignedIn, isLoaded]);
+
   const handleCTAClick = () => {
     window.location.href = "https://accounts.mockrithm.me/sign-up?redirect_url=https://mockrithm.me/user/resume";
+  };
+
+  const getResumeLink = (path: string) => {
+    if (isSubdomain) {
+      return path; // e.g., "/ats-checker" on resume.mockrithm.me
+    }
+    return `/resume${path}`; // e.g., "/resume/ats-checker" on mockrithm.me
   };
 
   const categories = Object.values(RESUME_LANDING_LIST).filter(
@@ -14,7 +39,19 @@ export default function ResumeLandingPage() {
   );
 
   return (
-    <div className="min-h-screen bg-[#07131e] text-white flex flex-col font-sans selection:bg-white selection:text-black">
+    <div className="relative min-h-screen bg-[#07131e] text-white flex flex-col font-sans selection:bg-white selection:text-black overflow-hidden">
+      {/* Fullscreen Looping Background Video */}
+      <video
+        autoPlay
+        loop
+        muted
+        playsInline
+        className="absolute inset-0 w-full h-full object-cover z-0"
+        src="https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260314_131748_f2ca2a28-fed7-44c8-b9a9-bd9acdd5ec31.mp4"
+      />
+      {/* Dark overlay for text readability */}
+      <div className="absolute inset-0 bg-black/40 z-[1]" />
+
       {/* Cinematic Header/Navbar */}
       <nav className="relative z-10 w-full max-w-7xl mx-auto px-6 md:px-8 py-5 flex items-center justify-between">
         <span
@@ -70,7 +107,7 @@ export default function ResumeLandingPage() {
             Start Building Free
           </button>
           <Link
-            href="/resume/ats-checker"
+            href={getResumeLink("/ats-checker")}
             className="border border-white/10 hover:border-white/20 bg-white/5 hover:bg-white/10 transition-all rounded-full px-10 py-4 text-base text-white font-medium flex items-center justify-center gap-2"
           >
             Scan Existing Resume
@@ -114,7 +151,7 @@ export default function ResumeLandingPage() {
 
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
           <Link
-            href="/resume/ats-checker"
+            href={getResumeLink("/ats-checker")}
             className="p-5 rounded-xl border border-white/10 bg-white/5 hover:bg-white/10 transition-all flex flex-col justify-between group"
           >
             <div>
@@ -125,7 +162,7 @@ export default function ResumeLandingPage() {
           </Link>
 
           <Link
-            href="/resume/templates"
+            href={getResumeLink("/templates")}
             className="p-5 rounded-xl border border-white/10 bg-white/5 hover:bg-white/10 transition-all flex flex-col justify-between group"
           >
             <div>
@@ -138,7 +175,7 @@ export default function ResumeLandingPage() {
           {categories.map((cat) => (
             <Link
               key={cat.slug}
-              href={`/resume/${cat.slug}`}
+              href={getResumeLink(`/${cat.slug}`)}
               className="p-5 rounded-xl border border-white/5 bg-white/[0.02] hover:bg-white/5 hover:border-white/10 transition-all flex flex-col justify-between group"
             >
               <div>

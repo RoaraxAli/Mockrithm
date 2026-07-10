@@ -1,48 +1,62 @@
-import { Metadata } from "next";
-import { notFound } from "next/navigation";
+"use client";
+
+import { useEffect, useState } from "react";
+import { useParams, notFound } from "next/navigation";
+import { useUser } from "@clerk/nextjs";
 import Link from "next/link";
 import { ArrowLeft, ArrowRight, CheckCircle2, ShieldCheck, Award } from "lucide-react";
 import { RESUME_LANDING_LIST } from "@/lib/resumeData";
 
-interface TopicPageProps {
-  params: Promise<{
-    topic: string;
-  }>;
-}
+export default function ResumeTopicPage() {
+  const params = useParams();
+  const topic = params?.topic as string;
+  const config = RESUME_LANDING_LIST[topic];
+  
+  const { isSignedIn, isLoaded } = useUser();
+  const [isSubdomain, setIsSubdomain] = useState(false);
 
-// Generate dynamic metadata for SEO compliance
-export async function generateMetadata({ params }: TopicPageProps): Promise<Metadata> {
-  const resolvedParams = await params;
-  const config = RESUME_LANDING_LIST[resolvedParams.topic];
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      setIsSubdomain(window.location.hostname.startsWith("resume."));
+    }
+  }, []);
 
-  if (!config) {
-    return {
-      title: "Not Found | Mockrithm Resume",
-      description: "Niche page not found."
-    };
-  }
-
-  return {
-    title: config.title,
-    description: config.description,
-    keywords: config.keywords,
-  };
-}
-
-export default async function ResumeTopicPage({ params }: TopicPageProps) {
-  const resolvedParams = await params;
-  const config = RESUME_LANDING_LIST[resolvedParams.topic];
+  // Redirect if already logged in
+  useEffect(() => {
+    if (isLoaded && isSignedIn) {
+      window.location.href = "https://mockrithm.me/user/resume";
+    }
+  }, [isSignedIn, isLoaded]);
 
   if (!config) {
     notFound();
   }
 
+  const getResumeHubLink = () => {
+    if (isSubdomain) {
+      return "/";
+    }
+    return "/resume";
+  };
+
   return (
-    <div className="min-h-screen bg-[#07131e] text-white flex flex-col font-sans selection:bg-white selection:text-black">
+    <div className="relative min-h-screen bg-[#07131e] text-white flex flex-col font-sans selection:bg-white selection:text-black overflow-hidden">
+      {/* Fullscreen Looping Background Video */}
+      <video
+        autoPlay
+        loop
+        muted
+        playsInline
+        className="absolute inset-0 w-full h-full object-cover z-0"
+        src="https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260314_131748_f2ca2a28-fed7-44c8-b9a9-bd9acdd5ec31.mp4"
+      />
+      {/* Dark overlay for text readability */}
+      <div className="absolute inset-0 bg-black/40 z-[1]" />
+
       {/* Navigation Header */}
       <nav className="relative z-10 w-full max-w-7xl mx-auto px-6 md:px-8 py-5 flex items-center justify-between">
         <Link
-          href="/resume"
+          href={getResumeHubLink()}
           className="text-xs font-semibold uppercase tracking-wider text-white/50 hover:text-white transition-colors flex items-center gap-2"
         >
           <ArrowLeft className="size-3" />
@@ -52,6 +66,7 @@ export default async function ResumeTopicPage({ params }: TopicPageProps) {
         <span
           className="text-2xl md:text-3xl tracking-tight text-white select-none cursor-pointer"
           style={{ fontFamily: "'Instrument Serif', serif" }}
+          onClick={() => { window.location.href = "https://mockrithm.me"; }}
         >
           Mockrithm<sup className="text-[10px] align-super">®</sup>
         </span>
