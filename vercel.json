@@ -43,6 +43,17 @@
       ],
       "destination": "https://blog.mockrithm.me",
       "permanent": false
+    },
+    {
+      "source": "/resume",
+      "has": [
+        {
+          "type": "host",
+          "value": "mockrithm.me"
+        }
+      ],
+      "destination": "https://resume.mockrithm.me",
+      "permanent": false
     }
   ],
   "rewrites": [
@@ -115,6 +126,26 @@
         }
       ],
       "destination": "/blogs/:path*"
+    },
+    {
+      "source": "/",
+      "has": [
+        {
+          "type": "host",
+          "value": "resume.mockrithm.me"
+        }
+      ],
+      "destination": "/resume"
+    },
+    {
+      "source": "/:path*",
+      "has": [
+        {
+          "type": "host",
+          "value": "resume.mockrithm.me"
+        }
+      ],
+      "destination": "/resume/:path*"
     }
   ]
 }

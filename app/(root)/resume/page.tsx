@@ -1,0 +1,166 @@
+"use client";
+
+import Link from "next/link";
+import { ArrowRight, FileText, CheckCircle, Shield, Award, Layout, Zap, Database } from "lucide-react";
+import { RESUME_LANDING_LIST } from "@/lib/resumeData";
+
+export default function ResumeLandingPage() {
+  const handleCTAClick = () => {
+    window.location.href = "https://accounts.mockrithm.me/sign-up";
+  };
+
+  const categories = Object.values(RESUME_LANDING_LIST).filter(
+    (item) => item.slug !== "ats-checker" && item.slug !== "templates"
+  );
+
+  return (
+    <div className="min-h-screen bg-[#07131e] text-white flex flex-col font-sans selection:bg-white selection:text-black">
+      {/* Cinematic Header/Navbar */}
+      <nav className="relative z-10 w-full max-w-7xl mx-auto px-6 md:px-8 py-5 flex items-center justify-between">
+        <span
+          className="text-2xl md:text-3xl tracking-tight text-white select-none cursor-pointer"
+          style={{ fontFamily: "'Instrument Serif', serif" }}
+          onClick={() => { window.location.href = "https://mockrithm.me"; }}
+        >
+          Mockrithm<sup className="text-[10px] align-super">®</sup>
+        </span>
+
+        <div className="hidden md:flex items-center gap-8 text-sm font-medium">
+          <Link href="https://mockrithm.me" className="text-white/60 hover:text-white transition-colors duration-200">
+            Home
+          </Link>
+          <a href="#niche-resumes" className="text-white/60 hover:text-white transition-colors duration-200">
+            Role Profiles
+          </a>
+          <Link href="https://games.mockrithm.me" className="text-white/60 hover:text-white transition-colors duration-200">
+            Games
+          </Link>
+          <Link href="https://docs.mockrithm.me" className="text-white/60 hover:text-white transition-colors duration-200">
+            Docs
+          </Link>
+        </div>
+
+        <button
+          onClick={handleCTAClick}
+          className="liquid-glass rounded-full px-5 py-2 text-sm text-white font-medium hover:scale-[1.03] transition-all duration-300 shadow-lg border-none outline-none cursor-pointer"
+        >
+          Begin Journey
+        </button>
+      </nav>
+
+      {/* Hero Section */}
+      <header className="relative flex-1 flex flex-col items-center justify-center text-center px-6 pt-24 pb-20 max-w-5xl mx-auto w-full z-10">
+        <h1
+          className="text-5xl sm:text-7xl md:text-[5.5rem] leading-[1] tracking-[-2px] font-normal text-white animate-fade-rise"
+          style={{ fontFamily: "'Instrument Serif', serif" }}
+        >
+          Build resumes that pass <br />
+          <em className="not-italic text-white/60">ATS filters automatically.</em>
+        </h1>
+
+        <p className="text-white/60 text-base sm:text-lg max-w-2xl mt-6 leading-relaxed animate-fade-rise-delay">
+          Stop getting rejected by applicant tracking software. Write structural, single-page, parsing-safe PDF resumes with our production-grade compiler.
+        </p>
+
+        <div className="flex flex-col sm:flex-row gap-4 mt-10 animate-fade-rise-delay-2">
+          <button
+            onClick={handleCTAClick}
+            className="liquid-glass rounded-full px-12 py-4 text-base text-white font-medium hover:scale-[1.03] transition-all duration-300 shadow-xl border-none outline-none cursor-pointer"
+          >
+            Start Building Free
+          </button>
+          <Link
+            href="/resume/ats-checker"
+            className="border border-white/10 hover:border-white/20 bg-white/5 hover:bg-white/10 transition-all rounded-full px-10 py-4 text-base text-white font-medium flex items-center justify-center gap-2"
+          >
+            Scan Existing Resume
+            <ArrowRight className="size-4" />
+          </Link>
+        </div>
+      </header>
+
+      {/* Features Grid */}
+      <section className="max-w-7xl mx-auto px-6 md:px-8 py-20 w-full grid grid-cols-1 md:grid-cols-3 gap-8 relative z-10">
+        <div className="p-8 rounded-2xl border border-white/5 bg-white/[0.02] backdrop-blur-md">
+          <Layout className="size-8 text-white/80 mb-4" />
+          <h3 className="text-lg font-bold mb-2">10+ Verified Templates</h3>
+          <p className="text-white/60 text-sm leading-relaxed">
+            Beautiful single-column structures engineered to preserve layout parsing logic during automated tracking loops.
+          </p>
+        </div>
+
+        <div className="p-8 rounded-2xl border border-white/5 bg-white/[0.02] backdrop-blur-md">
+          <Zap className="size-8 text-white/80 mb-4" />
+          <h3 className="text-lg font-bold mb-2">Instant ATS Diagnosis</h3>
+          <p className="text-white/60 text-sm leading-relaxed">
+            Get parsed structure feedback, calculate semantic match density scores, and discover missing target keywords instantly.
+          </p>
+        </div>
+
+        <div className="p-8 rounded-2xl border border-white/5 bg-white/[0.02] backdrop-blur-md">
+          <Database className="size-8 text-white/80 mb-4" />
+          <h3 className="text-lg font-bold mb-2">Git Parity & Projects</h3>
+          <p className="text-white/60 text-sm leading-relaxed">
+            Directly connect your GitHub repository to pull live projects and format technical achievements with metrics automatically.
+          </p>
+        </div>
+      </section>
+
+      {/* Subpage Niche Link List */}
+      <section id="niche-resumes" className="max-w-7xl mx-auto px-6 md:px-8 py-16 w-full border-t border-white/5 relative z-10">
+        <h2 className="text-3xl font-normal text-center mb-12" style={{ fontFamily: "'Instrument Serif', serif" }}>
+          Targeted Lead Roles & Configurations
+        </h2>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+          <Link
+            href="/resume/ats-checker"
+            className="p-5 rounded-xl border border-white/10 bg-white/5 hover:bg-white/10 transition-all flex flex-col justify-between group"
+          >
+            <div>
+              <span className="text-[10px] font-bold uppercase tracking-wider text-white/50">Scanner</span>
+              <h3 className="text-base font-bold mt-1 text-white group-hover:text-white">ATS Checker</h3>
+            </div>
+            <ArrowRight className="size-4 text-white/40 group-hover:translate-x-1 transition-transform mt-4 align-self-end" />
+          </Link>
+
+          <Link
+            href="/resume/templates"
+            className="p-5 rounded-xl border border-white/10 bg-white/5 hover:bg-white/10 transition-all flex flex-col justify-between group"
+          >
+            <div>
+              <span className="text-[10px] font-bold uppercase tracking-wider text-white/50">Designs</span>
+              <h3 className="text-base font-bold mt-1 text-white group-hover:text-white">Templates</h3>
+            </div>
+            <ArrowRight className="size-4 text-white/40 group-hover:translate-x-1 transition-transform mt-4 align-self-end" />
+          </Link>
+
+          {categories.map((cat) => (
+            <Link
+              key={cat.slug}
+              href={`/resume/${cat.slug}`}
+              className="p-5 rounded-xl border border-white/5 bg-white/[0.02] hover:bg-white/5 hover:border-white/10 transition-all flex flex-col justify-between group"
+            >
+              <div>
+                <span className="text-[10px] font-bold uppercase tracking-wider text-white/40">Niche Profile</span>
+                <h3 className="text-base font-bold mt-1 text-white/80 group-hover:text-white">{cat.title.split(" | ")[0].split(" Resume ")[0]}</h3>
+              </div>
+              <ArrowRight className="size-4 text-white/30 group-hover:translate-x-1 group-hover:text-white transition-all mt-4 align-self-end" />
+            </Link>
+          ))}
+        </div>
+      </section>
+
+      {/* Self-contained Local Footer */}
+      <footer className="w-full bg-black/40 border-t border-white/5 mt-auto py-8 text-center text-xs text-white/40 relative z-10">
+        <div className="max-w-7xl mx-auto px-6 flex flex-col sm:flex-row items-center justify-between gap-4">
+          <p>© 2026 Mockrithm Inc. All resume builders, scanners, and templates are subject to verification rules.</p>
+          <div className="flex gap-4">
+            <Link href="https://mockrithm.me/privacy-policy" className="hover:text-white transition-colors">Privacy</Link>
+            <Link href="https://mockrithm.me/terms" className="hover:text-white transition-colors">Terms</Link>
+          </div>
+        </div>
+      </footer>
+    </div>
+  );
+}

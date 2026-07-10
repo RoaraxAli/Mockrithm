@@ -80,11 +80,14 @@ const Footer: React.FC<FooterProps> = ({ className = "", isSignedIn = false }) =
                   Product
                 </h4>
                 <div className="flex flex-col gap-2">
-                  <Link href="/#features" className="text-[10.5px] text-zinc-400 hover:text-white font-medium transition-colors">
-                    Features
+                  <Link href="https://resume.mockrithm.me" className="text-[10.5px] text-zinc-400 hover:text-white font-medium transition-colors">
+                    Resume Builder
                   </Link>
-                  <Link href="/#pricing" className="text-[10.5px] text-zinc-400 hover:text-white font-medium transition-colors">
-                    Pricing
+                  <Link href="https://resume.mockrithm.me/ats-checker" className="text-[10.5px] text-zinc-400 hover:text-white font-medium transition-colors">
+                    Resume Analyzer
+                  </Link>
+                  <Link href="https://games.mockrithm.me" className="text-[10.5px] text-zinc-400 hover:text-white font-medium transition-colors">
+                    Coding Games
                   </Link>
                   <Link href="https://docs.mockrithm.me" className="text-[10.5px] text-zinc-400 hover:text-white font-medium transition-colors">
                     Documentation
@@ -145,11 +148,14 @@ const Footer: React.FC<FooterProps> = ({ className = "", isSignedIn = false }) =
                   <Link href="/user/take-interview" className="text-[10.5px] text-zinc-400 hover:text-white font-medium transition-colors">
                     Mock Interviews
                   </Link>
-                  <Link href="/user/resume" className="text-[10.5px] text-zinc-400 hover:text-white font-medium transition-colors">
+                  <Link href="https://resume.mockrithm.me" className="text-[10.5px] text-zinc-400 hover:text-white font-medium transition-colors">
                     Resume Builder
                   </Link>
-                  <Link href="/user/resume" className="text-[10.5px] text-zinc-400 hover:text-white font-medium transition-colors">
+                  <Link href="https://resume.mockrithm.me/ats-checker" className="text-[10.5px] text-zinc-400 hover:text-white font-medium transition-colors">
                     Resume Analyzer
+                  </Link>
+                  <Link href="https://games.mockrithm.me" className="text-[10.5px] text-zinc-400 hover:text-white font-medium transition-colors">
+                    Coding Games
                   </Link>
                 </div>
               </div>
