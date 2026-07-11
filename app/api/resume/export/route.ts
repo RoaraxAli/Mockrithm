@@ -3,10 +3,10 @@ import { getResumeById } from "@/lib/actions/resume.action";
 import puppeteer from "puppeteer";
 import { getCurrentUser } from "@/lib/actions/auth.action";
 import { getTemplateComponent } from "@/components/resume/templates";
-import { renderToStaticMarkup } from "react-dom/server";
 import React from "react";
 
-function compileHtml(parsedData: any) {
+async function compileHtml(parsedData: any) {
+  const { renderToStaticMarkup } = await import("react-dom/server");
   const basics = parsedData?.basics || {};
   const templateId = parsedData?.templateId || "minimal";
   const TemplateComponent = getTemplateComponent(templateId);
@@ -64,7 +64,7 @@ export async function POST(req: NextRequest) {
       dataToCompile = resume.parsedData;
     }
 
-    const htmlContent = compileHtml(dataToCompile);
+    const htmlContent = await compileHtml(dataToCompile);
 
     if (format === "html") {
       return new NextResponse(htmlContent, {
