@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { useDropzone } from "react-dropzone";
 import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
@@ -19,7 +19,15 @@ export default function ResumeUploadWizard({ userId }: { userId: string }) {
   const [isUploading, setIsUploading] = useState(false);
   const [statusText, setStatusText] = useState("");
   const [error, setError] = useState<string | null>(null);
-  const [step, setStep] = useState<1 | 2 | 3 | 4 | 5>(1);
+  const [step, setStep] = useState<1 | 2 | 3 | 4>(1);
+  const [pdfFileUrl, setPdfFileUrl] = useState<string | null>(null);
+
+  // Cleanup object URL on unmount
+  useEffect(() => {
+    return () => {
+      if (pdfFileUrl) URL.revokeObjectURL(pdfFileUrl);
+    };
+  }, [pdfFileUrl]);
 
   // Extracted Data and ATS analysis states
   const [parsedData, setParsedData] = useState<any>(null);
@@ -31,7 +39,13 @@ export default function ResumeUploadWizard({ userId }: { userId: string }) {
   const onDrop = useCallback((acceptedFiles: File[]) => {
     setError(null);
     if (acceptedFiles.length > 0) {
-      setFile(acceptedFiles[0]);
+      const selectedFile = acceptedFiles[0];
+      setFile(selectedFile);
+      const url = URL.createObjectURL(selectedFile);
+      setPdfFileUrl((prev) => {
+        if (prev) URL.revokeObjectURL(prev);
+        return url;
+      });
     }
   }, []);
 
@@ -76,7 +90,7 @@ export default function ResumeUploadWizard({ userId }: { userId: string }) {
       setParsedData(res.parsedData);
       setFileName(res.fileName);
 
-      setStep(3); // Go to Visual Previewing Step
+      setStep(2); // Go to Visual Previewing Step (was step 3)
     } catch (err: any) {
       setError(err.message || "An unexpected error occurred.");
     } finally {
@@ -103,7 +117,7 @@ export default function ResumeUploadWizard({ userId }: { userId: string }) {
 
       const analysis = await scoreRes.json();
       setAtsAnalysis(analysis);
-      setStep(4); // Go to Advanced ATS SIM Step
+      setStep(3); // Go to Advanced ATS SIM Step (was step 4)
     } catch (err: any) {
       setError(err.message || "An unexpected error occurred.");
     } finally {
@@ -191,10 +205,9 @@ export default function ResumeUploadWizard({ userId }: { userId: string }) {
         <div className="flex items-center gap-2.5 sm:gap-4 font-mono text-[9px] sm:text-xs flex-wrap">
           {[
             { s: 1, label: "UPLOAD" },
-            { s: 2, label: "JD TARGET" },
-            { s: 3, label: "VISUAL" },
-            { s: 4, label: "ATS REPORT" },
-            { s: 5, label: "TIER" }
+            { s: 2, label: "VISUAL" },
+            { s: 3, label: "ATS REPORT" },
+            { s: 4, label: "TIER" }
           ].map((item) => (
             <div key={item.s} className="flex items-center gap-2">
               <span className={cn(
@@ -206,7 +219,7 @@ export default function ResumeUploadWizard({ userId }: { userId: string }) {
               <span className={cn("hidden md:inline", step === item.s ? "text-white font-bold" : "text-zinc-500")}>
                 {item.label}
               </span>
-              {item.s < 5 && <div className="w-4 h-[1px] bg-zinc-800" />}
+              {item.s < 4 && <div className="w-4 h-[1px] bg-zinc-800" />}
             </div>
           ))}
         </div>
@@ -269,55 +282,23 @@ export default function ResumeUploadWizard({ userId }: { userId: string }) {
             </div>
           )}
 
-          {step === 2 && (
-            <div className="flex flex-col gap-4 animate-fadeIn">
-              <h3 className="text-[11px] font-mono font-bold text-zinc-400 tracking-[0.2em] uppercase flex items-center gap-2">
-                <Sparkles className="size-4.5 text-white" />
-                TARGET JD CALIBRATION
-              </h3>
-              <p className="text-xs text-zinc-400 leading-relaxed font-semibold">
-                To evaluate ATS score precisely, enter your country and target job requirements.
-              </p>
-
-              <div className="flex flex-col gap-2">
-                <label className="text-[10px] text-zinc-500 font-mono uppercase tracking-wider flex items-center gap-1">
-                  <MapPin className="size-3.5" /> Target / Residence Country
-                </label>
-                <input
-                  type="text"
-                  placeholder="e.g. United States, United Kingdom, Canada"
-                  value={country}
-                  onChange={(e) => setCountry(e.target.value)}
-                  className="bg-zinc-950/80 text-white text-xs rounded-xl p-3 border border-zinc-900 focus:border-zinc-700 outline-none leading-relaxed font-mono"
-                />
-              </div>
-              
-              <div className="flex flex-col gap-2">
-                <label className="text-[10px] text-zinc-500 font-mono uppercase tracking-wider">Job Description / Requirements</label>
-                <textarea
-                  value={jobDescription}
-                  onChange={(e) => setJobDescription(e.target.value)}
-                  placeholder="Paste the job description here..."
-                  rows={8}
-                  className="bg-zinc-950/80 text-white text-xs rounded-xl p-3.5 border border-zinc-900 focus:border-zinc-700 outline-none resize-none placeholder:text-zinc-800 leading-relaxed font-mono"
-                />
-              </div>
-            </div>
-          )}
-
-          {step === 3 && parsedData && (
+          {step === 2 && pdfFileUrl && (
             <div className="flex flex-col gap-4 animate-fadeIn">
               <h3 className="text-[11px] font-mono font-bold text-zinc-400 tracking-[0.2em] uppercase">
-                PIXEL-PERFECT TEMPLATE RENDERING
+                ACTUAL RESUME DOCUMENT PREVIEW
               </h3>
               <p className="text-xs text-zinc-400 leading-relaxed font-semibold">
-                Below is a rendering of the parsed data in our premium ATS minimalist template.
+                Below is the exact PDF document you uploaded.
               </p>
-              <PDFRenderer data={parsedData} />
+              <iframe
+                src={`${pdfFileUrl}#toolbar=0&navpanes=0`}
+                className="w-full bg-white rounded-2xl aspect-[1/1.414] max-h-[800px] border border-white/5"
+                title="Uploaded PDF Resume Preview"
+              />
             </div>
           )}
 
-          {step === 4 && atsAnalysis && (
+          {step === 3 && atsAnalysis && (
             <div className="flex flex-col gap-6 animate-fadeIn">
               <div className="flex flex-col md:flex-row items-center justify-between gap-6 border-b border-zinc-900 pb-6">
                 <div className="flex flex-col gap-1">
@@ -426,7 +407,7 @@ export default function ResumeUploadWizard({ userId }: { userId: string }) {
             </div>
           )}
 
-          {step === 5 && (
+          {step === 4 && (
             <div className="animate-fadeIn">
               <EmbeddedPlanSelector userId={userId} onSelected={handleSaveAndOnboard} />
             </div>
@@ -439,7 +420,7 @@ export default function ResumeUploadWizard({ userId }: { userId: string }) {
           <div className="p-6 backdrop-blur-xl bg-zinc-950/40 border border-zinc-900 rounded-2xl flex flex-col gap-4 shadow-xl">
             <span className="text-[8px] font-mono tracking-widest text-zinc-500 uppercase">// PIPELINE RULES</span>
             <h4 className="text-xs font-mono font-bold text-white uppercase tracking-wider">
-              {step === 1 ? "File Policy" : step === 2 ? "Calibration Policy" : "Simulation Guidance"}
+              {step === 1 ? "File Policy" : "Simulation Guidance"}
             </h4>
             <p className="text-xs text-zinc-400 leading-relaxed font-semibold">
               {step === 1 
@@ -484,7 +465,7 @@ export default function ResumeUploadWizard({ userId }: { userId: string }) {
                   </>
                 ) : (
                   <>
-                    EVALUATE ATS MATCH <ArrowRight className="size-4" />
+                    PROCEED TO ATS EVAL <ArrowRight className="size-4" />
                   </>
                 )}
               </Button>
@@ -501,10 +482,10 @@ export default function ResumeUploadWizard({ userId }: { userId: string }) {
           {step === 3 && (
             <div className="flex flex-col gap-3">
               <Button
-                onClick={() => setStep(2)}
+                onClick={() => setStep(4)}
                 className="w-full h-12 rounded-xl bg-white text-black hover:bg-zinc-200 flex items-center justify-center gap-2 font-mono font-bold text-xs uppercase tracking-wider cursor-pointer"
               >
-                PROCEED TO ATS EVAL <ArrowRight className="size-4" />
+                CHOOSE MEMBERSHIP TIER <ArrowRight className="size-4" />
               </Button>
               <Button
                 onClick={() => setStep(2)}
@@ -518,12 +499,6 @@ export default function ResumeUploadWizard({ userId }: { userId: string }) {
 
           {step === 4 && (
             <div className="flex flex-col gap-3">
-              <Button
-                onClick={() => setStep(5)}
-                className="w-full h-12 rounded-xl bg-white text-black hover:bg-zinc-200 flex items-center justify-center gap-2 font-mono font-bold text-xs uppercase tracking-wider cursor-pointer"
-              >
-                CHOOSE MEMBERSHIP TIER <ArrowRight className="size-4" />
-              </Button>
               <Button
                 onClick={() => setStep(3)}
                 variant="outline"
