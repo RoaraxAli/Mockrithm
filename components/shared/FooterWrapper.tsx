@@ -7,19 +7,19 @@ import Footer from "./Footer";
 
 const FooterWrapper = () => {
   const pathname = usePathname();
-  const [isDocsSubdomain, setIsDocsSubdomain] = useState(false);
+  const [isSubdomain, setIsSubdomain] = useState(false);
   const { isSignedIn } = useUser();
 
   useEffect(() => {
     if (typeof window !== "undefined") {
       const hostname = window.location.hostname;
-      if (hostname.startsWith("docs.")) {
-        setIsDocsSubdomain(true);
+      if (hostname.startsWith("docs.") || hostname.startsWith("resume.") || hostname.startsWith("games.")) {
+        setIsSubdomain(true);
       }
     }
   }, []);
 
-  if (isDocsSubdomain) return null;
+  if (isSubdomain) return null;
   if (!pathname) return null;
 
   // Hide on auth, admin, and active interview pages

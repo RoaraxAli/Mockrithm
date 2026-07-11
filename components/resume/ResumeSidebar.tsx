@@ -24,10 +24,10 @@ export function ResumeSidebar({ onClose }: ResumeSidebarProps) {
   };
 
   const navItems = [
-    { name: "My Resumes", href: "/dashboard", icon: LayoutDashboard },
+    { name: "Resume Builder", href: "/dashboard", icon: LayoutDashboard },
     { name: "Templates", href: "/templates", icon: Sparkles },
-    { name: "ATS Checker", href: "/ats-checker", icon: FileText },
-    { name: "Import PDF", href: "/upload", icon: Upload },
+    { name: "ATS Analyzer", href: "/ats-checker", icon: FileText },
+    { name: "Tailor Engine", href: "/upload", icon: Upload },
   ];
 
   const handleLogout = async () => {

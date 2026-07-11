@@ -26,7 +26,16 @@ export default function AuthLayout({
   const [userTier, setUserTier] = useState<"freemium" | "premium" | "pro" | null>(null);
   const [showPrompt, setShowPrompt] = useState<boolean>(false);
 
-  const [isDocsSubdomain, setIsDocsSubdomain] = useState(false);
+  const [isSubdomain, setIsSubdomain] = useState(false);
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const hostname = window.location.hostname;
+      if (hostname.startsWith("docs.") || hostname.startsWith("resume.") || hostname.startsWith("games.")) {
+        setIsSubdomain(true);
+      }
+    }
+  }, []);
 
   const pathname = usePathname();
   const router = useRouter();
@@ -48,7 +57,7 @@ export default function AuthLayout({
       "/reset-password",
     ].includes(pathname);
 
-  const shouldShowNavbar = !hideNavbar && !isDocsSubdomain;
+  const shouldShowNavbar = !hideNavbar && !isSubdomain;
 
   // --- Call States ---
   const [activeCallDoc, setActiveCallDoc] = useState<any>(null);
@@ -526,7 +535,7 @@ export default function AuthLayout({
         <Navbar userId={userId!} userName={userName || "User"} userRole={userRole} />
       )}
       {children}
-      {showPrompt && userId && (
+      {showPrompt && userId && !isSubdomain && (
         <PlanSelectionModal
           userId={userId}
           userTier={userTier}
