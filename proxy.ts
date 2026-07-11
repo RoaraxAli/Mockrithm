@@ -28,10 +28,7 @@ export default clerkMiddleware(async (auth, req) => {
 
   console.log(`[Proxy Log] Host: ${host} | Path: ${req.nextUrl.pathname}`);
 
-  // 📝 Bypass Clerk auth for resume subdomain requests (handled by vercel.json rewrites)
-  if (host === "resume.mockrithm.me" || host.includes("resume.mockrithm.me")) {
-    return NextResponse.next();
-  }
+
 
   // 🔐 Redirect auth routes on apex domain to the accounts subdomain
   if (isAuthRoute(req) && (host === "mockrithm.me" || host === "www.mockrithm.me")) {
