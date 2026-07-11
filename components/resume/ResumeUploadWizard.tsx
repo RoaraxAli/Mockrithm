@@ -167,7 +167,8 @@ export default function ResumeUploadWizard({ userId }: { userId: string }) {
         throw new Error(saveRes.error || "Failed to save profile details.");
       }
 
-      router.push(`/user/dashboard/resume`);
+      const isSubdomain = typeof window !== "undefined" && window.location.hostname.startsWith("resume.");
+      router.push(isSubdomain ? `/dashboard` : `/user/dashboard/resume`);
     } catch (err: any) {
       setError(err.message || "Final save failed.");
       setIsUploading(false);

@@ -22,7 +22,7 @@ export default async function Home() {
 
   if (host.startsWith("resume.")) {
     if (user) {
-      redirect("/user/resume");
+      redirect("/dashboard");
     }
     return <ResumeLandingPage />;
   }

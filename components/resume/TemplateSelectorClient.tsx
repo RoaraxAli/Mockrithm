@@ -517,10 +517,11 @@ export default function TemplateSelectorClient({ userId }: Props) {
       const res = await createResumeFromTemplate(userId, templateId);
       if (res.success && res.resumeId) {
         toast.success("Workspace loaded successfully!");
+        const isSubdomain = typeof window !== "undefined" && window.location.hostname.startsWith("resume.");
         if (fromOnboarding) {
-          router.push(`/user/dashboard/resume/workspace/${res.resumeId}?from=onboarding`);
+          router.push(isSubdomain ? `/workspace/${res.resumeId}?from=onboarding` : `/user/dashboard/resume/workspace/${res.resumeId}?from=onboarding`);
         } else {
-          router.push(`/user/dashboard/resume/workspace/${res.resumeId}`);
+          router.push(isSubdomain ? `/workspace/${res.resumeId}` : `/user/dashboard/resume/workspace/${res.resumeId}`);
         }
       } else {
         throw new Error(res.error || "Failed to create resume template");
