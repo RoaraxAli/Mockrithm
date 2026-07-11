@@ -30,10 +30,7 @@ export default clerkMiddleware(async (auth, req) => {
 
   // 📝 Bypass Clerk auth for resume subdomain requests (handled by vercel.json rewrites)
   if (host === "resume.mockrithm.me" || host.includes("resume.mockrithm.me")) {
-    // Log the protected state to see if it triggers the loop
-    const isProtected = isProtectedRoute(req);
-    console.log(`[Proxy Log Subdomain] Path: ${req.nextUrl.pathname} | isProtected: ${isProtected}`);
-    // Temporarily allow middleware to run so we can inspect session cookies
+    return NextResponse.next();
   }
 
   // 🔐 Redirect auth routes on apex domain to the accounts subdomain
