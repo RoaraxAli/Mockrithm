@@ -22,7 +22,7 @@ export default function ResumeSubdomainLayout({
   // Determine if we should show the custom sidebar
   // (Only if signed in, and not on the guest landing hub or dynamic landing topic pages)
   const isLanding = pathname === "/resume" || pathname === "/resume/" || pathname.split("/").length <= 3;
-  const isDashboardOrTool = pathname.includes("/dashboard") || pathname.includes("/templates") || pathname.includes("/ats-checker") || pathname.includes("/upload") || pathname.includes("/workspace") || pathname.includes("/analysis");
+  const isDashboardOrTool = pathname.includes("/dashboard") || pathname.includes("/templates");
   const showSidebar = isSignedIn && isDashboardOrTool;
 
   if (!showSidebar) {

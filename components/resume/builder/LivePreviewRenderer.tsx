@@ -85,7 +85,7 @@ export default function LivePreviewRenderer() {
       </div>
 
       {/* Frame Container */}
-      <div className="flex-1 w-full bg-zinc-950 border border-white/5 rounded-xl overflow-hidden relative shadow-2xl">
+      <div className="flex-1 w-full max-w-[620px] mx-auto aspect-[1/1.414] bg-zinc-950 border border-white/5 rounded-xl overflow-hidden relative shadow-2xl">
         {error && (
           <div className="absolute inset-0 flex items-center justify-center text-xs font-mono text-red-400/80">
             {error}
@@ -101,7 +101,7 @@ export default function LivePreviewRenderer() {
 
         {pdfUrl && (
           <iframe
-            src={`${pdfUrl}#toolbar=0&navpanes=0`}
+            src={`${pdfUrl}#toolbar=0&navpanes=0&view=FitH`}
             className="w-full h-full border-none bg-white rounded-xl"
             title="Resume Live PDF Preview"
           />

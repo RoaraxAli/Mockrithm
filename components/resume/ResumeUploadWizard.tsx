@@ -291,7 +291,7 @@ export default function ResumeUploadWizard({ userId }: { userId: string }) {
                 Below is the exact PDF document you uploaded.
               </p>
               <iframe
-                src={`${pdfFileUrl}#toolbar=0&navpanes=0`}
+                src={`${pdfFileUrl}#toolbar=0&navpanes=0&view=FitH`}
                 className="w-full bg-white rounded-2xl aspect-[1/1.414] max-h-[800px] border border-white/5"
                 title="Uploaded PDF Resume Preview"
               />
