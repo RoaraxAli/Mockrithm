@@ -402,7 +402,7 @@ function compileHtml(parsedData: any) {
 
 export async function POST(req: NextRequest) {
   try {
-    const { resumeId, userId, parsedData } = await req.json();
+    const { resumeId, userId, parsedData, format } = await req.json();
 
     if (!resumeId || !userId) {
       return NextResponse.json({ error: "Missing parameters" }, { status: 400 });
@@ -426,6 +426,15 @@ export async function POST(req: NextRequest) {
     }
 
     const htmlContent = compileHtml(dataToCompile);
+
+    if (format === "html") {
+      return new NextResponse(htmlContent, {
+        status: 200,
+        headers: {
+          "Content-Type": "text/html",
+        },
+      });
+    }
 
     // Launch headless browser with Puppeteer
     const browser = await puppeteer.launch({
