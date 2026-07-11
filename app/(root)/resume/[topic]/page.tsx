@@ -7,12 +7,16 @@ import Link from "next/link";
 import { ArrowLeft, ArrowRight, CheckCircle2, ShieldCheck, Award } from "lucide-react";
 import { RESUME_LANDING_LIST } from "@/lib/resumeData";
 
+import ResumeUploadWizard from "@/components/resume/ResumeUploadWizard";
+import TemplateSelectorClient from "@/components/resume/TemplateSelectorClient";
+import ResumeSubdomainLayout from "../layout";
+
 export default function ResumeTopicPage() {
   const params = useParams();
   const topic = params?.topic as string;
   const config = RESUME_LANDING_LIST[topic];
   
-  const { isSignedIn, isLoaded } = useUser();
+  const { isSignedIn, isLoaded, user } = useUser();
   const [isSubdomain, setIsSubdomain] = useState(false);
 
   useEffect(() => {
@@ -21,15 +25,54 @@ export default function ResumeTopicPage() {
     }
   }, []);
 
-  // Redirect if already logged in
+  // Redirect if already logged in (only for marketing pages, not checker/templates)
   useEffect(() => {
     if (isLoaded && isSignedIn) {
-      window.location.href = "/dashboard";
+      if (topic !== "ats-checker" && topic !== "templates") {
+        window.location.href = "/dashboard";
+      }
     }
-  }, [isSignedIn, isLoaded]);
+  }, [isSignedIn, isLoaded, topic]);
 
   if (!config) {
     notFound();
+  }
+
+  // Render actual tools for logged-in users
+  if (isLoaded && isSignedIn && user) {
+    if (topic === "ats-checker") {
+      return (
+        <ResumeSubdomainLayout>
+          <div className="flex flex-col gap-6 w-full py-6">
+            <div className="flex flex-col gap-2 mb-8 text-center max-w-xl mx-auto">
+              <h2 className="text-4xl font-normal text-white" style={{ fontFamily: "'Instrument Serif', serif" }}>
+                ATS Analyzer & Scanner
+              </h2>
+              <p className="text-sm text-zinc-400">
+                Upload your PDF to extract profile details and perform instant ATS keyword matching.
+              </p>
+            </div>
+            <ResumeUploadWizard userId={user.id} />
+          </div>
+        </ResumeSubdomainLayout>
+      );
+    }
+    if (topic === "templates") {
+      return (
+        <ResumeSubdomainLayout>
+          <div className="flex flex-col gap-6 w-full py-12 px-4">
+            <div className="flex flex-col gap-2 mb-8">
+              <span className="text-[10px] font-mono tracking-[0.2em] text-zinc-400 uppercase">STEP 02 // VISUAL LAYOUT</span>
+              <h2 className="text-4xl font-normal text-white" style={{ fontFamily: "'Instrument Serif', serif" }}>Select a Resume Template</h2>
+              <p className="text-sm text-zinc-400">
+                Choose a layout optimized for applicant tracking systems (ATS). You can change this template at any time in the editor.
+              </p>
+            </div>
+            <TemplateSelectorClient userId={user.id} />
+          </div>
+        </ResumeSubdomainLayout>
+      );
+    }
   }
 
   const getResumeHubLink = () => {
