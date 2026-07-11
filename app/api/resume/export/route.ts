@@ -402,7 +402,7 @@ function compileHtml(parsedData: any) {
 
 export async function POST(req: NextRequest) {
   try {
-    const { resumeId, userId } = await req.json();
+    const { resumeId, userId, parsedData } = await req.json();
 
     if (!resumeId || !userId) {
       return NextResponse.json({ error: "Missing parameters" }, { status: 400 });
@@ -416,12 +416,16 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const resume = await getResumeById(userId, resumeId);
-    if (!resume) {
-      return NextResponse.json({ error: "Resume not found" }, { status: 404 });
+    let dataToCompile = parsedData;
+    if (!dataToCompile) {
+      const resume = await getResumeById(userId, resumeId);
+      if (!resume) {
+        return NextResponse.json({ error: "Resume not found" }, { status: 404 });
+      }
+      dataToCompile = resume.parsedData;
     }
 
-    const htmlContent = compileHtml(resume.parsedData);
+    const htmlContent = compileHtml(dataToCompile);
 
     // Launch headless browser with Puppeteer
     const browser = await puppeteer.launch({
@@ -445,11 +449,13 @@ export async function POST(req: NextRequest) {
 
     await browser.close();
 
+    const resumeName = dataToCompile?.basics?.name || "resume";
+
     return new NextResponse(pdfBuffer, {
       status: 200,
       headers: {
         "Content-Type": "application/pdf",
-        "Content-Disposition": `attachment; filename="${resume.parsedData.basics.name || "resume"}.pdf"`,
+        "Content-Disposition": `attachment; filename="${resumeName}.pdf"`,
         "Content-Length": pdfBuffer.length.toString()
       }
     });

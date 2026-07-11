@@ -41,21 +41,8 @@ export default function ResumeTopicPage() {
   // Render actual tools for logged-in users
   if (isLoaded && isSignedIn && user) {
     if (topic === "ats-checker") {
-      return (
-        <ResumeSubdomainLayout>
-          <div className="flex flex-col gap-6 w-full py-6">
-            <div className="flex flex-col gap-2 mb-8 text-center max-w-xl mx-auto">
-              <h2 className="text-4xl font-normal text-white" style={{ fontFamily: "'Instrument Serif', serif" }}>
-                ATS Analyzer & Scanner
-              </h2>
-              <p className="text-sm text-zinc-400">
-                Upload your PDF to extract profile details and perform instant ATS keyword matching.
-              </p>
-            </div>
-            <ResumeUploadWizard userId={user.id} />
-          </div>
-        </ResumeSubdomainLayout>
-      );
+      window.location.href = "/upload";
+      return null;
     }
     if (topic === "templates") {
       return (

@@ -26,8 +26,7 @@ export function ResumeSidebar({ onClose }: ResumeSidebarProps) {
   const navItems = [
     { name: "Resume Builder", href: "/dashboard", icon: LayoutDashboard },
     { name: "Templates", href: "/templates", icon: Sparkles },
-    { name: "ATS Analyzer", href: "/ats-checker", icon: FileText },
-    { name: "Tailor Engine", href: "/upload", icon: Upload },
+    { name: "ATS & Tailor", href: "/upload", icon: Upload },
   ];
 
   const handleLogout = async () => {
