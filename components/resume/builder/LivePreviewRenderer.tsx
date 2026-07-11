@@ -9,8 +9,8 @@ export default function LivePreviewRenderer() {
   const TemplateComponent = getTemplateComponent(templateId);
 
   return (
-    <div className="w-full h-[85vh] overflow-y-auto rounded-xl border border-white/5 bg-zinc-950/40 p-4 shadow-2xl relative select-text">
-      <div className="max-w-[620px] mx-auto aspect-[1/1.414] rounded-xl shadow-2xl overflow-hidden border border-white/5">
+    <div className="w-full h-[85vh] overflow-y-auto bg-zinc-950/40 relative select-text flex justify-center items-start">
+      <div className="w-full max-w-[620px]">
         <TemplateComponent data={parsedData} templateId={templateId} />
       </div>
     </div>
