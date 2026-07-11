@@ -807,7 +807,7 @@ export default function ResumeWorkspace({ initialResume }: Props) {
             </Link>
           ) : (
             <Link 
-              href="/user/resume"
+              href="/dashboard"
               className="size-9 rounded-full border border-slate-800/80 bg-slate-900/30 flex items-center justify-center text-slate-400 hover:text-white hover:border-slate-700 transition-all shadow-sm"
             >
               <ArrowLeft className="size-4" />
