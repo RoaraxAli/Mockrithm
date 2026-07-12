@@ -189,14 +189,7 @@
   * {
     @apply border-border outline-ring/50;
   }
-  html {
-    overflow-y: auto;
-  }
-  @supports (overflow-y: overlay) {
-    html {
-      overflow-y: overlay;
-    }
-  }
+
   .custom-cursor-active,
   .custom-cursor-active * {
     cursor: none !important;
