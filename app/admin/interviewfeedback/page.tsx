@@ -1,10 +1,8 @@
 "use client"
 
 import { useEffect, useState } from "react"
-import { collection, getDocs, query, orderBy, deleteDoc, doc } from "firebase/firestore"
-import { db } from "@/firebase/client"
+import { getInterviewFeedbacks, deleteInterviewFeedback } from "@/lib/actions/admin.action";
 import { useRouter } from "next/navigation"
-import { getDoc, doc as docRef } from "firebase/firestore";
 
 import {
   Search,
@@ -58,57 +56,41 @@ export default function InterviewFeedbackPage() {
   const [feedbacks, setFeedbacks] = useState<Feedback[]>([])
   const [sortBy, setSortBy] = useState("newest")
   const [selectedFeedback, setSelectedFeedback] = useState<Feedback | null>(null)
+  const [loading, setLoading] = useState(true);
   const router = useRouter()
 
   useEffect(() => {
-    const fetchFeedbacks = async () => {
+    const fetchFeedback = async () => {
       try {
-        const q = query(collection(db, "interviewsfeedback"), orderBy("createdAt", "desc"));
-        const snap = await getDocs(q);
-
-        const feedbackWithUserInfo = await Promise.all(
-          snap.docs.map(async (doc) => {
-            const data = doc.data();
-            let userInfo = { name: "Unknown", email: "unknown@example.com" };
-
-            if (data.userId) {
-              try {
-                const { getUserProfile } = await import("@/lib/actions/auth.action");
-                const result = await getUserProfile(data.userId);
-                if (result && result.success) {
-                  userInfo = {
-                    name: result.name || "Unknown",
-                    email: result.email || "unknown@example.com",
-                  };
-                }
-              } catch (err) {
-                console.warn("Failed to fetch user info", err);
-              }
-            }
-
-            return {
-              id: doc.id,
-              candidateName: data.candidateName || userInfo.name,
-              email: data.email || userInfo.email,
-              interviewer: data.interviewer || "MOCKRITHM",
-              score: data.totalScore ?? "N/A",
-              createdAt: data.createdAt?.toDate
-                ? data.createdAt.toDate().toLocaleDateString()
-                : data.createdAt || "N/A",
-              finalAssessment: data.finalAssessment || "",
-              areasForImprovement: data.areasForImprovement || [],
-              categoryScores: data.categoryScores || [],
-            };
-          })
-        );
-
-        setFeedbacks(feedbackWithUserInfo);
+        const res = await getInterviewFeedbacks();
+        if (res.success && res.data) {
+          const feedbackData = res.data.map((data: any) => ({
+            id: data.id,
+            candidateName: data.candidateName || "Unknown Candidate",
+            email: data.email || "No Email Provided",
+            interviewer: data.interviewer || "MOCKRITHM",
+            score: data.score || 0,
+            createdAt: data.createdAt
+              ? new Date(data.createdAt).toLocaleDateString("en-US", {
+                  year: "numeric",
+                  month: "short",
+                  day: "numeric",
+                })
+              : "Unknown Date",
+            finalAssessment: data.finalAssessment || "",
+            areasForImprovement: data.areasForImprovement || [],
+            categoryScores: data.categoryScores || [],
+          }));
+          setFeedbacks(feedbackData);
+        }
       } catch (err) {
         console.error("Error fetching interview feedback:", err);
+      } finally {
+        setLoading(false);
       }
     };
 
-    fetchFeedbacks()
+    fetchFeedback();
 
     // GSAP Animations
     gsap.fromTo(
@@ -160,14 +142,21 @@ export default function InterviewFeedbackPage() {
       return 0
     })
 
-  const handleDeleteFeedback = async (id: string) => {
-    try {
-      await deleteDoc(doc(db, "interviewsfeedback", id))
-      setFeedbacks(feedbacks.filter((f) => f.id !== id))
-    } catch (err) {
-      console.error("Failed to delete feedback:", err)
+  const handleDelete = async (id: string) => {
+    if (confirm("Are you sure you want to delete this feedback?")) {
+      try {
+        const res = await deleteInterviewFeedback(id);
+        if (res.success) {
+          setFeedbacks((prev) => prev.filter((f) => f.id !== id));
+          if (selectedFeedback?.id === id) {
+            setSelectedFeedback(null);
+          }
+        }
+      } catch (err) {
+        console.error("Error deleting feedback:", err);
+      }
     }
-  }
+  };
 
   const getScoreColor = (score: number | string) => {
     const numScore = Number(score)
@@ -475,7 +464,7 @@ export default function InterviewFeedbackPage() {
                             <DropdownMenuContent align="end" className="bg-black/95 backdrop-blur-sm border-white/10">
                               <DropdownMenuItem
                                 className="text-red-400 hover:bg-white/5 focus:bg-white/5 cursor-pointer"
-                                onClick={() => handleDeleteFeedback(feedback.id)}
+                                onClick={() => handleDelete(feedback.id)}
                               >
                                 <Trash2 className="mr-2 h-4 w-4" />
                                 Delete Feedback

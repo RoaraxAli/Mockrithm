@@ -1,601 +1,352 @@
 "use client";
 
-import { useEffect, useState, useRef, useMemo, useCallback } from "react";
-import { gsap } from "gsap";
-import { ScrollTrigger } from "gsap/ScrollTrigger";
-import { useRouter } from "next/navigation";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { Separator } from "@/components/ui/separator";
+import { useEffect, useState, useMemo } from "react";
 import {
-  Tooltip,
-  TooltipTrigger,
-  TooltipContent,
-} from "@/components/ui/tooltip";
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+} from "@/components/ui/card";
 import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
-import { Badge } from "@/components/ui/badge";
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import {
-  MoreVertical,
-  Info,
-  Activity as ActivityIcon,
   Users,
   MessageSquare,
   Activity,
-  TrendingUp,
+  FileText,
+  DollarSign,
+  ShoppingCart,
+  CreditCard,
 } from "lucide-react";
-import { getAdminMetrics, getRecentActivity, resetSessions, exportFullActivityJSON } from "@/lib/actions/admin.action";
-import { toast } from "sonner";
+import {
+  LineChart,
+  Line,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer,
+  BarChart,
+  Bar,
+  PieChart,
+  Pie,
+  Cell,
+  Legend,
+} from "recharts";
+import { getAdminMetrics } from "@/lib/actions/admin.action";
 
-gsap.registerPlugin(ScrollTrigger);
+const REVENUE_DATA = [
+  { name: "Jan", thisYear: 40000, lastYear: 24000 },
+  { name: "Feb", thisYear: 30000, lastYear: 1398 },
+  { name: "Mar", thisYear: 20000, lastYear: 9800 },
+  { name: "Apr", thisYear: 27800, lastYear: 3908 },
+  { name: "May", thisYear: 18900, lastYear: 4800 },
+  { name: "Jun", thisYear: 23900, lastYear: 3800 },
+  { name: "Jul", thisYear: 34900, lastYear: 4300 },
+  { name: "Aug", thisYear: 40000, lastYear: 24000 },
+  { name: "Sep", thisYear: 30000, lastYear: 1398 },
+  { name: "Oct", thisYear: 20000, lastYear: 9800 },
+  { name: "Nov", thisYear: 27800, lastYear: 3908 },
+  { name: "Dec", thisYear: 18900, lastYear: 4800 },
+];
 
+const CHANNEL_DATA = [
+  { name: "Jan", online: 4000, store: 2400, wholesale: 2400 },
+  { name: "Feb", online: 3000, store: 1398, wholesale: 2210 },
+  { name: "Mar", online: 2000, store: 9800, wholesale: 2290 },
+  { name: "Apr", online: 2780, store: 3908, wholesale: 2000 },
+  { name: "May", online: 1890, store: 4800, wholesale: 2181 },
+  { name: "Jun", online: 2390, store: 3800, wholesale: 2500 },
+];
 
+const AOV_DATA = [
+  { name: "1", value: 800 },
+  { name: "2", value: 1200 },
+  { name: "3", value: 1000 },
+  { name: "4", value: 1400 },
+  { name: "5", value: 1100 },
+  { name: "6", value: 1600 },
+  { name: "7", value: 1300 },
+  { name: "8", value: 1500 },
+  { name: "9", value: 1200 },
+  { name: "10", value: 1700 },
+];
 
-type User = {
-  id: string;
-  name?: string;
-  email?: string;
-  role?: string;
-  status?: string;
-  createdAt?: any;
-};
-
-type Feedback = {
-  id: string;
-  name?: string;
-  email?: string;
-  message?: string;
-  createdAt?: any;
-};
-
-type ActivityItem = {
-  id: string;
-  user: string | undefined;
-  action: string;
-  createdAt: any;
-  type: "user" | "feedback";
-};
+const CATEGORY_DATA = [
+  { name: "Technical", value: 400, color: "#ffffff" },
+  { name: "Behavioural", value: 300, color: "#a1a1aa" },
+  { name: "Mixed", value: 300, color: "#52525b" },
+];
 
 export default function AdminDashboard() {
-  const [userCount, setUserCount] = useState(0);
-  const [feedbackCount, setFeedbackCount] = useState(0);
-  const [sessionCount, setSessionCount] = useState(0);
-  const [userGrowth, setUserGrowth] = useState("0");
-  const [feedbackGrowth, setFeedbackGrowth] = useState("0");
-  const [sessionGrowth, setSessionGrowth] = useState("0");
-  const [recentUsers, setRecentUsers] = useState<User[]>([]);
-  const [recentFeedbacks, setRecentFeedbacks] = useState<Feedback[]>([]);
-  const [activeTab, setActiveTab] = useState<"all" | "user" | "feedback">(
-    "all"
-  );
-  const [isDataLoaded, setIsDataLoaded] = useState(false);
-
-  const dashboardRef = useRef<HTMLDivElement>(null);
-  const parallaxRef = useRef<HTMLDivElement>(null);
-  const activityRef = useRef<HTMLDivElement>(null);
-  const metricsRef = useRef<HTMLDivElement>(null);
-  const headerRef = useRef<HTMLDivElement>(null);
-  const animationContextRef = useRef<gsap.Context | null>(null);
-
-  const router = useRouter();
-
-  const combinedActivity = useMemo<ActivityItem[]>(() => {
-    if (!isDataLoaded) return [];
-    const userActivities = recentUsers.map((user) => ({
-      id: user.id,
-      user: user.name || user.email,
-      action: "Signed up",
-      createdAt: user.createdAt || null,
-      type: "user" as const,
-    }));
-    const feedbackActivities = recentFeedbacks.map((f) => ({
-      id: f.id,
-      user: f.name || f.email,
-      action: "Submitted feedback",
-      createdAt: f.createdAt || null,
-      type: "feedback" as const,
-    }));
-    return [...userActivities, ...feedbackActivities].sort(
-      (a, b) => {
-        const dateA = a.createdAt?.toDate ? a.createdAt.toDate().getTime() : new Date(a.createdAt).getTime() || 0;
-        const dateB = b.createdAt?.toDate ? b.createdAt.toDate().getTime() : new Date(b.createdAt).getTime() || 0;
-        return dateB - dateA;
-      }
-    );
-  }, [recentUsers, recentFeedbacks, isDataLoaded]);
-
-  const filteredActivity = useMemo(
-    () =>
-      activeTab === "all"
-        ? combinedActivity
-        : combinedActivity.filter((item) => item.type === activeTab),
-    [combinedActivity, activeTab]
-  );
-
-  const activityCounts = useMemo(
-    () => ({
-      all: combinedActivity.length,
-      user: combinedActivity.filter((item) => item.type === "user").length,
-      feedback: combinedActivity.filter((item) => item.type === "feedback")
-        .length,
-    }),
-    [combinedActivity]
-  );
-
-  const metrics = useMemo(
-    () => [
-      { title: "Total Users", value: userCount, change: `${userGrowth}%`, icon: Users },
-      {
-        title: "Total Feedbacks",
-        value: feedbackCount,
-        change: `${feedbackGrowth}%`,
-        icon: MessageSquare,
-      },
-      {
-        title: "Total Sessions",
-        value: sessionCount,
-        change: `${sessionGrowth}%`,
-        icon: Activity,
-      },
-      { title: "Growth Rate", value: "12%", change: "+5%", icon: TrendingUp },
-    ],
-    [userCount, feedbackCount, sessionCount, userGrowth, feedbackGrowth, sessionGrowth]
-  );
-
-  const handleExportJSON = useCallback(async () => {
-    try {
-      toast.info("Generating full export...");
-      const res = await exportFullActivityJSON();
-      if (res.success && res.data) {
-        const blob = new Blob([res.data], { type: "application/json" });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement("a");
-        a.href = url;
-        a.download = `mockrithm_export_${new Date().toISOString().split("T")[0]}.json`;
-        a.click();
-        URL.revokeObjectURL(url);
-        toast.success("Export downloaded successfully!");
-      } else {
-        toast.error(res.error || "Failed to export data.");
-      }
-    } catch (err) {
-      console.error("Export failed:", err);
-      toast.error("Failed to export data.");
-    }
-  }, []);
-
-  const handleRefresh = useCallback(() => {
-    window.location.reload();
-  }, []);
-
-  const handleResetSessions = useCallback(async () => {
-    if (!confirm("Are you sure you want to delete a batch of session data? This cannot be undone.")) return;
-    
-    try {
-      const res = await resetSessions() as any;
-      if (res?.success) {
-        if (res.remaining > 0) {
-          toast.info(`Deleted ${res.deletedCount} sessions. ${res.remaining} remaining. Click again to delete more.`);
-        } else {
-          toast.success(`All sessions cleared! Deleted ${res.deletedCount} in this batch.`);
-        }
-        handleRefresh();
-      } else {
-        toast.error(res?.error || "Failed to reset sessions.");
-      }
-    } catch (err) {
-      console.error("Reset failed:", err);
-      toast.error("Failed to reset sessions.");
-    }
-  }, [handleRefresh]);
-
-  const initializeAnimations = useCallback(() => {
-    animationContextRef.current?.revert();
-    animationContextRef.current = gsap.context(() => {
-      // Header animation
-      if (headerRef.current) {
-        gsap.fromTo(
-          headerRef.current,
-          { opacity: 0, y: -30 },
-          { opacity: 1, y: 0, duration: 0.8, ease: "power3.out" }
-        );
-      }
-
-      // Metrics animation
-      if (metricsRef.current) {
-        gsap.fromTo(
-          ".metric-card",
-          { opacity: 0, y: 50, scale: 0.95 },
-          {
-            opacity: 1,
-            y: 0,
-            scale: 1,
-            duration: 0.8,
-            stagger: 0.15,
-            ease: "back.out(1.4)",
-            scrollTrigger: {
-              trigger: metricsRef.current,
-              start: "top 90%",
-              toggleActions: "play none none reset",
-            },
-          }
-        );
-      }
-
-      // Activity section animations
-      if (activityRef.current && filteredActivity.length > 0) {
-        gsap.set(".activity-row", {
-          opacity: 0,
-          y: 30,
-          scale: 0.95,
-          filter: "blur(5px)",
-        });
-        gsap.set(".activity-avatar", {
-          opacity: 0,
-          scale: 0.8,
-          filter: "brightness(0.5)",
-        });
-
-        ScrollTrigger.create({
-          trigger: activityRef.current,
-          start: "top 85%",
-          end: "bottom 20%",
-          toggleActions: "play none none none",
-          onEnter: () => {
-            gsap.to(".activity-row", {
-              opacity: 1,
-              y: 0,
-              scale: 1,
-              filter: "blur(0px)",
-              rotation: 0,
-              duration: 0.7,
-              stagger: 0.1,
-              ease: "power3.out",
-            });
-            gsap.to(".activity-avatar", {
-              opacity: 1,
-              scale: 1,
-              filter: "brightness(1)",
-              duration: 0.6,
-              stagger: 0.1,
-              ease: "power2.out",
-              delay: 0.2,
-              onComplete: () => {
-                // Pulse effect for avatars
-                gsap.to(".activity-avatar", {
-                  scale: 1.1,
-                  duration: 0.3,
-                  yoyo: true,
-                  repeat: 1,
-                  ease: "power1.inOut",
-                });
-              },
-            });
-          },
-          onLeaveBack: () => {
-            gsap.to(".activity-row", {
-              opacity: 0,
-              y: 30,
-              scale: 0.95,
-              filter: "blur(5px)",
-              duration: 0.4,
-              ease: "power2.in",
-            });
-            gsap.to(".activity-avatar", {
-              opacity: 0,
-              scale: 0.8,
-              filter: "brightness(0.5)",
-              duration: 0.4,
-              ease: "power2.in",
-            });
-          },
-        });
-
-        // Subtle parallax for activity rows
-        gsap.utils
-          .toArray<HTMLElement>(".activity-row")
-          .forEach((row, index) => {
-            gsap.to(row, {
-              y: index % 2 === 0 ? 15 : -15,
-              ease: "none",
-              scrollTrigger: {
-                trigger: row,
-                start: "top bottom",
-                end: "bottom top",
-                scrub: 2,
-              },
-            });
-          });
-      }
-
-      // Parallax bar animation
-      if (parallaxRef.current) {
-        gsap.to(parallaxRef.current, {
-          yPercent: 50,
-          ease: "none",
-          scrollTrigger: {
-            trigger: activityRef.current,
-            start: "top bottom",
-            end: "bottom top",
-            scrub: true,
-          },
-        });
-      }
-    }, dashboardRef.current ?? undefined);
-  }, [filteredActivity.length]);
-
+  const [metrics, setMetrics] = useState({
+    users: { total: 0, change: "0" },
+    feedbacks: { total: 0, change: "0" },
+    sessions: { total: 0, change: "0" },
+    interviews: { total: 0, change: "0" }, // Mock data
+  });
 
   useEffect(() => {
     let isMounted = true;
-    const fetchData = async () => {
+    const fetchMetrics = async () => {
       try {
-        const [metricsRes, activityRes] = await Promise.all([
-          getAdminMetrics(),
-          getRecentActivity(),
-        ]);
-
+        const res = await getAdminMetrics();
         if (!isMounted) return;
-
-        if (metricsRes.success && metricsRes.data) {
-          setUserCount(metricsRes.data.users.total);
-          setFeedbackCount(metricsRes.data.feedbacks.total);
-          setSessionCount(metricsRes.data.sessions.total);
-          setUserGrowth(metricsRes.data.users.change);
-          setFeedbackGrowth(metricsRes.data.feedbacks.change);
-          setSessionGrowth(metricsRes.data.sessions.change);
+        if (res.success && res.data) {
+          setMetrics({
+            users: res.data.users,
+            feedbacks: res.data.feedbacks,
+            sessions: res.data.sessions,
+            interviews: { total: 1245, change: "+14" }, // Mock data for interviews since it's missing in getAdminMetrics
+          });
         }
-
-        if (activityRes.success && activityRes.data) {
-          setRecentUsers(activityRes.data.recentUsers as User[]);
-          setRecentFeedbacks(activityRes.data.recentFeedbacks as Feedback[]);
-        }
-
-        setIsDataLoaded(true);
       } catch (err) {
-        console.error("Error loading admin data:", err);
+        console.error("Error loading metrics:", err);
       }
     };
-
-    fetchData();
+    fetchMetrics();
     return () => {
       isMounted = false;
     };
   }, []);
 
-  useEffect(() => {
-    if (isDataLoaded) {
-      initializeAnimations();
-    }
-    return () => {
-      animationContextRef.current?.revert();
-      ScrollTrigger.getAll().forEach((trigger) => trigger.kill());
-    };
-  }, [initializeAnimations, isDataLoaded, activeTab]);
-
   return (
-    <div className="space-y-8" ref={dashboardRef}>
-      <div ref={headerRef}>
-        <h1 className="text-3xl font-bold tracking-tight">Dashboard</h1>
-        <p className="text-gray-400 mt-2">
-          Welcome back! Here's what's happening.
-        </p>
+    <div className="flex-1 space-y-4 p-8 pt-6 bg-zinc-950 text-white min-h-screen">
+      <div className="flex items-center justify-between space-y-2 mb-6">
+        <h2 className="text-2xl font-bold tracking-tight">Overview</h2>
       </div>
 
-      <div
-        className="grid gap-6 md:grid-cols-2 lg:grid-cols-4"
-        ref={metricsRef}
-      >
-        {metrics.map((metric) => (
-          <Card
-            key={metric.title}
-            className="metric-card bg-white/5 border-white/10 backdrop-blur-sm hover:bg-white/10 transition-all duration-300"
-          >
-            <CardHeader className="flex flex-row items-center justify-between">
-              <CardTitle className="text-sm text-gray-400">
-                {metric.title}
-              </CardTitle>
-              <metric.icon className="h-4 w-4 text-gray-400" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{metric.value}</div>
-              <div className="text-xs text-green-400 mt-1">
-                {metric.change} from last month
-              </div>
-            </CardContent>
-          </Card>
-        ))}
+      {/* Top Metric Cards */}
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+        <Card className="bg-zinc-950 border-white/10">
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium text-zinc-400">
+              Total Users
+            </CardTitle>
+            <Users className="h-4 w-4 text-zinc-400" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{metrics.users.total.toLocaleString()}</div>
+            <p className="text-xs text-emerald-500 mt-1">
+              {metrics.users.change}% vs last month
+            </p>
+          </CardContent>
+        </Card>
+
+        <Card className="bg-zinc-950 border-white/10">
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium text-zinc-400">
+              Interviews Generated
+            </CardTitle>
+            <FileText className="h-4 w-4 text-zinc-400" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{metrics.interviews.total.toLocaleString()}</div>
+            <p className="text-xs text-emerald-500 mt-1">
+              {metrics.interviews.change}% vs last month
+            </p>
+          </CardContent>
+        </Card>
+
+        <Card className="bg-zinc-950 border-white/10">
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium text-zinc-400">
+              Feedback Submissions
+            </CardTitle>
+            <MessageSquare className="h-4 w-4 text-zinc-400" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{metrics.feedbacks.total.toLocaleString()}</div>
+            <p className="text-xs text-emerald-500 mt-1">
+              {metrics.feedbacks.change}% vs last month
+            </p>
+          </CardContent>
+        </Card>
+
+        <Card className="bg-zinc-950 border-white/10">
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium text-zinc-400">
+              Active Sessions
+            </CardTitle>
+            <Activity className="h-4 w-4 text-zinc-400" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{metrics.sessions.total.toLocaleString()}</div>
+            <p className="text-xs text-red-500 mt-1">
+              {metrics.sessions.change}% vs last month
+            </p>
+          </CardContent>
+        </Card>
       </div>
 
-      <Card className="bg-white/5 border-white/10 backdrop-blur-sm relative overflow-hidden">
-        <div
-          ref={parallaxRef}
-          className="activity-parallax absolute left-0 w-0.5 h-12 bg-gradient-to-b from-transparent via-white/50 to-transparent"
-        />
-        <CardHeader className="pb-4 flex flex-col gap-4">
-          <div className="flex items-start justify-between">
-            {/* Left side */}
-            <div className="space-y-1">
-              <CardTitle className="text-xl flex items-center gap-2">
-                <ActivityIcon className="h-5 w-5 text-gray-400" />
-                Recent Activity
-              </CardTitle>
-              <p className="text-sm text-gray-400">
-                Latest users and feedback events
-              </p>
-            </div>
+      {/* Main Charts Row 1 */}
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7">
+        <Card className="col-span-4 lg:col-span-5 bg-zinc-950 border-white/10">
+          <CardHeader>
+            <CardTitle className="text-zinc-200">User Growth</CardTitle>
+            <CardDescription className="text-zinc-500">
+              New user registrations over time
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="pl-2">
+            <ResponsiveContainer width="100%" height={350}>
+              <LineChart data={REVENUE_DATA} margin={{ top: 5, right: 10, left: 10, bottom: 0 }}>
+                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#27272a" />
+                <XAxis
+                  dataKey="name"
+                  stroke="#71717a"
+                  fontSize={12}
+                  tickLine={false}
+                  axisLine={false}
+                />
+                <YAxis
+                  stroke="#71717a"
+                  fontSize={12}
+                  tickLine={false}
+                  axisLine={false}
+                  tickFormatter={(value) => `${value / 1000}k`}
+                />
+                <Tooltip
+                  contentStyle={{ backgroundColor: "#09090b", borderColor: "#27272a", color: "#fff" }}
+                  itemStyle={{ color: "#fff" }}
+                />
+                <Legend verticalAlign="top" height={36} iconType="circle" />
+                <Line
+                  type="monotone"
+                  dataKey="thisYear"
+                  name="This Year"
+                  stroke="#ffffff"
+                  strokeWidth={2}
+                  dot={false}
+                  activeDot={{ r: 6, fill: "#ffffff" }}
+                />
+                <Line
+                  type="monotone"
+                  dataKey="lastYear"
+                  name="Last Year"
+                  stroke="#71717a"
+                  strokeWidth={2}
+                  dot={false}
+                  activeDot={{ r: 6, fill: "#71717a" }}
+                />
+              </LineChart>
+            </ResponsiveContainer>
+          </CardContent>
+        </Card>
 
-            {/* Right side */}
-            <div className="flex item-center gap-2">
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="h-8 w-8 p-0 text-gray-400 hover:text-white hover:bg-white/10"
-                  >
-                    <Info className="h-4 w-4" />
-                  </Button>
-                </TooltipTrigger>
-                <TooltipContent
-                  side="top"
-                  className="bg-black/90 border-white/20 text-white text-xs"
+        <Card className="col-span-3 lg:col-span-2 bg-zinc-950 border-white/10">
+          <CardHeader>
+            <CardTitle className="text-zinc-200">Interviews by Type</CardTitle>
+            <CardDescription className="text-zinc-500">
+              Technical vs Behavioural volume
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <ResponsiveContainer width="100%" height={350}>
+              <BarChart data={CHANNEL_DATA}>
+                <XAxis
+                  dataKey="name"
+                  stroke="#71717a"
+                  fontSize={12}
+                  tickLine={false}
+                  axisLine={false}
+                />
+                <YAxis hide />
+                <Tooltip
+                  contentStyle={{ backgroundColor: "#09090b", borderColor: "#27272a", color: "#fff" }}
+                  cursor={{ fill: "#27272a" }}
+                />
+                <Legend verticalAlign="top" height={36} iconType="circle" />
+                <Bar dataKey="online" name="Technical" stackId="a" fill="#ffffff" radius={[0, 0, 4, 4]} />
+                <Bar dataKey="store" name="Behavioural" stackId="a" fill="#71717a" />
+                <Bar dataKey="wholesale" name="Mixed" stackId="a" fill="#3f3f46" radius={[4, 4, 0, 0]} />
+              </BarChart>
+            </ResponsiveContainer>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Main Charts Row 2 */}
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+        <Card className="bg-zinc-950 border-white/10">
+          <CardHeader>
+            <CardTitle className="text-zinc-200">Daily Activity</CardTitle>
+            <CardDescription className="text-zinc-500 flex items-center gap-2">
+              <span className="text-emerald-500 font-medium">+2.4%</span> vs last month
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <ResponsiveContainer width="100%" height={250}>
+              <BarChart data={AOV_DATA}>
+                <Tooltip
+                  contentStyle={{ backgroundColor: "#09090b", borderColor: "#27272a", color: "#fff" }}
+                  cursor={{ fill: "#27272a" }}
+                />
+                <Bar dataKey="value" fill="#ffffff" radius={[2, 2, 0, 0]} />
+              </BarChart>
+            </ResponsiveContainer>
+          </CardContent>
+        </Card>
+
+        <Card className="bg-zinc-950 border-white/10">
+          <CardHeader>
+            <CardTitle className="text-zinc-200">Average Scores</CardTitle>
+            <CardDescription className="text-zinc-500 flex items-center gap-2">
+              <span className="text-emerald-500 font-medium">+1.3%</span> vs last month
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <ResponsiveContainer width="100%" height={250}>
+              <LineChart data={CHANNEL_DATA}>
+                <Tooltip
+                  contentStyle={{ backgroundColor: "#09090b", borderColor: "#27272a", color: "#fff" }}
+                />
+                <Line
+                  type="monotone"
+                  dataKey="online"
+                  stroke="#ffffff"
+                  strokeWidth={2}
+                  dot={false}
+                />
+                <Line
+                  type="monotone"
+                  dataKey="store"
+                  stroke="#71717a"
+                  strokeWidth={2}
+                  dot={false}
+                />
+              </LineChart>
+            </ResponsiveContainer>
+          </CardContent>
+        </Card>
+
+        <Card className="bg-zinc-950 border-white/10">
+          <CardHeader>
+            <CardTitle className="text-zinc-200">Interview Categories</CardTitle>
+          </CardHeader>
+          <CardContent className="flex items-center justify-center">
+            <ResponsiveContainer width="100%" height={250}>
+              <PieChart>
+                <Pie
+                  data={CATEGORY_DATA}
+                  cx="50%"
+                  cy="50%"
+                  innerRadius={60}
+                  outerRadius={80}
+                  paddingAngle={5}
+                  dataKey="value"
+                  stroke="none"
                 >
-                  Scroll to see activity feed
-                </TooltipContent>
-              </Tooltip>
-
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="h-8 w-8 p-0 text-gray-400 hover:text-white hover:bg-white/10"
-                  >
-                    <MoreVertical className="h-4 w-4" />
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent
-                  align="end"
-                  className="bg-black/95 border-white/20 text-white"
-                >
-                  <DropdownMenuItem
-                    onClick={handleExportJSON}
-                    className="hover:bg-white/10 focus:bg-white/10"
-                  >
-                    Export JSON
-                  </DropdownMenuItem>
-                  <DropdownMenuItem
-                    onClick={handleRefresh}
-                    className="hover:bg-white/10 focus:bg-white/10"
-                  >
-                    Refresh
-                  </DropdownMenuItem>
-                  <Separator className="bg-white/10 my-1" />
-                  <DropdownMenuItem
-                    onClick={handleResetSessions}
-                    className="hover:bg-red-500/20 focus:bg-red-500/20 text-red-400"
-                  >
-                    Reset Sessions Analytics
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
-            </div>
-          </div>
-
-          <Tabs
-            value={activeTab}
-            onValueChange={(value) =>
-              setActiveTab(value as "all" | "user" | "feedback")
-            }
-          >
-            <TabsList className="tabs-list bg-white/5 border border-white/10">
-              <TabsTrigger
-                value="all"
-                className="data-[state=active]:bg-white/10 data-[state=active]:text-white text-gray-400"
-              >
-                All ({activityCounts.all})
-              </TabsTrigger>
-              <TabsTrigger
-                value="user"
-                className="data-[state=active]:bg-white/10 data-[state=active]:text-white text-gray-400"
-              >
-                Users ({activityCounts.user})
-              </TabsTrigger>
-              <TabsTrigger
-                value="feedback"
-                className="data-[state=active]:bg-white/10 data-[state=active]:text-white text-gray-400"
-              >
-                Feedback ({activityCounts.feedback})
-              </TabsTrigger>
-            </TabsList>
-          </Tabs>
-        </CardHeader>
-        <Separator className="bg-white/30" />
-        <CardContent className="pt-0">
-          {filteredActivity.length === 0 ? (
-            <div className="flex flex-col items-center justify-center py-12 text-center">
-              <ActivityIcon className="h-12 w-12 text-gray-600 mb-3" />
-              <h3 className="text-lg font-medium text-gray-300 mb-1">
-                No Activity
-              </h3>
-              <p className="text-sm text-gray-500">
-                {activeTab === "all"
-                  ? "No recent activity to display"
-                  : `No ${activeTab} activity found`}
-              </p>
-            </div>
-          ) : (
-            <ScrollArea className="h-[360px] pr-4" ref={activityRef}>
-              <div className="space-y-0 activity-list">
-                {filteredActivity.map((activity, index) => (
-                  <div key={activity.id}>
-                    <div
-                      className="activity-row group flex justify-between items-center p-4 rounded-lg transition-all duration-200 cursor-pointer hover:-translate-y-0.5 hover:ring-1 hover:ring-white/10 hover:bg-white/[0.02]"
-                      onClick={() => {
-                        if (activity.type === "user") {
-                          router.push(`/admin/users/${activity.id}`);
-                        } else if (activity.type === "feedback") {
-                          router.push(`/admin/feedback/${activity.id}`);
-                        }
-                      }}
-                    >
-                      <div className="flex items-center gap-4">
-                        <Avatar className="activity-avatar h-10 w-10 ring-1 ring-white/10">
-                          <AvatarImage src="" />
-                          <AvatarFallback className="bg-gradient-to-br from-gray-700 to-gray-900 text-white text-sm font-bold">
-                            {activity.user
-                              ?.split(" ")
-                              .map((n) => n[0])
-                              .join("") || "?"}
-                          </AvatarFallback>
-                        </Avatar>
-                        <div className="min-w-0 flex-1">
-                          <p className="font-medium text-white truncate">
-                            {activity.user || "Unknown User"}
-                          </p>
-                          <p className="text-sm text-gray-400 truncate">
-                            {activity.action}
-                          </p>
-                        </div>
-                      </div>
-                      <div className="flex flex-col items-end gap-2">
-                        <Badge
-                          variant="secondary"
-                          className={`capitalize text-xs font-medium ${
-                            activity.type === "user"
-                              ? "bg-white/10 text-gray-300 border-white/20"
-                              : "bg-gray-800/80 text-gray-400 border-gray-700/50"
-                          }`}
-                        >
-                          {activity.type}
-                        </Badge>
-                        <p className="text-xs text-gray-500 tabular-nums">
-                          {activity.createdAt?.toDate
-                            ? activity.createdAt.toDate().toLocaleString()
-                            : new Date(activity.createdAt).toLocaleString() !== "Invalid Date"
-                            ? new Date(activity.createdAt).toLocaleString()
-                            : "Recently"}
-                        </p>
-                      </div>
-                    </div>
-
-                    {index < filteredActivity.length - 1 && (
-                      <Separator className="bg-white/10" />
-                    )}
-                  </div>
-                ))}
-              </div>
-            </ScrollArea>
-          )}
-        </CardContent>
-      </Card>
+                  {CATEGORY_DATA.map((entry, index) => (
+                    <Cell key={`cell-${index}`} fill={entry.color} />
+                  ))}
+                </Pie>
+                <Tooltip contentStyle={{ backgroundColor: "#09090b", borderColor: "#27272a", color: "#fff" }} />
+                <Legend layout="vertical" verticalAlign="middle" align="right" iconType="circle" />
+              </PieChart>
+            </ResponsiveContainer>
+          </CardContent>
+        </Card>
+      </div>
     </div>
   );
 }

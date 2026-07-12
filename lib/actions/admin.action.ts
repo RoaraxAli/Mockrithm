@@ -596,3 +596,117 @@ export async function getAuditLogs(limitCount: number = 50) {
   }
 }
 
+// --- Feedback Retrieval ---
+export async function getFeedbacks() {
+  try {
+    const user = await getCurrentUser();
+    if (!user || user.role?.toLowerCase() !== "admin") {
+      return { success: false, error: "Forbidden" };
+    }
+
+    const snapshot = await db.collection("feedback").orderBy("createdAt", "desc").get();
+    const data = snapshot.docs.map((doc: any) => ({
+      id: doc.id,
+      ...doc.data(),
+      createdAt: serializeDate(doc.data().createdAt),
+    }));
+
+    return { success: true, data };
+  } catch (error: any) {
+    console.error("Failed to fetch feedback:", error);
+    return { success: false, error: error.message };
+  }
+}
+
+export async function getFeedbackById(id: string) {
+  try {
+    const user = await getCurrentUser();
+    if (!user || user.role?.toLowerCase() !== "admin") {
+      return { success: false, error: "Forbidden" };
+    }
+
+    const docRef = await db.collection("feedback").doc(id).get();
+    if (!docRef.exists) return { success: false, error: "Not found" };
+
+    return {
+      success: true,
+      data: {
+        id: docRef.id,
+        ...docRef.data(),
+        createdAt: serializeDate(docRef.data().createdAt),
+      },
+    };
+  } catch (error: any) {
+    console.error("Failed to fetch feedback:", error);
+    return { success: false, error: error.message };
+  }
+}
+
+export async function updateFeedbackStatus(id: string, status: string) {
+  try {
+    const user = await getCurrentUser();
+    if (!user || user.role?.toLowerCase() !== "admin") {
+      return { success: false, error: "Forbidden" };
+    }
+
+    await db.collection("feedback").doc(id).update({ status });
+    return { success: true };
+  } catch (error: any) {
+    console.error("Failed to update feedback status:", error);
+    return { success: false, error: error.message };
+  }
+}
+
+export async function deleteFeedback(id: string) {
+  try {
+    const user = await getCurrentUser();
+    if (!user || user.role?.toLowerCase() !== "admin") {
+      return { success: false, error: "Forbidden" };
+    }
+
+    await db.collection("feedback").doc(id).delete();
+    await logAdminAction(user.id, "DELETE_FEEDBACK", { feedbackId: id });
+    return { success: true };
+  } catch (error: any) {
+    console.error("Failed to delete feedback:", error);
+    return { success: false, error: error.message };
+  }
+}
+
+// --- Interview Feedback Retrieval ---
+export async function getInterviewFeedbacks() {
+  try {
+    const user = await getCurrentUser();
+    if (!user || user.role?.toLowerCase() !== "admin") {
+      return { success: false, error: "Forbidden" };
+    }
+
+    const snapshot = await db.collection("interviewsfeedback").orderBy("createdAt", "desc").get();
+    const data = snapshot.docs.map((doc: any) => ({
+      id: doc.id,
+      ...doc.data(),
+      createdAt: serializeDate(doc.data().createdAt),
+    }));
+
+    return { success: true, data };
+  } catch (error: any) {
+    console.error("Failed to fetch interview feedback:", error);
+    return { success: false, error: error.message };
+  }
+}
+
+export async function deleteInterviewFeedback(id: string) {
+  try {
+    const user = await getCurrentUser();
+    if (!user || user.role?.toLowerCase() !== "admin") {
+      return { success: false, error: "Forbidden" };
+    }
+
+    await db.collection("interviewsfeedback").doc(id).delete();
+    await logAdminAction(user.id, "DELETE_INTERVIEW_FEEDBACK", { feedbackId: id });
+    return { success: true };
+  } catch (error: any) {
+    console.error("Failed to delete interview feedback:", error);
+    return { success: false, error: error.message };
+  }
+}

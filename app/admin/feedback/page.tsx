@@ -41,14 +41,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { db } from "@/firebase/client";
-import {
-  collection,
-  getDocs,
-  deleteDoc,
-  doc,
-  updateDoc,
-} from "firebase/firestore";
+import { getFeedbacks, deleteFeedback, updateFeedbackStatus } from "@/lib/actions/admin.action";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -72,23 +65,21 @@ export default function FeedbackPage() {
   useEffect(() => {
     const fetchFeedback = async () => {
       try {
-        const snapshot = await getDocs(collection(db, "feedback"));
-        const feedbackData = snapshot.docs.map((doc) => {
-          const data = doc.data();
-          return {
-            id: doc.id,
+        const res = await getFeedbacks();
+        if (res.success && res.data) {
+          const feedbackData = res.data.map((data: any) => ({
+            id: data.id,
             name: data.name || "",
             email: data.email || "",
             type: data.type || "General",
             message: data.message || "",
-            date:
-              typeof data.createdAt?.toDate === "function"
-                ? data.createdAt.toDate().toLocaleDateString()
-                : "N/A",
+            date: data.createdAt
+              ? new Date(data.createdAt).toLocaleDateString()
+              : "N/A",
             status: data.status || "Open",
-          };
-        });
-        setFeedback(feedbackData);
+          }));
+          setFeedback(feedbackData);
+        }
       } catch (error) {
         console.error("Error fetching feedback:", error);
       } finally {
@@ -134,8 +125,10 @@ export default function FeedbackPage() {
 
   const handleDeleteFeedback = async (id: string) => {
     try {
-      await deleteDoc(doc(db, "feedback", id));
-      setFeedback((prev) => prev.filter((item) => item.id !== id));
+      const res = await deleteFeedback(id);
+      if (res.success) {
+        setFeedback((prev) => prev.filter((item) => item.id !== id));
+      }
     } catch (error) {
       console.error("Failed to delete feedback:", error);
     }
@@ -143,12 +136,14 @@ export default function FeedbackPage() {
 
   const handleStatusChange = async (id: string, newStatus: string) => {
     try {
-      await updateDoc(doc(db, "feedback", id), { status: newStatus });
-      setFeedback((prev) =>
-        prev.map((item) =>
-          item.id === id ? { ...item, status: newStatus } : item
-        )
-      );
+      const res = await updateFeedbackStatus(id, newStatus);
+      if (res.success) {
+        setFeedback((prev) =>
+          prev.map((item) =>
+            item.id === id ? { ...item, status: newStatus } : item
+          )
+        );
+      }
     } catch (error) {
       console.error("Failed to update status:", error);
     }
