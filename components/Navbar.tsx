@@ -206,7 +206,7 @@ const Navbar = ({ userId, userName, userRole }: NavbarProps) => {
                 <div className="flex items-center space-x-4">
                   {isAdmin && (
                     <a
-                      href="https://admin.mockrithm.me"
+                      href="/admin"
                       className="text-xs font-bold uppercase tracking-wider px-3.5 py-1.5 rounded-lg border border-red-500/20 bg-red-500/5 text-red-400 hover:bg-red-500/10 hover:text-red-300 transition-all mr-2"
                     >
                       Admin
@@ -423,7 +423,7 @@ const Navbar = ({ userId, userName, userRole }: NavbarProps) => {
                   {isAdmin ? (
                     // Admin only → Admin Panel (external subdomain)
                     <a
-                      href="https://admin.mockrithm.me"
+                      href="/admin"
                       className="group flex items-center space-x-3 w-full px-4 py-3 text-sm text-gray-300 hover:text-white hover:bg-white/10 transition-all duration-200"
                       onClick={() => setIsMobileMenuOpen(false)}
                     >

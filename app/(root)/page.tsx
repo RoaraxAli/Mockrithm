@@ -44,7 +44,7 @@ export default async function Home() {
 
   if (user) {
     if (user.role?.toLowerCase() === "admin") {
-      redirect("https://admin.mockrithm.me");
+      redirect("/admin");
     }
     if (!user.onboarded) {
       redirect("/onboarding");
