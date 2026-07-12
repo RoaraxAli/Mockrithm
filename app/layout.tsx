@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Mona_Sans, Inter, Poppins, Merriweather, Playfair_Display, Lora, Roboto_Slab, Source_Sans_3, JetBrains_Mono } from "next/font/google";
+import { Mona_Sans, Inter, Poppins, Merriweather, Playfair_Display, Lora, Roboto_Slab, Source_Sans_3, Plus_Jakarta_Sans } from "next/font/google";
 import { Toaster } from "sonner";
 import { ClerkProvider } from "@clerk/nextjs";
 
@@ -61,10 +61,10 @@ const sourceSans3 = Source_Sans_3({
   weight: ["400", "500", "600", "700"],
 });
 
-const jetbrainsMono = JetBrains_Mono({
+const jetbrainsMono = Plus_Jakarta_Sans({
   variable: "--font-jetbrains-mono",
   subsets: ["latin"],
-  weight: ["400", "500", "600", "700"],
+  weight: ["400", "500", "600", "700", "800"],
 });
 
 export const metadata: Metadata = {
@@ -95,7 +95,6 @@ export default async function RootLayout({
             variables: {
               colorPrimary: "#ffffff",
               colorBackground: "#09090b", // zinc-950
-              colorTextBase: "#ffffff",
               colorTextSecondary: "#a1a1aa", // zinc-400
               colorBorder: "#27272a", // zinc-800
               colorInputBackground: "#09090b",

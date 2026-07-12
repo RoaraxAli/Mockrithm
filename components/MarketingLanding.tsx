@@ -289,7 +289,10 @@ export default function MarketingLanding() {
           <SectionDivider />
           <AwwwardsShowcase />
 
+          <SectionDivider />
           <div className="section-zoom"><PricingSection /></div>
+
+          <SectionDivider />
         </div>
       </div>
 
