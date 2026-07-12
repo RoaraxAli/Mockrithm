@@ -14,7 +14,6 @@ import {
   FormControl,
   FormField,
   FormItem,
-  FormLabel,
   FormMessage,
 } from "@/components/ui/form";
 import {
@@ -26,7 +25,8 @@ import {
 } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Send, User, Mail, MessageSquare } from "lucide-react";
+import { ArrowRight, Loader2 } from "lucide-react";
+import { motion } from "framer-motion";
 
 const formSchema = z.object({
   name: z.string().min(2, { message: "Name must be at least 2 characters." }),
@@ -69,35 +69,40 @@ export default function FeedbackForm() {
         ...values,
         createdAt: new Date(),
       });
-      toast.success("Thanks for your feedback!");
+      toast.success("Message received. We'll be in touch.");
       form.reset({ ...values, message: "" });
     } catch (error) {
       console.error("Feedback error:", error);
-      toast.error("Something went wrong. Please try again.");
+      toast.error("Transmission failed. Please try again.");
     } finally {
       setIsSubmitting(false);
     }
   };
 
+  const inputClasses = "bg-transparent border-0 border-b border-white/20 rounded-none px-0 py-4 h-auto text-lg text-white placeholder:text-zinc-500 focus-visible:ring-0 focus-visible:border-white transition-all duration-300";
+
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-        <div className="grid grid-cols-1 gap-6">
+      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-12">
+        <motion.div 
+          initial={{ opacity: 0, y: 10 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.1 }}
+          className="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-12"
+        >
           <FormField
             control={form.control}
             name="name"
             render={({ field }) => (
               <FormItem>
-                <FormLabel className="text-zinc-500 flex items-center gap-2 text-xs font-black uppercase tracking-widest">
-                  <User className="w-3.5 h-3.5" /> Name
-                </FormLabel>
                 <FormControl>
                   <Input
                     {...field}
-                    className="bg-zinc-950/60 border-zinc-800 text-white placeholder:text-zinc-700 h-12 rounded-lg focus:border-white/30 focus:ring-1 focus:ring-white/10 transition-all duration-200"
+                    placeholder="Your Name *"
+                    className={inputClasses}
                   />
                 </FormControl>
-                <FormMessage />
+                <FormMessage className="text-red-400 text-xs mt-2" />
               </FormItem>
             )}
           />
@@ -107,89 +112,103 @@ export default function FeedbackForm() {
             name="email"
             render={({ field }) => (
               <FormItem>
-                <FormLabel className="text-zinc-500 flex items-center gap-2 text-xs font-black uppercase tracking-widest">
-                  <Mail className="w-3.5 h-3.5" /> Email
-                </FormLabel>
                 <FormControl>
                   <Input
                     {...field}
-                    className="bg-zinc-950/60 border-zinc-800 text-white placeholder:text-zinc-700 h-12 rounded-lg focus:border-white/30 focus:ring-1 focus:ring-white/10 transition-all duration-200"
+                    placeholder="Email Address *"
+                    className={inputClasses}
                   />
                 </FormControl>
-                <FormMessage />
+                <FormMessage className="text-red-400 text-xs mt-2" />
               </FormItem>
             )}
           />
+        </motion.div>
 
+        <motion.div
+          initial={{ opacity: 0, y: 10 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.2 }}
+        >
           <FormField
             control={form.control}
             name="type"
             render={({ field }) => (
               <FormItem>
-                <FormLabel className="text-zinc-500 text-xs font-black uppercase tracking-widest">
-                  Feedback Type
-                </FormLabel>
                 <Select onValueChange={field.onChange} defaultValue={field.value}>
                   <FormControl>
-                    <SelectTrigger className="bg-zinc-950/60 border-zinc-800 text-white h-12 rounded-lg focus:border-white/30 focus:ring-1 focus:ring-white/10 transition-all duration-200">
-                      <SelectValue placeholder="Select feedback type" />
+                    <SelectTrigger className="bg-transparent border-0 border-b border-white/20 rounded-none px-0 py-4 h-auto text-lg text-white focus:ring-0 focus:border-white transition-all duration-300">
+                      <SelectValue placeholder="Topic of Discussion *" className="text-zinc-500" />
                     </SelectTrigger>
                   </FormControl>
-                  <SelectContent className="bg-zinc-950 border-zinc-900 text-white">
-                    <SelectItem value="Bug Report" className="text-xs font-bold hover:bg-white/5 cursor-pointer">
+                  <SelectContent className="bg-zinc-950/90 backdrop-blur-xl border-zinc-800 text-white rounded-xl">
+                    <SelectItem value="Bug Report" className="text-sm py-3 focus:bg-white/10 cursor-pointer">
                       Bug Report
                     </SelectItem>
-                    <SelectItem value="Feature Request" className="text-xs font-bold hover:bg-white/5 cursor-pointer">
+                    <SelectItem value="Feature Request" className="text-sm py-3 focus:bg-white/10 cursor-pointer">
                       Feature Request
                     </SelectItem>
-                    <SelectItem value="General Feedback" className="text-xs font-bold hover:bg-white/5 cursor-pointer">
-                      General Feedback
+                    <SelectItem value="General Feedback" className="text-sm py-3 focus:bg-white/10 cursor-pointer">
+                      General Inquiry
                     </SelectItem>
                   </SelectContent>
                 </Select>
-                <FormMessage />
+                <FormMessage className="text-red-400 text-xs mt-2" />
               </FormItem>
             )}
           />
+        </motion.div>
 
+        <motion.div
+          initial={{ opacity: 0, y: 10 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.3 }}
+        >
           <FormField
             control={form.control}
             name="message"
             render={({ field }) => (
               <FormItem>
-                <FormLabel className="text-zinc-500 flex items-center gap-2 text-xs font-black uppercase tracking-widest">
-                  <MessageSquare className="w-3.5 h-3.5" /> Message
-                </FormLabel>
                 <FormControl>
                   <Textarea
                     {...field}
-                    placeholder="Tell us what's on your mind..."
-                    className="bg-zinc-950/60 border-zinc-800 text-white placeholder:text-zinc-700 min-h-[140px] resize-none rounded-lg focus:border-white/30 focus:ring-1 focus:ring-white/10 transition-all duration-200"
+                    placeholder="Tell us everything..."
+                    className="bg-transparent border-0 border-b border-white/20 rounded-none px-0 py-4 min-h-[160px] text-lg text-white placeholder:text-zinc-500 focus-visible:ring-0 focus-visible:border-white transition-all duration-300 resize-none"
                   />
                 </FormControl>
-                <FormMessage />
+                <FormMessage className="text-red-400 text-xs mt-2" />
               </FormItem>
             )}
           />
+        </motion.div>
 
+        <motion.div
+          initial={{ opacity: 0, y: 10 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.4 }}
+          className="pt-4"
+        >
           <Button
             type="submit"
             disabled={isSubmitting}
-            className="w-full h-12 bg-white text-black font-black rounded-lg border border-white/80 hover:bg-zinc-200 hover:shadow-[0_0_20px_rgba(255,255,255,0.15)] transition-all duration-300 transform hover:scale-[1.01] disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none cursor-pointer"
+            className="group relative w-full h-16 bg-white text-black font-semibold text-lg overflow-hidden rounded-full hover:scale-[1.02] transition-all duration-500 disabled:opacity-70 disabled:hover:scale-100 disabled:cursor-not-allowed"
           >
-            {isSubmitting ? (
-              <div className="flex items-center justify-center gap-2 text-xs font-black uppercase tracking-wider">
-                <div className="w-4 h-4 border-2 border-zinc-600 border-t-black rounded-full animate-spin" />
-                Sending...
-              </div>
-            ) : (
-              <div className="flex items-center justify-center gap-2 text-xs font-black uppercase tracking-wider">
-                <Send className="w-4 h-4" />
-                Submit Feedback
-              </div>
-            )}
+            <div className="absolute inset-0 bg-zinc-200 translate-y-full group-hover:translate-y-0 transition-transform duration-500 ease-[cubic-bezier(0.19,1,0.22,1)]" />
+            <span className="relative flex items-center justify-center gap-3 w-full">
+              {isSubmitting ? (
+                <>
+                  <Loader2 className="w-5 h-5 animate-spin" />
+                  Transmitting...
+                </>
+              ) : (
+                <>
+                  Send Message
+                  <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform duration-300" />
+                </>
+              )}
+            </span>
           </Button>
-        </div>
+        </motion.div>
       </form>
     </Form>
   );
