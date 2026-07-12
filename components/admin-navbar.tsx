@@ -5,7 +5,7 @@ import { gsap } from "gsap";
 import { Bell, Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { useUser, useClerk } from "@clerk/nextjs";
+import { useUser, useClerk, UserButton } from "@clerk/nextjs";
 import { useRouter } from "next/navigation";
 import { useTheme } from "next-themes";
 import { Sun, Moon, Laptop } from "lucide-react";
@@ -241,11 +241,11 @@ export function AdminNavbar() {
             </PopoverContent>
           </Popover>
 
-          <div
-            className="cursor-pointer px-4 py-2 rounded-md border border-zinc-200 dark:border-white/5 bg-zinc-100 dark:bg-zinc-900/50 hover:bg-zinc-200 dark:hover:bg-zinc-800 transition duration-200 text-zinc-800 dark:text-zinc-200 font-medium text-sm text-center select-none flex items-center justify-center"
-            onClick={() => console.log("Clicked")}
-          >
-            {adminName || "Admin"}
+          <div className="flex items-center gap-2 border border-zinc-200 dark:border-white/5 bg-zinc-100 dark:bg-zinc-900/50 px-3 py-1.5 rounded-md">
+            <UserButton />
+            <span className="text-sm font-medium text-zinc-800 dark:text-zinc-200 select-none">
+              {adminName || "Admin"}
+            </span>
           </div>
         </div>
       </div>

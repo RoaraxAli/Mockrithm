@@ -933,6 +933,32 @@ html:not(.dark) {
     background-color: var(--background) !important;
   }
 
+  /* Map all variants of zinc-900 and zinc-800 to light slate/whites */
+  .bg-zinc-900,
+  .bg-zinc-900\/20,
+  .bg-zinc-900\/30,
+  .bg-zinc-900\/40,
+  .bg-zinc-900\/50,
+  .bg-zinc-900\/60,
+  .bg-zinc-900\/80,
+  .bg-zinc-800,
+  .bg-zinc-800\/20,
+  .bg-zinc-800\/30,
+  .bg-zinc-800\/40,
+  .bg-zinc-800\/50 {
+    background-color: var(--muted) !important;
+    color: var(--foreground) !important;
+  }
+
+  .hover\:bg-zinc-900\/50:hover,
+  .hover\:bg-zinc-900:hover,
+  .hover\:bg-zinc-800\/50:hover,
+  .hover\:bg-zinc-800:hover,
+  .hover\:bg-zinc-700:hover {
+    background-color: #cbd5e1 !important;
+    color: var(--foreground) !important;
+  }
+
   [data-slot=card],
   .card,
   .glass-card,
