@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { getAuthRedirectUrl } from "@/lib/utils/auth";
 
 export default function HeroSection() {
-  const springTransition = { type: "spring", stiffness: 90, damping: 18 };
+  const springTransition = { type: "spring" as const, stiffness: 90, damping: 18 };
 
   return (
     <section

@@ -23,7 +23,7 @@ interface ResourcesSectionProps {
 }
 
 export default function ResourcesSection({ articles, loadingBlogs }: ResourcesSectionProps) {
-  const springTransition = { type: "spring", stiffness: 85, damping: 18 };
+  const springTransition = { type: "spring" as const, stiffness: 85, damping: 18 };
   const headingRef = useRef<HTMLHeadingElement>(null);
 
   useEffect(() => {
@@ -116,7 +116,7 @@ export default function ResourcesSection({ articles, loadingBlogs }: ResourcesSe
                 initial={{ opacity: 0, y: 40, scale: 0.96 }}
                 whileInView={{ opacity: 1, y: 0, scale: 1 }}
                 viewport={{ once: true, margin: "-100px" }}
-                transition={{ type: "spring", stiffness: 85, damping: 18, delay: index * 0.08 }}
+                transition={{ type: "spring" as const, stiffness: 85, damping: 18, delay: index * 0.08 }}
                 whileHover={{ 
                   scale: 1.02, 
                   boxShadow: "0 20px 45px -10px rgba(0,0,0,0.8), 0 0 25px rgba(255, 255, 255, 0.03)",

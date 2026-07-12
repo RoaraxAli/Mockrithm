@@ -3,7 +3,7 @@
 import { motion } from "framer-motion";
 
 export default function TelemetryShowcase() {
-  const springTransition = { type: "spring", stiffness: 90, damping: 18 };
+  const springTransition = { type: "spring" as const, stiffness: 90, damping: 18 };
 
   const telemetryItems = [
     { title: "STAR Evaluation", desc: "Measures story composition elements dynamically." },
@@ -40,7 +40,7 @@ export default function TelemetryShowcase() {
                 initial={{ opacity: 0, x: -30 }}
                 whileInView={{ opacity: 1, x: 0 }}
                 viewport={{ once: true, margin: "-100px" }}
-                transition={{ type: "spring", stiffness: 90, damping: 18, delay: idx * 0.1 }}
+                transition={{ type: "spring" as const, stiffness: 90, damping: 18, delay: idx * 0.1 }}
                 className="flex gap-4 items-start"
               >
                 <span className="size-6 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-[10px] text-zinc-350 font-black shrink-0 mt-0.5 shadow-[0_0_15px_rgba(255,255,255,0.02)]">
@@ -60,7 +60,7 @@ export default function TelemetryShowcase() {
             initial={{ scale: 0.94, opacity: 0, rotateY: 8 }}
             whileInView={{ scale: 1, opacity: 1, rotateY: 0 }}
             viewport={{ once: true, margin: "-120px" }}
-            transition={{ type: "spring", stiffness: 60, damping: 18 }}
+            transition={{ type: "spring" as const, stiffness: 60, damping: 18 }}
             whileHover={{ 
               scale: 1.02, 
               boxShadow: "0 25px 50px -12px rgba(0, 0, 0, 0.9), 0 0 35px rgba(6, 182, 212, 0.1)",
