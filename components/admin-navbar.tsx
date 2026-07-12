@@ -7,6 +7,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useUser, useClerk } from "@clerk/nextjs";
 import { useRouter } from "next/navigation";
+import { useTheme } from "next-themes";
+import { Sun, Moon, Laptop } from "lucide-react";
 import {
   CommandDialog,
   CommandInput,
@@ -20,14 +22,24 @@ import { Users, ClipboardList, BookOpen, Key, Shield, MessageSquare, LayoutDashb
 export function AdminNavbar() {
   const { isLoaded, isSignedIn, user } = useUser();
   const { signOut: clerkSignOut } = useClerk();
+  const { theme, setTheme } = useTheme();
+  const [mounted, setMounted] = useState(false);
   const [adminName, setAdminName] = useState("");
   const [open, setOpen] = useState(false);
   const router = useRouter();
 
   useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  useEffect(() => {
     const down = (e: KeyboardEvent) => {
       if (e.key === "k" && (e.metaKey || e.ctrlKey)) {
         e.preventDefault();
+        // Blur whatever background element currently has focus
+        if (document.activeElement instanceof HTMLElement) {
+          document.activeElement.blur();
+        }
         setOpen((open) => !open);
       }
     };
@@ -80,7 +92,12 @@ export function AdminNavbar() {
         {/* Search Input Triggering Command Palette */}
         <div className="navbar-item flex items-center space-x-4 lg:ml-0 ml-12">
           <button
-            onClick={() => setOpen(true)}
+            onClick={() => {
+              if (document.activeElement instanceof HTMLElement) {
+                document.activeElement.blur();
+              }
+              setOpen(true);
+            }}
             className="flex items-center justify-between w-64 bg-zinc-900/50 border border-white/5 px-3 py-2 text-sm text-zinc-400 hover:text-zinc-200 rounded-md cursor-pointer hover:border-white/10 transition-colors"
           >
             <div className="flex items-center gap-2">
@@ -95,7 +112,7 @@ export function AdminNavbar() {
 
         {/* Command Palette Dialog */}
         <CommandDialog open={open} onOpenChange={setOpen}>
-          <CommandInput placeholder="Type a command or search..." />
+          <CommandInput placeholder="Type a command or search..." autoFocus />
           <CommandList className="bg-zinc-950 border border-white/5">
             <CommandEmpty>No results found.</CommandEmpty>
             <CommandGroup heading="Navigation">
@@ -133,14 +150,49 @@ export function AdminNavbar() {
 
         {/* Icons & Profile */}
         <div className="flex items-center space-x-4">
+          {/* Theme Switcher Segmented Control */}
+          {mounted ? (
+            <div className="flex items-center gap-0.5 bg-zinc-900/50 border border-white/5 p-0.5 rounded-md">
+              <button
+                onClick={() => setTheme("light")}
+                className={`p-1.5 rounded-md hover:bg-zinc-800 transition-all duration-200 cursor-pointer ${
+                  theme === "light" ? "bg-white text-zinc-950 shadow-sm" : "text-zinc-500 hover:text-zinc-300"
+                }`}
+                title="Light Mode"
+              >
+                <Sun className="h-3.5 w-3.5" />
+              </button>
+              <button
+                onClick={() => setTheme("dark")}
+                className={`p-1.5 rounded-md hover:bg-zinc-800 transition-all duration-200 cursor-pointer ${
+                  theme === "dark" ? "bg-zinc-950 text-white shadow-sm border border-white/5" : "text-zinc-500 hover:text-zinc-300"
+                }`}
+                title="Dark Mode"
+              >
+                <Moon className="h-3.5 w-3.5" />
+              </button>
+              <button
+                onClick={() => setTheme("system")}
+                className={`p-1.5 rounded-md hover:bg-zinc-800 transition-all duration-200 cursor-pointer ${
+                  theme === "system" ? "bg-zinc-950 text-white shadow-sm border border-white/5" : "text-zinc-500 hover:text-zinc-300"
+                }`}
+                title="System Preference"
+              >
+                <Laptop className="h-3.5 w-3.5" />
+              </button>
+            </div>
+          ) : (
+            <div className="h-8 w-24 bg-zinc-900/50 rounded-md animate-pulse border border-white/5" />
+          )}
+
           {/* Notifications */}
           <Button
             variant="ghost"
             size="icon"
-            className="navbar-item relative bg-zinc-900/50 hover:bg-zinc-800 border border-white/5 rounded-md"
+            className="navbar-item relative bg-zinc-900/50 hover:bg-zinc-800 border border-white/5 rounded-md cursor-pointer"
           >
-            <Bell className="h-5 w-5" />
-            <span className="absolute -top-1 -right-1 h-3 w-3 rounded-full bg-red-500" />
+            <Bell className="h-4 w-4 text-zinc-400 hover:text-zinc-200" />
+            <span className="absolute -top-1 -right-1 h-2.5 w-2.5 rounded-full bg-rose-500" />
           </Button>
 
           <div
