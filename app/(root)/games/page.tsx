@@ -2777,7 +2777,7 @@ function sanitizeInput(input: string): string {
       </main>
 
       {/* Footer */}
-      <div className="relative z-20 w-full bg-black/90">
+      <div className="relative z-20 w-full bg-transparent">
         <Footer />
       </div>
 

@@ -182,7 +182,7 @@ export default function ResumeLandingPage() {
       </div>
 
       {/* Footer */}
-      <div className="relative z-20 w-full bg-[#030712]">
+      <div className="relative z-20 w-full bg-transparent">
         <Footer />
       </div>
     </div>
