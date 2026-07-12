@@ -146,51 +146,33 @@ export default function AboutPage() {
           </motion.p>
         </section>
 
-        {/* The Genesis (Bento Grid Style) */}
-        <section className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-stretch px-6 max-w-6xl mx-auto">
-          <div className="lg:col-span-7 flex flex-col justify-center gap-6 pr-0 lg:pr-12">
-            <div>
-              <h2 className="text-[11px] font-bold uppercase tracking-[0.2em] text-zinc-500 mb-3">The Story</h2>
-              <h3 className="text-4xl md:text-5xl font-semibold text-white leading-tight">
-                Why we built this
-              </h3>
-            </div>
-            <div className="space-y-4 text-sm md:text-base text-zinc-300 leading-relaxed font-medium">
-              <p>
-                We were tired of paying for expensive mock interviews. We wanted a tool that anyone could use to practice technical and behavioral questions anytime, anywhere.
-              </p>
-              <p>
-                Mockrithm was created to simulate the actual mental pressure of real conversations, enabling candidates to build speaking rhythm, conquer anxiety, and land their dream jobs.
-              </p>
-            </div>
-          </div>
-          
-          <div className="lg:col-span-5 h-full">
-            <ThreeDTiltCard className="h-full flex flex-col justify-between border-white/10 bg-transparent shadow-none">
-              <Compass className="absolute top-6 right-6 h-16 w-16 text-white/10" />
-              <div className="mt-auto pt-24 relative z-10">
-                <h4 className="text-sm font-bold text-white uppercase tracking-wider mb-3">
-                  Our Vision
-                </h4>
-                <p className="text-sm text-zinc-300 leading-relaxed font-medium">
-                  To build the ultimate companion for career preparation—making premium, adaptive, real-time AI-driven coaching accessible to job-seekers worldwide without the premium price tag.
-                </p>
-              </div>
-            </ThreeDTiltCard>
+        {/* The Story */}
+        <section className="px-6 max-w-4xl mx-auto text-center">
+          <h2 className="text-[11px] font-bold uppercase tracking-[0.2em] text-zinc-500 mb-4">The Story</h2>
+          <h3 className="text-3xl md:text-4xl font-semibold text-white leading-tight mb-6">
+            Why we built this
+          </h3>
+          <div className="space-y-4 text-base md:text-lg text-zinc-300 leading-relaxed font-medium">
+            <p>
+              We were tired of paying for expensive mock interviews. We wanted a tool that anyone could use to practice technical and behavioral questions anytime, anywhere.
+            </p>
+            <p>
+              Mockrithm was created to simulate the actual mental pressure of real conversations, enabling candidates to build speaking rhythm, conquer anxiety, and land their dream jobs.
+            </p>
           </div>
         </section>
 
         {/* Core Values */}
         <section className="w-full px-6 max-w-6xl mx-auto">
           <div className="text-center mb-16">
-            <h2 className="text-[11px] font-bold uppercase tracking-[0.2em] text-zinc-500 mb-3" style={{ fontFamily: "'Inter', sans-serif" }}>Our Pillars</h2>
-            <h3 className="text-4xl md:text-5xl font-normal text-white" style={{ fontFamily: "'Instrument Serif', serif" }}>What Guides Our Platform</h3>
+            <h2 className="text-[11px] font-bold uppercase tracking-[0.2em] text-zinc-500 mb-3">Our Pillars</h2>
+            <h3 className="text-4xl md:text-5xl font-bold text-white">What Guides Our Platform</h3>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {coreValues.map((value, index) => (
-              <ThreeDTiltCard key={index} className="flex flex-col h-full bg-transparent border-white/5 shadow-none">
-                <div className="h-14 w-14 rounded-2xl bg-white/10 flex items-center justify-center border border-white/10 mb-6 shrink-0 shadow-inner relative z-10 backdrop-blur-xl transition-colors">
+              <ThreeDTiltCard key={index} className="flex flex-col h-full !bg-transparent !backdrop-blur-none !shadow-none border-white/10 hover:!border-white/20">
+                <div className="h-14 w-14 rounded-2xl bg-white/5 flex items-center justify-center border border-white/10 mb-6 shrink-0 relative z-10 transition-colors">
                   {value.icon}
                 </div>
                 <h4 className="text-base font-bold text-white mb-3 tracking-tight relative z-10">{value.title}</h4>
