@@ -54,6 +54,9 @@ export default clerkMiddleware(async (auth, req) => {
   }
 
   if (isProtectedRoute(req)) {
+    if (!userId && host.includes("admin.mockrithm.me")) {
+      return NextResponse.redirect("https://mockrithm.me/sign-in");
+    }
     await auth.protect()
   }
 })
