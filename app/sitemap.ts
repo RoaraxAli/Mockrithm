@@ -4,6 +4,7 @@ import { source } from '@/lib/source';
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const baseUrl = 'https://mockrithm.me';
   const docsUrl = 'https://docs.mockrithm.me';
+  const resumeUrl = 'https://resume.mockrithm.me';
 
   // 1. Static main marketing & game routes
   const mainRoutes = [
@@ -28,9 +29,6 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   // 2. Dynamic Documentation routes (using Fumadocs source collection)
   const docsPages = source.getPages();
   const docsRoutes = docsPages.map(page => {
-    // Fumadocs page.url is formatted as e.g. "/documentation/getting-started"
-    // Since docs.mockrithm.me maps the subdomain to the documentation subfolder,
-    // we strip "/documentation" to output absolute sitemap paths under https://docs.mockrithm.me/getting-started
     const slugPath = page.url.replace(/^\/documentation/, '');
     return {
       url: `${docsUrl}${slugPath || ''}`,
@@ -40,5 +38,15 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     };
   });
 
-  return [...mainRoutes, ...docsRoutes];
+  // 3. Resume onboarding route
+  const resumeRoutes = [
+    {
+      url: resumeUrl,
+      lastModified: new Date(),
+      changeFrequency: 'daily' as const,
+      priority: 0.9
+    }
+  ];
+
+  return [...mainRoutes, ...docsRoutes, ...resumeRoutes];
 }

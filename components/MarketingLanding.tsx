@@ -270,7 +270,7 @@ export default function MarketingLanding() {
   }, []);
 
   return (
-    <div className="w-full flex flex-col font-mona-sans relative z-10 min-h-screen text-white overflow-x-hidden selection:bg-white selection:text-black">
+    <div className="w-full flex flex-col font-mona-sans relative z-10 min-h-screen text-white overflow-y-hidden selection:bg-white selection:text-black">
 
       {/* Scroll progress bar (top of viewport) */}
       <div className="fixed top-0 left-0 right-0 h-[2px] z-[9998] pointer-events-none">
@@ -285,7 +285,7 @@ export default function MarketingLanding() {
       <div ref={contentRef} className="relative z-10 w-full flex flex-col min-h-screen">
         <AwwwardsHero />
 
-        <div className="bg-black">
+        <div className="bg-black relative z-20">
           <SectionDivider />
           <AwwwardsShowcase />
 

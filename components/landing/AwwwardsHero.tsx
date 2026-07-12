@@ -16,12 +16,12 @@ export default function AwwwardsHero() {
         loop
         muted
         playsInline
-        className="absolute inset-0 w-full h-full object-cover z-0"
+        className="fixed inset-0 w-full h-full object-cover z-0"
         src="https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260314_131748_f2ca2a28-fed7-44c8-b9a9-bd9acdd5ec31.mp4"
       />
 
       {/* Dark overlay for text readability */}
-      <div className="absolute inset-0 bg-black/30 z-[1]" />
+      <div className="fixed inset-0 bg-black/30 z-[1]" />
 
       {/* Navigation Bar */}
       <nav className="relative z-10 w-full max-w-7xl mx-auto px-6 md:px-8 py-5 flex items-center justify-between">
@@ -41,6 +41,9 @@ export default function AwwwardsHero() {
           </span>
           <span className="text-white/60 hover:text-white cursor-pointer transition-colors duration-200" onClick={() => { window.location.href = "https://games.mockrithm.me"; }}>
             Games
+          </span>
+          <span className="text-white/60 hover:text-white cursor-pointer transition-colors duration-200" onClick={() => { window.location.href = "https://resume.mockrithm.me"; }}>
+            Resume
           </span>
           <span className="text-white/60 hover:text-white cursor-pointer transition-colors duration-200" onClick={() => { window.location.href = "https://docs.mockrithm.me"; }}>
             Docs
