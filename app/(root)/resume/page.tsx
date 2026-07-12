@@ -39,7 +39,7 @@ export default function ResumeLandingPage() {
   );
 
   return (
-    <div className="relative min-h-screen bg-[#07131e] text-white flex flex-col font-sans selection:bg-white selection:text-black overflow-x-hidden">
+    <div className="relative min-h-screen bg-transparent text-white flex flex-col font-sans selection:bg-white selection:text-black overflow-x-hidden">
       
       {/* Fixed Fullscreen Background Video & Overlay (stays static behind the hero) */}
       <div className="fixed inset-0 w-full h-screen z-0 pointer-events-none">
@@ -55,7 +55,7 @@ export default function ResumeLandingPage() {
       </div>
 
       {/* Fixed Glassmorphic Navigation Bar (stays static at the top when scrolling) */}
-      <nav className="fixed top-0 left-0 right-0 z-50 w-full backdrop-blur-md bg-[#07131e]/40 border-b border-white/5 py-4">
+      <nav className="fixed top-0 left-0 right-0 z-50 w-full backdrop-blur-md bg-black/30 py-4">
         <div className="max-w-7xl mx-auto px-6 md:px-8 flex items-center justify-between">
           <span
             className="text-2xl md:text-3xl tracking-tight text-white select-none cursor-pointer"
@@ -120,8 +120,8 @@ export default function ResumeLandingPage() {
         </div>
       </header>
 
-      {/* Scrolling Content Wrapper (solid background, slides up to cover the video) */}
-      <div className="relative z-20 w-full bg-[#07131e] border-t border-white/5">
+      {/* Scrolling Content Wrapper (transparent background, video visible through) */}
+      <div className="relative z-20 w-full bg-transparent">
         
         {/* Features Grid */}
         <section className="max-w-7xl mx-auto px-6 md:px-8 py-24 w-full grid grid-cols-1 md:grid-cols-3 gap-8">

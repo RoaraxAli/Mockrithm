@@ -2595,14 +2595,22 @@ function sanitizeInput(input: string): string {
   const selectedTopic = topics[activeTopic];
 
   return (
-    <div className="min-h-screen bg-black text-white font-mona-sans relative overflow-x-hidden selection:bg-white selection:text-black">
-      {/* Background visual components */}
-      <div className="absolute inset-0 premium-grid-dot pointer-events-none opacity-25 z-0" />
-      <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-zinc-900/[0.04] blur-[160px] rounded-full pointer-events-none" />
-      <div className="absolute bottom-1/4 right-1/4 translate-x-1/2 translate-y-1/2 w-[600px] h-[600px] bg-zinc-900/[0.02] blur-[160px] rounded-full pointer-events-none" />
+    <div className="min-h-screen bg-transparent text-white font-mona-sans relative overflow-x-hidden selection:bg-white selection:text-black">
+      {/* Fixed Fullscreen Background Video */}
+      <div className="fixed inset-0 w-full h-screen z-0 pointer-events-none">
+        <video
+          autoPlay
+          loop
+          muted
+          playsInline
+          className="absolute inset-0 w-full h-full object-cover"
+          src="https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260314_131748_f2ca2a28-fed7-44c8-b9a9-bd9acdd5ec31.mp4"
+        />
+        <div className="absolute inset-0 bg-black/50" />
+      </div>
 
       {/* Navigation Header */}
-      <header className="relative z-10 border-b border-zinc-900 bg-zinc-950/60 backdrop-blur-md px-6 py-4 flex items-center justify-between">
+      <header className="fixed top-0 left-0 right-0 z-50 border-b border-white/5 bg-black/30 backdrop-blur-md px-6 py-4 flex items-center justify-between">
         <div className="flex items-center gap-3">
           <img
             src="/logo.svg"
@@ -2610,37 +2618,33 @@ function sanitizeInput(input: string): string {
             className="w-8 h-8 brightness-0 invert opacity-80"
           />
           <div className="flex flex-col leading-tight">
-            <span className="text-sm font-black tracking-widest uppercase font-mono text-white leading-none">
-              MOCKRITHM
-            </span>
-            <span className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest mt-0.5">
-              GAMES
+            <span className="text-2xl tracking-tight text-white" style={{ fontFamily: "'Instrument Serif', serif" }}>
+              Mockrithm<sup className="text-[10px] align-super">®</sup>
             </span>
           </div>
         </div>
         <div className="flex items-center gap-6">
-          <a
-            href="https://mockrithm.me"
-            className="text-xs font-bold uppercase tracking-wider text-zinc-400 hover:text-white transition-all font-mono"
-          >
-            Core Platform
-          </a>
+          <div className="hidden md:flex items-center gap-6 text-sm font-medium">
+            <a href="https://mockrithm.me" className="text-white/60 hover:text-white transition-colors duration-200">Home</a>
+            <a href="https://resume.mockrithm.me" className="text-white/60 hover:text-white transition-colors duration-200">Resume</a>
+            <a href="https://docs.mockrithm.me" className="text-white/60 hover:text-white transition-colors duration-200">Docs</a>
+          </div>
           <button
             onClick={handleAuthRedirect}
-            className="px-4.5 py-2.5 bg-white text-black text-xs font-black uppercase tracking-wider rounded-xl border border-white hover:bg-zinc-200 transition-all cursor-pointer shadow-lg shadow-white/5"
+            className="liquid-glass rounded-full px-5 py-2 text-sm text-white font-medium hover:scale-[1.03] transition-all duration-300 cursor-pointer shadow-lg active:scale-95 border-none outline-none"
           >
-            Start Playing
+            Begin Journey
           </button>
         </div>
       </header>
 
       {/* Hero Section */}
-      <main className="max-w-5xl mx-auto px-6 pt-24 pb-28 relative z-10">
+      <main className="max-w-5xl mx-auto px-6 pt-24 pb-28 relative z-10 mt-16">
         <div className="text-center mb-24">
           <div className="inline-flex items-center gap-1.5 bg-zinc-900/80 border border-zinc-800 px-3.5 py-1.5 rounded-full text-[9px] font-black uppercase tracking-[0.2em] text-zinc-400 font-mono mb-6">
             <Sparkles className="size-3 text-white animate-pulse" /> Awwwards Class Sandbox
           </div>
-          <h1 className="text-5xl md:text-8xl font-black uppercase tracking-tighter text-white font-mono leading-none">
+          <h1 className="text-5xl sm:text-7xl md:text-[5.5rem] leading-[1] tracking-[-2px] font-normal text-white animate-fade-rise" style={{ fontFamily: "'Instrument Serif', serif" }}>
             {selectedTopic.heroTitle}
           </h1>
           <p className="text-zinc-400 text-xs md:text-sm mt-8 max-w-xl mx-auto leading-relaxed font-mono">
@@ -2663,7 +2667,7 @@ function sanitizeInput(input: string): string {
         </div>
 
         {/* Lead Gen Callout Card */}
-        <section className="bg-gradient-to-br from-zinc-950 via-zinc-950 to-zinc-900/60 border border-zinc-850 rounded-3xl p-8 md:p-10 mb-28 relative overflow-hidden shadow-2xl">
+        <section className="bg-black/30 backdrop-blur-md border border-white/10 rounded-3xl p-8 md:p-10 mb-28 relative overflow-hidden shadow-2xl">
           <div className="absolute top-0 right-0 w-80 h-80 bg-zinc-800/10 blur-[90px] rounded-full pointer-events-none" />
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-8 relative z-10">
             <div className="space-y-3">
