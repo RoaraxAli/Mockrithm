@@ -7,7 +7,6 @@ import Link from "next/link";
 import { motion } from "framer-motion";
 import { ExternalLink, Github, Compass, Sparkles, Target, HeartHandshake, Users, Mail, MapPin, Clock, ArrowRight } from "lucide-react";
 import MarketingNavbar from "@/components/shared/MarketingNavbar";
-import Footer from "@/components/shared/Footer";
 import FeedbackForm from "@/components/FeedbackForm";
 
 // Premium 3D Tilt Card with Glare Reflection
@@ -345,8 +344,6 @@ export default function AboutPage() {
         </section>
 
       </main>
-
-      <Footer />
     </div>
   );
 }
