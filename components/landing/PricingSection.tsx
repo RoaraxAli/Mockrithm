@@ -57,7 +57,7 @@ export default function PricingSection() {
   };
 
   return (
-    <section id="pricing" className="pt-24 pb-32 relative scroll-mt-16 z-10 text-white bg-black overflow-hidden">
+    <section id="pricing" className="pt-24 pb-32 relative scroll-mt-16 z-10 text-white bg-transparent overflow-hidden">
       
       {/* Cool shape divider at the top */}
       <div className="absolute top-0 left-0 right-0 w-full overflow-hidden leading-none z-10 pointer-events-none">

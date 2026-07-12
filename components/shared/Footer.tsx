@@ -10,7 +10,7 @@ interface FooterProps {
 
 const Footer: React.FC<FooterProps> = ({ className = "", isSignedIn = false }) => {
   return (
-    <footer className={`w-full bg-black text-white px-4 pb-8 pt-4 z-30 relative font-mona-sans ${className}`}>
+    <footer className={`w-full bg-transparent text-white px-4 pb-8 pt-4 z-30 relative font-mona-sans ${className}`}>
       <div className="max-w-7xl mx-auto border border-white/10 bg-zinc-950/40 rounded-2xl p-8 sm:p-10 relative overflow-hidden backdrop-blur-md">
         
         {/* Ambient top glowing line */}

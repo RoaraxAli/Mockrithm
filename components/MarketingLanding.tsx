@@ -54,10 +54,10 @@ const SectionDivider = () => {
 
   return (
     <div ref={ref} className="relative w-full flex items-center justify-center my-16 select-none z-20">
-      <div className="divider-line w-full h-[1px] bg-gradient-to-r from-transparent via-zinc-800 to-transparent relative origin-center">
-        <div className="absolute left-[15%] top-1/2 -translate-y-1/2 size-1.5 rotate-45 border border-zinc-700 bg-black" />
+      <div className="divider-line w-full h-[1px] bg-gradient-to-r from-transparent via-zinc-700 to-transparent relative origin-center">
+        <div className="absolute left-[15%] top-1/2 -translate-y-1/2 size-1.5 rotate-45 border border-zinc-600 bg-zinc-950/60 backdrop-blur-sm" />
         <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 size-1.5 rounded-full bg-white shadow-[0_0_8px_rgba(255,255,255,0.4)]" />
-        <div className="absolute right-[15%] top-1/2 -translate-y-1/2 size-1.5 rotate-45 border border-zinc-700 bg-black" />
+        <div className="absolute right-[15%] top-1/2 -translate-y-1/2 size-1.5 rotate-45 border border-zinc-600 bg-zinc-950/60 backdrop-blur-sm" />
       </div>
     </div>
   );
@@ -285,7 +285,7 @@ export default function MarketingLanding() {
       <div ref={contentRef} className="relative z-10 w-full flex flex-col min-h-screen">
         <AwwwardsHero />
 
-        <div className="bg-black relative z-20">
+        <div className="bg-transparent relative z-20">
           <SectionDivider />
           <AwwwardsShowcase />
 
