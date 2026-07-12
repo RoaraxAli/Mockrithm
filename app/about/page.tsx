@@ -243,10 +243,10 @@ export default function AboutPage() {
                         color: "transparent"
                       }}
                     >
-                      2.4K+
+                      26
                     </div>
                     <div className="mt-3 text-[14px] leading-[1.4] text-zinc-300 drop-shadow-md">
-                      stars on Github. Loved by the open-source community.
+                      public repositories built across both our GitHub accounts.
                     </div>
                   </div>
                 </div>
@@ -275,10 +275,10 @@ export default function AboutPage() {
                         color: "transparent"
                       }}
                     >
-                      300+
+                      50
                     </div>
                     <div className="mt-3 text-[14px] leading-[1.4] text-zinc-300 drop-shadow-md">
-                      forks. Developers are constantly building upon our core.
+                      developer followers across the open-source community.
                     </div>
                   </div>
                 </div>
@@ -307,10 +307,10 @@ export default function AboutPage() {
                         color: "transparent"
                       }}
                     >
-                      150+
+                      2
                     </div>
                     <div className="mt-3 text-[14px] leading-[1.4] text-zinc-300 drop-shadow-md">
-                      contributors actively pushing updates to the codebase.
+                      passionate creators — engineers and students pushing code every single day.
                     </div>
                   </div>
                 </div>
