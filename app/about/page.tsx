@@ -96,11 +96,23 @@ export default function AboutPage() {
     <div className="min-h-screen bg-[#030712] text-white relative overflow-hidden font-mona-sans selection:bg-white selection:text-black">
       <MarketingNavbar />
 
-      {/* Abstract Background Elements */}
-      <div className="fixed inset-0 pointer-events-none z-0">
-        <div className="absolute top-0 left-1/4 w-[500px] h-[500px] bg-white/[0.02] blur-[100px] rounded-full" />
-        <div className="absolute bottom-1/4 right-1/4 w-[600px] h-[600px] bg-white/[0.01] blur-[120px] rounded-full" />
-        <div className="absolute inset-0 premium-grid-dot opacity-10" />
+      {/* Dynamic Background Elements */}
+      <div className="fixed inset-0 pointer-events-none z-0 overflow-hidden">
+        {/* Animated Orbs */}
+        <motion.div 
+          animate={{ x: [0, 50, 0], y: [0, -50, 0] }}
+          transition={{ duration: 15, repeat: Infinity, ease: "easeInOut" }}
+          className="absolute top-[10%] left-[20%] w-[600px] h-[600px] bg-blue-500/10 blur-[120px] rounded-full" 
+        />
+        <motion.div 
+          animate={{ x: [0, -50, 0], y: [0, 50, 0] }}
+          transition={{ duration: 18, repeat: Infinity, ease: "easeInOut", delay: 2 }}
+          className="absolute bottom-[20%] right-[10%] w-[700px] h-[700px] bg-emerald-500/10 blur-[150px] rounded-full" 
+        />
+        
+        {/* Deep grid with gradient overlay */}
+        <div className="absolute inset-0 premium-grid-dot opacity-20" />
+        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-[#030712]/50 to-[#030712]" />
       </div>
 
       <main className="relative z-10 max-w-[1400px] mx-auto pt-32 flex flex-col gap-32">
@@ -161,16 +173,23 @@ export default function AboutPage() {
             </div>
           </div>
           
-          <div className="lg:col-span-5 h-full">
-            <ThreeDTiltCard className="h-full flex flex-col justify-between border-white/10 bg-gradient-to-b from-white/5 to-transparent">
-              <Compass className="absolute top-6 right-6 h-16 w-16 text-white/10" />
-              <div className="mt-auto pt-24">
-                <h4 className="text-sm font-bold text-white uppercase tracking-wider mb-3" style={{ fontFamily: "'Inter', sans-serif" }}>Our Vision</h4>
-                <p className="text-sm text-zinc-400 leading-relaxed font-medium" style={{ fontFamily: "'Inter', sans-serif" }}>
+          <div className="lg:col-span-5 h-[400px] lg:h-full relative overflow-hidden rounded-2xl border border-white/10 group">
+            <div className="absolute inset-0 bg-[url('/images/vision.png')] bg-cover bg-center transition-transform duration-700 group-hover:scale-105" />
+            <div className="absolute inset-0 bg-gradient-to-t from-[#030712] via-[#030712]/80 to-[#030712]/20" />
+            <div className="absolute inset-0 bg-emerald-500/5 mix-blend-overlay" />
+            
+            <div className="absolute inset-0 p-8 flex flex-col justify-between">
+              <Compass className="self-end h-10 w-10 text-emerald-400/50" />
+              <div className="mt-auto relative z-10">
+                <h4 className="text-sm font-bold text-white uppercase tracking-wider mb-3 flex items-center gap-2" style={{ fontFamily: "'Inter', sans-serif" }}>
+                  <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+                  Our Vision
+                </h4>
+                <p className="text-sm text-zinc-300 leading-relaxed font-medium" style={{ fontFamily: "'Inter', sans-serif" }}>
                   To build the ultimate companion for career preparation—making premium, adaptive, real-time AI-driven coaching accessible to job-seekers worldwide without the premium price tag.
                 </p>
               </div>
-            </ThreeDTiltCard>
+            </div>
           </div>
         </section>
 
@@ -183,12 +202,15 @@ export default function AboutPage() {
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {coreValues.map((value, index) => (
-              <ThreeDTiltCard key={index} className="flex flex-col h-full bg-zinc-900/40 border-white/5">
-                <div className="h-14 w-14 rounded-2xl bg-white/10 flex items-center justify-center border border-white/10 mb-6 shrink-0 shadow-inner">
+              <ThreeDTiltCard key={index} className="flex flex-col h-full bg-gradient-to-br from-zinc-900/80 via-[#030712] to-[#0a192f]/40 border-white/10 backdrop-blur-md overflow-hidden relative group">
+                {/* Glowing orb behind the icon */}
+                <div className="absolute top-0 left-0 w-32 h-32 bg-emerald-500/20 blur-[50px] rounded-full group-hover:bg-blue-500/20 transition-colors duration-500" />
+                
+                <div className="h-14 w-14 rounded-2xl bg-white/5 flex items-center justify-center border border-white/10 mb-6 shrink-0 shadow-inner relative z-10 backdrop-blur-xl group-hover:border-white/20 transition-colors">
                   {value.icon}
                 </div>
-                <h4 className="text-base font-bold text-white mb-3 tracking-tight" style={{ fontFamily: "'Inter', sans-serif" }}>{value.title}</h4>
-                <p className="text-sm text-zinc-400 font-medium leading-relaxed" style={{ fontFamily: "'Inter', sans-serif" }}>{value.description}</p>
+                <h4 className="text-base font-bold text-white mb-3 tracking-tight relative z-10" style={{ fontFamily: "'Inter', sans-serif" }}>{value.title}</h4>
+                <p className="text-sm text-zinc-400 font-medium leading-relaxed relative z-10" style={{ fontFamily: "'Inter', sans-serif" }}>{value.description}</p>
               </ThreeDTiltCard>
             ))}
           </div>
