@@ -7,7 +7,7 @@ import { Compass, Sparkles, Target, HeartHandshake, ArrowUpRight, Github, Twitte
 import MarketingNavbar from "@/components/shared/MarketingNavbar";
 import FeedbackForm from "@/components/FeedbackForm";
 
-// Premium 3D Tilt Card with Enhanced Glassmorphism
+// Premium 3D Tilt Card with Glare Reflection
 function ThreeDTiltCard({ children, className = "" }: { children: React.ReactNode; className?: string }) {
   const cardRef = useRef<HTMLDivElement>(null);
   const [rotateX, setRotateX] = useState(0);
@@ -63,8 +63,8 @@ function ThreeDTiltCard({ children, className = "" }: { children: React.ReactNod
       >
         {isHovered && (
           <div
-            className="absolute inset-0 pointer-events-none rounded-2xl mix-blend-overlay opacity-50 transition-opacity duration-300"
-            style={{ background: `radial-gradient(circle 140px at ${glareX}% ${glareY}%, rgba(255,255,255,0.3), transparent)` }}
+            className="absolute inset-0 pointer-events-none rounded-xl mix-blend-overlay opacity-30 transition-opacity duration-300"
+            style={{ background: `radial-gradient(circle 140px at ${glareX}% ${glareY}%, rgba(255,255,255,0.2), transparent)` }}
           />
         )}
         {children}
@@ -93,7 +93,7 @@ export default function AboutPage() {
   ];
 
   return (
-    <div className="min-h-screen bg-transparent text-white relative overflow-hidden font-sans selection:bg-white selection:text-black">
+    <div className="min-h-screen bg-transparent text-white relative overflow-hidden font-mona-sans selection:bg-white selection:text-black">
       <MarketingNavbar />
 
       {/* Fixed Fullscreen Background Video & Overlay */}
@@ -109,116 +109,180 @@ export default function AboutPage() {
         <div className="absolute inset-0 bg-black/80" />
       </div>
 
-      <main className="relative z-10 max-w-7xl mx-auto pt-32 pb-32 flex flex-col gap-32">
+      <main className="relative z-10 max-w-[1400px] mx-auto pt-32 flex flex-col gap-32">
         
         {/* Hero Section */}
-        <section className="text-center flex flex-col items-center max-w-3xl mx-auto pt-16 px-6">
+        <section className="text-center flex flex-col items-center max-w-4xl mx-auto pt-16 px-6">
+          <motion.div 
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, ease: "easeOut" }}
+          >
+            <Badge
+              variant="outline"
+              className="border-white/10 bg-white/5 text-zinc-300 px-4 py-1.5 text-[10px] font-bold tracking-[0.2em] uppercase rounded-full backdrop-blur-md mb-8"
+            >
+              The Philosophy
+            </Badge>
+          </motion.div>
+
           <motion.h1
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.7, delay: 0.1, ease: "easeOut" }}
-            className="text-5xl sm:text-6xl md:text-7xl font-bold tracking-tight text-white leading-tight"
+            className="text-5xl sm:text-7xl md:text-8xl font-bold tracking-tight leading-[1.05] text-white"
           >
-            A realistic mock interview platform.
+            A realistic mock <br />
+            <em className="text-white/80 italic font-light">interview platform.</em>
           </motion.h1>
 
           <motion.p
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.7, delay: 0.2, ease: "easeOut" }}
-            className="mt-8 text-lg sm:text-xl text-zinc-300 leading-relaxed font-medium"
+            className="mt-10 text-lg sm:text-xl text-zinc-300 leading-relaxed max-w-3xl font-medium"
           >
             We built Mockrithm because standard interview prep is broken. Memorizing answers doesn't help you in a real technical interview. You need actual practice with an interviewer that challenges your logic.
           </motion.p>
         </section>
 
-        {/* The Story Section */}
-        <section className="px-6 max-w-4xl mx-auto text-center">
-          <h2 className="text-sm font-bold uppercase tracking-[0.2em] text-zinc-500 mb-4">The Story</h2>
-          <h3 className="text-3xl md:text-4xl font-semibold text-white leading-tight mb-6">
-            Why we built this.
-          </h3>
-          <div className="space-y-4 text-base md:text-lg text-zinc-300 leading-relaxed">
-            <p>
-              We were tired of paying for expensive mock interviews. We wanted a tool that anyone could use to practice technical and behavioral questions anytime, anywhere. 
-            </p>
-            <p>
-              Mockrithm was created to simulate the actual mental pressure of real conversations, enabling candidates to build speaking rhythm, conquer anxiety, and land their dream jobs without breaking the bank.
-            </p>
+        {/* The Genesis (Bento Grid Style) */}
+        <section className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-stretch px-6 max-w-6xl mx-auto">
+          <div className="lg:col-span-7 flex flex-col justify-center gap-6 pr-0 lg:pr-12">
+            <div>
+              <h2 className="text-[11px] font-bold uppercase tracking-[0.2em] text-zinc-500 mb-3">The Story</h2>
+              <h3 className="text-4xl md:text-5xl font-semibold text-white leading-tight">
+                Why we built this
+              </h3>
+            </div>
+            <div className="space-y-4 text-sm md:text-base text-zinc-300 leading-relaxed font-medium">
+              <p>
+                We were tired of paying for expensive mock interviews. We wanted a tool that anyone could use to practice technical and behavioral questions anytime, anywhere.
+              </p>
+              <p>
+                Mockrithm was created to simulate the actual mental pressure of real conversations, enabling candidates to build speaking rhythm, conquer anxiety, and land their dream jobs.
+              </p>
+            </div>
+          </div>
+          
+          <div className="lg:col-span-5 h-full">
+            <ThreeDTiltCard className="h-full flex flex-col justify-between border-white/10 bg-transparent shadow-none">
+              <Compass className="absolute top-6 right-6 h-16 w-16 text-white/10" />
+              <div className="mt-auto pt-24 relative z-10">
+                <h4 className="text-sm font-bold text-white uppercase tracking-wider mb-3">
+                  Our Vision
+                </h4>
+                <p className="text-sm text-zinc-300 leading-relaxed font-medium">
+                  To build the ultimate companion for career preparation—making premium, adaptive, real-time AI-driven coaching accessible to job-seekers worldwide without the premium price tag.
+                </p>
+              </div>
+            </ThreeDTiltCard>
           </div>
         </section>
 
         {/* Core Values */}
-        <section className="w-full px-6 max-w-5xl mx-auto">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+        <section className="w-full px-6 max-w-6xl mx-auto">
+          <div className="text-center mb-16">
+            <h2 className="text-[11px] font-bold uppercase tracking-[0.2em] text-zinc-500 mb-3" style={{ fontFamily: "'Inter', sans-serif" }}>Our Pillars</h2>
+            <h3 className="text-4xl md:text-5xl font-normal text-white" style={{ fontFamily: "'Instrument Serif', serif" }}>What Guides Our Platform</h3>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {coreValues.map((value, index) => (
-              <ThreeDTiltCard key={index} className="flex flex-col h-full">
-                <div className="h-12 w-12 rounded-xl bg-white/10 flex items-center justify-center border border-white/10 mb-6 shrink-0 relative z-10 backdrop-blur-xl transition-colors">
+              <ThreeDTiltCard key={index} className="flex flex-col h-full bg-transparent border-white/5 shadow-none">
+                <div className="h-14 w-14 rounded-2xl bg-white/10 flex items-center justify-center border border-white/10 mb-6 shrink-0 shadow-inner relative z-10 backdrop-blur-xl transition-colors">
                   {value.icon}
                 </div>
-                <h4 className="text-lg font-semibold text-white mb-3 tracking-tight relative z-10">{value.title}</h4>
-                <p className="text-sm text-zinc-300 leading-relaxed relative z-10">{value.description}</p>
+                <h4 className="text-base font-bold text-white mb-3 tracking-tight relative z-10">{value.title}</h4>
+                <p className="text-sm text-zinc-300 font-medium leading-relaxed relative z-10">{value.description}</p>
               </ThreeDTiltCard>
             ))}
           </div>
         </section>
 
+        {/* --- CUSTOM FOUNDERS SECTION --- */}
+        <section id="about" className="relative min-h-[80vh] flex flex-col justify-center py-20 sm:py-28 px-6 sm:px-10 overflow-hidden">
+          <div className="max-w-7xl mx-auto relative z-10 w-full">
+            <div className="flex flex-col lg:flex-row items-start justify-between gap-10 lg:gap-20">
+              
+              {/* Left Side: Heading */}
+              <div>
+                <h2 className="text-white font-bold uppercase tracking-tight leading-[0.95] text-[36px] sm:text-[48px] lg:text-[54px]">
+                  About <br /> the creators
+                </h2>
+              </div>
+
+              {/* Right Side: Description */}
+              <div className="flex flex-col max-w-xl text-zinc-300 text-[17px] sm:text-[18px] leading-[1.5]">
+                <p>
+                  Mockrithm was created by Ali & Ahmed — engineers who understand the intense pressure, anxiety, and bottlenecks of technical recruitment.
+                </p>
+                <p className="mt-4">
+                  Our mission is to offer every candidate the chance to reshape their career trajectory by providing high-fidelity, adaptive, AI-driven preparation that was previously locked behind expensive coaching.
+                </p>
+              </div>
+            </div>
+
+            </div>
+          </div>
+        </section>
+
+        {/* --- CUSTOM CONTACT SECTION OVERHAUL --- */}
         {/* Contact Section */}
-        <section id="contact" className="w-full scroll-mt-32 px-6 pt-10 max-w-5xl mx-auto mb-20 border-t border-white/10 mt-10">
-          <div className="text-center mb-16 pt-16">
-            <h2 className="text-sm font-bold uppercase tracking-[0.2em] text-zinc-500 mb-3">Reach Out</h2>
-            <h3 className="text-4xl md:text-5xl font-semibold text-white">
-              Get in touch
+        <section id="contact" className="w-full scroll-mt-32 px-6 pt-10 max-w-6xl mx-auto mb-20">
+          <div className="text-center mb-16">
+            <h2 className="text-[11px] font-bold uppercase tracking-[0.2em] text-zinc-500 mb-3" style={{ fontFamily: "'Inter', sans-serif" }}>Reach Out</h2>
+            <h3 className="text-4xl md:text-5xl font-normal text-white" style={{ fontFamily: "'Instrument Serif', serif" }}>
+              Get in <em className="text-white/60 italic font-light">touch</em>
             </h3>
-            <p className="mt-4 text-base text-zinc-400 leading-relaxed max-w-xl mx-auto">
-              Have questions, feedback, or need support? Send us a message directly and our team will get back to you shortly.
+            <p className="mt-4 text-base text-zinc-400 leading-relaxed font-medium max-w-xl mx-auto" style={{ fontFamily: "'Inter', sans-serif" }}>
+              Have questions, feedback, or need support? Send us a message directly and our team will get back to you shortly. We're building this for you.
             </p>
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-24 items-start">
             
-            {/* Left Column: Info */}
-            <div className="flex flex-col gap-10 lg:pt-8">
-              <div className="flex items-start gap-5 group cursor-pointer">
-                <div className="h-14 w-14 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center shrink-0 group-hover:bg-white/10 transition-colors shadow-lg">
-                  <HeartHandshake className="h-6 w-6 text-white/80 group-hover:text-white transition-colors" />
+            {/* Left Column: Info & Story */}
+            <div className="flex flex-col gap-8 lg:pt-8">
+              <div className="flex items-start gap-4 group cursor-pointer">
+                <div className="h-14 w-14 rounded-full bg-white/5 border border-white/10 flex items-center justify-center shrink-0 group-hover:bg-white/10 transition-colors">
+                  <HeartHandshake className="h-6 w-6 text-white/70 group-hover:text-white transition-colors" />
                 </div>
-                <div className="flex flex-col gap-1">
+                <div className="flex flex-col gap-1.5" style={{ fontFamily: "'Inter', sans-serif" }}>
                   <span className="text-xs font-bold uppercase tracking-wider text-zinc-500">Email Us</span>
                   <a href="mailto:support@mockrithm.me" className="text-xl font-medium text-white hover:text-zinc-300 transition-colors flex items-center gap-2">
                     support@mockrithm.me <ArrowUpRight className="h-4 w-4 opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all" />
                   </a>
-                  <span className="text-sm text-zinc-400 mt-1">We typically reply within 24 hours.</span>
+                  <span className="text-sm text-zinc-500">We typically reply within 24 hours.</span>
                 </div>
               </div>
 
-              <div className="flex items-start gap-5 group">
-                <div className="h-14 w-14 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center shrink-0 shadow-lg">
-                  <Target className="h-6 w-6 text-white/80" />
+              <div className="flex items-start gap-4 group">
+                <div className="h-14 w-14 rounded-full bg-white/5 border border-white/10 flex items-center justify-center shrink-0">
+                  <Target className="h-6 w-6 text-white/70" />
                 </div>
-                <div className="flex flex-col gap-1">
+                <div className="flex flex-col gap-1.5" style={{ fontFamily: "'Inter', sans-serif" }}>
                   <span className="text-xs font-bold uppercase tracking-wider text-zinc-500">Location</span>
                   <span className="text-xl font-medium text-white">Global / Remote</span>
-                  <span className="text-sm text-zinc-400 mt-1">Built in the cloud, for the world.</span>
+                  <span className="text-sm text-zinc-500">Built in the cloud, for the world.</span>
                 </div>
               </div>
-              
-              <div className="flex items-start gap-5 group cursor-pointer">
-                <div className="h-14 w-14 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center shrink-0 group-hover:bg-white/10 transition-colors shadow-lg">
-                  <Instagram className="h-6 w-6 text-white/80 group-hover:text-white transition-colors" />
+              <div className="flex items-start gap-4 group cursor-pointer">
+                <div className="h-14 w-14 rounded-full bg-white/5 border border-white/10 flex items-center justify-center shrink-0 group-hover:bg-white/10 transition-colors">
+                  <Instagram className="h-6 w-6 text-white/70 group-hover:text-white transition-colors" />
                 </div>
-                <div className="flex flex-col gap-1">
+                <div className="flex flex-col gap-1.5" style={{ fontFamily: "'Inter', sans-serif" }}>
                   <span className="text-xs font-bold uppercase tracking-wider text-zinc-500">Instagram</span>
                   <a href="https://instagram.com/mockrithm" target="_blank" rel="noreferrer" className="text-xl font-medium text-white hover:text-zinc-300 transition-colors flex items-center gap-2">
                     @mockrithm <ArrowUpRight className="h-4 w-4 opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all" />
                   </a>
-                  <span className="text-sm text-zinc-400 mt-1">Follow us for updates & tips.</span>
+                  <span className="text-sm text-zinc-500">Follow us for updates & tips.</span>
                 </div>
               </div>
             </div>
 
             {/* Right Column: Simple Form */}
-            <div className="w-full rounded-3xl border border-white/10 bg-white/5 backdrop-blur-2xl p-8 shadow-[0_8px_30px_rgb(0,0,0,0.12)]">
+            <div className="w-full rounded-2xl border border-white/10 bg-zinc-900/30 p-8 shadow-2xl">
               <FeedbackForm />
             </div>
 
