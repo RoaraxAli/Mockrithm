@@ -55,7 +55,7 @@ export function AdminNavbar() {
   };
 
   return (
-    <header className="sticky top-0 z-40 border-b border-white/10 bg-black/80 backdrop-blur-sm">
+    <header className="sticky top-0 z-40 border-b border-white/5 bg-zinc-950/80 backdrop-blur-sm">
       <div className="flex h-16 items-center justify-between px-4 lg:px-8">
         {/* Search */}
         <div className="navbar-item flex items-center space-x-4 lg:ml-0 ml-12">
@@ -65,7 +65,7 @@ export function AdminNavbar() {
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="Search..."
-              className="w-64 bg-white/5 border-white/10 pl-10 focus:border-white/20"
+              className="w-64 bg-zinc-900/50 border-white/5 pl-10 focus:border-white/20 text-zinc-200 placeholder:text-zinc-500 rounded-md"
             />
           </div>
         </div>
@@ -76,27 +76,14 @@ export function AdminNavbar() {
           <Button
             variant="ghost"
             size="icon"
-            className="navbar-item relative bg-white/5 hover:bg-white/10 border border-white/10"
+            className="navbar-item relative bg-zinc-900/50 hover:bg-zinc-800 border border-white/5 rounded-md"
           >
             <Bell className="h-5 w-5" />
             <span className="absolute -top-1 -right-1 h-3 w-3 rounded-full bg-red-500" />
           </Button>
 
           <div
-            className="
-    cursor-pointer
-    px-4 py-2
-    rounded-lg
-    border border-white/60
-    hover:shadow-lg
-    hover:border-gray-300
-    transition
-    duration-200
-    text-white
-    font-medium
-    text-center
-    select-none
-  "
+            className="cursor-pointer px-4 py-2 rounded-md border border-white/5 bg-zinc-900/50 hover:bg-zinc-800 transition duration-200 text-zinc-200 font-medium text-sm text-center select-none flex items-center justify-center"
             onClick={() => console.log("Clicked")}
           >
             {adminName || "Admin"}

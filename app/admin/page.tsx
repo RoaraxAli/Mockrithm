@@ -32,50 +32,7 @@ import {
   Cell,
   Legend,
 } from "recharts";
-import { getAdminMetrics } from "@/lib/actions/admin.action";
-
-const REVENUE_DATA = [
-  { name: "Jan", thisYear: 40000, lastYear: 24000 },
-  { name: "Feb", thisYear: 30000, lastYear: 1398 },
-  { name: "Mar", thisYear: 20000, lastYear: 9800 },
-  { name: "Apr", thisYear: 27800, lastYear: 3908 },
-  { name: "May", thisYear: 18900, lastYear: 4800 },
-  { name: "Jun", thisYear: 23900, lastYear: 3800 },
-  { name: "Jul", thisYear: 34900, lastYear: 4300 },
-  { name: "Aug", thisYear: 40000, lastYear: 24000 },
-  { name: "Sep", thisYear: 30000, lastYear: 1398 },
-  { name: "Oct", thisYear: 20000, lastYear: 9800 },
-  { name: "Nov", thisYear: 27800, lastYear: 3908 },
-  { name: "Dec", thisYear: 18900, lastYear: 4800 },
-];
-
-const CHANNEL_DATA = [
-  { name: "Jan", online: 4000, store: 2400, wholesale: 2400 },
-  { name: "Feb", online: 3000, store: 1398, wholesale: 2210 },
-  { name: "Mar", online: 2000, store: 9800, wholesale: 2290 },
-  { name: "Apr", online: 2780, store: 3908, wholesale: 2000 },
-  { name: "May", online: 1890, store: 4800, wholesale: 2181 },
-  { name: "Jun", online: 2390, store: 3800, wholesale: 2500 },
-];
-
-const AOV_DATA = [
-  { name: "1", value: 800 },
-  { name: "2", value: 1200 },
-  { name: "3", value: 1000 },
-  { name: "4", value: 1400 },
-  { name: "5", value: 1100 },
-  { name: "6", value: 1600 },
-  { name: "7", value: 1300 },
-  { name: "8", value: 1500 },
-  { name: "9", value: 1200 },
-  { name: "10", value: 1700 },
-];
-
-const CATEGORY_DATA = [
-  { name: "Technical", value: 400, color: "#ffffff" },
-  { name: "Behavioural", value: 300, color: "#a1a1aa" },
-  { name: "Mixed", value: 300, color: "#52525b" },
-];
+import { getAdminMetrics, getAdminChartsData } from "@/lib/actions/admin.action";
 
 export default function AdminDashboard() {
   const [metrics, setMetrics] = useState({
@@ -85,25 +42,41 @@ export default function AdminDashboard() {
     interviews: { total: 0, change: "0" }, // Mock data
   });
 
+  const [chartsData, setChartsData] = useState({
+    userGrowthData: [],
+    interviewData: [],
+    categoryData: [],
+    dailyActivityData: [],
+  });
+
   useEffect(() => {
     let isMounted = true;
-    const fetchMetrics = async () => {
+    const fetchData = async () => {
       try {
-        const res = await getAdminMetrics();
+        const [metricsRes, chartsRes] = await Promise.all([
+          getAdminMetrics(),
+          getAdminChartsData()
+        ]);
+        
         if (!isMounted) return;
-        if (res.success && res.data) {
+        
+        if (metricsRes.success && metricsRes.data) {
           setMetrics({
-            users: res.data.users,
-            feedbacks: res.data.feedbacks,
-            sessions: res.data.sessions,
-            interviews: { total: 1245, change: "+14" }, // Mock data for interviews since it's missing in getAdminMetrics
+            users: metricsRes.data.users,
+            feedbacks: metricsRes.data.feedbacks || { total: 0, change: 0 },
+            sessions: metricsRes.data.sessions,
+            interviews: { total: 1245, change: "+14" }, // Could also pull from real metrics if updated
           });
+        }
+
+        if (chartsRes.success && chartsRes.data) {
+          setChartsData(chartsRes.data);
         }
       } catch (err) {
         console.error("Error loading metrics:", err);
       }
     };
-    fetchMetrics();
+    fetchData();
     return () => {
       isMounted = false;
     };
@@ -189,7 +162,7 @@ export default function AdminDashboard() {
           </CardHeader>
           <CardContent className="pl-2">
             <ResponsiveContainer width="100%" height={350}>
-              <LineChart data={REVENUE_DATA} margin={{ top: 5, right: 10, left: 10, bottom: 0 }}>
+              <LineChart data={chartsData.userGrowthData} margin={{ top: 5, right: 10, left: 10, bottom: 0 }}>
                 <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#27272a" />
                 <XAxis
                   dataKey="name"
@@ -242,7 +215,7 @@ export default function AdminDashboard() {
           </CardHeader>
           <CardContent>
             <ResponsiveContainer width="100%" height={350}>
-              <BarChart data={CHANNEL_DATA}>
+              <BarChart data={chartsData.interviewData}>
                 <XAxis
                   dataKey="name"
                   stroke="#71717a"
@@ -276,7 +249,7 @@ export default function AdminDashboard() {
           </CardHeader>
           <CardContent>
             <ResponsiveContainer width="100%" height={250}>
-              <BarChart data={AOV_DATA}>
+              <BarChart data={chartsData.dailyActivityData}>
                 <Tooltip
                   contentStyle={{ backgroundColor: "#09090b", borderColor: "#27272a", color: "#fff" }}
                   cursor={{ fill: "#27272a" }}
@@ -296,7 +269,7 @@ export default function AdminDashboard() {
           </CardHeader>
           <CardContent>
             <ResponsiveContainer width="100%" height={250}>
-              <LineChart data={CHANNEL_DATA}>
+              <LineChart data={chartsData.interviewData}>
                 <Tooltip
                   contentStyle={{ backgroundColor: "#09090b", borderColor: "#27272a", color: "#fff" }}
                 />
@@ -327,7 +300,7 @@ export default function AdminDashboard() {
             <ResponsiveContainer width="100%" height={250}>
               <PieChart>
                 <Pie
-                  data={CATEGORY_DATA}
+                  data={chartsData.categoryData}
                   cx="50%"
                   cy="50%"
                   innerRadius={60}
@@ -336,7 +309,7 @@ export default function AdminDashboard() {
                   dataKey="value"
                   stroke="none"
                 >
-                  {CATEGORY_DATA.map((entry, index) => (
+                  {chartsData.categoryData.map((entry: any, index: number) => (
                     <Cell key={`cell-${index}`} fill={entry.color} />
                   ))}
                 </Pie>

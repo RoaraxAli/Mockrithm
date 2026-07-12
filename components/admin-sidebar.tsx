@@ -142,12 +142,12 @@ const handleLogout = async () => {
   const SidebarContent = () => (
     <Card
       className={cn(
-        "h-full bg-black border-r border-white/10 rounded-none shadow-none transition-all duration-300",
+        "h-full bg-zinc-950 border-r border-white/5 rounded-none shadow-none transition-all duration-300",
         isCollapsed ? "w-16" : "w-64"
       )}
     >
       <CardContent className="flex flex-col h-full p-0">
-        <div className="flex h-20 items-center justify-between px-6 border-b border-white/10">
+        <div className="flex h-16 items-center justify-between px-6 border-b border-white/5">
           {!isCollapsed && (
             <h1 className="text-xl font-bold text-white">Admin Panel</h1>
           )}
@@ -174,10 +174,10 @@ const handleLogout = async () => {
                   <Link
                     href={item.href}
                     className={cn(
-                      "sidebar-item flex items-center rounded-lg px-3 py-2 text-sm font-medium transition-all duration-200 cursor-pointer hover:bg-white/10",
+                      "sidebar-item flex items-center rounded-md px-3 py-2 text-sm font-medium transition-all duration-200 cursor-pointer hover:bg-zinc-900",
                       isActive
-                        ? "bg-white/10 text-white shadow"
-                        : "text-gray-400 hover:text-white",
+                        ? "bg-zinc-900 text-zinc-100 shadow-sm"
+                        : "text-zinc-400 hover:text-zinc-100",
                       isCollapsed && "justify-center"
                     )}
                     title={isCollapsed ? item.name : undefined}
@@ -198,13 +198,13 @@ const handleLogout = async () => {
           </nav>
         </ScrollArea>
 
-        <div className="border-t border-white/10 p-4">
+        <div className="border-t border-white/5 p-4">
           <div
             className={cn(
-              "sidebar-item flex items-center justify-between rounded-lg px-3 py-2 text-sm font-medium transition-all duration-200 cursor-pointer hover:bg-white/10",
+              "sidebar-item flex items-center justify-between rounded-md px-3 py-2 text-sm font-medium transition-all duration-200 cursor-pointer hover:bg-zinc-900",
               adminSectionOpen
-                ? "bg-white/10 text-white"
-                : "text-gray-400 hover:text-white",
+                ? "bg-zinc-900 text-zinc-100"
+                : "text-zinc-400 hover:text-zinc-100",
               isCollapsed && "justify-center"
             )}
             onClick={() =>
@@ -223,7 +223,7 @@ const handleLogout = async () => {
                   src={adminImage || "/placeholder.svg"}
                   alt={adminName}
                 />
-                <AvatarFallback className="bg-white/10 text-white">
+                <AvatarFallback className="bg-zinc-800 text-zinc-300">
                   <User className="h-4 w-4" />
                 </AvatarFallback>
               </Avatar>
@@ -238,7 +238,7 @@ const handleLogout = async () => {
               <Button
                 variant="ghost"
                 size="sm"
-                className="w-full justify-start text-gray-400 hover:text-white hover:bg-white/10"
+                className="w-full justify-start text-zinc-400 hover:text-zinc-100 hover:bg-zinc-900"
                 onClick={() => router.push("/")}
               >
                 <Globe className="mr-2 h-4 w-4" />
@@ -248,7 +248,7 @@ const handleLogout = async () => {
               <Button
                 variant="ghost"
                 size="sm"
-                className="w-full justify-start text-gray-400 hover:text-white hover:bg-white/10"
+                className="w-full justify-start text-zinc-400 hover:text-zinc-100 hover:bg-zinc-900"
                 onClick={toggleMaintenance}
                 disabled={loadingMaintenance}
               >
@@ -268,7 +268,7 @@ const handleLogout = async () => {
               <Button
                 variant="ghost"
                 size="sm"
-                className="w-full justify-start text-gray-400 hover:text-white hover:bg-white/10"
+                className="w-full justify-start text-zinc-400 hover:text-zinc-100 hover:bg-zinc-900"
                 onClick={handleLogout}
               >
                 <LogOut className="mr-2 h-4 w-4" />
@@ -299,12 +299,12 @@ const handleLogout = async () => {
           <Button
             variant="ghost"
             size="icon"
-            className="lg:hidden fixed top-4 left-4 z-50 bg-black/50 backdrop-blur-sm border border-white/10"
+            className="lg:hidden fixed top-4 left-4 z-50 bg-zinc-950/50 backdrop-blur-sm border border-white/5"
           >
             <Menu className="h-5 w-5" />
           </Button>
         </SheetTrigger>
-        <SheetContent side="left" className="w-64 p-0 bg-black border-white/10">
+        <SheetContent side="left" className="w-64 p-0 bg-zinc-950 border-white/5">
           <SidebarContent />
         </SheetContent>
       </Sheet>
