@@ -5,6 +5,7 @@ import { useUser } from "@clerk/nextjs";
 import { usePathname, useRouter } from "next/navigation";
 import Navbar from "@/components/Navbar";
 import PlanSelectionModal from "@/components/PlanSelectionModal";
+import FooterWrapper from "@/components/shared/FooterWrapper";
 import { Phone, PhoneOff, Mic, MicOff, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -535,6 +536,7 @@ export default function AuthLayout({
         <Navbar userId={userId!} userName={userName || "User"} userRole={userRole} />
       )}
       {children}
+      <FooterWrapper />
       {showPrompt && userId && !isSubdomain && (
         <PlanSelectionModal
           userId={userId}

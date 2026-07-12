@@ -5,7 +5,6 @@ import { ClerkProvider } from "@clerk/nextjs";
 
 import AuthLayout from "@/components/Authlayout";
 import Preloader from "@/components/shared/Preloader";
-import FooterWrapper from "@/components/shared/FooterWrapper";
 import MagneticCursor from "@/components/landing/MagneticCursor";
 import { getCurrentUser } from "@/lib/actions/auth.action";
 import { Analytics } from "@vercel/analytics/react";
@@ -95,10 +94,7 @@ export default async function RootLayout({
             variables: {
               colorPrimary: "#ffffff",
               colorBackground: "#09090b", // zinc-950
-              colorTextSecondary: "#a1a1aa", // zinc-400
               colorBorder: "#27272a", // zinc-800
-              colorInputBackground: "#09090b",
-              colorInputText: "#ffffff",
             }
           }}
         >
@@ -112,7 +108,6 @@ export default async function RootLayout({
             </AuthLayout>
           </RootProvider>
           <Toaster />
-          <FooterWrapper />
         </ClerkProvider>
       </body>
     </html>
