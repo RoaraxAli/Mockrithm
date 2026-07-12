@@ -26,6 +26,15 @@ export default clerkMiddleware(async (auth, req) => {
     return NextResponse.next();
   }
 
+  // 🛡️ Admin subdomain isolation
+  // Block direct access to /admin on the main site. Allow if host is admin.mockrithm.me or localhost.
+  if (req.nextUrl.pathname.startsWith("/admin")) {
+    if (!host.includes("admin.mockrithm.me") && !host.includes("localhost")) {
+      url.pathname = "/404";
+      return NextResponse.rewrite(url);
+    }
+  }
+
   console.log(`[Proxy Log] Host: ${host} | Path: ${req.nextUrl.pathname}`);
 
 

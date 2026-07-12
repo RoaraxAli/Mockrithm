@@ -156,6 +156,26 @@
         }
       ],
       "destination": "/resume/:path*"
+    },
+    {
+      "source": "/",
+      "has": [
+        {
+          "type": "host",
+          "value": "admin.mockrithm.me"
+        }
+      ],
+      "destination": "/admin"
+    },
+    {
+      "source": "/:path*",
+      "has": [
+        {
+          "type": "host",
+          "value": "admin.mockrithm.me"
+        }
+      ],
+      "destination": "/admin/:path*"
     }
   ]
 }

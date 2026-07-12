@@ -18,6 +18,7 @@ import {
   User,
   BookOpen,
   Key,
+  Shield,
 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -53,6 +54,7 @@ const navigation = [
   { name: "Feedback", href: "/admin/feedback", icon: MessageSquare },
   { name: "Blogs", href: "/admin/blogs", icon: BookOpen },
   { name: "API Telemetry", href: "/admin/keys", icon: Key },
+  { name: "Audit Logs", href: "/admin/audit", icon: Shield },
 ];
 
 export function AdminSidebar() {

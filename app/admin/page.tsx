@@ -31,7 +31,7 @@ import {
   Activity,
   TrendingUp,
 } from "lucide-react";
-import { getAdminMetrics, getRecentActivity, resetSessions } from "@/lib/actions/admin.action";
+import { getAdminMetrics, getRecentActivity, resetSessions, exportFullActivityJSON } from "@/lib/actions/admin.action";
 import { toast } from "sonner";
 
 gsap.registerPlugin(ScrollTrigger);
@@ -149,30 +149,47 @@ export default function AdminDashboard() {
     [userCount, feedbackCount, sessionCount, userGrowth, feedbackGrowth, sessionGrowth]
   );
 
-  const handleExportJSON = useCallback(() => {
-    const data = { users: recentUsers, feedbacks: recentFeedbacks };
-    const blob = new Blob([JSON.stringify(data, null, 2)], {
-      type: "application/json",
-    });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = "activity.json";
-    a.click();
-    URL.revokeObjectURL(url);
-  }, [recentUsers, recentFeedbacks]);
+  const handleExportJSON = useCallback(async () => {
+    try {
+      toast.info("Generating full export...");
+      const res = await exportFullActivityJSON();
+      if (res.success && res.data) {
+        const blob = new Blob([res.data], { type: "application/json" });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = `mockrithm_export_${new Date().toISOString().split("T")[0]}.json`;
+        a.click();
+        URL.revokeObjectURL(url);
+        toast.success("Export downloaded successfully!");
+      } else {
+        toast.error(res.error || "Failed to export data.");
+      }
+    } catch (err) {
+      console.error("Export failed:", err);
+      toast.error("Failed to export data.");
+    }
+  }, []);
 
   const handleRefresh = useCallback(() => {
     window.location.reload();
   }, []);
 
   const handleResetSessions = useCallback(async () => {
-    if (!confirm("Are you sure you want to delete ALL session data? This cannot be undone.")) return;
+    if (!confirm("Are you sure you want to delete a batch of session data? This cannot be undone.")) return;
     
     try {
-      const res = await resetSessions();
-      toast.success("Sessions reset successfully!");
-      handleRefresh();
+      const res = await resetSessions() as any;
+      if (res?.success) {
+        if (res.remaining > 0) {
+          toast.info(`Deleted ${res.deletedCount} sessions. ${res.remaining} remaining. Click again to delete more.`);
+        } else {
+          toast.success(`All sessions cleared! Deleted ${res.deletedCount} in this batch.`);
+        }
+        handleRefresh();
+      } else {
+        toast.error(res?.error || "Failed to reset sessions.");
+      }
     } catch (err) {
       console.error("Reset failed:", err);
       toast.error("Failed to reset sessions.");

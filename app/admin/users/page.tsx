@@ -1,16 +1,9 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import {
-  collection,
-  getDocs,
-  deleteDoc,
-  doc,
-} from "firebase/firestore";
-import { db } from "@/firebase/client";
+import { useEffect, useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
 
-import { Search, Trash2, MoreHorizontal, UserPlus, Pencil } from "lucide-react";
+import { Search, Trash2, MoreHorizontal, UserPlus, Pencil, Shield, ChevronLeft, ChevronRight } from "lucide-react";
 
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
@@ -32,6 +25,10 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
+  DropdownMenuSub,
+  DropdownMenuSubTrigger,
+  DropdownMenuSubContent,
+  DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu";
 import {
   Select,
@@ -40,51 +37,67 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { toast } from "sonner";
 
 if (typeof window !== "undefined") {
   gsap.registerPlugin(ScrollTrigger);
 }
 
+const PAGE_SIZE = 20;
+
 export default function UsersPage() {
   const [searchTerm, setSearchTerm] = useState("");
   const [roleFilter, setRoleFilter] = useState("all");
   const [users, setUsers] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  // Pagination state
+  const [cursorHistory, setCursorHistory] = useState<(string | undefined)[]>([undefined]);
+  const [currentPage, setCurrentPage] = useState(0);
+  const [hasMore, setHasMore] = useState(false);
+
+  const fetchPage = useCallback(async (cursorId?: string) => {
+    setLoading(true);
+    try {
+      const { getAdminUsersPaginated } = await import("@/lib/actions/admin.action");
+      const res = await getAdminUsersPaginated(PAGE_SIZE, cursorId);
+      if (res.success && res.data) {
+        const fetchedUsers = res.data.map((user: any) => ({
+          ...user,
+          createdAt: user.createdAt
+            ? new Date(user.createdAt).toLocaleDateString()
+            : "—",
+        }));
+        setUsers(fetchedUsers);
+        setHasMore(res.hasMore ?? false);
+
+        // Store the next cursor for forward pagination
+        if (res.nextCursorId) {
+          setCursorHistory((prev) => {
+            const next = [...prev];
+            if (next.length <= currentPage + 1) {
+              next.push(res.nextCursorId as string);
+            } else {
+              next[currentPage + 1] = res.nextCursorId as string;
+            }
+            return next;
+          });
+        }
+      } else {
+        console.error("Failed to fetch users:", res.error);
+      }
+    } catch (err) {
+      console.error("Error fetching users:", err);
+    } finally {
+      setLoading(false);
+    }
+  }, [currentPage]);
 
   useEffect(() => {
-    const fetchUsers = async () => {
-      try {
-        const { getAdminUsers } = await import("@/lib/actions/admin.action");
-        const res = await getAdminUsers();
-        if (res.success && res.data) {
-          const fetchedUsers = res.data.map((user: any) => ({
-            ...user,
-            createdAt: user.createdAt 
-              ? new Date(user.createdAt).toLocaleDateString() 
-              : "—"
-          }));
+    fetchPage(cursorHistory[currentPage]);
+  }, [currentPage]);
 
-          // sort manually if createdAt exists
-          fetchedUsers.sort((a: any, b: any) => {
-            const aDate = new Date(a.createdAt);
-            const bDate = new Date(b.createdAt);
-            return isNaN(bDate.getTime())
-              ? -1
-              : isNaN(aDate.getTime())
-              ? 1
-              : bDate.getTime() - aDate.getTime();
-          });
-
-          setUsers(fetchedUsers);
-        } else {
-          console.error("Failed to fetch users:", res.error);
-        }
-      } catch (err) {
-        console.error("Error fetching users:", err);
-      }
-    };
-
-    fetchUsers();
-
+  useEffect(() => {
     gsap.fromTo(
       ".table-row",
       { opacity: 0, y: 20 },
@@ -117,7 +130,7 @@ export default function UsersPage() {
     return () => {
       ScrollTrigger.getAll().forEach((trigger) => trigger.kill());
     };
-  }, []);
+  }, [users]);
 
   const filteredUsers = users.filter((user) => {
     const matchesSearch =
@@ -130,18 +143,38 @@ export default function UsersPage() {
   });
 
   const handleDeleteUser = async (userId: string) => {
+    if (!confirm("Are you sure you want to delete this user? This cannot be undone.")) return;
     try {
       const { deleteAdminUser } = await import("@/lib/actions/admin.action");
       const res = await deleteAdminUser(userId);
       if (res.success) {
         setUsers(users.filter((user) => user.id !== userId));
+        toast.success("User deleted successfully.");
       } else {
-        console.error("Failed to delete user:", res.error);
+        toast.error(res.error || "Failed to delete user.");
       }
     } catch (err) {
       console.error("Failed to delete user:", err);
+      toast.error("Failed to delete user.");
     }
   };
+
+  const handleRoleChange = async (userId: string, newRole: string) => {
+    try {
+      const { updateUserRole } = await import("@/lib/actions/admin.action");
+      const res = await updateUserRole(userId, newRole);
+      if (res.success) {
+        setUsers(users.map((u) => u.id === userId ? { ...u, role: newRole } : u));
+        toast.success(`Role updated to ${newRole}`);
+      } else {
+        toast.error(res.error || "Failed to update role.");
+      }
+    } catch (err) {
+      console.error("Failed to update role:", err);
+      toast.error("Failed to update role.");
+    }
+  };
+
   const router = useRouter();
 
   return (
@@ -262,6 +295,25 @@ export default function UsersPage() {
                             <Pencil className="mr-2 h-4 w-4" />
                             Edit User
                           </DropdownMenuItem>
+                          <DropdownMenuSub>
+                            <DropdownMenuSubTrigger className="hover:bg-white/5">
+                              <Shield className="mr-2 h-4 w-4" />
+                              Change Role
+                            </DropdownMenuSubTrigger>
+                            <DropdownMenuSubContent className="bg-black/95 backdrop-blur-sm border-white/10">
+                              {["User", "Admin", "Moderator"].map((role) => (
+                                <DropdownMenuItem
+                                  key={role}
+                                  className={`hover:bg-white/5 ${user.role === role ? "text-white font-bold" : "text-gray-400"}`}
+                                  onClick={() => handleRoleChange(user.id, role)}
+                                  disabled={user.role === role}
+                                >
+                                  {role} {user.role === role && "✓"}
+                                </DropdownMenuItem>
+                              ))}
+                            </DropdownMenuSubContent>
+                          </DropdownMenuSub>
+                          <DropdownMenuSeparator className="bg-white/10" />
                           <DropdownMenuItem
                             className="hover:bg-white/5 text-red-400"
                             onClick={() => handleDeleteUser(user.id)}
@@ -283,6 +335,33 @@ export default function UsersPage() {
               No users found matching your criteria.
             </div>
           )}
+
+          {/* Pagination Controls */}
+          <div className="flex items-center justify-between pt-4 border-t border-white/10 mt-4">
+            <p className="text-xs text-gray-400">
+              Page {currentPage + 1} · Showing {filteredUsers.length} users
+            </p>
+            <div className="flex items-center gap-2">
+              <Button
+                variant="ghost"
+                size="sm"
+                className="text-gray-400 hover:text-white hover:bg-white/10"
+                disabled={currentPage === 0}
+                onClick={() => setCurrentPage((p) => Math.max(0, p - 1))}
+              >
+                <ChevronLeft className="h-4 w-4 mr-1" /> Previous
+              </Button>
+              <Button
+                variant="ghost"
+                size="sm"
+                className="text-gray-400 hover:text-white hover:bg-white/10"
+                disabled={!hasMore}
+                onClick={() => setCurrentPage((p) => p + 1)}
+              >
+                Next <ChevronRight className="h-4 w-4 ml-1" />
+              </Button>
+            </div>
+          </div>
         </CardContent>
       </Card>
     </div>

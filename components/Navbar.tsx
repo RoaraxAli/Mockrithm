@@ -205,12 +205,12 @@ const Navbar = ({ userId, userName, userRole }: NavbarProps) => {
               <Show when="signed-in">
                 <div className="flex items-center space-x-4">
                   {isAdmin && (
-                    <Link
-                      href="/admin"
+                    <a
+                      href="https://admin.mockrithm.me"
                       className="text-xs font-bold uppercase tracking-wider px-3.5 py-1.5 rounded-lg border border-red-500/20 bg-red-500/5 text-red-400 hover:bg-red-500/10 hover:text-red-300 transition-all mr-2"
                     >
                       Admin
-                    </Link>
+                    </a>
                   )}
 
                   <UserButton
@@ -421,15 +421,15 @@ const Navbar = ({ userId, userName, userRole }: NavbarProps) => {
                 </Show>
                 <Show when="signed-in">
                   {isAdmin ? (
-                    // Admin only → Admin Panel
-                    <Link
-                      href="/admin"
+                    // Admin only → Admin Panel (external subdomain)
+                    <a
+                      href="https://admin.mockrithm.me"
                       className="group flex items-center space-x-3 w-full px-4 py-3 text-sm text-gray-300 hover:text-white hover:bg-white/10 transition-all duration-200"
                       onClick={() => setIsMobileMenuOpen(false)}
                     >
                       <Home className="w-5 h-5 group-hover:scale-110 transition-transform duration-300" />
                       <span className="font-medium">Admin Panel</span>
-                    </Link>
+                    </a>
                   ) : (
                     <>
                       {/* User Panel Pages */}

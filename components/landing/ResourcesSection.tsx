@@ -110,9 +110,15 @@ export default function ResourcesSection({ articles, loadingBlogs }: ResourcesSe
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-start mb-16 pt-8">
-            {articles.map((article, index) => (
-              <motion.div
+            {articles.map((article, index) => {
+              const slug = article.title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+              const blogUrl = `https://blog.mockrithm.me/${slug}`;
+              return (
+              <motion.a
                 key={article.id}
+                href={blogUrl}
+                target="_blank"
+                rel="noopener noreferrer"
                 initial={{ opacity: 0, y: 40, scale: 0.96 }}
                 whileInView={{ opacity: 1, y: 0, scale: 1 }}
                 viewport={{ once: true, margin: "-100px" }}
@@ -122,7 +128,7 @@ export default function ResourcesSection({ articles, loadingBlogs }: ResourcesSe
                   boxShadow: "0 20px 45px -10px rgba(0,0,0,0.8), 0 0 25px rgba(255, 255, 255, 0.03)",
                   borderColor: "rgba(255, 255, 255, 0.12)"
                 }}
-                className={`p-8 rounded-2xl border border-white/5 bg-zinc-950/30 backdrop-blur-md transition-all duration-300 flex flex-col justify-between min-h-[270px] relative group overflow-hidden shadow-2xl w-full ${
+                className={`p-8 rounded-2xl border border-white/5 bg-zinc-950/30 backdrop-blur-md transition-all duration-300 flex flex-col justify-between min-h-[270px] relative group overflow-hidden shadow-2xl w-full block ${
                   index % 2 !== 0 ? "md:translate-y-12" : ""
                 }`}
               >
@@ -142,8 +148,9 @@ export default function ResourcesSection({ articles, loadingBlogs }: ResourcesSe
                   <span className="flex items-center gap-1.5"><Calendar className="size-3.5" /> {article.date}</span>
                   <span className="flex items-center gap-1.5"><User className="size-3.5" /> {article.author}</span>
                 </div>
-              </motion.div>
-            ))}
+              </motion.a>
+              );
+            })}
           </div>
         )}
       </div>

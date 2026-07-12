@@ -133,7 +133,7 @@ const AuthForm = ({ type }: { type: FormType }) => {
         const isAdmin = (signInResult as any).role === "Admin";
         if (isAdmin) {
           localStorage.setItem("isAdmin", "true");
-          router.replace("/admin");
+          window.location.href = "https://admin.mockrithm.me";
         } else {
           localStorage.removeItem("isAdmin");
           router.replace("/dashboard");
