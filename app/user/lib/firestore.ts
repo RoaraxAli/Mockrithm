@@ -49,14 +49,14 @@ export async function getUserInterviews(userId: string): Promise<Interview[]> {
       .where("userId", "==", userId)
       .get()
 
-    const interviews = querySnapshot.docs.map((doc) => {
+    const interviews = querySnapshot.docs.map((doc: any) => {
       return serializeDoc({
         id: doc.id,
         ...doc.data()
       }) as Interview
     })
     
-    return interviews.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+    return interviews.sort((a: any, b: any) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
   } catch (error) {
     console.error("Error fetching user interviews:", error)
     throw error
@@ -88,7 +88,7 @@ export async function getUserFeedback(userId: string): Promise<Feedback[]> {
       .where("userId", "==", userId)
       .get()
 
-    const feedbacks = querySnapshot.docs.map((doc) => {
+    const feedbacks = querySnapshot.docs.map((doc: any) => {
       const data = doc.data()
       return serializeDoc({
         id: doc.id,
@@ -101,7 +101,7 @@ export async function getUserFeedback(userId: string): Promise<Feedback[]> {
       }) as Feedback
     })
     
-    return feedbacks.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+    return feedbacks.sort((a: any, b: any) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
   } catch (error) {
     console.error("Error fetching user feedback:", error)
     throw error

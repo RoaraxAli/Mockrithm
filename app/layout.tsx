@@ -95,7 +95,7 @@ export default async function RootLayout({
             variables: {
               colorPrimary: "#ffffff",
               colorBackground: "#09090b", // zinc-950
-              colorText: "#ffffff",
+              colorTextBase: "#ffffff",
               colorTextSecondary: "#a1a1aa", // zinc-400
               colorBorder: "#27272a", // zinc-800
               colorInputBackground: "#09090b",

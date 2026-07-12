@@ -85,8 +85,8 @@ const Feedback = async ({ params }: RouteParams) => {
       </div>
 
       {/* Multi-file submitted code viewer */}
-      {feedback?.candidateCode && (
-        <FeedbackTabs candidateCode={feedback.candidateCode} />
+      {(feedback as any)?.candidateCode && (
+        <FeedbackTabs candidateCode={(feedback as any).candidateCode} />
       )}
 
       {/* Speech Metrics Grid */}

@@ -1249,8 +1249,8 @@ function GamesPageContent() {
               const isActive = activeTab === item.id;
               return (
                 <button key={item.id}
-                  onClick={() => { if (!item.disabled) { playSound("click"); setActiveTab(item.id as any); if (item.id === "dashboard") { setGameView("dashboard"); setActiveGame(null); } } }}
-                  disabled={item.disabled}
+                  onClick={() => { if (!(item as any).disabled) { playSound("click"); setActiveTab(item.id as any); if (item.id === "dashboard") { setGameView("dashboard"); setActiveGame(null); } } }}
+                  disabled={(item as any).disabled}
                   className={`w-full flex items-center justify-between px-4 py-3 rounded-xl transition-all font-bold text-xs uppercase tracking-wider ${
                     isActive ? "bg-white text-black font-extrabold" : "text-zinc-400 hover:bg-zinc-900 hover:text-white"
                   } disabled:opacity-30 disabled:cursor-not-allowed`}>
@@ -2758,7 +2758,7 @@ function sanitizeInput(input: string): string {
                   <span className="w-2.5 h-2.5 rounded-full bg-amber-500/50" />
                   <span className="w-2.5 h-2.5 rounded-full bg-emerald-500/50" />
                   <span className="ml-2 text-zinc-400 font-mono">
-                    playgrounds/sandbox.{activeTopic === "git" ? "sh" : activeTopic === "html" ? "html" : activeTopic === "css" ? "css" : activeTopic === "python" ? "py" : "ts"}
+                    playgrounds/sandbox.{(activeTopic as string) === "git" ? "sh" : activeTopic === "html" ? "html" : activeTopic === "css" ? "css" : activeTopic === "python" ? "py" : "ts"}
                   </span>
                 </div>
                 <span className="font-mono text-zinc-600">Active Playground</span>
