@@ -3,7 +3,7 @@
 import { useState, useRef } from "react";
 import { Badge } from "@/components/ui/badge";
 import { motion } from "framer-motion";
-import { Compass, Sparkles, Target, HeartHandshake, ArrowUpRight, Github, Twitter, Linkedin, Instagram } from "lucide-react";
+import { Compass, Sparkles, Target, HeartHandshake, ArrowUpRight, Instagram } from "lucide-react";
 import MarketingNavbar from "@/components/shared/MarketingNavbar";
 import FeedbackForm from "@/components/FeedbackForm";
 
