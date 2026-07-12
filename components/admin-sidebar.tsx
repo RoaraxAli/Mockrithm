@@ -19,6 +19,7 @@ import {
   BookOpen,
   Key,
   Shield,
+  ChevronsUpDown,
 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -147,15 +148,34 @@ const handleLogout = async () => {
       )}
     >
       <CardContent className="flex flex-col h-full p-0">
-        <div className="flex h-16 items-center justify-between px-6 border-b border-white/5">
+        <div className="flex h-16 items-center px-4 border-b border-white/5">
           {!isCollapsed && (
-            <h1 className="text-xl font-bold text-white">Admin Panel</h1>
+            <div className="flex items-center justify-between w-full rounded-md border border-white/5 bg-zinc-900/30 px-3 py-2 cursor-pointer hover:bg-zinc-900/50 transition-colors">
+              <div className="flex items-center gap-3">
+                <div className="h-6 w-6 rounded-md bg-indigo-500/20 text-indigo-400 flex items-center justify-center font-bold text-xs">
+                  M
+                </div>
+                <div className="flex flex-col">
+                  <span className="text-sm font-medium text-zinc-100 leading-none">Mockrithm</span>
+                  <span className="text-xs text-zinc-500 mt-1 leading-none">Production</span>
+                </div>
+              </div>
+              <ChevronsUpDown className="h-4 w-4 text-zinc-500" />
+            </div>
           )}
+          {isCollapsed && (
+            <div className="mx-auto h-8 w-8 rounded-md bg-indigo-500/20 text-indigo-400 flex items-center justify-center font-bold text-sm">
+              M
+            </div>
+          )}
+        </div>
+
+        <div className="flex justify-end p-2 pb-0">
           <Button
             variant="ghost"
             size="icon"
             onClick={() => setIsCollapsed(!isCollapsed)}
-            className="text-white hover:bg-white/10 ml-auto"
+            className="text-zinc-400 hover:bg-zinc-900 h-6 w-6"
           >
             {isCollapsed ? (
               <ChevronRight className="h-4 w-4" />
@@ -174,10 +194,10 @@ const handleLogout = async () => {
                   <Link
                     href={item.href}
                     className={cn(
-                      "sidebar-item flex items-center rounded-md px-3 py-2 text-sm font-medium transition-all duration-200 cursor-pointer hover:bg-zinc-900",
+                      "sidebar-item flex items-center rounded-md px-3 py-2 text-sm font-medium transition-all duration-200 cursor-pointer group",
                       isActive
-                        ? "bg-zinc-900 text-zinc-100 shadow-sm"
-                        : "text-zinc-400 hover:text-zinc-100",
+                        ? "bg-indigo-500/10 text-indigo-400"
+                        : "text-zinc-400 hover:bg-zinc-900/50 hover:text-zinc-200",
                       isCollapsed && "justify-center"
                     )}
                     title={isCollapsed ? item.name : undefined}
@@ -185,8 +205,9 @@ const handleLogout = async () => {
                     {item.icon && (
                       <item.icon
                         className={cn(
-                          "h-5 w-5 flex-shrink-0",
-                          !isCollapsed && "mr-3"
+                          "h-4 w-4 flex-shrink-0 transition-colors",
+                          !isCollapsed && "mr-3",
+                          isActive ? "text-indigo-400" : "text-zinc-500 group-hover:text-zinc-300"
                         )}
                       />
                     )}

@@ -7,13 +7,33 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useUser, useClerk } from "@clerk/nextjs";
 import { useRouter } from "next/navigation";
+import {
+  CommandDialog,
+  CommandInput,
+  CommandList,
+  CommandEmpty,
+  CommandGroup,
+  CommandItem,
+} from "@/components/ui/command";
+import { Users, ClipboardList, BookOpen, Key, Shield, MessageSquare, LayoutDashboard } from "lucide-react";
 
 export function AdminNavbar() {
   const { isLoaded, isSignedIn, user } = useUser();
   const { signOut: clerkSignOut } = useClerk();
   const [adminName, setAdminName] = useState("");
-  const [searchQuery, setSearchQuery] = useState("");
+  const [open, setOpen] = useState(false);
   const router = useRouter();
+
+  useEffect(() => {
+    const down = (e: KeyboardEvent) => {
+      if (e.key === "k" && (e.metaKey || e.ctrlKey)) {
+        e.preventDefault();
+        setOpen((open) => !open);
+      }
+    };
+    document.addEventListener("keydown", down);
+    return () => document.removeEventListener("keydown", down);
+  }, []);
 
   // Fetch admin name from Firestore
   useEffect(() => {
@@ -57,18 +77,59 @@ export function AdminNavbar() {
   return (
     <header className="sticky top-0 z-40 border-b border-white/5 bg-zinc-950/80 backdrop-blur-sm">
       <div className="flex h-16 items-center justify-between px-4 lg:px-8">
-        {/* Search */}
+        {/* Search Input Triggering Command Palette */}
         <div className="navbar-item flex items-center space-x-4 lg:ml-0 ml-12">
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
-            <Input
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Search..."
-              className="w-64 bg-zinc-900/50 border-white/5 pl-10 focus:border-white/20 text-zinc-200 placeholder:text-zinc-500 rounded-md"
-            />
-          </div>
+          <button
+            onClick={() => setOpen(true)}
+            className="flex items-center justify-between w-64 bg-zinc-900/50 border border-white/5 px-3 py-2 text-sm text-zinc-400 hover:text-zinc-200 rounded-md cursor-pointer hover:border-white/10 transition-colors"
+          >
+            <div className="flex items-center gap-2">
+              <Search className="h-4 w-4 text-zinc-500" />
+              <span>Search...</span>
+            </div>
+            <kbd className="pointer-events-none inline-flex h-5 select-none items-center gap-1 rounded border border-white/10 bg-zinc-950 px-1.5 font-mono text-[10px] font-medium text-zinc-500">
+              <span className="text-xs">⌘</span>K
+            </kbd>
+          </button>
         </div>
+
+        {/* Command Palette Dialog */}
+        <CommandDialog open={open} onOpenChange={setOpen}>
+          <CommandInput placeholder="Type a command or search..." />
+          <CommandList className="bg-zinc-950 border border-white/5">
+            <CommandEmpty>No results found.</CommandEmpty>
+            <CommandGroup heading="Navigation">
+              <CommandItem onSelect={() => { router.push("/admin"); setOpen(false); }}>
+                <LayoutDashboard className="mr-2 h-4 w-4" />
+                <span>Dashboard</span>
+              </CommandItem>
+              <CommandItem onSelect={() => { router.push("/admin/users"); setOpen(false); }}>
+                <Users className="mr-2 h-4 w-4" />
+                <span>Users</span>
+              </CommandItem>
+              <CommandItem onSelect={() => { router.push("/admin/interviewfeedback"); setOpen(false); }}>
+                <ClipboardList className="mr-2 h-4 w-4" />
+                <span>Interview Feedback</span>
+              </CommandItem>
+              <CommandItem onSelect={() => { router.push("/admin/feedback"); setOpen(false); }}>
+                <MessageSquare className="mr-2 h-4 w-4" />
+                <span>Feedback</span>
+              </CommandItem>
+              <CommandItem onSelect={() => { router.push("/admin/blogs"); setOpen(false); }}>
+                <BookOpen className="mr-2 h-4 w-4" />
+                <span>Blogs</span>
+              </CommandItem>
+              <CommandItem onSelect={() => { router.push("/admin/keys"); setOpen(false); }}>
+                <Key className="mr-2 h-4 w-4" />
+                <span>API Telemetry</span>
+              </CommandItem>
+              <CommandItem onSelect={() => { router.push("/admin/audit"); setOpen(false); }}>
+                <Shield className="mr-2 h-4 w-4" />
+                <span>Audit Logs</span>
+              </CommandItem>
+            </CommandGroup>
+          </CommandList>
+        </CommandDialog>
 
         {/* Icons & Profile */}
         <div className="flex items-center space-x-4">

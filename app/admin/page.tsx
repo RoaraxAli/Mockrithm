@@ -89,75 +89,119 @@ export default function AdminDashboard() {
       </div>
 
       {/* Top Metric Cards */}
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        <Card className="bg-zinc-950 border-white/10">
+      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
+        <Card className="bg-zinc-950 border-white/5 shadow-none hover:bg-zinc-900/20 transition-colors group">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium text-zinc-400">
               Total Users
             </CardTitle>
-            <Users className="h-4 w-4 text-zinc-400" />
+            <Users className="h-4 w-4 text-zinc-500 group-hover:text-zinc-300 transition-colors" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{metrics.users.total.toLocaleString()}</div>
-            <p className="text-xs text-emerald-500 mt-1">
-              {metrics.users.change}% vs last month
-            </p>
+            <div className="flex items-end justify-between">
+              <div>
+                <div className="text-2xl font-bold">{metrics.users.total.toLocaleString()}</div>
+                <p className="text-xs text-emerald-500 mt-1 flex items-center gap-1 font-medium">
+                  {metrics.users.change}% vs last month
+                </p>
+              </div>
+              <div className="h-[40px] w-[80px]">
+                <ResponsiveContainer width="100%" height="100%">
+                  <LineChart data={chartsData.userGrowthData.slice(-4)}>
+                    <Line type="monotone" dataKey="thisYear" stroke="#10b981" strokeWidth={2} dot={false} isAnimationActive={false} />
+                  </LineChart>
+                </ResponsiveContainer>
+              </div>
+            </div>
           </CardContent>
         </Card>
 
-        <Card className="bg-zinc-950 border-white/10">
+        <Card className="bg-zinc-950 border-white/5 shadow-none hover:bg-zinc-900/20 transition-colors group">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium text-zinc-400">
               Interviews Generated
             </CardTitle>
-            <FileText className="h-4 w-4 text-zinc-400" />
+            <FileText className="h-4 w-4 text-zinc-500 group-hover:text-zinc-300 transition-colors" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{metrics.interviews.total.toLocaleString()}</div>
-            <p className="text-xs text-emerald-500 mt-1">
-              {metrics.interviews.change}% vs last month
-            </p>
+            <div className="flex items-end justify-between">
+              <div>
+                <div className="text-2xl font-bold">{metrics.interviews.total.toLocaleString()}</div>
+                <p className="text-xs text-emerald-500 mt-1 flex items-center gap-1 font-medium">
+                  {metrics.interviews.change}% vs last month
+                </p>
+              </div>
+              <div className="h-[40px] w-[80px]">
+                <ResponsiveContainer width="100%" height="100%">
+                  <LineChart data={chartsData.interviewData.slice(-4)}>
+                    <Line type="monotone" dataKey="online" stroke="#10b981" strokeWidth={2} dot={false} isAnimationActive={false} />
+                  </LineChart>
+                </ResponsiveContainer>
+              </div>
+            </div>
           </CardContent>
         </Card>
 
-        <Card className="bg-zinc-950 border-white/10">
+        <Card className="bg-zinc-950 border-white/5 shadow-none hover:bg-zinc-900/20 transition-colors group">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium text-zinc-400">
               Feedback Submissions
             </CardTitle>
-            <MessageSquare className="h-4 w-4 text-zinc-400" />
+            <MessageSquare className="h-4 w-4 text-zinc-500 group-hover:text-zinc-300 transition-colors" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{metrics.feedbacks.total.toLocaleString()}</div>
-            <p className="text-xs text-emerald-500 mt-1">
-              {metrics.feedbacks.change}% vs last month
-            </p>
+            <div className="flex items-end justify-between">
+              <div>
+                <div className="text-2xl font-bold">{metrics.feedbacks.total.toLocaleString()}</div>
+                <p className="text-xs text-emerald-500 mt-1 flex items-center gap-1 font-medium">
+                  {metrics.feedbacks.change}% vs last month
+                </p>
+              </div>
+              <div className="h-[40px] w-[80px]">
+                <ResponsiveContainer width="100%" height="100%">
+                  <BarChart data={chartsData.dailyActivityData.slice(-4)}>
+                    <Bar dataKey="value" fill="#10b981" radius={[2,2,0,0]} isAnimationActive={false} />
+                  </BarChart>
+                </ResponsiveContainer>
+              </div>
+            </div>
           </CardContent>
         </Card>
 
-        <Card className="bg-zinc-950 border-white/10">
+        <Card className="bg-zinc-950 border-white/5 shadow-none hover:bg-zinc-900/20 transition-colors group">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium text-zinc-400">
               Active Sessions
             </CardTitle>
-            <Activity className="h-4 w-4 text-zinc-400" />
+            <Activity className="h-4 w-4 text-zinc-500 group-hover:text-zinc-300 transition-colors" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{metrics.sessions.total.toLocaleString()}</div>
-            <p className="text-xs text-red-500 mt-1">
-              {metrics.sessions.change}% vs last month
-            </p>
+            <div className="flex items-end justify-between">
+              <div>
+                <div className="text-2xl font-bold">{metrics.sessions.total.toLocaleString()}</div>
+                <p className="text-xs text-rose-500 mt-1 flex items-center gap-1 font-medium">
+                  {metrics.sessions.change}% vs last month
+                </p>
+              </div>
+              <div className="h-[40px] w-[80px]">
+                <ResponsiveContainer width="100%" height="100%">
+                  <LineChart data={chartsData.dailyActivityData.slice(-4)}>
+                    <Line type="step" dataKey="value" stroke="#f43f5e" strokeWidth={2} dot={false} isAnimationActive={false} />
+                  </LineChart>
+                </ResponsiveContainer>
+              </div>
+            </div>
           </CardContent>
         </Card>
       </div>
 
       {/* Main Charts Row 1 */}
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7">
-        <Card className="col-span-4 lg:col-span-5 bg-zinc-950 border-white/10">
+      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-7">
+        <Card className="col-span-4 lg:col-span-5 bg-zinc-950 border-white/5 shadow-none">
           <CardHeader>
-            <CardTitle className="text-zinc-200">User Growth</CardTitle>
+            <CardTitle className="text-base font-semibold text-zinc-100">User Growth</CardTitle>
             <CardDescription className="text-zinc-500">
-              New user registrations over time
+              New user registrations over the last 6 months
             </CardDescription>
           </CardHeader>
           <CardContent className="pl-2">
@@ -206,11 +250,11 @@ export default function AdminDashboard() {
           </CardContent>
         </Card>
 
-        <Card className="col-span-3 lg:col-span-2 bg-zinc-950 border-white/10">
+        <Card className="col-span-4 lg:col-span-2 bg-zinc-950 border-white/5 shadow-none">
           <CardHeader>
-            <CardTitle className="text-zinc-200">Interviews by Type</CardTitle>
+            <CardTitle className="text-base font-semibold text-zinc-100">Interviews by Type</CardTitle>
             <CardDescription className="text-zinc-500">
-              Technical vs Behavioural volume
+              Volume breakdown by category
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -239,11 +283,12 @@ export default function AdminDashboard() {
       </div>
 
       {/* Main Charts Row 2 */}
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-        <Card className="bg-zinc-950 border-white/10">
+      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-7">
+        <Card className="col-span-4 lg:col-span-3 bg-zinc-950 border-white/5 shadow-none">
           <CardHeader>
-            <CardTitle className="text-zinc-200">Daily Activity</CardTitle>
-            <CardDescription className="text-zinc-500 flex items-center gap-2">
+            <CardTitle className="text-base font-semibold text-zinc-100">Daily Activity</CardTitle>
+            <CardDescription className="text-zinc-500">
+              Sessions conducted per day
               <span className="text-emerald-500 font-medium">+2.4%</span> vs last month
             </CardDescription>
           </CardHeader>
@@ -260,9 +305,9 @@ export default function AdminDashboard() {
           </CardContent>
         </Card>
 
-        <Card className="bg-zinc-950 border-white/10">
+        <Card className="col-span-4 lg:col-span-2 bg-zinc-950 border-white/5 shadow-none">
           <CardHeader>
-            <CardTitle className="text-zinc-200">Average Scores</CardTitle>
+            <CardTitle className="text-base font-semibold text-zinc-100">Average Scores</CardTitle>
             <CardDescription className="text-zinc-500 flex items-center gap-2">
               <span className="text-emerald-500 font-medium">+1.3%</span> vs last month
             </CardDescription>
@@ -292,9 +337,12 @@ export default function AdminDashboard() {
           </CardContent>
         </Card>
 
-        <Card className="bg-zinc-950 border-white/10">
+        <Card className="col-span-4 lg:col-span-2 bg-zinc-950 border-white/5 shadow-none">
           <CardHeader>
-            <CardTitle className="text-zinc-200">Interview Categories</CardTitle>
+            <CardTitle className="text-base font-semibold text-zinc-100">Interview Categories</CardTitle>
+            <CardDescription className="text-zinc-500">
+              Subject matter distribution
+            </CardDescription>
           </CardHeader>
           <CardContent className="flex items-center justify-center">
             <ResponsiveContainer width="100%" height={250}>
