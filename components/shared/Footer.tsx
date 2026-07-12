@@ -83,7 +83,7 @@ const Footer: React.FC<FooterProps> = ({ className = "", isSignedIn = false }) =
                   <Link href="https://resume.mockrithm.me" className="text-[10.5px] text-zinc-400 hover:text-white font-medium transition-colors">
                     Resume Builder
                   </Link>
-                  <Link href="https://resume.mockrithm.me/ats-checker" className="text-[10.5px] text-zinc-400 hover:text-white font-medium transition-colors">
+                  <Link href="https://resume.mockrithm.me/upload" className="text-[10.5px] text-zinc-400 hover:text-white font-medium transition-colors">
                     Resume Analyzer
                   </Link>
                   <Link href="https://games.mockrithm.me" className="text-[10.5px] text-zinc-400 hover:text-white font-medium transition-colors">
@@ -151,7 +151,7 @@ const Footer: React.FC<FooterProps> = ({ className = "", isSignedIn = false }) =
                   <Link href="https://resume.mockrithm.me" className="text-[10.5px] text-zinc-400 hover:text-white font-medium transition-colors">
                     Resume Builder
                   </Link>
-                  <Link href="https://resume.mockrithm.me/ats-checker" className="text-[10.5px] text-zinc-400 hover:text-white font-medium transition-colors">
+                  <Link href="https://resume.mockrithm.me/upload" className="text-[10.5px] text-zinc-400 hover:text-white font-medium transition-colors">
                     Resume Analyzer
                   </Link>
                   <Link href="https://games.mockrithm.me" className="text-[10.5px] text-zinc-400 hover:text-white font-medium transition-colors">

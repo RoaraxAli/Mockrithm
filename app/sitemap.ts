@@ -1,12 +1,14 @@
 import { MetadataRoute } from 'next';
 import { source } from '@/lib/source';
+import { RESUME_LANDING_LIST } from '@/lib/resumeData';
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const baseUrl = 'https://mockrithm.me';
   const docsUrl = 'https://docs.mockrithm.me';
   const resumeUrl = 'https://resume.mockrithm.me';
+  const gamesUrl = 'https://games.mockrithm.me';
 
-  // 1. Static main marketing & game routes
+  // 1. Static main marketing routes
   const mainRoutes = [
     '',
     '/about',
@@ -17,7 +19,6 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     '/refund-policy',
     '/terms',
     '/ownership-statement',
-    '/games',
     '/blog'
   ].map(route => ({
     url: `${baseUrl}${route}`,
@@ -38,15 +39,47 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     };
   });
 
-  // 3. Resume onboarding route
-  const resumeRoutes = [
+  // 3. Resume subdomain routes — landing + all niche role pages
+  const resumeNicheSlugs = Object.keys(RESUME_LANDING_LIST).filter(
+    slug => slug !== 'ats-checker' // removed page
+  );
+
+  const resumeRoutes: MetadataRoute.Sitemap = [
     {
       url: resumeUrl,
       lastModified: new Date(),
       changeFrequency: 'daily' as const,
       priority: 0.9
-    }
+    },
+    ...resumeNicheSlugs.map(slug => ({
+      url: `${resumeUrl}/${slug}`,
+      lastModified: new Date(),
+      changeFrequency: 'weekly' as const,
+      priority: 0.7
+    }))
   ];
 
-  return [...mainRoutes, ...docsRoutes, ...resumeRoutes];
+  // 4. Games subdomain routes — landing + all topic pages
+  const gamesTopics = [
+    'html', 'css', 'js', 'sql', 'api', 'dsa',
+    'audio', 'star', 'logic', 'react', 'python',
+    'devops', 'metrics', 'system', 'security'
+  ];
+
+  const gamesRoutes: MetadataRoute.Sitemap = [
+    {
+      url: gamesUrl,
+      lastModified: new Date(),
+      changeFrequency: 'daily' as const,
+      priority: 0.9
+    },
+    ...gamesTopics.map(topic => ({
+      url: `${gamesUrl}/${topic}`,
+      lastModified: new Date(),
+      changeFrequency: 'weekly' as const,
+      priority: 0.7
+    }))
+  ];
+
+  return [...mainRoutes, ...docsRoutes, ...resumeRoutes, ...gamesRoutes];
 }

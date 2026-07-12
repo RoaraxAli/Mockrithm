@@ -28,7 +28,7 @@ export default function ResumeTopicPage() {
   // Redirect if already logged in (only for marketing pages, not checker/templates)
   useEffect(() => {
     if (isLoaded && isSignedIn) {
-      if (topic !== "ats-checker" && topic !== "templates") {
+      if (topic !== "templates") {
         window.location.href = "/dashboard";
       }
     }
@@ -40,10 +40,6 @@ export default function ResumeTopicPage() {
 
   // Render actual tools for logged-in users
   if (isLoaded && isSignedIn && user) {
-    if (topic === "ats-checker") {
-      window.location.href = "/upload";
-      return null;
-    }
     if (topic === "templates") {
       return (
         <ResumeSubdomainLayout>

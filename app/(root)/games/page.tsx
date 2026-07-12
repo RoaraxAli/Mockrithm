@@ -28,6 +28,7 @@ const Editor = dynamic(() => import("@monaco-editor/react"), { ssr: false });
 
 import GitGame from "@/components/games/GitGame";
 import LivePreview from "@/components/games/LivePreview";
+import Footer from "@/components/shared/Footer";
 
 // --- Country → valid cities map for location validation ---
 const COUNTRY_CITIES: Record<string, string[]> = {
@@ -2775,6 +2776,10 @@ function sanitizeInput(input: string): string {
         </section>
       </main>
 
+      {/* Footer */}
+      <div className="relative z-20 w-full bg-black/90">
+        <Footer />
+      </div>
 
     </div>
   );

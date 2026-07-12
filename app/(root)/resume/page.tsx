@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useUser } from "@clerk/nextjs";
 import { ArrowRight, Layout, Zap, Database } from "lucide-react";
 import { RESUME_LANDING_LIST } from "@/lib/resumeData";
+import Footer from "@/components/shared/Footer";
 
 export default function ResumeLandingPage() {
   const { isSignedIn, isLoaded } = useUser();
@@ -29,9 +30,9 @@ export default function ResumeLandingPage() {
 
   const getResumeLink = (path: string) => {
     if (isSubdomain) {
-      return path; // e.g., "/ats-checker" on resume.mockrithm.me
+      return path;
     }
-    return `/resume${path}`; // e.g., "/resume/ats-checker" on mockrithm.me
+    return `/resume${path}`;
   };
 
   const categories = Object.values(RESUME_LANDING_LIST).filter(
@@ -106,17 +107,11 @@ export default function ResumeLandingPage() {
         <div className="flex flex-col sm:flex-row gap-4 mt-10 animate-fade-rise-delay-2">
           <button
             onClick={handleCTAClick}
-            className="liquid-glass rounded-full px-12 py-4 text-base text-white font-medium hover:scale-[1.03] transition-all duration-300 shadow-xl border-none outline-none cursor-pointer"
+            className="liquid-glass rounded-full px-14 py-4.5 text-base text-white font-medium hover:scale-[1.03] transition-all duration-300 shadow-xl border-none outline-none cursor-pointer flex items-center gap-2"
           >
-            Start Building Free
-          </button>
-          <Link
-            href={getResumeLink("/ats-checker")}
-            className="border border-white/10 hover:border-white/20 bg-white/5 hover:bg-white/10 transition-all rounded-full px-10 py-4 text-base text-white font-medium flex items-center justify-center gap-2"
-          >
-            Scan Existing Resume
+            Begin Journey
             <ArrowRight className="size-4" />
-          </Link>
+          </button>
         </div>
       </header>
 
@@ -157,16 +152,6 @@ export default function ResumeLandingPage() {
           </h2>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-            <Link
-              href={getResumeLink("/ats-checker")}
-              className="p-5 rounded-xl border border-white/10 bg-white/5 hover:bg-white/10 transition-all flex flex-col justify-between group"
-            >
-              <div>
-                <span className="text-[10px] font-bold uppercase tracking-wider text-white/50">Scanner</span>
-                <h3 className="text-base font-bold mt-1 text-white group-hover:text-white">ATS Checker</h3>
-              </div>
-              <ArrowRight className="size-4 text-white/40 group-hover:translate-x-1 transition-transform mt-4 align-self-end" />
-            </Link>
 
             <Link
               href={getResumeLink("/templates")}
@@ -194,6 +179,11 @@ export default function ResumeLandingPage() {
             ))}
           </div>
         </section>
+      </div>
+
+      {/* Footer */}
+      <div className="relative z-20 w-full bg-[#030712]">
+        <Footer />
       </div>
     </div>
   );
