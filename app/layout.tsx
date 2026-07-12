@@ -11,6 +11,7 @@ import { Analytics } from "@vercel/analytics/react";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 
 import { RootProvider } from "fumadocs-ui/provider/next";
+import { ThemeProvider } from "@/components/theme-provider";
 import "fumadocs-ui/style.css";
 import "./globals.css";
 
@@ -103,9 +104,11 @@ export default async function RootLayout({
           <SpeedInsights />
           <MagneticCursor />
           <RootProvider>
-            <AuthLayout initialUserId={user?.id} initialUserName={user?.name} initialUserRole={user?.role}>
-              {children}
-            </AuthLayout>
+            <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
+              <AuthLayout initialUserId={user?.id} initialUserName={user?.name} initialUserRole={user?.role}>
+                {children}
+              </AuthLayout>
+            </ThemeProvider>
           </RootProvider>
           <Toaster />
         </ClerkProvider>

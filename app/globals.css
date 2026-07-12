@@ -185,6 +185,32 @@
   --color-sidebar-ring: var(--sidebar-ring);
 }
 
+:root {
+  --primary-accent: #6366f1;
+  --primary-accent-alpha: rgba(99, 102, 241, 0.1);
+  --primary-accent-border: rgba(99, 102, 241, 0.2);
+}
+
+.text-accent-custom {
+  color: var(--primary-accent) !important;
+}
+
+.bg-accent-custom {
+  background-color: var(--primary-accent) !important;
+}
+
+.bg-accent-alpha-custom {
+  background-color: var(--primary-accent-alpha) !important;
+}
+
+.border-accent-custom {
+  border-color: var(--primary-accent-border) !important;
+}
+
+.hover-bg-accent-alpha-custom:hover {
+  background-color: var(--primary-accent-alpha) !important;
+}
+
 @layer base {
   * {
     @apply border-border outline-ring/50;

@@ -196,9 +196,9 @@ const handleLogout = async () => {
                     className={cn(
                       "sidebar-item flex items-center rounded-md px-3 py-2 text-sm font-medium transition-all duration-200 cursor-pointer group",
                       isActive
-                        ? "bg-indigo-500/10 text-indigo-400"
+                        ? "bg-accent-alpha-custom text-accent-custom border-l-2 border-accent-custom pl-[10px]"
                         : "text-zinc-400 hover:bg-zinc-900/50 hover:text-zinc-200",
-                      isCollapsed && "justify-center"
+                      isCollapsed && "justify-center border-l-0 pl-3"
                     )}
                     title={isCollapsed ? item.name : undefined}
                   >
@@ -207,7 +207,7 @@ const handleLogout = async () => {
                         className={cn(
                           "h-4 w-4 flex-shrink-0 transition-colors",
                           !isCollapsed && "mr-3",
-                          isActive ? "text-indigo-400" : "text-zinc-500 group-hover:text-zinc-300"
+                          isActive ? "text-accent-custom" : "text-zinc-500 group-hover:text-zinc-300"
                         )}
                       />
                     )}
