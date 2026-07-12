@@ -216,16 +216,6 @@ export default function AboutPage() {
                 <p className="mt-4">
                   Our mission is to offer every candidate the chance to reshape their career trajectory by providing high-fidelity, adaptive, AI-driven preparation that was previously locked behind expensive coaching.
                 </p>
-                
-                <a href="https://github.com/RoaraxAli/Mockrithm" target="_blank" rel="noreferrer" className="group inline-flex items-center gap-4 mt-6 text-[14px] font-medium text-white hover:text-zinc-300 transition-colors">
-                  View Repository
-                  <div 
-                    className="flex items-center justify-center w-8 h-8 border border-white/30 transition-transform group-hover:-translate-y-0.5"
-                    style={{ clipPath: "polygon(8px 0, 100% 0, 100% calc(100% - 8px), calc(100% - 8px) 100%, 0 100%, 0 8px)" }}
-                  >
-                    <ArrowUpRight className="w-3.5 h-3.5 text-white" strokeWidth={2} />
-                  </div>
-                </a>
               </div>
             </div>
 
@@ -241,7 +231,7 @@ export default function AboutPage() {
                   className="relative w-full h-full overflow-hidden bg-zinc-900 bg-cover bg-center"
                   style={{ 
                     clipPath: "polygon(64px 0, calc(100% - 14px) 0, calc(100% - 4px) 4px, 100% 14px, 100% calc(100% - 14px), calc(100% - 4px) calc(100% - 4px), calc(100% - 14px) 100%, 14px 100%, 4px calc(100% - 4px), 0 calc(100% - 14px), 0 64px)",
-                    backgroundImage: "url('https://images.unsplash.com/photo-1550751827-4bd374c3f58b?auto=format&fit=crop&w=1280&q=80')",
+                    backgroundImage: "url('https://images.higgs.ai/?default=1&output=webp&url=https%3A%2F%2Fd8j0ntlcm91z4.cloudfront.net%2Fuser_38xzZboKViGWJOttwIXH07lWA1P%2Fhf_20260514_154203_6c6f94dc-a07e-4ba5-8688-106f01ccd2c8.png&w=1280&q=85')",
                     backgroundBlendMode: "overlay"
                   }}
                 >
@@ -275,7 +265,7 @@ export default function AboutPage() {
                   className="relative w-full h-full overflow-hidden bg-zinc-900 bg-cover bg-center"
                   style={{ 
                     clipPath: "polygon(0 14px, 4px 4px, 14px 0, calc(100% - 64px) 0, 100% 64px, 100% calc(100% - 14px), calc(100% - 4px) calc(100% - 4px), calc(100% - 14px) 100%, 64px 100%, 0 calc(100% - 64px))",
-                    backgroundImage: "url('https://images.unsplash.com/photo-1555066931-4365d14bab8c?auto=format&fit=crop&w=1280&q=80')",
+                    backgroundImage: "url('https://images.higgs.ai/?default=1&output=webp&url=https%3A%2F%2Fd8j0ntlcm91z4.cloudfront.net%2Fuser_38xzZboKViGWJOttwIXH07lWA1P%2Fhf_20260514_154151_45c62c60-3bcc-4f21-8f9d-03722ebb5df8.png&w=1280&q=85')",
                     backgroundBlendMode: "overlay"
                   }}
                 >
@@ -309,7 +299,7 @@ export default function AboutPage() {
                   className="relative w-full h-full overflow-hidden bg-zinc-900 bg-cover bg-center"
                   style={{ 
                     clipPath: "polygon(0 14px, 4px 4px, 14px 0, calc(100% - 64px) 0, 100% 64px, 100% calc(100% - 64px), calc(100% - 64px) 100%, 14px 100%, 4px calc(100% - 4px), 0 calc(100% - 14px))",
-                    backgroundImage: "url('https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?auto=format&fit=crop&w=1280&q=80')",
+                    backgroundImage: "url('https://images.higgs.ai/?default=1&output=webp&url=https%3A%2F%2Fd8j0ntlcm91z4.cloudfront.net%2Fuser_38xzZboKViGWJOttwIXH07lWA1P%2Fhf_20260514_152238_24ec8db4-d728-4739-bb30-e985533e9637.png&w=1280&q=85')",
                     backgroundBlendMode: "overlay"
                   }}
                 >
