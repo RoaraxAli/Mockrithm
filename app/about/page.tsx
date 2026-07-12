@@ -4,11 +4,11 @@ import { useState, useRef } from "react";
 import { Badge } from "@/components/ui/badge";
 import { CardContent } from "@/components/ui/card";
 import Link from "next/link";
-import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
-import { ExternalLink, Github, Compass, Sparkles, Target, HeartHandshake, Users } from "lucide-react";
+import { ExternalLink, Github, Compass, Sparkles, Target, HeartHandshake, Users, Mail, MapPin, Clock, ArrowRight } from "lucide-react";
 import MarketingNavbar from "@/components/shared/MarketingNavbar";
 import Footer from "@/components/shared/Footer";
+import FeedbackForm from "@/components/FeedbackForm";
 
 // Premium 3D Tilt Card with Glare Reflection
 function ThreeDTiltCard({ children, className = "" }: { children: React.ReactNode; className?: string }) {
@@ -130,10 +130,10 @@ export default function AboutPage() {
         <div className="absolute inset-0 premium-grid-dot opacity-10" />
       </div>
 
-      <main className="relative z-10 max-w-6xl mx-auto px-6 pt-32 pb-24 flex flex-col gap-24">
+      <main className="relative z-10 max-w-6xl mx-auto px-6 pt-32 pb-24 flex flex-col gap-32">
         
         {/* Hero Section */}
-        <section className="text-center flex flex-col items-center max-w-4xl mx-auto">
+        <section className="text-center flex flex-col items-center max-w-4xl mx-auto pt-8">
           <motion.div 
             initial={{ opacity: 0, y: -10 }}
             animate={{ opacity: 1, y: 0 }}
@@ -226,7 +226,7 @@ export default function AboutPage() {
 
         {/* Core Values */}
         <section className="w-full">
-          <div className="text-center mb-12">
+          <div className="text-center mb-16">
             <h2 className="text-[11px] font-bold uppercase tracking-[0.2em] text-zinc-500 mb-3" style={{ fontFamily: "'Inter', sans-serif" }}>Our Pillars</h2>
             <h3 className="text-4xl md:text-5xl font-normal text-white" style={{ fontFamily: "'Instrument Serif', serif" }}>What Guides Our Platform</h3>
           </div>
@@ -241,35 +241,6 @@ export default function AboutPage() {
                 <p className="text-sm text-zinc-400 font-medium leading-relaxed" style={{ fontFamily: "'Inter', sans-serif" }}>{value.description}</p>
               </ThreeDTiltCard>
             ))}
-          </div>
-        </section>
-
-        {/* Compare Table */}
-        <section className="w-full">
-          <div className="text-center mb-12">
-            <h2 className="text-[11px] font-bold uppercase tracking-[0.2em] text-zinc-500 mb-3" style={{ fontFamily: "'Inter', sans-serif" }}>Comparison</h2>
-            <h3 className="text-4xl md:text-5xl font-normal text-white" style={{ fontFamily: "'Instrument Serif', serif" }}>The Mockrithm Difference</h3>
-          </div>
-
-          <div className="rounded-2xl border border-white/10 bg-zinc-900/30 overflow-hidden backdrop-blur-sm">
-            <table className="w-full text-left border-collapse">
-              <thead>
-                <tr className="border-b border-white/10 bg-white/5">
-                  <th className="p-6 text-xs font-bold uppercase tracking-wider text-zinc-400 w-1/4" style={{ fontFamily: "'Inter', sans-serif" }}>Aspect</th>
-                  <th className="p-6 text-xs font-bold uppercase tracking-wider text-zinc-500 w-1/3" style={{ fontFamily: "'Inter', sans-serif" }}>Traditional Prep</th>
-                  <th className="p-6 text-xs font-bold uppercase tracking-wider text-white w-5/12" style={{ fontFamily: "'Inter', sans-serif" }}>Mockrithm</th>
-                </tr>
-              </thead>
-              <tbody style={{ fontFamily: "'Inter', sans-serif" }}>
-                {differences.map((diff, index) => (
-                  <tr key={index} className="border-b border-white/5 hover:bg-white/[0.02] transition-colors">
-                    <td className="p-6 text-sm font-bold text-white tracking-tight">{diff.metric}</td>
-                    <td className="p-6 text-sm text-zinc-500 font-medium">{diff.traditional}</td>
-                    <td className="p-6 text-sm text-zinc-300 font-medium leading-relaxed">{diff.mockrithm}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
           </div>
         </section>
 
@@ -293,11 +264,84 @@ export default function AboutPage() {
                   We believe standard study guides aren't enough. Communication is a muscle, and Mockrithm helps you train it. We look forward to hearing your feedback and continually iterating on our AI-powered interview dynamics.
                 </p>
               </div>
-              <p className="text-[10px] text-zinc-500 font-bold uppercase tracking-[0.2em] mt-10" style={{ fontFamily: "'Inter', sans-serif" }}>
-                Minimalist Interface • Robust AI Diagnostics • Actionable Analytics
-              </p>
             </CardContent>
           </ThreeDTiltCard>
+        </section>
+
+        {/* Divider / Spacer before Contact */}
+        <div className="w-full h-px bg-gradient-to-r from-transparent via-white/10 to-transparent" />
+
+        {/* Contact Section */}
+        <section id="contact" className="w-full scroll-mt-32">
+          <div className="text-center mb-16">
+            <h2 className="text-[11px] font-bold uppercase tracking-[0.2em] text-zinc-500 mb-3" style={{ fontFamily: "'Inter', sans-serif" }}>Reach Out</h2>
+            <h3 className="text-4xl md:text-5xl font-normal text-white" style={{ fontFamily: "'Instrument Serif', serif" }}>
+              Get in <em className="text-white/60 italic font-light">touch</em>
+            </h3>
+            <p className="mt-4 text-base text-zinc-400 leading-relaxed font-medium max-w-xl mx-auto" style={{ fontFamily: "'Inter', sans-serif" }}>
+              Have questions, feedback, or need support? Send us a message directly and our team will get back to you shortly. We're building this for you.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-24 items-start max-w-6xl mx-auto">
+            
+            {/* Left Column: Info & Story */}
+            <div className="flex flex-col gap-8 lg:pt-8">
+              {/* Contact Method: Email */}
+              <div className="flex items-start gap-4 group cursor-pointer">
+                <div className="h-14 w-14 rounded-full bg-white/5 border border-white/10 flex items-center justify-center shrink-0 group-hover:bg-white/10 transition-colors">
+                  <Mail className="h-6 w-6 text-white/70 group-hover:text-white transition-colors" />
+                </div>
+                <div className="flex flex-col gap-1.5" style={{ fontFamily: "'Inter', sans-serif" }}>
+                  <span className="text-xs font-bold uppercase tracking-wider text-zinc-500">Email Us</span>
+                  <a href="mailto:support@mockrithm.me" className="text-xl font-medium text-white hover:text-zinc-300 transition-colors flex items-center gap-2">
+                    support@mockrithm.me <ArrowRight className="h-4 w-4 opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all" />
+                  </a>
+                  <span className="text-sm text-zinc-500">We typically reply within 24 hours.</span>
+                </div>
+              </div>
+
+              {/* Contact Method: Location */}
+              <div className="flex items-start gap-4 group">
+                <div className="h-14 w-14 rounded-full bg-white/5 border border-white/10 flex items-center justify-center shrink-0">
+                  <MapPin className="h-6 w-6 text-white/70" />
+                </div>
+                <div className="flex flex-col gap-1.5" style={{ fontFamily: "'Inter', sans-serif" }}>
+                  <span className="text-xs font-bold uppercase tracking-wider text-zinc-500">Location</span>
+                  <span className="text-xl font-medium text-white">Global / Remote</span>
+                  <span className="text-sm text-zinc-500">Built in the cloud, for the world.</span>
+                </div>
+              </div>
+
+              {/* Contact Method: Hours */}
+              <div className="flex items-start gap-4 group">
+                <div className="h-14 w-14 rounded-full bg-white/5 border border-white/10 flex items-center justify-center shrink-0">
+                  <Clock className="h-6 w-6 text-white/70" />
+                </div>
+                <div className="flex flex-col gap-1.5" style={{ fontFamily: "'Inter', sans-serif" }}>
+                  <span className="text-xs font-bold uppercase tracking-wider text-zinc-500">Operating Hours</span>
+                  <span className="text-xl font-medium text-white">24/7 Platform</span>
+                  <span className="text-sm text-zinc-500">Support: Mon-Fri, 9AM-5PM EST</span>
+                </div>
+              </div>
+            </div>
+
+            {/* Right Column: Form */}
+            <div className="relative w-full rounded-3xl border border-white/10 bg-zinc-900/40 p-8 md:p-10 backdrop-blur-md overflow-hidden shadow-2xl">
+              <div className="absolute inset-0 premium-grid-dot opacity-5 pointer-events-none" />
+              <div className="absolute -top-24 -right-24 w-48 h-48 bg-white/5 blur-[50px] rounded-full pointer-events-none" />
+              
+              <div className="relative z-10">
+                <h3 className="text-2xl font-normal text-white mb-8" style={{ fontFamily: "'Instrument Serif', serif" }}>
+                  Send a Message
+                </h3>
+                <div className="form-container-override">
+                  <FeedbackForm />
+                </div>
+              </div>
+            </div>
+
+          </div>
         </section>
 
       </main>

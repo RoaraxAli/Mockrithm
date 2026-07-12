@@ -56,6 +56,8 @@ export default function AuthLayout({
       "/forgot-password",
       "/verify-code",
       "/reset-password",
+      "/about",
+      "/contact",
     ].includes(pathname);
 
   const shouldShowNavbar = !hideNavbar && !isSubdomain;

@@ -59,7 +59,7 @@ export default function MarketingNavbar() {
           <Link href="https://mockrithm.me/about" className="text-white/60 hover:text-white transition-colors duration-200">
             About
           </Link>
-          <Link href="https://mockrithm.me/contact" className="text-white/60 hover:text-white transition-colors duration-200">
+          <Link href="https://mockrithm.me/about#contact" className="text-white/60 hover:text-white transition-colors duration-200">
             Reach Us
           </Link>
         </div>
