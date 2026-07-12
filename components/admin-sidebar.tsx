@@ -143,24 +143,24 @@ const handleLogout = async () => {
   const SidebarContent = () => (
     <Card
       className={cn(
-        "h-full bg-zinc-950 border-r border-white/5 rounded-none shadow-none transition-all duration-300",
+        "h-full bg-zinc-50 dark:bg-zinc-950 border-r border-zinc-200 dark:border-white/5 rounded-none shadow-none transition-all duration-300",
         isCollapsed ? "w-16" : "w-64"
       )}
     >
       <CardContent className="flex flex-col h-full p-0">
-        <div className="flex h-16 items-center px-4 border-b border-white/5">
+        <div className="flex h-16 items-center px-4 border-b border-zinc-200 dark:border-white/5">
           {!isCollapsed && (
-            <div className="flex items-center justify-between w-full rounded-md border border-white/5 bg-zinc-900/30 px-3 py-2 cursor-pointer hover:bg-zinc-900/50 transition-colors">
+            <div className="flex items-center justify-between w-full rounded-md border border-zinc-200 dark:border-white/5 bg-zinc-100 dark:bg-zinc-900/30 px-3 py-2 cursor-pointer hover:bg-zinc-200 dark:hover:bg-zinc-900/50 transition-colors">
               <div className="flex items-center gap-3">
                 <div className="h-6 w-6 rounded-md bg-indigo-500/20 text-indigo-400 flex items-center justify-center font-bold text-xs">
                   M
                 </div>
                 <div className="flex flex-col">
-                  <span className="text-sm font-medium text-zinc-100 leading-none">Mockrithm</span>
-                  <span className="text-xs text-zinc-500 mt-1 leading-none">Production</span>
+                  <span className="text-sm font-medium text-zinc-900 dark:text-zinc-100 leading-none">Mockrithm</span>
+                  <span className="text-xs text-zinc-400 dark:text-zinc-500 mt-1 leading-none">Production</span>
                 </div>
               </div>
-              <ChevronsUpDown className="h-4 w-4 text-zinc-500" />
+              <ChevronsUpDown className="h-4 w-4 text-zinc-400 dark:text-zinc-500" />
             </div>
           )}
           {isCollapsed && (

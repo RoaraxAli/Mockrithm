@@ -70,7 +70,7 @@ export default function AdminLayout({
   }
 
   return (
-    <div className="min-h-screen bg-zinc-950">
+    <div className="min-h-screen bg-background">
       <AdminSidebar />
       <div className="lg:pl-64">
         <AdminNavbar />

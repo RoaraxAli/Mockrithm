@@ -912,3 +912,78 @@
 .animate-fade-rise-delay { animation: fade-rise 0.8s ease-out 0.2s both; }
 .animate-fade-rise-delay-2 { animation: fade-rise 0.8s ease-out 0.4s both; }
 
+/* Dynamic Light Theme Overrides for Admin Panels */
+html:not(.dark) {
+  --background: #f8fafc;
+  --foreground: #0f172a;
+  --card: #ffffff;
+  --card-foreground: #0f172a;
+  --popover: #ffffff;
+  --popover-foreground: #0f172a;
+  --border: #e2e8f0;
+  --muted: #f1f5f9;
+  --muted-foreground: #64748b;
+
+  .bg-zinc-950, 
+  .bg-zinc-950\/20, 
+  .bg-zinc-950\/30, 
+  .bg-zinc-950\/40, 
+  .bg-zinc-950\/50,
+  .bg-black {
+    background-color: var(--background) !important;
+  }
+
+  [data-slot=card],
+  .card,
+  .glass-card,
+  .bg-card {
+    background-color: var(--card) !important;
+    color: var(--card-foreground) !important;
+    border-color: var(--border) !important;
+    box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.05), 0 1px 2px -1px rgba(0, 0, 0, 0.05) !important;
+  }
+
+  .text-zinc-100,
+  .text-zinc-200,
+  .text-zinc-300,
+  .text-white {
+    color: var(--foreground) !important;
+  }
+
+  .text-zinc-400,
+  .text-zinc-500 {
+    color: var(--muted-foreground) !important;
+  }
+
+  .border-white\/5,
+  .border-zinc-800,
+  .border-zinc-900,
+  .border-zinc-900\/60 {
+    border-color: var(--border) !important;
+  }
+
+  [data-slot=input],
+  [data-slot=select],
+  [data-slot=textarea],
+  .bg-zinc-900\/30 input,
+  .bg-black\/30 input,
+  select {
+    background-color: var(--card) !important;
+    border-color: #cbd5e1 !important;
+    color: var(--foreground) !important;
+  }
+
+  [data-slot=button].bg-zinc-950,
+  .border-white\/5.bg-zinc-950,
+  .bg-zinc-950.text-zinc-400 {
+    background-color: var(--card) !important;
+    border-color: #cbd5e1 !important;
+    color: var(--foreground) !important;
+  }
+
+  .bg-zinc-900\/10 {
+    background-color: var(--muted) !important;
+  }
+}
+
+

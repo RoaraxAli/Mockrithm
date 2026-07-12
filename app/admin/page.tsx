@@ -83,14 +83,14 @@ export default function AdminDashboard() {
   }, []);
 
   return (
-    <div className="flex-1 space-y-4 p-8 pt-6 bg-zinc-950 text-white min-h-screen">
+    <div className="flex-1 space-y-4 p-8 pt-6 bg-background text-foreground min-h-screen">
       <div className="flex items-center justify-between space-y-2 mb-6">
         <h2 className="text-2xl font-bold tracking-tight">Overview</h2>
       </div>
 
       {/* Top Metric Cards */}
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
-        <Card className="bg-zinc-950 border-white/5 shadow-none hover:bg-zinc-900/20 transition-colors group">
+        <Card className="bg-card border-border shadow-xs hover:bg-zinc-50 dark:hover:bg-zinc-900/20 transition-colors group">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium text-zinc-400">
               Total Users
@@ -116,7 +116,7 @@ export default function AdminDashboard() {
           </CardContent>
         </Card>
 
-        <Card className="bg-zinc-950 border-white/5 shadow-none hover:bg-zinc-900/20 transition-colors group">
+        <Card className="bg-card border-border shadow-xs hover:bg-zinc-50 dark:hover:bg-zinc-900/20 transition-colors group">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium text-zinc-400">
               Interviews Generated
@@ -142,7 +142,7 @@ export default function AdminDashboard() {
           </CardContent>
         </Card>
 
-        <Card className="bg-zinc-950 border-white/5 shadow-none hover:bg-zinc-900/20 transition-colors group">
+        <Card className="bg-card border-border shadow-xs hover:bg-zinc-50 dark:hover:bg-zinc-900/20 transition-colors group">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium text-zinc-400">
               Feedback Submissions
@@ -168,7 +168,7 @@ export default function AdminDashboard() {
           </CardContent>
         </Card>
 
-        <Card className="bg-zinc-950 border-white/5 shadow-none hover:bg-zinc-900/20 transition-colors group">
+        <Card className="bg-card border-border shadow-xs hover:bg-zinc-50 dark:hover:bg-zinc-900/20 transition-colors group">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium text-zinc-400">
               Active Sessions
@@ -197,7 +197,7 @@ export default function AdminDashboard() {
 
       {/* Main Charts Row 1 */}
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-7">
-        <Card className="col-span-4 lg:col-span-5 bg-zinc-950 border-white/5 shadow-none">
+        <Card className="col-span-4 lg:col-span-5 bg-card border-border shadow-xs">
           <CardHeader>
             <CardTitle className="text-base font-semibold text-zinc-100">User Growth</CardTitle>
             <CardDescription className="text-zinc-500">
@@ -250,7 +250,7 @@ export default function AdminDashboard() {
           </CardContent>
         </Card>
 
-        <Card className="col-span-4 lg:col-span-2 bg-zinc-950 border-white/5 shadow-none">
+        <Card className="col-span-4 lg:col-span-2 bg-card border-border shadow-xs">
           <CardHeader>
             <CardTitle className="text-base font-semibold text-zinc-100">Interviews by Type</CardTitle>
             <CardDescription className="text-zinc-500">
@@ -284,7 +284,7 @@ export default function AdminDashboard() {
 
       {/* Main Charts Row 2 */}
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-7">
-        <Card className="col-span-4 lg:col-span-3 bg-zinc-950 border-white/5 shadow-none">
+        <Card className="col-span-4 lg:col-span-3 bg-card border-border shadow-xs">
           <CardHeader>
             <CardTitle className="text-base font-semibold text-zinc-100">Daily Activity</CardTitle>
             <CardDescription className="text-zinc-500">
@@ -305,7 +305,7 @@ export default function AdminDashboard() {
           </CardContent>
         </Card>
 
-        <Card className="col-span-4 lg:col-span-2 bg-zinc-950 border-white/5 shadow-none">
+        <Card className="col-span-4 lg:col-span-2 bg-card border-border shadow-xs">
           <CardHeader>
             <CardTitle className="text-base font-semibold text-zinc-100">Average Scores</CardTitle>
             <CardDescription className="text-zinc-500 flex items-center gap-2">
@@ -337,7 +337,7 @@ export default function AdminDashboard() {
           </CardContent>
         </Card>
 
-        <Card className="col-span-4 lg:col-span-2 bg-zinc-950 border-white/5 shadow-none">
+        <Card className="col-span-4 lg:col-span-2 bg-card border-border shadow-xs">
           <CardHeader>
             <CardTitle className="text-base font-semibold text-zinc-100">Interview Categories</CardTitle>
             <CardDescription className="text-zinc-500">

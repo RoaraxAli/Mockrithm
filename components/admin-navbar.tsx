@@ -109,7 +109,7 @@ export function AdminNavbar() {
   };
 
   return (
-    <header className="sticky top-0 z-40 border-b border-white/5 bg-zinc-950/80 backdrop-blur-sm">
+    <header className="sticky top-0 z-40 border-b border-zinc-200 dark:border-white/5 bg-background/80 backdrop-blur-sm">
       <div className="flex h-16 items-center justify-between px-4 lg:px-8">
         {/* Search Input Triggering Command Palette */}
         <div className="navbar-item flex items-center space-x-4 lg:ml-0 ml-12">
@@ -120,7 +120,7 @@ export function AdminNavbar() {
               }
               setOpen(true);
             }}
-            className="flex items-center justify-between w-64 bg-zinc-900/50 border border-white/5 px-3 py-2 text-sm text-zinc-400 hover:text-zinc-200 rounded-md cursor-pointer hover:border-white/10 transition-colors"
+            className="flex items-center justify-between w-64 bg-zinc-100 dark:bg-zinc-900/50 border border-zinc-200 dark:border-white/5 px-3 py-2 text-sm text-zinc-500 dark:text-zinc-400 hover:text-zinc-800 dark:hover:text-zinc-200 rounded-md cursor-pointer hover:border-zinc-300 dark:hover:border-white/10 transition-colors"
           >
             <div className="flex items-center gap-2">
               <Search className="h-4 w-4 text-zinc-500" />
@@ -174,11 +174,11 @@ export function AdminNavbar() {
         <div className="flex items-center space-x-4">
           {/* Theme Switcher Segmented Control */}
           {mounted ? (
-            <div className="flex items-center gap-0.5 bg-zinc-900/50 border border-white/5 p-0.5 rounded-md">
+            <div className="flex items-center gap-0.5 bg-zinc-100 dark:bg-zinc-900/50 border border-zinc-200 dark:border-white/5 p-0.5 rounded-md">
               <button
                 onClick={() => setTheme("light")}
-                className={`p-1.5 rounded-md hover:bg-zinc-800 transition-all duration-200 cursor-pointer ${
-                  theme === "light" ? "bg-white text-zinc-950 shadow-sm" : "text-zinc-500 hover:text-zinc-300"
+                className={`p-1.5 rounded-md hover:bg-zinc-200 dark:hover:bg-zinc-800 transition-all duration-200 cursor-pointer ${
+                  theme === "light" ? "bg-white text-zinc-950 shadow-sm" : "text-zinc-500 hover:text-zinc-700"
                 }`}
                 title="Light Mode"
               >
@@ -186,7 +186,7 @@ export function AdminNavbar() {
               </button>
               <button
                 onClick={() => setTheme("dark")}
-                className={`p-1.5 rounded-md hover:bg-zinc-800 transition-all duration-200 cursor-pointer ${
+                className={`p-1.5 rounded-md hover:bg-zinc-200 dark:hover:bg-zinc-800 transition-all duration-200 cursor-pointer ${
                   theme === "dark" ? "bg-zinc-950 text-white shadow-sm border border-white/5" : "text-zinc-500 hover:text-zinc-300"
                 }`}
                 title="Dark Mode"
@@ -195,7 +195,7 @@ export function AdminNavbar() {
               </button>
               <button
                 onClick={() => setTheme("system")}
-                className={`p-1.5 rounded-md hover:bg-zinc-800 transition-all duration-200 cursor-pointer ${
+                className={`p-1.5 rounded-md hover:bg-zinc-200 dark:hover:bg-zinc-800 transition-all duration-200 cursor-pointer ${
                   theme === "system" ? "bg-zinc-950 text-white shadow-sm border border-white/5" : "text-zinc-500 hover:text-zinc-300"
                 }`}
                 title="System Preference"
@@ -204,7 +204,7 @@ export function AdminNavbar() {
               </button>
             </div>
           ) : (
-            <div className="h-8 w-24 bg-zinc-900/50 rounded-md animate-pulse border border-white/5" />
+            <div className="h-8 w-24 bg-zinc-100 dark:bg-zinc-900/50 rounded-md animate-pulse border border-zinc-200 dark:border-white/5" />
           )}
 
           {/* Color Palette Switcher Popover */}
@@ -213,28 +213,28 @@ export function AdminNavbar() {
               <Button
                 variant="ghost"
                 size="icon"
-                className="navbar-item relative bg-zinc-900/50 hover:bg-zinc-800 border border-white/5 rounded-md cursor-pointer"
+                className="navbar-item relative bg-zinc-100 dark:bg-zinc-900/50 hover:bg-zinc-200 dark:hover:bg-zinc-800 border border-zinc-200 dark:border-white/5 rounded-md cursor-pointer"
                 title="Theme Colors"
               >
-                <Palette className="h-4 w-4 text-zinc-400 hover:text-zinc-200" />
+                <Palette className="h-4 w-4 text-zinc-500 dark:text-zinc-400 hover:text-zinc-800 dark:hover:text-zinc-200" />
               </Button>
             </PopoverTrigger>
-            <PopoverContent align="end" className="bg-zinc-950 border border-white/5 p-3 w-48 text-zinc-200">
-              <h4 className="text-xs font-semibold text-zinc-400 mb-2 font-mono uppercase tracking-wider">Accent Color</h4>
+            <PopoverContent align="end" className="bg-popover border border-zinc-200 dark:border-white/5 p-3 w-48 text-popover-foreground">
+              <h4 className="text-xs font-semibold text-zinc-500 dark:text-zinc-400 mb-2 font-mono uppercase tracking-wider">Accent Color</h4>
               <div className="grid grid-cols-3 gap-2">
                 {PALETTE_OPTIONS.map((option) => (
                   <button
                     key={option.name}
                     onClick={() => changePalette(option.name, option.hex, option.alpha, option.border)}
-                    className={`flex flex-col items-center justify-center p-2 rounded-md hover:bg-zinc-900 transition-colors border cursor-pointer ${
-                      activePalette === option.name ? "border-indigo-500 bg-zinc-900" : "border-transparent"
+                    className={`flex flex-col items-center justify-center p-2 rounded-md hover:bg-zinc-100 dark:hover:bg-zinc-900 transition-colors border cursor-pointer ${
+                      activePalette === option.name ? "border-accent-custom bg-accent-alpha-custom" : "border-transparent"
                     }`}
                   >
                     <span
                       className="h-4 w-4 rounded-full mb-1"
                       style={{ backgroundColor: option.hex }}
                     />
-                    <span className="text-[10px] text-zinc-300">{option.name}</span>
+                    <span className="text-[10px] text-zinc-700 dark:text-zinc-300 font-medium">{option.name}</span>
                   </button>
                 ))}
               </div>
@@ -242,7 +242,7 @@ export function AdminNavbar() {
           </Popover>
 
           <div
-            className="cursor-pointer px-4 py-2 rounded-md border border-white/5 bg-zinc-900/50 hover:bg-zinc-800 transition duration-200 text-zinc-200 font-medium text-sm text-center select-none flex items-center justify-center"
+            className="cursor-pointer px-4 py-2 rounded-md border border-zinc-200 dark:border-white/5 bg-zinc-100 dark:bg-zinc-900/50 hover:bg-zinc-200 dark:hover:bg-zinc-800 transition duration-200 text-zinc-800 dark:text-zinc-200 font-medium text-sm text-center select-none flex items-center justify-center"
             onClick={() => console.log("Clicked")}
           >
             {adminName || "Admin"}
