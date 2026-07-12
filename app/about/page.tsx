@@ -275,10 +275,10 @@ export default function AboutPage() {
                         color: "transparent"
                       }}
                     >
-                      50
+                      330+
                     </div>
                     <div className="mt-3 text-[14px] leading-[1.4] text-zinc-300 drop-shadow-md">
-                      developer followers across the open-source community.
+                      commits pushed to Mockrithm alone. We are constantly iterating and building.
                     </div>
                   </div>
                 </div>
