@@ -204,6 +204,105 @@ export default function AboutPage() {
                 </p>
               </div>
             </div>
+            
+            {/* Stats Cards Grid - IMAGES FIXED TO FULL OPACITY */}
+            <div className="mt-14 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+              
+              {/* Card 1 */}
+              <div 
+                className="relative w-full h-[280px] sm:h-[340px] bg-white/10 p-[1.5px]"
+                style={{ clipPath: "polygon(64px 0, calc(100% - 14px) 0, calc(100% - 4px) 4px, 100% 14px, 100% calc(100% - 14px), calc(100% - 4px) calc(100% - 4px), calc(100% - 14px) 100%, 14px 100%, 4px calc(100% - 4px), 0 calc(100% - 14px), 0 64px)" }}
+              >
+                <div 
+                  className="relative w-full h-full overflow-hidden bg-cover bg-center"
+                  style={{ 
+                    clipPath: "polygon(64px 0, calc(100% - 14px) 0, calc(100% - 4px) 4px, 100% 14px, 100% calc(100% - 14px), calc(100% - 4px) calc(100% - 4px), calc(100% - 14px) 100%, 14px 100%, 4px calc(100% - 4px), 0 calc(100% - 14px), 0 64px)",
+                    backgroundImage: "url('/images/ring1.png')"
+                  }}
+                >
+                  <div className="absolute left-6 right-6 bottom-6 max-w-[66%]">
+                    <div 
+                      className="font-semibold uppercase leading-none text-[36px] sm:text-[52px]"
+                      style={{
+                        background: "linear-gradient(294deg, #ffffff 20%, #a1a1aa)",
+                        WebkitBackgroundClip: "text",
+                        backgroundClip: "text",
+                        color: "transparent"
+                      }}
+                    >
+                      26
+                    </div>
+                    <div className="mt-3 text-[14px] leading-[1.4] text-zinc-300 drop-shadow-md">
+                      public repositories built across both our GitHub accounts.
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Card 2 */}
+              <div 
+                className="relative w-full h-[280px] sm:h-[340px] bg-white/10 p-[1.5px] lg:mt-24"
+                style={{ clipPath: "polygon(0 14px, 4px 4px, 14px 0, calc(100% - 64px) 0, 100% 64px, 100% calc(100% - 14px), calc(100% - 4px) calc(100% - 4px), calc(100% - 14px) 100%, 64px 100%, 0 calc(100% - 64px))" }}
+              >
+                <div 
+                  className="relative w-full h-full overflow-hidden bg-cover bg-center"
+                  style={{ 
+                    clipPath: "polygon(0 14px, 4px 4px, 14px 0, calc(100% - 64px) 0, 100% 64px, 100% calc(100% - 14px), calc(100% - 4px) calc(100% - 4px), calc(100% - 14px) 100%, 64px 100%, 0 calc(100% - 64px))",
+                    backgroundImage: "url('/images/ring2.png')"
+                  }}
+                >
+                  <div className="absolute left-6 bottom-20 max-w-[66%]">
+                    <div 
+                      className="font-semibold uppercase leading-none text-[36px] sm:text-[52px]"
+                      style={{
+                        background: "linear-gradient(294deg, #ffffff 20%, #a1a1aa)",
+                        WebkitBackgroundClip: "text",
+                        backgroundClip: "text",
+                        color: "transparent"
+                      }}
+                    >
+                      330+
+                    </div>
+                    <div className="mt-3 text-[14px] leading-[1.4] text-zinc-300 drop-shadow-md">
+                      commits pushed to Mockrithm alone. We are constantly iterating and building.
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Card 3 */}
+              <div 
+                className="relative w-full h-[280px] sm:h-[340px] bg-white/10 p-[1.5px]"
+                style={{ clipPath: "polygon(0 14px, 4px 4px, 14px 0, calc(100% - 64px) 0, 100% 64px, 100% calc(100% - 64px), calc(100% - 64px) 100%, 14px 100%, 4px calc(100% - 4px), 0 calc(100% - 14px))" }}
+              >
+                <div 
+                  className="relative w-full h-full overflow-hidden bg-cover bg-center"
+                  style={{ 
+                    clipPath: "polygon(0 14px, 4px 4px, 14px 0, calc(100% - 64px) 0, 100% 64px, 100% calc(100% - 64px), calc(100% - 64px) 100%, 14px 100%, 4px calc(100% - 4px), 0 calc(100% - 14px))",
+                    backgroundImage: "url('/images/ring3.png')"
+                  }}
+                >
+                  <div className="absolute left-6 right-28 bottom-6 max-w-[66%]">
+                    <div 
+                      className="font-semibold uppercase leading-none text-[36px] sm:text-[52px]"
+                      style={{
+                        background: "linear-gradient(294deg, #ffffff 20%, #a1a1aa)",
+                        WebkitBackgroundClip: "text",
+                        backgroundClip: "text",
+                        color: "transparent"
+                      }}
+                    >
+                      2
+                    </div>
+                    <div className="mt-3 text-[14px] leading-[1.4] text-zinc-300 drop-shadow-md">
+                      passionate creators — engineers and students pushing code every single day.
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+            </div>
+
           </div>
         </section>
 
