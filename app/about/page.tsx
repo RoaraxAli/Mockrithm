@@ -3,7 +3,7 @@
 import { useState, useRef } from "react";
 import { Badge } from "@/components/ui/badge";
 import { motion } from "framer-motion";
-import { Compass, Sparkles, Target, HeartHandshake, ArrowUpRight, Github, Twitter, Linkedin } from "lucide-react";
+import { Compass, Sparkles, Target, HeartHandshake, ArrowUpRight, Github, Twitter, Linkedin, Instagram } from "lucide-react";
 import MarketingNavbar from "@/components/shared/MarketingNavbar";
 import FeedbackForm from "@/components/FeedbackForm";
 
@@ -229,7 +229,7 @@ export default function AboutPage() {
                   className="relative w-full h-full overflow-hidden bg-cover bg-center"
                   style={{ 
                     clipPath: "polygon(64px 0, calc(100% - 14px) 0, calc(100% - 4px) 4px, 100% 14px, 100% calc(100% - 14px), calc(100% - 4px) calc(100% - 4px), calc(100% - 14px) 100%, 14px 100%, 4px calc(100% - 4px), 0 calc(100% - 14px), 0 64px)",
-                    backgroundImage: "url('https://images.higgs.ai/?default=1&output=webp&url=https%3A%2F%2Fd8j0ntlcm91z4.cloudfront.net%2Fuser_38xzZboKViGWJOttwIXH07lWA1P%2Fhf_20260514_154203_6c6f94dc-a07e-4ba5-8688-106f01ccd2c8.png&w=1280&q=85')"
+                    backgroundImage: "url('/images/ring1.png')"
                   }}
                 >
                   <div className="absolute left-6 right-6 bottom-6 max-w-[66%]">
@@ -243,10 +243,10 @@ export default function AboutPage() {
                         color: "transparent"
                       }}
                     >
-                      10x
+                      2.4K+
                     </div>
                     <div className="mt-3 text-[14px] leading-[1.4] text-zinc-300 drop-shadow-md">
-                      faster feedback loops compared to traditional human-led mock interviews.
+                      stars on Github. Loved by the open-source community.
                     </div>
                   </div>
                 </div>
@@ -261,7 +261,7 @@ export default function AboutPage() {
                   className="relative w-full h-full overflow-hidden bg-cover bg-center"
                   style={{ 
                     clipPath: "polygon(0 14px, 4px 4px, 14px 0, calc(100% - 64px) 0, 100% 64px, 100% calc(100% - 14px), calc(100% - 4px) calc(100% - 4px), calc(100% - 14px) 100%, 64px 100%, 0 calc(100% - 64px))",
-                    backgroundImage: "url('https://images.higgs.ai/?default=1&output=webp&url=https%3A%2F%2Fd8j0ntlcm91z4.cloudfront.net%2Fuser_38xzZboKViGWJOttwIXH07lWA1P%2Fhf_20260514_154151_45c62c60-3bcc-4f21-8f9d-03722ebb5df8.png&w=1280&q=85')"
+                    backgroundImage: "url('/images/ring2.png')"
                   }}
                 >
                   <div className="absolute left-6 bottom-20 max-w-[66%]">
@@ -275,10 +275,10 @@ export default function AboutPage() {
                         color: "transparent"
                       }}
                     >
-                      50+
+                      300+
                     </div>
                     <div className="mt-3 text-[14px] leading-[1.4] text-zinc-300 drop-shadow-md">
-                      unique behavioral and technical scenarios mapped to top tech companies.
+                      forks. Developers are constantly building upon our core.
                     </div>
                   </div>
                 </div>
@@ -293,7 +293,7 @@ export default function AboutPage() {
                   className="relative w-full h-full overflow-hidden bg-cover bg-center"
                   style={{ 
                     clipPath: "polygon(0 14px, 4px 4px, 14px 0, calc(100% - 64px) 0, 100% 64px, 100% calc(100% - 64px), calc(100% - 64px) 100%, 14px 100%, 4px calc(100% - 4px), 0 calc(100% - 14px))",
-                    backgroundImage: "url('https://images.higgs.ai/?default=1&output=webp&url=https%3A%2F%2Fd8j0ntlcm91z4.cloudfront.net%2Fuser_38xzZboKViGWJOttwIXH07lWA1P%2Fhf_20260514_152238_24ec8db4-d728-4739-bb30-e985533e9637.png&w=1280&q=85')"
+                    backgroundImage: "url('/images/ring3.png')"
                   }}
                 >
                   <div className="absolute left-6 right-28 bottom-6 max-w-[66%]">
@@ -307,10 +307,10 @@ export default function AboutPage() {
                         color: "transparent"
                       }}
                     >
-                      24/7
+                      150+
                     </div>
                     <div className="mt-3 text-[14px] leading-[1.4] text-zinc-300 drop-shadow-md">
-                      availability. Your personal elite interview coach, ready whenever you are.
+                      contributors actively pushing updates to the codebase.
                     </div>
                   </div>
                 </div>
@@ -364,6 +364,18 @@ export default function AboutPage() {
                   <span className="text-xs font-bold uppercase tracking-wider text-zinc-500">Location</span>
                   <span className="text-xl font-medium text-white">Global / Remote</span>
                   <span className="text-sm text-zinc-500">Built in the cloud, for the world.</span>
+                </div>
+              </div>
+              <div className="flex items-start gap-4 group cursor-pointer">
+                <div className="h-14 w-14 rounded-full bg-white/5 border border-white/10 flex items-center justify-center shrink-0 group-hover:bg-white/10 transition-colors">
+                  <Instagram className="h-6 w-6 text-white/70 group-hover:text-white transition-colors" />
+                </div>
+                <div className="flex flex-col gap-1.5" style={{ fontFamily: "'Inter', sans-serif" }}>
+                  <span className="text-xs font-bold uppercase tracking-wider text-zinc-500">Instagram</span>
+                  <a href="https://instagram.com/mockrithm" target="_blank" rel="noreferrer" className="text-xl font-medium text-white hover:text-zinc-300 transition-colors flex items-center gap-2">
+                    @mockrithm <ArrowUpRight className="h-4 w-4 opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all" />
+                  </a>
+                  <span className="text-sm text-zinc-500">Follow us for updates & tips.</span>
                 </div>
               </div>
             </div>
