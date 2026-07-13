@@ -676,11 +676,11 @@ chartPath = `M ${chartPoints[0].x} ${chartPoints[0].y} ` + chartPoints.slice(1).
             <div className="flex items-center justify-between border-b border-white/5 pb-4">
               <div className="flex items-center gap-2">
                 <FileText className="size-4 text-zinc-400" />
-                <h3 className="text-xs font-black uppercase tracking-widest text-white">ATS Resume Intelligence Desk</h3>
+                <h3 className="text-sm font-black uppercase tracking-widest text-white">ATS Resume Intelligence Desk</h3>
               </div>
               <Link 
                 href="/user/resume" 
-                className="text-[9px] font-mono font-black text-zinc-400 hover:text-white uppercase tracking-widest flex items-center gap-1 transition-colors"
+                className="text-xs font-mono font-black text-zinc-400 hover:text-white uppercase tracking-widest flex items-center gap-1 transition-colors"
               >
                 Analyze Resume <ArrowUpRight className="size-3" />
               </Link>
@@ -696,15 +696,15 @@ chartPath = `M ${chartPoints[0].x} ${chartPoints[0].y} ` + chartPoints.slice(1).
                 {/* Stats & Metadata block */}
                 <div className="p-5 bg-zinc-950/30 border border-white/5 rounded-xl flex flex-col justify-between gap-4">
                   <div className="space-y-1">
-                    <span className="text-[7px] font-mono font-bold text-zinc-500 uppercase tracking-widest">Active Document</span>
-                    <h4 className="text-xs font-black text-white truncate">{latestResume.fileName}</h4>
-                    <p className="text-[8.5px] text-zinc-550 font-mono">
+                    <span className="text-[10px] font-mono font-bold text-zinc-500 uppercase tracking-widest">Active Document</span>
+                    <h4 className="text-sm font-bold text-white truncate">{latestResume.fileName}</h4>
+                    <p className="text-xs text-zinc-400 font-mono">
                       Parsed: {new Date(latestResume.createdAt).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}
                     </p>
                   </div>
 
                   <div className="space-y-1.5">
-                    <div className="flex justify-between text-[8px] font-mono text-zinc-500 font-bold uppercase">
+                    <div className="flex justify-between text-xs font-mono text-zinc-500 font-bold uppercase">
                       <span>ATS Matching Score</span>
                       <span className="text-white">{latestAtsScore}/100</span>
                     </div>
@@ -721,7 +721,7 @@ chartPath = `M ${chartPoints[0].x} ${chartPoints[0].y} ` + chartPoints.slice(1).
 
                   <Link 
                     href="/user/resume" 
-                    className="w-full h-9 rounded-lg bg-zinc-900 hover:bg-zinc-800 border border-white/5 text-zinc-300 hover:text-white text-[9px] font-mono font-bold uppercase tracking-wider flex items-center justify-center transition-all"
+                    className="w-full h-9 rounded-lg bg-zinc-900 hover:bg-zinc-800 border border-white/5 text-zinc-300 hover:text-white text-xs font-mono font-bold uppercase tracking-wider flex items-center justify-center transition-all"
                   >
                     Modify Resume CV
                   </Link>
@@ -729,25 +729,25 @@ chartPath = `M ${chartPoints[0].x} ${chartPoints[0].y} ` + chartPoints.slice(1).
 
                 {/* Strengths & Weaknesses blocks */}
                 <div className="p-5 bg-zinc-950/30 border border-white/5 rounded-xl space-y-3">
-                  <span className="text-[8px] font-mono font-bold text-zinc-550 uppercase tracking-widest flex items-center gap-1.5">
+                  <span className="text-xs font-mono font-bold text-zinc-400 uppercase tracking-widest flex items-center gap-1.5">
                     <CheckCircle2 className="size-3 text-emerald-500" /> Structural Strengths
                   </span>
                   <div className="flex flex-col gap-1.5 max-h-[110px] overflow-y-auto pr-1">
                     {resumeStrengths.length > 0 ? (
                       resumeStrengths.slice(0, 3).map((strength: string, i: number) => (
-                        <div key={i} className="text-[9px] text-zinc-300 leading-relaxed font-semibold">
+                        <div key={i} className="text-xs text-zinc-300 leading-relaxed font-semibold">
                           • {strength}
                         </div>
                       ))
                     ) : (
-                      <div className="text-[8.5px] text-zinc-550 font-mono italic">No structural index data.</div>
+                      <div className="text-xs text-zinc-500 font-mono italic">No structural index data.</div>
                     )}
                   </div>
                 </div>
 
                 {/* Missing keywords block */}
                 <div className="p-5 bg-zinc-950/30 border border-white/5 rounded-xl space-y-3">
-                  <span className="text-[8px] font-mono font-bold text-zinc-550 uppercase tracking-widest flex items-center gap-1.5">
+                  <span className="text-xs font-mono font-bold text-zinc-400 uppercase tracking-widest flex items-center gap-1.5">
                     <AlertTriangle className="size-3 text-yellow-500" /> Keyword Gaps
                   </span>
                   <div className="flex flex-wrap gap-1.5 max-h-[110px] overflow-y-auto pr-1">
@@ -755,13 +755,13 @@ chartPath = `M ${chartPoints[0].x} ${chartPoints[0].y} ` + chartPoints.slice(1).
                       missingKeywords.slice(0, 8).map((keyword: string) => (
                         <span 
                           key={keyword}
-                          className="text-[8.5px] font-mono font-bold uppercase text-zinc-400 bg-white/5 border border-white/10 px-2 py-0.5 rounded"
+                          className="text-xs font-mono font-bold uppercase text-zinc-400 bg-white/5 border border-white/10 px-2 py-0.5 rounded"
                         >
                           {keyword}
                         </span>
                       ))
                     ) : (
-                      <div className="text-[8.5px] text-zinc-550 font-mono italic">No keyword gap reports found.</div>
+                      <div className="text-xs text-zinc-555 font-mono italic">No keyword gap reports found.</div>
                     )}
                   </div>
                 </div>
@@ -771,10 +771,10 @@ chartPath = `M ${chartPoints[0].x} ${chartPoints[0].y} ` + chartPoints.slice(1).
               <div className="py-12 border border-dashed border-zinc-900 rounded-xl bg-zinc-950/10 flex flex-col items-center justify-center text-center p-6 gap-3 select-none">
                 <FileText className="size-8 text-zinc-700" />
                 <div className="space-y-1">
-                  <p className="text-[10px] text-zinc-500 font-bold uppercase tracking-wider">No Resume parsed yet</p>
-                  <p className="text-[9px] text-zinc-650 max-w-sm">Upload and scan your resume against corporate job listings to unlock full ATS recommendations.</p>
+                  <p className="text-xs text-zinc-500 font-bold uppercase tracking-wider">No Resume parsed yet</p>
+                  <p className="text-xs text-zinc-400 max-w-sm">Upload and scan your resume against corporate job listings to unlock full ATS recommendations.</p>
                 </div>
-                <Button asChild className="bg-white hover:bg-zinc-200 text-black font-black text-[9px] tracking-wider uppercase h-8 px-4 rounded-lg cursor-pointer transition-all">
+                <Button asChild className="bg-white hover:bg-zinc-200 text-black font-black text-xs tracking-wider uppercase h-8 px-4 rounded-lg cursor-pointer transition-all">
                   <Link href="/user/resume">Upload Resume</Link>
                 </Button>
               </div>

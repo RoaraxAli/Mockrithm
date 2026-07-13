@@ -76,34 +76,44 @@ export default function NotFound() {
 
         .bg-layer-spaceship {
           background-image: url('https://pub-e68758f43067417dba612b2371819aa1.r2.dev/viktor-components/alien-spaceship.png');
-          background-position: center 40%;
-          background-size: contain;
+          background-position: center 18%;
+          background-size: 220px;
           background-repeat: no-repeat;
           background-attachment: fixed;
-          opacity: 0.1;
+          opacity: 0.15;
         }
 
         .bg-page-gradient {
           background: linear-gradient(to top left, #07070a, #111116);
         }
 
+        .decoration-cloud {
+          top: -30px !important;
+          left: -40px !important;
+        }
+
+        .decoration-favorite {
+          bottom: -24px !important;
+          right: -30px !important;
+        }
+
         @media (max-width: 768px) {
           .bg-layer-spaceship {
-            background-size: 90% !important;
-            background-position: center 45% !important;
+            background-size: 160px !important;
+            background-position: center 20% !important;
           }
           .title-text {
             font-size: 30px !important;
           }
           .decoration-cloud {
             font-size: 30px !important;
-            top: -12px !important;
-            left: -16px !important;
+            top: -24px !important;
+            left: -32px !important;
           }
           .decoration-favorite {
             font-size: 24px !important;
-            bottom: -10px !important;
-            right: 12px !important;
+            bottom: -20px !important;
+            right: -20px !important;
           }
           .nav-card-container {
             gap: 10px !important;
@@ -116,20 +126,21 @@ export default function NotFound() {
 
         @media (max-width: 480px) {
           .bg-layer-spaceship {
-            background-size: 100% !important;
+            background-size: 130px !important;
+            background-position: center 22% !important;
           }
           .title-text {
             font-size: 26px !important;
           }
           .decoration-cloud {
             font-size: 24px !important;
-            top: -8px !important;
-            left: -12px !important;
+            top: -20px !important;
+            left: -24px !important;
           }
           .decoration-favorite {
             font-size: 20px !important;
-            bottom: -8px !important;
-            right: 8px !important;
+            bottom: -16px !important;
+            right: -16px !important;
           }
         }
       `}} />
@@ -251,7 +262,7 @@ export default function NotFound() {
           
           {/* Cloud Decoration */}
           <span 
-            className="material-symbols-rounded absolute -top-5 -left-1 text-[42px] select-none pointer-events-none animate-float-slow decoration-cloud"
+            className="material-symbols-rounded absolute text-[42px] select-none pointer-events-none animate-float-slow decoration-cloud"
             style={{
               background: 'linear-gradient(to bottom, #F7B2FB 50%, #786EF1 80%, #5588FB 100%)',
               WebkitBackgroundClip: 'text',
@@ -264,7 +275,7 @@ export default function NotFound() {
 
           {/* Heart Decoration */}
           <span 
-            className="material-symbols-rounded absolute -bottom-4 right-12 text-[32px] select-none pointer-events-none animate-float-slow-delay decoration-favorite"
+            className="material-symbols-rounded absolute text-[32px] select-none pointer-events-none animate-float-slow-delay decoration-favorite"
             style={{
               background: 'linear-gradient(to bottom, #F7B2FB 50%, #786EF1 80%, #5588FB 100%)',
               WebkitBackgroundClip: 'text',

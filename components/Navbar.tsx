@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useRouter, usePathname } from "next/navigation";
 import { useState, useEffect } from "react";
 import Image from "next/image";
-import { Show, useClerk, UserButton } from "@clerk/nextjs";
+import { useClerk, UserButton } from "@clerk/nextjs";
 import { getAuthRedirectUrl } from "@/lib/utils/auth";
 import { BillingOptions } from "@/app/user/components/BillingOptions";
 import { UserResumePanel } from "@/app/user/components/UserResumePanel";
@@ -186,7 +186,7 @@ const Navbar = ({ userId, userName, userRole }: NavbarProps) => {
 
             {/* Desktop User Dropdown / Login */}
             <div className="hidden md:flex items-center ml-auto">
-              <Show when="signed-out">
+              {!userId ? (
                 <div className="flex items-center space-x-2">
                   <Link
                     href={getAuthRedirectUrl("sign-in")}
@@ -201,9 +201,8 @@ const Navbar = ({ userId, userName, userRole }: NavbarProps) => {
                     Start Prep
                   </Link>
                 </div>
-              </Show>
-              <Show when="signed-in">
-                <div className="flex items-center space-x-4">
+              ) : (
+                <div className="flex items-center space-x-4 flex-row">
                   {isAdmin && (
                     <a
                       href="/admin"
@@ -274,11 +273,11 @@ const Navbar = ({ userId, userName, userRole }: NavbarProps) => {
                     </UserButton.UserProfilePage>
                   </UserButton>
                 </div>
-              </Show>
+              )}
             </div>
 
             {/* Mobile User Button */}
-            <Show when="signed-in">
+            {userId && (
               <div className="md:hidden flex items-center mr-2">
                 <UserButton
                   appearance={{
@@ -341,18 +340,18 @@ const Navbar = ({ userId, userName, userRole }: NavbarProps) => {
                   </UserButton.UserProfilePage>
                 </UserButton>
               </div>
-            </Show>
+            )}
 
             {/* Mobile Actions Container */}
             <div className="flex items-center space-x-2 md:hidden">
-              <Show when="signed-out">
+              {!userId && (
                 <Link
                   href={getAuthRedirectUrl("sign-up")}
                   className="bg-white text-black font-extrabold hover:bg-zinc-200 transition-all border border-white rounded-xl text-[9px] uppercase tracking-wider px-3.5 py-1.5"
                 >
                   Start Prep
                 </Link>
-              </Show>
+              )}
 
 
               {/* Mobile Menu Toggle */}
@@ -399,7 +398,7 @@ const Navbar = ({ userId, userName, userRole }: NavbarProps) => {
               })}
 
               <div className="border-t border-white/20 pt-4 mt-4 space-y-2">
-                <Show when="signed-out">
+                {!userId ? (
                   <div className="flex flex-col gap-2">
                     <Link
                       href={getAuthRedirectUrl("sign-in")}
@@ -418,82 +417,79 @@ const Navbar = ({ userId, userName, userRole }: NavbarProps) => {
                       <span className="font-medium">Start Prep</span>
                     </Link>
                   </div>
-                </Show>
-                <Show when="signed-in">
-                  {isAdmin ? (
-                    // Admin only → Admin Panel (external subdomain)
-                    <a
-                      href="/admin"
+                ) : isAdmin ? (
+                  // Admin only → Admin Panel (external subdomain)
+                  <a
+                    href="/admin"
+                    className="group flex items-center space-x-3 w-full px-4 py-3 text-sm text-gray-300 hover:text-white hover:bg-white/10 transition-all duration-200"
+                    onClick={() => setIsMobileMenuOpen(false)}
+                  >
+                    <Home className="w-5 h-5 group-hover:scale-110 transition-transform duration-300" />
+                    <span className="font-medium">Admin Panel</span>
+                  </a>
+                ) : (
+                  <>
+                    {/* User Panel Pages */}
+
+                    <Link
+                      href="/user/take-interview"
                       className="group flex items-center space-x-3 w-full px-4 py-3 text-sm text-gray-300 hover:text-white hover:bg-white/10 transition-all duration-200"
                       onClick={() => setIsMobileMenuOpen(false)}
                     >
-                      <Home className="w-5 h-5 group-hover:scale-110 transition-transform duration-300" />
-                      <span className="font-medium">Admin Panel</span>
-                    </a>
-                  ) : (
-                    <>
-                      {/* User Panel Pages */}
-
-                      <Link
-                        href="/user/take-interview"
-                        className="group flex items-center space-x-3 w-full px-4 py-3 text-sm text-gray-300 hover:text-white hover:bg-white/10 transition-all duration-200"
-                        onClick={() => setIsMobileMenuOpen(false)}
-                      >
-                        <PlayCircle className="w-5 h-5 text-zinc-500 group-hover:text-white transition-colors" />
-                        <span className="font-medium">Take Interview</span>
-                      </Link>
-                      <Link
-                        href="/user/resume"
-                        className="group flex items-center space-x-3 w-full px-4 py-3 text-sm text-gray-300 hover:text-white hover:bg-white/10 transition-all duration-200"
-                        onClick={() => setIsMobileMenuOpen(false)}
-                      >
-                        <Sparkles className="w-5 h-5 text-zinc-500 group-hover:text-white transition-colors" />
-                        <span className="font-medium">Resume Builder</span>
-                      </Link>
-                      <Link
-                        href="/user/interviews"
-                        className="group flex items-center space-x-3 w-full px-4 py-3 text-sm text-gray-300 hover:text-white hover:bg-white/10 transition-all duration-200"
-                        onClick={() => setIsMobileMenuOpen(false)}
-                      >
-                        <FileText className="w-5 h-5 text-zinc-500 group-hover:text-white transition-colors" />
-                        <span className="font-medium">Your Interviews</span>
-                      </Link>
-                      <Link
-                        href="/user/feedback"
-                        className="group flex items-center space-x-3 w-full px-4 py-3 text-sm text-gray-300 hover:text-white hover:bg-white/10 transition-all duration-200"
-                        onClick={() => setIsMobileMenuOpen(false)}
-                      >
-                        <MessageSquare className="w-5 h-5 text-zinc-500 group-hover:text-white transition-colors" />
-                        <span className="font-medium">Feedback</span>
-                      </Link>
+                      <PlayCircle className="w-5 h-5 text-zinc-500 group-hover:text-white transition-colors" />
+                      <span className="font-medium">Take Interview</span>
+                    </Link>
+                    <Link
+                      href="/user/resume"
+                      className="group flex items-center space-x-3 w-full px-4 py-3 text-sm text-gray-300 hover:text-white hover:bg-white/10 transition-all duration-200"
+                      onClick={() => setIsMobileMenuOpen(false)}
+                    >
+                      <Sparkles className="w-5 h-5 text-zinc-500 group-hover:text-white transition-colors" />
+                      <span className="font-medium">Resume Builder</span>
+                    </Link>
+                    <Link
+                      href="/user/interviews"
+                      className="group flex items-center space-x-3 w-full px-4 py-3 text-sm text-gray-300 hover:text-white hover:bg-white/10 transition-all duration-200"
+                      onClick={() => setIsMobileMenuOpen(false)}
+                    >
+                      <FileText className="w-5 h-5 text-zinc-500 group-hover:text-white transition-colors" />
+                      <span className="font-medium">Your Interviews</span>
+                    </Link>
+                    <Link
+                      href="/user/feedback"
+                      className="group flex items-center space-x-3 w-full px-4 py-3 text-sm text-gray-300 hover:text-white hover:bg-white/10 transition-all duration-200"
+                      onClick={() => setIsMobileMenuOpen(false)}
+                    >
+                      <MessageSquare className="w-5 h-5 text-zinc-500 group-hover:text-white transition-colors" />
+                      <span className="font-medium">Feedback</span>
+                    </Link>
 
 
-                      {/* Sign Out */}
-                      <button
-                        onClick={() => {
-                          handleLogout();
-                          setIsMobileMenuOpen(false);
-                        }}
-                        className="group flex items-center space-x-3 w-full px-4 py-3 text-sm text-gray-300 hover:text-white hover:bg-white/10 transition-all duration-300 cursor-pointer"
-                      >
-                        <LogOut className="w-5 h-5 text-zinc-500 group-hover:text-rose-450 transition-colors" />
-                        <span className="font-medium">Sign Out</span>
-                      </button>
+                    {/* Sign Out */}
+                    <button
+                      onClick={() => {
+                        handleLogout();
+                        setIsMobileMenuOpen(false);
+                      }}
+                      className="group flex items-center space-x-3 w-full px-4 py-3 text-sm text-gray-300 hover:text-white hover:bg-white/10 transition-all duration-300 cursor-pointer"
+                    >
+                      <LogOut className="w-5 h-5 text-zinc-500 group-hover:text-rose-450 transition-colors" />
+                      <span className="font-medium">Sign Out</span>
+                    </button>
 
-                      {/* Delete Account */}
-                      <button
-                        onClick={() => {
-                          handleDeleteAccount();
-                          setIsMobileMenuOpen(false);
-                        }}
-                        className="group flex items-center space-x-3 w-full px-4 py-3 text-sm text-white hover:text-red-300 hover:bg-red-500/10 transition-all duration-300 cursor-pointer"
-                      >
-                        <Trash2 className="w-5 h-5 text-white group-hover:text-red-300" />
-                        <span className="font-medium">Delete Account</span>
-                      </button>
-                    </>
-                  )}
-                </Show>
+                    {/* Delete Account */}
+                    <button
+                      onClick={() => {
+                        handleDeleteAccount();
+                        setIsMobileMenuOpen(false);
+                      }}
+                      className="group flex items-center space-x-3 w-full px-4 py-3 text-sm text-white hover:text-red-300 hover:bg-red-500/10 transition-all duration-300 cursor-pointer"
+                    >
+                      <Trash2 className="w-5 h-5 text-white group-hover:text-red-300" />
+                      <span className="font-medium">Delete Account</span>
+                    </button>
+                  </>
+                )}
               </div>
 
             </div>
