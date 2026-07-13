@@ -938,7 +938,13 @@ const Agent = ({
 
     console.log("[Agent.tsx] Starting Whisper microphone recording...");
     try {
-      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      const stream = await navigator.mediaDevices.getUserMedia({
+        audio: {
+          echoCancellation: true,
+          noiseSuppression: true,
+          autoGainControl: true
+        }
+      });
       audioStreamRef.current = stream;
 
       const mediaRecorder = new MediaRecorder(stream, { mimeType: "audio/webm" });
@@ -982,8 +988,8 @@ const Agent = ({
           }
           const rms = Math.sqrt(sumSquares / bufferLength);
 
-          // Voice threshold detection (increased to 0.025 for better noise immunity)
-          if (rms > 0.025) {
+          // Voice threshold detection (lowered to 0.015 for better sensitivity to soft speech)
+          if (rms > 0.015) {
             consecutiveSpeechFrames++;
             if (consecutiveSpeechFrames >= 3) { // Require ~300ms of sustained volume
               lastSpeechTime = Date.now();
@@ -996,8 +1002,9 @@ const Agent = ({
             consecutiveSpeechFrames = 0; // Reset counter on silence
           }
 
-          // If user spoke and now we have 1.5s of silence, transcribe and submit
-          if (hasSpoken && Date.now() - lastSpeechTime > 1500) {
+          // If user spoke and now we have 2.2s of silence, transcribe and submit
+          // (Increased from 1.5s to 2.2s so the interviewer doesn't cut off slow speakers or breathing pauses)
+          if (hasSpoken && Date.now() - lastSpeechTime > 2200) {
             console.log("[Agent.tsx] VAD: Silence detected. Initiating transcription...");
             stopWhisperRecordingAndTranscribe();
           }
@@ -2318,10 +2325,18 @@ ${codeRef.current}
               {/* AI Voice Interviewer Orb Card - Terminal Style */}
               <motion.div 
                 whileHover={{ y: -1 }}
+                onClick={() => {
+                  if (callStatus === CallStatus.ACTIVE && isSpeaking) {
+                    console.log("[Agent.tsx] Click-to-interrupt: User tapped interviewer orb. Stopping playback.");
+                    stopTTSPlayback();
+                    setIsSpeaking(false);
+                    resumeListeningAfterSpeech();
+                  }
+                }}
                 className={cn(
                   "flex items-center justify-center flex-col gap-3.5 p-4 min-h-[175px] backdrop-blur-xl border rounded-xl flex-1 w-full shadow-2xl relative overflow-hidden transition-all duration-500",
                   callStatus === CallStatus.ACTIVE && isSpeaking
-                    ? "bg-black/85 border-zinc-700/80 shadow-[0_0_30px_rgba(255,255,255,0.02)]"
+                    ? "bg-black/85 border-zinc-700/80 shadow-[0_0_30px_rgba(255,255,255,0.02)] cursor-pointer hover:border-zinc-500"
                     : "bg-black/40 border-zinc-800/80"
                 )}
               >
@@ -2365,12 +2380,17 @@ ${codeRef.current}
                 {callStatus === CallStatus.ACTIVE && (
                   <div className="flex flex-col items-center gap-2 w-full mt-0.5 font-mono">
                     {isSpeaking ? (
-                      <div className="flex items-end justify-center gap-1 h-3.5">
-                        <div className="w-1 bg-white rounded-full h-2 animate-[pulse_0.7s_infinite]" />
-                        <div className="w-1 bg-zinc-300 rounded-full h-3.5 animate-[pulse_1s_infinite] delay-100" />
-                        <div className="w-1 bg-white rounded-full h-2.5 animate-[pulse_0.6s_infinite] delay-200" />
-                        <div className="w-1 bg-zinc-300 rounded-full h-1.5 animate-[pulse_0.8s_infinite] delay-150" />
-                      </div>
+                      <>
+                        <div className="flex items-end justify-center gap-1 h-3.5">
+                          <div className="w-1 bg-white rounded-full h-2 animate-[pulse_0.7s_infinite]" />
+                          <div className="w-1 bg-zinc-300 rounded-full h-3.5 animate-[pulse_1s_infinite] delay-100" />
+                          <div className="w-1 bg-white rounded-full h-2.5 animate-[pulse_0.6s_infinite] delay-200" />
+                          <div className="w-1 bg-zinc-300 rounded-full h-1.5 animate-[pulse_0.8s_infinite] delay-150" />
+                        </div>
+                        <span className="text-[7.5px] text-zinc-500 font-bold uppercase tracking-wider mt-1.5 transition-colors">
+                          Click orb to interrupt
+                        </span>
+                      </>
                     ) : (
                       <div className="flex items-center gap-1 h-3.5 opacity-30">
                         <span className="w-1 h-1 bg-zinc-700 rounded-full animate-bounce" />
