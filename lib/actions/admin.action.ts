@@ -156,6 +156,27 @@ export async function getAdminMetrics() {
     ).data().count;
 
     const userChange =
+      userLastMonth > 0
+        ? ((userThisMonth - userLastMonth) / userLastMonth) * 100
+        : userThisMonth > 0
+        ? 100
+        : 0;
+
+    // Feedbacks metrics
+    const feedbackTotal = (await db.collection("feedback").count().get()).data().count;
+    const feedbackThisMonth = (
+      await db.collection("feedback").where("createdAt", ">=", thirtyDaysAgo).count().get()
+    ).data().count;
+    const feedbackLastMonth = (
+      await db
+        .collection("feedback")
+        .where("createdAt", ">=", sixtyDaysAgo)
+        .where("createdAt", "<", thirtyDaysAgo)
+        .count()
+        .get()
+    ).data().count;
+
+    const feedbackChange =
       feedbackLastMonth > 0
         ? ((feedbackThisMonth - feedbackLastMonth) / feedbackLastMonth) * 100
         : feedbackThisMonth > 0
@@ -490,13 +511,19 @@ export async function getBlogs() {
       createdAt: doc.data().createdAt ?? null,
     }));
 
-    if (blogs.length === 0) {
+    const needsReseed = blogs.length === 0 || blogs.some((b: any) => b.content.length < 300);
+
+    if (needsReseed) {
+      for (const doc of querySnapshot.docs) {
+        await db.collection("blogs").doc(doc.id).delete();
+      }
+
       const seedBlogs = [
         {
           title: "How to Bypass Modern ATS Screeners",
           category: "Resume Strategy",
           excerpt: "An in-depth look at how corporate parsing engines analyze PDF and Docx files. Learn why complex grids and visual styling could get your application auto-rejected.",
-          content: "Corporate screening engines utilize automated parsers to match credentials. Multi-column grids or dynamic diagrams frequently trigger parser failures. To maximize your success rate, design clean single-column templates, prioritize clear sections like experience and education, and use standardized system fonts.",
+          content: "Applicant Tracking Systems (ATS) are the gatekeepers of modern hiring. Over 98% of Fortune 500 companies use them to parse, filter, and rank resumes before a human recruiter ever sees them.\n\nTo bypass these systems, you must understand how their parsing engines analyze documents. Most ATS engines convert PDF and DOCX files into raw text strings. When your resume contains complex elements like multi-column tables, visual grids, text boxes, or custom graphical icons, the parser reads them out of order or fails to parse them altogether. This results in missing information in your profile and automatic rejection.\n\nKey rules to ensure a perfect ATS score:\n1. Use a clean, single-column layout. Avoid side-by-side structures where experience is placed next to skills.\n2. Keep section headings standard. Use terms like 'Professional Experience', 'Education', and 'Skills' rather than creative alternatives.\n3. Avoid using text boxes, headers, footers, tables, or complex shapes. The text inside them is often ignored or scrambled.\n4. Use standard system fonts like Arial, Calibri, or Times New Roman. Custom web fonts can fail to decode.\n5. Optimize for keywords. Carefully scan the target job description and ensure matching keywords are naturally integrated into your bullet points.",
           date: "June 12, 2026",
           readTime: "5 min read",
           author: "Ahmed Hussain",
@@ -506,7 +533,7 @@ export async function getBlogs() {
           title: "Top 5 Vocal Filler Words to Avoid",
           category: "Speech Articulation",
           excerpt: "Scientific research on speech pacing shows vocal filler counts directly affect an interviewer's perception of your confidence. Learn simple breathing methods to sound clean.",
-          content: "Verbal fillers like 'um', 'like', and 'ah' interrupt communication cycles. Training with real-time pace guides teaches speakers to pause silently instead of vocalizing pauses, projecting confidence and command of topics.",
+          content: "Vocal fillers are the verbal crutches we use when our brain is searching for the next word. While common in casual speech, an excess of fillers during a technical or leadership interview can severely undermine your perceived confidence, expertise, and communication clarity.\n\nAccording to communication science research, speakers who use more than 5 filler words per minute are rated as less prepared and less authoritative. The top 5 fillers to monitor and eliminate are:\n1. 'Um' / 'Uh': The classic cognitive stall sound.\n2. 'Like': Often inserted as a conversational spacer.\n3. 'You know': An assumption checker that breaks cadence.\n4. 'So': Used as an unnecessary sentence starter or connector.\n5. 'Actually': A defensive qualifier that can sound contradictory.\n\nTo reduce fillers, practice the power of the silent pause. When you need to think, close your mouth and pause silently for 1–2 seconds. Recruiters perceive a silent pause as thoughtful and controlled, whereas vocalized fillers sound anxious. Using real-time pacing tools helps build visual awareness of your cadence.",
           date: "May 28, 2026",
           readTime: "4 min read",
           author: "Speech Team",
@@ -516,7 +543,7 @@ export async function getBlogs() {
           title: "Mastering the AI Mock Interview",
           category: "Interview Prep",
           excerpt: "A comprehensive developer guide on explaining system design concepts and algorithmic answers cleanly to interactive voice models using the STAR method.",
-          content: "Conversing with AI interviewers requires clarity and structure. Use the STAR (Situation, Task, Action, Result) format to organize answers. Explain your technical choices step-by-step to demonstrate structural systems design experience.",
+          content: "Preparing for an AI-driven voice interview is a unique challenge. Unlike speaking with a human, an AI interviewer evaluates your answers using precise speech-to-text transcription, semantic pattern matching, and structure analysis.\n\nTo excel in an AI interview, you must adapt your communication framework:\n1. Structure answers with the STAR method: Situation (set the context), Task (describe the challenge), Action (explain what you did step-by-step), and Result (share the quantifiable outcome). AI models are programmed to search for this narrative structure.\n2. Speak with steady pacing. Aim for 120 to 140 words per minute. Speaking too fast causes transcription errors, while speaking too slow triggers timeout detection.\n3. Enunciate technical terms clearly. Make sure database names, frameworks, and programming patterns are pronounced carefully to guarantee they map correctly in the transcription log.\n4. Explicitly mention design trade-offs. AI models evaluate senior candidates by detecting keywords related to trade-offs (e.g., 'latency vs. consistency', 'horizontal scaling vs. vertical scaling').",
           date: "May 15, 2026",
           readTime: "6 min read",
           author: "AI Labs",
@@ -526,7 +553,7 @@ export async function getBlogs() {
           title: "Design Patterns in System Architecture",
           category: "System Design",
           excerpt: "A cheat sheet of the most commonly asked systems architecture design patterns in big-tech companies, including load balancing, cache layers, and databases shards.",
-          content: "Scale requires patterns. Study rate limiting models, sharded schemas, caching architectures, and load balancing configurations to handle massive concurrent traffic profiles securely and reliably.",
+          content: "System design interviews assess your ability to build scalable, reliable, and maintainable software systems. To succeed, you must move beyond basic code implementation and demonstrate a command of core architectural design patterns.\n\nCrucial system design concepts to master include:\n1. Load Balancing: Distributing traffic across multiple servers using round-robin, least-connections, or IP hashing algorithms to prevent service degradation.\n2. Cache Layers: Utilizing in-memory data structures like Redis or Memcached to store frequently read data, drastically reducing database load and latency.\n3. Database Sharding: Horizontally partitioning databases across multiple servers using hash-key or range-based routing to scale write throughput.\n4. Rate Limiting: Protecting downstream services from abuse or cascading failures by restricting incoming requests via token bucket or sliding window logs.",
           date: "April 29, 2026",
           readTime: "8 min read",
           author: "Arch Team",
@@ -537,7 +564,7 @@ export async function getBlogs() {
       for (const sb of seedBlogs) {
         await db.collection("blogs").add(sb);
       }
-      
+
       const reSnapshot = await db.collection("blogs").get();
       blogs = reSnapshot.docs.map((doc: any) => ({
         id: doc.id,

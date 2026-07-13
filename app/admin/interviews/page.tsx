@@ -48,7 +48,7 @@ type Interview = {
   type: "Technical" | "Behavioural" | "Mixed" | string;
   techstack: string[];
   questions: string[];
-  coverImage: string;
+  coverImage?: string;
   createdAt: any;
   finalized: boolean;
   createdBy?: "admin" | string;

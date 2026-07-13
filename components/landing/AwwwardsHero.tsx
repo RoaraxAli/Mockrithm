@@ -1,7 +1,5 @@
 "use client";
 
-import MarketingNavbar from "../shared/MarketingNavbar";
-
 export default function AwwwardsHero() {
   const handleJourneyBegin = () => {
     window.location.href = "https://accounts.mockrithm.me/sign-up";
@@ -24,9 +22,6 @@ export default function AwwwardsHero() {
 
       {/* Dark overlay for text readability */}
       <div className="fixed inset-0 bg-black/30 z-[1]" />
-
-      {/* Shared Navigation Bar */}
-      <MarketingNavbar />
 
       {/* Hero Content Section — vertically centered in remaining space */}
       <div className="relative z-10 flex-1 flex flex-col items-center justify-center text-center px-6 max-w-5xl mx-auto w-full">

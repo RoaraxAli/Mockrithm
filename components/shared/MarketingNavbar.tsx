@@ -44,6 +44,9 @@ export default function MarketingNavbar() {
           <Link href="https://mockrithm.me" className="text-white/60 hover:text-white transition-colors duration-200">
             Home
           </Link>
+          <Link href="https://mockrithm.me/interview" className="text-white/60 hover:text-white transition-colors duration-200">
+            Interview
+          </Link>
           <Link href="https://games.mockrithm.me" className="text-white/60 hover:text-white transition-colors duration-200">
             Games
           </Link>

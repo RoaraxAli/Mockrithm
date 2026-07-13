@@ -10,6 +10,7 @@ import AwwwardsHero from "./landing/AwwwardsHero";
 import AwwwardsShowcase from "./landing/AwwwardsShowcase";
 import ResourcesSection from "./landing/ResourcesSection";
 import PricingSection from "./landing/PricingSection";
+import MarketingNavbar from "./shared/MarketingNavbar";
 
 interface Article {
   id: string;
@@ -271,6 +272,7 @@ export default function MarketingLanding() {
 
   return (
     <div className="w-full flex flex-col font-mona-sans relative z-10 min-h-screen text-white overflow-y-hidden selection:bg-white selection:text-black">
+      <MarketingNavbar />
 
       {/* Scroll progress bar (top of viewport) */}
       <div className="fixed top-0 left-0 right-0 h-[2px] z-[9998] pointer-events-none">

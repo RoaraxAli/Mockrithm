@@ -16,6 +16,32 @@ export default clerkMiddleware(async (auth, req) => {
 
   const host = req.headers.get("host") || "";
 
+  // 🔄 Redirect old resume URLs to the resume subdomain
+  const pathname = req.nextUrl.pathname;
+  if (pathname.startsWith("/user/dashboard/resume") || pathname.startsWith("/user/resume")) {
+    let newPath = pathname;
+    if (pathname.startsWith("/user/dashboard/resume")) {
+      newPath = pathname.replace("/user/dashboard/resume", "");
+    } else if (pathname.startsWith("/user/resume")) {
+      newPath = pathname.replace("/user/resume", "");
+    }
+    
+    // Clean up double slashes or missing leading slash
+    if (!newPath.startsWith("/")) {
+      newPath = "/" + newPath;
+    }
+    
+    // Map base paths to appropriate subdomain routes
+    if (pathname === "/user/dashboard/resume" || pathname === "/user/dashboard/resume/") {
+      newPath = "/dashboard";
+    } else if (pathname === "/user/resume" || pathname === "/user/resume/") {
+      newPath = "/";
+    }
+
+    const redirectUrl = `https://resume.mockrithm.me${newPath}${req.nextUrl.search}`;
+    return NextResponse.redirect(redirectUrl);
+  }
+
   // 📖 Bypass Clerk auth for documentation subdomain
   if (host === "docs.mockrithm.me" || host.includes("docs.mockrithm.me")) {
     return NextResponse.next();

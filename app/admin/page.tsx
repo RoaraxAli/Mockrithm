@@ -43,10 +43,10 @@ export default function AdminDashboard() {
   });
 
   const [chartsData, setChartsData] = useState({
-    userGrowthData: [],
-    interviewData: [],
-    categoryData: [],
-    dailyActivityData: [],
+    userGrowthData: [] as any[],
+    interviewData: [] as any[],
+    categoryData: [] as any[],
+    dailyActivityData: [] as any[],
   });
 
   useEffect(() => {

@@ -2573,15 +2573,7 @@ ${code}
                     <span className="w-2 h-2 rounded-full bg-amber-500/40" />
                     <span className="w-2 h-2 rounded-full bg-zinc-300/40" />
                     <span className="ml-2 text-zinc-400 font-bold">
-                      {codingProblem.language === "python" ? "solution.py" : 
-                       codingProblem.language === "javascript" || codingProblem.language === "typescript" ? "solution.ts" :
-                       codingProblem.language === "markdown" ? "draft.md" : 
-                       codingProblem.language === "latex" ? "equation.tex" : 
-                       codingProblem.language === "html" ? "index.html" : 
-                       codingProblem.language === "css" ? "styles.css" : 
-                       codingProblem.language === "swift" ? "main.swift" : 
-                       codingProblem.language === "java" ? "Solution.java" : 
-                       codingProblem.language === "cpp" ? "main.cpp" : "draft.txt"}
+                      draft.txt
                     </span>
                   </div>
                   <span className="text-[8px] uppercase font-bold tracking-widest text-zinc-300 bg-zinc-900 px-2.5 py-0.5 rounded border border-violet-500/20 font-mono">
