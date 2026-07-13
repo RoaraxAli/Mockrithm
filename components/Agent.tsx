@@ -1735,7 +1735,7 @@ ${code}
         submittedTextRef.current = ""; // reset so next answer isn't blocked
         submittedThisTurnRef.current = false;
         isListeningRef.current = false;
-        if (showSandbox) {
+        if (showSandbox && !hasSubmittedCurrentCodeRef.current) {
           setLastMessage("Sandbox Active. Voice disabled — use sandbox buttons or submit when done.");
         } else {
           setLastMessage("Listening... Speak now");
