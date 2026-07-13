@@ -1267,7 +1267,8 @@ CRITICAL RULES - CONVERSATIONAL FLOW & CONCISENESS:
 - DO NOT VERBALLY READ OUT THE LONG CHALLENGE INSTRUCTIONS OR CODE: When you transition to the coding challenge, simply introduce it briefly in one sentence (under 15 words) and output '[SHOW_SANDBOX]'. The candidate will read the details in the workspace on their screen. Never output code blocks, templates, or instructions in your speech.
 - DO NOT LECTURE ON CORRECT ANSWERS: If the candidate answers correctly or reasonably, do not explain the concept, define terms, or repeat the textbook answer back to them. Simply acknowledge briefly (e.g. "Got it.", "Makes sense.", "Solid explanation.") and transition immediately to the next question.
 - GENTLY CORRECT BIG BLUNDERS: If the candidate makes a major blunder or says something completely incorrect, gently correct them and guide them in the right direction in one short, polite sentence before transitioning.
-- KEEP RESPONSES VERY SHORT: Keep your replies under 25 words maximum. No yapping or long paragraphs. Keep the pacing fast and conversational.
+- CRITICAL CONCISENESS & NO YAP: Keep your replies extremely short (under 20 words maximum). Never write long explanations, define basic terms, or lecture the candidate. Real conversation is fast and snappy. Speak in 1-2 brief sentences only.
+- NO HALLUCINATIONS: Do not refer to UI tabs, examples on the screen, or other options. The user's screen only displays you (the interviewer avatar), the chat logs, and a Start button. There are no other tabs or visual elements on the screen.
 - Write only plain, clean text. Do not use markdown like bold (**), italics (*), lists, or hashtags.
 - Never use emojis.
 - Conclude the interview properly when all questions are asked and answered.
@@ -1280,7 +1281,7 @@ ${
 - Description: ${codingProblemRef.current.description}
 - Candidate's current draft/code is:
 \`\`\`${codingProblemRef.current.language}
-${code}
+${codeRef.current}
 \`\`\`
 - If the candidate gets stuck, provide a Socratic hint to help them think in the right direction. Do NOT give them the full solution.`
     : ""
@@ -1311,7 +1312,8 @@ YOUR CONVERSATION FLOW:
    - Ask them to pick one.
 
 RULES:
-- Keep every reply under 30 words.
+- Keep every reply under 20 words.
+- NO UI HALLUCINATIONS: The user's screen only shows you, the chat logs, and a Start button. There are no examples or other tabs to choose from. Do not refer to elements that are not on the screen.
 - Write only plain clean text. No markdown, no emojis, no symbols.
 - ${languageInstruction}
 - Do NOT append "[END_CALL]" when suggesting options. Only append "[END_CALL]" at the very end of your message AFTER the candidate has explicitly responded and selected one of the options (e.g., they picked "Technical", "Live Coding Sandbox", etc.). Once they make their final selection, confirm it in one short sentence and append "[END_CALL]" at the end.`;
@@ -1526,7 +1528,7 @@ ${
 - Description: ${codingProblemRef.current.description}
 - Candidate's current draft/code is:
 \`\`\`${codingProblemRef.current.language}
-${code}
+${codeRef.current}
 \`\`\`
 - If the candidate gets stuck, provide a Socratic hint to help them think in the right direction. Do NOT give them the full solution.`
     : ""
@@ -2131,30 +2133,32 @@ ${code}
                 <span className="text-zinc-600 mr-1.5">{t("language")}:</span>
                 <span className="text-sky-300 font-bold">{currentLangConfig.name.split(" (")[0]}</span>
               </div>
-               <InterviewTimer
-                 initialSeconds={timerSecondsLeft}
-                 onTimeUp={() => {
-                   console.log("[Agent.tsx] Time is up! Finishing session...");
-                   isTimerEndingRef.current = true;
-                   if (typeRef.current === "interview") {
-                     handleSpeechCompleted("[SYSTEM: Time is up. Conclude the interview warmly, thank the candidate, and ALWAYS append '[END_CALL]' at the very end.]");
-                     
-                     // Client-side safety timeout: Force disconnect after 8 seconds if LLM yaps, gets rate limited, or fails to hang up
-                     setTimeout(() => {
-                       if (isCallActiveRef.current) {
-                         console.warn("[Agent.tsx] Time-up safety timeout triggered. Forcing disconnect.");
-                         handleDisconnect();
-                       }
-                     }, 8000);
-                   } else {
-                     handleDisconnect();
-                   }
-                 }}
-               />
-               {timerSecondsLeft === null && (
+               {activeType === "interview" && (
+                 <InterviewTimer
+                   initialSeconds={timerSecondsLeft}
+                   onTimeUp={() => {
+                     console.log("[Agent.tsx] Time is up! Finishing session...");
+                     isTimerEndingRef.current = true;
+                     if (typeRef.current === "interview") {
+                       handleSpeechCompleted("[SYSTEM: Time is up. Conclude the interview warmly, thank the candidate, and ALWAYS append '[END_CALL]' at the very end.]");
+                       
+                       // Client-side safety timeout: Force disconnect after 8 seconds if LLM yaps, gets rate limited, or fails to hang up
+                       setTimeout(() => {
+                         if (isCallActiveRef.current) {
+                           console.warn("[Agent.tsx] Time-up safety timeout triggered. Forcing disconnect.");
+                           handleDisconnect();
+                         }
+                       }, 8000);
+                     } else {
+                       handleDisconnect();
+                     }
+                   }}
+                 />
+               )}
+               {timerSecondsLeft === null && activeType === "interview" && (
                  <button
                    onClick={() => handleDisconnect()}
-                   className="px-2.5 py-1 rounded-full bg-rose-950/40 hover:bg-rose-900/60 border border-rose-900 text-rose-300 hover:text-rose-200 text-[8.5px] font-bold uppercase tracking-wider transition-all duration-300 cursor-pointer animate-pulse"
+                   className="px-2.5 py-1 rounded-full bg-rose-950/40 hover:bg-rose-900/60 border border-rose-900 text-rose-300 hover:text-rose-200 text-[8.5px] font-bold uppercase tracking-wider transition-all duration-300 cursor-pointer"
                  >
                    Finish Session
                  </button>
