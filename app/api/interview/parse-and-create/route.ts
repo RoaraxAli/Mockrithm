@@ -68,6 +68,61 @@ export async function POST(request: Request) {
       .map((m: any) => `${m.role}: ${m.content}`)
       .join("\n");
 
+    // Dynamic Topic Randomizer for Interview Questions
+    const rawRole = (userResumeData?.targetRole || "").toLowerCase();
+    const transcriptLower = transcriptText.toLowerCase();
+    let focusTopics: string[] = [];
+
+    if (
+      rawRole.includes("front") || rawRole.includes("web") || rawRole.includes("ui") || rawRole.includes("react") ||
+      transcriptLower.includes("front") || transcriptLower.includes("web") || transcriptLower.includes("ui") || transcriptLower.includes("react")
+    ) {
+      focusTopics = [
+        "browser performance optimization (e.g. repaints, code-splitting, layout thrashing)",
+        "React hooks & advanced side effects (e.g. custom hooks, useEffect optimization)",
+        "state management architecture (e.g. Context, Redux, local state vs global state)",
+        "hoisting, closure scope, and prototype chain",
+        "CSS layouts & modern visual engines (e.g. Grid, Flexbox, custom variables)",
+        "asynchronous JS flow control (e.g. Promises, async/await, race conditions)",
+        "web security basics (e.g. XSS prevention, CSRF, secure HTTP headers)",
+        "browser Web APIs & DOM events (e.g. event bubbling, debouncing/throttling)",
+        "React component composition patterns (e.g. compound components, render props)",
+        "TypeScript type safety & strict utility definitions"
+      ];
+    } else if (
+      rawRole.includes("back") || rawRole.includes("server") || rawRole.includes("node") || rawRole.includes("api") ||
+      transcriptLower.includes("back") || transcriptLower.includes("server") || transcriptLower.includes("node") || transcriptLower.includes("api")
+    ) {
+      focusTopics = [
+        "database indexing & complex query optimization",
+        "API design principles (RESTful vs GraphQL, versioning)",
+        "server-side caching layers (Redis, Memcached)",
+        "asynchronous message brokers & worker queues (RabbitMQ, BullMQ)",
+        "secure authentication & token authorization schemes (JWT, OAuth2)",
+        "horizontal/vertical scaling & reverse proxy load balancing (Nginx)",
+        "concurrency models, process clustering, and multi-threading",
+        "centralized logging, telemetry, and error middleware",
+        "database schema modeling, integrity, and migrations",
+        "microservices communication protocols (gRPC, message buses)"
+      ];
+    } else {
+      focusTopics = [
+        "problem solving & systematic algorithmic thinking",
+        "leadership, team dynamics, and cross-functional communication",
+        "system architecture, clean code practices, and structure",
+        "industry standards, best practices, and secure configuration",
+        "testing strategies, unit tests, and validation gates",
+        "resource optimization, execution efficiency, and memory constraints",
+        "defensive programming & edge-case handling"
+      ];
+    }
+
+    const shuffled = [...focusTopics].sort(() => 0.5 - Math.random());
+    const selectedTopics = shuffled.slice(0, 3);
+    const randomTopicInstruction = selectedTopics.length > 0
+      ? `- DIVERSITY & FRESHNESS REQUIREMENT: You MUST base the generated questions specifically on a combination of these 3 randomly selected focus areas: ${selectedTopics.map((t) => `"${t}"`).join(", ")}. Do NOT default to generic questions like var/let/const, React state, or closures unless explicitly requested by one of these topics.`
+      : "";
+
     const masterPrompt = `
       You are an expert technical interviewer and setup parser.
       Analyze the following conversation transcript between a candidate and an interview setup assistant, as well as the candidate's resume/profile data.
@@ -90,6 +145,7 @@ export async function POST(request: Request) {
       4. Coding Challenge: a custom programming task suitable for the role/level (set to null if requiresSandbox is false).
       
       GUIDELINES:
+      ${randomTopicInstruction}
       - Scan the Transcript first. If the candidate explicitly chose to practice a role DIFFERENT from their default targetRole (e.g. "Prime Minister of Pakistan", "Joker", etc.), you MUST override the role and use this new requested role.
       - If the role is changed/overridden from the default targetRole, DO NOT use the techstack/skills or resume details from the Resume/Profile Data. Instead, generate relevant competencies/skills for the new chosen role (e.g. for Prime Minister: "crisis leadership", "governance", "public policy", "foreign affairs"; for Joker: "stand-up comedy", "timing", "joke delivery", "crowd interaction").
       - requiresSandbox MUST be false for conceptual, verbal, or conversational modes (e.g., "Technical", "Behavioral", "System Design", "Q&A", "Interview", "Verbal Q&A", "Discussion", or "Oral Defense"). These are purely conversational and do not need a workspace/sandbox.
