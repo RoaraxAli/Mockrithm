@@ -28,19 +28,39 @@ export async function POST(request: Request) {
 
   try {
     const body = await request.json();
-    const groqPayload = {
-      model: body.model || process.env.GROQ_LLM_MODEL || "llama-3.3-70b-versatile",
-      messages: (body.messages || []).slice(-30), // Cap conversation history to last 30 messages
-      stream: body.stream !== false,
-    };
+    const model = body.model || process.env.GROQ_LLM_MODEL || "llama-3.3-70b-versatile";
+    const isZenmux = model === "z-ai/glm-4.7-flash-free";
 
-    const response = await fetchGroq("/chat/completions", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(groqPayload),
-    });
+    let response;
+    if (isZenmux) {
+      console.log("[DEBUG] Routing chat completion request to Zenmux GLM-4.7...");
+      response = await fetch("https://zenmux.ai/api/v1/chat/completions", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": "Bearer sk-ai-v1-4920d263924179c0ea44a15eae5a86c5952353b776d649496f42a33095cae754"
+        },
+        body: JSON.stringify({
+          model: model,
+          messages: (body.messages || []).slice(-30),
+          stream: body.stream !== false,
+        })
+      });
+    } else {
+      const groqPayload = {
+        model: model,
+        messages: (body.messages || []).slice(-30),
+        stream: body.stream !== false,
+      };
+
+      response = await fetchGroq("/chat/completions", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(groqPayload),
+      });
+    }
 
     const responseHeaders = new Headers();
     responseHeaders.set("Content-Type", response.headers.get("content-type") || "text/event-stream");

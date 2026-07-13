@@ -1,21 +1,5 @@
 import { NextResponse } from "next/server";
-import { generateObject } from "ai";
-import { google } from "@ai-sdk/google";
-import { z } from "zod";
 import { getCurrentUser } from "@/lib/actions/auth.action";
-
-const analysisSchema = z.object({
-  atsScore: z.number().min(0).max(100),
-  matchedKeywords: z.array(z.string()),
-  missingKeywords: z.array(z.string()),
-  bulletPointSuggestions: z.array(
-    z.object({
-      original: z.string(),
-      suggested: z.string(),
-      explanation: z.string(),
-    })
-  ),
-});
 
 export async function POST(request: Request) {
   try {
@@ -33,26 +17,60 @@ export async function POST(request: Request) {
       );
     }
 
-    const { object } = await generateObject({
-      model: google("gemini-2.5-flash"),
-      schema: analysisSchema,
-      prompt: `
-        You are an expert ATS (Applicant Tracking System) optimization bot and recruiter.
-        Analyze the following resume text against the target job description.
-        
-        Resume:
-        ${resumeText}
-        
-        Job Description:
-        ${jobDescription}
-        
-        Tasks:
-        1. Calculate a realistic ATS Match Score (0 to 100) based on skills, keyword density, and experience alignment.
-        2. Identify key skills/keywords from the Job Description that ARE present in the Resume (matchedKeywords).
-        3. Identify key skills/keywords from the Job Description that ARE MISSING from the Resume (missingKeywords).
-        4. Analyze the experience bullet points in the Resume and suggest 3-5 rephrased versions that incorporate missing keywords, use strong action verbs, and structure them to show impact/results (Situation-Task-Action-Result format) to pass ATS filters and recruiter screening.
-      `,
+    console.log("[DEBUG] Starting ATS Resume Analysis using Zenmux GLM-4.7...");
+    const response = await fetch("https://zenmux.ai/api/v1/chat/completions", {
+      method: "POST",
+      headers: {
+        "Authorization": "Bearer sk-ai-v1-4920d263924179c0ea44a15eae5a86c5952353b776d649496f42a33095cae754",
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        model: "z-ai/glm-4.7-flash-free",
+        response_format: { type: "json_object" },
+        messages: [
+          {
+            role: "user",
+            content: `You are an expert ATS (Applicant Tracking System) optimization bot and recruiter.
+Analyze the following resume text against the target job description.
+
+Resume:
+${resumeText}
+
+Job Description:
+${jobDescription}
+
+Tasks:
+1. Calculate a realistic ATS Match Score (0 to 100) based on skills, keyword density, and experience alignment.
+2. Identify key skills/keywords from the Job Description that ARE present in the Resume (matchedKeywords).
+3. Identify key skills/keywords from the Job Description that ARE MISSING from the Resume (missingKeywords).
+4. Analyze the experience bullet points in the Resume and suggest 3-5 rephrased versions that incorporate missing keywords, use strong action verbs, and structure them to show impact/results (Situation-Task-Action-Result format) to pass ATS filters and recruiter screening.
+
+Return the response in raw JSON format matching this schema:
+{
+  "atsScore": number,
+  "matchedKeywords": ["string"],
+  "missingKeywords": ["string"],
+  "bulletPointSuggestions": [
+    {
+      "original": "string",
+      "suggested": "string",
+      "explanation": "string"
+    }
+  ]
+}`
+          }
+        ]
+      })
     });
+
+    if (!response.ok) {
+      const errText = await response.text();
+      throw new Error(`Zenmux API returned status ${response.status}: ${errText}`);
+    }
+
+    const data = await response.json();
+    const resultText = data.choices[0].message.content;
+    const object = JSON.parse(resultText);
 
     return NextResponse.json(object, { status: 200 });
   } catch (error: any) {

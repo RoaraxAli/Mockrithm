@@ -63,13 +63,13 @@ export async function POST(request: Request) {
     const targetLangConfig = interviewLanguages.find((l) => l.code === language) || interviewLanguages[0];
     const languageInstruction = `LANGUAGE REQUIREMENT: The session language is "${targetLangConfig.name}" (Code: ${targetLangConfig.code}). You MUST output text ONLY in this language. Do not mix languages. Do not write Roman script translation (e.g. if Urdu is selected, write exclusively in actual Urdu script/characters, never in English or Roman Urdu).`;
 
-    // 2. Parse setup preferences from conversation transcript
     const transcriptText = messages
       .filter((m: any) => m.role !== "system")
       .map((m: any) => `${m.role}: ${m.content}`)
       .join("\n");
 
-    const setupPrompt = `
+    const masterPrompt = `
+      You are an expert technical interviewer and setup parser.
       Analyze the following conversation transcript between a candidate and an interview setup assistant, as well as the candidate's resume/profile data.
       
       Candidate Resume/Profile Data:
@@ -78,13 +78,27 @@ export async function POST(request: Request) {
       Transcript:
       ${transcriptText}
       
-      Extract or infer the configured job interview parameters.
+      Candidate Name: ${userName}
+      Session duration: ${duration || "default"} minutes
       
-      CRITICAL INSTRUCTIONS:
+      ${languageInstruction}
+      
+      Your task is to generate a single JSON response containing:
+      1. Setup Parameters: job role, level, techstack/competencies, selected mode, number of questions, requiresSandbox.
+      2. Tailored Questions: exactly the requested amount of questions relevant to the tech stack.
+      3. Welcome Greeting: Alex's first welcome message confirming setup and stating the first question (max 2 sentences, no markdown).
+      4. Coding Challenge: a custom programming task suitable for the role/level (set to null if requiresSandbox is false).
+      
+      GUIDELINES:
       - Scan the Transcript first. If the candidate explicitly chose to practice a role DIFFERENT from their default targetRole (e.g. "Prime Minister of Pakistan", "Joker", etc.), you MUST override the role and use this new requested role.
-      - If the role is changed/overridden from the default targetRole, DO NOT use the techstack/skills or resume details from the Resume/Profile Data (e.g. do not use JavaScript, React, Node.js for a Prime Minister or Joker). Instead, generate relevant competencies/skills for the new chosen role (e.g. for Prime Minister: "crisis leadership", "governance", "public policy", "foreign affairs"; for Joker: "stand-up comedy", "timing", "joke delivery", "crowd interaction").
+      - If the role is changed/overridden from the default targetRole, DO NOT use the techstack/skills or resume details from the Resume/Profile Data. Instead, generate relevant competencies/skills for the new chosen role (e.g. for Prime Minister: "crisis leadership", "governance", "public policy", "foreign affairs"; for Joker: "stand-up comedy", "timing", "joke delivery", "crowd interaction").
       - requiresSandbox MUST be false for conceptual, verbal, or conversational modes (e.g., "Technical", "Behavioral", "System Design", "Q&A", "Interview", "Verbal Q&A", "Discussion", or "Oral Defense"). These are purely conversational and do not need a workspace/sandbox.
       - Only set "requiresSandbox" to true if the chosen option/mode explicitly involves hands-on writing, editing, or coding (e.g. "Live Coding Sandbox", "Code Review", "Coding Challenge", "Drafting Task", "Writing Sandbox", or solving equations in an editor).
+      - Questions: Questions MUST be strictly relevant to the listed tech stack or core competencies. Do NOT ask questions about other tools, languages, or frameworks not explicitly listed.
+      - CRITICAL FRONTEND REQUIREMENT: If the role is Frontend Engineer or includes "frontend" / "front-end", you MUST NOT ask any database, SQL, backend, or cloud systems questions. Only ask about HTML, CSS, JavaScript, React, and general Web APIs/browser concepts. Never ask SQL queries or database optimization questions.
+      - Coding/Written Challenge (If requiresSandbox is true): Generate a written, coding, or mathematical challenge suitable for the level and role. Do NOT provide the full solution in the templateCode. The templateCode should only have a broken/buggy code snippet or an empty template skeleton to complete, with clear comments explaining what to do.
+      - Escape all double-quotes inside string values as \\" and newlines as \\n.
+      - Welcome greeting: You are an AI interviewer named Alex. Do NOT greet, introduce yourself again, or say hello. Confirm that the interview is beginning and state the first question directly in your response. Keep it extremely short: 2 sentences maximum. No markdown. Example: "Great, let's start the interview. Here is your first question: [First Question]"
       
       You must return ONLY a JSON object conforming exactly to this schema:
       {
@@ -93,135 +107,73 @@ export async function POST(request: Request) {
         "techstack": ["technology1", "technology2", ... or key competencies],
         "type": "the selected option/mode (e.g. Public Address, Stand-up Set, Technical, Behavioral, Live Coding Sandbox, etc.)",
         "amount": number of questions (default to 5 if not specified),
-        "requiresSandbox": true/false,
-        "sandboxTitle": "a suitable title for the written challenge (if requiresSandbox is true)",
-        "sandboxDescription": "instructions for the written/coding challenge (if requiresSandbox is true)",
-        "sandboxTemplate": "initial text/code structure to edit (if requiresSandbox is true)",
-        "sandboxLanguage": "syntax highlighting language (e.g. javascript, python, markdown, text - default is 'text')"
+        "requiresSandbox": boolean,
+        "questions": ["Question 1", "Question 2", ...],
+        "codingProblem": {
+          "title": "challenge/drafting/solving title",
+          "description": "challenge description and instructions for the candidate",
+          "templateCode": "starter text, equations, or code template/buggy snippet for the candidate to build upon",
+          "language": "language name in lowercase (e.g. javascript, typescript, python, markdown, text, latex - default is 'text')"
+        } (or null if requiresSandbox is false),
+        "firstMessage": "Alex's first question/welcome statement"
       }
     `;
 
-    console.log("[DEBUG] Parsing setup preferences using Groq...");
-    let setup;
-    try {
-      const setupResponseText = await groqChatCompletion([
-        { role: "system", content: "You are a setup parser. You only output valid JSON conforming to the requested schema." },
-        { role: "user", content: setupPrompt }
-      ], true);
-      console.log(`[DEBUG] Raw setup response from Groq: ${setupResponseText}`);
-      setup = JSON.parse(setupResponseText);
-      console.log("[DEBUG] Parsed setup preferences:", setup);
-    } catch (e: any) {
-      console.error("[ERROR] Failed to parse setup preferences from Groq response:", e);
-      throw e;
-    }
-
-    // 3. Generate tailored questions
-    const questionsPrompt = `
-      Prepare exactly ${setup.amount || 5} interview questions for a job interview.
-      The job role is ${setup.role} (${setup.level} level).
-      The tech stack to ask about is: ${(setup.techstack || []).join(", ")}.
-      The focus between behavioral and technical questions should lean towards: ${setup.type}.
-      
-      CRITICAL REQUIREMENTS:
-      - ${languageInstruction}
-      - Questions MUST be strictly relevant to the listed tech stack or core competencies: ${(setup.techstack || []).join(", ")}. Do NOT ask questions about other tools, languages, or frameworks not explicitly listed.
-      - CRITICAL FRONTEND REQUIREMENT: If the role is Frontend Engineer or includes "frontend" / "front-end", you MUST NOT ask any database, SQL, backend, or cloud systems questions. Only ask about HTML, CSS, JavaScript, React, and general Web APIs/browser concepts. Never ask SQL queries or database optimization questions.
-      - Return ONLY a JSON object with a single "questions" key containing the array of questions. Example:
-      {
-        "questions": ["Question 1", "Question 2", "Question 3"]
-      }
-      - Do not use special characters which might break voice text-to-speech.
-    `;
-
-    console.log("[DEBUG] Generating tailored questions using Groq...");
+    console.log("[DEBUG] Sending consolidated setup & question generation request to Groq...");
     let questionsList: string[] = [];
-    try {
-      const questionsResponseText = await groqChatCompletion([
-        { role: "system", content: "You only output valid JSON containing the array of questions." },
-        { role: "user", content: questionsPrompt }
-      ], true);
-      console.log(`[DEBUG] Raw questions response from Groq: ${questionsResponseText}`);
-      const questionsObj = JSON.parse(questionsResponseText);
-      questionsList = questionsObj.questions || [];
-      console.log(`[DEBUG] Inferred Questions (${questionsList.length}):`, questionsList);
-    } catch (e: any) {
-      console.error("[ERROR] Failed to parse tailored questions from Groq response:", e);
-      throw e;
-    }
-
-    // 4. Generate custom challenge if sandbox is required
     let codingProblem = null;
-    if (setup.requiresSandbox) {
-      console.log("[DEBUG] Sandbox/Workspace is required. Generating custom task...");
-      try {
-        const codingPrompt = `
-          Generate a written, coding, or mathematical challenge suitable for a ${setup.level}-level ${setup.role} for the session mode "${setup.type}".
-          Key topics/skills: ${(setup.techstack || []).join(", ") || "General"}.
-          
-          CRITICAL FRONTEND REQUIREMENT: If the role is Frontend Engineer or includes "frontend" / "front-end", you MUST NOT generate any database, SQL, backend, or cloud systems coding tasks. The task must focus entirely on client-side web technologies (HTML, CSS, JavaScript, React, UI components, state management, or browser APIs).
-          
-          CRITICAL:
-          - ${languageInstruction}
-          - Create a modern, practical example. For coding roles, ask the candidate to write code from scratch or fix a broken snippet (e.g., implementing React state counter, correcting a function bug, handling async APIs, etc.).
-          - Do NOT provide the full solution in the template. The template should only have a broken/buggy code snippet or an empty template skeleton to complete, with clear comments explaining what to do.
-          - Example: If React, ask them to implement a Counter component using useState, leaving the function body/handlers blank for them to write.
-          
-          CRITICAL JSON ESCAPING RULES:
-          - You must output ONLY a valid JSON object matching the requested schema.
-          - Never use raw newlines inside any string property values (like description or templateCode). Instead, escape all newlines as "\\n" so that the output remains a single-line or properly escaped JSON.
-          - Never use triple quotes (like """ or ''') inside string property values.
-          - Escape all double-quotes inside string values as \\".
-          
-          You must return ONLY a JSON object conforming to this schema:
-          {
-            "title": "challenge/drafting/solving title",
-            "description": "challenge description and instructions for the candidate",
-            "templateCode": "starter text, equations, or code template/buggy snippet for the candidate to build upon",
-            "language": "language name in lowercase (e.g. javascript, typescript, python, markdown, text, latex - default is 'text')"
-          }
-        `;
-        const codingResponseText = await groqChatCompletion([
-          { role: "system", content: "You only output a valid JSON coding or drafting challenge." },
-          { role: "user", content: codingPrompt }
-        ], true);
-        console.log(`[DEBUG] Raw challenge response from Groq: ${codingResponseText}`);
-        codingProblem = JSON.parse(codingResponseText);
-        console.log("[DEBUG] Generated custom problem/task:", codingProblem);
-      } catch (err: any) {
-        console.error("[ERROR] Failed to generate/parse custom challenge. Falling back to default.", err);
-        codingProblem = {
-          title: setup.sandboxTitle || "Practice Task",
-          description: setup.sandboxDescription || "Complete the practice exercise in the workspace editor.",
-          templateCode: setup.sandboxTemplate || "",
-          language: setup.sandboxLanguage || "text",
+    let firstMessage = "Hello! Ready to start.";
+    let setup = {
+      role: "Software Developer",
+      type: "Technical",
+      level: "Mid-level",
+      techstack: ["General"],
+      amount: 5,
+      requiresSandbox: false,
+    };
+
+    try {
+      const responseText = await groqChatCompletion([
+        { role: "system", content: "You are an interview setup assistant. You only output valid JSON conforming to the requested schema." },
+        { role: "user", content: masterPrompt }
+      ], true);
+      
+      console.log(`[DEBUG] Raw consolidated response from Groq: ${responseText}`);
+      const masterObj = JSON.parse(responseText);
+      
+      if (masterObj.setup) {
+        setup = {
+          role: masterObj.role || masterObj.setup.role || "Software Developer",
+          type: masterObj.type || masterObj.setup.type || "Technical",
+          level: masterObj.level || masterObj.setup.level || "Mid-level",
+          techstack: masterObj.techstack || masterObj.setup.techstack || ["General"],
+          amount: masterObj.amount || masterObj.setup.amount || 5,
+          requiresSandbox: !!(masterObj.requiresSandbox ?? masterObj.setup.requiresSandbox),
+        };
+      } else {
+        setup = {
+          role: masterObj.role || "Software Developer",
+          type: masterObj.type || "Technical",
+          level: masterObj.level || "Mid-level",
+          techstack: masterObj.techstack || ["General"],
+          amount: masterObj.amount || 5,
+          requiresSandbox: !!masterObj.requiresSandbox,
         };
       }
-    }
 
-    // 5. Generate unique dynamic first welcome greeting
-    const welcomePrompt = `
-      You are an AI interviewer named Alex. The candidate has already been introduced to the interview details and is ready to begin.
-      Candidate Name: ${userName}
-      Job Role: ${setup.role} (${setup.level})
-      First Question to ask: "${questionsList[0] || ""}"
-      
-      Guidelines:
-      - ${languageInstruction}
-      - Do NOT greet, introduce yourself again, or say hello. Confirm that the interview is beginning and state the first question directly in your response.
-      - Keep it extremely short: 2 sentences maximum. No markdown.
-      - Example: "Great, let's start the ${setup.role} interview. Here is your first question: ${questionsList[0] || ""}"
-    `;
+      questionsList = masterObj.questions || [];
+      codingProblem = masterObj.codingProblem || null;
+      firstMessage = masterObj.firstMessage || "Hello! Ready to start.";
 
-    console.log("[DEBUG] Generating welcome message using Groq...");
-    let firstMessage = "Hello! Ready to start.";
-    try {
-      firstMessage = await groqChatCompletion([
-        { role: "user", content: welcomePrompt }
-      ]);
-      console.log(`[DEBUG] Generated first message: "${firstMessage}"`);
+      console.log("[DEBUG] Successfully parsed consolidated parameters:", {
+        setup,
+        questionsCount: questionsList.length,
+        hasCodingProblem: !!codingProblem,
+        firstMessage,
+      });
     } catch (e: any) {
-      console.error("[ERROR] Failed to generate first welcome message. Using fallback.", e);
+      console.error("[ERROR] Failed to generate consolidated setup from Groq response, trying fallback...", e);
+      throw e;
     }
 
     // 6. Save the interview in Firestore

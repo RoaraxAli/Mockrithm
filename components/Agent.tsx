@@ -2215,9 +2215,19 @@ ${code}
                       onChange={(e) => setSelectedModel(e.target.value)}
                       className="bg-zinc-950 text-zinc-100 text-xs rounded-xl p-3 border border-zinc-900 focus:border-zinc-700 focus:ring-1 focus:ring-zinc-800 outline-none cursor-pointer hover:bg-zinc-900 transition-all font-semibold"
                     >
-                      <option value="llama-3.1-8b-instant">Llama 3.1 8B (Fast & Recommended)</option>
+                      <option value="llama-3.1-8b-instant">Llama 3.1 8B (Fastest Replies)</option>
                       <option value="llama-3.3-70b-versatile">Llama 3.3 70B (High Quality)</option>
+                      <option value="z-ai/glm-4.7-flash-free">Zenmux GLM-4.7 (Deep Reasoning - Slower)</option>
                     </select>
+                    {selectedModel === "z-ai/glm-4.7-flash-free" ? (
+                      <span className="text-[9px] text-amber-500/80 font-medium leading-tight mt-1">
+                        ⚠️ o1-style reasoning. Responses take 3-4s to start speaking.
+                      </span>
+                    ) : (
+                      <span className="text-[9px] text-emerald-500/80 font-medium leading-tight mt-1">
+                        ⚡ Fast replies. Instant, sub-second response times.
+                      </span>
+                    )}
                   </div>
 
                   <div className="flex flex-col gap-2">
