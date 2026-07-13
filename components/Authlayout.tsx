@@ -60,7 +60,7 @@ export default function AuthLayout({
       "/contact",
     ].includes(pathname);
 
-  const shouldShowNavbar = !hideNavbar && !isSubdomain;
+  const shouldShowNavbar = (!hideNavbar || (pathname === "/" && userId)) && !isSubdomain;
 
   // --- Call States ---
   const [activeCallDoc, setActiveCallDoc] = useState<any>(null);

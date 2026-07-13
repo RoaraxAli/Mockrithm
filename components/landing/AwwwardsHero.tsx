@@ -1,6 +1,18 @@
 "use client";
 
+import { useState, useEffect } from "react";
+
 export default function AwwwardsHero() {
+  const [videoSrc, setVideoSrc] = useState<string | null>(null);
+
+  useEffect(() => {
+    // Defer loading the 3.6MB video until after the page mounts
+    const timer = setTimeout(() => {
+      setVideoSrc("/bg.mp4");
+    }, 500);
+    return () => clearTimeout(timer);
+  }, []);
+
   const handleJourneyBegin = () => {
     window.location.href = "https://accounts.mockrithm.me/sign-up";
   };
@@ -8,17 +20,21 @@ export default function AwwwardsHero() {
   return (
     <section
       id="awwwards-hero"
-      className="relative w-full h-screen flex flex-col overflow-hidden select-none"
+      className="relative w-full h-screen flex flex-col overflow-hidden select-none bg-zinc-950"
     >
       {/* Fullscreen Looping Background Video */}
-      <video
-        autoPlay
-        loop
-        muted
-        playsInline
-        className="fixed inset-0 w-full h-full object-cover z-0"
-        src="/upscaled-video.mp4"
-      />
+      {videoSrc ? (
+        <video
+          autoPlay
+          loop
+          muted
+          playsInline
+          className="fixed inset-0 w-full h-full object-cover z-0 transition-opacity duration-500 opacity-100"
+          src={videoSrc}
+        />
+      ) : (
+        <div className="fixed inset-0 w-full h-full bg-zinc-950 z-0" />
+      )}
 
       {/* Dark overlay for text readability */}
       <div className="fixed inset-0 bg-black/30 z-[1]" />

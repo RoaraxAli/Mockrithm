@@ -18,6 +18,14 @@ export default function ResumeTopicPage() {
   
   const { isSignedIn, isLoaded, user } = useUser();
   const [isSubdomain, setIsSubdomain] = useState(false);
+  const [videoSrc, setVideoSrc] = useState<string | null>(null);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setVideoSrc("/bg.mp4");
+    }, 800);
+    return () => clearTimeout(timer);
+  }, []);
 
   useEffect(() => {
     if (typeof window !== "undefined") {
@@ -69,15 +77,19 @@ export default function ResumeTopicPage() {
     <div className="relative min-h-screen bg-[#07131e] text-white flex flex-col font-sans selection:bg-white selection:text-black overflow-x-hidden">
       
       {/* Fixed Fullscreen Background Video & Overlay */}
-      <div className="fixed inset-0 w-full h-screen z-0 pointer-events-none">
-        <video
-          autoPlay
-          loop
-          muted
-          playsInline
-          className="absolute inset-0 w-full h-full object-cover"
-          src="/upscaled-video.mp4"
-        />
+      <div className="fixed inset-0 w-full h-screen z-0 pointer-events-none bg-zinc-950">
+        {videoSrc ? (
+          <video
+            autoPlay
+            loop
+            muted
+            playsInline
+            className="absolute inset-0 w-full h-full object-cover transition-opacity duration-500 opacity-100"
+            src={videoSrc}
+          />
+        ) : (
+          <div className="absolute inset-0 w-full h-full bg-zinc-950" />
+        )}
         <div className="absolute inset-0 bg-black/40" />
       </div>
 

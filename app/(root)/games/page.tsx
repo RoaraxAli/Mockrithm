@@ -146,6 +146,15 @@ interface Achievement {
 type View = "dashboard" | "game-detail" | "game-runner";
 
 function GamesPageContent() {
+  const [videoSrc, setVideoSrc] = useState<string | null>(null);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setVideoSrc("/bg.mp4");
+    }, 900);
+    return () => clearTimeout(timer);
+  }, []);
+
   const { isLoaded, isSignedIn, user: clerkUser } = useUser();
   const searchParams = useSearchParams();
   const router = useRouter();
@@ -2598,15 +2607,19 @@ function sanitizeInput(input: string): string {
   return (
     <div className="min-h-screen bg-transparent text-white font-mona-sans relative overflow-x-hidden selection:bg-white selection:text-black">
       {/* Fixed Fullscreen Background Video */}
-      <div className="fixed inset-0 w-full h-screen z-0 pointer-events-none">
-        <video
-          autoPlay
-          loop
-          muted
-          playsInline
-          className="absolute inset-0 w-full h-full object-cover"
-          src="/upscaled-video.mp4"
-        />
+      <div className="fixed inset-0 w-full h-screen z-0 pointer-events-none bg-zinc-950">
+        {videoSrc ? (
+          <video
+            autoPlay
+            loop
+            muted
+            playsInline
+            className="absolute inset-0 w-full h-full object-cover transition-opacity duration-500 opacity-100"
+            src={videoSrc}
+          />
+        ) : (
+          <div className="absolute inset-0 w-full h-full bg-zinc-950" />
+        )}
         <div className="absolute inset-0 bg-black/50" />
       </div>
 

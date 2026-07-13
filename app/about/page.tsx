@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { Badge } from "@/components/ui/badge";
 import { motion } from "framer-motion";
 import { Compass, Sparkles, Target, HeartHandshake, ArrowUpRight, Instagram } from "lucide-react";
@@ -74,6 +74,15 @@ function ThreeDTiltCard({ children, className = "" }: { children: React.ReactNod
 }
 
 export default function AboutPage() {
+  const [videoSrc, setVideoSrc] = useState<string | null>(null);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setVideoSrc("/bg.mp4");
+    }, 600);
+    return () => clearTimeout(timer);
+  }, []);
+
   const coreValues = [
     {
       icon: <Sparkles className="h-6 w-6 text-white" />,
@@ -97,15 +106,19 @@ export default function AboutPage() {
       <MarketingNavbar />
 
       {/* Fixed Fullscreen Background Video & Overlay */}
-      <div className="fixed inset-0 w-full h-screen z-0 pointer-events-none">
-        <video
-          autoPlay
-          loop
-          muted
-          playsInline
-          className="absolute inset-0 w-full h-full object-cover"
-          src="/upscaled-video.mp4"
-        />
+      <div className="fixed inset-0 w-full h-screen z-0 pointer-events-none bg-zinc-950">
+        {videoSrc ? (
+          <video
+            autoPlay
+            loop
+            muted
+            playsInline
+            className="absolute inset-0 w-full h-full object-cover transition-opacity duration-500 opacity-100"
+            src={videoSrc}
+          />
+        ) : (
+          <div className="absolute inset-0 w-full h-full bg-zinc-950" />
+        )}
         <div className="absolute inset-0 bg-black/80" />
       </div>
 
