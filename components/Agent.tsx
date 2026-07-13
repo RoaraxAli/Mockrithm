@@ -133,6 +133,13 @@ const Agent = ({
     }
   }, [selectedStt, callStatus]);
 
+  // Interview Language (selected before the session starts)
+  const [selectedLanguage, setSelectedLanguage] = useState<string>("en-US");
+  const languageRef = useRef<string>("en-US");
+  useEffect(() => {
+    languageRef.current = selectedLanguage;
+  }, [selectedLanguage]);
+
   // Enforce tier-based constraints on configurations reactively
   useEffect(() => {
     const tier = userTier || "freemium";
@@ -155,13 +162,6 @@ const Agent = ({
       }
     }
   }, [userTier, selectedLanguage, selectedModel, selectedStt, selectedVoice]);
-
-  // Interview Language (selected before the session starts)
-  const [selectedLanguage, setSelectedLanguage] = useState<string>("en-US");
-  const languageRef = useRef<string>("en-US");
-  useEffect(() => {
-    languageRef.current = selectedLanguage;
-  }, [selectedLanguage]);
 
   // Interview Duration Selection
   const [showDurationModal, setShowDurationModal] = useState(false);
