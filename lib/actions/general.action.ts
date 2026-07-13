@@ -340,6 +340,26 @@ export const getInterviewsByUserId = cache(async (
   });
 });
 
+export const getAllInterviews = cache(async (): Promise<Interview[]> => {
+  const querySnapshot = await db
+    .collection("interviews")
+    .orderBy("createdAt", "desc")
+    .get();
+
+  return querySnapshot.docs.map((doc: any) => {
+    const data = doc.data();
+    return {
+      id: doc.id,
+      ...data,
+      createdAt: data.createdAt?.toDate
+        ? data.createdAt.toDate().toISOString()
+        : data.createdAt instanceof Date
+        ? data.createdAt.toISOString()
+        : data.createdAt ?? null,
+    };
+  }) as unknown as Interview[];
+});
+
 export async function optimizeUserProfileWithFeedback(userId: string, feedback: any) {
   try {
     const userDocRef = db.collection("users").doc(userId);

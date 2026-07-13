@@ -103,7 +103,7 @@ export default async function RootLayout({
           <Analytics />
           <SpeedInsights />
           <MagneticCursor />
-          <RootProvider theme={{ attribute: "class", defaultTheme: "system", enableSystem: true }}>
+          <RootProvider theme={{ attribute: "class", defaultTheme: "system", enableSystem: true }} search={{ enabled: false }}>
             <AuthLayout initialUserId={user?.id} initialUserName={user?.name} initialUserRole={user?.role}>
               {children}
             </AuthLayout>

@@ -6,13 +6,11 @@ import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { Search, Plus, Pencil, MoreHorizontal } from "lucide-react";
 import {
   collection,
-  query,
-  orderBy,
   addDoc,
   Timestamp,
-  onSnapshot,
 } from "firebase/firestore";
 import { db } from "@/firebase/client";
+import { getAllInterviews } from "@/lib/actions/general.action";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
@@ -90,25 +88,25 @@ function QuestionBuilder({
 
   return (
     <div className="space-y-3">
-      <label className="text-white text-sm font-medium">{label}</label>
+      <label className="text-foreground text-sm font-medium">{label}</label>
 
       <div className="space-y-2 max-h-40 overflow-y-auto rounded-lg">
         {questions.length === 0 && (
-          <div className="text-white/60 text-sm border border-dashed border-white/15 rounded p-3">
+          <div className="text-zinc-500 dark:text-white/60 text-sm border border-dashed border-zinc-200 dark:border-white/15 rounded p-3">
             No questions yet. Add your first one below.
           </div>
         )}
         {questions.map((q, idx) => (
           <div
             key={`${q}-${idx}`}
-            className="flex items-center gap-2 bg-black/30 border border-white/10 p-2 rounded"
+            className="flex items-center gap-2 bg-zinc-100 dark:bg-zinc-900/30 border border-zinc-200 dark:border-white/10 p-2 rounded"
           >
-            <div className="text-white/90 text-sm flex-1">{q}</div>
+            <div className="text-foreground text-sm flex-1">{q}</div>
             <div className="flex items-center gap-1">
               <Button
                 variant="ghost"
                 size="sm"
-                className="text-white/70 hover:text-white hover:bg-white/10"
+                className="text-zinc-500 dark:text-white/70 hover:text-foreground hover:bg-zinc-200 dark:hover:bg-white/10"
                 onClick={() => move(idx, idx - 1)}
                 title="Move up"
               >
@@ -117,7 +115,7 @@ function QuestionBuilder({
               <Button
                 variant="ghost"
                 size="sm"
-                className="text-white/70 hover:text-white hover:bg-white/10"
+                className="text-zinc-500 dark:text-white/70 hover:text-foreground hover:bg-zinc-200 dark:hover:bg-white/10"
                 onClick={() => move(idx, idx + 1)}
                 title="Move down"
               >
@@ -126,7 +124,7 @@ function QuestionBuilder({
               <Button
                 variant="ghost"
                 size="sm"
-                className="text-red-400 hover:text-red-600"
+                className="text-red-500 hover:text-red-600"
                 onClick={() => remove(idx)}
                 title="Remove"
               >
@@ -140,7 +138,7 @@ function QuestionBuilder({
       <div className="flex gap-2">
         <Input
           placeholder="Type a question and press Enter"
-          className="flex-1 bg-black/30 text-white border-white/10"
+          className="flex-1 bg-zinc-100 dark:bg-zinc-900/30 text-foreground border-zinc-200 dark:border-white/10"
           value={draft}
           onChange={(e) => setDraft(e.target.value)}
           onKeyDown={(e) => {
@@ -150,7 +148,7 @@ function QuestionBuilder({
             }
           }}
         />
-        <Button className="bg-white text-black" onClick={add}>
+        <Button className="bg-zinc-950 text-white dark:bg-white dark:text-black" onClick={add}>
           Add
         </Button>
       </div>
@@ -175,26 +173,18 @@ export default function InterviewsPage() {
   });
 
   useEffect(() => {
-    const q = query(collection(db, "interviews"), orderBy("createdAt", "desc"));
-    const unsubscribe = onSnapshot(q, (snapshot) => {
-      const data = snapshot.docs.map((d) => {
-        const v: any = d.data();
-        return {
-          id: d.id,
-          role: v.role ?? "",
-          level: v.level ?? "",
-          type: v.type ?? "Mixed",
-          techstack: Array.isArray(v.techstack) ? v.techstack : (v.techstack ? String(v.techstack).split(",").map((t: string) => t.trim()) : []),
-          questions: Array.isArray(v.questions) ? v.questions : [],
-          coverImage: v.coverImage || "/covers/default.png",
-          finalized: v.finalized ?? true,
-          createdAt: v.createdAt?.toDate ? v.createdAt.toDate() : (v.createdAt ? new Date(v.createdAt) : new Date()),
-          createdBy: v.createdBy,
-          userId: v.userId || "all-users",
-        } as Interview;
-      });
-      setInterviews(data);
-    });
+    let active = true;
+    const fetchAll = async () => {
+      try {
+        const data = await getAllInterviews();
+        if (active) {
+          setInterviews(data);
+        }
+      } catch (err) {
+        console.error("Failed to load interviews:", err);
+      }
+    };
+    fetchAll();
 
     // Animations
     if (typeof window !== "undefined") {
@@ -229,7 +219,7 @@ export default function InterviewsPage() {
     }
 
     return () => {
-      unsubscribe();
+      active = false;
       if (typeof window !== "undefined") {
         ScrollTrigger.getAll().forEach((t) => t.kill());
       }
@@ -292,35 +282,35 @@ export default function InterviewsPage() {
   };
 
   return (
-    <div className="space-y-8 p-6 md:p-10 bg-black min-h-screen">
+    <div className="space-y-8 p-6 md:p-10 bg-background text-foreground min-h-screen">
       {/* Create Modal */}
       {showForm && (
         <div className="fixed inset-0 z-50 bg-black/80 flex items-center justify-center">
-          <div className="bg-black border border-white/20 p-6 rounded-2xl w-full max-w-xl space-y-5">
-            <h2 className="text-xl font-bold text-white">Create Interview</h2>
+          <div className="bg-card border border-border p-6 rounded-2xl w-full max-w-xl space-y-5 text-card-foreground">
+            <h2 className="text-xl font-bold text-foreground">Create Interview</h2>
 
             <Input
               placeholder="Role For The Interview (e.g., Frontend Engineer)"
               value={form.role}
               onChange={(e) => setForm({ ...form, role: e.target.value })}
-              className="bg-black/30 text-white border-white/10"
+              className="bg-zinc-100 dark:bg-zinc-900/30 text-foreground border-zinc-200 dark:border-white/10"
             />
 
             <Input
               placeholder="The Job Level (e.g., Junior, Mid, Senior)"
               value={form.level}
               onChange={(e) => setForm({ ...form, level: e.target.value })}
-              className="bg-black/30 text-white border-white/10"
+              className="bg-zinc-100 dark:bg-zinc-900/30 text-foreground border-zinc-200 dark:border-white/10"
             />
 
             <Select
               value={form.type}
               onValueChange={(value) => setForm({ ...form, type: value as Interview["type"] })}
             >
-              <SelectTrigger className="w-full bg-black/30 text-white border-white/10">
+              <SelectTrigger className="w-full bg-zinc-100 dark:bg-zinc-900/30 text-foreground border-zinc-200 dark:border-white/10">
                 <SelectValue placeholder="Select interview type" />
               </SelectTrigger>
-              <SelectContent className="bg-black text-white">
+              <SelectContent className="bg-popover border-border text-popover-foreground">
                 <SelectItem value="Technical">Technical</SelectItem>
                 <SelectItem value="Behavioural">Behavioural</SelectItem>
                 <SelectItem value="Mixed">Mixed</SelectItem>
@@ -331,7 +321,7 @@ export default function InterviewsPage() {
               placeholder="Cover Image URL (optional)"
               value={form.coverImage}
               onChange={(e) => setForm({ ...form, coverImage: e.target.value })}
-              className="bg-black/30 text-white border-white/10"
+              className="bg-zinc-100 dark:bg-zinc-900/30 text-foreground border-zinc-200 dark:border-white/10"
             />
 
             <Input
@@ -343,7 +333,7 @@ export default function InterviewsPage() {
                   techstack: e.target.value.split(",").map((t) => t.trim()),
                 })
               }
-              className="bg-black/30 text-white border-white/10"
+              className="bg-zinc-100 dark:bg-zinc-900/30 text-foreground border-zinc-200 dark:border-white/10"
             />
 
             {/* New, immersive questions UI */}
@@ -352,7 +342,7 @@ export default function InterviewsPage() {
               onChange={(next) => setForm({ ...form, questions: next })}
             />
 
-            <label className="flex items-center gap-2 text-white">
+            <label className="flex items-center gap-2 text-foreground">
               <input
                 type="checkbox"
                 checked={form.finalized}
@@ -367,11 +357,11 @@ export default function InterviewsPage() {
               <Button
                 variant="ghost"
                 onClick={() => setShowForm(false)}
-                className="text-white"
+                className="text-foreground"
               >
                 Cancel
               </Button>
-              <Button onClick={handleCreateInterview} className="bg-white text-black">
+              <Button onClick={handleCreateInterview} className="bg-foreground text-background">
                 Create
               </Button>
             </div>
@@ -382,36 +372,36 @@ export default function InterviewsPage() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-white">Interviews</h1>
-          <p className="text-white/70 mt-2">Manage generated interviews</p>
+          <h1 className="text-3xl font-bold text-foreground">Interviews</h1>
+          <p className="text-zinc-500 dark:text-zinc-400 mt-2">Manage generated interviews</p>
         </div>
         <Button
           onClick={() => setShowForm(true)}
-          className="bg-white text-black hover:bg-white/90"
+          className="bg-zinc-950 text-white hover:bg-zinc-900 dark:bg-white dark:text-black dark:hover:bg-white/90"
         >
           <Plus className="mr-2 h-4 w-4" /> Add Interview
         </Button>
       </div>
 
       {/* Table */}
-      <Card className="interviews-card bg-black/50 backdrop-blur-sm border-white/10 rounded-2xl">
-        <CardHeader className="border-b border-white/10">
+      <Card className="interviews-card bg-card border-border shadow-xs rounded-2xl">
+        <CardHeader className="border-b border-border">
           <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
             <div className="relative flex-1 max-w-md">
-              <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-white/50" />
+              <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-zinc-500 dark:text-zinc-400" />
               <Input
                 placeholder="Search by role or tech..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-10 bg-black/30 text-white border-white/10"
+                className="pl-10 bg-zinc-100 dark:bg-zinc-900/30 text-foreground border-zinc-200 dark:border-white/10"
               />
             </div>
 
             <Select value={statusFilter} onValueChange={(v) => setStatusFilter(v as any)}>
-              <SelectTrigger className="w-full sm:w-48 bg-black text-white border-white/10">
+              <SelectTrigger className="w-full sm:w-48 bg-zinc-100 dark:bg-zinc-900/30 text-foreground border-zinc-200 dark:border-white/10">
                 <SelectValue placeholder="Filter by status" />
               </SelectTrigger>
-              <SelectContent className="bg-black text-white">
+              <SelectContent className="bg-popover border-border text-popover-foreground">
                 <SelectItem value="All">All</SelectItem>
                 <SelectItem value="Finalized">Finalized</SelectItem>
                 <SelectItem value="Draft">Draft</SelectItem>
@@ -425,42 +415,42 @@ export default function InterviewsPage() {
             <div className="overflow-x-auto">
               <Table>
                 <TableHeader>
-                  <TableRow className="border-white/10">
-                    <TableHead className="text-white/70">Role</TableHead>
-                    <TableHead className="text-white/70">Level</TableHead>
-                    <TableHead className="text-white/70">Type</TableHead>
-                    <TableHead className="text-white/70">Tech Stack</TableHead>
-                    <TableHead className="text-white/70">Finalized</TableHead>
-                    <TableHead className="text-white/70">Created At</TableHead>
-                    <TableHead className="text-white/70 text-right">Actions</TableHead>
+                  <TableRow className="border-border">
+                    <TableHead className="text-zinc-500 dark:text-zinc-400">Role</TableHead>
+                    <TableHead className="text-zinc-500 dark:text-zinc-400">Level</TableHead>
+                    <TableHead className="text-zinc-500 dark:text-zinc-400">Type</TableHead>
+                    <TableHead className="text-zinc-500 dark:text-zinc-400">Tech Stack</TableHead>
+                    <TableHead className="text-zinc-500 dark:text-zinc-400">Finalized</TableHead>
+                    <TableHead className="text-zinc-500 dark:text-zinc-400">Created At</TableHead>
+                    <TableHead className="text-zinc-500 dark:text-zinc-400 text-right">Actions</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {filteredInterviews.map((i) => (
                     <TableRow
                       key={i.id}
-                      className="table-row border-white/10 hover:bg-white/5 transition-colors"
+                      className="table-row border-border hover:bg-zinc-100 dark:hover:bg-white/5 transition-colors"
                     >
-                      <TableCell className="text-white">{i.role}</TableCell>
-                      <TableCell className="text-white/80">{i.level}</TableCell>
-                      <TableCell className="text-white/80">{i.type}</TableCell>
-                      <TableCell className="text-white/80">{i.techstack.join(", ")}</TableCell>
-                      <TableCell className="text-white/80">{i.finalized ? "Yes" : "No"}</TableCell>
-                      <TableCell className="text-white/80">{formatDate(i.createdAt)}</TableCell>
+                      <TableCell className="text-foreground font-medium">{i.role}</TableCell>
+                      <TableCell className="text-zinc-700 dark:text-zinc-300">{i.level}</TableCell>
+                      <TableCell className="text-zinc-700 dark:text-zinc-300">{i.type}</TableCell>
+                      <TableCell className="text-zinc-700 dark:text-zinc-300">{i.techstack.join(", ")}</TableCell>
+                      <TableCell className="text-zinc-700 dark:text-zinc-300">{i.finalized ? "Yes" : "No"}</TableCell>
+                      <TableCell className="text-zinc-700 dark:text-zinc-300">{formatDate(i.createdAt)}</TableCell>
                       <TableCell className="text-right">
                         <DropdownMenu>
                           <DropdownMenuTrigger asChild>
                             <Button
                               variant="ghost"
                               size="icon"
-                              className="h-8 w-8 text-white/70 hover:text-white hover:bg-white/10"
+                              className="h-8 w-8 text-zinc-500 dark:text-zinc-400 hover:text-foreground hover:bg-zinc-200 dark:hover:bg-white/10"
                             >
                               <MoreHorizontal className="h-4 w-4" />
                             </Button>
                           </DropdownMenuTrigger>
-                          <DropdownMenuContent align="end" className="bg-black border-white/10">
+                          <DropdownMenuContent align="end" className="bg-popover border-border text-popover-foreground">
                             <DropdownMenuItem
-                              className="text-white hover:bg-white/10"
+                              className="hover:bg-zinc-100 dark:hover:bg-white/10 cursor-pointer"
                               onClick={() => router.push(`/admin/interviews/${i.id}/edit`)}
                             >
                               <Pencil className="mr-2 h-4 w-4" />
@@ -475,7 +465,7 @@ export default function InterviewsPage() {
               </Table>
             </div>
           ) : (
-            <div className="text-center py-12 text-white/70">No interviews found.</div>
+            <div className="text-center py-12 text-zinc-500 dark:text-zinc-400">No interviews found.</div>
           )}
         </CardContent>
       </Card>

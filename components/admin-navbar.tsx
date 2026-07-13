@@ -240,13 +240,6 @@ export function AdminNavbar() {
               </div>
             </PopoverContent>
           </Popover>
-
-          <div className="flex items-center gap-2 border border-zinc-200 dark:border-white/5 bg-zinc-100 dark:bg-zinc-900/50 px-3 py-1.5 rounded-md">
-            <UserButton />
-            <span className="text-sm font-medium text-zinc-800 dark:text-zinc-200 select-none">
-              {adminName || "Admin"}
-            </span>
-          </div>
         </div>
       </div>
     </header>

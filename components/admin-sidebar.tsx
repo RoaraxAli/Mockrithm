@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { gsap } from "gsap";
-import { useClerk } from "@clerk/nextjs";
+import { useClerk, UserButton } from "@clerk/nextjs";
 import {
   LayoutDashboard,
   Users,
@@ -219,13 +219,13 @@ const handleLogout = async () => {
           </nav>
         </ScrollArea>
 
-        <div className="border-t border-white/5 p-4">
+        <div className="border-t border-zinc-200 dark:border-white/5 p-4">
           <div
             className={cn(
-              "sidebar-item flex items-center justify-between rounded-md px-3 py-2 text-sm font-medium transition-all duration-200 cursor-pointer hover:bg-zinc-900",
+              "sidebar-item flex items-center justify-between rounded-md px-3 py-2 text-sm font-medium transition-all duration-200 cursor-pointer hover:bg-zinc-100 dark:hover:bg-zinc-900",
               adminSectionOpen
-                ? "bg-zinc-900 text-zinc-100"
-                : "text-zinc-400 hover:text-zinc-100",
+                ? "bg-zinc-100 dark:bg-zinc-900 text-zinc-900 dark:text-zinc-100"
+                : "text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100",
               isCollapsed && "justify-center"
             )}
             onClick={() =>
@@ -239,17 +239,9 @@ const handleLogout = async () => {
                 isCollapsed && "space-x-0 justify-center"
               )}
             >
-              <Avatar className="h-8 w-8">
-                <AvatarImage
-                  src={adminImage || "/placeholder.svg"}
-                  alt={adminName}
-                />
-                <AvatarFallback className="bg-zinc-800 text-zinc-300">
-                  <User className="h-4 w-4" />
-                </AvatarFallback>
-              </Avatar>
+              <UserButton />
               {!isCollapsed && (
-                <span className="truncate">{adminName || "Admin"}</span>
+                <span className="truncate text-zinc-800 dark:text-zinc-200 font-medium">{adminName || "Admin"}</span>
               )}
             </div>
           </div>
