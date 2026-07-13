@@ -95,6 +95,7 @@ const InterviewDetails = async ({ params }: RouteParams) => {
         codingProblem={serializedInterview.codingProblem}
         role={serializedInterview.role}
         sessionType={serializedInterview.type}
+        userTier={serializedUser?.tier || "freemium"}
       />
     </>
   );

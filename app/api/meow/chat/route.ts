@@ -28,7 +28,18 @@ export async function POST(request: Request) {
 
   try {
     const body = await request.json();
-    const model = body.model || process.env.GROQ_LLM_MODEL || "llama-3.3-70b-versatile";
+    let model = body.model || process.env.GROQ_LLM_MODEL || "llama-3.3-70b-versatile";
+    const userTier = (user as any).tier || "freemium";
+
+    // Enforce model tier limits
+    if (userTier === "freemium") {
+      model = "llama-3.1-8b-instant";
+    } else if (userTier === "premium") {
+      if (model === "z-ai/glm-4.7-flash-free") {
+        model = "llama-3.3-70b-versatile";
+      }
+    }
+
     const isZenmux = model === "z-ai/glm-4.7-flash-free";
 
     let response;

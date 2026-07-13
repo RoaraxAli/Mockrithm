@@ -56,6 +56,7 @@ const Agent = ({
   userResumeData,
   role: propRole,
   sessionType: propSessionType,
+  userTier = "freemium",
 }: AgentProps) => {
   const router = useRouter();
 
@@ -131,6 +132,29 @@ const Agent = ({
       }
     }
   }, [selectedStt, callStatus]);
+
+  // Enforce tier-based constraints on configurations reactively
+  useEffect(() => {
+    const tier = userTier || "freemium";
+    if (tier === "freemium") {
+      if (selectedModel !== "llama-3.1-8b-instant") {
+        setSelectedModel("llama-3.1-8b-instant");
+      }
+      if (selectedStt !== "browser") {
+        setSelectedStt("browser");
+      }
+      if (selectedVoice !== "groq-autumn" && selectedVoice !== "local" && selectedVoice !== "groq-noura") {
+        setSelectedVoice(selectedLanguage === "ar-SA" ? "groq-noura" : "groq-autumn");
+      }
+    } else if (tier === "premium") {
+      if (selectedModel === "z-ai/glm-4.7-flash-free") {
+        setSelectedModel("llama-3.3-70b-versatile");
+      }
+      if (selectedStt === "whisper-v3") {
+        setSelectedStt("whisper-turbo");
+      }
+    }
+  }, [userTier, selectedLanguage, selectedModel, selectedStt, selectedVoice]);
 
   // Interview Language (selected before the session starts)
   const [selectedLanguage, setSelectedLanguage] = useState<string>("en-US");
@@ -2238,9 +2262,13 @@ ${codeRef.current}
                       onChange={(e) => setSelectedModel(e.target.value)}
                       className="bg-zinc-950 text-zinc-100 text-xs rounded-xl p-3 border border-zinc-900 focus:border-zinc-700 focus:ring-1 focus:ring-zinc-800 outline-none cursor-pointer hover:bg-zinc-900 transition-all font-semibold"
                     >
-                      <option value="llama-3.1-8b-instant">Llama 3.1 8B (Fastest Replies)</option>
-                      <option value="llama-3.3-70b-versatile">Llama 3.3 70B (High Quality)</option>
-                      <option value="z-ai/glm-4.7-flash-free">Zenmux GLM-4.7 (Deep Reasoning - Slower)</option>
+                      <option value="llama-3.1-8b-instant">Llama 3.1 8B (Free)</option>
+                      <option value="llama-3.3-70b-versatile" disabled={userTier === "freemium"}>
+                        Llama 3.3 70B {userTier === "freemium" ? "(Premium Only)" : "(Premium)"}
+                      </option>
+                      <option value="z-ai/glm-4.7-flash-free" disabled={userTier === "freemium" || userTier === "premium"}>
+                        Zenmux GLM-4.7 {userTier === "freemium" || userTier === "premium" ? "(Pro Only)" : "(Pro)"}
+                      </option>
                     </select>
                     {selectedModel === "z-ai/glm-4.7-flash-free" ? (
                       <span className="text-[9px] text-amber-500/80 font-medium leading-tight mt-1">
@@ -2264,24 +2292,24 @@ ${codeRef.current}
                     >
                       {selectedLanguage === "ar-SA" ? (
                         <>
-                          <option value="groq-abdullah">Abdullah (Male - Natural)</option>
-                          <option value="groq-aisha">Aisha (Female - Crisp)</option>
-                          <option value="groq-fahad">Fahad (Male - Composed)</option>
-                          <option value="groq-sultan">Sultan (Male - Deep)</option>
-                          <option value="groq-lulwa">Lulwa (Female - Warm)</option>
-                          <option value="groq-noura">Noura (Female - Natural)</option>
+                          <option value="groq-noura">Noura (Female - Free)</option>
+                          <option value="groq-abdullah" disabled={userTier === "freemium"}>Abdullah {userTier === "freemium" ? "(Premium Only)" : "(Premium)"}</option>
+                          <option value="groq-aisha" disabled={userTier === "freemium"}>Aisha {userTier === "freemium" ? "(Premium Only)" : "(Premium)"}</option>
+                          <option value="groq-fahad" disabled={userTier === "freemium"}>Fahad {userTier === "freemium" ? "(Premium Only)" : "(Premium)"}</option>
+                          <option value="groq-sultan" disabled={userTier === "freemium"}>Sultan {userTier === "freemium" ? "(Premium Only)" : "(Premium)"}</option>
+                          <option value="groq-lulwa" disabled={userTier === "freemium"}>Lulwa {userTier === "freemium" ? "(Premium Only)" : "(Premium)"}</option>
                         </>
                       ) : (
                         <>
-                          <option value="groq-autumn">Autumn (Female - Natural)</option>
-                          <option value="groq-diana">Diana (Female - Crisp)</option>
-                          <option value="groq-hannah">Hannah (Female - Warm)</option>
-                          <option value="groq-austin">Austin (Male - Business)</option>
-                          <option value="groq-daniel">Daniel (Male - Composed)</option>
-                          <option value="groq-troy">Troy (Male - Deep)</option>
+                          <option value="groq-autumn">Autumn (Female - Free)</option>
+                          <option value="groq-diana" disabled={userTier === "freemium"}>Diana {userTier === "freemium" ? "(Premium Only)" : "(Premium)"}</option>
+                          <option value="groq-hannah" disabled={userTier === "freemium"}>Hannah {userTier === "freemium" ? "(Premium Only)" : "(Premium)"}</option>
+                          <option value="groq-austin" disabled={userTier === "freemium"}>Austin {userTier === "freemium" ? "(Premium Only)" : "(Premium)"}</option>
+                          <option value="groq-daniel" disabled={userTier === "freemium"}>Daniel {userTier === "freemium" ? "(Premium Only)" : "(Premium)"}</option>
+                          <option value="groq-troy" disabled={userTier === "freemium"}>Troy {userTier === "freemium" ? "(Premium Only)" : "(Premium)"}</option>
                         </>
                       )}
-                      <option value="local">Local Browser Synthesis</option>
+                      <option value="local">Local Browser Synthesis (Free)</option>
                     </select>
                   </div>
 
@@ -2295,8 +2323,12 @@ ${codeRef.current}
                       className="bg-zinc-950 text-zinc-100 text-xs rounded-xl p-3 border border-zinc-900 focus:border-zinc-700 focus:ring-1 focus:ring-zinc-800 outline-none cursor-pointer hover:bg-zinc-900 transition-all font-semibold"
                     >
                       <option value="browser">Browser Web Speech (Free)</option>
-                      <option value="whisper-turbo">Whisper Large V3 Turbo (Fast)</option>
-                      <option value="whisper-v3">Whisper Large V3 (Accurate)</option>
+                      <option value="whisper-turbo" disabled={userTier === "freemium"}>
+                        Whisper Large V3 Turbo {userTier === "freemium" ? "(Premium Only)" : "(Premium)"}
+                      </option>
+                      <option value="whisper-v3" disabled={userTier === "freemium" || userTier === "premium"}>
+                        Whisper Large V3 {userTier === "freemium" || userTier === "premium" ? "(Pro Only)" : "(Pro)"}
+                      </option>
                     </select>
                   </div>
                 </motion.div>

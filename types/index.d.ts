@@ -94,6 +94,7 @@ interface AgentProps {
   userCountry?: string;
   role?: string;
   sessionType?: string;
+  userTier?: string;
 }
 
 interface RouteParams {

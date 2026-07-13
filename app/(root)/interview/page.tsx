@@ -20,6 +20,7 @@ const Page = async () => {
           resumeData: user.resumeData || null,
           country: user.country || "",
         }}
+        userTier={(user as any).tier || "freemium"}
       />
     </div>
   );
