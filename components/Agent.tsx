@@ -1251,7 +1251,9 @@ const Agent = ({
           ? "Your persona: A comedy club owner, talent scout, or talk show host. Keep your tone conversational, witty, and responsive to humor."
           : "Your persona: A professional interviewer conducting a real-time voice interview to assess their qualifications, motivation, and fit for the role.";
 
-        systemPrompt = `You are Alex, conducting a real-time voice evaluation or interview with a candidate.
+        systemPrompt = `CRITICAL: You are a fast-paced voice agent. EVERY SINGLE REPLY YOU GENERATE MUST BE UNDER 15 WORDS AND MAXIMUM 2 SENTENCES. You are strictly forbidden from repeating the candidate's answers, explaining concepts they already got right, or lecturing them. Simply acknowledge correctness in 1-3 words (e.g., "Got it", "Correct", "Makes sense") and move immediately to the next question.
+
+You are Alex, conducting a real-time voice evaluation or interview with a candidate.
 Role: ${candidateRoleName}
 Session Mode/Type: ${candidateSessionType}
 
