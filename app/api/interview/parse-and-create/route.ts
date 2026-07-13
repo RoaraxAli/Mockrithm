@@ -161,9 +161,37 @@ export async function POST(request: Request) {
         };
       }
 
+      // Programmatic fallbacks for requiresSandbox based on type/mode name or coding roles
+      const lowercaseType = setup.type.toLowerCase();
+      const isCodingRole = setup.role.toLowerCase().includes("engineer") || 
+                           setup.role.toLowerCase().includes("developer") || 
+                           setup.role.toLowerCase().includes("programmer") ||
+                           setup.role.toLowerCase().includes("coder");
+
+      if (
+        lowercaseType.includes("sandbox") || 
+        lowercaseType.includes("code review") || 
+        lowercaseType.includes("coding") ||
+        (isCodingRole && !lowercaseType.includes("behavioral") && !lowercaseType.includes("verbal"))
+      ) {
+        setup.requiresSandbox = true;
+      }
+
       questionsList = masterObj.questions || [];
       codingProblem = masterObj.codingProblem || null;
       firstMessage = masterObj.firstMessage || "Hello! Ready to start.";
+
+      // Ensure that if requiresSandbox is true, we have a coding problem
+      if (setup.requiresSandbox && !codingProblem) {
+        codingProblem = {
+          title: `${setup.role} Sandbox Exercise`,
+          description: `Write code or solve the technical challenge for a ${setup.level}-level ${setup.role} role.`,
+          templateCode: isCodingRole 
+            ? `// Write your ${setup.role} code here\nfunction main() {\n  console.log("Ready");\n}\n`
+            : "Write your solution here\n",
+          language: isCodingRole ? "javascript" : "text",
+        };
+      }
 
       console.log("[DEBUG] Successfully parsed consolidated parameters:", {
         setup,

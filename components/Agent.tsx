@@ -1403,9 +1403,16 @@ RULES:
       console.error("[Agent.tsx] Error message:", e.message);
       console.error("[Agent.tsx] Error stack:", e.stack);
       setLastMessage(`Error: ${e.message}`);
-      setTimeout(() => {
-        resumeListeningAfterSpeech();
-      }, 3000);
+      isProcessingRef.current = false; // Reset processing flag to unfreeze UI
+      
+      if (isTimerEndingRef.current) {
+        console.warn("[Agent.tsx] LLM failed during time-up wrap up. Disconnecting immediately to prevent freeze.");
+        handleDisconnect();
+      } else {
+        setTimeout(() => {
+          resumeListeningAfterSpeech();
+        }, 3000);
+      }
     }
   };
 
@@ -1602,6 +1609,7 @@ ${code}
     } catch (e: any) {
       console.error("[Agent.tsx] LLM streaming failed during auto-hint:", e);
       setLastMessage("Error: " + e.message);
+      isProcessingRef.current = false; // Reset processing flag to unfreeze UI
       setTimeout(() => {
         resumeListeningAfterSpeech();
       }, 3000);
@@ -1657,6 +1665,10 @@ ${code}
 
         // Reset the message history to start the interview cleanly
         setMessages([{ role: "assistant", content: welcome }]);
+
+        // Start countdown timer here when the active interview mode starts!
+        const durationSeconds = selectedDuration === "brief" ? 5 * 60 : selectedDuration === "medium" ? 10 * 60 : null;
+        setTimerSecondsLeft(durationSeconds);
 
         // Force call to be active
         isCallActiveRef.current = true;
@@ -1751,12 +1763,8 @@ ${code}
     sentenceBufferRef.current = "";
     speechQueueRef.current = [];
 
-    // Start countdown timer if applicable
-    if (durationSeconds !== null) {
-      setTimerSecondsLeft(durationSeconds);
-    } else {
-      setTimerSecondsLeft(null);
-    }
+    // The timer remains disabled/null during the setup conversation phase
+    setTimerSecondsLeft(null);
 
     // Dynamic Custom Welcome Greeting seeding
     let welcomeMsg = activeFirstMessage || firstMessage || interviewer.firstMessage || "Hello! Thank you for taking the time to speak with me today.";
@@ -2130,6 +2138,14 @@ ${code}
                    isTimerEndingRef.current = true;
                    if (typeRef.current === "interview") {
                      handleSpeechCompleted("[SYSTEM: Time is up. Conclude the interview warmly, thank the candidate, and ALWAYS append '[END_CALL]' at the very end.]");
+                     
+                     // Client-side safety timeout: Force disconnect after 8 seconds if LLM yaps, gets rate limited, or fails to hang up
+                     setTimeout(() => {
+                       if (isCallActiveRef.current) {
+                         console.warn("[Agent.tsx] Time-up safety timeout triggered. Forcing disconnect.");
+                         handleDisconnect();
+                       }
+                     }, 8000);
                    } else {
                      handleDisconnect();
                    }
