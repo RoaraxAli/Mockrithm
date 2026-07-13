@@ -1270,7 +1270,7 @@ CRITICAL SANDBOX WORKSPACE RULE:
 - CODE EVALUATION & INTERACTIVE DIALOGUE FLOW RULE: When the candidate submits code/text in the sandbox, do NOT immediately present the next question in your response. Instead, first evaluate the submitted solution briefly, then ask them a single follow-up question about their solution (e.g., asking why they chose a specific method, how they would optimize it, or what edge cases they considered). Wait for them to answer verbally. Once they explain verbally, you may ask a second verbal follow-up or transition to the next question in your structured flow by introducing the task and outputting '[SHOW_SANDBOX]'. Only conclude the interview and append '[END_CALL]' when all questions in the structured flow have been completed.
 
 CRITICAL RULES - CONVERSATIONAL FLOW & CONCISENESS:
-- SOCRATIC HINT / STUCK PIVOT: If the candidate says "I don't know", "I am stuck", or remains silent, do NOT fail them or jump to the next question. Give them a helpful, encouraging conceptual hint or ask a simpler sub-question to guide them. Encourage them to guess or reason it out.
+- SOCRATIC HINT / STUCK PIVOT: If the candidate says "I don't know" or "I am stuck" for the first time on a question, give them ONE helpful conceptual hint or ask a simpler sub-question. BUT if they say "I don't know", "skip", or "I have no idea" a second time, or explicitly ask to move on, you MUST immediately stop asking about it, briefly explain the correct answer in under 15 words, and transition directly to the next question. Never get stuck looping on the same concept or force them to answer.
 - DO NOT VERBALLY READ OUT THE LONG CHALLENGE INSTRUCTIONS OR CODE: When you transition to the coding challenge, simply introduce it briefly in one sentence (under 15 words) and output '[SHOW_SANDBOX]'. The candidate will read the details in the workspace on their screen. Never output code blocks, templates, or instructions in your speech.
 - DO NOT LECTURE ON CORRECT ANSWERS: If the candidate answers correctly or reasonably, do not explain the concept, define terms, or repeat the textbook answer back to them. Simply acknowledge briefly (e.g. "Got it.", "Makes sense.", "Solid explanation.") and transition immediately to the next question.
 - GENTLY CORRECT BIG BLUNDERS: If the candidate makes a major blunder or says something completely incorrect, gently correct them and guide them in the right direction in one short, polite sentence before transitioning.
@@ -1676,7 +1676,7 @@ ${codeRef.current}
         setMessages([{ role: "assistant", content: welcome }]);
 
         // Start countdown timer here when the active interview mode starts!
-        const durationSeconds = selectedDuration === "brief" ? 5 * 60 : selectedDuration === "medium" ? 10 * 60 : null;
+        const durationSeconds = selectedDurationRef.current === "brief" ? 5 * 60 : selectedDurationRef.current === "medium" ? 10 * 60 : null;
         setTimerSecondsLeft(durationSeconds);
 
         // Force call to be active
@@ -2162,14 +2162,7 @@ ${codeRef.current}
                    }}
                  />
                )}
-               {timerSecondsLeft === null && activeType === "interview" && (
-                 <button
-                   onClick={() => handleDisconnect()}
-                   className="px-2.5 py-1 rounded-full bg-rose-950/40 hover:bg-rose-900/60 border border-rose-900 text-rose-300 hover:text-rose-200 text-[8.5px] font-bold uppercase tracking-wider transition-all duration-300 cursor-pointer"
-                 >
-                   Finish Session
-                 </button>
-               )}
+
               <div>
                 <span className="text-zinc-600 mr-1.5">{t("connection")}:</span>
                 <span className="text-emerald-400 font-bold">{t("stable")}</span>
