@@ -809,6 +809,14 @@ export async function toggleMaintenanceMode(active: boolean) {
 
     await db.collection("settings").doc("maintenance").set({ active }, { merge: true });
     await logAdminAction(user.id, "TOGGLE_MAINTENANCE", { active });
+
+    // If maintenance mode is turned off, trigger email notifications in the background
+    if (!active) {
+      sendMaintenanceLiveEmails().catch((err) => {
+        console.error("Failed to notify maintenance subscribers in background:", err);
+      });
+    }
+
     return { success: true };
   } catch (error: any) {
     console.error("Failed to toggle maintenance mode:", error);
@@ -824,5 +832,84 @@ export async function getMaintenanceMode() {
   } catch (error: any) {
     console.error("Failed to fetch maintenance mode:", error);
     return { success: false, error: error.message };
+  }
+}
+
+async function sendMaintenanceLiveEmails() {
+  const apiKey = process.env.RESEND_API_KEY;
+  if (!apiKey) {
+    console.warn("[Maintenance Email]: Skipping notifications because RESEND_API_KEY is not defined.");
+    return;
+  }
+
+  try {
+    const snapshot = await db.collection("feedback")
+      .where("type", "==", "maintenance_subscription")
+      .get();
+
+    if (snapshot.empty) {
+      console.log("[Maintenance Email]: No subscribers to notify.");
+      return;
+    }
+
+    const { Resend } = await import("resend");
+    const resend = new Resend(apiKey);
+
+    const subscribers = snapshot.docs.map(doc => ({
+      id: doc.id,
+      email: doc.data().email
+    }));
+
+    console.log(`[Maintenance Email]: Sending notification to ${subscribers.length} subscribers...`);
+
+    const emailPromises = subscribers.map(async (sub) => {
+      try {
+        await resend.emails.send({
+          from: "Mockrithm <notifications@mockrithm.me>",
+          to: sub.email,
+          subject: "⚡ Mockrithm is back online!",
+          html: `
+            <div style="background-color: #09090b; padding: 40px 20px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; text-align: center; color: #ffffff;">
+              <div style="max-w-md mx-auto bg-[#18181b] border border-[#27272a] rounded-[2rem] p-8 sm:p-12 shadow-2xl; text-align: left; margin: 0 auto;">
+                <div style="text-align: center; margin-bottom: 24px;">
+                  <div style="display: inline-flex; align-items: center; justify-content: center; width: 64px; height: 64px; border-radius: 50%; background-color: rgba(168, 85, 247, 0.1); border: 1px solid rgba(168, 85, 247, 0.2); margin: 0 auto 16px auto;">
+                    <span style="font-size: 24px; color: #a855f7; line-height: 64px;">⚡</span>
+                  </div>
+                  <h1 style="color: #ffffff; font-size: 24px; font-weight: 800; margin: 0; letter-spacing: -0.025em; text-transform: uppercase;">MOCKRITHM</h1>
+                </div>
+                
+                <h2 style="color: #ffffff; font-size: 20px; font-weight: 700; margin-bottom: 12px; letter-spacing: -0.015em;">We are back online!</h2>
+                <p style="color: #a1a1aa; font-size: 14px; line-height: 1.6; margin-bottom: 24px;">
+                  Thank you for your patience. Our system maintenance is complete, and all services, including database nodes, AI interview models, and sandbox environments, are fully operational.
+                </p>
+
+                <div style="text-align: center; margin-bottom: 24px;">
+                  <a href="https://mockrithm.me" style="display: inline-block; background: linear-gradient(to right, #a855f7, #6366f1); color: #ffffff; font-size: 14px; font-weight: 700; text-decoration: none; padding: 12px 32px; border-radius: 9999px; transition: all 0.2s;">
+                    Launch Mockrithm
+                  </a>
+                </div>
+
+                <hr style="border: none; border-top: 1px solid #27272a; margin: 24px 0;" />
+                
+                <div style="font-size: 12px; color: #71717a; text-align: center;">
+                  <p style="margin: 0 0 8px 0;">This email was sent to you because you requested to be notified when Mockrithm returned online.</p>
+                  <p style="margin: 0;">&copy; ${new Date().getFullYear()} Mockrithm. All rights reserved.</p>
+                </div>
+              </div>
+            </div>
+          `
+        });
+
+        // Delete the subscription document on successful dispatch
+        await db.collection("feedback").doc(sub.id).delete();
+      } catch (err: any) {
+        console.error(`[Maintenance Email]: Failed to notify ${sub.email}:`, err.message);
+      }
+    });
+
+    await Promise.all(emailPromises);
+    console.log("[Maintenance Email]: All notifications dispatched and cleaned up.");
+  } catch (error) {
+    console.error("[Maintenance Email]: Error running mail notifications:", error);
   }
 }
