@@ -51,6 +51,9 @@ class ApiKeyManager {
   }
 
   public getBestKey(): string {
+    if (this.keys.length === 0) {
+      this.loadKeys();
+    }
     const now = Date.now();
     
     // Re-check and clear expired blocks

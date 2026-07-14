@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
+import { useAuth } from "@clerk/nextjs";
 import { Badge } from "@/components/ui/badge";
 import { motion } from "framer-motion";
 import { Compass, Sparkles, Target, HeartHandshake, ArrowUpRight, Instagram } from "lucide-react";
@@ -75,6 +76,7 @@ function ThreeDTiltCard({ children, className = "" }: { children: React.ReactNod
 
 export default function AboutPage() {
   const [videoSrc, setVideoSrc] = useState<string | null>(null);
+  const { isSignedIn } = useAuth();
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -103,7 +105,7 @@ export default function AboutPage() {
 
   return (
     <div className="min-h-screen bg-transparent text-white relative overflow-hidden font-mona-sans selection:bg-white selection:text-black">
-      <MarketingNavbar />
+      {!isSignedIn && <MarketingNavbar />}
 
       {/* Fixed Fullscreen Background Video & Overlay */}
       <div className="fixed inset-0 w-full h-screen z-0 pointer-events-none bg-zinc-950">

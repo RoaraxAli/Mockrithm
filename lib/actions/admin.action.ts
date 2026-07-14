@@ -799,3 +799,30 @@ export async function deleteInterviewFeedback(id: string) {
     return { success: false, error: error.message };
   }
 }
+
+export async function toggleMaintenanceMode(active: boolean) {
+  try {
+    const user = await getCurrentUser();
+    if (!user || user.role?.toLowerCase() !== "admin") {
+      return { success: false, error: "Forbidden" };
+    }
+
+    await db.collection("settings").doc("maintenance").set({ active }, { merge: true });
+    await logAdminAction(user.id, "TOGGLE_MAINTENANCE", { active });
+    return { success: true };
+  } catch (error: any) {
+    console.error("Failed to toggle maintenance mode:", error);
+    return { success: false, error: error.message };
+  }
+}
+
+export async function getMaintenanceMode() {
+  try {
+    const snap = await db.collection("settings").doc("maintenance").get();
+    const active = snap.exists ? snap.data()?.active || false : false;
+    return { success: true, active };
+  } catch (error: any) {
+    console.error("Failed to fetch maintenance mode:", error);
+    return { success: false, error: error.message };
+  }
+}

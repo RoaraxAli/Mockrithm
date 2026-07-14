@@ -110,6 +110,7 @@ const Navbar = ({ userId, userName, userRole }: NavbarProps) => {
     ? [
         { href: "/", label: "Home", icon: Home },
         { href: "/about", label: "About", icon: Info },
+        { href: "/interview", label: "Interview", icon: PlayCircle },
       ]
     : [
         { href: "/#intro", label: "Intro", icon: Home },

@@ -83,11 +83,10 @@ export function AdminSidebar() {
   useEffect(() => {
     const fetchMaintenanceStatus = async () => {
       try {
-        const { doc, getDoc } = await import("firebase/firestore");
-        const { db } = await import("@/firebase/client");
-        const snap = await getDoc(doc(db, "settings", "maintenance"));
-        if (snap.exists()) {
-          setMaintenance(snap.data()?.active || false);
+        const { getMaintenanceMode } = await import("@/lib/actions/admin.action");
+        const res = await getMaintenanceMode();
+        if (res.success) {
+          setMaintenance(res.active || false);
         }
       } catch (err) {
         console.error("Failed to fetch maintenance status:", err);
@@ -103,10 +102,13 @@ export function AdminSidebar() {
     try {
       setLoadingMaintenance(true);
       const nextState = !maintenance;
-      const { doc, setDoc } = await import("firebase/firestore");
-      const { db } = await import("@/firebase/client");
-      await setDoc(doc(db, "settings", "maintenance"), { active: nextState }, { merge: true });
-      setMaintenance(nextState);
+      const { toggleMaintenanceMode } = await import("@/lib/actions/admin.action");
+      const res = await toggleMaintenanceMode(nextState);
+      if (res.success) {
+        setMaintenance(nextState);
+      } else {
+        console.error("Failed to toggle maintenance:", res.error);
+      }
     } catch (err) {
       console.error("Failed to toggle maintenance:", err);
     } finally {
