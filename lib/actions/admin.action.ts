@@ -855,14 +855,14 @@ async function sendMaintenanceLiveEmails() {
     const { Resend } = await import("resend");
     const resend = new Resend(apiKey);
 
-    const subscribers = snapshot.docs.map(doc => ({
+    const subscribers = snapshot.docs.map((doc: any) => ({
       id: doc.id,
       email: doc.data().email
     }));
 
     console.log(`[Maintenance Email]: Sending notification to ${subscribers.length} subscribers...`);
 
-    const emailPromises = subscribers.map(async (sub) => {
+    const emailPromises = subscribers.map(async (sub: any) => {
       try {
         await resend.emails.send({
           from: "Mockrithm <notifications@mockrithm.me>",

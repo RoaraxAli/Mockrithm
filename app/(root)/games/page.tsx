@@ -2226,6 +2226,14 @@ function GamesPageContent() {
 
 export function GamesLandingPage({ initialTopic = "html" }: { initialTopic?: "html" | "css" | "js" | "sql" | "api" | "dsa" | "audio" | "star" | "logic" | "react" | "python" | "devops" | "metrics" | "system" | "security" }) {
   const [activeTopic, setActiveTopic] = useState(initialTopic);
+  const [videoSrc, setVideoSrc] = useState<string | null>(null);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setVideoSrc("/bg.mp4");
+    }, 900);
+    return () => clearTimeout(timer);
+  }, []);
 
   const topics = {
     html: {
