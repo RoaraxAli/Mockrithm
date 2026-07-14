@@ -76,6 +76,7 @@ const Navbar = ({ userId, userName, userRole }: NavbarProps) => {
 
   const handleLogout = async () => {
     try {
+      document.cookie = "bypass_admin=; path=/; expires=Thu, 01 Jan 1970 00:00:00 UTC;";
       await clerkSignOut();
       window.location.href = "/sign-in";
     } catch (error) {
@@ -94,6 +95,7 @@ const Navbar = ({ userId, userName, userRole }: NavbarProps) => {
       const { deleteUserAccount } = await import("@/lib/actions/auth.action");
       const res = await deleteUserAccount(userId);
       if (res && res.success) {
+        document.cookie = "bypass_admin=; path=/; expires=Thu, 01 Jan 1970 00:00:00 UTC;";
         await clerkSignOut();
         window.location.href = "/sign-in";
       } else {

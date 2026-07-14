@@ -29,6 +29,7 @@ export function Sidebar({
 
   const handleLogout = async () => {
     try {
+      document.cookie = "bypass_admin=; path=/; expires=Thu, 01 Jan 1970 00:00:00 UTC;"
       await clerkSignOut()
       window.location.href = "/sign-in"
     } catch (error) {

@@ -98,5 +98,11 @@ service cloud.firestore {
     match /interviewsfeedback {
       allow list: if isAdmin();
     }
+
+    // Rules for settings collection (e.g. maintenance mode)
+    match /settings/{settingId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
   }
 }

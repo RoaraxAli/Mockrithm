@@ -282,7 +282,7 @@ export default function InterviewsPage() {
   };
 
   return (
-    <div className="space-y-8 p-6 md:p-10 bg-background text-foreground min-h-screen">
+    <div className="space-y-6">
       {/* Create Modal */}
       {showForm && (
         <div className="fixed inset-0 z-50 bg-black/80 flex items-center justify-center">

@@ -5,19 +5,33 @@ const isProtectedRoute = createRouteMatcher(['/user(.*)', '/admin(.*)', '/dashbo
 const isAuthRoute = createRouteMatcher(['/sign-in(.*)', '/sign-up(.*)', '/forgot-password(.*)', '/reset-password(.*)'])
 
 export default clerkMiddleware(async (auth, req) => {
-  const isMaintenance = process.env.NEXT_PUBLIC_MAINTENANCE === "true"
-  const url = req.nextUrl.clone()
+  const host = req.headers.get("host") || "";
+  const pathname = req.nextUrl.pathname;
+  const url = req.nextUrl.clone();
 
-  // 🚧 Maintenance mode redirect
-  if (isMaintenance && !req.nextUrl.pathname.startsWith("/maintenance")) {
-    url.pathname = "/maintenance"
-    return NextResponse.redirect(url)
+  // 🚧 Dynamic Maintenance mode check
+  if (!pathname.startsWith("/maintenance") && !pathname.startsWith("/api/maintenance") && !pathname.startsWith("/admin")) {
+    try {
+      let apiBase = "https://mockrithm.me";
+      if (host.includes("localhost") || host.includes("127.0.0.1")) {
+        apiBase = `http://${host}`;
+      }
+      const res = await fetch(`${apiBase}/api/maintenance`, {
+        next: { revalidate: 10 }
+      } as any);
+      if (res.ok) {
+        const data = await res.json();
+        if (data && data.maintenance === true) {
+          url.pathname = "/maintenance";
+          return NextResponse.redirect(url);
+        }
+      }
+    } catch (err) {
+      console.error("[Maintenance Check Error]:", err);
+    }
   }
 
-  const host = req.headers.get("host") || "";
-
   // 🔄 Redirect old resume URLs to the resume subdomain
-  const pathname = req.nextUrl.pathname;
   if (pathname.startsWith("/user/dashboard/resume") || pathname.startsWith("/user/resume")) {
     let newPath = pathname;
     if (pathname.startsWith("/user/dashboard/resume")) {
@@ -49,6 +63,11 @@ export default clerkMiddleware(async (auth, req) => {
 
   // 🎮 Bypass and forward games subdomain requests (handled by vercel.json rewrites)
   if (host === "games.mockrithm.me" || host.includes("games.mockrithm.me")) {
+    return NextResponse.next();
+  }
+
+  // 📰 Bypass Clerk auth for blog subdomain
+  if (host === "blog.mockrithm.me" || host.includes("blog.mockrithm.me")) {
     return NextResponse.next();
   }
 

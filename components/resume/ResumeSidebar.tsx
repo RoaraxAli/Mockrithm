@@ -31,6 +31,7 @@ export function ResumeSidebar({ onClose }: ResumeSidebarProps) {
 
   const handleLogout = async () => {
     try {
+      document.cookie = "bypass_admin=; path=/; expires=Thu, 01 Jan 1970 00:00:00 UTC;";
       await signOut();
       window.location.href = "/";
     } catch (err) {

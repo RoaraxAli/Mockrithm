@@ -1,4 +1,4 @@
-import { headers } from "next/headers";
+import { headers, cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import BlogsPage from "../blog/page";
 import LandingDashboard from "@/components/LandingDashboard";
@@ -11,6 +11,8 @@ export default async function Home() {
   const headerList = await headers();
   const host = headerList.get("host") || "";
   const user = await getCurrentUser();
+  const cookieStore = await cookies();
+  const bypassAdmin = cookieStore.get("bypass_admin")?.value === "true";
 
   if (host.startsWith("docs.")) {
     redirect("/documentation");
@@ -28,9 +30,6 @@ export default async function Home() {
   }
 
   if (host.startsWith("games.")) {
-    if (user) {
-      redirect("/user");
-    }
     return <GamesLandingPage />;
   }
 
@@ -43,7 +42,7 @@ export default async function Home() {
   }
 
   if (user) {
-    if (user.role?.toLowerCase() === "admin") {
+    if (user.role?.toLowerCase() === "admin" && !bypassAdmin) {
       redirect("/admin");
     }
     if (!user.onboarded) {

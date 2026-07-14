@@ -32,7 +32,7 @@ export default function AuthLayout({
   useEffect(() => {
     if (typeof window !== "undefined") {
       const hostname = window.location.hostname;
-      if (hostname.startsWith("docs.") || hostname.startsWith("resume.") || hostname.startsWith("games.")) {
+      if (hostname.startsWith("docs.") || hostname.startsWith("resume.") || hostname.startsWith("games.") || hostname.startsWith("blog.")) {
         setIsSubdomain(true);
       }
     }

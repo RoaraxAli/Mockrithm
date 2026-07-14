@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { gsap } from "gsap";
-import { useClerk, UserButton } from "@clerk/nextjs";
+import { useClerk, UserButton, useUser } from "@clerk/nextjs";
 import {
   LayoutDashboard,
   Users,
@@ -29,19 +29,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { cn } from "@/lib/utils";
 
-// Mock Firebase functions for demo
-const mockAuth: { currentUser: null | { uid: string } } = {
-  currentUser: { uid: "demo-uid" },
-};
-const mockGetDoc = async () => ({
-  exists: () => true,
-  data: () => ({
-    name: "Admin",
-    profileImage: "public/admin.png",
-    maintenance: false,
-  }),
-});
-const mockUpdateDoc = async () => {};
+// Firebase Admin config handled in API
 
 const navigation = [
   { name: "Dashboard", href: "/admin", icon: LayoutDashboard },
@@ -62,6 +50,7 @@ export function AdminSidebar() {
   const pathname = usePathname();
   const router = useRouter();
   const { signOut } = useClerk();
+  const { user: clerkUser } = useUser();
   const [adminName, setAdminName] = useState("");
   const [adminImage, setAdminImage] = useState("");
   const [maintenance, setMaintenance] = useState(false);
@@ -82,29 +71,24 @@ export function AdminSidebar() {
         delay: 0.2,
       }
     );
+  }, []);
 
-    const fetchAdminData = async () => {
-      const user = mockAuth.currentUser;
-      if (!user) return;
+  useEffect(() => {
+    if (clerkUser) {
+      setAdminName(clerkUser.fullName || clerkUser.firstName || "Admin");
+      setAdminImage(clerkUser.imageUrl || "");
+    }
+  }, [clerkUser]);
 
-      try {
-        const snap = await mockGetDoc();
-        if (snap.exists()) {
-          const data = snap.data();
-          setAdminName(data?.name || "Admin");
-          setAdminImage(data?.profileImage || "");
-        }
-      } catch (error) {
-        console.error("Failed to fetch admin data:", error);
-      }
-    };
-
-    fetchAdminData();
-
+  useEffect(() => {
     const fetchMaintenanceStatus = async () => {
       try {
-        const snap = await mockGetDoc();
-        if (snap.exists()) setMaintenance(snap.data()?.maintenance || false);
+        const { doc, getDoc } = await import("firebase/firestore");
+        const { db } = await import("@/firebase/client");
+        const snap = await getDoc(doc(db, "settings", "maintenance"));
+        if (snap.exists()) {
+          setMaintenance(snap.data()?.active || false);
+        }
       } catch (err) {
         console.error("Failed to fetch maintenance status:", err);
       } finally {
@@ -118,8 +102,11 @@ export function AdminSidebar() {
   const toggleMaintenance = async () => {
     try {
       setLoadingMaintenance(true);
-      await mockUpdateDoc();
-      setMaintenance(!maintenance);
+      const nextState = !maintenance;
+      const { doc, setDoc } = await import("firebase/firestore");
+      const { db } = await import("@/firebase/client");
+      await setDoc(doc(db, "settings", "maintenance"), { active: nextState }, { merge: true });
+      setMaintenance(nextState);
     } catch (err) {
       console.error("Failed to toggle maintenance:", err);
     } finally {
@@ -130,6 +117,7 @@ export function AdminSidebar() {
 
 const handleLogout = async () => {
   try {
+    document.cookie = "bypass_admin=; path=/; expires=Thu, 01 Jan 1970 00:00:00 UTC;";
     await Promise.all([
       signOut(),
       fetch("/api/auth/sign-out", { method: "POST" })
@@ -252,7 +240,10 @@ const handleLogout = async () => {
                 variant="ghost"
                 size="sm"
                 className="w-full justify-start text-zinc-400 hover:text-zinc-100 hover:bg-zinc-900"
-                onClick={() => router.push("/")}
+                onClick={() => {
+                  document.cookie = "bypass_admin=true; path=/; max-age=86400"; // 1 day
+                  router.push("/");
+                }}
               >
                 <Globe className="mr-2 h-4 w-4" />
                 Visit Website
