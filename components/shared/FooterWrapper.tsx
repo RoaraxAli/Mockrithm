@@ -31,6 +31,7 @@ const FooterWrapper = () => {
     "/verify-code",
     "/blogs",
     "/blog",
+    "/maintenance",
   ];
   
   if (hideOnPaths.some((path) => pathname.startsWith(path))) {
