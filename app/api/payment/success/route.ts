@@ -36,6 +36,17 @@ export async function GET(request: Request) {
 
     console.log(`User ${userId} checkout session validated via redirect.`);
 
+    // Perform secure backend Firestore update to upgrade user immediately
+    await db.collection("users").doc(userId).set(
+      {
+        tier: "premium",
+        premiumUpdatedAt: new Date(),
+        stripeSessionId: session.id,
+        stripePaymentIntentId: (session.payment_intent as string) || "N/A",
+      },
+      { merge: true }
+    );
+
     // Redirect back to client dashboard success page
     const origin = new URL(request.url).origin;
     const amount = (session.amount_total ? session.amount_total / 100 : 10.00).toFixed(2);
