@@ -492,10 +492,8 @@ export default function AuthLayout({
             if (!isPaymentPage) {
               const isPremiumUser = tier === "premium" || tier === "pro";
               if (isPremiumUser) {
-                const hasSeenPremiumModal = localStorage.getItem(`seen_premium_modal_${user.id}`) === "true";
-                if (!hasSeenPremiumModal) {
-                  setShowPrompt(true);
-                }
+                localStorage.setItem(`seen_premium_modal_${user.id}`, "true");
+                setShowPrompt(false);
               } else {
                 const lastPromptTimeStr = localStorage.getItem(`plan_prompt_time_${user.id}`);
                 if (!lastPromptTimeStr) {

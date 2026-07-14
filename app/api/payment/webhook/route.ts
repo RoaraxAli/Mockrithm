@@ -44,12 +44,16 @@ export async function POST(request: Request) {
         return NextResponse.json({ error: "Missing metadata user ID" }, { status: 400 });
       }
 
-      console.log(`[Stripe Webhook] Provisioning premium for user: ${userId}, Session ID: ${session.id}`);
+      const plan = session.metadata?.plan || "premium";
+      const billingInterval = session.metadata?.billingInterval || "monthly";
+
+      console.log(`[Stripe Webhook] Provisioning ${plan} for user: ${userId}, Session ID: ${session.id}`);
 
       // Perform secure backend Firestore update
       await db.collection("users").doc(userId).set(
         {
-          tier: "premium",
+          tier: plan,
+          billingInterval: billingInterval,
           premiumUpdatedAt: new Date(),
           stripeSessionId: session.id,
           stripePaymentIntentId: (session.payment_intent as string) || "N/A",

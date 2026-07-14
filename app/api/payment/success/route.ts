@@ -36,10 +36,14 @@ export async function GET(request: Request) {
 
     console.log(`User ${userId} checkout session validated via redirect.`);
 
+    const plan = session.metadata?.plan || "premium";
+    const billingInterval = session.metadata?.billingInterval || "monthly";
+
     // Perform secure backend Firestore update to upgrade user immediately
     await db.collection("users").doc(userId).set(
       {
-        tier: "premium",
+        tier: plan,
+        billingInterval: billingInterval,
         premiumUpdatedAt: new Date(),
         stripeSessionId: session.id,
         stripePaymentIntentId: (session.payment_intent as string) || "N/A",
@@ -53,7 +57,7 @@ export async function GET(request: Request) {
     const currency = (session.currency || "USD").toUpperCase();
 
     return NextResponse.redirect(
-      `${origin}/payment/success?status=success&session_id=${sessionId}&amount=${amount}&currency=${currency}`,
+      `${origin}/payment/success?status=success&session_id=${sessionId}&amount=${amount}&currency=${currency}&plan=${plan}`,
       303
     );
   } catch (error: any) {

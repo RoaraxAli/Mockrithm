@@ -15,6 +15,7 @@ function PaymentResultContent() {
   const amount = searchParams.get("amount") || "10.00";
   const currency = searchParams.get("currency") || "USD";
   const error = searchParams.get("error") || "";
+  const plan = searchParams.get("plan") || "premium";
 
   const [dateStr, setDateStr] = useState("");
 
@@ -61,10 +62,10 @@ function PaymentResultContent() {
               </span>
 
               <h1 className="text-3xl font-black text-white mt-4 tracking-tight">
-                Welcome to Premium
+                {plan === "pro" ? "Welcome to Pro" : "Welcome to Premium"}
               </h1>
               <p className="text-zinc-450 text-xs mt-2 max-w-sm mx-auto leading-relaxed">
-                Your Stripe transaction has been processed and verified successfully. Premium features are now unlocked.
+                Your Stripe transaction has been processed and verified successfully. {plan === "pro" ? "Pro" : "Premium"} features are now unlocked.
               </p>
             </div>
 

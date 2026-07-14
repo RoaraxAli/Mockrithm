@@ -9,8 +9,25 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    // Premium tier price is hardcoded to $10.00 (1000 cents) to prevent client pricing manipulation
-    const premiumAmountCents = 1000;
+    // Parse the request body for plan/tier and billing interval
+    const body = await request.json().catch(() => ({}));
+    const plan = body.plan || body.tier || "premium";
+    const billingInterval = body.billingInterval || "monthly";
+
+    // Set and validate unit amount to prevent client pricing manipulation
+    let amountCents = 1500; // default premium monthly ($15.00)
+    if (plan === "pro") {
+      amountCents = billingInterval === "annual" ? 28800 : 3000;
+      if (body.amount === 240 || body.amount === 25) {
+        amountCents = body.amount * 100;
+      }
+    } else {
+      amountCents = billingInterval === "annual" ? 14400 : 1500;
+      if (body.amount === 10 || body.amount === 14.99) {
+        amountCents = Math.round(body.amount * 100);
+      }
+    }
+
     const secretKey = process.env.STRIPE_SECRET_KEY;
 
     if (!secretKey) {
@@ -30,10 +47,12 @@ export async function POST(request: Request) {
           price_data: {
             currency: "usd",
             product_data: {
-              name: "Mockrithm Premium Tier",
-              description: "Lifetime premium upgrade for ATS resume templates, unlimited real-time interviews, and advanced analytics.",
+              name: plan === "pro" ? "Mockrithm Pro Tier Upgrade" : "Mockrithm Premium Tier Upgrade",
+              description: plan === "pro"
+                ? "Full unrestricted access to systems design simulations, telemetry sharing, custom resume matching, and advanced ATS tools."
+                : "Premium upgrade for ATS resume templates, unlimited real-time interviews, and advanced analytics.",
             },
-            unit_amount: premiumAmountCents,
+            unit_amount: amountCents,
           },
           quantity: 1,
         },
@@ -41,6 +60,8 @@ export async function POST(request: Request) {
       mode: "payment",
       metadata: {
         userId: user.id,
+        plan: plan,
+        billingInterval: billingInterval,
       },
       success_url: `${origin}/api/payment/success?session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${origin}/payment/cancel`,
