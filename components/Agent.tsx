@@ -174,6 +174,7 @@ const Agent = ({
   const timerIntervalRef = useRef<NodeJS.Timeout | null>(null);
   const isTimerEndingRef = useRef(false);
   const isGreetingRef = useRef(false);
+  const [isGeneratingFeedback, setIsGeneratingFeedback] = useState(false);
 
   // Live Coding States
   const [code, setCode] = useState("");
@@ -337,6 +338,7 @@ const Agent = ({
 
     const handleGenerateFeedback = async (messages: SavedMessage[]) => {
       console.log("handleGenerateFeedback with WPM tracking");
+      setIsGeneratingFeedback(true);
 
       const sumWpm = userWPMsRef.current.reduce((a, b) => a + b, 0);
       const averageWpm = userWPMsRef.current.length > 0 ? Math.round(sumWpm / userWPMsRef.current.length) : 0;
@@ -359,36 +361,47 @@ const Agent = ({
         candidateCodeData = codeRef.current || "";
       }
 
-      const { success, feedbackId: id } = await createFeedback({
-        interviewId: interviewId!,
-        userId: userId!,
-        transcript: messages
-          .map((m) => {
-            let textVal = m.content;
-            if (textVal.startsWith("[SYSTEM: The candidate has completed their code")) {
-              textVal = "[Candidate submitted code solution]";
-            } else if (textVal.startsWith("[SYSTEM: The candidate has completed their text")) {
-              textVal = "[Candidate submitted draft text]";
-            } else {
-              textVal = textVal.split("[SYSTEM:")[0].trim();
-            }
-            return { role: m.role, content: textVal };
-          })
-          .filter((m) => m.content.length > 0),
-        feedbackId: feedbackId || undefined,
-        averageWpm,
-        topFillerWords,
-        candidateCode: codingProblemRef.current ? candidateCodeData : undefined
-      });
+      try {
+        const { success, feedbackId: id } = await createFeedback({
+          interviewId: interviewId!,
+          userId: userId!,
+          transcript: messages
+            .map((m) => {
+              let textVal = m.content;
+              if (textVal.startsWith("[SYSTEM: The candidate has completed their code")) {
+                textVal = "[Candidate submitted code solution]";
+              } else if (textVal.startsWith("[SYSTEM: The candidate has completed their text")) {
+                textVal = "[Candidate submitted draft text]";
+              } else {
+                textVal = textVal.split("[SYSTEM:")[0].trim();
+              }
+              return { role: m.role, content: textVal };
+            })
+            .filter((m) => m.content.length > 0),
+          feedbackId: feedbackId || undefined,
+          averageWpm,
+          topFillerWords,
+          candidateCode: codingProblemRef.current ? candidateCodeData : undefined
+        });
 
-      if (success && id) {
-        if (typeof window !== "undefined" && window.location.hostname.includes("games.mockrithm.me")) {
-          window.location.href = `https://mockrithm.me/interview/${interviewId}/feedback`;
+        if (success && id) {
+          if (typeof window !== "undefined" && window.location.hostname.includes("games.mockrithm.me")) {
+            window.location.href = `https://mockrithm.me/interview/${interviewId}/feedback`;
+          } else {
+            router.push(`/interview/${interviewId}/feedback`);
+          }
         } else {
-          router.push(`/interview/${interviewId}/feedback`);
+          console.log("Error saving feedback");
+          setIsGeneratingFeedback(false);
+          if (typeof window !== "undefined" && window.location.hostname.includes("games.mockrithm.me")) {
+            window.location.href = "https://mockrithm.me/";
+          } else {
+            router.push("/");
+          }
         }
-      } else {
-        console.log("Error saving feedback");
+      } catch (err) {
+        console.error("Failed to generate feedback:", err);
+        setIsGeneratingFeedback(false);
         if (typeof window !== "undefined" && window.location.hostname.includes("games.mockrithm.me")) {
           window.location.href = "https://mockrithm.me/";
         } else {
@@ -1345,7 +1358,9 @@ CRITICAL RULES - CONVERSATIONAL FLOW & CONCISENESS:
         const profileSkills = userResumeData?.resumeData?.parsedData?.skills || userResumeData?.resumeData?.fixedParsedData?.skills || [];
         const skillsList = Array.isArray(profileSkills) ? profileSkills.slice(0, 6).join(", ") : "";
 
-        systemPrompt = `You are a professional interview assistant helping ${userName} configure their mock session.
+        systemPrompt = `CRITICAL: You are an extremely brief configuration assistant. EVERY SINGLE REPLY YOU GENERATE MUST BE UNDER 15 WORDS AND MAXIMUM 1 SENTENCE. Avoid introductory yapping, details or lists. Be extremely brief, fast and direct.
+
+You are a professional interview assistant helping ${userName} configure their mock session.
 
 CANDIDATE PROFILE (already collected, do NOT ask about these again unless changing):
 - Name: ${userName}
@@ -1783,7 +1798,16 @@ ${codeRef.current}
 
       // Check if the assistant message signals the end of the interview
       const lowercaseMsg = fullMessageText.toLowerCase();
-      const isGoodbye = lowercaseMsg.includes("[end_call]");
+      let isGoodbye = lowercaseMsg.includes("[end_call]");
+
+      if (!isGoodbye && typeRef.current === "generate") {
+        const hasSelection = lowercaseMsg.includes("technical") || lowercaseMsg.includes("sandbox") || lowercaseMsg.includes("coding");
+        const hasStartPhrase = lowercaseMsg.includes("started") || lowercaseMsg.includes("begin") || lowercaseMsg.includes("starting") || lowercaseMsg.includes("start the") || lowercaseMsg.includes("let's get") || lowercaseMsg.includes("let's start");
+        if (hasSelection && hasStartPhrase) {
+          console.warn("[Agent.tsx] LLM forgot [END_CALL] tag but confirmed transition. Triggering backup transition.");
+          isGoodbye = true;
+        }
+      }
 
       if (isGoodbye) {
         if (typeRef.current === "generate") {
@@ -1894,6 +1918,11 @@ ${codeRef.current}
     isCallActiveRef.current = false;
     isListeningRef.current = false;
     submittedThisTurnRef.current = false;
+
+    if (typeRef.current === "generate") {
+      setLastMessage("");
+      setMessages([]);
+    }
 
     if (silenceTimerRef.current) {
       clearTimeout(silenceTimerRef.current);
@@ -2629,7 +2658,14 @@ ${codeRef.current}
 
             {/* Action Trigger Buttons */}
             <div className="w-full flex justify-center mt-0.5">
-              {callStatus !== "ACTIVE" ? (
+              {isGeneratingFeedback ? (
+                <div className="flex flex-col items-center gap-3 py-2 animate-pulse">
+                  <div className="animate-spin rounded-full h-7 w-7 border-2 border-white border-t-transparent"></div>
+                  <span className="text-[10px] text-zinc-400 font-mono font-bold uppercase tracking-wider">
+                    Generating Feedback...
+                  </span>
+                </div>
+              ) : callStatus !== "ACTIVE" ? (
                 <button 
                   className="relative cursor-pointer flex items-center justify-center font-bold text-xs bg-white text-black px-8 py-3 rounded-full hover:bg-zinc-200 transition-all duration-300 active:scale-95 border border-white shadow-xl uppercase tracking-wider shadow-[0_4px_25px_rgba(255,255,255,0.15)]" 
                   onClick={() => handleCall()}
