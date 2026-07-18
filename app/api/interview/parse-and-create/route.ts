@@ -218,7 +218,7 @@ export async function POST(request: Request) {
         };
       }
 
-      // Programmatic fallbacks for requiresSandbox based on type/mode name or coding roles
+      // Programmatic fallbacks for requiresSandbox based on type/mode name
       const lowercaseType = setup.type.toLowerCase();
       const isCodingRole = setup.role.toLowerCase().includes("engineer") || 
                            setup.role.toLowerCase().includes("developer") || 
@@ -228,10 +228,16 @@ export async function POST(request: Request) {
       if (
         lowercaseType.includes("sandbox") || 
         lowercaseType.includes("code review") || 
-        lowercaseType.includes("coding") ||
-        (isCodingRole && !lowercaseType.includes("behavioral") && !lowercaseType.includes("verbal"))
+        lowercaseType.includes("coding")
       ) {
         setup.requiresSandbox = true;
+      } else if (
+        lowercaseType.includes("technical") || 
+        lowercaseType.includes("behavioral") || 
+        lowercaseType.includes("behavioural") || 
+        lowercaseType.includes("verbal")
+      ) {
+        setup.requiresSandbox = false;
       }
 
       questionsList = masterObj.questions || [];

@@ -106,7 +106,12 @@ const Agent = ({
 
   const [callStatus, setCallStatus] = useState<CallStatus>(CallStatus.INACTIVE);
   const [messages, _setMessages] = useState<SavedMessage[]>([]);
-  const [isSpeaking, setIsSpeaking] = useState(false);
+  const [isSpeaking, _setIsSpeaking] = useState(false);
+  const isSpeakingRef = useRef(false);
+  const setIsSpeaking = (val: boolean) => {
+    isSpeakingRef.current = val;
+    _setIsSpeaking(val);
+  };
   const [lastMessage, setLastMessage] = useState<string>("");
 
   // Meow Engine Configuration States
@@ -731,7 +736,7 @@ const Agent = ({
   // Speech Recognition (STT) Setup
   const startSpeechRecognition = () => {
     // Prevent starting the microphone if the AI is currently speaking, processing, or in greeting phase
-    if (isSpeaking || isSpeakingActiveRef.current || isProcessingRef.current || isGreetingRef.current) {
+    if (isSpeakingRef.current || isSpeakingActiveRef.current || isProcessingRef.current || isGreetingRef.current) {
       console.log("[Agent.tsx] STT skipped: AI is currently speaking, processing, or greeting.");
       return;
     }
