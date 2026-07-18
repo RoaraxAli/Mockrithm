@@ -173,6 +173,7 @@ const Agent = ({
   const [timerSecondsLeft, setTimerSecondsLeft] = useState<number | null>(null);
   const timerIntervalRef = useRef<NodeJS.Timeout | null>(null);
   const isTimerEndingRef = useRef(false);
+  const isGreetingRef = useRef(false);
 
   // Live Coding States
   const [code, setCode] = useState("");
@@ -857,8 +858,8 @@ const Agent = ({
       if (displayText.length > 0) {
         setLastMessage(displayText);
 
-        // Duplex Interruption: If user starts speaking while AI is talking, pause AI instantly
-        if ((isSpeaking || audioRef.current) && displayText.split(/\s+/).length >= 2) {
+        // Duplex Interruption: If user starts speaking while AI is talking, pause AI instantly (skip during greetings)
+        if (!isGreetingRef.current && (isSpeaking || audioRef.current) && displayText.split(/\s+/).length >= 2) {
           console.log("[Agent.tsx] User interrupted AI. Pausing playback...");
           if (audioRef.current) {
             try { audioRef.current.pause(); } catch(e) {}
@@ -1654,6 +1655,16 @@ ${codeRef.current}
 
   async function transitionToInterview() {
     console.log("[Agent.tsx] transitionToInterview triggered.");
+    
+    // Clean up any active microphone/speech recognition session from the generate phase
+    stopWhisperRecordingOnly();
+    try {
+      if (recognitionRef.current) {
+        recognitionRef.current.abort();
+      }
+    } catch (e) {}
+    isListeningRef.current = false;
+
     isProcessingRef.current = true;
     setIsSpeaking(true);
     setLastMessage("Configuring your interview questions. Please hold on...");
@@ -1703,7 +1714,8 @@ ${codeRef.current}
         setMessages([{ role: "assistant", content: welcome }]);
 
         // Start countdown timer here when the active interview mode starts!
-        const durationSeconds = selectedDurationRef.current === "brief" ? 5 * 60 : selectedDurationRef.current === "medium" ? 10 * 60 : null;
+        const chosenDuration = selectedDurationRef.current || "medium";
+        const durationSeconds = chosenDuration === "brief" ? 5 * 60 : chosenDuration === "medium" ? 10 * 60 : null;
         setTimerSecondsLeft(durationSeconds);
 
         // Force call to be active
@@ -1711,8 +1723,10 @@ ${codeRef.current}
         setCallStatus(CallStatus.ACTIVE);
         setIsSpeaking(true);
 
-        // Speak the welcome greeting
+        // Speak the welcome greeting (prevent interruption during greeting)
+        isGreetingRef.current = true;
         await speakSentence(welcome);
+        isGreetingRef.current = false;
 
         setIsSpeaking(false);
         submittedTextRef.current = "";
@@ -1836,8 +1850,10 @@ ${codeRef.current}
     setLastMessage(welcomeMsg);
     setMessages([{ role: "assistant", content: welcomeMsg }]);
 
-    // Speak welcome message
+    // Speak welcome message (prevent interruption during greeting)
+    isGreetingRef.current = true;
     await speakSentence(welcomeMsg);
+    isGreetingRef.current = false;
 
     // Start listening once welcome message finishes speaking
     if (isCallActiveRef.current) {

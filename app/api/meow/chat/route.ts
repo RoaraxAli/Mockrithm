@@ -31,8 +31,9 @@ export async function POST(request: Request) {
     let model = body.model || process.env.GROQ_LLM_MODEL || "llama-3.3-70b-versatile";
     const userTier = (user as any).tier || "freemium";
 
-    // Enforce model tier limits
-    if (userTier === "freemium") {
+    // Enforce model tier limits, but allow 70b for pre-interview setup (generate mode) to prevent glitches
+    const isGenerateMode = (body.messages || []).some((m: any) => m.role === "system" && m.content.includes("configure their mock"));
+    if (userTier === "freemium" && !isGenerateMode) {
       model = "llama-3.1-8b-instant";
     } else if (userTier === "premium") {
       if (model === "z-ai/glm-4.7-flash-free") {
