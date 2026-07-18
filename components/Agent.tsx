@@ -402,9 +402,7 @@ const Agent = ({
     };
 
     if (callStatus === CallStatus.FINISHED) {
-      if (activeType === "generate") {
-        handleSaveConversationSetup(messagesRef.current);
-      } else {
+      if (activeType === "interview") {
         handleGenerateFeedback(messagesRef.current);
       }
     }
@@ -1872,7 +1870,7 @@ ${codeRef.current}
   };
 
   const handleDisconnect = () => {
-    setCallStatus(CallStatus.FINISHED);
+    setCallStatus(typeRef.current === "generate" ? CallStatus.INACTIVE : CallStatus.FINISHED);
     isCallActiveRef.current = false;
     isListeningRef.current = false;
     submittedThisTurnRef.current = false;
