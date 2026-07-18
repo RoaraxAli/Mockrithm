@@ -1777,6 +1777,7 @@ ${codeRef.current}
         submittedThisTurnRef.current = false;
         isListeningRef.current = false;
         setLastMessage("Listening... Speak now");
+        isProcessingRef.current = false;
         startSpeechRecognition();
       } else {
         console.error("[Agent.tsx] API success is false or missing interviewId:", data);
