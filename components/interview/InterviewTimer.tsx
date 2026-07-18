@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { cn } from "@/lib/utils";
 
 interface InterviewTimerProps {
@@ -15,15 +15,20 @@ export function InterviewTimer({ initialSeconds, onTimeUp }: InterviewTimerProps
     setSecondsLeft(initialSeconds);
   }, [initialSeconds]);
 
+  const onTimeUpRef = useRef(onTimeUp);
   useEffect(() => {
-    if (secondsLeft === null || secondsLeft <= 0) return;
+    onTimeUpRef.current = onTimeUp;
+  }, [onTimeUp]);
+
+  useEffect(() => {
+    if (initialSeconds === null || initialSeconds <= 0) return;
 
     const interval = setInterval(() => {
       setSecondsLeft((prev) => {
         if (prev === null) return null;
         if (prev <= 1) {
           clearInterval(interval);
-          onTimeUp();
+          onTimeUpRef.current();
           return 0;
         }
         return prev - 1;
@@ -31,7 +36,7 @@ export function InterviewTimer({ initialSeconds, onTimeUp }: InterviewTimerProps
     }, 1000);
 
     return () => clearInterval(interval);
-  }, [secondsLeft, onTimeUp]);
+  }, [initialSeconds]);
 
   if (secondsLeft === null) {
     return (
