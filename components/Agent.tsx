@@ -730,6 +730,12 @@ const Agent = ({
 
   // Speech Recognition (STT) Setup
   const startSpeechRecognition = () => {
+    // Prevent starting the microphone if the AI is currently speaking, processing, or in greeting phase
+    if (isSpeaking || isSpeakingActiveRef.current || isProcessingRef.current || isGreetingRef.current) {
+      console.log("[Agent.tsx] STT skipped: AI is currently speaking, processing, or greeting.");
+      return;
+    }
+
     if (selectedSttRef.current !== "browser") {
       startWhisperRecording();
       return;
