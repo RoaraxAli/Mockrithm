@@ -100,14 +100,14 @@ export default function OnboardingWizardClient({ userId, userName, userTier = "f
   const router = useRouter();
   const searchParams = useSearchParams();
   const paramResumeId = searchParams.get("resumeId");
-  const [step, setStep] = useState<1 | 2 | 3 | 4 | 5 | 6 | 7>(1);
+  const [step, setStep] = useState<1 | 2 | 3 | 4 | 5 | 6>(1);
 
   const handleSelectFreemium = async () => {
     setIsProcessing(true);
     try {
       const res = await updateUserTier(userId, "freemium");
       if (res.success) {
-        setStep(7);
+        setStep(6);
         setTimeout(() => {
           router.push("/");
           router.refresh();
@@ -533,14 +533,14 @@ export default function OnboardingWizardClient({ userId, userName, userTier = "f
       }
 
       if (userTier === "premium" || userTier === "pro") {
-        setStep(7);
+        setStep(6);
         setTimeout(() => {
           router.push("/");
           router.refresh();
         }, 2000);
       } else {
         setIsProcessing(false);
-        setStep(6);
+        setStep(5);
       }
     } catch (err: any) {
       setError(err.message || "Final save failed.");
@@ -585,8 +585,8 @@ export default function OnboardingWizardClient({ userId, userName, userTier = "f
             </div>
           </div>
           <div className="flex gap-1.5">
-            {[2, 3, 4, 5, 6].map((s) => {
-              if (s === 6 && (userTier === "premium" || userTier === "pro")) return null;
+            {[2, 3, 4, 5].map((s) => {
+              if (s === 5 && (userTier === "premium" || userTier === "pro")) return null;
               return (
                 <span 
                   key={s} 
@@ -1198,27 +1198,37 @@ export default function OnboardingWizardClient({ userId, userName, userTier = "f
                         Back
                       </Button>
                       <Button 
-                        onClick={handleOptimizeResume}
+                        onClick={handleCompleteOnboarding}
                         disabled={isProcessing}
                         className="flex-1 h-12 rounded-xl bg-white text-black hover:bg-zinc-200 text-xs font-bold uppercase tracking-wider cursor-pointer"
                       >
                         {isProcessing ? (
                           <span className="flex items-center justify-center gap-1.5">
-                            <Loader2 className="size-4 animate-spin" /> Optimizing Profile...
+                            <Loader2 className="size-4 animate-spin" /> Saving Profile...
                           </span>
                         ) : (
-                          "Auto-Fix & Polish Profile →"
+                          "Complete Onboarding →"
                         )}
                       </Button>
                     </div>
                   </div>
 
-                  {/* Right Side: Interactive Diagnostic Resume Preview */}
+                  {/* Right Side: Exact PDF Document without empty space */}
                   <div className="lg:col-span-7 flex flex-col gap-3">
                     <span className="text-xs font-mono uppercase tracking-wider text-zinc-400">
-                      ATS Resume Diagnostic Preview
+                      {fileUrl ? "Original Resume Document" : "Structured Resume Preview"}
                     </span>
-                    <PDFRenderer data={parsedData} mode="diagnostic" atsAnalysis={atsAnalysis} />
+                    {fileUrl ? (
+                      <div className="w-full h-[650px] rounded-2xl overflow-hidden border border-zinc-900 bg-white p-0 m-0 shadow-2xl">
+                        <iframe
+                          src={`${fileUrl}#toolbar=0&navpanes=0&scrollbar=0&view=FitH`}
+                          className="w-full h-full border-none outline-none overflow-hidden m-0 p-0"
+                          style={{ border: "none", margin: 0, padding: 0, overflow: "hidden" }}
+                        />
+                      </div>
+                    ) : (
+                      <PDFRenderer data={parsedData} mode="normal" />
+                    )}
                   </div>
 
                 </div>
@@ -1226,103 +1236,10 @@ export default function OnboardingWizardClient({ userId, userName, userTier = "f
             </motion.div>
           )}
 
-          {/* Outcome & Summary Screen (Step 5: Everything Fixed) */}
-          {step === 5 && fixedAtsAnalysis && (
+          {/* Plan Selection Screen (Step 5) */}
+          {step === 5 && (
             <motion.div 
               key="step-5"
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -10 }}
-              className="flex flex-col gap-6"
-            >
-              <div className="flex flex-col gap-1 border-b border-white/5 pb-4">
-                <h2 className="text-2xl font-bold tracking-tight text-white">Polished and Optimised Profile</h2>
-                <p className="text-xs text-zinc-400 uppercase tracking-wider font-mono">STEP 05 OF 05</p>
-              </div>
-
-              {isProcessing ? (
-                <div className="flex flex-col items-center justify-center py-12 gap-4">
-                  <Loader2 className="size-10 animate-spin text-white" />
-                  <span className="font-mono text-xs tracking-widest text-zinc-300">{statusText}</span>
-                </div>
-              ) : (
-                <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-                  
-                  {/* Left Side: Score calibration & Onboarding complete actions */}
-                  <div className="lg:col-span-5 flex flex-col gap-6">
-                    
-                    {/* Score comparison gauge */}
-                    <div className="p-6 bg-emerald-950/15 border border-emerald-900/30 rounded-2xl flex flex-col items-center gap-4 text-center relative overflow-hidden">
-                      <div className="absolute top-0 right-0 p-1 bg-emerald-500/10 text-emerald-400 text-[10px] font-mono uppercase tracking-wider border-b border-l border-emerald-500/20 rounded-bl-lg">
-                        Final Score
-                      </div>
-
-                      <span className="text-xs font-mono uppercase tracking-wider text-emerald-400">Calibration Successful</span>
-
-                      <div className={`size-28 rounded-full border-4 flex items-center justify-center font-bold text-4xl rotate-[-4deg] shadow-lg font-mono ${getGradeStamp(fixedAtsAnalysis.atsScore).c} bg-zinc-950/60`}>
-                        {getGradeStamp(fixedAtsAnalysis.atsScore).l}
-                      </div>
-
-                      <div className="flex flex-col gap-1 mt-1">
-                        <span className="text-2xl font-black text-white font-mono">{fixedAtsAnalysis.atsScore}% Score</span>
-                        <p className="text-xs text-zinc-300 font-semibold leading-relaxed max-w-xs mt-1">
-                          Excellent! Your resume details have been optimized and are fully calibrated for a <span className="font-bold text-white">#{role}</span> profile.
-                        </p>
-                      </div>
-                    </div>
-
-                    {/* Final Score Explanation Callout */}
-                    <div className="p-4 bg-zinc-900/50 border border-zinc-800 rounded-xl flex flex-col gap-2">
-                      <div className="flex items-center gap-2 text-emerald-400">
-                        <CheckCircle className="size-4 shrink-0" />
-                        <span className="text-xs font-bold uppercase tracking-wider font-mono">Why is the new score {fixedAtsAnalysis.atsScore}%?</span>
-                      </div>
-                      <p className="text-[11px] text-zinc-350 leading-relaxed font-semibold">
-                        Your score improved because we optimized your current summary, restructured accomplishments to use metrics/STAR frameworks, and added missing keywords.
-                        Since we do not fabricate fake content (like companies or certifications), the score maxes out at the limits of your uploaded details. To reach a 90%+ score, simply update your profile on the dashboard with additional experiences and projects.
-                      </p>
-                    </div>
-
-                    {/* Summary list of changes */}
-                    <div className="p-5 bg-zinc-950 border border-zinc-900 rounded-xl flex flex-col gap-2">
-                      <span className="text-xs font-mono tracking-wider text-zinc-400 uppercase flex items-center gap-1">
-                        <CheckCircle className="size-4 text-emerald-400" /> Optimization Changes
-                      </span>
-                      <p className="text-xs text-zinc-300 leading-relaxed font-semibold mt-1">
-                        {summary}
-                      </p>
-                    </div>
-
-                    <div className="p-4 bg-white/[0.01] border border-white/5 rounded-2xl flex flex-col gap-2.5">
-                      <h4 className="text-xs font-bold text-white uppercase tracking-wider">Calibration Ingest Complete</h4>
-                      <p className="text-xs text-zinc-350 leading-relaxed font-semibold">
-                        Click complete to persist this profile to the database. These details will serve as instructions to tailor AI mock interviews.
-                      </p>
-                    </div>
-
-                    <Button 
-                      onClick={handleCompleteOnboarding}
-                      className="w-full h-12 rounded-xl bg-white text-black hover:bg-zinc-200 text-xs font-bold uppercase tracking-wider cursor-pointer"
-                    >
-                      Complete Onboarding {"→"}
-                    </Button>
-                  </div>
-
-                  {/* Right Side: Clean, Optimized Resume Preview (Everything Fixed) */}
-                  <div className="lg:col-span-7 flex flex-col gap-3">
-                    <span className="text-xs font-mono uppercase tracking-wider text-zinc-400">Optimized Resume Preview</span>
-                    <PDFRenderer data={fixedParsedData} mode="optimized" atsAnalysis={atsAnalysis} />
-                  </div>
-
-                </div>
-              )}
-            </motion.div>
-          )}
-
-          {/* Plan Selection Screen (Step 6) */}
-          {step === 6 && (
-            <motion.div 
-              key="step-6"
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -10 }}
@@ -1330,7 +1247,7 @@ export default function OnboardingWizardClient({ userId, userName, userTier = "f
             >
               <div className="flex flex-col gap-1">
                 <h2 className="text-2xl font-bold tracking-tight text-white">Select Your Plan Tier</h2>
-                <p className="text-xs text-zinc-400 uppercase tracking-wider font-mono">STEP 05 OF 05</p>
+                <p className="text-xs text-zinc-400 uppercase tracking-wider font-mono">STEP 04 OF 04</p>
               </div>
 
               <p className="text-sm text-zinc-200 leading-relaxed font-semibold">
@@ -1424,7 +1341,7 @@ export default function OnboardingWizardClient({ userId, userName, userTier = "f
 
               <div className="flex gap-4 mt-2">
                 <Button 
-                  onClick={() => setStep(5)}
+                  onClick={() => setStep(4)}
                   variant="outline"
                   className="w-full h-12 rounded-xl border border-zinc-850 hover:bg-zinc-900 text-xs font-bold uppercase tracking-wider text-zinc-200 cursor-pointer"
                 >
@@ -1434,10 +1351,10 @@ export default function OnboardingWizardClient({ userId, userName, userTier = "f
             </motion.div>
           )}
 
-          {/* Success Screen (Step 7) */}
-          {step === 7 && (
+          {/* Success Screen (Step 6) */}
+          {step === 6 && (
             <motion.div 
-              key="step-7"
+              key="step-6"
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
               className="flex flex-col items-center justify-center text-center py-10 gap-4 max-w-xl mx-auto"
