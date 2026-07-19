@@ -41,7 +41,7 @@ export default function AuthLayout({
   const pathname = usePathname();
   const router = useRouter();
   const hideNavbar =
-    (pathname.startsWith("/interview/") && pathname !== "/interview") ||
+    (pathname.startsWith("/interview/") && !pathname.includes("/feedback") && pathname !== "/interview") ||
     pathname.startsWith("/user") ||
     pathname.startsWith("/admin") ||
     pathname.startsWith("/onboarding") ||
@@ -76,7 +76,7 @@ export default function AuthLayout({
   const timerIntervalRef = useRef<any>(null);
   const webrtcCleanupRef = useRef<{ close: () => void } | null>(null);
 
-  const isGivingInterview = pathname.startsWith("/interview/") && pathname !== "/interview";
+  const isGivingInterview = pathname.startsWith("/interview/") && pathname !== "/interview" && !pathname.includes("/feedback");
 
   // --- 1. Sound Synthesis for Call Ringtones ---
   const startRingtone = (isIncoming: boolean) => {
@@ -482,32 +482,7 @@ export default function AuthLayout({
           if (result && result.success) {
             setUserName(result.name || user.fullName || user.firstName || "User");
             setUserRole(result.role || "User");
-            const tier = result.tier;
-            setUserTier(tier as any);
-            
-            const isPaymentPage = 
-              pathname.startsWith("/payment/success") || 
-              pathname.startsWith("/payment/cancel") || 
-              pathname.startsWith("/api/payment");
-
-            if (!isPaymentPage) {
-              const isPremiumUser = tier === "premium" || tier === "pro";
-              if (isPremiumUser) {
-                localStorage.setItem(`seen_premium_modal_${user.id}`, "true");
-                setShowPrompt(false);
-              } else {
-                const lastPromptTimeStr = localStorage.getItem(`plan_prompt_time_${user.id}`);
-                if (!lastPromptTimeStr) {
-                  setShowPrompt(true);
-                } else {
-                  const lastPromptTime = parseInt(lastPromptTimeStr, 10);
-                  const thirtyDaysInMs = 30 * 24 * 60 * 60 * 1000;
-                  if (Date.now() - lastPromptTime > thirtyDaysInMs) {
-                    setShowPrompt(true);
-                  }
-                }
-              }
-            }
+            setUserTier(result.tier as any);
           } else {
             setUserName(user.fullName || user.firstName || "User");
             setUserRole("User");
@@ -538,19 +513,6 @@ export default function AuthLayout({
       )}
       {children}
       <FooterWrapper />
-      {showPrompt && userId && !isSubdomain && (
-        <PlanSelectionModal
-          userId={userId}
-          userTier={userTier}
-          onCompleted={() => {
-            localStorage.setItem(`plan_prompt_time_${userId}`, Date.now().toString());
-            if (userTier === "premium" || userTier === "pro") {
-              localStorage.setItem(`seen_premium_modal_${userId}`, "true");
-            }
-            setShowPrompt(false);
-          }}
-        />
-      )}
 
       {/* Hidden audio element for remote stream */}
       <audio ref={remoteAudioRef} autoPlay playsInline className="hidden" />

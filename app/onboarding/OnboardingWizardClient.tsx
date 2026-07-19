@@ -7,11 +7,13 @@ import { motion, AnimatePresence } from "framer-motion";
 import { 
   Sparkles, Globe, Briefcase, FileUp, Loader2, 
   Check, ArrowRight, ShieldAlert, Award, RefreshCw,
-  FileText, Activity, CheckCircle, AlertTriangle, HelpCircle
+  FileText, Activity, CheckCircle, AlertTriangle, HelpCircle,
+  Crown
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { saveOnboardingData } from "@/lib/actions/onboarding.action";
 import { getResumeById } from "@/lib/actions/resume.action";
+import { updateUserTier } from "@/lib/actions/auth.action";
 import PDFRenderer from "@/components/resume/PDFRenderer";
 
 // Interactive Legible Resume Preview Component
@@ -91,13 +93,62 @@ const ResumePreview = ({ data, title }: { data: any; title: string }) => {
 interface OnboardingWizardClientProps {
   userId: string;
   userName: string;
+  userTier?: string;
 }
 
-export default function OnboardingWizardClient({ userId, userName }: OnboardingWizardClientProps) {
+export default function OnboardingWizardClient({ userId, userName, userTier = "freemium" }: OnboardingWizardClientProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const paramResumeId = searchParams.get("resumeId");
-  const [step, setStep] = useState<1 | 2 | 3 | 4 | 5 | 6>(1);
+  const [step, setStep] = useState<1 | 2 | 3 | 4 | 5 | 6 | 7>(1);
+
+  const handleSelectFreemium = async () => {
+    setIsProcessing(true);
+    try {
+      const res = await updateUserTier(userId, "freemium");
+      if (res.success) {
+        setStep(7);
+        setTimeout(() => {
+          router.push("/");
+          router.refresh();
+        }, 2000);
+      } else {
+        setError("Failed to select plan. Please try again.");
+      }
+    } catch (e: any) {
+      console.error(e);
+      setError("An error occurred selecting plan.");
+    } finally {
+      setIsProcessing(false);
+    }
+  };
+
+  const handlePay = async () => {
+    setIsProcessing(true);
+    try {
+      const res = await fetch("/api/payment/init", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          tier: "premium",
+        }),
+      });
+
+      const data = await res.json();
+      if (data.checkoutUrl) {
+        window.location.href = data.checkoutUrl;
+      } else {
+        setError(data.error || "Failed to initialize checkout.");
+        setIsProcessing(false);
+      }
+    } catch (e: any) {
+      console.error(e);
+      setError("Could not reach payment gateway.");
+      setIsProcessing(false);
+    }
+  };
   const [country, setCountry] = useState("");
   const [role, setRole] = useState("");
   const [file, setFile] = useState<File | null>(null);
@@ -344,11 +395,16 @@ export default function OnboardingWizardClient({ userId, userName }: OnboardingW
         throw new Error(res.error || "Failed to save onboarding data.");
       }
 
-      setStep(6);
-      setTimeout(() => {
-        router.push("/");
-        router.refresh();
-      }, 2000);
+      if (userTier === "premium" || userTier === "pro") {
+        setStep(7);
+        setTimeout(() => {
+          router.push("/");
+          router.refresh();
+        }, 2000);
+      } else {
+        setIsProcessing(false);
+        setStep(6);
+      }
     } catch (err: any) {
       setError(err.message || "Final save failed.");
       setIsProcessing(false);
@@ -392,18 +448,21 @@ export default function OnboardingWizardClient({ userId, userName }: OnboardingW
             </div>
           </div>
           <div className="flex gap-1.5">
-            {[1, 2, 3, 4].map((s) => (
-              <span 
-                key={s} 
-                className={`h-1.5 rounded-full transition-all duration-300 ${
-                  step === s 
-                    ? "w-6 bg-white" 
-                    : step > s 
-                    ? "w-2 bg-zinc-400" 
-                    : "w-2 bg-zinc-800"
-                }`} 
-              />
-            ))}
+            {[2, 3, 4, 5, 6].map((s) => {
+              if (s === 6 && (userTier === "premium" || userTier === "pro")) return null;
+              return (
+                <span 
+                  key={s} 
+                  className={`h-1.5 rounded-full transition-all duration-300 ${
+                    step === s 
+                      ? "w-6 bg-white" 
+                      : step > s 
+                      ? "w-2 bg-zinc-400" 
+                      : "w-2 bg-zinc-800"
+                  }`} 
+                />
+              );
+            })}
           </div>
         </div>
 
@@ -936,10 +995,125 @@ export default function OnboardingWizardClient({ userId, userName }: OnboardingW
             </motion.div>
           )}
 
-          {/* Success Screen */}
+          {/* Plan Selection Screen (Step 6) */}
           {step === 6 && (
             <motion.div 
               key="step-6"
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
+              className="flex flex-col gap-6 max-w-2xl mx-auto w-full"
+            >
+              <div className="flex flex-col gap-1">
+                <h2 className="text-2xl font-bold tracking-tight text-white">Select Your Plan Tier</h2>
+                <p className="text-xs text-zinc-400 uppercase tracking-wider font-mono">STEP 05 OF 05</p>
+              </div>
+
+              <p className="text-sm text-zinc-200 leading-relaxed font-semibold">
+                Choose the calibration plan that fits your preparation goals. You can change your selection anytime.
+              </p>
+
+              <div className="grid md:grid-cols-2 gap-6 mt-2">
+                {/* Freemium Card */}
+                <div className="border border-zinc-900 bg-zinc-950/45 rounded-2xl p-6 flex flex-col justify-between hover:border-zinc-800 transition-all">
+                  <div>
+                    <div className="flex justify-between items-start mb-4">
+                      <span className="text-[10px] font-bold tracking-widest text-zinc-400 uppercase bg-zinc-900 px-2.5 py-1 rounded-full">
+                        Free Access
+                      </span>
+                    </div>
+                    <h3 className="text-lg font-bold text-zinc-200">Freemium</h3>
+                    <p className="text-zinc-400 text-xs mt-2 leading-relaxed">
+                      Basic trial with standard features and restricted credits.
+                    </p>
+                    <ul className="space-y-2.5 mt-5 text-[11px] text-zinc-400">
+                      <li className="flex items-center gap-2">
+                        <Check className="size-3.5 text-zinc-600 shrink-0" />
+                        <span>Standard AI Voice Engine</span>
+                      </li>
+                      <li className="flex items-center gap-2">
+                        <Check className="size-3.5 text-zinc-600 shrink-0" />
+                        <span>5 Mock Interview Practices</span>
+                      </li>
+                      <li className="flex items-center gap-2">
+                        <Check className="size-3.5 text-zinc-600 shrink-0" />
+                        <span>5 ATS Resume Scans</span>
+                      </li>
+                    </ul>
+                  </div>
+                  <Button
+                    onClick={handleSelectFreemium}
+                    disabled={isProcessing}
+                    className="mt-6 w-full py-2.5 rounded-lg border border-zinc-850 hover:bg-zinc-900 hover:text-white text-zinc-300 text-xs font-bold transition-all disabled:opacity-50 cursor-pointer flex justify-center items-center gap-1.5"
+                  >
+                    {isProcessing ? <Loader2 className="size-3.5 animate-spin" /> : "Continue Freemium"}
+                  </Button>
+                </div>
+
+                {/* Premium Card */}
+                <div className="border border-white/10 bg-white/[0.02] rounded-2xl p-6 flex flex-col justify-between hover:border-white/20 transition-all relative">
+                  <div className="absolute inset-0 rounded-2xl bg-gradient-to-tr from-white/[0.02] to-white/[0.08] pointer-events-none" />
+
+                  <div>
+                    <div className="flex justify-between items-start mb-4">
+                      <span className="text-[10px] font-bold tracking-widest text-black uppercase bg-white px-2.5 py-1 rounded-full flex items-center gap-1">
+                        <Crown className="size-3 fill-black text-black" /> Premium
+                      </span>
+                      <span className="text-[11px] font-bold text-white">$14.99 USD</span>
+                    </div>
+                    <h3 className="text-lg font-bold text-white">Premium Tier</h3>
+                    <p className="text-zinc-400 text-xs mt-2 leading-relaxed">
+                      Complete, high-volume prep engine with smart telemetry and parsing.
+                    </p>
+                    <ul className="space-y-2.5 mt-5 text-[11px] text-white">
+                      <li className="flex items-center gap-2">
+                        <Check className="size-3.5 text-white shrink-0" />
+                        <span>70 AI Voice Interviews / month</span>
+                      </li>
+                      <li className="flex items-center gap-2">
+                        <Check className="size-3.5 text-white shrink-0" />
+                        <span>Unlimited ATS Resume Scans</span>
+                      </li>
+                      <li className="flex items-center gap-2">
+                        <Check className="size-3.5 text-white shrink-0" />
+                        <span>Full Real-Time HTML Preview</span>
+                      </li>
+                    </ul>
+                  </div>
+                  <Button
+                    onClick={handlePay}
+                    disabled={isProcessing}
+                    className="mt-6 w-full py-2.5 rounded-lg bg-white hover:bg-zinc-200 text-black text-xs font-bold transition-all disabled:opacity-50 cursor-pointer flex justify-center items-center gap-1.5"
+                  >
+                    {isProcessing ? (
+                      <>
+                        <Loader2 className="size-3.5 animate-spin" /> Initializing...
+                      </>
+                    ) : (
+                      <>
+                        Upgrade to Premium <ArrowRight className="size-3.5" />
+                      </>
+                    )}
+                  </Button>
+                </div>
+              </div>
+
+              <div className="flex gap-4 mt-2">
+                <Button 
+                  onClick={() => setStep(5)}
+                  variant="outline"
+                  className="w-full h-12 rounded-xl border border-zinc-850 hover:bg-zinc-900 text-xs font-bold uppercase tracking-wider text-zinc-200 cursor-pointer"
+                >
+                  Back
+                </Button>
+              </div>
+            </motion.div>
+          )}
+
+          {/* Success Screen (Step 7) */}
+          {step === 7 && (
+            <motion.div 
+              key="step-7"
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
               className="flex flex-col items-center justify-center text-center py-10 gap-4 max-w-xl mx-auto"

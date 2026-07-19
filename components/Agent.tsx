@@ -1830,9 +1830,17 @@ ${codeRef.current}
             clearInterval(timerIntervalRef.current);
             timerIntervalRef.current = null;
           }
-          setTimeout(() => {
-            handleDisconnect();
-          }, 1500);
+          const checkAndDisconnect = () => {
+            const isStillSpeaking = isSpeakingActiveRef.current || isSpeaking || (audioRef.current && !audioRef.current.paused);
+            if (isStillSpeaking) {
+              console.log("[Agent.tsx] Interviewer is still speaking. Delaying disconnect...");
+              setTimeout(checkAndDisconnect, 250);
+            } else {
+              console.log("[Agent.tsx] Interviewer finished speaking. Disconnecting...");
+              handleDisconnect();
+            }
+          };
+          setTimeout(checkAndDisconnect, 1000);
         }
       } else {
         // Reset per-turn flags so the next turn captures fresh speech exactly once.

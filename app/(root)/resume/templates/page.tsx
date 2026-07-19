@@ -17,7 +17,7 @@ export default async function SubdomainTemplatesPage({ searchParams }: { searchP
     <div className="flex flex-col gap-6 w-full max-w-6xl mx-auto py-12 px-4 font-sans">
       <div className="flex items-center gap-2 mb-4">
         <Link
-          href={fromOnboarding ? "/welcome" : "/dashboard"}
+          href={fromOnboarding ? "https://mockrithm.me/onboarding" : "/dashboard"}
           className="inline-flex items-center gap-2 px-4 py-2 bg-white/5 border border-white/10 text-white rounded-lg hover:bg-white/10 transition-colors text-sm font-semibold uppercase tracking-wider"
         >
           <ChevronLeft className="size-4" />

@@ -25,7 +25,7 @@ export default async function OnboardingPage() {
       <div className="absolute top-1/4 left-1/4 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-white/[0.01] blur-[120px] rounded-full pointer-events-none" />
       <div className="absolute bottom-1/4 right-1/4 translate-x-1/2 translate-y-1/2 w-[500px] h-[500px] bg-white/[0.015] blur-[120px] rounded-full pointer-events-none" />
 
-      <OnboardingWizardClient userId={user.id} userName={user.name || "User"} />
+      <OnboardingWizardClient userId={user.id} userName={user.name || "User"} userTier={(user as any).tier || "freemium"} />
     </div>
   );
 }

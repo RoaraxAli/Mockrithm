@@ -2,7 +2,7 @@
 
 import { useUser } from "@clerk/nextjs";
 import { usePathname } from "next/navigation";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { ResumeSidebar } from "@/components/resume/ResumeSidebar";
 import { Menu } from "lucide-react";
 
@@ -14,6 +14,16 @@ export default function ResumeSubdomainLayout({
   const { isSignedIn, isLoaded } = useUser();
   const pathname = usePathname();
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [fromOnboarding, setFromOnboarding] = useState(false);
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const params = new URLSearchParams(window.location.search);
+      if (params.get("from") === "onboarding") {
+        setFromOnboarding(true);
+      }
+    }
+  }, []);
 
   if (!isLoaded) {
     return <div className="min-h-screen bg-[#030712]" />;
@@ -23,7 +33,7 @@ export default function ResumeSubdomainLayout({
   // (Only if signed in, and not on the guest landing hub or dynamic landing topic pages)
   const isLanding = pathname === "/resume" || pathname === "/resume/" || pathname.split("/").length <= 3;
   const isDashboardOrTool = pathname.includes("/dashboard") || pathname.includes("/templates");
-  const showSidebar = isSignedIn && isDashboardOrTool;
+  const showSidebar = isSignedIn && isDashboardOrTool && !fromOnboarding;
 
   if (!showSidebar) {
     return <>{children}</>;

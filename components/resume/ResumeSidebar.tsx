@@ -102,7 +102,7 @@ export function ResumeSidebar({ onClose }: ResumeSidebarProps) {
           className="group flex items-center px-4 py-3 text-xs font-semibold uppercase tracking-wider rounded-xl text-zinc-400 hover:bg-white/5 hover:text-white transition-all duration-300 border border-transparent"
         >
           <Globe className="mr-3 h-4.5 w-4.5 text-zinc-500 group-hover:text-zinc-300" />
-          Apex Portal
+          Website
         </Link>
 
         <button
