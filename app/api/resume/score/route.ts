@@ -23,7 +23,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const { parsedData, jobDescription } = await request.json();
+    const { parsedData, jobDescription, rawText } = await request.json();
 
     if (!parsedData) {
       return NextResponse.json(
@@ -49,11 +49,13 @@ export async function POST(request: Request) {
     let object;
     const promptText = `
         You are an elite ATS (Applicant Tracking System) optimization bot and senior technical recruiter.
-        Analyze the following structured JSON resume data against the target job description (if provided).
+        Analyze the following structured JSON resume data and raw resume text against the target job description (if provided).
         If no job description is provided, evaluate the resume based on general best practices for modern tech/professional roles.
         
         Resume Data (JSON):
         ${JSON.stringify(parsedData, null, 2)}
+
+        ${rawText ? `Raw Resume Text:\n${rawText}` : ""}
         
         Target Job Description:
         ${jobDescription || "No specific job description provided. Evaluate generally."}
@@ -174,10 +176,6 @@ export async function POST(request: Request) {
 
     object.weaknesses = [...customChecks.extraWeaknesses, ...object.weaknesses];
     object.improvementSuggestions = [...customChecks.extraSuggestions, ...object.improvementSuggestions];
-
-    if (parsedData.work && parsedData.work.length === 0) {
-      object.atsScore = Math.max(0, Math.min(object.atsScore, 30));
-    }
 
     return NextResponse.json(object, { status: 200 });
   } catch (error: any) {

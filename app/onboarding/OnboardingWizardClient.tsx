@@ -445,7 +445,7 @@ export default function OnboardingWizardClient({ userId, userName, userTier = "f
       const res = await fetch("/api/resume/score", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ parsedData, jobDescription: jd }),
+        body: JSON.stringify({ parsedData, rawText, jobDescription: jd }),
       });
 
       if (!res.ok) {
