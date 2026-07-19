@@ -18,7 +18,7 @@ export default function PDFRenderer({ data, mode = "normal", atsAnalysis = null 
   const { basics, work = [], education = [], skills = [], projects = [], certifications = [], socialLinks = [] } = data;
 
   return (
-    <div className="w-full bg-white text-black p-8 font-serif shadow-2xl border border-zinc-200 aspect-[1/1.414] overflow-y-auto max-h-[800px] text-[11px] leading-relaxed select-text rounded-2xl">
+    <div className="w-full bg-white text-black p-6 font-serif shadow-2xl border border-zinc-200 aspect-[1/1.414] overflow-y-auto max-h-[800px] text-[11px] leading-relaxed select-text rounded-2xl m-0">
       {/* Header section */}
       <div className="text-center border-b border-black pb-4 mb-4">
         <h1 className="text-xl font-bold tracking-tight uppercase mb-1">{basics?.name || "Your Name"}</h1>

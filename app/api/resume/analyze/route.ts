@@ -19,9 +19,7 @@ export async function POST(request: Request) {
     }
 
     const userTier = (user as any).tier || "freemium";
-    const model = userTier === "pro" 
-      ? "z-ai/glm-4.7-flash-free" 
-      : userTier === "premium" 
+    const model = userTier === "pro" || userTier === "premium" 
       ? "llama-3.3-70b-versatile" 
       : "llama-3.1-8b-instant";
 
@@ -54,45 +52,23 @@ Return the response in raw JSON format matching this schema:
   ]
 }`;
 
-    let response;
-    if (userTier === "pro") {
-      console.log("[DEBUG] Starting ATS Resume Analysis using Zenmux GLM-4.7...");
-      response = await fetch("https://zenmux.ai/api/v1/chat/completions", {
-        method: "POST",
-        headers: {
-          "Authorization": "Bearer sk-ai-v1-4920d263924179c0ea44a15eae5a86c5952353b776d649496f42a33095cae754",
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({
-          model,
-          response_format: { type: "json_object" },
-          messages: [
-            {
-              role: "user",
-              content: promptContent
-            }
-          ]
-        })
-      });
-    } else {
-      console.log(`[DEBUG] Starting ATS Resume Analysis using Groq ${model}...`);
-      response = await fetchGroq("/chat/completions", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({
-          model,
-          response_format: { type: "json_object" },
-          messages: [
-            {
-              role: "user",
-              content: promptContent
-            }
-          ]
-        })
-      });
-    }
+    console.log(`[DEBUG] Starting ATS Resume Analysis using Groq API (${model})...`);
+    const response = await fetchGroq("/chat/completions", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        model,
+        response_format: { type: "json_object" },
+        messages: [
+          {
+            role: "user",
+            content: promptContent
+          }
+        ]
+      })
+    });
 
     if (!response.ok) {
       const errText = await response.text();

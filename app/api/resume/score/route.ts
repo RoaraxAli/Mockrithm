@@ -42,15 +42,13 @@ export async function POST(request: Request) {
     }
 
     const userTier = (user as any).tier || "freemium";
-    const model = userTier === "pro" 
-      ? "z-ai/glm-4.7-flash-free" 
-      : userTier === "premium" 
+    const model = userTier === "pro" || userTier === "premium"
       ? "llama-3.3-70b-versatile" 
       : "llama-3.1-8b-instant";
 
     let object;
     const promptText = `
-        You are an expert ATS (Applicant Tracking System) optimization bot and senior technical recruiter.
+        You are an elite ATS (Applicant Tracking System) optimization bot and senior technical recruiter.
         Analyze the following structured JSON resume data against the target job description (if provided).
         If no job description is provided, evaluate the resume based on general best practices for modern tech/professional roles.
         
@@ -71,22 +69,23 @@ export async function POST(request: Request) {
       `;
 
     try {
-      let response;
-      if (userTier === "pro") {
-        console.log("[DEBUG] Fetching ATS Scorecard from Zenmux GLM-4.7...");
-        response = await fetch("https://zenmux.ai/api/v1/chat/completions", {
-          method: "POST",
-          headers: {
-            "Authorization": "Bearer sk-ai-v1-4920d263924179c0ea44a15eae5a86c5952353b776d649496f42a33095cae754",
-            "Content-Type": "application/json"
-          },
-          body: JSON.stringify({
-            model,
-            response_format: { type: "json_object" },
-            messages: [
-              {
-                role: "user",
-                content: promptText + `\n\nReturn the response in raw JSON format matching this schema:
+      console.log(`[DEBUG] Fetching ATS Scorecard from Groq API (${model})...`);
+      const response = await fetchGroq("/chat/completions", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          model,
+          response_format: { type: "json_object" },
+          messages: [
+            {
+              role: "system",
+              content: "You are an elite ATS scoring engine. Evaluate resumes with extreme precision, penalizing missing skills, lack of STAR methodology, and unquantified metrics."
+            },
+            {
+              role: "user",
+              content: promptText + `\n\nReturn the response in raw JSON format matching this schema:
 {
   "atsScore": number,
   "missingKeywords": ["string"],
@@ -96,28 +95,10 @@ export async function POST(request: Request) {
   "formattingQuality": "string",
   "skillRelevance": "string"
 }`
-              }
-            ]
-          })
-        });
-      } else {
-        console.log(`[DEBUG] Fetching ATS Scorecard from Groq ${model}...`);
-        response = await fetchGroq("/chat/completions", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json"
-          },
-          body: JSON.stringify({
-            model,
-            response_format: { type: "json_object" },
-            messages: [
-              {
-                role: "user",
-                content: promptText + `\n\nReturn the response in raw JSON format matching this schema:
-{
-  "atsScore": number,
-  "missingKeywords": ["string"],
-  "strengths": ["string"],
+            }
+          ]
+        })
+      });
   "weaknesses": ["string"],
   "improvementSuggestions": ["string"],
   "formattingQuality": "string",

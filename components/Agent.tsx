@@ -2347,21 +2347,12 @@ ${codeRef.current}
                     >
                       <option value="llama-3.1-8b-instant">Llama 3.1 8B (Free)</option>
                       <option value="llama-3.3-70b-versatile" disabled={userTier === "freemium"}>
-                        Llama 3.3 70B {userTier === "freemium" ? "(Premium Only)" : "(Premium)"}
-                      </option>
-                      <option value="z-ai/glm-4.7-flash-free" disabled={userTier === "freemium" || userTier === "premium"}>
-                        Zenmux GLM-4.7 {userTier === "freemium" || userTier === "premium" ? "(Pro Only)" : "(Pro)"}
+                        Llama 3.3 70B {userTier === "freemium" ? "(Premium Only)" : "(Pro)"}
                       </option>
                     </select>
-                    {selectedModel === "z-ai/glm-4.7-flash-free" ? (
-                      <span className="text-[9px] text-amber-500/80 font-medium leading-tight mt-1">
-                        ⚠️ o1-style reasoning. Responses take 3-4s to start speaking.
-                      </span>
-                    ) : (
-                      <span className="text-[9px] text-emerald-500/80 font-medium leading-tight mt-1">
-                        ⚡ Fast replies. Instant, sub-second response times.
-                      </span>
-                    )}
+                    <span className="text-[9px] text-emerald-500/80 font-medium leading-tight mt-1">
+                      ⚡ Ultra-fast Groq API engine. Instant sub-second response times.
+                    </span>
                   </div>
 
                   <div className="flex flex-col gap-2">

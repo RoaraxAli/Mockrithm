@@ -31,35 +31,16 @@ export async function POST(request: Request) {
     let model = body.model || process.env.GROQ_LLM_MODEL || "llama-3.3-70b-versatile";
     const userTier = (user as any).tier || "freemium";
 
-    // Enforce model tier limits, but allow 70b for pre-interview setup (generate mode) to prevent glitches
+    // Enforce model tier limits
     const isGenerateMode = (body.messages || []).some((m: any) => m.role === "system" && m.content.includes("configure their mock"));
     if (userTier === "freemium" && !isGenerateMode) {
       model = "llama-3.1-8b-instant";
-    } else if (userTier === "premium") {
-      if (model === "z-ai/glm-4.7-flash-free") {
-        model = "llama-3.3-70b-versatile";
-      }
+    } else {
+      model = "llama-3.3-70b-versatile";
     }
 
-    const isZenmux = model === "z-ai/glm-4.7-flash-free";
-
-    let response;
-    if (isZenmux) {
-      console.log("[DEBUG] Routing chat completion request to Zenmux GLM-4.7...");
-      response = await fetch("https://zenmux.ai/api/v1/chat/completions", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "Authorization": "Bearer sk-ai-v1-4920d263924179c0ea44a15eae5a86c5952353b776d649496f42a33095cae754"
-        },
-        body: JSON.stringify({
-          model: model,
-          messages: (body.messages || []).slice(-30),
-          stream: body.stream !== false,
-        })
-      });
-    } else {
-      const groqPayload = {
+    console.log(`[DEBUG] Routing chat completion request to Groq API (${model})...`);
+    const groqPayload = {
         model: model,
         messages: (body.messages || []).slice(-30),
         stream: body.stream !== false,

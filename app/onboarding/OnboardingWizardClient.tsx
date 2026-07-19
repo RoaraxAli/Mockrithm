@@ -1219,10 +1219,13 @@ export default function OnboardingWizardClient({ userId, userName, userTier = "f
                       {fileUrl ? "Original Resume Document" : "Structured Resume Preview"}
                     </span>
                     {fileUrl ? (
-                      <iframe
-                        src={fileUrl}
-                        className="w-full h-[600px] border border-zinc-900 rounded-2xl bg-zinc-950 shadow-inner"
-                      />
+                      <div className="w-full h-[650px] rounded-2xl overflow-hidden border border-zinc-900 bg-white p-0 m-0 shadow-2xl">
+                        <iframe
+                          src={`${fileUrl}#toolbar=0&navpanes=0&scrollbar=0`}
+                          className="w-full h-full border-none outline-none overflow-hidden m-0 p-0"
+                          style={{ border: "none", margin: 0, padding: 0, overflow: "hidden" }}
+                        />
+                      </div>
                     ) : (
                       <PDFRenderer data={parsedData} mode="normal" />
                     )}
