@@ -1188,55 +1188,38 @@ export default function OnboardingWizardClient({ userId, userName, userTier = "f
                         </div>
                       )}
                     </div>
-
-                    <div className="flex flex-col sm:flex-row gap-3 w-full mt-4">
-                      <Button 
-                        onClick={() => setStep(3)}
-                        variant="outline"
-                        className="w-full sm:w-1/3 h-12 rounded-xl border border-zinc-800 bg-zinc-950 hover:bg-zinc-900 text-xs font-bold uppercase tracking-wider text-zinc-200 cursor-pointer"
-                      >
-                        Back
-                      </Button>
-                      <Button 
-                        onClick={handleCompleteOnboarding}
-                        disabled={isProcessing}
-                        className="w-full sm:w-2/3 h-12 rounded-xl bg-white text-black hover:bg-zinc-200 text-xs font-bold uppercase tracking-wider cursor-pointer shadow-xl"
-                      >
-                        {isProcessing ? (
-                          <span className="flex items-center justify-center gap-1.5">
-                            <Loader2 className="size-4 animate-spin" /> Saving Profile...
-                          </span>
-                        ) : (
-                          "Complete Onboarding →"
-                        )}
-                      </Button>
-                    </div>
                   </div>
 
-                  {/* Right Side: Exact PDF Document scaled to fill container */}
+                  {/* Right Side: Structured Resume Preview (100% width, no gray background) */}
                   <div className="lg:col-span-7 flex flex-col gap-3">
                     <span className="text-xs font-mono uppercase tracking-wider text-zinc-400">
-                      {fileUrl ? "Original Resume Document" : "Structured Resume Preview"}
+                      Resume Document Preview
                     </span>
-                    {fileUrl ? (
-                      <div className="w-full h-[680px] rounded-2xl overflow-hidden border border-zinc-900 bg-zinc-950 p-0 m-0 shadow-2xl relative">
-                        <iframe
-                          src={`${fileUrl}#toolbar=0&navpanes=0&scrollbar=0&view=FitH&zoom=140`}
-                          className="w-full h-full border-none outline-none m-0 p-0"
-                          style={{
-                            border: "none",
-                            margin: 0,
-                            padding: 0,
-                            width: "100%",
-                            height: "100%",
-                            transform: "scale(1.25)",
-                            transformOrigin: "top center",
-                          }}
-                        />
-                      </div>
-                    ) : (
-                      <PDFRenderer data={parsedData} mode="normal" />
-                    )}
+                    <PDFRenderer data={parsedData} mode="normal" />
+                  </div>
+
+                  {/* Full-Width Bottom Action Bar (Spans 100% of wizard width) */}
+                  <div className="col-span-1 lg:col-span-12 flex gap-4 w-full pt-4 border-t border-white/10 mt-2">
+                    <Button 
+                      onClick={() => setStep(3)}
+                      variant="outline"
+                      className="w-32 sm:w-40 h-12 rounded-xl border border-zinc-800 bg-zinc-950 hover:bg-zinc-900 text-xs font-bold uppercase tracking-wider text-zinc-200 cursor-pointer"
+                    >
+                      Back
+                    </Button>
+                    <Button 
+                      onClick={handleCompleteOnboarding}
+                      disabled={isProcessing}
+                      className="flex-1 h-12 rounded-xl bg-white text-black hover:bg-zinc-200 text-xs font-bold uppercase tracking-wider cursor-pointer shadow-xl"
+                    >
+                      {isProcessing ? (
+                        <span className="flex items-center justify-center gap-1.5">
+                          <Loader2 className="size-4 animate-spin" /> Saving Profile...
+                        </span>
+                      ) : (
+                        "Complete Onboarding"
+                      )}
+                    </Button>
                   </div>
 
                 </div>
