@@ -11,11 +11,11 @@ import {
 } from "lucide-react"
 
 const navigation = [
-  { name: "Take Interview", href: "/user/take-interview", icon: PlayCircle },
-  { name: "Resume Builder", href: "/user/resume", icon: Sparkles },
-  { name: "Your Interviews", href: "/user/interviews", icon: FileText },
-  { name: "Feedback", href: "/user/feedback", icon: MessageSquare },
-  { name: "Mic Check", href: "/user/mic-check", icon: Mic },
+  { name: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
+  { name: "Take Interview", href: "/interview", icon: PlayCircle },
+  { name: "Resume Builder", href: "/resume", icon: Sparkles },
+  { name: "Your Interviews", href: "/dashboard", icon: FileText },
+  { name: "Mic Check", href: "/interview", icon: Mic },
 ]
 
 export function Sidebar({ 
