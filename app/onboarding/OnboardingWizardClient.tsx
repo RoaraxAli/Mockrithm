@@ -207,6 +207,143 @@ export default function OnboardingWizardClient({ userId, userName, userTier = "f
   const [fixedAtsAnalysis, setFixedAtsAnalysis] = useState<any>(null);
   const [summary, setSummary] = useState("");
 
+  // Helper functions to allow real-time editing of all extracted resume fields
+  const updateBasics = (field: string, value: string) => {
+    setParsedData((prev: any) => ({
+      ...prev,
+      basics: {
+        ...(prev?.basics || {}),
+        [field]: value,
+      },
+    }));
+  };
+
+  const updateSkill = (index: number, value: string) => {
+    setParsedData((prev: any) => {
+      const currentSkills = [...(prev?.skills || [])];
+      if (typeof currentSkills[index] === "object" && currentSkills[index] !== null) {
+        currentSkills[index] = { ...currentSkills[index], name: value };
+      } else {
+        currentSkills[index] = value;
+      }
+      return { ...prev, skills: currentSkills };
+    });
+  };
+
+  const removeSkill = (index: number) => {
+    setParsedData((prev: any) => {
+      const currentSkills = [...(prev?.skills || [])];
+      currentSkills.splice(index, 1);
+      return { ...prev, skills: currentSkills };
+    });
+  };
+
+  const addSkill = () => {
+    setParsedData((prev: any) => ({
+      ...prev,
+      skills: [...(prev?.skills || []), "New Skill"],
+    }));
+  };
+
+  const updateWork = (workIdx: number, field: string, value: any) => {
+    setParsedData((prev: any) => {
+      const currentWork = [...(prev?.work || [])];
+      currentWork[workIdx] = {
+        ...(currentWork[workIdx] || {}),
+        [field]: value,
+      };
+      return { ...prev, work: currentWork };
+    });
+  };
+
+  const updateWorkHighlight = (workIdx: number, hIdx: number, value: string) => {
+    setParsedData((prev: any) => {
+      const currentWork = [...(prev?.work || [])];
+      const highlights = [...(currentWork[workIdx]?.highlights || [])];
+      highlights[hIdx] = value;
+      currentWork[workIdx] = { ...currentWork[workIdx], highlights };
+      return { ...prev, work: currentWork };
+    });
+  };
+
+  const removeWorkHighlight = (workIdx: number, hIdx: number) => {
+    setParsedData((prev: any) => {
+      const currentWork = [...(prev?.work || [])];
+      const highlights = [...(currentWork[workIdx]?.highlights || [])];
+      highlights.splice(hIdx, 1);
+      currentWork[workIdx] = { ...currentWork[workIdx], highlights };
+      return { ...prev, work: currentWork };
+    });
+  };
+
+  const addWorkHighlight = (workIdx: number) => {
+    setParsedData((prev: any) => {
+      const currentWork = [...(prev?.work || [])];
+      const highlights = [...(currentWork[workIdx]?.highlights || []), "Key achievement or responsibility..."];
+      currentWork[workIdx] = { ...currentWork[workIdx], highlights };
+      return { ...prev, work: currentWork };
+    });
+  };
+
+  const removeWork = (workIdx: number) => {
+    setParsedData((prev: any) => {
+      const currentWork = [...(prev?.work || [])];
+      currentWork.splice(workIdx, 1);
+      return { ...prev, work: currentWork };
+    });
+  };
+
+  const addWork = () => {
+    setParsedData((prev: any) => ({
+      ...prev,
+      work: [
+        ...(prev?.work || []),
+        {
+          company: "Company Name",
+          position: "Job Title",
+          startDate: "2022",
+          endDate: "Present",
+          highlights: ["Key achievement or responsibility..."],
+        },
+      ],
+    }));
+  };
+
+  const updateEducation = (eduIdx: number, field: string, value: string) => {
+    setParsedData((prev: any) => {
+      const currentEdu = [...(prev?.education || [])];
+      currentEdu[eduIdx] = {
+        ...(currentEdu[eduIdx] || {}),
+        [field]: value,
+      };
+      return { ...prev, education: currentEdu };
+    });
+  };
+
+  const removeEducation = (eduIdx: number) => {
+    setParsedData((prev: any) => {
+      const currentEdu = [...(prev?.education || [])];
+      currentEdu.splice(eduIdx, 1);
+      return { ...prev, education: currentEdu };
+    });
+  };
+
+  const addEducation = () => {
+    setParsedData((prev: any) => ({
+      ...prev,
+      education: [
+        ...(prev?.education || []),
+        {
+          institution: "University / Institution",
+          studyType: "Bachelor's",
+          area: "Computer Science",
+          startDate: "2018",
+          endDate: "2022",
+        },
+      ],
+    }));
+  };
+
   // Load custom handwritten font
   useEffect(() => {
     const link = document.createElement("link");
@@ -648,88 +785,282 @@ export default function OnboardingWizardClient({ userId, userName, userTier = "f
 
               <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
                 
-                {/* Left Side: Auto-Populated Inputs & Extracted Fields List */}
-                <div className="lg:col-span-6 flex flex-col gap-6">
-                  
-                  <div className="p-5 bg-white/[0.015] border border-white/5 rounded-2xl flex flex-col gap-4">
-                    <span className="text-xs font-bold uppercase text-white tracking-wider font-mono flex items-center gap-1.5">
-                      <Sparkles className="size-4 text-white" /> Calibration Calibration
-                    </span>
-                    <p className="text-xs text-zinc-300 leading-relaxed font-semibold">
-                      We auto-detected these details from your resume. Adjust them if they are incorrect before calculating your ATS score.
-                    </p>
+                  {/* Left Side: Interactive Resume Editor */}
+                  <div className="lg:col-span-6 flex flex-col gap-5 max-h-[600px] overflow-y-auto pr-2 custom-scrollbar">
+                    
+                    {/* Header Box */}
+                    <div className="p-4 bg-white/[0.015] border border-white/5 rounded-2xl flex flex-col gap-3">
+                      <span className="text-xs font-bold uppercase text-white tracking-wider font-mono flex items-center gap-1.5">
+                        <Sparkles className="size-4 text-white" /> Profile Calibration
+                      </span>
+                      <p className="text-xs text-zinc-300 leading-relaxed font-semibold">
+                        We auto-detected these details from your resume. You can edit any field, skill, work experience, or summary below before calculating your ATS score.
+                      </p>
 
-                    <div className="flex flex-col gap-4 mt-2">
-                      <div className="flex flex-col gap-2">
+                      <div className="flex flex-col gap-2 mt-1">
                         <label className="text-xs font-mono font-bold uppercase tracking-wider text-zinc-300 flex items-center gap-1.5">
                           <Briefcase className="size-4 text-white" /> Target Job Role
                         </label>
                         <input
                           type="text"
                           value={role}
-                          onChange={(e) => setRole(e.target.value)}
+                          onChange={(e) => {
+                            setRole(e.target.value);
+                            updateBasics("label", e.target.value);
+                          }}
                           placeholder="e.g. Software Engineer"
                           className="bg-zinc-950 text-white text-xs rounded-xl p-3 border border-zinc-900 focus:border-zinc-700 outline-none leading-relaxed font-semibold transition-all"
                         />
                       </div>
+                    </div>
 
-                      <div className="flex flex-col gap-2">
-                        <label className="text-xs font-mono font-bold uppercase tracking-wider text-zinc-300 flex items-center gap-1.5">
-                          <Globe className="size-4 text-white" /> Target Country
-                        </label>
-                        <input
-                          type="text"
-                          value={country}
-                          onChange={(e) => setCountry(e.target.value)}
-                          placeholder="e.g. United States"
-                          className="bg-zinc-950 text-white text-xs rounded-xl p-3 border border-zinc-900 focus:border-zinc-700 outline-none leading-relaxed font-semibold transition-all"
+                    {/* Section 1: Basic Information */}
+                    <div className="p-4 bg-zinc-950 border border-zinc-900 rounded-2xl flex flex-col gap-3">
+                      <span className="text-xs font-mono font-bold text-white uppercase tracking-wider flex items-center justify-between">
+                        <span>Personal Information</span>
+                        <span className="text-[10px] text-zinc-500 font-normal">Editable</span>
+                      </span>
+
+                      <div className="grid grid-cols-2 gap-3">
+                        <div className="flex flex-col gap-1.5">
+                          <label className="text-[10px] font-mono uppercase text-zinc-400">Full Name</label>
+                          <input
+                            type="text"
+                            value={parsedData.basics?.name || ""}
+                            onChange={(e) => updateBasics("name", e.target.value)}
+                            placeholder="Full Name"
+                            className="bg-zinc-900 text-white text-xs rounded-lg p-2.5 border border-zinc-800 focus:border-zinc-600 outline-none font-semibold"
+                          />
+                        </div>
+                        <div className="flex flex-col gap-1.5">
+                          <label className="text-[10px] font-mono uppercase text-zinc-400">Email Address</label>
+                          <input
+                            type="text"
+                            value={parsedData.basics?.email || ""}
+                            onChange={(e) => updateBasics("email", e.target.value)}
+                            placeholder="Email"
+                            className="bg-zinc-900 text-white text-xs rounded-lg p-2.5 border border-zinc-800 focus:border-zinc-600 outline-none font-semibold"
+                          />
+                        </div>
+                      </div>
+
+                      <div className="flex flex-col gap-1.5">
+                        <label className="text-[10px] font-mono uppercase text-zinc-400">Professional Summary</label>
+                        <textarea
+                          rows={3}
+                          value={parsedData.basics?.summary || ""}
+                          onChange={(e) => updateBasics("summary", e.target.value)}
+                          placeholder="Short summary of your background..."
+                          className="bg-zinc-900 text-white text-xs rounded-lg p-2.5 border border-zinc-800 focus:border-zinc-600 outline-none font-semibold leading-relaxed resize-y"
                         />
                       </div>
                     </div>
-                  </div>
 
-                  {/* Complete list of extracted values by heading */}
-                  <div className="flex flex-col gap-4 p-5 bg-zinc-950 border border-zinc-900 rounded-2xl max-h-[300px] overflow-y-auto">
-                    <span className="text-xs font-mono tracking-wider text-zinc-400 uppercase">Extracted Heading Fields</span>
-                    
-                    <div className="flex flex-col gap-3">
-                      <div>
-                        <span className="text-xs font-bold text-white uppercase block">Basics</span>
-                        <span className="text-xs text-zinc-300 leading-relaxed mt-0.5 block font-semibold">
-                          Name: {parsedData.basics?.name || "N/A"} • Email: {parsedData.basics?.email || "N/A"}
+                    {/* Section 2: Skills Editor */}
+                    <div className="p-4 bg-zinc-950 border border-zinc-900 rounded-2xl flex flex-col gap-3">
+                      <div className="flex items-center justify-between">
+                        <span className="text-xs font-mono font-bold text-white uppercase tracking-wider">
+                          Skills & Competencies ({parsedData.skills?.length || 0})
                         </span>
+                        <button
+                          type="button"
+                          onClick={addSkill}
+                          className="text-[10px] font-mono px-2.5 py-1 bg-white/10 hover:bg-white/20 text-white border border-white/20 rounded-md transition-all cursor-pointer"
+                        >
+                          + Add Skill
+                        </button>
                       </div>
 
-                      <div className="h-[1px] bg-zinc-900 w-full" />
-
-                      <div>
-                        <span className="text-xs font-bold text-white uppercase block">Professional Summary</span>
-                        <p className="text-xs text-zinc-400 leading-relaxed mt-0.5 line-clamp-3 font-semibold">
-                          {parsedData.basics?.summary || "N/A"}
-                        </p>
-                      </div>
-
-                      <div className="h-[1px] bg-zinc-900 w-full" />
-
-                      <div>
-                        <span className="text-xs font-bold text-white uppercase block">Inferred Skills ({parsedData.skills?.length || 0})</span>
-                        <p className="text-xs text-zinc-300 leading-relaxed mt-0.5 line-clamp-2 font-semibold">
-                          {parsedData.skills?.join(", ") || "N/A"}
-                        </p>
-                      </div>
-
-                      <div className="h-[1px] bg-zinc-900 w-full" />
-
-                      <div>
-                        <span className="text-xs font-bold text-white uppercase block">Work Experience</span>
-                        <p className="text-xs text-zinc-300 leading-relaxed mt-0.5 block font-semibold">
-                          {parsedData.work?.map((w: any) => `${w.position} at ${w.company}`).join(" | ") || "N/A"}
-                        </p>
+                      <div className="flex flex-wrap gap-2 mt-1">
+                        {(parsedData.skills || []).map((skillItem: any, idx: number) => {
+                          const val = typeof skillItem === "string" ? skillItem : skillItem?.name || "";
+                          return (
+                            <div key={idx} className="flex items-center gap-1.5 bg-zinc-900 border border-zinc-800 px-2.5 py-1 rounded-lg hover:border-zinc-700 transition-all">
+                              <input
+                                type="text"
+                                value={val}
+                                onChange={(e) => updateSkill(idx, e.target.value)}
+                                className="bg-transparent text-white text-xs font-mono outline-none border-none w-28 focus:w-36 transition-all"
+                              />
+                              <button
+                                type="button"
+                                onClick={() => removeSkill(idx)}
+                                className="text-zinc-500 hover:text-rose-400 text-xs font-bold shrink-0 cursor-pointer ml-1"
+                                title="Remove skill"
+                              >
+                                ✕
+                              </button>
+                            </div>
+                          );
+                        })}
                       </div>
                     </div>
-                  </div>
 
-                </div>
+                    {/* Section 3: Work History Editor */}
+                    <div className="p-4 bg-zinc-950 border border-zinc-900 rounded-2xl flex flex-col gap-4">
+                      <div className="flex items-center justify-between">
+                        <span className="text-xs font-mono font-bold text-white uppercase tracking-wider">
+                          Work Experience ({parsedData.work?.length || 0})
+                        </span>
+                        <button
+                          type="button"
+                          onClick={addWork}
+                          className="text-[10px] font-mono px-2.5 py-1 bg-white/10 hover:bg-white/20 text-white border border-white/20 rounded-md transition-all cursor-pointer"
+                        >
+                          + Add Experience
+                        </button>
+                      </div>
+
+                      <div className="flex flex-col gap-4">
+                        {(parsedData.work || []).map((w: any, workIdx: number) => (
+                          <div key={workIdx} className="p-3 bg-zinc-900/60 border border-zinc-850 rounded-xl flex flex-col gap-3">
+                            <div className="flex items-center justify-between">
+                              <span className="text-[10px] font-mono uppercase text-zinc-400">Position #{workIdx + 1}</span>
+                              <button
+                                type="button"
+                                onClick={() => removeWork(workIdx)}
+                                className="text-zinc-500 hover:text-rose-400 text-xs font-bold cursor-pointer"
+                              >
+                                Remove
+                              </button>
+                            </div>
+
+                            <div className="grid grid-cols-2 gap-2">
+                              <input
+                                type="text"
+                                value={w.position || ""}
+                                onChange={(e) => updateWork(workIdx, "position", e.target.value)}
+                                placeholder="Job Position"
+                                className="bg-zinc-950 text-white text-xs rounded-lg p-2 border border-zinc-800 outline-none font-semibold"
+                              />
+                              <input
+                                type="text"
+                                value={w.company || ""}
+                                onChange={(e) => updateWork(workIdx, "company", e.target.value)}
+                                placeholder="Company Name"
+                                className="bg-zinc-950 text-white text-xs rounded-lg p-2 border border-zinc-800 outline-none font-semibold"
+                              />
+                            </div>
+
+                            <div className="grid grid-cols-2 gap-2">
+                              <input
+                                type="text"
+                                value={w.startDate || ""}
+                                onChange={(e) => updateWork(workIdx, "startDate", e.target.value)}
+                                placeholder="Start Date"
+                                className="bg-zinc-950 text-white text-xs rounded-lg p-2 border border-zinc-800 outline-none font-semibold"
+                              />
+                              <input
+                                type="text"
+                                value={w.endDate || ""}
+                                onChange={(e) => updateWork(workIdx, "endDate", e.target.value)}
+                                placeholder="End Date"
+                                className="bg-zinc-950 text-white text-xs rounded-lg p-2 border border-zinc-800 outline-none font-semibold"
+                              />
+                            </div>
+
+                            {/* Highlights */}
+                            <div className="flex flex-col gap-2 mt-1">
+                              <div className="flex items-center justify-between">
+                                <span className="text-[10px] font-mono uppercase text-zinc-400">Key Highlights</span>
+                                <button
+                                  type="button"
+                                  onClick={() => addWorkHighlight(workIdx)}
+                                  className="text-[9px] font-mono text-zinc-300 hover:text-white underline cursor-pointer"
+                                >
+                                  + Add Bullet
+                                </button>
+                              </div>
+                              {(w.highlights || []).map((h: string, hIdx: number) => (
+                                <div key={hIdx} className="flex items-center gap-2">
+                                  <textarea
+                                    rows={2}
+                                    value={h}
+                                    onChange={(e) => updateWorkHighlight(workIdx, hIdx, e.target.value)}
+                                    className="bg-zinc-950 text-zinc-200 text-xs rounded-lg p-2 border border-zinc-800 outline-none font-medium flex-1 resize-y"
+                                  />
+                                  <button
+                                    type="button"
+                                    onClick={() => removeWorkHighlight(workIdx, hIdx)}
+                                    className="text-zinc-500 hover:text-rose-400 text-xs font-bold shrink-0 cursor-pointer"
+                                  >
+                                    ✕
+                                  </button>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* Section 4: Education Editor */}
+                    <div className="p-4 bg-zinc-950 border border-zinc-900 rounded-2xl flex flex-col gap-4">
+                      <div className="flex items-center justify-between">
+                        <span className="text-xs font-mono font-bold text-white uppercase tracking-wider">
+                          Education ({parsedData.education?.length || 0})
+                        </span>
+                        <button
+                          type="button"
+                          onClick={addEducation}
+                          className="text-[10px] font-mono px-2.5 py-1 bg-white/10 hover:bg-white/20 text-white border border-white/20 rounded-md transition-all cursor-pointer"
+                        >
+                          + Add Education
+                        </button>
+                      </div>
+
+                      <div className="flex flex-col gap-3">
+                        {(parsedData.education || []).map((edu: any, eduIdx: number) => (
+                          <div key={eduIdx} className="p-3 bg-zinc-900/60 border border-zinc-850 rounded-xl flex flex-col gap-2">
+                            <div className="flex items-center justify-between">
+                              <span className="text-[10px] font-mono uppercase text-zinc-400">Education #{eduIdx + 1}</span>
+                              <button
+                                type="button"
+                                onClick={() => removeEducation(eduIdx)}
+                                className="text-zinc-500 hover:text-rose-400 text-xs font-bold cursor-pointer"
+                              >
+                                Remove
+                              </button>
+                            </div>
+
+                            <div className="grid grid-cols-2 gap-2">
+                              <input
+                                type="text"
+                                value={edu.institution || ""}
+                                onChange={(e) => updateEducation(eduIdx, "institution", e.target.value)}
+                                placeholder="Institution Name"
+                                className="bg-zinc-950 text-white text-xs rounded-lg p-2 border border-zinc-800 outline-none font-semibold"
+                              />
+                              <input
+                                type="text"
+                                value={edu.studyType || edu.degree || ""}
+                                onChange={(e) => updateEducation(eduIdx, "studyType", e.target.value)}
+                                placeholder="Degree (e.g. Bachelor's)"
+                                className="bg-zinc-950 text-white text-xs rounded-lg p-2 border border-zinc-800 outline-none font-semibold"
+                              />
+                            </div>
+                            <div className="grid grid-cols-2 gap-2">
+                              <input
+                                type="text"
+                                value={edu.area || ""}
+                                onChange={(e) => updateEducation(eduIdx, "area", e.target.value)}
+                                placeholder="Field / Major"
+                                className="bg-zinc-950 text-white text-xs rounded-lg p-2 border border-zinc-800 outline-none font-semibold"
+                              />
+                              <input
+                                type="text"
+                                value={edu.endDate || ""}
+                                onChange={(e) => updateEducation(eduIdx, "endDate", e.target.value)}
+                                placeholder="Graduation Year"
+                                className="bg-zinc-950 text-white text-xs rounded-lg p-2 border border-zinc-800 outline-none font-semibold"
+                              />
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+
+                  </div>
 
                 {/* Right Side: Detailed visual preview */}
                 <div className="lg:col-span-6 flex flex-col gap-4">
