@@ -1198,37 +1198,27 @@ export default function OnboardingWizardClient({ userId, userName, userTier = "f
                         Back
                       </Button>
                       <Button 
-                        onClick={handleCompleteOnboarding}
+                        onClick={handleOptimizeResume}
                         disabled={isProcessing}
                         className="flex-1 h-12 rounded-xl bg-white text-black hover:bg-zinc-200 text-xs font-bold uppercase tracking-wider cursor-pointer"
                       >
                         {isProcessing ? (
                           <span className="flex items-center justify-center gap-1.5">
-                            <Loader2 className="size-4 animate-spin" /> Finalizing...
+                            <Loader2 className="size-4 animate-spin" /> Optimizing Profile...
                           </span>
                         ) : (
-                          "Complete Onboarding"
+                          "Auto-Fix & Polish Profile →"
                         )}
                       </Button>
                     </div>
                   </div>
 
-                  {/* Right Side: Original PDF or PDFRenderer Fallback */}
+                  {/* Right Side: Interactive Diagnostic Resume Preview */}
                   <div className="lg:col-span-7 flex flex-col gap-3">
                     <span className="text-xs font-mono uppercase tracking-wider text-zinc-400">
-                      {fileUrl ? "Original Resume Document" : "Structured Resume Preview"}
+                      ATS Resume Diagnostic Preview
                     </span>
-                    {fileUrl ? (
-                      <div className="w-full h-[650px] rounded-2xl overflow-hidden border border-zinc-900 bg-white p-0 m-0 shadow-2xl">
-                        <iframe
-                          src={`${fileUrl}#toolbar=0&navpanes=0&scrollbar=0`}
-                          className="w-full h-full border-none outline-none overflow-hidden m-0 p-0"
-                          style={{ border: "none", margin: 0, padding: 0, overflow: "hidden" }}
-                        />
-                      </div>
-                    ) : (
-                      <PDFRenderer data={parsedData} mode="normal" />
-                    )}
+                    <PDFRenderer data={parsedData} mode="diagnostic" atsAnalysis={atsAnalysis} />
                   </div>
 
                 </div>
