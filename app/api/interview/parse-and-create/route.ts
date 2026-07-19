@@ -5,26 +5,38 @@ import { getCurrentUser } from "@/lib/actions/auth.action";
 import { interviewLanguages } from "@/constants";
 import { fetchGroq } from "@/lib/apiKeyManager";
 
-async function groqChatCompletion(messages: any[], jsonMode = false) {
-  const response = await fetchGroq("/chat/completions", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      model: process.env.GROQ_LLM_MODEL || "llama-3.3-70b-versatile",
-      messages,
-      response_format: jsonMode ? { type: "json_object" } : undefined
-    })
-  });
+async function groqChatCompletion(messages: any[], jsonMode = false): Promise<string> {
+  try {
+    const response = await fetchGroq("/chat/completions", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        model: process.env.GROQ_LLM_MODEL || "llama-3.3-70b-versatile",
+        messages,
+        response_format: jsonMode ? { type: "json_object" } : undefined
+      })
+    });
 
-  if (!response.ok) {
-    const errText = await response.text();
-    throw new Error(`Groq API returned status ${response.status}: ${errText}`);
+    if (!response.ok) {
+      if (jsonMode) {
+        console.warn("[groqChatCompletion] JSON mode failed, retrying without strict json_mode constraint...");
+        return groqChatCompletion(messages, false);
+      }
+      const errText = await response.text();
+      throw new Error(`Groq API returned status ${response.status}: ${errText}`);
+    }
+
+    const data = await response.json();
+    return data.choices[0].message.content.trim();
+  } catch (err: any) {
+    if (jsonMode) {
+      console.warn("[groqChatCompletion] JSON mode exception, retrying without strict json_mode constraint:", err);
+      return groqChatCompletion(messages, false);
+    }
+    throw err;
   }
-
-  const data = await response.json();
-  return data.choices[0].message.content.trim();
 }
 
 export async function POST(request: Request) {
@@ -154,7 +166,6 @@ export async function POST(request: Request) {
       - CRITICAL: If requiresSandbox is true (e.g. "Live Coding Sandbox" or "Code Review" mode), the generated questions MUST be hands-on code writing, editing, or code review tasks. Do NOT generate purely conceptual, discussion, or verbal questions (such as "What are best practices..." or "Explain React lifecycle") in the questions array for these modes. Every question in the array must request a hands-on solution or review in the editor.
       - CRITICAL FRONTEND REQUIREMENT: If the role is Frontend Engineer or includes "frontend" / "front-end", you MUST NOT ask any database, SQL, backend, or cloud systems questions. Only ask about HTML, CSS, JavaScript, React, and general Web APIs/browser concepts. Never ask SQL queries or database optimization questions.
       - Coding/Written Challenge (If requiresSandbox is true): Generate a written, coding, or mathematical challenge suitable for the level and role. Do NOT provide the full solution in the templateCode. The templateCode should only have a broken/buggy code snippet or an empty template skeleton to complete, with clear comments explaining what to do.
-      - Escape all double-quotes inside string values as \\" and newlines as \\n.
       - CRITICAL WELCOME GREETING RULE: The welcome greeting ("firstMessage") MUST state the first question from the questions list directly in your response. You are an AI interviewer named Alex. Do NOT greet, introduce yourself again, or say hello. Do NOT ask the candidate if they are ready, do NOT ask "Are we ready to begin?", and do NOT ask for confirmation. Do NOT talk about the duration or time limit in the greeting. Keep it extremely short: 2 sentences maximum. No markdown. Example: "Great, let's start the interview. Here is your first question: [First Question]"
       
       You must return ONLY a JSON object conforming exactly to this schema:
@@ -196,7 +207,21 @@ export async function POST(request: Request) {
       ], true);
       
       console.log(`[DEBUG] Raw consolidated response from Groq: ${responseText}`);
-      const masterObj = JSON.parse(responseText);
+      
+      let masterObj: any = {};
+      try {
+        masterObj = JSON.parse(responseText);
+      } catch (jsonErr) {
+        console.warn("[WARN] Direct JSON.parse failed, attempting regex JSON extraction...", jsonErr);
+        const jsonMatch = responseText.match(/\{[\s\S]*\}/);
+        if (jsonMatch) {
+          try {
+            masterObj = JSON.parse(jsonMatch[0]);
+          } catch (e2) {
+            console.error("[ERROR] Regex JSON parse also failed:", e2);
+          }
+        }
+      }
       
       if (masterObj.setup) {
         setup = {
@@ -240,9 +265,16 @@ export async function POST(request: Request) {
         setup.requiresSandbox = false;
       }
 
-      questionsList = masterObj.questions || [];
+      questionsList = Array.isArray(masterObj.questions) && masterObj.questions.length > 0
+        ? masterObj.questions
+        : [
+            `What are key architectural principles when building a ${setup.role} application?`,
+            `How do you optimize performance and handle error conditions in ${setup.techstack[0] || setup.role}?`,
+            `Describe a challenging bug or feature you implemented in your previous projects.`
+          ];
+
       codingProblem = masterObj.codingProblem || null;
-      firstMessage = masterObj.firstMessage || "Hello! Ready to start.";
+      firstMessage = masterObj.firstMessage || `Great, let's start the interview. Here is your first question: ${questionsList[0]}`;
 
       // Ensure that if requiresSandbox is true, we have a coding problem
       if (setup.requiresSandbox && !codingProblem) {
@@ -263,8 +295,13 @@ export async function POST(request: Request) {
         firstMessage,
       });
     } catch (e: any) {
-      console.error("[ERROR] Failed to generate consolidated setup from Groq response, trying fallback...", e);
-      throw e;
+      console.error("[ERROR] Failed to generate consolidated setup from Groq response, using safe fallback parameters...", e);
+      questionsList = [
+        "What are key architectural principles when building a software application?",
+        "How do you approach debugging complex technical issues?",
+        "Describe a challenging project you built recently."
+      ];
+      firstMessage = `Great, let's start the interview. Here is your first question: ${questionsList[0]}`;
     }
 
     // 6. Save the interview in Firestore
