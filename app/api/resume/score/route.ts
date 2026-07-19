@@ -99,16 +99,6 @@ export async function POST(request: Request) {
           ]
         })
       });
-  "weaknesses": ["string"],
-  "improvementSuggestions": ["string"],
-  "formattingQuality": "string",
-  "skillRelevance": "string"
-}`
-              }
-            ]
-          })
-        });
-      }
 
       if (!response.ok) {
         const errText = await response.text();

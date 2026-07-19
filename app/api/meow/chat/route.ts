@@ -41,19 +41,18 @@ export async function POST(request: Request) {
 
     console.log(`[DEBUG] Routing chat completion request to Groq API (${model})...`);
     const groqPayload = {
-        model: model,
-        messages: (body.messages || []).slice(-30),
-        stream: body.stream !== false,
-      };
+      model: model,
+      messages: (body.messages || []).slice(-30),
+      stream: body.stream !== false,
+    };
 
-      response = await fetchGroq("/chat/completions", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(groqPayload),
-      });
-    }
+    const response = await fetchGroq("/chat/completions", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(groqPayload),
+    });
 
     const responseHeaders = new Headers();
     responseHeaders.set("Content-Type", response.headers.get("content-type") || "text/event-stream");
