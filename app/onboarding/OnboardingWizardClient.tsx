@@ -558,7 +558,7 @@ export default function OnboardingWizardClient({ userId, userName, userTier = "f
   };
 
   return (
-    <div className="w-full max-w-4xl relative z-10 font-mona-sans px-2">
+    <div className="w-full max-w-5xl relative z-10 font-mona-sans px-2">
       <div className="backdrop-blur-2xl bg-zinc-950/45 border border-white/10 rounded-3xl p-6 sm:p-10 shadow-[0_0_50px_rgba(0,0,0,0.85)] relative overflow-hidden flex flex-col gap-6">
         
         {/* Glowing aura */}
@@ -1189,18 +1189,18 @@ export default function OnboardingWizardClient({ userId, userName, userTier = "f
                       )}
                     </div>
 
-                    <div className="flex gap-4 mt-2">
+                    <div className="flex flex-col sm:flex-row gap-3 w-full mt-4">
                       <Button 
                         onClick={() => setStep(3)}
                         variant="outline"
-                        className="flex-1 h-12 rounded-xl border border-zinc-850 hover:bg-zinc-900 text-xs font-bold uppercase tracking-wider text-zinc-200 cursor-pointer"
+                        className="w-full sm:w-1/3 h-12 rounded-xl border border-zinc-800 bg-zinc-950 hover:bg-zinc-900 text-xs font-bold uppercase tracking-wider text-zinc-200 cursor-pointer"
                       >
                         Back
                       </Button>
                       <Button 
                         onClick={handleCompleteOnboarding}
                         disabled={isProcessing}
-                        className="flex-1 h-12 rounded-xl bg-white text-black hover:bg-zinc-200 text-xs font-bold uppercase tracking-wider cursor-pointer"
+                        className="w-full sm:w-2/3 h-12 rounded-xl bg-white text-black hover:bg-zinc-200 text-xs font-bold uppercase tracking-wider cursor-pointer shadow-xl"
                       >
                         {isProcessing ? (
                           <span className="flex items-center justify-center gap-1.5">
@@ -1213,17 +1213,25 @@ export default function OnboardingWizardClient({ userId, userName, userTier = "f
                     </div>
                   </div>
 
-                  {/* Right Side: Exact PDF Document without empty space */}
+                  {/* Right Side: Exact PDF Document scaled to fill container */}
                   <div className="lg:col-span-7 flex flex-col gap-3">
                     <span className="text-xs font-mono uppercase tracking-wider text-zinc-400">
                       {fileUrl ? "Original Resume Document" : "Structured Resume Preview"}
                     </span>
                     {fileUrl ? (
-                      <div className="w-full h-[650px] rounded-2xl overflow-hidden border border-zinc-900 bg-white p-0 m-0 shadow-2xl">
+                      <div className="w-full h-[680px] rounded-2xl overflow-hidden border border-zinc-900 bg-zinc-950 p-0 m-0 shadow-2xl relative">
                         <iframe
-                          src={`${fileUrl}#toolbar=0&navpanes=0&scrollbar=0&view=FitH`}
-                          className="w-full h-full border-none outline-none overflow-hidden m-0 p-0"
-                          style={{ border: "none", margin: 0, padding: 0, overflow: "hidden" }}
+                          src={`${fileUrl}#toolbar=0&navpanes=0&scrollbar=0&view=FitH&zoom=140`}
+                          className="w-full h-full border-none outline-none m-0 p-0"
+                          style={{
+                            border: "none",
+                            margin: 0,
+                            padding: 0,
+                            width: "100%",
+                            height: "100%",
+                            transform: "scale(1.25)",
+                            transformOrigin: "top center",
+                          }}
                         />
                       </div>
                     ) : (
