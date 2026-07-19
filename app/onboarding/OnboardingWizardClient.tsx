@@ -418,9 +418,20 @@ export default function OnboardingWizardClient({ userId, userName, userTier = "f
       setFileName(data.fileName);
 
       // Prepopulate role and country from parsing details
-      if (data.parsedData?.basics?.label) {
-        setRole(data.parsedData.basics.label);
+      const detectedLabel = data.parsedData?.basics?.label;
+      const lowerRaw = (data.rawText || "").toLowerCase();
+      const lowerFile = (data.fileName || "").toLowerCase();
+
+      if (detectedLabel && detectedLabel !== "Software Developer") {
+        setRole(detectedLabel);
+      } else if (lowerRaw.includes("intern") || lowerFile.includes("intern")) {
+        setRole("Software Development Intern");
+      } else if (detectedLabel) {
+        setRole(detectedLabel);
+      } else {
+        setRole("Software Engineer");
       }
+
       const basics = data.parsedData?.basics as any;
       if (basics?.country) {
         setCountry(basics.country);

@@ -154,7 +154,8 @@ export async function POST(request: Request) {
       const extraSuggestions: string[] = [];
 
       const work = parsedData.work || [];
-      if (work.length === 0) {
+      const projects = parsedData.projects || [];
+      if (work.length === 0 && projects.length === 0) {
         extraWeaknesses.push("Professional work history and experience section is completely empty.");
         extraSuggestions.push("Add at least 1-2 items under work or personal experience. ATS systems and recruiters prioritize your concrete work history to evaluate your profile.");
       }
