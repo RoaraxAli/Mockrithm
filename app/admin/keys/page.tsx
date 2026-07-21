@@ -1,8 +1,9 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Key, RefreshCw, AlertTriangle, CheckCircle, Clock, Mic } from "lucide-react";
+import { Key, RefreshCw, AlertTriangle, CheckCircle, Clock, Mic, CreditCard, ShieldCheck, Zap } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { toast } from "sonner";
 
 interface KeyStatus {
   name: string;
@@ -24,6 +25,10 @@ export default function ApiKeysTelemetryPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  // Active Payment Gateway Provider state
+  const [paymentProvider, setPaymentProvider] = useState<"paddle" | "stripe">("paddle");
+  const [updatingProvider, setUpdatingProvider] = useState(false);
+
   const fetchKeyStats = async () => {
     setLoading(true);
     setError(null);
@@ -44,8 +49,44 @@ export default function ApiKeysTelemetryPage() {
     }
   };
 
+  const fetchPaymentProvider = async () => {
+    try {
+      const res = await fetch("/api/admin/payment-settings");
+      if (res.ok) {
+        const data = await res.json();
+        if (data.provider) setPaymentProvider(data.provider);
+      }
+    } catch (e) {
+      console.error("Failed to load payment provider setting:", e);
+    }
+  };
+
+  const handleSwitchProvider = async (newProvider: "paddle" | "stripe") => {
+    if (newProvider === paymentProvider) return;
+    setUpdatingProvider(true);
+    try {
+      const res = await fetch("/api/admin/payment-settings", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ provider: newProvider }),
+      });
+      if (res.ok) {
+        setPaymentProvider(newProvider);
+        toast.success(`Payment gateway switched to ${newProvider.toUpperCase()} Sandbox successfully!`);
+      } else {
+        toast.error("Failed to switch payment gateway.");
+      }
+    } catch (e: any) {
+      console.error(e);
+      toast.error("Error switching payment gateway.");
+    } finally {
+      setUpdatingProvider(false);
+    }
+  };
+
   useEffect(() => {
     fetchKeyStats();
+    fetchPaymentProvider();
   }, []);
 
   const getStatusBadge = (key: KeyStatus) => {
@@ -81,10 +122,10 @@ export default function ApiKeysTelemetryPage() {
         <div>
           <h1 className="text-2xl font-extrabold uppercase tracking-tight text-white flex items-center gap-3">
             <Key className="size-6 text-violet-400" />
-            API Key Telemetry
+            API Keys & Payment Gateway Control
           </h1>
           <p className="text-xs text-zinc-500 font-semibold uppercase tracking-wider mt-1.5">
-            Real-time tracking of in-memory load balancing and rate limits
+            Real-time telemetry, rate limits, and payment gateway routing
           </p>
         </div>
         <Button
@@ -95,6 +136,62 @@ export default function ApiKeysTelemetryPage() {
           <RefreshCw className={`size-3.5 ${loading ? "animate-spin" : ""}`} />
           {loading ? "Refreshing..." : "Refresh Stats"}
         </Button>
+      </div>
+
+      {/* 💳 PAYMENT GATEWAY SWITCHER CARD */}
+      <div className="p-6 rounded-2xl border border-zinc-800 bg-zinc-950/60 backdrop-blur-xl space-y-4">
+        <div className="flex items-center justify-between flex-wrap gap-3">
+          <div className="flex items-center gap-3">
+            <div className="size-10 rounded-xl bg-violet-500/10 border border-violet-500/20 flex items-center justify-center text-violet-400">
+              <CreditCard className="size-5" />
+            </div>
+            <div>
+              <h3 className="text-sm font-extrabold text-white uppercase tracking-wider font-mono">
+                Active Payment Gateway
+              </h3>
+              <p className="text-[11px] text-zinc-400 font-mono">
+                Dynamically switch payment routing between Paddle Billing & Stripe Checkout
+              </p>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-2 bg-zinc-900 p-1.5 rounded-xl border border-zinc-800">
+            <button
+              onClick={() => handleSwitchProvider("paddle")}
+              disabled={updatingProvider}
+              className={`px-4 py-2 rounded-lg text-xs font-mono font-bold uppercase tracking-wider transition-all flex items-center gap-2 cursor-pointer ${
+                paymentProvider === "paddle"
+                  ? "bg-amber-400 text-black shadow-md shadow-amber-400/20"
+                  : "text-zinc-400 hover:text-white"
+              }`}
+            >
+              <Zap className="size-3.5 fill-current" />
+              <span>Paddle Sandbox</span>
+              {paymentProvider === "paddle" && <span className="size-2 rounded-full bg-black animate-pulse" />}
+            </button>
+
+            <button
+              onClick={() => handleSwitchProvider("stripe")}
+              disabled={updatingProvider}
+              className={`px-4 py-2 rounded-lg text-xs font-mono font-bold uppercase tracking-wider transition-all flex items-center gap-2 cursor-pointer ${
+                paymentProvider === "stripe"
+                  ? "bg-violet-500 text-white shadow-md shadow-violet-500/20"
+                  : "text-zinc-400 hover:text-white"
+              }`}
+            >
+              <CreditCard className="size-3.5" />
+              <span>Stripe Sandbox</span>
+              {paymentProvider === "stripe" && <span className="size-2 rounded-full bg-white animate-pulse" />}
+            </button>
+          </div>
+        </div>
+
+        <div className="flex items-center justify-between text-[11px] font-mono text-zinc-400 pt-2 border-t border-zinc-900">
+          <span>Active Gateway Target: <strong className="text-white uppercase">{paymentProvider}</strong></span>
+          <span className="text-emerald-400 flex items-center gap-1">
+            <ShieldCheck className="size-3.5" /> Live Firestore Routing Active
+          </span>
+        </div>
       </div>
 
       {error && (

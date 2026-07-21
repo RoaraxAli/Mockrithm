@@ -1,5 +1,7 @@
 import { NextResponse } from "next/server";
 import { getCurrentUser } from "@/lib/actions/auth.action";
+import { db } from "@/firebase/admin";
+import Stripe from "stripe";
 
 // Cache created price IDs in memory to avoid repeated API creation calls
 const priceCache: Record<string, string> = {};
@@ -30,11 +32,72 @@ export async function POST(request: Request) {
       }
     }
 
+    // Check active Payment Gateway Provider setting from Firestore or environment
+    let activeProvider = process.env.PAYMENT_PROVIDER || "paddle";
+    try {
+      const settingsDoc = await db.collection("system_settings").doc("payment").get();
+      if (settingsDoc.exists && settingsDoc.data()?.provider) {
+        activeProvider = settingsDoc.data()?.provider;
+      }
+    } catch (e) {
+      console.warn("Could not read payment settings doc, falling back to default:", e);
+    }
+
+    const origin = request.headers.get("origin") || new URL(request.url).origin;
+
+    // -------------------------------------------------------------
+    // 💳 STRIPE PAYMENTS PROVIDER ROUTE
+    // -------------------------------------------------------------
+    if (activeProvider === "stripe") {
+      const stripeSecret = process.env.STRIPE_SECRET_KEY;
+      if (!stripeSecret) {
+        return NextResponse.json({ error: "Stripe Secret Key not configured" }, { status: 500 });
+      }
+
+      const stripe = new Stripe(stripeSecret);
+      const session = await stripe.checkout.sessions.create({
+        payment_method_types: ["card"],
+        line_items: [
+          {
+            price_data: {
+              currency: "usd",
+              product_data: {
+                name: plan === "pro" ? "Mockrithm Pro Tier Upgrade" : "Mockrithm Premium Tier Upgrade",
+                description: plan === "pro"
+                  ? "Full unrestricted access to systems design simulations, telemetry sharing, custom resume matching, and advanced ATS tools."
+                  : "Premium upgrade for ATS resume templates, unlimited real-time interviews, and advanced analytics.",
+              },
+              unit_amount: amountCents,
+            },
+            quantity: 1,
+          },
+        ],
+        mode: "payment",
+        metadata: {
+          userId: user.id,
+          plan: plan,
+          billingInterval: billingInterval,
+          provider: "stripe",
+        },
+        success_url: `${origin}/api/payment/success?session_id={CHECKOUT_SESSION_ID}&provider=stripe`,
+        cancel_url: `${origin}/payment/cancel`,
+      });
+
+      if (!session.url) {
+        return NextResponse.json({ error: "Failed to create Stripe checkout session URL" }, { status: 500 });
+      }
+
+      return NextResponse.json({ success: true, checkoutUrl: session.url, provider: "stripe" });
+    }
+
+    // -------------------------------------------------------------
+    // ⚓ PADDLE PAYMENTS PROVIDER ROUTE
+    // -------------------------------------------------------------
     const apiKey = process.env.PADDLE_API_KEY;
     const paddleEnv = process.env.PADDLE_ENV || "sandbox";
     const apiBase = paddleEnv === "sandbox" ? "https://sandbox-api.paddle.com" : "https://api.paddle.com";
 
-    // Check environment variables first
+    // Check environment variables for custom price IDs
     let priceId = "";
     if (plan === "pro") {
       priceId = billingInterval === "annual"
@@ -45,8 +108,6 @@ export async function POST(request: Request) {
         ? (process.env.PADDLE_PRICE_PREMIUM_ANNUAL || "")
         : (process.env.PADDLE_PRICE_PREMIUM_MONTHLY || "");
     }
-
-    const origin = request.headers.get("origin") || new URL(request.url).origin;
 
     if (apiKey && apiKey.startsWith("pdl_")) {
       const authHeaders = {
@@ -86,7 +147,6 @@ export async function POST(request: Request) {
       // 3. If no matching price exists in Paddle catalog, create Product & Price dynamically
       if (!priceId) {
         try {
-          // Create Product
           const prodRes = await fetch(`${apiBase}/products`, {
             method: "POST",
             headers: authHeaders,
@@ -102,7 +162,6 @@ export async function POST(request: Request) {
             const productId = prodData.data?.id;
 
             if (productId) {
-              // Create Price
               const priceRes = await fetch(`${apiBase}/prices`, {
                 method: "POST",
                 headers: authHeaders,
@@ -125,14 +184,9 @@ export async function POST(request: Request) {
                 priceId = priceData.data?.id;
                 if (priceId) {
                   priceCache[cacheKey] = priceId;
-                  console.log(`Created dynamic Paddle ${paddleEnv} Price ID: ${priceId}`);
                 }
-              } else {
-                console.error("Paddle Price creation failed:", await priceRes.text());
               }
             }
-          } else {
-            console.error("Paddle Product creation failed:", await prodRes.text());
           }
         } catch (e) {
           console.error("Dynamic Paddle product/price creation error:", e);
@@ -156,17 +210,14 @@ export async function POST(request: Request) {
                 userId: user.id,
                 plan: plan,
                 billingInterval: billingInterval,
+                provider: "paddle",
               },
             }),
           });
 
           const txnData = await txnRes.json();
-          console.log("Paddle Transaction Response:", JSON.stringify(txnData));
-
           if (txnRes.ok && txnData.data?.checkout?.url) {
-            return NextResponse.json({ success: true, checkoutUrl: txnData.data.checkout.url });
-          } else if (txnData.error) {
-            console.error("Paddle transaction creation error:", txnData.error);
+            return NextResponse.json({ success: true, checkoutUrl: txnData.data.checkout.url, provider: "paddle" });
           }
         } catch (err) {
           console.error("Paddle transaction API request failed:", err);
@@ -174,11 +225,11 @@ export async function POST(request: Request) {
       }
     }
 
-    // Direct fallback if Paddle credentials or API call failed
-    const checkoutUrl = `${origin}/api/payment/success?session_id=PAD-${Date.now()}&plan=${plan}&billingInterval=${billingInterval}`;
-    return NextResponse.json({ success: true, checkoutUrl });
+    // Direct fallback if Paddle API call failed
+    const checkoutUrl = `${origin}/api/payment/success?session_id=PAD-${Date.now()}&plan=${plan}&billingInterval=${billingInterval}&provider=paddle`;
+    return NextResponse.json({ success: true, checkoutUrl, provider: "paddle" });
   } catch (error: any) {
-    console.error("Error in Paddle payment init:", error);
+    console.error("Error in payment init:", error);
     return NextResponse.json({ error: error.message || "Internal Server Error" }, { status: 500 });
   }
 }
