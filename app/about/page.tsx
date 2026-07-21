@@ -5,8 +5,53 @@ import { useAuth } from "@clerk/nextjs";
 import { Badge } from "@/components/ui/badge";
 import { motion } from "framer-motion";
 import { Compass, Sparkles, Target, HeartHandshake, ArrowUpRight, Instagram } from "lucide-react";
+import { gsap } from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
+import Lenis from "lenis";
+
 import MarketingNavbar from "@/components/shared/MarketingNavbar";
 import FeedbackForm from "@/components/FeedbackForm";
+
+// Custom geometric monochrome divider matching Home page
+const SectionDivider = () => {
+  const ref = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    gsap.registerPlugin(ScrollTrigger);
+    const line = ref.current?.querySelector(".divider-line") as HTMLElement | null;
+    if (!line || !ref.current) return;
+
+    const tween = gsap.fromTo(
+      line,
+      { scaleX: 0 },
+      {
+        scaleX: 1,
+        duration: 1.1,
+        ease: "power3.out",
+        scrollTrigger: {
+          trigger: ref.current,
+          start: "top 85%",
+          toggleActions: "play none none reverse",
+        },
+      }
+    );
+    return () => {
+      tween.scrollTrigger?.kill();
+      tween.kill();
+    };
+  }, []);
+
+  return (
+    <div ref={ref} className="relative w-full flex items-center justify-center my-16 select-none z-20">
+      <div className="divider-line w-full h-[1px] bg-gradient-to-r from-transparent via-zinc-700 to-transparent relative origin-center">
+        <div className="absolute left-[15%] top-1/2 -translate-y-1/2 size-1.5 rotate-45 border border-zinc-600 bg-zinc-950/60 backdrop-blur-sm" />
+        <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 size-1.5 rounded-full bg-white shadow-[0_0_8px_rgba(255,255,255,0.4)]" />
+        <div className="absolute right-[15%] top-1/2 -translate-y-1/2 size-1.5 rotate-45 border border-zinc-600 bg-zinc-950/60 backdrop-blur-sm" />
+      </div>
+    </div>
+  );
+};
 
 // Premium 3D Tilt Card with Glare Reflection
 function ThreeDTiltCard({ children, className = "" }: { children: React.ReactNode; className?: string }) {
@@ -48,8 +93,8 @@ function ThreeDTiltCard({ children, className = "" }: { children: React.ReactNod
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
       style={{ perspective: 1000, transformStyle: "preserve-3d" }}
-      className={`relative rounded-2xl border border-white/10 bg-white/5 backdrop-blur-2xl p-8 transition-all duration-300 shadow-[0_8px_30px_rgb(0,0,0,0.12)] ${
-        isHovered ? "border-white/20 shadow-[0_20px_40px_rgba(255,255,255,0.05)]" : ""
+      className={`relative rounded-2xl border border-white/10 bg-zinc-900/40 backdrop-blur-xl p-8 transition-all duration-300 shadow-[0_8px_30px_rgb(0,0,0,0.12)] ${
+        isHovered ? "border-white/20 shadow-[0_20px_40px_rgba(255,255,255,0.08)]" : ""
       } ${className}`}
     >
       <div
@@ -77,12 +122,80 @@ function ThreeDTiltCard({ children, className = "" }: { children: React.ReactNod
 export default function AboutPage() {
   const [videoSrc, setVideoSrc] = useState<string | null>(null);
   const { isSignedIn } = useAuth();
+  const contentRef = useRef<HTMLDivElement>(null);
+  const progressBarRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const timer = setTimeout(() => {
       setVideoSrc("/bg.mp4");
     }, 600);
     return () => clearTimeout(timer);
+  }, []);
+
+  // Initialize Lenis smooth scroll + top progress bar driven by scroll
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+
+    gsap.registerPlugin(ScrollTrigger);
+
+    const lenis = new Lenis({
+      lerp: 0.07,
+      wheelMultiplier: 0.8,
+      touchMultiplier: 0.8,
+      infinite: false,
+    });
+
+    lenis.on("scroll", ScrollTrigger.update);
+
+    const onTick = (time: number) => {
+      lenis.raf(time * 1000);
+    };
+    gsap.ticker.add(onTick);
+    gsap.ticker.lagSmoothing(0);
+
+    const progressTarget = gsap.quickTo(progressBarRef.current, "scaleX", {
+      duration: 0.4,
+      ease: "power2.out",
+    });
+    lenis.on("scroll", ({ progress }: { progress: number }) => {
+      progressTarget(progress);
+    });
+
+    return () => {
+      lenis.destroy();
+      gsap.ticker.remove(onTick);
+      ScrollTrigger.getAll().forEach((trigger) => trigger.kill());
+    };
+  }, []);
+
+  // Section zoom animation on scroll
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    gsap.registerPlugin(ScrollTrigger);
+
+    const ctx = gsap.context(() => {
+      const sections = gsap.utils.toArray<HTMLElement>(".section-zoom");
+
+      sections.forEach((section) => {
+        gsap.fromTo(
+          section,
+          { scale: 1.03, opacity: 0.85 },
+          {
+            scale: 1,
+            opacity: 1,
+            ease: "none",
+            scrollTrigger: {
+              trigger: section,
+              start: "top bottom",
+              end: "top 75%",
+              scrub: 0.1,
+            },
+          }
+        );
+      });
+    }, contentRef);
+
+    return () => ctx.revert();
   }, []);
 
   const coreValues = [
@@ -104,8 +217,17 @@ export default function AboutPage() {
   ];
 
   return (
-    <div className="min-h-screen bg-transparent text-white relative overflow-hidden font-mona-sans selection:bg-white selection:text-black">
+    <div className="min-h-screen bg-zinc-950 text-white relative font-mona-sans selection:bg-white selection:text-black">
       {!isSignedIn && <MarketingNavbar />}
+
+      {/* Scroll progress bar (top of viewport) */}
+      <div className="fixed top-0 left-0 right-0 h-[2px] z-[9998] pointer-events-none">
+        <div
+          ref={progressBarRef}
+          className="h-full bg-gradient-to-r from-white/40 via-white to-white/40 origin-left shadow-[0_0_8px_rgba(255,255,255,0.6)]"
+          style={{ transform: "scaleX(0)", willChange: "transform" }}
+        />
+      </div>
 
       {/* Fixed Fullscreen Background Video & Overlay */}
       <div className="fixed inset-0 w-full h-screen z-0 pointer-events-none bg-zinc-950">
@@ -121,10 +243,13 @@ export default function AboutPage() {
         ) : (
           <div className="absolute inset-0 w-full h-full bg-zinc-950" />
         )}
-        <div className="absolute inset-0 bg-black/80" />
+        <div className="absolute inset-0 bg-black/50 z-0" />
       </div>
 
-      <main className="relative z-10 max-w-[1400px] mx-auto pt-32 flex flex-col gap-32">
+      {/* Cinematic ambient background glow spot */}
+      <div className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[1000px] h-[500px] bg-[radial-gradient(circle,rgba(255,255,255,0.025)_0%,rgba(0,0,0,0)_60%)] pointer-events-none z-0" />
+
+      <main ref={contentRef} className="relative z-10 max-w-[1400px] mx-auto pt-32 flex flex-col gap-12">
         
         {/* Hero Section */}
         <section className="text-center flex flex-col items-center max-w-4xl mx-auto pt-16 px-6">
@@ -133,41 +258,44 @@ export default function AboutPage() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, ease: "easeOut" }}
           >
-            <Badge
-              variant="outline"
-              className="border-white/10 bg-white/5 text-zinc-300 px-4 py-1.5 text-[10px] font-bold tracking-[0.2em] uppercase rounded-full backdrop-blur-md mb-8"
-            >
-              The Philosophy
-            </Badge>
+            <div className="inline-flex items-center gap-1.5 bg-zinc-900/80 border border-white/10 px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400 font-mono mb-8 backdrop-blur-md shadow-lg">
+              <Sparkles className="size-3.5 text-white" /> THE PHILOSOPHY
+            </div>
           </motion.div>
 
           <motion.h1
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.7, delay: 0.1, ease: "easeOut" }}
-            className="text-5xl sm:text-7xl md:text-8xl font-bold tracking-tight leading-[1.05] text-white"
+            className="text-5xl sm:text-7xl md:text-[5.5rem] leading-[1] tracking-[-2px] font-normal text-white animate-fade-rise"
+            style={{ fontFamily: "'Instrument Serif', serif" }}
           >
             A realistic mock <br />
-            <em className="text-white/80 italic font-light">interview platform.</em>
+            <em className="not-italic text-white/60">interview platform.</em>
           </motion.h1>
 
           <motion.p
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.7, delay: 0.2, ease: "easeOut" }}
-            className="mt-10 text-lg sm:text-xl text-zinc-300 leading-relaxed max-w-3xl font-medium"
+            className="mt-8 text-white/60 text-base sm:text-lg max-w-2xl leading-relaxed font-normal animate-fade-rise-delay"
+            style={{ fontFamily: "'Inter', sans-serif" }}
           >
             We built Mockrithm because standard interview prep is broken. Memorizing answers doesn't help you in a real technical interview. You need actual practice with an interviewer that challenges your logic.
           </motion.p>
         </section>
 
+        <SectionDivider />
+
         {/* The Story */}
-        <section className="px-6 max-w-4xl mx-auto text-center">
-          <h2 className="text-[11px] font-bold uppercase tracking-[0.2em] text-zinc-500 mb-4">The Story</h2>
-          <h3 className="text-3xl md:text-4xl font-semibold text-white leading-tight mb-6">
-            Why we built this
-          </h3>
-          <div className="space-y-4 text-base md:text-lg text-zinc-300 leading-relaxed font-medium">
+        <section className="section-zoom px-6 max-w-4xl mx-auto text-center">
+          <div className="inline-flex items-center gap-1.5 bg-zinc-900/80 border border-white/10 px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400 font-mono mb-4 backdrop-blur-md">
+            <Compass className="size-3.5 text-white" /> THE STORY
+          </div>
+          <h2 className="text-4xl md:text-5xl font-normal text-white leading-tight mb-6" style={{ fontFamily: "'Instrument Serif', serif" }}>
+            Why we <em className="not-italic text-white/60">built this</em>
+          </h2>
+          <div className="space-y-4 text-base md:text-lg text-zinc-300 leading-relaxed font-normal" style={{ fontFamily: "'Inter', sans-serif" }}>
             <p>
               We were tired of paying for expensive mock interviews. We wanted a tool that anyone could use to practice technical and behavioral questions anytime, anywhere.
             </p>
@@ -177,40 +305,48 @@ export default function AboutPage() {
           </div>
         </section>
 
-        {/* Core Values */}
-        <section className="w-full px-6 max-w-6xl mx-auto">
+        <SectionDivider />
+
+        {/* Core Values / Pillars */}
+        <section className="section-zoom w-full px-6 max-w-6xl mx-auto">
           <div className="text-center mb-16">
-            <h2 className="text-[11px] font-bold uppercase tracking-[0.2em] text-zinc-500 mb-3">Our Pillars</h2>
-            <h3 className="text-4xl md:text-5xl font-bold text-white">What Guides Our Platform</h3>
+            <div className="inline-flex items-center gap-1.5 bg-zinc-900/80 border border-white/10 px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400 font-mono mb-3 backdrop-blur-md">
+              <Target className="size-3.5 text-white" /> OUR PILLARS
+            </div>
+            <h3 className="text-4xl md:text-5xl font-normal text-white" style={{ fontFamily: "'Instrument Serif', serif" }}>
+              What <em className="not-italic text-white/60">guides our platform</em>
+            </h3>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {coreValues.map((value, index) => (
-              <ThreeDTiltCard key={index} className="flex flex-col h-full !bg-transparent !backdrop-blur-none !shadow-none border-white/10 hover:!border-white/20">
-                <div className="h-14 w-14 rounded-2xl bg-white/5 flex items-center justify-center border border-white/10 mb-6 shrink-0 relative z-10 transition-colors">
+              <ThreeDTiltCard key={index} className="flex flex-col h-full !bg-zinc-900/40 !backdrop-blur-xl border border-white/10 hover:!border-white/20 transition-all duration-300 shadow-2xl">
+                <div className="h-14 w-14 rounded-2xl bg-white/10 flex items-center justify-center border border-white/15 mb-6 shrink-0 relative z-10 transition-colors shadow-inner">
                   {value.icon}
                 </div>
-                <h4 className="text-base font-bold text-white mb-3 tracking-tight relative z-10">{value.title}</h4>
-                <p className="text-sm text-zinc-300 font-medium leading-relaxed relative z-10">{value.description}</p>
+                <h4 className="text-xl font-normal text-white mb-3 tracking-tight relative z-10" style={{ fontFamily: "'Instrument Serif', serif" }}>{value.title}</h4>
+                <p className="text-sm text-zinc-300 font-normal leading-relaxed relative z-10" style={{ fontFamily: "'Inter', sans-serif" }}>{value.description}</p>
               </ThreeDTiltCard>
             ))}
           </div>
         </section>
 
+        <SectionDivider />
+
         {/* --- CUSTOM FOUNDERS SECTION --- */}
-        <section id="about" className="relative min-h-[80vh] flex flex-col justify-center py-20 sm:py-28 px-6 sm:px-10 overflow-hidden">
+        <section id="about" className="section-zoom relative min-h-[70vh] flex flex-col justify-center py-12 px-6 sm:px-10 overflow-hidden">
           <div className="max-w-7xl mx-auto relative z-10 w-full">
             <div className="flex flex-col lg:flex-row items-start justify-between gap-10 lg:gap-20">
               
               {/* Left Side: Heading */}
               <div>
-                <h2 className="text-white font-bold uppercase tracking-tight leading-[0.95] text-[36px] sm:text-[48px] lg:text-[54px]">
-                  About <br /> the creators
+                <h2 className="text-white font-normal uppercase tracking-tight leading-[0.95] text-[36px] sm:text-[48px] lg:text-[54px]" style={{ fontFamily: "'Instrument Serif', serif" }}>
+                  About <br /> <em className="not-italic text-white/60">the creators</em>
                 </h2>
               </div>
 
               {/* Right Side: Description */}
-              <div className="flex flex-col max-w-xl text-zinc-300 text-[17px] sm:text-[18px] leading-[1.5]">
+              <div className="flex flex-col max-w-xl text-zinc-300 text-[17px] sm:text-[18px] leading-[1.6] font-normal" style={{ fontFamily: "'Inter', sans-serif" }}>
                 <p>
                   Mockrithm was created by Ali & Ahmed — engineers who understand the intense pressure, anxiety, and bottlenecks of technical recruitment.
                 </p>
@@ -220,16 +356,16 @@ export default function AboutPage() {
               </div>
             </div>
             
-            {/* Stats Cards Grid - IMAGES FIXED TO FULL OPACITY */}
-            <div className="mt-14 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+            {/* Stats Cards Grid */}
+            <div className="mt-14 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               
               {/* Card 1 */}
               <div 
-                className="relative w-full h-[280px] sm:h-[340px] bg-white/10 p-[1.5px]"
+                className="relative w-full h-[280px] sm:h-[340px] bg-white/15 p-[1.5px] shadow-2xl transition-all duration-300 hover:bg-white/25"
                 style={{ clipPath: "polygon(64px 0, calc(100% - 14px) 0, calc(100% - 4px) 4px, 100% 14px, 100% calc(100% - 14px), calc(100% - 4px) calc(100% - 4px), calc(100% - 14px) 100%, 14px 100%, 4px calc(100% - 4px), 0 calc(100% - 14px), 0 64px)" }}
               >
                 <div 
-                  className="relative w-full h-full overflow-hidden bg-cover bg-center"
+                  className="relative w-full h-full overflow-hidden bg-cover bg-center bg-zinc-950/90 backdrop-blur-md"
                   style={{ 
                     clipPath: "polygon(64px 0, calc(100% - 14px) 0, calc(100% - 4px) 4px, 100% 14px, 100% calc(100% - 14px), calc(100% - 4px) calc(100% - 4px), calc(100% - 14px) 100%, 14px 100%, 4px calc(100% - 4px), 0 calc(100% - 14px), 0 64px)",
                     backgroundImage: "url('/images/ring1.png')"
@@ -237,8 +373,9 @@ export default function AboutPage() {
                 >
                   <div className="absolute left-6 right-6 bottom-6 max-w-[66%]">
                     <div 
-                      className="font-semibold uppercase leading-none text-[36px] sm:text-[52px]"
+                      className="font-normal uppercase leading-none text-[42px] sm:text-[56px]"
                       style={{
+                        fontFamily: "'Instrument Serif', serif",
                         background: "linear-gradient(294deg, #ffffff 20%, #a1a1aa)",
                         WebkitBackgroundClip: "text",
                         backgroundClip: "text",
@@ -247,7 +384,7 @@ export default function AboutPage() {
                     >
                       26
                     </div>
-                    <div className="mt-3 text-[14px] leading-[1.4] text-zinc-300 drop-shadow-md">
+                    <div className="mt-3 text-[14px] leading-[1.4] text-zinc-300 drop-shadow-md font-normal" style={{ fontFamily: "'Inter', sans-serif" }}>
                       public repositories built across both our GitHub accounts.
                     </div>
                   </div>
@@ -256,11 +393,11 @@ export default function AboutPage() {
 
               {/* Card 2 */}
               <div 
-                className="relative w-full h-[280px] sm:h-[340px] bg-white/10 p-[1.5px] lg:mt-24"
+                className="relative w-full h-[280px] sm:h-[340px] bg-white/15 p-[1.5px] lg:mt-24 shadow-2xl transition-all duration-300 hover:bg-white/25"
                 style={{ clipPath: "polygon(0 14px, 4px 4px, 14px 0, calc(100% - 64px) 0, 100% 64px, 100% calc(100% - 14px), calc(100% - 4px) calc(100% - 4px), calc(100% - 14px) 100%, 64px 100%, 0 calc(100% - 64px))" }}
               >
                 <div 
-                  className="relative w-full h-full overflow-hidden bg-cover bg-center"
+                  className="relative w-full h-full overflow-hidden bg-cover bg-center bg-zinc-950/90 backdrop-blur-md"
                   style={{ 
                     clipPath: "polygon(0 14px, 4px 4px, 14px 0, calc(100% - 64px) 0, 100% 64px, 100% calc(100% - 14px), calc(100% - 4px) calc(100% - 4px), calc(100% - 14px) 100%, 64px 100%, 0 calc(100% - 64px))",
                     backgroundImage: "url('/images/ring2.png')"
@@ -268,8 +405,9 @@ export default function AboutPage() {
                 >
                   <div className="absolute left-6 bottom-20 max-w-[66%]">
                     <div 
-                      className="font-semibold uppercase leading-none text-[36px] sm:text-[52px]"
+                      className="font-normal uppercase leading-none text-[42px] sm:text-[56px]"
                       style={{
+                        fontFamily: "'Instrument Serif', serif",
                         background: "linear-gradient(294deg, #ffffff 20%, #a1a1aa)",
                         WebkitBackgroundClip: "text",
                         backgroundClip: "text",
@@ -278,7 +416,7 @@ export default function AboutPage() {
                     >
                       330+
                     </div>
-                    <div className="mt-3 text-[14px] leading-[1.4] text-zinc-300 drop-shadow-md">
+                    <div className="mt-3 text-[14px] leading-[1.4] text-zinc-300 drop-shadow-md font-normal" style={{ fontFamily: "'Inter', sans-serif" }}>
                       commits pushed to Mockrithm alone. We are constantly iterating and building.
                     </div>
                   </div>
@@ -287,20 +425,21 @@ export default function AboutPage() {
 
               {/* Card 3 */}
               <div 
-                className="relative w-full h-[280px] sm:h-[340px] bg-white/10 p-[1.5px]"
+                className="relative w-full h-[280px] sm:h-[340px] bg-white/15 p-[1.5px] shadow-2xl transition-all duration-300 hover:bg-white/25"
                 style={{ clipPath: "polygon(0 14px, 4px 4px, 14px 0, calc(100% - 64px) 0, 100% 64px, 100% calc(100% - 64px), calc(100% - 64px) 100%, 14px 100%, 4px calc(100% - 4px), 0 calc(100% - 14px))" }}
               >
                 <div 
-                  className="relative w-full h-full overflow-hidden bg-cover bg-center"
+                  className="relative w-full h-full overflow-hidden bg-cover bg-center bg-zinc-950/90 backdrop-blur-md"
                   style={{ 
-                    clipPath: "polygon(0 14px, 4px 4px, 14px 0, calc(100% - 64px) 0, 100% 64px, 100% calc(100% - 64px), calc(100% - 64px) 100%, 14px 100%, 4px calc(100% - 4px), 0 calc(100% - 14px))",
+                    clipPath: "polygon(0 14px, 4px 4px, 14px 0, calc(100% - 64px) 0, 100% 64px, 100% calc(100% - 14px), calc(100% - 4px) calc(100% - 4px), calc(100% - 64px) 100%, 14px 100%, 4px calc(100% - 4px), 0 calc(100% - 14px))",
                     backgroundImage: "url('/images/ring3.png')"
                   }}
                 >
                   <div className="absolute left-6 right-28 bottom-6 max-w-[66%]">
                     <div 
-                      className="font-semibold uppercase leading-none text-[36px] sm:text-[52px]"
+                      className="font-normal uppercase leading-none text-[42px] sm:text-[56px]"
                       style={{
+                        fontFamily: "'Instrument Serif', serif",
                         background: "linear-gradient(294deg, #ffffff 20%, #a1a1aa)",
                         WebkitBackgroundClip: "text",
                         backgroundClip: "text",
@@ -309,7 +448,7 @@ export default function AboutPage() {
                     >
                       2
                     </div>
-                    <div className="mt-3 text-[14px] leading-[1.4] text-zinc-300 drop-shadow-md">
+                    <div className="mt-3 text-[14px] leading-[1.4] text-zinc-300 drop-shadow-md font-normal" style={{ fontFamily: "'Inter', sans-serif" }}>
                       passionate creators — engineers and students pushing code every single day.
                     </div>
                   </div>
@@ -321,29 +460,32 @@ export default function AboutPage() {
           </div>
         </section>
 
-        {/* --- CUSTOM CONTACT SECTION OVERHAUL --- */}
+        <SectionDivider />
+
         {/* Contact Section */}
-        <section id="contact" className="w-full scroll-mt-32 px-6 pt-10 max-w-6xl mx-auto mb-20">
+        <section id="contact" className="section-zoom w-full scroll-mt-32 px-6 pt-6 max-w-6xl mx-auto mb-20">
           <div className="text-center mb-16">
-            <h2 className="text-[11px] font-bold uppercase tracking-[0.2em] text-zinc-500 mb-3" style={{ fontFamily: "'Inter', sans-serif" }}>Reach Out</h2>
+            <div className="inline-flex items-center gap-1.5 bg-zinc-900/80 border border-white/10 px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400 font-mono mb-3 backdrop-blur-md">
+              <HeartHandshake className="size-3.5 text-white" /> REACH OUT
+            </div>
             <h3 className="text-4xl md:text-5xl font-normal text-white" style={{ fontFamily: "'Instrument Serif', serif" }}>
-              Get in <em className="text-white/60 italic font-light">touch</em>
+              Get in <em className="not-italic text-white/60">touch</em>
             </h3>
-            <p className="mt-4 text-base text-zinc-400 leading-relaxed font-medium max-w-xl mx-auto" style={{ fontFamily: "'Inter', sans-serif" }}>
+            <p className="mt-4 text-base text-zinc-400 leading-relaxed font-normal max-w-xl mx-auto" style={{ fontFamily: "'Inter', sans-serif" }}>
               Have questions, feedback, or need support? Send us a message directly and our team will get back to you shortly. We're building this for you.
             </p>
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-24 items-start">
             
-            {/* Left Column: Info & Story */}
-            <div className="flex flex-col gap-8 lg:pt-8">
+            {/* Left Column: Info */}
+            <div className="flex flex-col gap-8 lg:pt-4">
               <div className="flex items-start gap-4 group cursor-pointer">
-                <div className="h-14 w-14 rounded-full bg-white/5 border border-white/10 flex items-center justify-center shrink-0 group-hover:bg-white/10 transition-colors">
+                <div className="h-14 w-14 rounded-2xl bg-zinc-900/60 border border-white/10 flex items-center justify-center shrink-0 group-hover:bg-white/10 group-hover:border-white/20 transition-all shadow-md">
                   <HeartHandshake className="h-6 w-6 text-white/70 group-hover:text-white transition-colors" />
                 </div>
                 <div className="flex flex-col gap-1.5" style={{ fontFamily: "'Inter', sans-serif" }}>
-                  <span className="text-xs font-bold uppercase tracking-wider text-zinc-500">Email Us</span>
+                  <span className="text-xs font-mono font-bold uppercase tracking-wider text-zinc-500">Email Us</span>
                   <a href="mailto:support@mockrithm.me" className="text-xl font-medium text-white hover:text-zinc-300 transition-colors flex items-center gap-2">
                     support@mockrithm.me <ArrowUpRight className="h-4 w-4 opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all" />
                   </a>
@@ -352,21 +494,22 @@ export default function AboutPage() {
               </div>
 
               <div className="flex items-start gap-4 group">
-                <div className="h-14 w-14 rounded-full bg-white/5 border border-white/10 flex items-center justify-center shrink-0">
+                <div className="h-14 w-14 rounded-2xl bg-zinc-900/60 border border-white/10 flex items-center justify-center shrink-0">
                   <Target className="h-6 w-6 text-white/70" />
                 </div>
                 <div className="flex flex-col gap-1.5" style={{ fontFamily: "'Inter', sans-serif" }}>
-                  <span className="text-xs font-bold uppercase tracking-wider text-zinc-500">Location</span>
+                  <span className="text-xs font-mono font-bold uppercase tracking-wider text-zinc-500">Location</span>
                   <span className="text-xl font-medium text-white">Global / Remote</span>
                   <span className="text-sm text-zinc-500">Built in the cloud, for the world.</span>
                 </div>
               </div>
+
               <div className="flex items-start gap-4 group cursor-pointer">
-                <div className="h-14 w-14 rounded-full bg-white/5 border border-white/10 flex items-center justify-center shrink-0 group-hover:bg-white/10 transition-colors">
+                <div className="h-14 w-14 rounded-2xl bg-zinc-900/60 border border-white/10 flex items-center justify-center shrink-0 group-hover:bg-white/10 group-hover:border-white/20 transition-all shadow-md">
                   <Instagram className="h-6 w-6 text-white/70 group-hover:text-white transition-colors" />
                 </div>
                 <div className="flex flex-col gap-1.5" style={{ fontFamily: "'Inter', sans-serif" }}>
-                  <span className="text-xs font-bold uppercase tracking-wider text-zinc-500">Instagram</span>
+                  <span className="text-xs font-mono font-bold uppercase tracking-wider text-zinc-500">Instagram</span>
                   <a href="https://instagram.com/mockrithm" target="_blank" rel="noreferrer" className="text-xl font-medium text-white hover:text-zinc-300 transition-colors flex items-center gap-2">
                     @mockrithm <ArrowUpRight className="h-4 w-4 opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all" />
                   </a>
@@ -375,8 +518,8 @@ export default function AboutPage() {
               </div>
             </div>
 
-            {/* Right Column: Simple Form */}
-            <div className="w-full rounded-2xl border border-white/10 bg-zinc-900/30 p-8 shadow-2xl">
+            {/* Right Column: Feedback Form Card */}
+            <div className="w-full rounded-2xl border border-white/10 bg-zinc-900/40 backdrop-blur-xl p-8 shadow-2xl">
               <FeedbackForm />
             </div>
 
