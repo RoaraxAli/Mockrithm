@@ -2687,7 +2687,7 @@ function sanitizeInput(input: string): string {
     window.location.href = "https://accounts.mockrithm.me/sign-in?redirect_url=https://games.mockrithm.me";
   };
 
-  const selectedTopic = topics[activeTopic];
+  const selectedTopic = (topics as any)[activeTopic] || topics.html;
 
   return (
     <div className="min-h-screen bg-transparent text-white font-mona-sans relative overflow-x-hidden selection:bg-white selection:text-black">
