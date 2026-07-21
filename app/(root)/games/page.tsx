@@ -29,6 +29,7 @@ const Editor = dynamic(() => import("@monaco-editor/react"), { ssr: false });
 import GitGame from "@/components/games/GitGame";
 import LivePreview from "@/components/games/LivePreview";
 import Footer from "@/components/shared/Footer";
+import { ECertificateModal } from "@/components/games/ECertificateModal";
 
 // --- Country → valid cities map for location validation ---
 const COUNTRY_CITIES: Record<string, string[]> = {
@@ -215,6 +216,28 @@ function GamesPageContent() {
   const [progress, setProgress] = useState<Record<string, GameProgress>>({});
   const [totalXp, setTotalXp] = useState(0);
   const [loading, setLoading] = useState(true);
+
+  // Certificate Modal State
+  const [isCertModalOpen, setIsCertModalOpen] = useState(false);
+  const [certModalData, setCertModalData] = useState<{
+    userName: string;
+    gameName: string;
+    gameTheme?: string;
+    gameId: string;
+    levelReached: number;
+  } | null>(null);
+
+  const openCertificate = (game: GameInfo, level: number) => {
+    playSound("success");
+    setCertModalData({
+      userName: clerkUser?.fullName || clerkUser?.firstName || clerkUser?.primaryEmailAddress?.emailAddress?.split("@")[0] || "Developer Candidate",
+      gameName: game.name,
+      gameTheme: game.theme,
+      gameId: game.id,
+      levelReached: Math.max(level, 10),
+    });
+    setIsCertModalOpen(true);
+  };
 
   // Location onboarding modal
   const [showLocationModal, setShowLocationModal] = useState(false);
@@ -1026,7 +1049,20 @@ function GamesPageContent() {
 
     setEvalLogs(results);
     setEvaluationSuccess(allPassed);
-    if (allPassed) { playSound("success"); toast.success("Level complete! Great job."); handleLevelCompletion(); }
+    if (allPassed) {
+      playSound("success");
+      if (activeGame && (currentLevelNum === 10 || currentLevelNum >= 10)) {
+        toast.success(`🎓 Level ${currentLevelNum} Complete! E-Certificate Unlocked!`, {
+          action: {
+            label: "View Certificate",
+            onClick: () => openCertificate(activeGame, Math.max(currentLevelNum, (progress[activeGame.id]?.completedLevel || 0) + 1))
+          }
+        });
+      } else {
+        toast.success("Level complete! Great job.");
+      }
+      handleLevelCompletion();
+    }
     else { playSound("fail"); toast.error("Some tests failed. Check the output below."); }
   };
 
@@ -1404,6 +1440,29 @@ function GamesPageContent() {
                             <div className={`h-full bg-gradient-to-r ${activeGame.gradient} transition-all duration-500`} style={{ width: `${pct}%` }} />
                           </div>
                         </div>
+
+                        {gameProg.completedLevel >= 10 && (
+                          <div className="bg-gradient-to-br from-amber-500/10 via-zinc-950 to-amber-500/10 border border-amber-500/30 rounded-xl p-4 flex flex-col gap-2 mt-2">
+                            <div className="flex items-center justify-between">
+                              <span className="text-[10px] font-mono font-extrabold text-amber-300 uppercase flex items-center gap-1.5">
+                                <Award className="size-4 text-amber-400" /> E-Certificate Unlocked
+                              </span>
+                              <span className="text-[8px] font-mono text-amber-400 bg-amber-500/10 border border-amber-500/20 px-2 py-0.5 rounded-full font-bold">
+                                Level {gameProg.completedLevel}+
+                              </span>
+                            </div>
+                            <p className="text-[10px] text-zinc-400 font-mono leading-relaxed">
+                              You unlocked the official Mockrithm Mastery Certificate for {activeGame.name}.
+                            </p>
+                            <button
+                              onClick={() => openCertificate(activeGame, gameProg.completedLevel)}
+                              className="w-full py-2.5 bg-gradient-to-r from-amber-400 to-amber-500 hover:from-amber-300 hover:to-amber-400 text-black font-black text-xs uppercase tracking-wider rounded-lg transition-all shadow-md shadow-amber-500/20 flex items-center justify-center gap-2 cursor-pointer mt-1"
+                            >
+                              <Award className="size-4" />
+                              <span>Generate E-Certificate</span>
+                            </button>
+                          </div>
+                        )}
                       </div>
 
                       {/* Prerequisites */}
@@ -1829,6 +1888,15 @@ function GamesPageContent() {
                           <div className={`h-full bg-gradient-to-r ${game.gradient}`} style={{ width: `${pct}%` }} />
                         </div>
                       </div>
+                      {gp.completedLevel >= 10 && (
+                        <button
+                          onClick={() => openCertificate(game, gp.completedLevel)}
+                          className="mt-2 py-1 px-2.5 bg-amber-500/20 hover:bg-amber-500/30 border border-amber-500/40 text-amber-300 rounded-md text-[8px] font-mono font-bold uppercase tracking-wider flex items-center justify-center gap-1 transition-all cursor-pointer"
+                        >
+                          <Award className="size-3 text-amber-400" />
+                          <span>E-Certificate</span>
+                        </button>
+                      )}
                     </div>
                   );
                 })}
@@ -1873,6 +1941,15 @@ function GamesPageContent() {
                         <div className={`h-full bg-gradient-to-r ${isStarted ? game.gradient : "from-zinc-900 to-zinc-950"}`} style={{ width: `${pct}%` }} />
                       </div>
                     </div>
+                    {gp.completedLevel >= 10 && (
+                      <button
+                        onClick={() => openCertificate(game, gp.completedLevel)}
+                        className="mt-3 w-full py-1.5 bg-gradient-to-r from-amber-500/20 to-amber-400/20 hover:from-amber-500/30 hover:to-amber-400/30 border border-amber-500/40 text-amber-300 rounded-lg text-[9px] font-mono font-bold uppercase tracking-wider flex items-center justify-center gap-1.5 transition-all cursor-pointer shadow-sm"
+                      >
+                        <Award className="size-3.5 text-amber-400" />
+                        <span>Generate E-Certificate</span>
+                      </button>
+                    )}
                   </div>
                 );
               })}
@@ -2801,6 +2878,18 @@ function sanitizeInput(input: string): string {
       <div className="relative z-20 w-full bg-transparent">
         <Footer />
       </div>
+
+      {certModalData && (
+        <ECertificateModal
+          isOpen={isCertModalOpen}
+          onClose={() => setIsCertModalOpen(false)}
+          userName={certModalData.userName}
+          gameName={certModalData.gameName}
+          gameTheme={certModalData.gameTheme}
+          gameId={certModalData.gameId}
+          levelReached={certModalData.levelReached}
+        />
+      )}
 
     </div>
   );
