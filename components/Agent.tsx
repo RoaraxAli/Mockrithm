@@ -606,6 +606,7 @@ const Agent = ({
             console.log("[Agent.tsx] TTS audio playback ended naturally.");
             URL.revokeObjectURL(audioUrl);
             audioRef.current = null;
+            setIsSpeaking(false);
             resolve();
           });
 
@@ -640,6 +641,7 @@ const Agent = ({
     if (isSpeakingActiveRef.current) return;
 
     if (speechQueueRef.current.length === 0) {
+      setIsSpeaking(false);
       if (streamCompletedRef.current) {
         resumeListeningAfterSpeech();
       }
@@ -1837,13 +1839,18 @@ ${codeRef.current}
             clearInterval(timerIntervalRef.current);
             timerIntervalRef.current = null;
           }
+          let attempts = 0;
           const checkAndDisconnect = () => {
-            const isStillSpeaking = isSpeakingActiveRef.current || isSpeaking || (audioRef.current && !audioRef.current.paused);
-            if (isStillSpeaking) {
+            attempts++;
+            const isAudioPlaying = audioRef.current && !audioRef.current.paused && !audioRef.current.ended;
+            const isStillSpeaking = isSpeakingActiveRef.current || (isAudioPlaying ? true : false);
+            if (isStillSpeaking && attempts < 20) {
               console.log("[Agent.tsx] Interviewer is still speaking. Delaying disconnect...");
               setTimeout(checkAndDisconnect, 250);
             } else {
-              console.log("[Agent.tsx] Interviewer finished speaking. Disconnecting...");
+              console.log("[Agent.tsx] Interviewer finished speaking or max wait reached. Disconnecting now...");
+              setIsSpeaking(false);
+              isSpeakingActiveRef.current = false;
               handleDisconnect();
             }
           };
