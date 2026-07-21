@@ -53,7 +53,13 @@ export default clerkMiddleware(async (auth, req) => {
     }
 
     const redirectUrl = `https://resume.mockrithm.me${newPath}${req.nextUrl.search}`;
-    return NextResponse.redirect(redirectUrl);
+    const redirectRes = NextResponse.redirect(redirectUrl);
+    const origin = req.headers.get("origin") || "*";
+    redirectRes.headers.set("Access-Control-Allow-Origin", origin);
+    redirectRes.headers.set("Access-Control-Allow-Credentials", "true");
+    redirectRes.headers.set("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
+    redirectRes.headers.set("Access-Control-Allow-Headers", "Content-Type, Authorization, X-Requested-With, RSC, Next-Router-State-Tree, Next-Router-Prefetch");
+    return redirectRes;
   }
 
   // 📖 Bypass Clerk auth for documentation subdomain

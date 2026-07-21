@@ -442,14 +442,14 @@ const Navbar = ({ userId, userName, userRole }: NavbarProps) => {
                       <PlayCircle className="w-5 h-5 text-zinc-500 group-hover:text-white transition-colors" />
                       <span className="font-medium">Take Interview</span>
                     </Link>
-                    <Link
-                      href="/user/resume"
+                    <a
+                      href="https://resume.mockrithm.me"
                       className="group flex items-center space-x-3 w-full px-4 py-3 text-sm text-gray-300 hover:text-white hover:bg-white/10 transition-all duration-200"
                       onClick={() => setIsMobileMenuOpen(false)}
                     >
                       <Sparkles className="w-5 h-5 text-zinc-500 group-hover:text-white transition-colors" />
                       <span className="font-medium">Resume Builder</span>
-                    </Link>
+                    </a>
                     <Link
                       href="/user/interviews"
                       className="group flex items-center space-x-3 w-full px-4 py-3 text-sm text-gray-300 hover:text-white hover:bg-white/10 transition-all duration-200"

@@ -293,9 +293,9 @@ chartPath = `M ${chartPoints[0].x} ${chartPoints[0].y} ` + chartPoints.slice(1).
             </Button>
 
             <Button asChild variant="outline" className="border-white/5 hover:border-white/20 bg-zinc-900/30 text-zinc-300 hover:text-white font-bold text-xs px-6 py-2.5 rounded-full cursor-pointer h-11 w-full sm:w-48 transition-all duration-300 hover:scale-[1.02]">
-              <Link href="/user/resume" className="flex items-center justify-center gap-2">
+              <a href="https://resume.mockrithm.me" className="flex items-center justify-center gap-2">
                 Resume Desk {"→"}
-              </Link>
+              </a>
             </Button>
           </motion.div>
 
@@ -678,12 +678,12 @@ chartPath = `M ${chartPoints[0].x} ${chartPoints[0].y} ` + chartPoints.slice(1).
                 <FileText className="size-4 text-zinc-400" />
                 <h3 className="text-sm font-black uppercase tracking-widest text-white">ATS Resume Intelligence Desk</h3>
               </div>
-              <Link 
-                href="/user/resume" 
+              <a 
+                href="https://resume.mockrithm.me" 
                 className="text-xs font-mono font-black text-zinc-400 hover:text-white uppercase tracking-widest flex items-center gap-1 transition-colors"
               >
                 Analyze Resume <ArrowUpRight className="size-3" />
-              </Link>
+              </a>
             </div>
 
             {loadingData ? (
@@ -719,12 +719,12 @@ chartPath = `M ${chartPoints[0].x} ${chartPoints[0].y} ` + chartPoints.slice(1).
                     </div>
                   </div>
 
-                  <Link 
-                    href="/user/resume" 
+                  <a 
+                    href="https://resume.mockrithm.me" 
                     className="w-full h-9 rounded-lg bg-zinc-900 hover:bg-zinc-800 border border-white/5 text-zinc-300 hover:text-white text-xs font-mono font-bold uppercase tracking-wider flex items-center justify-center transition-all"
                   >
                     Modify Resume CV
-                  </Link>
+                  </a>
                 </div>
 
                 {/* Strengths & Weaknesses blocks */}
@@ -775,7 +775,7 @@ chartPath = `M ${chartPoints[0].x} ${chartPoints[0].y} ` + chartPoints.slice(1).
                   <p className="text-xs text-zinc-400 max-w-sm">Upload and scan your resume against corporate job listings to unlock full ATS recommendations.</p>
                 </div>
                 <Button asChild className="bg-white hover:bg-zinc-200 text-black font-black text-xs tracking-wider uppercase h-8 px-4 rounded-lg cursor-pointer transition-all">
-                  <Link href="/user/resume">Upload Resume</Link>
+                  <a href="https://resume.mockrithm.me">Upload Resume</a>
                 </Button>
               </div>
             )}

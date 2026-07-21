@@ -554,8 +554,9 @@ const Agent = ({
     return new Promise((resolve) => {
       const cleanText = text.replace(/\[END[-_ ]?CALL\]/gi, "").replace(/\[SHOW[-_ ]?SANDBOX\]/gi, "").replace(/[*#_`~[\]]/g, "").trim();
       console.log(`[Agent.tsx] speakSentence called. Raw: "${text}", Cleaned: "${cleanText}"`);
-      if (!cleanText) {
-        console.log("[Agent.tsx] Empty text, resolving speakSentence immediately.");
+      const hasSpeakableContent = /[\p{L}\p{N}]/u.test(cleanText);
+      if (!cleanText || !hasSpeakableContent) {
+        console.log("[Agent.tsx] Empty or punctuation-only text, resolving speakSentence immediately.");
         resolve();
         return;
       }
@@ -665,7 +666,8 @@ const Agent = ({
 
   const queueSpeechChunk = (text: string) => {
     const cleanText = text.replace(/\[END[-_ ]?CALL\]/gi, "").replace(/\[SHOW[-_ ]?SANDBOX\]/gi, "").replace(/[*#_`~[\]]/g, "").trim();
-    if (!cleanText) {
+    const hasSpeakableContent = /[\p{L}\p{N}]/u.test(cleanText);
+    if (!cleanText || !hasSpeakableContent) {
       if (effectiveVoice === "local") {
         if (streamCompletedRef.current && localSpeechFinishedCountRef.current === localSpeechQueueCountRef.current) {
           localSpeechQueueCountRef.current = 0;

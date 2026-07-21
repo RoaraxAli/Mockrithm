@@ -13,8 +13,8 @@ export async function POST(request: Request) {
     const body = await request.json();
     const { text, voice, language } = body;
 
-    if (!text) {
-      return NextResponse.json({ error: "Text input is required" }, { status: 400 });
+    if (!text || !/[\p{L}\p{N}]/u.test(text)) {
+      return NextResponse.json({ error: "Text input with speakable words is required" }, { status: 400 });
     }
 
     // Determine which TTS provider to use based on language

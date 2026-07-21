@@ -259,27 +259,51 @@ export async function createFeedback(params: CreateFeedbackParams) {
 }
 
 export async function getInterviewById(id: string): Promise<Interview | null> {
-  const interview = await db.collection("interviews").doc(id).get();
+  if (!id) return null;
+  const interviewSnap = await db.collection("interviews").doc(id).get();
+  if (!interviewSnap.exists) return null;
 
-  return interview.data() as Interview | null;
+  const data = interviewSnap.data();
+  return JSON.parse(JSON.stringify({
+    id: interviewSnap.id,
+    ...data,
+    createdAt: data?.createdAt?.toDate
+      ? data.createdAt.toDate().toISOString()
+      : data?.createdAt instanceof Date
+      ? data.createdAt.toISOString()
+      : data?.createdAt ?? null,
+  })) as Interview;
 }
 
 export const getFeedbackByInterviewId = cache(async (
   params: GetFeedbackByInterviewIdParams
 ): Promise<Feedback | null> => {
   const { interviewId, userId } = params;
+  if (!interviewId) return null;
 
-  const querySnapshot = await db
-  .collection("interviewsfeedback")
-  .where("interviewId", "==", interviewId)
-  .where("userId", "==", userId)
-  .limit(1)
-  .get();
+  let querySnapshot;
+  if (userId) {
+    querySnapshot = await db
+      .collection("interviewsfeedback")
+      .where("interviewId", "==", interviewId)
+      .where("userId", "==", userId)
+      .limit(1)
+      .get();
+  }
+
+  if (!querySnapshot || querySnapshot.empty) {
+    querySnapshot = await db
+      .collection("interviewsfeedback")
+      .where("interviewId", "==", interviewId)
+      .limit(1)
+      .get();
+  }
+
   if (querySnapshot.empty) return null;
 
   const feedbackDoc = querySnapshot.docs[0];
   const data = feedbackDoc.data();
-  return {
+  return JSON.parse(JSON.stringify({
     id: feedbackDoc.id,
     ...data,
     createdAt: data.createdAt?.toDate
@@ -287,7 +311,7 @@ export const getFeedbackByInterviewId = cache(async (
       : data.createdAt instanceof Date
       ? data.createdAt.toISOString()
       : data.createdAt ?? null,
-  } as unknown as Feedback;
+  })) as unknown as Feedback;
 });
 
 export const getFeedbacksForUser = cache(async (userId: string): Promise<Feedback[]> => {

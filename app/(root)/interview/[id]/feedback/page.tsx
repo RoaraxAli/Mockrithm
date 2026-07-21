@@ -20,14 +20,32 @@ interface RouteParams {
 const Feedback = async ({ params }: RouteParams) => {
   const { id } = await params;
   const user = await getCurrentUser();
+  if (!user) redirect("/sign-in");
 
   const interview = await getInterviewById(id);
   if (!interview) redirect("/");
 
   const feedback = await getFeedbackByInterviewId({
     interviewId: id,
-    userId: user?.id!,
+    userId: user.id,
   });
+
+  if (!feedback) {
+    return (
+      <div className="dark bg-zinc-950 text-zinc-50 min-h-screen w-full flex flex-col items-center justify-center font-mona-sans p-6 text-center">
+        <div className="max-w-md border border-zinc-900 bg-zinc-900/20 p-8 rounded-2xl flex flex-col items-center gap-4 backdrop-blur-xl">
+          <Activity className="size-10 text-zinc-500 animate-pulse" />
+          <h2 className="text-xl font-bold uppercase tracking-tight text-white">Report Not Found</h2>
+          <p className="text-xs text-zinc-400 leading-relaxed font-mono">
+            No evaluation report could be loaded for session #{id.slice(0, 8)}.
+          </p>
+          <Button asChild className="mt-4 rounded-full bg-white text-black font-bold text-xs uppercase px-6 h-10 border border-white hover:bg-zinc-200 transition-all">
+            <Link href="/">Return to Dashboard</Link>
+          </Button>
+        </div>
+      </div>
+    );
+  }
 
   const formattedDate = feedback?.createdAt
     ? dayjs(feedback.createdAt).format("MMMM D, YYYY")
@@ -112,13 +130,13 @@ const Feedback = async ({ params }: RouteParams) => {
                 </span>
               </div>
 
-              {serializedFeedback?.eloResult && (
+              {(feedback as any)?.eloResult && (
                 <div className="flex justify-between items-center text-xs font-mono border-t border-zinc-900/80 pt-2 mt-1">
                   <span className="text-[10px] text-zinc-400 font-bold uppercase tracking-wider">
                     Elo Rating Update:
                   </span>
                   <span className="font-bold text-indigo-400">
-                    {serializedFeedback.eloResult.overallElo} ELO ({serializedFeedback.eloResult.overallDelta >= 0 ? `+${serializedFeedback.eloResult.overallDelta}` : serializedFeedback.eloResult.overallDelta} ELO)
+                    {(feedback as any).eloResult.overallElo} ELO ({(feedback as any).eloResult.overallDelta >= 0 ? `+${(feedback as any).eloResult.overallDelta}` : (feedback as any).eloResult.overallDelta} ELO)
                   </span>
                 </div>
               )}
