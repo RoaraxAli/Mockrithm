@@ -58,6 +58,14 @@
   ],
   "rewrites": [
     {
+      "source": "/_next/:path*",
+      "destination": "/_next/:path*"
+    },
+    {
+      "source": "/api/:path*",
+      "destination": "/api/:path*"
+    },
+    {
       "source": "/",
       "has": [
         {
@@ -98,6 +106,16 @@
       "destination": "/games"
     },
     {
+      "source": "/games/:path*",
+      "has": [
+        {
+          "type": "host",
+          "value": "games.mockrithm.me"
+        }
+      ],
+      "destination": "/games/:path*"
+    },
+    {
       "source": "/:path*",
       "has": [
         {
@@ -118,6 +136,16 @@
       "destination": "/blogs"
     },
     {
+      "source": "/blogs/:path*",
+      "has": [
+        {
+          "type": "host",
+          "value": "blog.mockrithm.me"
+        }
+      ],
+      "destination": "/blogs/:path*"
+    },
+    {
       "source": "/:path*",
       "has": [
         {
@@ -128,16 +156,6 @@
       "destination": "/blogs/:path*"
     },
     {
-      "source": "/api/:path*",
-      "has": [
-        {
-          "type": "host",
-          "value": "resume.mockrithm.me"
-        }
-      ],
-      "destination": "/api/:path*"
-    },
-    {
       "source": "/",
       "has": [
         {
@@ -146,6 +164,16 @@
         }
       ],
       "destination": "/resume"
+    },
+    {
+      "source": "/resume/:path*",
+      "has": [
+        {
+          "type": "host",
+          "value": "resume.mockrithm.me"
+        }
+      ],
+      "destination": "/resume/:path*"
     },
     {
       "source": "/:path*",
@@ -166,6 +194,16 @@
         }
       ],
       "destination": "/admin"
+    },
+    {
+      "source": "/admin/:path*",
+      "has": [
+        {
+          "type": "host",
+          "value": "admin.mockrithm.me"
+        }
+      ],
+      "destination": "/admin/:path*"
     },
     {
       "source": "/:path*",

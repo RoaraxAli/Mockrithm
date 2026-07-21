@@ -2900,8 +2900,11 @@ export default function GamesPage() {
 
   if (!isLoaded) {
     return (
-      <div className="min-h-screen bg-black text-white flex flex-col items-center justify-center font-mono">
-        <div className="text-zinc-500 animate-pulse text-xs uppercase tracking-widest">Loading Game Terminal...</div>
+      <div className="dark bg-zinc-950 text-white min-h-screen w-full flex flex-col items-center justify-center font-mono relative overflow-hidden z-50 p-6 text-center select-none">
+        <div className="flex flex-col items-center gap-4">
+          <div className="size-8 rounded-full border-2 border-amber-500/20 border-t-amber-400 animate-spin" />
+          <div className="text-zinc-400 font-bold text-xs uppercase tracking-widest animate-pulse">Initializing Game Terminal...</div>
+        </div>
       </div>
     );
   }
@@ -2912,8 +2915,11 @@ export default function GamesPage() {
 
   return (
     <React.Suspense fallback={
-      <div className="min-h-screen bg-black text-white flex flex-col items-center justify-center font-mono">
-        <div className="text-zinc-500 animate-pulse text-xs uppercase tracking-widest">Loading Game Terminal...</div>
+      <div className="dark bg-zinc-950 text-white min-h-screen w-full flex flex-col items-center justify-center font-mono relative overflow-hidden z-50 p-6 text-center select-none">
+        <div className="flex flex-col items-center gap-4">
+          <div className="size-8 rounded-full border-2 border-amber-500/20 border-t-amber-400 animate-spin" />
+          <div className="text-zinc-400 font-bold text-xs uppercase tracking-widest animate-pulse">Loading Terminal Data...</div>
+        </div>
       </div>
     }>
       <GamesPageContent />
