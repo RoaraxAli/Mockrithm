@@ -2297,6 +2297,19 @@ function GamesPageContent() {
           </div>
         )}
       </div>
+
+      {certModalData && (
+        <ECertificateModal
+          isOpen={isCertModalOpen}
+          onClose={() => setIsCertModalOpen(false)}
+          userName={certModalData.userName}
+          gameName={certModalData.gameName}
+          gameTheme={certModalData.gameTheme}
+          gameId={certModalData.gameId}
+          levelReached={certModalData.levelReached}
+        />
+      )}
+
     </div>
   );
 }
@@ -2878,18 +2891,6 @@ function sanitizeInput(input: string): string {
       <div className="relative z-20 w-full bg-transparent">
         <Footer />
       </div>
-
-      {certModalData && (
-        <ECertificateModal
-          isOpen={isCertModalOpen}
-          onClose={() => setIsCertModalOpen(false)}
-          userName={certModalData.userName}
-          gameName={certModalData.gameName}
-          gameTheme={certModalData.gameTheme}
-          gameId={certModalData.gameId}
-          levelReached={certModalData.levelReached}
-        />
-      )}
 
     </div>
   );
