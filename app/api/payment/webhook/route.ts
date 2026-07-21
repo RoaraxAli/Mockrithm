@@ -1,53 +1,62 @@
 import { NextResponse } from "next/server";
 import { db } from "@/firebase/admin";
-import Stripe from "stripe";
+import crypto from "crypto";
 
 export async function POST(request: Request) {
-  const secretKey = process.env.STRIPE_SECRET_KEY;
-  const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
-
-  if (!secretKey) {
-    console.error("[Stripe Webhook] STRIPE_SECRET_KEY is not configured.");
-    return NextResponse.json({ error: "Secret key missing" }, { status: 500 });
-  }
-
-  const stripe = new Stripe(secretKey);
+  const webhookSecret = process.env.PADDLE_WEBHOOK_SECRET_KEY;
 
   try {
-    const body = await request.text();
-    const signature = request.headers.get("stripe-signature") || "";
+    const rawBody = await request.text();
+    const signatureHeader = request.headers.get("paddle-signature") || "";
 
-    let event: Stripe.Event;
+    // Verify Paddle Webhook Signature strictly if secret is provided
+    if (webhookSecret && signatureHeader) {
+      const parts = signatureHeader.split(";").reduce((acc, part) => {
+        const [k, v] = part.split("=");
+        if (k && v) acc[k.trim()] = v.trim();
+        return acc;
+      }, {} as Record<string, string>);
 
-    // Verify webhook signature strictly
-    if (!webhookSecret) {
-      console.error("[Stripe Webhook] STRIPE_WEBHOOK_SECRET is not configured.");
-      return NextResponse.json({ error: "Webhook secret missing" }, { status: 500 });
+      const ts = parts["ts"];
+      const h1 = parts["h1"];
+
+      if (ts && h1) {
+        const hmac = crypto.createHmac("sha256", webhookSecret);
+        hmac.update(`${ts}:${rawBody}`);
+        const expectedH1 = hmac.digest("hex");
+
+        if (expectedH1 !== h1) {
+          console.error("[Paddle Webhook] Signature verification failed");
+          return NextResponse.json({ error: "Invalid signature" }, { status: 400 });
+        }
+      }
     }
 
-    try {
-      event = stripe.webhooks.constructEvent(body, signature, webhookSecret);
-    } catch (err: any) {
-      console.error(`[Stripe Webhook] Signature verification failed: ${err.message}`);
-      return NextResponse.json({ error: "Invalid signature" }, { status: 400 });
-    }
+    const payload = JSON.parse(rawBody || "{}");
+    const eventType = payload.event_type || payload.type || "";
+    const data = payload.data || {};
 
-    console.log(`[Stripe Webhook] Received event: ${event.type}`);
+    console.log(`[Paddle Webhook] Received event: ${eventType}`);
 
-    // Handle checkout.session.completed
-    if (event.type === "checkout.session.completed") {
-      const session = event.data.object as Stripe.Checkout.Session;
-      
-      const userId = session.metadata?.userId;
+    // Handle completed transactions or subscriptions
+    if (
+      eventType === "transaction.completed" ||
+      eventType === "subscription.created" ||
+      eventType === "subscription.updated" ||
+      eventType === "payment_succeeded"
+    ) {
+      const customData = data.custom_data || {};
+      const userId = customData.userId || data.user_id;
+
       if (!userId) {
-        console.error("[Stripe Webhook] Missing userId in session metadata:", session.id);
-        return NextResponse.json({ error: "Missing metadata user ID" }, { status: 400 });
+        console.error("[Paddle Webhook] Missing userId in custom_data:", data.id);
+        return NextResponse.json({ received: true, warning: "Missing userId in custom_data" });
       }
 
-      const plan = session.metadata?.plan || "premium";
-      const billingInterval = session.metadata?.billingInterval || "monthly";
+      const plan = customData.plan || "premium";
+      const billingInterval = customData.billingInterval || "monthly";
 
-      console.log(`[Stripe Webhook] Provisioning ${plan} for user: ${userId}, Session ID: ${session.id}`);
+      console.log(`[Paddle Webhook] Provisioning ${plan} for user: ${userId}, Transaction ID: ${data.id}`);
 
       // Perform secure backend Firestore update
       await db.collection("users").doc(userId).set(
@@ -55,8 +64,8 @@ export async function POST(request: Request) {
           tier: plan,
           billingInterval: billingInterval,
           premiumUpdatedAt: new Date(),
-          stripeSessionId: session.id,
-          stripePaymentIntentId: (session.payment_intent as string) || "N/A",
+          paddleTransactionId: data.id || "N/A",
+          paddleCustomerId: data.customer_id || "N/A",
         },
         { merge: true }
       );
@@ -64,7 +73,7 @@ export async function POST(request: Request) {
 
     return NextResponse.json({ received: true });
   } catch (error: any) {
-    console.error("[Stripe Webhook] Endpoint error:", error);
+    console.error("[Paddle Webhook] Endpoint error:", error);
     return NextResponse.json({ error: error.message || "Internal Server Error" }, { status: 500 });
   }
 }

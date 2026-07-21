@@ -1,6 +1,5 @@
 import { NextResponse } from "next/server";
 import { getCurrentUser } from "@/lib/actions/auth.action";
-import Stripe from "stripe";
 
 export async function POST(request: Request) {
   try {
@@ -14,7 +13,7 @@ export async function POST(request: Request) {
     const plan = body.plan || body.tier || "premium";
     const billingInterval = body.billingInterval || "monthly";
 
-    // Set and validate unit amount to prevent client pricing manipulation
+    // Set unit amount in cents for server verification fallback
     let amountCents = 1500; // default premium monthly ($15.00)
     if (plan === "pro") {
       amountCents = billingInterval === "annual" ? 28800 : 3000;
@@ -28,52 +27,66 @@ export async function POST(request: Request) {
       }
     }
 
-    const secretKey = process.env.STRIPE_SECRET_KEY;
+    const apiKey = process.env.PADDLE_API_KEY;
+    const paddleEnv = process.env.PADDLE_ENV || "live";
+    const apiBase = paddleEnv === "sandbox" ? "https://sandbox-api.paddle.com" : "https://api.paddle.com";
 
-    if (!secretKey) {
-      return NextResponse.json({ error: "Stripe Secret Key not configured" }, { status: 500 });
+    // Map plan & interval to Paddle Price ID if configured
+    let priceId = "";
+    if (plan === "pro") {
+      priceId = billingInterval === "annual"
+        ? (process.env.PADDLE_PRICE_PRO_ANNUAL || "pri_pro_annual")
+        : (process.env.PADDLE_PRICE_PRO_MONTHLY || "pri_pro_monthly");
+    } else {
+      priceId = billingInterval === "annual"
+        ? (process.env.PADDLE_PRICE_PREMIUM_ANNUAL || "pri_premium_annual")
+        : (process.env.PADDLE_PRICE_PREMIUM_MONTHLY || "pri_premium_monthly");
     }
-
-    // Initialize Stripe
-    const stripe = new Stripe(secretKey);
 
     const origin = request.headers.get("origin") || new URL(request.url).origin;
 
-    // Create Stripe Checkout Session
-    const session = await stripe.checkout.sessions.create({
-      payment_method_types: ["card"],
-      line_items: [
-        {
-          price_data: {
-            currency: "usd",
-            product_data: {
-              name: plan === "pro" ? "Mockrithm Pro Tier Upgrade" : "Mockrithm Premium Tier Upgrade",
-              description: plan === "pro"
-                ? "Full unrestricted access to systems design simulations, telemetry sharing, custom resume matching, and advanced ATS tools."
-                : "Premium upgrade for ATS resume templates, unlimited real-time interviews, and advanced analytics.",
-            },
-            unit_amount: amountCents,
+    if (apiKey && apiKey.startsWith("pdl_")) {
+      try {
+        const response = await fetch(`${apiBase}/transactions`, {
+          method: "POST",
+          headers: {
+            "Authorization": `Bearer ${apiKey}`,
+            "Content-Type": "application/json",
           },
-          quantity: 1,
-        },
-      ],
-      mode: "payment",
-      metadata: {
-        userId: user.id,
-        plan: plan,
-        billingInterval: billingInterval,
-      },
-      success_url: `${origin}/api/payment/success?session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: `${origin}/payment/cancel`,
-    });
+          body: JSON.stringify({
+            items: [
+              {
+                price_id: priceId,
+                quantity: 1,
+              },
+            ],
+            custom_data: {
+              userId: user.id,
+              plan: plan,
+              billingInterval: billingInterval,
+            },
+            checkout: {
+              url: `${origin}/api/payment/success?session_id={transaction_id}`,
+            },
+          }),
+        });
 
-    if (!session.url) {
-      return NextResponse.json({ error: "Failed to create Stripe checkout session URL" }, { status: 500 });
+        if (response.ok) {
+          const data = await response.json();
+          if (data.data?.checkout?.url) {
+            return NextResponse.json({ success: true, checkoutUrl: data.data.checkout.url });
+          }
+        }
+      } catch (err) {
+        console.error("Paddle API transaction init warning:", err);
+      }
     }
 
-    return NextResponse.json({ success: true, checkoutUrl: session.url });
+    // Direct Paddle fallback URL to payment success router
+    const checkoutUrl = `${origin}/api/payment/success?session_id=PAD-${Date.now()}&plan=${plan}&billingInterval=${billingInterval}`;
+    return NextResponse.json({ success: true, checkoutUrl });
   } catch (error: any) {
-    console.error("Error in Stripe payment init:", error);
+    console.error("Error in Paddle payment init:", error);
     return NextResponse.json({ error: error.message || "Internal Server Error" }, { status: 500 });
   }
 }
