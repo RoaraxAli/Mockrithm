@@ -160,24 +160,6 @@ const Footer: React.FC<FooterProps> = ({ className = "", isSignedIn = false }) =
                 </div>
               </div>
 
-              {/* Post-login Column 4: Account */}
-              <div className="flex flex-col gap-3">
-                <h4 className="text-[10px] font-black uppercase tracking-widest text-white border-b border-white/5 pb-1">
-                  Account
-                </h4>
-                <div className="flex flex-col gap-2">
-                  <Link href="/user/dashboard" className="text-[10.5px] text-zinc-400 hover:text-white font-medium transition-colors">
-                    Dashboard
-                  </Link>
-                  <Link href="/user/interviews" className="text-[10.5px] text-zinc-400 hover:text-white font-medium transition-colors">
-                    Activity History
-                  </Link>
-                  <Link href="/user/feedback" className="text-[10.5px] text-zinc-400 hover:text-white font-medium transition-colors">
-                    Platform Feedback
-                  </Link>
-                </div>
-              </div>
-
               {/* Post-login Column 5: Legal */}
               <div className="flex flex-col gap-3">
                 <h4 className="text-[10px] font-black uppercase tracking-widest text-white border-b border-white/5 pb-1">
