@@ -65,7 +65,7 @@ export function BillingOptions({ user, onRefresh }: BillingOptionsProps) {
 
       const data = await res.json();
       if (data.checkoutUrl) {
-        toast.success("Redirecting to Stripe secure checkout...");
+        toast.success("Redirecting to Paddle secure checkout...");
         window.location.href = data.checkoutUrl;
       } else {
         toast.error(data.error || "Failed to initialize checkout.");
