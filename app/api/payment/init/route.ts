@@ -51,7 +51,7 @@ export async function POST(request: Request) {
     if (activeProvider === "stripe") {
       const stripeSecret = process.env.STRIPE_SECRET_KEY;
       if (!stripeSecret) {
-        return NextResponse.json({ error: "Stripe Secret Key not configured" }, { status: 500 });
+        return NextResponse.json({ error: "Stripe Secret Key not configured in .env" }, { status: 500 });
       }
 
       const stripe = new Stripe(stripeSecret);
@@ -96,6 +96,7 @@ export async function POST(request: Request) {
     const apiKey = process.env.PADDLE_API_KEY;
     const paddleEnv = process.env.PADDLE_ENV || "sandbox";
     const apiBase = paddleEnv === "sandbox" ? "https://sandbox-api.paddle.com" : "https://api.paddle.com";
+    const paddleBuyDomain = paddleEnv === "sandbox" ? "https://sandbox-buy.paddle.com" : "https://buy.paddle.com";
 
     // Check environment variables for custom price IDs
     let priceId = "";
@@ -109,125 +110,152 @@ export async function POST(request: Request) {
         : (process.env.PADDLE_PRICE_PREMIUM_MONTHLY || "");
     }
 
-    if (apiKey && apiKey.startsWith("pdl_")) {
-      const authHeaders = {
-        "Authorization": `Bearer ${apiKey}`,
-        "Content-Type": "application/json",
-      };
+    if (!apiKey || !apiKey.startsWith("pdl_")) {
+      return NextResponse.json(
+        { error: "Paddle API Key (PADDLE_API_KEY) is not configured in .env" },
+        { status: 500 }
+      );
+    }
 
-      const cacheKey = `${plan}_${billingInterval}_${amountCents}`;
+    const authHeaders = {
+      "Authorization": `Bearer ${apiKey}`,
+      "Content-Type": "application/json",
+    };
 
-      // 1. Check if priceId is cached or configured
-      if (!priceId && priceCache[cacheKey]) {
-        priceId = priceCache[cacheKey];
-      }
+    const cacheKey = `${plan}_${billingInterval}_${amountCents}`;
 
-      // 2. Fetch existing active prices from Paddle API if priceId not set
-      if (!priceId) {
-        try {
-          const pricesRes = await fetch(`${apiBase}/prices?status=active`, { headers: authHeaders });
-          if (pricesRes.ok) {
-            const pricesData = await pricesRes.json();
-            const existingPrices: any[] = pricesData.data || [];
-            const match = existingPrices.find(
-              (p: any) =>
-                p.unit_price?.amount === amountCents.toString() &&
-                p.unit_price?.currency_code === "USD"
-            );
-            if (match) {
-              priceId = match.id;
-              priceCache[cacheKey] = priceId;
-            }
+    // 1. Check if priceId is cached
+    if (!priceId && priceCache[cacheKey]) {
+      priceId = priceCache[cacheKey];
+    }
+
+    // 2. Fetch existing active prices from Paddle API if priceId not set
+    if (!priceId) {
+      try {
+        const pricesRes = await fetch(`${apiBase}/prices?status=active`, { headers: authHeaders });
+        if (pricesRes.ok) {
+          const pricesData = await pricesRes.json();
+          const existingPrices: any[] = pricesData.data || [];
+          const match = existingPrices.find(
+            (p: any) =>
+              p.unit_price?.amount === amountCents.toString() &&
+              p.unit_price?.currency_code === "USD"
+          );
+          if (match) {
+            priceId = match.id;
+            priceCache[cacheKey] = priceId;
           }
-        } catch (e) {
-          console.error("Warning: Paddle price list error:", e);
         }
-      }
-
-      // 3. If no matching price exists in Paddle catalog, create Product & Price dynamically
-      if (!priceId) {
-        try {
-          const prodRes = await fetch(`${apiBase}/products`, {
-            method: "POST",
-            headers: authHeaders,
-            body: JSON.stringify({
-              name: plan === "pro" ? "Mockrithm Pro Membership" : "Mockrithm Premium Membership",
-              tax_category: "standard",
-              description: `Access to Mockrithm ${plan.toUpperCase()} tier tools`,
-            }),
-          });
-
-          if (prodRes.ok) {
-            const prodData = await prodRes.json();
-            const productId = prodData.data?.id;
-
-            if (productId) {
-              const priceRes = await fetch(`${apiBase}/prices`, {
-                method: "POST",
-                headers: authHeaders,
-                body: JSON.stringify({
-                  product_id: productId,
-                  description: `${plan.toUpperCase()} ${billingInterval}`,
-                  unit_price: {
-                    amount: amountCents.toString(),
-                    currency_code: "USD",
-                  },
-                  billing_cycle: {
-                    interval: billingInterval === "annual" ? "year" : "month",
-                    frequency: 1,
-                  },
-                }),
-              });
-
-              if (priceRes.ok) {
-                const priceData = await priceRes.json();
-                priceId = priceData.data?.id;
-                if (priceId) {
-                  priceCache[cacheKey] = priceId;
-                }
-              }
-            }
-          }
-        } catch (e) {
-          console.error("Dynamic Paddle product/price creation error:", e);
-        }
-      }
-
-      // 4. Create Transaction with verified priceId
-      if (priceId) {
-        try {
-          const txnRes = await fetch(`${apiBase}/transactions`, {
-            method: "POST",
-            headers: authHeaders,
-            body: JSON.stringify({
-              items: [
-                {
-                  price_id: priceId,
-                  quantity: 1,
-                },
-              ],
-              custom_data: {
-                userId: user.id,
-                plan: plan,
-                billingInterval: billingInterval,
-                provider: "paddle",
-              },
-            }),
-          });
-
-          const txnData = await txnRes.json();
-          if (txnRes.ok && txnData.data?.checkout?.url) {
-            return NextResponse.json({ success: true, checkoutUrl: txnData.data.checkout.url, provider: "paddle" });
-          }
-        } catch (err) {
-          console.error("Paddle transaction API request failed:", err);
-        }
+      } catch (e) {
+        console.error("Warning: Paddle price list error:", e);
       }
     }
 
-    // Direct fallback if Paddle API call failed
-    const checkoutUrl = `${origin}/api/payment/success?session_id=PAD-${Date.now()}&plan=${plan}&billingInterval=${billingInterval}&provider=paddle`;
-    return NextResponse.json({ success: true, checkoutUrl, provider: "paddle" });
+    // 3. If no matching price exists in Paddle catalog, create Product & Price dynamically
+    if (!priceId) {
+      try {
+        const prodRes = await fetch(`${apiBase}/products`, {
+          method: "POST",
+          headers: authHeaders,
+          body: JSON.stringify({
+            name: plan === "pro" ? "Mockrithm Pro Membership" : "Mockrithm Premium Membership",
+            tax_category: "standard",
+            description: `Access to Mockrithm ${plan.toUpperCase()} tier tools`,
+          }),
+        });
+
+        if (prodRes.ok) {
+          const prodData = await prodRes.json();
+          const productId = prodData.data?.id;
+
+          if (productId) {
+            const priceRes = await fetch(`${apiBase}/prices`, {
+              method: "POST",
+              headers: authHeaders,
+              body: JSON.stringify({
+                product_id: productId,
+                description: `${plan.toUpperCase()} ${billingInterval}`,
+                unit_price: {
+                  amount: amountCents.toString(),
+                  currency_code: "USD",
+                },
+                billing_cycle: {
+                  interval: billingInterval === "annual" ? "year" : "month",
+                  frequency: 1,
+                },
+              }),
+            });
+
+            if (priceRes.ok) {
+              const priceData = await priceRes.json();
+              priceId = priceData.data?.id;
+              if (priceId) {
+                priceCache[cacheKey] = priceId;
+              }
+            } else {
+              const priceErr = await priceRes.text();
+              console.error("Paddle Price creation API error:", priceErr);
+            }
+          }
+        } else {
+          const prodErr = await prodRes.text();
+          console.error("Paddle Product creation API error:", prodErr);
+        }
+      } catch (e) {
+        console.error("Dynamic Paddle product/price creation error:", e);
+      }
+    }
+
+    // 4. Create Transaction on Paddle API
+    if (priceId) {
+      try {
+        const txnRes = await fetch(`${apiBase}/transactions`, {
+          method: "POST",
+          headers: authHeaders,
+          body: JSON.stringify({
+            items: [
+              {
+                price_id: priceId,
+                quantity: 1,
+              },
+            ],
+            custom_data: {
+              userId: user.id,
+              plan: plan,
+              billingInterval: billingInterval,
+              provider: "paddle",
+            },
+          }),
+        });
+
+        const txnData = await txnRes.json();
+        console.log("Paddle Transaction Created:", txnData.data?.id, "Checkout URL:", txnData.data?.checkout?.url);
+
+        // A) If Paddle API returned a direct checkout URL
+        if (txnRes.ok && txnData.data?.checkout?.url) {
+          return NextResponse.json({ success: true, checkoutUrl: txnData.data.checkout.url, provider: "paddle" });
+        }
+
+        // B) If transaction was created, build official Paddle Hosted Checkout URL using price ID
+        if (priceId) {
+          const hostedCheckoutUrl = `${paddleBuyDomain}/checkout/custom?price_id=${priceId}&passthrough=${encodeURIComponent(JSON.stringify({ userId: user.id, plan, billingInterval }))}`;
+          return NextResponse.json({ success: true, checkoutUrl: hostedCheckoutUrl, provider: "paddle" });
+        }
+      } catch (err: any) {
+        console.error("Paddle transaction API request failed:", err);
+      }
+    }
+
+    // C) Direct Hosted Checkout URL fallback using priceId or error if price creation failed
+    if (priceId) {
+      const hostedCheckoutUrl = `${paddleBuyDomain}/checkout/custom?price_id=${priceId}`;
+      return NextResponse.json({ success: true, checkoutUrl: hostedCheckoutUrl, provider: "paddle" });
+    }
+
+    return NextResponse.json(
+      { error: "Could not create Paddle checkout session. Please check your Paddle API keys and Sandbox configuration." },
+      { status: 500 }
+    );
   } catch (error: any) {
     console.error("Error in payment init:", error);
     return NextResponse.json({ error: error.message || "Internal Server Error" }, { status: 500 });
