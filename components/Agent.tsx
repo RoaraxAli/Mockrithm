@@ -4,13 +4,14 @@ import Image from "next/image";
 import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import {
-  Phone, PhoneOff, Mic, Brain, Volume2, Settings,
+  Phone, PhoneOff, Mic, Brain, Volume2, Settings, Trophy,
   Code, Sparkles, CheckCircle2, AlertTriangle, Lightbulb, Play, User, Languages
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
 import { InterviewTimer } from "@/components/interview/InterviewTimer";
 import { MonacoSandbox } from "@/components/interview/MonacoSandbox";
+import { EloLeaderboard } from "@/components/interview/EloLeaderboard";
 import { interviewer, interviewLanguages } from "@/constants";
 import { createFeedback } from "@/lib/actions/general.action";
 import { Button } from "@/components/ui/button";
@@ -118,6 +119,7 @@ const Agent = ({
   const [selectedVoice, setSelectedVoice] = useState<string>("groq-autumn");
   const [selectedModel, setSelectedModel] = useState<string>("llama-3.1-8b-instant");
   const [showSettings, setShowSettings] = useState(false);
+  const [settingsTab, setSettingsTab] = useState<"calibration" | "leaderboard">("calibration");
   const [selectedStt, setSelectedStt] = useState<"browser" | "whisper-v3" | "whisper-turbo">("whisper-turbo");
   const selectedSttRef = useRef<string>("whisper-turbo");
   useEffect(() => {
@@ -1329,8 +1331,8 @@ CRITICAL RULES - CONVERSATIONAL FLOW & CONCISENESS:
 - GENTLY CORRECT BIG BLUNDERS: If the candidate makes a major blunder or says something completely incorrect, gently correct them and guide them in the right direction in one short, polite sentence before transitioning.
 - CRITICAL CONCISENESS & NO YAP: Keep your replies extremely short (under 20 words maximum). Speak in 1-2 brief sentences only.
 - NO HALLUCINATIONS: Do not refer to UI tabs, examples on the screen, or other options. The user's screen only displays you (the interviewer avatar), the chat logs, and a Start button.
-- Conclude the interview properly when all questions are asked and answered.
-- When all questions are done OR when you receive a [SYSTEM: Time is up...] message, conclude the interview warmly. Thank the candidate, wish them luck, say goodbye, and ALWAYS append "[END_CALL]" at the very end so the system knows to close the session. Example: "Thanks so much for your time today. Best of luck! [END_CALL]"
+- CONTINUOUS SANDBOX INTERVIEW PACING RULE: Do NOT conclude or append '[END_CALL]' prematurely while the session timer is still running. If all initial questions are completed before time is up, continue the technical evaluation with relevant follow-ups, code optimizations, edge cases, or architecture questions.
+- ENDING RULE: Conclude the interview and append '[END_CALL]' ONLY when you receive a '[SYSTEM: Time is up...]' message, OR if the candidate explicitly requests to end or stop the interview early. Example upon time up: "Thanks so much for your time today. Best of luck! [END_CALL]"
 
 Sandbox/Workspace Info:
 - The candidate is working on the task/problem: "${codingProblemRef.current.title}".
@@ -1369,8 +1371,8 @@ CRITICAL RULES - CONVERSATIONAL FLOW & CONCISENESS:
 - SOCRATIC HINT / STUCK PIVOT: If the candidate says "I don't know" or "I am stuck" on a question, give them ONE helpful conceptual hint or ask a simpler sub-question. BUT if they say "I don't know", "skip", or "I have no idea" a second time, or explicitly ask to move on, you MUST immediately stop asking about it, briefly explain the correct answer in under 15 words, and transition directly to the next question.
 - GENTLY CORRECT BIG BLUNDERS: If the candidate makes a major blunder or says something completely incorrect, gently correct them in one short sentence before transitioning.
 - NO HALLUCINATIONS: Do not refer to UI tabs, examples on the screen, or other options.
-- Conclude the interview properly when all questions are asked and answered.
-- When all questions are done OR when you receive a [SYSTEM: Time is up...] message, conclude the interview warmly and ALWAYS append "[END_CALL]" at the very end. Example: "Thanks so much for your time today. Best of luck! [END_CALL]"`;
+- CONTINUOUS TECHNICAL INTERVIEW PACING RULE: Do NOT conclude or append '[END_CALL]' prematurely just because you went through the initial list of questions above! If all initial questions are completed and the session timer is still running (meaning you have NOT received a '[SYSTEM: Time is up...]' message), keep the interview active and engaging for the candidate. Ask relevant technical follow-up questions about their answers, explore performance trade-offs, edge cases, system architecture, or ask technical questions about their listed projects (${candidateProjectsText}).
+- ENDING RULE: Conclude the interview and append '[END_CALL]' ONLY when you receive a '[SYSTEM: Time is up...]' message, OR if the candidate explicitly requests to end or stop the interview early (e.g. "I'm done", "let's wrap up", "end the interview"). Never output '[END_CALL]' before time is up unless explicitly requested by the candidate. Example upon time up: "Thanks so much for your time today. Best of luck! [END_CALL]"`;
         }
       } else {
         const profileRole = roleRef.current || userResumeData?.targetRole || "";
@@ -1606,8 +1608,8 @@ CRITICAL RULES - CONVERSATIONAL FLOW & CONCISENESS:
 - KEEP RESPONSES VERY SHORT: Keep your replies under 25 words maximum. No yapping or long paragraphs. Keep the pacing fast and conversational.
 - Write only plain, clean text. Do not use markdown like bold (**), italics (*), lists, or hashtags.
 - Never use emojis.
-- Conclude the interview properly when all questions are asked and answered.
-- When all questions are done OR when you receive a [SYSTEM: Time is up...] message, conclude the interview warmly. Thank the candidate, wish them luck, say goodbye, and ALWAYS append "[END_CALL]" at the very end so the system knows to close the session.
+- CONTINUOUS INTERVIEW PACING RULE: Do NOT conclude or append '[END_CALL]' prematurely while the session timer is active. If initial questions are finished, continue asking relevant technical follow-up questions, trade-offs, edge cases, or candidate project questions.
+- ENDING RULE: Conclude the interview and ALWAYS append '[END_CALL]' ONLY when you receive a '[SYSTEM: Time is up...]' message, OR if the candidate explicitly requests to end the interview.
 
 ${
   codingProblemRef.current
@@ -1874,6 +1876,7 @@ ${codeRef.current}
   // Connect & Disconnect Call Lifecycles
   const startCallWithDuration = async (duration: "brief" | "medium" | "lengthy") => {
     setSelectedDuration(duration);
+    selectedDurationRef.current = duration;
     setShowDurationModal(false);
     isTimerEndingRef.current = false;
 
@@ -1889,8 +1892,12 @@ ${codeRef.current}
     sentenceBufferRef.current = "";
     speechQueueRef.current = [];
 
-    // The timer remains disabled/null during the setup conversation phase
-    setTimerSecondsLeft(null);
+    if (type === "generate") {
+      // The timer remains disabled/null during the setup conversation phase
+      setTimerSecondsLeft(null);
+    } else {
+      setTimerSecondsLeft(durationSeconds);
+    }
 
     // Dynamic Custom Welcome Greeting seeding
     let welcomeMsg = activeFirstMessage || firstMessage || interviewer.firstMessage || "Hello! Thank you for taking the time to speak with me today.";
@@ -2301,45 +2308,78 @@ ${codeRef.current}
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.4, ease: "easeOut" }}
-            className="w-full max-w-xl mx-auto p-6 backdrop-blur-2xl bg-zinc-950/40 rounded-2xl flex flex-col gap-5 border border-zinc-900 shadow-2xl relative overflow-hidden group"
+            className={cn(
+              "w-full mx-auto p-6 backdrop-blur-2xl bg-zinc-950/40 rounded-2xl flex flex-col gap-5 border border-zinc-900 shadow-2xl relative overflow-hidden group transition-all duration-300",
+              showSettings && settingsTab === "leaderboard" ? "max-w-4xl" : "max-w-xl"
+            )}
           >
-            <div className="flex items-center justify-between">
-              <h4 className="text-xs font-bold text-white uppercase tracking-widest flex items-center gap-2.5">
-                <span className="p-1.5 bg-zinc-900 rounded-lg border border-zinc-800">
-                  <Settings className="size-4 text-white" />
-                </span>
-                {t("calibration")}
-              </h4>
-              <button
-                onClick={() => setShowSettings(!showSettings)}
-                className="text-[10px] font-bold text-white hover:text-zinc-350 cursor-pointer transition-colors duration-200 px-3 py-1.5 bg-zinc-950 border border-zinc-900 rounded-lg hover:border-zinc-800 shadow-md uppercase tracking-wider"
-              >
-                {showSettings ? t("hide_settings") : t("show_settings")}
-              </button>
+            <div className="flex items-center justify-between flex-wrap gap-3">
+              <div className="flex items-center gap-2">
+                <h4 className="text-xs font-bold text-white uppercase tracking-widest flex items-center gap-2">
+                  <span className="p-1.5 bg-zinc-900 rounded-lg border border-zinc-800">
+                    <Settings className="size-4 text-white" />
+                  </span>
+                  {t("calibration")}
+                </h4>
+              </div>
+
+              <div className="flex items-center gap-2">
+                {showSettings && (
+                  <div className="flex items-center bg-zinc-900/90 p-1 rounded-xl border border-zinc-800 text-[10px] font-mono font-bold">
+                    <button
+                      onClick={() => setSettingsTab("calibration")}
+                      className={cn(
+                        "px-3 py-1 rounded-lg transition-all flex items-center gap-1.5",
+                        settingsTab === "calibration" ? "bg-zinc-800 text-white shadow" : "text-zinc-400 hover:text-white"
+                      )}
+                    >
+                      <Settings className="size-3" /> Voice & Audio
+                    </button>
+                    <button
+                      onClick={() => setSettingsTab("leaderboard")}
+                      className={cn(
+                        "px-3 py-1 rounded-lg transition-all flex items-center gap-1.5",
+                        settingsTab === "leaderboard" ? "bg-indigo-600 text-white shadow" : "text-zinc-400 hover:text-white"
+                      )}
+                    >
+                      <Trophy className="size-3 text-amber-400" /> Leaderboard & ELO
+                    </button>
+                  </div>
+                )}
+
+                <button
+                  onClick={() => setShowSettings(!showSettings)}
+                  className="text-[10px] font-bold text-white hover:text-zinc-350 cursor-pointer transition-colors duration-200 px-3 py-1.5 bg-zinc-950 border border-zinc-900 rounded-lg hover:border-zinc-800 shadow-md uppercase tracking-wider"
+                >
+                  {showSettings ? t("hide_settings") : t("show_settings")}
+                </button>
+              </div>
             </div>
 
             {/* Interview Language — always visible, must be chosen before starting */}
-            <div className="flex flex-col gap-2">
-              <label className="text-[10px] text-zinc-500 font-semibold uppercase tracking-wider flex items-center gap-1.5">
-                <Languages className="size-3.5 text-zinc-400" /> {t("language")}
-              </label>
-              <select
-                value={selectedLanguage}
-                onChange={(e) => setSelectedLanguage(e.target.value)}
-                className="bg-zinc-950 text-zinc-100 text-xs rounded-xl p-3 border border-zinc-900 focus:border-zinc-700 focus:ring-1 focus:ring-zinc-800 outline-none cursor-pointer hover:bg-zinc-900 transition-all font-semibold"
-              >
-                {interviewLanguages.map((lang) => (
-                  <option key={lang.code} value={lang.code}>
-                    {lang.name} {!lang.neuralTTS && "(Browser Voice)"}
-                  </option>
-                ))}
-              </select>
-              {!currentLangConfig.neuralTTS && (
-                <p className="text-[10px] text-amber-400/80 font-semibold leading-relaxed">
-                  This language uses your browser/OS built-in voice for the interviewer. For best results, install the {currentLangConfig.name.split(" ")[0]} voice in your system settings.
-                </p>
-              )}
-            </div>
+            {(!showSettings || settingsTab === "calibration") && (
+              <div className="flex flex-col gap-2">
+                <label className="text-[10px] text-zinc-500 font-semibold uppercase tracking-wider flex items-center gap-1.5">
+                  <Languages className="size-3.5 text-zinc-400" /> {t("language")}
+                </label>
+                <select
+                  value={selectedLanguage}
+                  onChange={(e) => setSelectedLanguage(e.target.value)}
+                  className="bg-zinc-950 text-zinc-100 text-xs rounded-xl p-3 border border-zinc-900 focus:border-zinc-700 focus:ring-1 focus:ring-zinc-800 outline-none cursor-pointer hover:bg-zinc-900 transition-all font-semibold"
+                >
+                  {interviewLanguages.map((lang) => (
+                    <option key={lang.code} value={lang.code}>
+                      {lang.name} {!lang.neuralTTS && "(Browser Voice)"}
+                    </option>
+                  ))}
+                </select>
+                {!currentLangConfig.neuralTTS && (
+                  <p className="text-[10px] text-amber-400/80 font-semibold leading-relaxed">
+                    This language uses your browser/OS built-in voice for the interviewer. For best results, install the {currentLangConfig.name.split(" ")[0]} voice in your system settings.
+                  </p>
+                )}
+              </div>
+            )}
 
             <AnimatePresence>
               {showSettings && (
@@ -2348,77 +2388,83 @@ ${codeRef.current}
                   animate={{ opacity: 1, height: "auto" }}
                   exit={{ opacity: 0, height: 0 }}
                   transition={{ duration: 0.3 }}
-                  className="grid grid-cols-1 sm:grid-cols-3 gap-4 mt-2 border-t border-zinc-900 pt-4 overflow-hidden"
+                  className="mt-2 border-t border-zinc-900 pt-4 overflow-hidden"
                 >
-                  <div className="flex flex-col gap-2">
-                    <label className="text-[10px] text-zinc-500 font-semibold uppercase tracking-wider flex items-center gap-1.5">
-                      <Brain className="size-3.5 text-zinc-400" /> {t("model")}
-                    </label>
-                    <select
-                      value={selectedModel}
-                      onChange={(e) => setSelectedModel(e.target.value)}
-                      className="bg-zinc-950 text-zinc-100 text-xs rounded-xl p-3 border border-zinc-900 focus:border-zinc-700 focus:ring-1 focus:ring-zinc-800 outline-none cursor-pointer hover:bg-zinc-900 transition-all font-semibold"
-                    >
-                      <option value="llama-3.1-8b-instant">Llama 3.1 8B (Free)</option>
-                      <option value="llama-3.3-70b-versatile" disabled={userTier === "freemium"}>
-                        Llama 3.3 70B {userTier === "freemium" ? "(Premium Only)" : "(Pro)"}
-                      </option>
-                    </select>
-                    <span className="text-[9px] text-emerald-500/80 font-medium leading-tight mt-1">
-                      ⚡ Ultra-fast Groq API engine. Instant sub-second response times.
-                    </span>
-                  </div>
+                  {settingsTab === "leaderboard" ? (
+                    <EloLeaderboard currentUserId={userId} />
+                  ) : (
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                      <div className="flex flex-col gap-2">
+                        <label className="text-[10px] text-zinc-500 font-semibold uppercase tracking-wider flex items-center gap-1.5">
+                          <Brain className="size-3.5 text-zinc-400" /> {t("model")}
+                        </label>
+                        <select
+                          value={selectedModel}
+                          onChange={(e) => setSelectedModel(e.target.value)}
+                          className="bg-zinc-950 text-zinc-100 text-xs rounded-xl p-3 border border-zinc-900 focus:border-zinc-700 focus:ring-1 focus:ring-zinc-800 outline-none cursor-pointer hover:bg-zinc-900 transition-all font-semibold"
+                        >
+                          <option value="llama-3.1-8b-instant">Llama 3.1 8B (Free)</option>
+                          <option value="llama-3.3-70b-versatile" disabled={userTier === "freemium"}>
+                            Llama 3.3 70B {userTier === "freemium" ? "(Premium Only)" : "(Pro)"}
+                          </option>
+                        </select>
+                        <span className="text-[9px] text-emerald-500/80 font-medium leading-tight mt-1">
+                          ⚡ Ultra-fast Groq API engine. Instant sub-second response times.
+                        </span>
+                      </div>
 
-                  <div className="flex flex-col gap-2">
-                    <label className="text-[10px] text-zinc-500 font-semibold uppercase tracking-wider flex items-center gap-1.5">
-                      <Volume2 className="size-3.5 text-zinc-400" /> {t("voice")}
-                    </label>
-                    <select
-                      value={selectedVoice}
-                      onChange={(e) => setSelectedVoice(e.target.value)}
-                      className="bg-zinc-950 text-zinc-100 text-xs rounded-xl p-3 border border-zinc-900 focus:border-zinc-700 focus:ring-1 focus:ring-zinc-800 outline-none cursor-pointer hover:bg-zinc-900 transition-all font-semibold"
-                    >
-                      {selectedLanguage === "ar-SA" ? (
-                        <>
-                          <option value="groq-noura">Noura (Female - Free)</option>
-                          <option value="groq-abdullah" disabled={userTier === "freemium"}>Abdullah {userTier === "freemium" ? "(Premium Only)" : "(Premium)"}</option>
-                          <option value="groq-aisha" disabled={userTier === "freemium"}>Aisha {userTier === "freemium" ? "(Premium Only)" : "(Premium)"}</option>
-                          <option value="groq-fahad" disabled={userTier === "freemium"}>Fahad {userTier === "freemium" ? "(Premium Only)" : "(Premium)"}</option>
-                          <option value="groq-sultan" disabled={userTier === "freemium"}>Sultan {userTier === "freemium" ? "(Premium Only)" : "(Premium)"}</option>
-                          <option value="groq-lulwa" disabled={userTier === "freemium"}>Lulwa {userTier === "freemium" ? "(Premium Only)" : "(Premium)"}</option>
-                        </>
-                      ) : (
-                        <>
-                          <option value="groq-autumn">Autumn (Female - Free)</option>
-                          <option value="groq-diana" disabled={userTier === "freemium"}>Diana {userTier === "freemium" ? "(Premium Only)" : "(Premium)"}</option>
-                          <option value="groq-hannah" disabled={userTier === "freemium"}>Hannah {userTier === "freemium" ? "(Premium Only)" : "(Premium)"}</option>
-                          <option value="groq-austin" disabled={userTier === "freemium"}>Austin {userTier === "freemium" ? "(Premium Only)" : "(Premium)"}</option>
-                          <option value="groq-daniel" disabled={userTier === "freemium"}>Daniel {userTier === "freemium" ? "(Premium Only)" : "(Premium)"}</option>
-                          <option value="groq-troy" disabled={userTier === "freemium"}>Troy {userTier === "freemium" ? "(Premium Only)" : "(Premium)"}</option>
-                        </>
-                      )}
-                      <option value="local">Local Browser Synthesis (Free)</option>
-                    </select>
-                  </div>
+                      <div className="flex flex-col gap-2">
+                        <label className="text-[10px] text-zinc-500 font-semibold uppercase tracking-wider flex items-center gap-1.5">
+                          <Volume2 className="size-3.5 text-zinc-400" /> {t("voice")}
+                        </label>
+                        <select
+                          value={selectedVoice}
+                          onChange={(e) => setSelectedVoice(e.target.value)}
+                          className="bg-zinc-950 text-zinc-100 text-xs rounded-xl p-3 border border-zinc-900 focus:border-zinc-700 focus:ring-1 focus:ring-zinc-800 outline-none cursor-pointer hover:bg-zinc-900 transition-all font-semibold"
+                        >
+                          {selectedLanguage === "ar-SA" ? (
+                            <>
+                              <option value="groq-noura">Noura (Female - Free)</option>
+                              <option value="groq-abdullah" disabled={userTier === "freemium"}>Abdullah {userTier === "freemium" ? "(Premium Only)" : "(Premium)"}</option>
+                              <option value="groq-aisha" disabled={userTier === "freemium"}>Aisha {userTier === "freemium" ? "(Premium Only)" : "(Premium)"}</option>
+                              <option value="groq-fahad" disabled={userTier === "freemium"}>Fahad {userTier === "freemium" ? "(Premium Only)" : "(Premium)"}</option>
+                              <option value="groq-sultan" disabled={userTier === "freemium"}>Sultan {userTier === "freemium" ? "(Premium Only)" : "(Premium)"}</option>
+                              <option value="groq-lulwa" disabled={userTier === "freemium"}>Lulwa {userTier === "freemium" ? "(Premium Only)" : "(Premium)"}</option>
+                            </>
+                          ) : (
+                            <>
+                              <option value="groq-autumn">Autumn (Female - Free)</option>
+                              <option value="groq-diana" disabled={userTier === "freemium"}>Diana {userTier === "freemium" ? "(Premium Only)" : "(Premium)"}</option>
+                              <option value="groq-hannah" disabled={userTier === "freemium"}>Hannah {userTier === "freemium" ? "(Premium Only)" : "(Premium)"}</option>
+                              <option value="groq-austin" disabled={userTier === "freemium"}>Austin {userTier === "freemium" ? "(Premium Only)" : "(Premium)"}</option>
+                              <option value="groq-daniel" disabled={userTier === "freemium"}>Daniel {userTier === "freemium" ? "(Premium Only)" : "(Premium)"}</option>
+                              <option value="groq-troy" disabled={userTier === "freemium"}>Troy {userTier === "freemium" ? "(Premium Only)" : "(Premium)"}</option>
+                            </>
+                          )}
+                          <option value="local">Local Browser Synthesis (Free)</option>
+                        </select>
+                      </div>
 
-                  <div className="flex flex-col gap-2">
-                    <label className="text-[10px] text-zinc-500 font-semibold uppercase tracking-wider flex items-center gap-1.5">
-                      <Mic className="size-3.5 text-zinc-400" /> Speech-to-Text (STT)
-                    </label>
-                    <select
-                      value={selectedStt}
-                      onChange={(e) => setSelectedStt(e.target.value as any)}
-                      className="bg-zinc-950 text-zinc-100 text-xs rounded-xl p-3 border border-zinc-900 focus:border-zinc-700 focus:ring-1 focus:ring-zinc-800 outline-none cursor-pointer hover:bg-zinc-900 transition-all font-semibold"
-                    >
-                      <option value="browser">Browser Web Speech (Free)</option>
-                      <option value="whisper-turbo" disabled={userTier === "freemium"}>
-                        Whisper Large V3 Turbo {userTier === "freemium" ? "(Premium Only)" : "(Premium)"}
-                      </option>
-                      <option value="whisper-v3" disabled={userTier === "freemium" || userTier === "premium"}>
-                        Whisper Large V3 {userTier === "freemium" || userTier === "premium" ? "(Pro Only)" : "(Pro)"}
-                      </option>
-                    </select>
-                  </div>
+                      <div className="flex flex-col gap-2">
+                        <label className="text-[10px] text-zinc-500 font-semibold uppercase tracking-wider flex items-center gap-1.5">
+                          <Mic className="size-3.5 text-zinc-400" /> Speech-to-Text (STT)
+                        </label>
+                        <select
+                          value={selectedStt}
+                          onChange={(e) => setSelectedStt(e.target.value as any)}
+                          className="bg-zinc-950 text-zinc-100 text-xs rounded-xl p-3 border border-zinc-900 focus:border-zinc-700 focus:ring-1 focus:ring-zinc-800 outline-none cursor-pointer hover:bg-zinc-900 transition-all font-semibold"
+                        >
+                          <option value="browser">Browser Web Speech (Free)</option>
+                          <option value="whisper-turbo" disabled={userTier === "freemium"}>
+                            Whisper Large V3 Turbo {userTier === "freemium" ? "(Premium Only)" : "(Premium)"}
+                          </option>
+                          <option value="whisper-v3" disabled={userTier === "freemium" || userTier === "premium"}>
+                            Whisper Large V3 {userTier === "freemium" || userTier === "premium" ? "(Pro Only)" : "(Pro)"}
+                          </option>
+                        </select>
+                      </div>
+                    </div>
+                  )}
                 </motion.div>
               )}
             </AnimatePresence>

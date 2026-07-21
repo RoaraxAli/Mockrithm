@@ -9,6 +9,7 @@ import { db } from "@/firebase/admin";
 import { feedbackSchema } from "@/constants";
 import { fetchGroq } from "@/lib/apiKeyManager";
 import { assertOwnership } from "@/lib/actions/getAuthenticatedUserId";
+import { updateUserEloRating } from "@/lib/actions/elo.action";
 
 async function groqGenerateObject(prompt: string) {
   const response = await fetchGroq("/chat/completions", {
@@ -181,6 +182,34 @@ export async function createFeedback(params: CreateFeedbackParams) {
       normalizedCategoryScores.reduce((acc, cat) => acc + cat.score, 0) / normalizedCategoryScores.length
     );
 
+    // Fetch interview details for role and sessionType
+    let interviewRole = "Software Engineer";
+    let interviewType = "Technical";
+    try {
+      const intSnap = await db.collection("interviews").doc(interviewId).get();
+      if (intSnap.exists) {
+        const intData = intSnap.data();
+        if (intData?.role) interviewRole = intData.role;
+        if (intData?.type) interviewType = intData.type;
+      }
+    } catch (e) {
+      console.warn("Could not fetch interview details for Elo update:", e);
+    }
+
+    // Update candidate's Elo rating across overall, role, and mode
+    let eloResult = null;
+    try {
+      eloResult = await updateUserEloRating({
+        userId,
+        interviewId,
+        role: interviewRole,
+        sessionType: interviewType,
+        totalScore: calculatedTotalScore,
+      });
+    } catch (eloErr) {
+      console.error("Failed to update user Elo rating:", eloErr);
+    }
+
     const feedback = {
       interviewId,
       userId,
@@ -197,6 +226,7 @@ export async function createFeedback(params: CreateFeedbackParams) {
       candidateCode: candidateCode || "",
       transcript: transcript || [],
       studyGuide: object.studyGuide || [],
+      eloResult: eloResult || null,
     };
 
     let feedbackRef;

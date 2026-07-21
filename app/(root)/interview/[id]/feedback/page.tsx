@@ -94,21 +94,34 @@ const Feedback = async ({ params }: RouteParams) => {
                 <span className="text-xl text-zinc-500 font-light">%</span>
               </div>
             </div>
-            <div className="mt-8 border-t border-zinc-900 pt-4 flex justify-between items-center">
-              <span className="text-[10px] text-zinc-400 font-black uppercase tracking-wider font-mono">
-                Status:
-              </span>
-              <span className={`text-[10px] font-bold uppercase tracking-wider font-mono px-2.5 py-1 rounded bg-zinc-950 border ${
-                totalScore >= 80 ? "text-emerald-400 border-emerald-500/20" :
-                totalScore >= 60 ? "text-blue-400 border-blue-500/20" :
-                totalScore >= 40 ? "text-amber-400 border-amber-500/20" :
-                "text-rose-450 border-rose-500/20"
-              }`}>
-                {totalScore >= 80 ? "Excellent Fit" :
-                 totalScore >= 60 ? "Strong Match" :
-                 totalScore >= 40 ? "Partial Match" :
-                 "Weak Match"}
-              </span>
+            <div className="mt-8 border-t border-zinc-900 pt-4 flex flex-col gap-2">
+              <div className="flex justify-between items-center">
+                <span className="text-[10px] text-zinc-400 font-black uppercase tracking-wider font-mono">
+                  Status:
+                </span>
+                <span className={`text-[10px] font-bold uppercase tracking-wider font-mono px-2.5 py-1 rounded bg-zinc-950 border ${
+                  totalScore >= 80 ? "text-emerald-400 border-emerald-500/20" :
+                  totalScore >= 60 ? "text-blue-400 border-blue-500/20" :
+                  totalScore >= 40 ? "text-amber-400 border-amber-500/20" :
+                  "text-rose-450 border-rose-500/20"
+                }`}>
+                  {totalScore >= 80 ? "Excellent Fit" :
+                   totalScore >= 60 ? "Strong Match" :
+                   totalScore >= 40 ? "Partial Match" :
+                   "Weak Match"}
+                </span>
+              </div>
+
+              {serializedFeedback?.eloResult && (
+                <div className="flex justify-between items-center text-xs font-mono border-t border-zinc-900/80 pt-2 mt-1">
+                  <span className="text-[10px] text-zinc-400 font-bold uppercase tracking-wider">
+                    Elo Rating Update:
+                  </span>
+                  <span className="font-bold text-indigo-400">
+                    {serializedFeedback.eloResult.overallElo} ELO ({serializedFeedback.eloResult.overallDelta >= 0 ? `+${serializedFeedback.eloResult.overallDelta}` : serializedFeedback.eloResult.overallDelta} ELO)
+                  </span>
+                </div>
+              )}
             </div>
           </div>
 
