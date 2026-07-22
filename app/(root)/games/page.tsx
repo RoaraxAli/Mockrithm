@@ -28,7 +28,7 @@ const Editor = dynamic(() => import("@monaco-editor/react"), { ssr: false });
 
 import GitGame from "@/components/games/GitGame";
 import LivePreview from "@/components/games/LivePreview";
-import { FrogCssGameRunner } from "@/components/games/FrogCssGameRunner";
+const FrogCssGameRunner = dynamic(() => import("@/components/games/FrogCssGameRunner").then(m => m.FrogCssGameRunner), { ssr: false });
 import Footer from "@/components/shared/Footer";
 import { ECertificateModal } from "@/components/games/ECertificateModal";
 

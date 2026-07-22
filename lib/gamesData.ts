@@ -2609,11 +2609,37 @@ const GAME_SYLLABUS: Record<string, string[]> = {
   tailwind: ["Text sizes text-lg", "Margin and paddings", "Background colors bg-zinc", "Borders rounded utilities", "Flex grid responsive sm", "Hover states hover:bg", "Transitions durations", "Custom extend spacing", "Arbitrary colors extends", "Tailwind plugins writes"]
 };
 
+import { ALL_FROG_LEVELS } from "./frogLevelsData";
+
 /**
  * Dynamic Progressive Syllabus Generator
  * Maps level L and step index to completely different, progressive categories of missions.
  */
 export function generateLevel(gameId: string, level: number): LevelData {
+  // Use 3D Frog 100-level progressive syllabus for CSS3
+  if (gameId === "css3" && level <= 100) {
+    const frogLvl = ALL_FROG_LEVELS.find(l => l.id === level) || ALL_FROG_LEVELS[0];
+    return {
+      id: `css3-${level}`,
+      level: level,
+      levelId: level,
+      tier: "Apprentice",
+      title: frogLvl.title,
+      conceptText: frogLvl.prompt,
+      codeExample: frogLvl.starterCode,
+      missionText: frogLvl.targetDescription,
+      starterCode: frogLvl.starterCode,
+      hints: frogLvl.hints,
+      validation: {
+        checkType: "css",
+        testCases: (frogLvl.validationRules.regexMatches || []).map(r => ({
+          description: `Matching CSS rule: ${r}`,
+          testRegex: r
+        }))
+      }
+    };
+  }
+
   // Use handcrafted HTML5 levels 1-100 for initial onboarding
   if (gameId === "html5" && level <= 100) {
     if (level >= 1 && level <= 11) {

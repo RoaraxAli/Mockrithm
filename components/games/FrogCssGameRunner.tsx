@@ -3,7 +3,10 @@
 import React, { useState, useEffect } from "react";
 import dynamic from "next/dynamic";
 import { ALL_FROG_LEVELS, FrogLevel } from "@/lib/frogLevelsData";
-import { ThreeFrogViewport } from "./ThreeFrogViewport";
+const ThreeFrogViewport = dynamic(
+  () => import("./ThreeFrogViewport").then((mod) => mod.ThreeFrogViewport),
+  { ssr: false }
+);
 import {
   Code2, RotateCcw, HelpCircle, ArrowLeft, Sparkles, Map, Play, CheckCircle2, Award
 } from "lucide-react";
