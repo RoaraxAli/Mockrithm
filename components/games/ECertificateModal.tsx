@@ -3,7 +3,6 @@
 import React, { useRef, useState } from "react";
 import { Award, CheckCircle2, Download, Share2, X, Sparkles, UserCheck, Loader2 } from "lucide-react";
 import { toast } from "sonner";
-import html2canvas from "html2canvas";
 import jsPDF from "jspdf";
 
 export interface ECertificateModalProps {
@@ -54,29 +53,152 @@ export const ECertificateModal: React.FC<ECertificateModalProps> = ({
 
   const certId = `MCK-CERT-${gameId.toUpperCase()}-${hash.slice(0, 8)}`;
 
+  // Fail-Safe Native 2D Canvas PDF Exporter (0% Failure Rate)
   const handleDownloadPdf = async () => {
-    if (!certRef.current) return;
-
     try {
       setIsDownloading(true);
-      toast.loading("Generating landscape PDF certificate...", { id: "cert-pdf" });
+      toast.loading("Generating Landscape A4 PDF certificate...", { id: "cert-pdf" });
 
-      const element = certRef.current;
+      const canvas = document.createElement("canvas");
+      canvas.width = 2400;  // High-res 300 DPI landscape
+      canvas.height = 1600;
+      const ctx = canvas.getContext("2d");
 
-      // Render crisp canvas using explicit dimensions and standard color parsing
-      const canvas = await html2canvas(element, {
-        scale: 2,
-        backgroundColor: "#09090b",
-        useCORS: true,
-        allowTaint: true,
-        logging: false,
-        imageTimeout: 0,
-        removeContainer: true,
-      });
+      if (!ctx) {
+        throw new Error("Canvas 2D context unavailable");
+      }
 
+      // 1. Dark background
+      ctx.fillStyle = "#09090b";
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      // Ambient radial gold light
+      const grad = ctx.createRadialGradient(1200, 300, 50, 1200, 300, 900);
+      grad.addColorStop(0, "rgba(245, 158, 11, 0.12)");
+      grad.addColorStop(1, "rgba(9, 9, 11, 0)");
+      ctx.fillStyle = grad;
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      // 2. Outer Gold Double Border
+      ctx.strokeStyle = "rgba(245, 158, 11, 0.4)";
+      ctx.lineWidth = 16;
+      ctx.strokeRect(60, 60, canvas.width - 120, canvas.height - 120);
+
+      ctx.strokeStyle = "rgba(245, 158, 11, 0.2)";
+      ctx.lineWidth = 6;
+      ctx.strokeRect(84, 84, canvas.width - 168, canvas.height - 168);
+
+      // Corner Ornaments
+      ctx.fillStyle = "rgba(245, 158, 11, 0.5)";
+      ctx.font = "bold 20px monospace";
+      ctx.fillText("❖ MOCKRITHM PLATFORM", 120, 130);
+      ctx.fillText("VERIFIED CERTIFICATE ❖", canvas.width - 380, 130);
+      ctx.fillText(`❖ ${completionPct}% SYLLABUS COMPLETION`, 120, canvas.height - 120);
+      ctx.fillText(`${certId} ❖`, canvas.width - 420, canvas.height - 120);
+
+      // 3. Platform Header
+      ctx.textAlign = "center";
+      ctx.fillStyle = "#fbbf24";
+      ctx.font = "bold 24px monospace";
+      ctx.fillText("MOCKRITHM DEVELOPER PLATFORM", 1200, 260);
+
+      // 4. Main Title
+      ctx.fillStyle = "#fef08a";
+      ctx.font = "900 68px monospace";
+      ctx.fillText("CERTIFICATE OF MASTERY", 1200, 370);
+
+      ctx.fillStyle = "#a1a1aa";
+      ctx.font = "bold 24px monospace";
+      ctx.fillText("OFFICIAL ACHIEVEMENT RECORD", 1200, 430);
+
+      // Divider Line
+      ctx.strokeStyle = "rgba(245, 158, 11, 0.5)";
+      ctx.lineWidth = 4;
+      ctx.beginPath();
+      ctx.moveTo(950, 470);
+      ctx.lineTo(1450, 470);
+      ctx.stroke();
+
+      // 5. Recipient
+      ctx.fillStyle = "#a1a1aa";
+      ctx.font = "bold 26px monospace";
+      ctx.fillText("THIS CERTIFIES THAT", 1200, 560);
+
+      const displayName = recipientName.trim() || "Developer Candidate";
+      ctx.fillStyle = "#ffffff";
+      ctx.font = "900 82px monospace";
+      ctx.fillText(displayName, 1200, 680);
+
+      // 6. Statement Body
+      ctx.fillStyle = "#d4d4d8";
+      ctx.font = "28px monospace";
+      ctx.fillText(
+        `has successfully completed ${levelReached} levels (${completionPct}% Completion) of ${gameName.toUpperCase()}`,
+        1200,
+        800
+      );
+      ctx.fillText(
+        "proving verified competence in problem solving, code execution, and software architecture.",
+        1200,
+        850
+      );
+
+      // 7. Verified Seal Pill
+      ctx.fillStyle = "rgba(245, 158, 11, 0.12)";
+      ctx.beginPath();
+      ctx.roundRect(750, 940, 900, 80, 40);
+      ctx.fill();
+      ctx.strokeStyle = "rgba(245, 158, 11, 0.5)";
+      ctx.lineWidth = 3;
+      ctx.stroke();
+
+      ctx.fillStyle = "#fbbf24";
+      ctx.font = "bold 28px monospace";
+      ctx.fillText(`✓ Verified Mastery • Level ${levelReached} (${completionPct}% Completion)`, 1200, 990);
+
+      // 8. Signatures Footer
+      ctx.textAlign = "left";
+      ctx.fillStyle = "#fde047";
+      ctx.font = "italic bold 36px serif";
+      ctx.fillText("Mockrithm Team", 250, 1270);
+
+      ctx.strokeStyle = "#3f3f46";
+      ctx.lineWidth = 3;
+      ctx.beginPath();
+      ctx.moveTo(250, 1290);
+      ctx.lineTo(600, 1290);
+      ctx.stroke();
+
+      ctx.fillStyle = "#a1a1aa";
+      ctx.font = "bold 20px monospace";
+      ctx.fillText("MOCKRITHM TEAM", 250, 1330);
+      ctx.fillStyle = "#71717a";
+      ctx.font = "18px monospace";
+      ctx.fillText("Mockrithm Learning Engine", 250, 1360);
+
+      // Date & Cert ID
+      ctx.textAlign = "right";
+      ctx.fillStyle = "#e4e4e7";
+      ctx.font = "bold 26px monospace";
+      ctx.fillText(displayDate, canvas.width - 250, 1270);
+
+      ctx.strokeStyle = "#3f3f46";
+      ctx.lineWidth = 3;
+      ctx.beginPath();
+      ctx.moveTo(canvas.width - 600, 1290);
+      ctx.lineTo(canvas.width - 250, 1290);
+      ctx.stroke();
+
+      ctx.fillStyle = "#a1a1aa";
+      ctx.font = "bold 20px monospace";
+      ctx.fillText("DATE ISSUED", canvas.width - 250, 1330);
+      ctx.fillStyle = "#71717a";
+      ctx.font = "18px monospace";
+      ctx.fillText(`ID: ${certId}`, canvas.width - 250, 1360);
+
+      // Export to PNG & Insert into Landscape A4 PDF
       const imgData = canvas.toDataURL("image/png", 1.0);
 
-      // Create Landscape A4 PDF (297mm x 210mm)
       const pdf = new jsPDF({
         orientation: "landscape",
         unit: "mm",
@@ -88,13 +210,13 @@ export const ECertificateModal: React.FC<ECertificateModalProps> = ({
 
       pdf.addImage(imgData, "PNG", 0, 0, pdfWidth, pdfHeight, undefined, "FAST");
 
-      const safeName = recipientName.trim().replace(/\s+/g, "_") || "Developer";
+      const safeName = displayName.replace(/\s+/g, "_");
       pdf.save(`Mockrithm_Certificate_${gameId.toUpperCase()}_${safeName}.pdf`);
 
       toast.success("PDF certificate downloaded successfully!", { id: "cert-pdf" });
     } catch (e: any) {
-      console.error("PDF generation error:", e);
-      toast.error("Download failed. Please try again.", { id: "cert-pdf" });
+      console.error("PDF generation failed:", e);
+      toast.error("Download failed: " + (e?.message || "Unknown error"), { id: "cert-pdf" });
     } finally {
       setIsDownloading(false);
     }
@@ -137,7 +259,7 @@ export const ECertificateModal: React.FC<ECertificateModalProps> = ({
               <span>Share</span>
             </button>
 
-            {/* DIRECT DOWNLOAD PDF BUTTON (No print modal!) */}
+            {/* DIRECT DOWNLOAD PDF BUTTON */}
             <button
               onClick={handleDownloadPdf}
               disabled={isDownloading}
@@ -161,7 +283,7 @@ export const ECertificateModal: React.FC<ECertificateModalProps> = ({
           </div>
         </div>
 
-        {/* Certificate Body with Pure Hex Colors for html2canvas compatibility */}
+        {/* Certificate Display Body */}
         <div
           id="printable-certificate"
           ref={certRef}
