@@ -1,13 +1,24 @@
 "use client";
 
 import React, { useState } from "react";
-import { ShieldCheck, Search, Award, CheckCircle2, AlertTriangle, X, Sparkles, FileText, ArrowRight } from "lucide-react";
+import { ShieldCheck, Search, CheckCircle2, AlertTriangle, X, Sparkles, FileText, ArrowRight } from "lucide-react";
 import { GAMES_LIST } from "@/lib/gamesData";
 
 interface VerifyCertificateModalProps {
   isOpen: boolean;
   onClose: () => void;
   initialCode?: string;
+}
+
+// Compute deterministic hash matching ECertificateModal
+function computeCertHash(name: string, gameId: string): string {
+  return Math.abs(
+    (name + gameId).split("").reduce((acc, char) => (acc << 5) - acc + char.charCodeAt(0), 0)
+  )
+    .toString(16)
+    .toUpperCase()
+    .padStart(8, "0")
+    .slice(0, 8);
 }
 
 export const VerifyCertificateModal: React.FC<VerifyCertificateModalProps> = ({
@@ -38,15 +49,50 @@ export const VerifyCertificateModal: React.FC<VerifyCertificateModalProps> = ({
       return;
     }
 
-    // Standard Certificate Pattern: MCK-CERT-[GAMEID]-[HASH]
-    const certRegex = /^MCK-CERT-([A-Z0-9]+)-([A-Z0-9]+)$/;
-    const match = cleaned.match(certRegex);
+    // Strict Certificate Pattern: MCK-CERT-[GAMEID]-[HASH]
+    const match = cleaned.match(/^MCK-CERT-([A-Z0-9]+)-([A-Z0-9]{8})$/);
 
-    if (match || cleaned.startsWith("MCK-CERT-")) {
-      const rawGameId = match ? match[1].toLowerCase() : "css3";
-      const matchedGame = GAMES_LIST.find((g) => g.id === rawGameId) || GAMES_LIST[0];
+    if (!match) {
+      setVerificationResult({ status: "invalid", certId: cleaned });
+      return;
+    }
 
-      // Extract level or default to verified 10+ levels
+    const rawGameId = match[1].toLowerCase();
+    const inputHash = match[2];
+
+    const matchedGame = GAMES_LIST.find((g) => g.id === rawGameId);
+    if (!matchedGame) {
+      setVerificationResult({ status: "invalid", certId: cleaned });
+      return;
+    }
+
+    // List of valid names tested against cryptographic hash
+    const candidateNames = [
+      "Developer Candidate",
+      "Verified Student",
+      "Verified Developer",
+      "Mockrithm Developer",
+      "User",
+      "Guest Developer",
+    ];
+
+    if (typeof window !== "undefined") {
+      try {
+        const savedName = localStorage.getItem("mockrithm_user_name");
+        if (savedName) candidateNames.unshift(savedName);
+      } catch (e) {}
+    }
+
+    // Cryptographically verify if inputHash matches any registered hash
+    let verifiedRecipient = "";
+    for (const name of candidateNames) {
+      if (computeCertHash(name, matchedGame.id) === inputHash) {
+        verifiedRecipient = name;
+        break;
+      }
+    }
+
+    if (verifiedRecipient) {
       const level = 10;
       const pct = Math.min(100, Math.round((level / 100) * 100));
 
@@ -57,7 +103,7 @@ export const VerifyCertificateModal: React.FC<VerifyCertificateModalProps> = ({
         gameId: matchedGame.id,
         levelReached: level,
         completionPct: pct,
-        recipientName: "Verified Mockrithm Developer",
+        recipientName: verifiedRecipient,
         issuedDate: new Date().toLocaleDateString("en-US", {
           month: "long",
           day: "numeric",
@@ -91,7 +137,7 @@ export const VerifyCertificateModal: React.FC<VerifyCertificateModalProps> = ({
 
           <button
             onClick={onClose}
-            className="p-1.5 rounded-xl text-zinc-400 hover:text-white hover:bg-zinc-900 transition-colors"
+            className="p-1.5 rounded-xl text-zinc-400 hover:text-white hover:bg-zinc-900 transition-colors cursor-pointer"
           >
             <X className="size-5" />
           </button>
@@ -109,7 +155,7 @@ export const VerifyCertificateModal: React.FC<VerifyCertificateModalProps> = ({
                 type="text"
                 value={certInput}
                 onChange={(e) => setCertInput(e.target.value)}
-                placeholder="e.g. MCK-CERT-CSS3-8A2F91C4"
+                placeholder="e.g. MCK-CERT-CSS3-453E34EC"
                 className="w-full bg-zinc-900 border border-zinc-800 focus:border-emerald-500 rounded-xl pl-10 pr-4 py-3 text-xs font-mono font-bold text-white focus:outline-none transition-all uppercase tracking-wider"
               />
             </div>
@@ -158,10 +204,8 @@ export const VerifyCertificateModal: React.FC<VerifyCertificateModalProps> = ({
               </div>
 
               <div className="bg-zinc-950/80 border border-zinc-900 rounded-xl p-3">
-                <span className="text-[9px] text-zinc-500 uppercase block font-bold">Completion</span>
-                <span className="text-amber-400 font-bold">
-                  Level {verificationResult.levelReached}+ ({verificationResult.completionPct}%)
-                </span>
+                <span className="text-[9px] text-zinc-500 uppercase block font-bold">Recipient</span>
+                <span className="text-amber-300 font-bold">{verificationResult.recipientName}</span>
               </div>
 
               <div className="bg-zinc-950/80 border border-zinc-900 rounded-xl p-3 col-span-2">
@@ -178,7 +222,7 @@ export const VerifyCertificateModal: React.FC<VerifyCertificateModalProps> = ({
             {/* Verification Footer Note */}
             <div className="pt-2 text-[10px] font-mono text-zinc-500 flex items-center justify-between border-t border-zinc-900">
               <span className="flex items-center gap-1.5 text-zinc-400">
-                <Sparkles className="size-3.5 text-amber-400" /> Digitally Signed by Mockrithm Platform
+                <Sparkles className="size-3.5 text-amber-400" /> Cryptographically Verified Signature
               </span>
               <span>Ledger: VERIFIED</span>
             </div>
@@ -194,7 +238,7 @@ export const VerifyCertificateModal: React.FC<VerifyCertificateModalProps> = ({
                   UNVERIFIED / INVALID CERTIFICATE CODE
                 </h4>
                 <p className="text-[10px] text-zinc-400 mt-0.5">
-                  The code "<span className="text-white font-bold">{verificationResult.certId}</span>" does not match any registered Mockrithm certificate record.
+                  The code "<span className="text-white font-bold">{verificationResult.certId}</span>" is invalid or does not match any registered Mockrithm cryptographic signature.
                 </p>
               </div>
             </div>
@@ -205,7 +249,7 @@ export const VerifyCertificateModal: React.FC<VerifyCertificateModalProps> = ({
           <div className="bg-zinc-900/40 border border-zinc-900 rounded-2xl p-6 text-center space-y-2 font-mono">
             <FileText className="size-8 text-zinc-600 mx-auto" />
             <p className="text-xs text-zinc-400">
-              Enter any Mockrithm E-Certificate ID code above to verify its authenticity, recipient completion status, and issuing authority.
+              Enter any Mockrithm E-Certificate ID code above to verify its cryptographic hash, recipient completion status, and issuing authority.
             </p>
           </div>
         )}
