@@ -278,12 +278,22 @@ export const FrogCssGameRunner: React.FC<FrogCssGameRunnerProps> = ({ onBack }) 
           </div>
 
           <div className="p-3 border-t border-zinc-900 bg-zinc-950 flex gap-2 select-none shrink-0">
-            <button
-              onClick={evaluateCode}
-              className="w-full py-3 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold uppercase tracking-widest rounded-xl transition-all cursor-pointer flex items-center justify-center gap-2 border border-emerald-600 shadow-lg shadow-emerald-950/20"
-            >
-              🚀 Verify & Run Code
-            </button>
+            {evaluationSuccess === true ? (
+              <button
+                onClick={handleNextLevel}
+                disabled={currentLevelNum === 100}
+                className="w-full py-3 bg-emerald-500 hover:bg-emerald-400 text-slate-950 text-xs font-black uppercase tracking-widest rounded-xl transition-all cursor-pointer flex items-center justify-center gap-2 shadow-lg shadow-emerald-500/30 animate-bounce"
+              >
+                🎉 Level Passed! Next Level ➔
+              </button>
+            ) : (
+              <button
+                onClick={evaluateCode}
+                className="w-full py-3 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold uppercase tracking-widest rounded-xl transition-all cursor-pointer flex items-center justify-center gap-2 border border-emerald-600 shadow-lg shadow-emerald-950/20"
+              >
+                🚀 Verify & Run Code
+              </button>
+            )}
           </div>
         </div>
 

@@ -30,25 +30,51 @@ function parseCssColorToHex(colorStr: string): number | null {
   return null;
 }
 
-// Extract CSS properties from user code
-function parseCssRules(cssText: string): Record<string, string> {
-  const styles: Record<string, string> = {};
+// Extract CSS properties grouped by selector (.frog vs #pond)
+function parseCssSelectorRules(cssText: string): {
+  frog: Record<string, string>;
+  pond: Record<string, string>;
+} {
+  const result = { frog: {} as Record<string, string>, pond: {} as Record<string, string> };
+
   try {
+    // Match .frog { ... } block
     const frogBlockMatch = cssText.match(/\.frog\s*\{([^}]+)\}/i);
-    const contentToParse = frogBlockMatch ? frogBlockMatch[1] : cssText;
-    const rules = contentToParse.split(";");
-    for (const rule of rules) {
-      const parts = rule.split(":");
-      if (parts.length >= 2) {
-        const prop = parts[0].trim().toLowerCase();
-        const val = parts.slice(1).join(":").trim().toLowerCase();
-        styles[prop] = val;
+    if (frogBlockMatch) {
+      const rules = frogBlockMatch[1].split(";");
+      for (const rule of rules) {
+        const parts = rule.split(":");
+        if (parts.length >= 2) {
+          result.frog[parts[0].trim().toLowerCase()] = parts.slice(1).join(":").trim().toLowerCase();
+        }
+      }
+    } else {
+      // Fallback: parse un-bracketed rules into frog
+      const rules = cssText.split(";");
+      for (const rule of rules) {
+        const parts = rule.split(":");
+        if (parts.length >= 2) {
+          result.frog[parts[0].trim().toLowerCase()] = parts.slice(1).join(":").trim().toLowerCase();
+        }
+      }
+    }
+
+    // Match #pond { ... } block
+    const pondBlockMatch = cssText.match(/#pond\s*\{([^}]+)\}/i);
+    if (pondBlockMatch) {
+      const rules = pondBlockMatch[1].split(";");
+      for (const rule of rules) {
+        const parts = rule.split(":");
+        if (parts.length >= 2) {
+          result.pond[parts[0].trim().toLowerCase()] = parts.slice(1).join(":").trim().toLowerCase();
+        }
       }
     }
   } catch (e) {
     console.warn("CSS parsing error:", e);
   }
-  return styles;
+
+  return result;
 }
 
 export const ThreeFrogViewport: React.FC<ThreeFrogViewportProps> = ({
@@ -68,41 +94,42 @@ export const ThreeFrogViewport: React.FC<ThreeFrogViewportProps> = ({
   const sceneRef = useRef<THREE.Scene | null>(null);
   const frogGroupRef = useRef<THREE.Group | null>(null);
   const frogMatRef = useRef<THREE.MeshStandardMaterial | null>(null);
+  const eyeMatRef = useRef<THREE.MeshBasicMaterial | null>(null);
+  const pondMatRef = useRef<THREE.MeshStandardMaterial | null>(null);
   const outlineMeshRef = useRef<THREE.Mesh | null>(null);
   const rendererRef = useRef<THREE.WebGLRenderer | null>(null);
   const animFrameId = useRef<number | null>(null);
 
-  // Build a Polished, Realistic 3D Frog Mesh Model
-  const createBetterFrogMeshGroup = (defaultColor = 0x52525b) => {
+  // Build 3D Frog Mesh Group
+  const createFrogMeshGroup = (defaultColor = 0x52525b) => {
     const group = new THREE.Group();
 
     // Glossy Frog Skin Material
     const frogMat = new THREE.MeshStandardMaterial({
       color: defaultColor,
-      roughness: 0.2, // glossy skin
+      roughness: 0.2,
       metalness: 0.1,
       transparent: true,
       opacity: 1.0,
     });
 
-    // 1. Head / Main Body (Smooth Tapered Ellipsoid)
+    // Body
     const bodyGeo = new THREE.SphereGeometry(1.0, 32, 24);
     bodyGeo.scale(1.1, 0.75, 1.2);
     const bodyMesh = new THREE.Mesh(bodyGeo, frogMat);
     bodyMesh.position.y = 0.65;
     group.add(bodyMesh);
 
-    // 2. Eye Sockets & Expressive Eyes
+    // Eye Sockets & Eye Whites
     const socketGeo = new THREE.SphereGeometry(0.35, 20, 20);
     const eyeWhiteGeo = new THREE.SphereGeometry(0.24, 20, 20);
     const pupilGeo = new THREE.SphereGeometry(0.12, 16, 16);
     const shineGeo = new THREE.SphereGeometry(0.04, 8, 8);
 
-    const eyeWhiteMat = new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.1 });
+    const eyeWhiteMat = new THREE.MeshBasicMaterial({ color: 0xffffff });
     const pupilMat = new THREE.MeshBasicMaterial({ color: 0x09090b });
     const shineMat = new THREE.MeshBasicMaterial({ color: 0xffffff });
 
-    // Left Eye Socket & Eye
     const socketL = new THREE.Mesh(socketGeo, frogMat);
     socketL.position.set(-0.48, 1.15, 0.4);
     group.add(socketL);
@@ -115,11 +142,6 @@ export const ThreeFrogViewport: React.FC<ThreeFrogViewportProps> = ({
     pupilL.position.set(-0.48, 1.2, 0.74);
     group.add(pupilL);
 
-    const shineL = new THREE.Mesh(shineGeo, shineMat);
-    shineL.position.set(-0.44, 1.24, 0.84);
-    group.add(shineL);
-
-    // Right Eye Socket & Eye
     const socketR = new THREE.Mesh(socketGeo, frogMat);
     socketR.position.set(0.48, 1.15, 0.4);
     group.add(socketR);
@@ -132,11 +154,7 @@ export const ThreeFrogViewport: React.FC<ThreeFrogViewportProps> = ({
     pupilR.position.set(0.48, 1.2, 0.74);
     group.add(pupilR);
 
-    const shineR = new THREE.Mesh(shineGeo, shineMat);
-    shineR.position.set(0.44, 1.24, 0.84);
-    group.add(shineR);
-
-    // 3. Mouth Line
+    // Mouth
     const mouthGeo = new THREE.TorusGeometry(0.45, 0.025, 8, 24, Math.PI);
     const mouthMat = new THREE.MeshBasicMaterial({ color: 0x27272a });
     const mouth = new THREE.Mesh(mouthGeo, mouthMat);
@@ -144,7 +162,7 @@ export const ThreeFrogViewport: React.FC<ThreeFrogViewportProps> = ({
     mouth.position.set(0, 0.62, 0.95);
     group.add(mouth);
 
-    // 4. Front Legs & Webbed Feet
+    // Legs
     const legFrontGeo = new THREE.CylinderGeometry(0.12, 0.15, 0.55, 16);
     const footGeo = new THREE.ConeGeometry(0.28, 0.06, 16);
     footGeo.scale(1.2, 1, 1.5);
@@ -152,7 +170,7 @@ export const ThreeFrogViewport: React.FC<ThreeFrogViewportProps> = ({
     const legFL = new THREE.Mesh(legFrontGeo, frogMat);
     legFL.position.set(-0.7, 0.35, 0.6);
     legFL.rotation.z = 0.25;
-    const footFL = new THREE.Mesh(footGeo, footGeo ? frogMat : frogMat);
+    const footFL = new THREE.Mesh(footGeo, frogMat);
     footFL.position.set(-0.8, 0.08, 0.8);
     group.add(legFL, footFL);
 
@@ -163,7 +181,6 @@ export const ThreeFrogViewport: React.FC<ThreeFrogViewportProps> = ({
     footFR.position.set(0.8, 0.08, 0.8);
     group.add(legFR, footFR);
 
-    // 5. Hind Thighs & Bent Back Legs
     const thighGeo = new THREE.SphereGeometry(0.48, 20, 20);
     thighGeo.scale(1.4, 0.6, 1.1);
 
@@ -177,7 +194,7 @@ export const ThreeFrogViewport: React.FC<ThreeFrogViewportProps> = ({
     thighR.rotation.z = -0.3;
     group.add(thighR);
 
-    return { group, material: frogMat };
+    return { group, material: frogMat, eyeMaterial: eyeWhiteMat };
   };
 
   // Initialize Three.js 3D Scene
@@ -190,14 +207,14 @@ export const ThreeFrogViewport: React.FC<ThreeFrogViewportProps> = ({
       const height = container.clientHeight || 300;
 
       const scene = new THREE.Scene();
-      scene.background = new THREE.Color(0x09090b); // zinc-950
+      scene.background = new THREE.Color(0x09090b);
       sceneRef.current = scene;
 
       const camera = new THREE.PerspectiveCamera(38, width / height, 0.1, 100);
       camera.position.set(0, 4.8, 7.5);
       camera.lookAt(0, 0.4, 0);
 
-      // Studio Lighting
+      // Lights
       const ambientLight = new THREE.AmbientLight(0xffffff, 1.0);
       scene.add(ambientLight);
 
@@ -209,12 +226,13 @@ export const ThreeFrogViewport: React.FC<ThreeFrogViewportProps> = ({
       fillLight.position.set(-5, 4, -4);
       scene.add(fillLight);
 
-      // Lily Pad Base
+      // Lily Pad Base (#pond)
       const lilyPadGeo = new THREE.CylinderGeometry(2.8, 2.8, 0.12, 36);
       const lilyPadMat = new THREE.MeshStandardMaterial({
-        color: 0x15803d, // dark green lily pad
+        color: 0x15803d, // default dark green
         roughness: 0.4,
       });
+      pondMatRef.current = lilyPadMat;
       const lilyPadMesh = new THREE.Mesh(lilyPadGeo, lilyPadMat);
       lilyPadMesh.position.set(0, -0.06, 0);
       scene.add(lilyPadMesh);
@@ -232,18 +250,19 @@ export const ThreeFrogViewport: React.FC<ThreeFrogViewportProps> = ({
       waterRing.position.y = -0.05;
       scene.add(waterRing);
 
-      // User 3D Frog (Polished 3D Model)
-      const userData = createBetterFrogMeshGroup(0x52525b); // Neutral slate default
+      // User 3D Frog
+      const userData = createFrogMeshGroup(0x52525b); // Neutral slate default
       frogGroupRef.current = userData.group;
       frogMatRef.current = userData.material;
+      eyeMatRef.current = userData.eyeMaterial;
       userData.group.position.set(0, 0, 0);
       scene.add(userData.group);
 
-      // Outline Mesh (only for border property)
+      // Outline Mesh (for border property)
       const outlineGeo = new THREE.SphereGeometry(1.05, 24, 20);
       outlineGeo.scale(1.1, 0.75, 1.2);
       const outlineMat = new THREE.MeshBasicMaterial({
-        color: 0xef4444,
+        color: 0x27ae60,
         side: THREE.BackSide,
         visible: false,
       });
@@ -267,11 +286,9 @@ export const ThreeFrogViewport: React.FC<ThreeFrogViewportProps> = ({
 
         if (frogGroupRef.current) {
           if (isVictory) {
-            // Victory 3D spin & hop animation!
             frogGroupRef.current.position.y = Math.abs(Math.sin(elapsedTime * 6)) * 1.3;
             frogGroupRef.current.rotation.y += 0.08;
           } else {
-            // Gentle idle breathing motion
             frogGroupRef.current.position.y = Math.sin(elapsedTime * 2.5) * 0.03;
           }
         }
@@ -306,51 +323,66 @@ export const ThreeFrogViewport: React.FC<ThreeFrogViewportProps> = ({
     }
   }, [mounted, isVictory]);
 
-  // Dynamically apply user CSS directly to User 3D Frog on EVERY KEYSTROKE!
+  // Dynamically apply user CSS directly on EVERY KEYSTROKE!
   useEffect(() => {
     if (!mounted || !frogMatRef.current || !frogGroupRef.current) return;
 
-    const parsed = parseCssRules(userCss);
+    const parsed = parseCssSelectorRules(userCss);
 
-    // 1. Color / Background-Color
-    const colorStr = parsed["background-color"] || parsed["color"] || parsed["background"];
-    if (colorStr) {
-      const parsedHex = parseCssColorToHex(colorStr);
-      if (parsedHex !== null) {
-        frogMatRef.current.color.setHex(parsedHex);
-      }
+    // 1. .frog background-color -> 3D Frog Skin Color
+    if (parsed.frog["background-color"] || parsed.frog["background"]) {
+      const colorVal = parsed.frog["background-color"] || parsed.frog["background"];
+      const hex = parseCssColorToHex(colorVal);
+      if (hex !== null) frogMatRef.current.color.setHex(hex);
     } else {
-      frogMatRef.current.color.setHex(0x52525b);
+      frogMatRef.current.color.setHex(0x52525b); // default slate
     }
 
-    // 2. Opacity
-    if (parsed["opacity"]) {
-      const op = parseFloat(parsed["opacity"]);
-      if (!isNaN(op)) {
-        frogMatRef.current.opacity = Math.max(0.1, Math.min(1.0, op));
+    // 2. .frog color -> 3D Frog Eye / Details Color
+    if (parsed.frog["color"] && eyeMatRef.current) {
+      const hex = parseCssColorToHex(parsed.frog["color"]);
+      if (hex !== null) eyeMatRef.current.color.setHex(hex);
+    } else if (eyeMatRef.current) {
+      eyeMatRef.current.color.setHex(0xffffff); // default white eyes
+    }
+
+    // 3. #pond background-color -> 3D Lily Pad Pond Base Color
+    if (parsed.pond["background-color"] || parsed.pond["background"]) {
+      const pondColorVal = parsed.pond["background-color"] || parsed.pond["background"];
+      const hex = parseCssColorToHex(pondColorVal);
+      if (hex !== null && pondMatRef.current) {
+        pondMatRef.current.color.setHex(hex);
       }
+    } else if (pondMatRef.current) {
+      pondMatRef.current.color.setHex(0x15803d); // default dark green
+    }
+
+    // 4. .frog opacity
+    if (parsed.frog["opacity"]) {
+      const op = parseFloat(parsed.frog["opacity"]);
+      if (!isNaN(op)) frogMatRef.current.opacity = Math.max(0.1, Math.min(1.0, op));
     } else {
       frogMatRef.current.opacity = 1.0;
     }
 
-    // 3. Border
-    if (parsed["border"] || parsed["outline"]) {
+    // 5. .frog border
+    if (parsed.frog["border"] || parsed.frog["outline"]) {
       if (outlineMeshRef.current) {
         outlineMeshRef.current.visible = true;
-        const bVal = parsed["border"] || parsed["outline"] || "";
-        const bColor = parseCssColorToHex(bVal) || 0xef4444;
+        const bVal = parsed.frog["border"] || parsed.frog["outline"] || "";
+        const bColor = parseCssColorToHex(bVal) || 0x27ae60;
         (outlineMeshRef.current.material as THREE.MeshBasicMaterial).color.setHex(bColor);
       }
     } else if (outlineMeshRef.current) {
       outlineMeshRef.current.visible = false;
     }
 
-    // 4. Scale
-    if (parsed["scale"]) {
-      const s = parseFloat(parsed["scale"]);
+    // 6. .frog scale
+    if (parsed.frog["scale"]) {
+      const s = parseFloat(parsed.frog["scale"]);
       if (!isNaN(s)) frogGroupRef.current.scale.set(s, s, s);
-    } else if (parsed["transform"] && parsed["transform"].includes("scale")) {
-      const scaleMatch = parsed["transform"].match(/scale\(([^)]+)\)/);
+    } else if (parsed.frog["transform"] && parsed.frog["transform"].includes("scale")) {
+      const scaleMatch = parsed.frog["transform"].match(/scale\(([^)]+)\)/);
       if (scaleMatch) {
         const s = parseFloat(scaleMatch[1]);
         if (!isNaN(s)) frogGroupRef.current.scale.set(s, s, s);
@@ -359,9 +391,9 @@ export const ThreeFrogViewport: React.FC<ThreeFrogViewportProps> = ({
       frogGroupRef.current.scale.set(1, 1, 1);
     }
 
-    // 5. Rotation
-    if (parsed["transform"] && parsed["transform"].includes("rotate")) {
-      const rotMatch = parsed["transform"].match(/rotate\(([^)]+)deg\)/);
+    // 7. .frog rotation
+    if (parsed.frog["transform"] && parsed.frog["transform"].includes("rotate")) {
+      const rotMatch = parsed.frog["transform"].match(/rotate\(([^)]+)deg\)/);
       if (rotMatch) {
         const deg = parseFloat(rotMatch[1]);
         if (!isNaN(deg)) frogGroupRef.current.rotation.y = (deg * Math.PI) / 180;
@@ -370,9 +402,9 @@ export const ThreeFrogViewport: React.FC<ThreeFrogViewportProps> = ({
       frogGroupRef.current.rotation.y = 0;
     }
 
-    // 6. Positioning / Flex Align
-    if (parsed["justify-content"] || parsed["align-items"]) {
-      const justify = parsed["justify-content"];
+    // 8. #pond flex positioning
+    if (parsed.pond["justify-content"] || parsed.pond["align-items"]) {
+      const justify = parsed.pond["justify-content"];
       if (justify === "flex-end" || justify === "right") frogGroupRef.current.position.x = 1.2;
       else if (justify === "center") frogGroupRef.current.position.x = 0;
       else if (justify === "flex-start" || justify === "left") frogGroupRef.current.position.x = -1.2;
