@@ -1554,8 +1554,15 @@ function GamesPageContent() {
             {/* ── VIEW: GAME RUNNER ── */}
             {gameView === "game-runner" && activeGame && (() => {
               if (activeGame.id === "css3") {
+                const dbCompleted = progress["css3"]?.completedLevel || 0;
                 return (
-                  <FrogCssGameRunner onBack={() => { playSound("click"); setGameView("game-detail"); }} />
+                  <FrogCssGameRunner
+                    onBack={() => { playSound("click"); setGameView("game-detail"); }}
+                    completedLevelFromDb={dbCompleted}
+                    onCompleteLevel={() => {
+                      handleLevelCompletion();
+                    }}
+                  />
                 );
               }
               const maxLvl = 100;

@@ -3,23 +3,30 @@
 import React, { useState, useEffect } from "react";
 import dynamic from "next/dynamic";
 import { ALL_FROG_LEVELS, FrogLevel } from "@/lib/frogLevelsData";
+import {
+  Code2, RotateCcw, HelpCircle, ArrowLeft, Sparkles, Map, CheckCircle2, Lock
+} from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
+import { toast } from "sonner";
+
 const ThreeFrogViewport = dynamic(
   () => import("./ThreeFrogViewport").then((mod) => mod.ThreeFrogViewport),
   { ssr: false }
 );
-import {
-  Code2, RotateCcw, HelpCircle, ArrowLeft, Sparkles, Map, Play, CheckCircle2, Award
-} from "lucide-react";
-import { motion, AnimatePresence } from "framer-motion";
-import { toast } from "sonner";
 
 const Editor = dynamic(() => import("@monaco-editor/react"), { ssr: false });
 
 interface FrogCssGameRunnerProps {
   onBack?: () => void;
+  completedLevelFromDb?: number;
+  onCompleteLevel?: (levelNum: number) => void;
 }
 
-export const FrogCssGameRunner: React.FC<FrogCssGameRunnerProps> = ({ onBack }) => {
+export const FrogCssGameRunner: React.FC<FrogCssGameRunnerProps> = ({
+  onBack,
+  completedLevelFromDb = 0,
+  onCompleteLevel,
+}) => {
   const [mounted, setMounted] = useState(false);
   const [currentLevelNum, setCurrentLevelNum] = useState(1);
   const [editorCode, setEditorCode] = useState("");
@@ -33,9 +40,6 @@ export const FrogCssGameRunner: React.FC<FrogCssGameRunnerProps> = ({ onBack }) 
   useEffect(() => {
     setMounted(true);
   }, []);
-
-  const activeLevelData: FrogLevel =
-    ALL_FROG_LEVELS.find((l) => l.id === currentLevelNum) || ALL_FROG_LEVELS[0];
 
   // Load progress from localStorage
   useEffect(() => {
@@ -52,6 +56,14 @@ export const FrogCssGameRunner: React.FC<FrogCssGameRunnerProps> = ({ onBack }) 
     }
   }, []);
 
+  // Compute highest level completed across database and local storage
+  const maxCompletedFromList = completedLevels.length > 0 ? Math.max(...completedLevels) : 0;
+  const highestCompleted = Math.max(completedLevelFromDb, maxCompletedFromList);
+  const unlockedLevelLimit = Math.min(100, highestCompleted + 1);
+
+  const activeLevelData: FrogLevel =
+    ALL_FROG_LEVELS.find((l) => l.id === currentLevelNum) || ALL_FROG_LEVELS[0];
+
   // Update editor code and initial CSS state on level change
   useEffect(() => {
     setEditorCode(activeLevelData.starterCode);
@@ -65,7 +77,7 @@ export const FrogCssGameRunner: React.FC<FrogCssGameRunnerProps> = ({ onBack }) 
   const handleCodeChange = (val: string | undefined) => {
     const code = val || "";
     setEditorCode(code);
-    setUserCss(code); // Immediately triggers real-time 3D viewport update on keystroke!
+    setUserCss(code);
   };
 
   const evaluateCode = () => {
@@ -92,11 +104,18 @@ export const FrogCssGameRunner: React.FC<FrogCssGameRunnerProps> = ({ onBack }) 
     setEvaluationSuccess(allPassed);
 
     if (allPassed) {
-      toast.success(`🎉 Level ${currentLevelNum} Complete! Excellent work.`);
+      toast.success(`🎉 Level ${currentLevelNum} Complete! Progress saved.`);
+
+      // Update local storage & completed list state
       if (!completedLevels.includes(currentLevelNum)) {
         const nextCompleted = [...completedLevels, currentLevelNum];
         setCompletedLevels(nextCompleted);
         localStorage.setItem("mockrithm_frog_game_progress", JSON.stringify(nextCompleted));
+      }
+
+      // Record persistently in database (Firestore)
+      if (onCompleteLevel) {
+        onCompleteLevel(currentLevelNum);
       }
     } else {
       toast.error("Test validation failed. Check hint details.");
@@ -104,15 +123,25 @@ export const FrogCssGameRunner: React.FC<FrogCssGameRunnerProps> = ({ onBack }) 
   };
 
   const handleSelectLevel = (lvl: number) => {
-    if (lvl >= 1 && lvl <= 100) {
-      setCurrentLevelNum(lvl);
-      localStorage.setItem("mockrithm_frog_game_level", lvl.toString());
-      setIsDrawerOpen(false);
+    if (lvl < 1 || lvl > 100) return;
+
+    // Strict Progression Rule: User CANNOT play levels beyond their max unlocked level!
+    if (lvl > unlockedLevelLimit && evaluationSuccess !== true) {
+      toast.error(`🔒 Level ${lvl} is locked! Complete Level ${unlockedLevelLimit - 1} first.`);
+      return;
     }
+
+    setCurrentLevelNum(lvl);
+    localStorage.setItem("mockrithm_frog_game_level", lvl.toString());
+    setIsDrawerOpen(false);
   };
 
   const handleNextLevel = () => {
-    if (currentLevelNum < 100) handleSelectLevel(currentLevelNum + 1);
+    if (currentLevelNum < unlockedLevelLimit || evaluationSuccess === true) {
+      handleSelectLevel(currentLevelNum + 1);
+    } else {
+      toast.error(`🔒 Level ${currentLevelNum + 1} is locked! Pass Level ${currentLevelNum} first.`);
+    }
   };
 
   const handlePrevLevel = () => {
@@ -149,7 +178,7 @@ export const FrogCssGameRunner: React.FC<FrogCssGameRunnerProps> = ({ onBack }) 
             onClick={() => setIsDrawerOpen(!isDrawerOpen)}
             className="px-3.5 py-1.5 rounded-xl bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/30 text-emerald-400 font-mono font-bold text-xs flex items-center gap-2 transition cursor-pointer"
           >
-            <Map className="size-3.5" /> Level Map ({completedLevels.length}/100)
+            <Map className="size-3.5" /> Level Map ({highestCompleted}/100)
           </button>
         </div>
 
@@ -178,7 +207,7 @@ export const FrogCssGameRunner: React.FC<FrogCssGameRunnerProps> = ({ onBack }) 
 
           <button
             onClick={handleNextLevel}
-            disabled={currentLevelNum === 100}
+            disabled={currentLevelNum >= unlockedLevelLimit && evaluationSuccess !== true}
             className="px-2.5 py-1.5 rounded-lg bg-zinc-950 border border-zinc-900 hover:border-zinc-700 text-zinc-400 hover:text-white transition-all cursor-pointer disabled:opacity-30 disabled:pointer-events-none text-xs"
           >
             ▶
@@ -186,7 +215,7 @@ export const FrogCssGameRunner: React.FC<FrogCssGameRunnerProps> = ({ onBack }) 
         </div>
       </div>
 
-      {/* Main 3-Column Workspace Grid filling full container height */}
+      {/* Main 3-Column Workspace Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 flex-1 min-h-0 items-stretch select-none overflow-hidden">
         {/* Column 1: Info and Instructions (4 Cols) */}
         <div className="lg:col-span-4 flex flex-col bg-zinc-950/60 border border-zinc-900 rounded-2xl p-5 overflow-y-auto gap-4 select-text">
@@ -356,7 +385,7 @@ export const FrogCssGameRunner: React.FC<FrogCssGameRunnerProps> = ({ onBack }) 
           <div className="w-full max-w-4xl max-h-[85vh] bg-zinc-950 border border-zinc-800 rounded-2xl p-6 flex flex-col space-y-4 shadow-2xl overflow-hidden font-mono">
             <div className="flex items-center justify-between border-b border-zinc-900 pb-4">
               <h3 className="text-sm font-bold text-white uppercase tracking-wider flex items-center gap-2">
-                <Sparkles className="size-4 text-emerald-400" /> Select Level (1–100)
+                <Sparkles className="size-4 text-emerald-400" /> Level Progression Map (1–100)
               </h3>
               <button
                 onClick={() => setIsDrawerOpen(false)}
@@ -368,8 +397,9 @@ export const FrogCssGameRunner: React.FC<FrogCssGameRunnerProps> = ({ onBack }) 
 
             <div className="flex-1 overflow-y-auto grid grid-cols-5 sm:grid-cols-10 gap-2 p-1">
               {ALL_FROG_LEVELS.map((lvl) => {
-                const isCompleted = completedLevels.includes(lvl.id);
+                const isCompleted = lvl.id <= highestCompleted || completedLevels.includes(lvl.id);
                 const isCurrent = lvl.id === currentLevelNum;
+                const isLocked = lvl.id > unlockedLevelLimit;
 
                 return (
                   <button
@@ -379,12 +409,19 @@ export const FrogCssGameRunner: React.FC<FrogCssGameRunnerProps> = ({ onBack }) 
                       isCurrent
                         ? "bg-white text-black border border-white shadow-lg"
                         : isCompleted
-                        ? "bg-emerald-500/20 border border-emerald-500/40 text-emerald-400"
-                        : "bg-zinc-900/60 border border-zinc-800 text-zinc-500 hover:text-white hover:bg-zinc-800"
+                        ? "bg-emerald-500/20 border border-emerald-500/40 text-emerald-400 hover:bg-emerald-500/30"
+                        : isLocked
+                        ? "bg-zinc-900/30 border border-zinc-800/40 text-zinc-600 cursor-not-allowed opacity-60"
+                        : "bg-zinc-900/80 border border-zinc-700 text-zinc-300 hover:bg-zinc-800"
                     }`}
+                    title={isLocked ? `Level ${lvl.id} (Locked)` : `Level ${lvl.id}`}
                   >
-                    {lvl.id}
-                    {isCompleted && (
+                    {isLocked ? (
+                      <Lock className="size-3.5 text-zinc-600" />
+                    ) : (
+                      lvl.id
+                    )}
+                    {isCompleted && !isCurrent && (
                       <CheckCircle2 className="size-3 text-emerald-400 absolute top-1 right-1" />
                     )}
                   </button>
