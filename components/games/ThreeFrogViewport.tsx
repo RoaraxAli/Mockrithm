@@ -10,16 +10,22 @@ interface ThreeFrogViewportProps {
   isVictory: boolean;
 }
 
-// Convert any valid CSS color string to THREE.Color hex number
+// Convert any valid CSS color string to THREE.Color hex number safely
 function parseCssColorToHex(colorStr: string): number | null {
   if (!colorStr) return null;
-  const cleaned = colorStr.trim().toLowerCase();
-  const ctx = document.createElement("canvas").getContext("2d");
-  if (!ctx) return null;
-  ctx.fillStyle = cleaned;
-  const computed = ctx.fillStyle;
-  if (computed.startsWith("#")) {
-    return parseInt(computed.replace("#", "0x"), 16);
+  if (typeof window === "undefined" || typeof document === "undefined") return null;
+
+  try {
+    const cleaned = colorStr.trim().toLowerCase();
+    const ctx = document.createElement("canvas").getContext("2d");
+    if (!ctx) return null;
+    ctx.fillStyle = cleaned;
+    const computed = ctx.fillStyle;
+    if (computed.startsWith("#")) {
+      return parseInt(computed.replace("#", "0x"), 16);
+    }
+  } catch (e) {
+    /* ignore parsing error */
   }
   return null;
 }
@@ -52,6 +58,11 @@ export const ThreeFrogViewport: React.FC<ThreeFrogViewportProps> = ({
 }) => {
   const mountRef = useRef<HTMLDivElement>(null);
   const [webGlSupported, setWebGlSupported] = useState(true);
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   // Three.js References
   const sceneRef = useRef<THREE.Scene | null>(null);
@@ -125,7 +136,7 @@ export const ThreeFrogViewport: React.FC<ThreeFrogViewportProps> = ({
     shineR.position.set(0.44, 1.24, 0.84);
     group.add(shineR);
 
-    // 3. Cute Mouth Line
+    // 3. Mouth Line
     const mouthGeo = new THREE.TorusGeometry(0.45, 0.025, 8, 24, Math.PI);
     const mouthMat = new THREE.MeshBasicMaterial({ color: 0x27272a });
     const mouth = new THREE.Mesh(mouthGeo, mouthMat);
@@ -141,7 +152,7 @@ export const ThreeFrogViewport: React.FC<ThreeFrogViewportProps> = ({
     const legFL = new THREE.Mesh(legFrontGeo, frogMat);
     legFL.position.set(-0.7, 0.35, 0.6);
     legFL.rotation.z = 0.25;
-    const footFL = new THREE.Mesh(footGeo, frogMat);
+    const footFL = new THREE.Mesh(footGeo, footGeo ? frogMat : frogMat);
     footFL.position.set(-0.8, 0.08, 0.8);
     group.add(legFL, footFL);
 
@@ -171,7 +182,7 @@ export const ThreeFrogViewport: React.FC<ThreeFrogViewportProps> = ({
 
   // Initialize Three.js 3D Scene
   useEffect(() => {
-    if (!mountRef.current) return;
+    if (!mounted || !mountRef.current) return;
 
     try {
       const container = mountRef.current;
@@ -221,7 +232,7 @@ export const ThreeFrogViewport: React.FC<ThreeFrogViewportProps> = ({
       waterRing.position.y = -0.05;
       scene.add(waterRing);
 
-      // User 3D Frog (Polished 3D Model, NO net wireframe mesh!)
+      // User 3D Frog (Polished 3D Model)
       const userData = createBetterFrogMeshGroup(0x52525b); // Neutral slate default
       frogGroupRef.current = userData.group;
       frogMatRef.current = userData.material;
@@ -293,15 +304,15 @@ export const ThreeFrogViewport: React.FC<ThreeFrogViewportProps> = ({
       console.warn("WebGL fallback initialized:", e);
       setWebGlSupported(false);
     }
-  }, [isVictory]);
+  }, [mounted, isVictory]);
 
   // Dynamically apply user CSS directly to User 3D Frog on EVERY KEYSTROKE!
   useEffect(() => {
-    if (!frogMatRef.current || !frogGroupRef.current) return;
+    if (!mounted || !frogMatRef.current || !frogGroupRef.current) return;
 
     const parsed = parseCssRules(userCss);
 
-    // 1. Color / Background-Color -> Directly updates 3D Frog Skin Color
+    // 1. Color / Background-Color
     const colorStr = parsed["background-color"] || parsed["color"] || parsed["background"];
     if (colorStr) {
       const parsedHex = parseCssColorToHex(colorStr);
@@ -309,11 +320,10 @@ export const ThreeFrogViewport: React.FC<ThreeFrogViewportProps> = ({
         frogMatRef.current.color.setHex(parsedHex);
       }
     } else {
-      // Neutral slate default when no color property set yet
       frogMatRef.current.color.setHex(0x52525b);
     }
 
-    // 2. Opacity -> Sets 3D Frog Material Opacity
+    // 2. Opacity
     if (parsed["opacity"]) {
       const op = parseFloat(parsed["opacity"]);
       if (!isNaN(op)) {
@@ -323,7 +333,7 @@ export const ThreeFrogViewport: React.FC<ThreeFrogViewportProps> = ({
       frogMatRef.current.opacity = 1.0;
     }
 
-    // 3. Border -> Enables outline mesh if requested
+    // 3. Border
     if (parsed["border"] || parsed["outline"]) {
       if (outlineMeshRef.current) {
         outlineMeshRef.current.visible = true;
@@ -367,9 +377,17 @@ export const ThreeFrogViewport: React.FC<ThreeFrogViewportProps> = ({
       else if (justify === "center") frogGroupRef.current.position.x = 0;
       else if (justify === "flex-start" || justify === "left") frogGroupRef.current.position.x = -1.2;
     } else {
-      userFrogGroupRef.current?.position.set(0, 0, 0);
+      frogGroupRef.current.position.set(0, 0, 0);
     }
-  }, [userCss, level]);
+  }, [mounted, userCss, level]);
+
+  if (!mounted) {
+    return (
+      <div className="w-full h-full min-h-[260px] bg-zinc-950 border border-zinc-900 rounded-2xl flex items-center justify-center font-mono text-xs text-zinc-600">
+        Initializing 3D Viewport...
+      </div>
+    );
+  }
 
   return (
     <div className="w-full h-full min-h-[260px] bg-zinc-950 border border-zinc-900 rounded-2xl overflow-hidden relative flex flex-col items-center justify-center p-2 shadow-2xl">

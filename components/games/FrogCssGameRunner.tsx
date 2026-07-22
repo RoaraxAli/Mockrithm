@@ -20,6 +20,7 @@ interface FrogCssGameRunnerProps {
 }
 
 export const FrogCssGameRunner: React.FC<FrogCssGameRunnerProps> = ({ onBack }) => {
+  const [mounted, setMounted] = useState(false);
   const [currentLevelNum, setCurrentLevelNum] = useState(1);
   const [editorCode, setEditorCode] = useState("");
   const [userCss, setUserCss] = useState("");
@@ -28,6 +29,10 @@ export const FrogCssGameRunner: React.FC<FrogCssGameRunnerProps> = ({ onBack }) 
   const [evaluationSuccess, setEvaluationSuccess] = useState<boolean | null>(null);
   const [evalLogs, setEvalLogs] = useState<string[]>([]);
   const [completedLevels, setCompletedLevels] = useState<number[]>([]);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   const activeLevelData: FrogLevel =
     ALL_FROG_LEVELS.find((l) => l.id === currentLevelNum) || ALL_FROG_LEVELS[0];
@@ -113,6 +118,14 @@ export const FrogCssGameRunner: React.FC<FrogCssGameRunnerProps> = ({ onBack }) 
   const handlePrevLevel = () => {
     if (currentLevelNum > 1) handleSelectLevel(currentLevelNum - 1);
   };
+
+  if (!mounted) {
+    return (
+      <div className="w-full h-[calc(100vh-100px)] bg-zinc-950 flex items-center justify-center font-mono text-xs text-zinc-500">
+        Loading 3D Engine...
+      </div>
+    );
+  }
 
   return (
     <div className="flex flex-col gap-4 w-full h-[calc(100vh-100px)] text-zinc-100 font-sans overflow-hidden">
