@@ -3,6 +3,8 @@
 import React, { useRef, useState } from "react";
 import { Award, CheckCircle2, Download, Share2, X, Sparkles, UserCheck, Loader2 } from "lucide-react";
 import { toast } from "sonner";
+import html2canvas from "html2canvas";
+import jsPDF from "jspdf";
 
 export interface ECertificateModalProps {
   isOpen: boolean;
@@ -59,42 +61,40 @@ export const ECertificateModal: React.FC<ECertificateModalProps> = ({
       setIsDownloading(true);
       toast.loading("Generating landscape PDF certificate...", { id: "cert-pdf" });
 
-      const html2canvas = (await import("html2canvas")).default;
-      const jsPDF = (await import("jspdf")).default;
-
       const element = certRef.current;
 
-      // Capture full-color high-resolution element
+      // Render crisp canvas using explicit dimensions and standard color parsing
       const canvas = await html2canvas(element, {
         scale: 2,
         backgroundColor: "#09090b",
         useCORS: true,
         allowTaint: true,
         logging: false,
+        imageTimeout: 0,
+        removeContainer: true,
       });
 
-      const imgData = canvas.toDataURL("image/png");
+      const imgData = canvas.toDataURL("image/png", 1.0);
 
-      // Generate Landscape A4 PDF document (297mm x 210mm)
+      // Create Landscape A4 PDF (297mm x 210mm)
       const pdf = new jsPDF({
         orientation: "landscape",
         unit: "mm",
         format: "a4",
       });
 
-      const pdfWidth = pdf.internal.pageSize.getWidth();
-      const pdfHeight = pdf.internal.pageSize.getHeight();
+      const pdfWidth = pdf.internal.pageSize.getWidth();   // 297mm
+      const pdfHeight = pdf.internal.pageSize.getHeight(); // 210mm
 
-      pdf.addImage(imgData, "PNG", 0, 0, pdfWidth, pdfHeight);
+      pdf.addImage(imgData, "PNG", 0, 0, pdfWidth, pdfHeight, undefined, "FAST");
 
       const safeName = recipientName.trim().replace(/\s+/g, "_") || "Developer";
       pdf.save(`Mockrithm_Certificate_${gameId.toUpperCase()}_${safeName}.pdf`);
 
       toast.success("PDF certificate downloaded successfully!", { id: "cert-pdf" });
     } catch (e: any) {
-      console.error("PDF export failed:", e);
-      toast.error("Generating fallback PDF print view...", { id: "cert-pdf" });
-      window.print();
+      console.error("PDF generation error:", e);
+      toast.error("Download failed. Please try again.", { id: "cert-pdf" });
     } finally {
       setIsDownloading(false);
     }
@@ -108,54 +108,14 @@ export const ECertificateModal: React.FC<ECertificateModalProps> = ({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-md overflow-y-auto animate-in fade-in duration-200 font-sans">
-      {/* Fallback Print Styles */}
-      <style jsx global>{`
-        @media print {
-          @page {
-            size: A4 landscape;
-            margin: 0;
-          }
-          html, body {
-            margin: 0 !important;
-            padding: 0 !important;
-            background: #09090b !important;
-            -webkit-print-color-adjust: exact !important;
-            print-color-adjust: exact !important;
-          }
-          body * {
-            visibility: hidden !important;
-          }
-          #printable-certificate, #printable-certificate * {
-            visibility: visible !important;
-          }
-          #printable-certificate {
-            position: absolute !important;
-            left: 0 !important;
-            top: 0 !important;
-            width: 100vw !important;
-            height: 100vh !important;
-            margin: 0 !important;
-            padding: 3rem 4rem !important;
-            background: #09090b !important;
-            color: #ffffff !important;
-            -webkit-print-color-adjust: exact !important;
-            print-color-adjust: exact !important;
-            box-shadow: none !important;
-            border-radius: 0 !important;
-          }
-          .no-print {
-            display: none !important;
-          }
-        }
-      `}</style>
-
-      <div className="relative w-full max-w-4xl my-6 bg-zinc-950 border border-amber-500/40 rounded-2xl shadow-2xl overflow-hidden text-zinc-100 font-sans">
+      <div className="relative w-full max-w-4xl my-6 bg-[#09090b] border border-[#f59e0b]/40 rounded-2xl shadow-2xl overflow-hidden text-[#ffffff] font-sans">
+        
         {/* Header Bar with SINGLE Download PDF Button */}
-        <div className="no-print p-4 sm:p-5 bg-zinc-900/80 border-b border-zinc-800 flex flex-col sm:flex-row items-center justify-between gap-4">
+        <div className="no-print p-4 sm:p-5 bg-[#18181b] border-b border-[#27272a] flex flex-col sm:flex-row items-center justify-between gap-4">
           {/* Real Name Input */}
           <div className="flex items-center gap-2.5 w-full sm:w-auto">
-            <UserCheck className="size-4 text-amber-400 shrink-0" />
-            <span className="text-xs font-mono text-zinc-300 font-bold whitespace-nowrap">
+            <UserCheck className="size-4 text-[#f59e0b] shrink-0" />
+            <span className="text-xs font-mono text-[#d4d4d8] font-bold whitespace-nowrap">
               Certificate Full Name:
             </span>
             <input
@@ -163,25 +123,25 @@ export const ECertificateModal: React.FC<ECertificateModalProps> = ({
               value={recipientName}
               onChange={(e) => setRecipientName(e.target.value)}
               placeholder="Enter your real full name"
-              className="bg-zinc-950 border border-amber-500/40 focus:border-amber-400 rounded-xl px-3.5 py-1.5 text-xs font-mono font-bold text-amber-300 focus:outline-none w-full sm:w-64 transition-all"
+              className="bg-[#09090b] border border-[#f59e0b]/40 focus:border-[#fbbf24] rounded-xl px-3.5 py-1.5 text-xs font-mono font-bold text-[#fbbf24] focus:outline-none w-full sm:w-64 transition-all"
             />
           </div>
 
           <div className="flex items-center gap-3 w-full sm:w-auto justify-end">
             <button
               onClick={handleCopyLink}
-              className="flex items-center gap-1.5 px-3.5 py-2 text-xs font-semibold rounded-xl bg-zinc-800 text-zinc-200 hover:bg-zinc-700 transition-colors cursor-pointer"
+              className="flex items-center gap-1.5 px-3.5 py-2 text-xs font-semibold rounded-xl bg-[#27272a] text-[#e4e4e7] hover:bg-[#3f3f46] transition-colors cursor-pointer"
               title="Copy certificate link"
             >
               <Share2 className="size-3.5" />
               <span>Share</span>
             </button>
 
-            {/* SINGLE DIRECT DOWNLOAD PDF BUTTON */}
+            {/* DIRECT DOWNLOAD PDF BUTTON (No print modal!) */}
             <button
               onClick={handleDownloadPdf}
               disabled={isDownloading}
-              className="flex items-center gap-2 px-5 py-2.5 text-xs font-bold rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 transition-all shadow-md shadow-amber-500/20 cursor-pointer disabled:opacity-50 font-mono uppercase tracking-wider"
+              className="flex items-center gap-2 px-5 py-2.5 text-xs font-bold rounded-xl bg-[#f59e0b] hover:bg-[#fbbf24] text-[#09090b] transition-all shadow-md shadow-[#f59e0b]/20 cursor-pointer disabled:opacity-50 font-mono uppercase tracking-wider"
               title="Download PDF Certificate"
             >
               {isDownloading ? (
@@ -194,109 +154,105 @@ export const ECertificateModal: React.FC<ECertificateModalProps> = ({
 
             <button
               onClick={onClose}
-              className="p-1.5 rounded-xl text-zinc-400 hover:text-white hover:bg-zinc-800 transition-colors cursor-pointer"
+              className="p-1.5 rounded-xl text-[#a1a1aa] hover:text-[#ffffff] hover:bg-[#27272a] transition-colors cursor-pointer"
             >
               <X className="size-5" />
             </button>
           </div>
         </div>
 
-        {/* Certificate Printable Body */}
+        {/* Certificate Body with Pure Hex Colors for html2canvas compatibility */}
         <div
           id="printable-certificate"
           ref={certRef}
-          className="relative p-8 sm:p-12 bg-gradient-to-b from-zinc-950 via-zinc-900 to-zinc-950 text-white select-none border-8 border-double border-amber-500/30 m-3 rounded-xl overflow-hidden shadow-2xl"
+          style={{ backgroundColor: "#09090b", color: "#ffffff" }}
+          className="relative p-8 sm:p-12 text-white select-none border-8 border-double border-[#f59e0b]/30 m-3 rounded-xl overflow-hidden shadow-2xl"
         >
-          {/* Subtle background graphics */}
-          <div className="absolute inset-0 bg-[radial-gradient(#eab308_1px,transparent_1px)] [background-size:24px_24px] opacity-5 pointer-events-none" />
-          <div className="absolute top-0 right-0 w-96 h-96 bg-amber-500/5 rounded-full blur-3xl pointer-events-none" />
-          <div className="absolute bottom-0 left-0 w-96 h-96 bg-emerald-500/5 rounded-full blur-3xl pointer-events-none" />
-
           {/* Corner Crest Ornaments */}
-          <div className="absolute top-4 left-4 text-amber-500/40 font-mono text-[10px] uppercase select-none">❖ MOCKRITHM PLATFORM</div>
-          <div className="absolute top-4 right-4 text-amber-500/40 font-mono text-[10px] uppercase select-none">VERIFIED CERTIFICATE ❖</div>
-          <div className="absolute bottom-4 left-4 text-amber-500/40 font-mono text-[10px] uppercase select-none">❖ {completionPct}% SYLLABUS COMPLETION</div>
-          <div className="absolute bottom-4 right-4 text-amber-500/40 font-mono text-[10px] uppercase select-none">{certId} ❖</div>
+          <div className="absolute top-4 left-4 text-[#f59e0b]/50 font-mono text-[10px] uppercase select-none">❖ MOCKRITHM PLATFORM</div>
+          <div className="absolute top-4 right-4 text-[#f59e0b]/50 font-mono text-[10px] uppercase select-none">VERIFIED CERTIFICATE ❖</div>
+          <div className="absolute bottom-4 left-4 text-[#f59e0b]/50 font-mono text-[10px] uppercase select-none">❖ {completionPct}% SYLLABUS COMPLETION</div>
+          <div className="absolute bottom-4 right-4 text-[#f59e0b]/50 font-mono text-[10px] uppercase select-none">{certId} ❖</div>
 
           <div className="relative z-10 flex flex-col items-center text-center space-y-6 max-w-2xl mx-auto py-4">
             
             {/* Header / Logo */}
             <div className="flex flex-col items-center gap-2">
-              <div className="size-14 rounded-2xl bg-gradient-to-br from-amber-400 to-amber-600 p-0.5 shadow-xl shadow-amber-500/20 flex items-center justify-center">
-                <div className="w-full h-full bg-zinc-950 rounded-[14px] flex items-center justify-center">
-                  <Award className="size-8 text-amber-400" />
+              <div className="size-14 rounded-2xl bg-[#f59e0b] p-0.5 shadow-xl flex items-center justify-center">
+                <div className="w-full h-full bg-[#09090b] rounded-[14px] flex items-center justify-center">
+                  <Award className="size-8 text-[#f59e0b]" />
                 </div>
               </div>
-              <span className="text-[10px] font-mono tracking-[0.3em] text-amber-400/90 uppercase font-black">
+              <span className="text-[10px] font-mono tracking-[0.3em] text-[#fbbf24] uppercase font-black">
                 MOCKRITHM DEVELOPER PLATFORM
               </span>
             </div>
 
             {/* Title */}
             <div className="space-y-1">
-              <h1 className="text-2xl sm:text-4xl font-black tracking-widest text-transparent bg-clip-text bg-gradient-to-r from-amber-200 via-amber-400 to-amber-200 uppercase font-mono">
+              <h1 className="text-2xl sm:text-4xl font-black tracking-widest text-[#fef08a] uppercase font-mono">
                 Certificate of Mastery
               </h1>
-              <p className="text-[11px] font-mono tracking-widest text-zinc-400 uppercase">
+              <p className="text-[11px] font-mono tracking-widest text-[#a1a1aa] uppercase">
                 Official Achievement Record
               </p>
             </div>
 
             {/* Presentation Divider */}
-            <div className="w-48 h-0.5 bg-gradient-to-r from-transparent via-amber-500/50 to-transparent my-2" />
+            <div className="w-48 h-0.5 bg-[#f59e0b]/50 my-2" />
 
             {/* Recipient */}
             <div className="space-y-2">
-              <p className="text-xs font-mono tracking-wider text-zinc-400 uppercase">
+              <p className="text-xs font-mono tracking-wider text-[#a1a1aa] uppercase">
                 THIS CERTIFIES THAT
               </p>
-              <h2 className="text-3xl sm:text-5xl font-extrabold tracking-tight text-white font-mono drop-shadow-md">
+              <h2 className="text-3xl sm:text-5xl font-extrabold tracking-tight text-[#ffffff] font-mono drop-shadow-md">
                 {recipientName || "Developer Candidate"}
               </h2>
             </div>
 
             {/* Statement with percentage completion */}
-            <p className="text-xs sm:text-sm text-zinc-300 leading-relaxed font-mono max-w-xl">
-              has successfully completed <strong className="text-amber-300 font-bold">{levelReached} levels ({completionPct}% Completion)</strong> of{" "}
-              <span className="text-emerald-400 font-bold uppercase">{gameName}</span>
+            <p className="text-xs sm:text-sm text-[#d4d4d8] leading-relaxed font-mono max-w-xl">
+              has successfully completed <strong className="text-[#fbbf24] font-bold">{levelReached} levels ({completionPct}% Completion)</strong> of{" "}
+              <span className="text-[#34d399] font-bold uppercase">{gameName}</span>
               {gameTheme ? ` (${gameTheme})` : ""}, proving verified competence in problem solving, code execution, and software architecture on Mockrithm.
             </p>
 
             {/* Official Ribbon Seal */}
             <div className="pt-4 flex flex-col items-center gap-1">
-              <div className="px-6 py-2 rounded-full border border-amber-500/40 bg-amber-500/10 text-amber-300 text-xs font-mono font-bold tracking-widest uppercase flex items-center gap-2 shadow-inner">
-                <Sparkles className="size-4 text-amber-400 animate-pulse" />
+              <div className="px-6 py-2 rounded-full border border-[#f59e0b]/40 bg-[#f59e0b]/10 text-[#fbbf24] text-xs font-mono font-bold tracking-widest uppercase flex items-center gap-2 shadow-inner">
+                <Sparkles className="size-4 text-[#f59e0b]" />
                 <span>Verified Mastery • Level {levelReached} ({completionPct}% Completion)</span>
-                <CheckCircle2 className="size-4 text-amber-400" />
+                <CheckCircle2 className="size-4 text-[#f59e0b]" />
               </div>
             </div>
 
             {/* Signatures & Verification Footer */}
-            <div className="w-full pt-8 grid grid-cols-2 gap-8 border-t border-zinc-800/80 text-left">
+            <div className="w-full pt-8 grid grid-cols-2 gap-8 border-t border-[#27272a] text-left">
               {/* Signature 1 */}
               <div className="flex flex-col space-y-1">
-                <div className="h-8 font-serif italic text-amber-200 text-lg flex items-end font-bold">
+                <div className="h-8 font-serif italic text-[#fde047] text-lg flex items-end font-bold">
                   Mockrithm Team
                 </div>
-                <div className="w-36 h-0.5 bg-zinc-700" />
-                <span className="text-[10px] font-mono text-zinc-400 uppercase font-bold">
+                <div className="w-36 h-0.5 bg-[#3f3f46]" />
+                <span className="text-[10px] font-mono text-[#a1a1aa] uppercase font-bold">
                   Mockrithm Team
                 </span>
-                <span className="text-[9px] font-mono text-zinc-500">
+                <span className="text-[9px] font-mono text-[#71717a]">
                   Mockrithm Learning Engine
                 </span>
               </div>
 
               {/* Signature 2 */}
               <div className="flex flex-col space-y-1 items-end text-right">
-                <div className="h-8 font-mono font-bold text-zinc-300 text-xs flex items-end">
+                <div className="h-8 font-mono font-bold text-[#e4e4e7] text-xs flex items-end">
                   {displayDate}
                 </div>
-                <div className="w-36 h-0.5 bg-zinc-700" />
-                <span className="text-[10px] font-mono text-zinc-400 uppercase font-bold">
+                <div className="w-36 h-0.5 bg-[#3f3f46]" />
+                <span className="text-[10px] font-mono text-[#a1a1aa] uppercase font-bold">
                   Date Issued
                 </span>
-                <span className="text-[9px] font-mono text-zinc-500 font-mono">
+                <span className="text-[9px] font-mono text-[#71717a] font-mono">
                   ID: {certId}
                 </span>
               </div>
