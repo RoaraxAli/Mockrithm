@@ -63,9 +63,20 @@ export const ECertificateModal: React.FC<ECertificateModalProps> = ({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-md overflow-y-auto animate-in fade-in duration-200">
-      {/* Print CSS ensuring 100% exact fidelity without layout alteration */}
+      {/* Landscape Print CSS with zero margins (strips browser header dates & footer URLs) */}
       <style jsx global>{`
         @media print {
+          @page {
+            size: A4 landscape;
+            margin: 0;
+          }
+          html, body {
+            margin: 0 !important;
+            padding: 0 !important;
+            background: #09090b !important;
+            -webkit-print-color-adjust: exact !important;
+            print-color-adjust: exact !important;
+          }
           body * {
             visibility: hidden !important;
           }
@@ -73,18 +84,19 @@ export const ECertificateModal: React.FC<ECertificateModalProps> = ({
             visibility: visible !important;
           }
           #printable-certificate {
-            position: fixed !important;
+            position: absolute !important;
             left: 0 !important;
             top: 0 !important;
             width: 100vw !important;
             height: 100vh !important;
             margin: 0 !important;
-            padding: 2.5rem !important;
+            padding: 3rem 4rem !important;
             background: #09090b !important;
             color: #ffffff !important;
             -webkit-print-color-adjust: exact !important;
             print-color-adjust: exact !important;
             box-shadow: none !important;
+            border-radius: 0 !important;
           }
           .no-print {
             display: none !important;
@@ -113,7 +125,7 @@ export const ECertificateModal: React.FC<ECertificateModalProps> = ({
           <div className="flex items-center gap-3 w-full sm:w-auto justify-end">
             <button
               onClick={handleCopyLink}
-              className="flex items-center gap-1.5 px-3 py-2 text-xs font-semibold rounded-xl bg-zinc-800 text-zinc-200 hover:bg-zinc-700 transition-colors"
+              className="flex items-center gap-1.5 px-3 py-2 text-xs font-semibold rounded-xl bg-zinc-800 text-zinc-200 hover:bg-zinc-700 transition-colors cursor-pointer"
               title="Copy certificate link"
             >
               <Share2 className="size-3.5" />
@@ -122,16 +134,16 @@ export const ECertificateModal: React.FC<ECertificateModalProps> = ({
 
             <button
               onClick={handlePrint}
-              className="flex items-center gap-1.5 px-4 py-2 text-xs font-bold rounded-xl bg-amber-500 hover:bg-amber-400 text-black transition-all shadow-md shadow-amber-500/20"
+              className="flex items-center gap-1.5 px-4 py-2 text-xs font-bold rounded-xl bg-amber-500 hover:bg-amber-400 text-black transition-all shadow-md shadow-amber-500/20 cursor-pointer"
               title="Print or Save PDF"
             >
               <Printer className="size-3.5" />
-              <span>Download / Save PDF</span>
+              <span>Download / Save PDF (Landscape)</span>
             </button>
 
             <button
               onClick={onClose}
-              className="p-1.5 rounded-xl text-zinc-400 hover:text-white hover:bg-zinc-800 transition-colors"
+              className="p-1.5 rounded-xl text-zinc-400 hover:text-white hover:bg-zinc-800 transition-colors cursor-pointer"
             >
               <X className="size-5" />
             </button>
