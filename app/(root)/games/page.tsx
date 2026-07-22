@@ -1375,7 +1375,24 @@ function GamesPageContent() {
 
             {/* ── VIEW: GAME DETAIL ── */}
             {gameView === "game-detail" && activeGame && (() => {
-              const gameProg = progress[activeGame.id] || { completedLevel: 0, xp: 0 };
+              let effectiveCompletedLevel = progress[activeGame.id]?.completedLevel || 0;
+              if (typeof window !== "undefined") {
+                try {
+                  const frogProg = localStorage.getItem("mockrithm_frog_game_progress");
+                  if (frogProg && activeGame.id === "css3") {
+                    const arr = JSON.parse(frogProg);
+                    if (Array.isArray(arr) && arr.length > 0) {
+                      effectiveCompletedLevel = Math.max(effectiveCompletedLevel, Math.max(...arr));
+                    }
+                  }
+                } catch (e) {}
+              }
+
+              const gameProg = {
+                completedLevel: effectiveCompletedLevel,
+                xp: (progress[activeGame.id]?.xp || 0) || (effectiveCompletedLevel * 100)
+              };
+
               const prereqs = activeGame.prerequisites;
               const prereqGames = GAMES_LIST.filter(g => prereqs.includes(g.id));
               const missingPrereqs = prereqGames.filter(g => !(progress[g.id]?.completedLevel > 0));
