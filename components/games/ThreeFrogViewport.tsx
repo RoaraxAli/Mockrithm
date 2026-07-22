@@ -17,13 +17,10 @@ function parseCssColorToHex(colorStr: string): number | null {
 
   try {
     const cleaned = colorStr.trim().toLowerCase();
-    
-    // Check tokens in compound strings like "14px solid white" -> "white"
     const tokens = cleaned.split(/[\s,]+/);
     for (const token of tokens) {
       if (!token || token === "solid" || token === "dashed" || token === "dotted" || token.endsWith("px")) continue;
       
-      // Known named colors check for instant speed
       if (token === "white" || token === "#fff" || token === "#ffffff") return 0xffffff;
       if (token === "black" || token === "#000" || token === "#000000") return 0x000000;
       if (token === "red") return 0xef4444;
@@ -53,7 +50,6 @@ function parseCssPropertiesBulletproof(cssText: string): {
   const pondProps: Record<string, string> = {};
 
   try {
-    // Split by semicolons or newlines
     const lines = cssText.split(/[;\n]+/);
     for (const line of lines) {
       const cleanLine = line.replace(/[\{\}]/g, "").trim();
@@ -64,7 +60,6 @@ function parseCssPropertiesBulletproof(cssText: string): {
         let rawProp = parts[0].trim().toLowerCase();
         const rawVal = parts.slice(1).join(":").trim().toLowerCase();
 
-        // Clean out selector prefixes like ".frog background-color" -> "background-color"
         rawProp = rawProp.replace(/\.frog/g, "").replace(/#pond/g, "").trim();
 
         if (cleanLine.includes("#pond") || rawProp.startsWith("pond-")) {
@@ -90,6 +85,10 @@ export const ThreeFrogViewport: React.FC<ThreeFrogViewportProps> = ({
   const [webGlSupported, setWebGlSupported] = useState(true);
   const [mounted, setMounted] = useState(false);
 
+  // Dynamic CSS box style state for the container behind/around the frog
+  const [containerBoxStyle, setContainerBoxStyle] = useState<React.CSSProperties>({});
+  const [pondContainerStyle, setPondContainerStyle] = useState<React.CSSProperties>({});
+
   useEffect(() => {
     setMounted(true);
   }, []);
@@ -100,8 +99,6 @@ export const ThreeFrogViewport: React.FC<ThreeFrogViewportProps> = ({
   const frogMatRef = useRef<THREE.MeshStandardMaterial | null>(null);
   const eyeMatRef = useRef<THREE.MeshBasicMaterial | null>(null);
   const pondMatRef = useRef<THREE.MeshStandardMaterial | null>(null);
-  const borderOutlineMeshRef = useRef<THREE.Mesh | null>(null);
-  const borderRingRef = useRef<THREE.Mesh | null>(null);
   const rendererRef = useRef<THREE.WebGLRenderer | null>(null);
   const animFrameId = useRef<number | null>(null);
 
@@ -248,31 +245,6 @@ export const ThreeFrogViewport: React.FC<ThreeFrogViewportProps> = ({
       userData.group.position.set(0, 0, 0);
       scene.add(userData.group);
 
-      // 1. 3D Body Outline Shell Mesh (Reacts to `border`)
-      const borderOutlineGeo = new THREE.SphereGeometry(1.12, 32, 24);
-      borderOutlineGeo.scale(1.1, 0.75, 1.2);
-      const borderOutlineMat = new THREE.MeshBasicMaterial({
-        color: 0xffffff,
-        side: THREE.BackSide,
-        visible: false,
-      });
-      const borderOutlineMesh = new THREE.Mesh(borderOutlineGeo, borderOutlineMat);
-      borderOutlineMesh.position.y = 0.65;
-      borderOutlineMeshRef.current = borderOutlineMesh;
-      userData.group.add(borderOutlineMesh);
-
-      // 2. 3D Base Border Ring (Reacts to `border`)
-      const borderRingGeo = new THREE.TorusGeometry(1.6, 0.1, 16, 48);
-      const borderRingMat = new THREE.MeshBasicMaterial({
-        color: 0xffffff,
-        visible: false,
-      });
-      const borderRing = new THREE.Mesh(borderRingGeo, borderRingMat);
-      borderRing.rotation.x = Math.PI / 2;
-      borderRing.position.y = 0.15;
-      borderRingRef.current = borderRing;
-      userData.group.add(borderRing);
-
       // Renderer
       const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
       renderer.setSize(width, height);
@@ -367,36 +339,24 @@ export const ThreeFrogViewport: React.FC<ThreeFrogViewportProps> = ({
       frogMatRef.current.opacity = 1.0;
     }
 
-    // 5. .frog border -> 3D Glowing Shell & Ring Outlines!
-    if (parsed.frog["border"] || parsed.frog["outline"]) {
-      const bVal = parsed.frog["border"] || parsed.frog["outline"] || "";
-      const bColor = parseCssColorToHex(bVal) || 0xffffff;
+    // 5. Build dynamic HTML Bounding Box Container style for .frog (Border, Border-Radius, Margin, Padding)
+    const newBoxStyle: React.CSSProperties = {};
+    if (parsed.frog["border"]) newBoxStyle.border = parsed.frog["border"];
+    if (parsed.frog["outline"]) newBoxStyle.outline = parsed.frog["outline"];
+    if (parsed.frog["border-radius"]) newBoxStyle.borderRadius = parsed.frog["border-radius"];
+    if (parsed.frog["margin"]) newBoxStyle.margin = parsed.frog["margin"];
+    if (parsed.frog["padding"]) newBoxStyle.padding = parsed.frog["padding"];
+    if (parsed.frog["box-sizing"]) newBoxStyle.boxSizing = parsed.frog["box-sizing"] as any;
+    setContainerBoxStyle(newBoxStyle);
 
-      if (borderOutlineMeshRef.current) {
-        borderOutlineMeshRef.current.visible = true;
-        (borderOutlineMeshRef.current.material as THREE.MeshBasicMaterial).color.setHex(bColor);
-      }
-      if (borderRingRef.current) {
-        borderRingRef.current.visible = true;
-        (borderRingRef.current.material as THREE.MeshBasicMaterial).color.setHex(bColor);
+    // 6. Build dynamic HTML Pond Container style for #pond
+    const newPondStyle: React.CSSProperties = {};
+    if (parsed.pond["border"]) newPondStyle.border = parsed.pond["border"];
+    if (parsed.pond["border-radius"]) newPondStyle.borderRadius = parsed.pond["border-radius"];
+    if (parsed.pond["background-color"]) newPondStyle.backgroundColor = parsed.pond["background-color"];
+    setPondContainerStyle(newPondStyle);
 
-        // Adjust scale based on border px width
-        const widthMatch = bVal.match(/(\d+)px/);
-        if (widthMatch) {
-          const px = parseInt(widthMatch[1], 10);
-          const scaleFactor = 1 + (px * 0.04);
-          borderRingRef.current.scale.set(scaleFactor, scaleFactor, scaleFactor);
-          if (borderOutlineMeshRef.current) {
-            borderOutlineMeshRef.current.scale.set(1.1 * scaleFactor, 0.75 * scaleFactor, 1.2 * scaleFactor);
-          }
-        }
-      }
-    } else {
-      if (borderOutlineMeshRef.current) borderOutlineMeshRef.current.visible = false;
-      if (borderRingRef.current) borderRingRef.current.visible = false;
-    }
-
-    // 6. .frog scale / width / height
+    // 7. .frog scale / width / height
     if (parsed.frog["scale"]) {
       const s = parseFloat(parsed.frog["scale"]);
       if (!isNaN(s)) frogGroupRef.current.scale.set(s, s, s);
@@ -414,7 +374,7 @@ export const ThreeFrogViewport: React.FC<ThreeFrogViewportProps> = ({
       frogGroupRef.current.scale.set(1, 1, 1);
     }
 
-    // 7. .frog rotation
+    // 8. .frog rotation
     if (parsed.frog["transform"] && parsed.frog["transform"].includes("rotate")) {
       const rotMatch = parsed.frog["transform"].match(/rotate\(([^)]+)deg\)/);
       if (rotMatch) {
@@ -425,7 +385,7 @@ export const ThreeFrogViewport: React.FC<ThreeFrogViewportProps> = ({
       frogGroupRef.current.rotation.y = 0;
     }
 
-    // 8. #pond flex positioning
+    // 9. #pond flex positioning
     if (parsed.pond["justify-content"] || parsed.pond["align-items"]) {
       const justify = parsed.pond["justify-content"];
       if (justify === "flex-end" || justify === "right") frogGroupRef.current.position.x = 1.3;
@@ -445,12 +405,22 @@ export const ThreeFrogViewport: React.FC<ThreeFrogViewportProps> = ({
   }
 
   return (
-    <div className="w-full h-full min-h-[260px] bg-zinc-950 border border-zinc-900 rounded-2xl overflow-hidden relative flex flex-col items-center justify-center p-2 shadow-2xl">
+    <div
+      id="pond"
+      className="w-full h-full min-h-[260px] bg-zinc-950 border border-zinc-900 rounded-2xl overflow-hidden relative flex flex-col items-center justify-center p-2 shadow-2xl transition-all duration-300"
+      style={pondContainerStyle}
+    >
       {/* Target Description Overlay Header */}
-      <div className="absolute top-3 left-3 z-10 bg-zinc-900/90 backdrop-blur-md px-3 py-1.5 rounded-xl text-[10px] font-mono text-zinc-400 border border-zinc-800 flex items-center gap-2">
+      <div className="absolute top-3 left-3 z-20 bg-zinc-900/90 backdrop-blur-md px-3 py-1.5 rounded-xl text-[10px] font-mono text-zinc-400 border border-zinc-800 flex items-center gap-2">
         <span className="w-2 h-2 rounded-full bg-emerald-500 animate-ping" />
         Target: <span className="font-bold text-white">{level.targetDescription}</span>
       </div>
+
+      {/* Dynamic 2D/3D Bounding Container Box behind/around the Frog (.frog) */}
+      <div
+        className="frog absolute z-10 w-44 h-44 rounded-xl transition-all duration-300 pointer-events-none flex items-center justify-center border-emerald-500/0"
+        style={containerBoxStyle}
+      />
 
       {/* WebGL 3D Viewport Canvas */}
       <div ref={mountRef} className="w-full h-full min-h-[240px] relative z-0" />
