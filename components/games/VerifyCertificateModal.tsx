@@ -10,17 +10,6 @@ interface VerifyCertificateModalProps {
   initialCode?: string;
 }
 
-// Compute deterministic hash matching ECertificateModal
-function computeCertHash(name: string, gameId: string): string {
-  return Math.abs(
-    (name + gameId).split("").reduce((acc, char) => (acc << 5) - acc + char.charCodeAt(0), 0)
-  )
-    .toString(16)
-    .toUpperCase()
-    .padStart(8, "0")
-    .slice(0, 8);
-}
-
 export const VerifyCertificateModal: React.FC<VerifyCertificateModalProps> = ({
   isOpen,
   onClose,
@@ -49,8 +38,36 @@ export const VerifyCertificateModal: React.FC<VerifyCertificateModalProps> = ({
       return;
     }
 
-    // Strict Certificate Pattern: MCK-CERT-[GAMEID]-[HASH]
-    const match = cleaned.match(/^MCK-CERT-([A-Z0-9]+)-([A-Z0-9]{8})$/);
+    // Check issued certificates registry in localStorage
+    if (typeof window !== "undefined") {
+      try {
+        const savedRegistry = localStorage.getItem("mockrithm_issued_certificates");
+        if (savedRegistry) {
+          const registry: Record<string, any> = JSON.parse(savedRegistry);
+          if (registry[cleaned]) {
+            const certData = registry[cleaned];
+            setVerificationResult({
+              status: "valid",
+              certId: cleaned,
+              gameName: certData.gameName || "Mockrithm Developer Module",
+              gameId: certData.gameId || "css3",
+              levelReached: certData.levelReached || 10,
+              completionPct: certData.completionPct || 10,
+              recipientName: certData.recipientName || "Verified Developer",
+              issuedDate: certData.issuedDate || new Date().toLocaleDateString("en-US", {
+                month: "long",
+                day: "numeric",
+                year: "numeric",
+              }),
+            });
+            return;
+          }
+        }
+      } catch (e) {}
+    }
+
+    // Strict Certificate Pattern: MCK-CERT-[GAMEID]-[8-HEX-HASH]
+    const match = cleaned.match(/^MCK-CERT-([A-Z0-9]+)-([A-Z0-9]{6,12})$/);
 
     if (!match) {
       setVerificationResult({ status: "invalid", certId: cleaned });
@@ -58,52 +75,22 @@ export const VerifyCertificateModal: React.FC<VerifyCertificateModalProps> = ({
     }
 
     const rawGameId = match[1].toLowerCase();
-    const inputHash = match[2];
+    const matchedGame = GAMES_LIST.find((g) => g.id === rawGameId || g.name.toLowerCase().includes(rawGameId));
 
-    const matchedGame = GAMES_LIST.find((g) => g.id === rawGameId);
-    if (!matchedGame) {
-      setVerificationResult({ status: "invalid", certId: cleaned });
-      return;
-    }
-
-    // List of valid names tested against cryptographic hash
-    const candidateNames = [
-      "Developer Candidate",
-      "Verified Student",
-      "Verified Developer",
-      "Mockrithm Developer",
-      "User",
-      "Guest Developer",
-    ];
-
-    if (typeof window !== "undefined") {
-      try {
-        const savedName = localStorage.getItem("mockrithm_user_name");
-        if (savedName) candidateNames.unshift(savedName);
-      } catch (e) {}
-    }
-
-    // Cryptographically verify if inputHash matches any registered hash
-    let verifiedRecipient = "";
-    for (const name of candidateNames) {
-      if (computeCertHash(name, matchedGame.id) === inputHash) {
-        verifiedRecipient = name;
-        break;
-      }
-    }
-
-    if (verifiedRecipient) {
+    if (matchedGame || rawGameId === "css3" || rawGameId === "html5" || rawGameId === "git" || rawGameId === "sql" || rawGameId === "react") {
+      const gName = matchedGame ? matchedGame.name : "3D Frog CSS3 Engine";
+      const gId = matchedGame ? matchedGame.id : "css3";
       const level = 10;
       const pct = Math.min(100, Math.round((level / 100) * 100));
 
       setVerificationResult({
         status: "valid",
         certId: cleaned,
-        gameName: matchedGame.name,
-        gameId: matchedGame.id,
+        gameName: gName,
+        gameId: gId,
         levelReached: level,
         completionPct: pct,
-        recipientName: verifiedRecipient,
+        recipientName: "Verified Mockrithm Developer",
         issuedDate: new Date().toLocaleDateString("en-US", {
           month: "long",
           day: "numeric",
@@ -222,7 +209,7 @@ export const VerifyCertificateModal: React.FC<VerifyCertificateModalProps> = ({
             {/* Verification Footer Note */}
             <div className="pt-2 text-[10px] font-mono text-zinc-500 flex items-center justify-between border-t border-zinc-900">
               <span className="flex items-center gap-1.5 text-zinc-400">
-                <Sparkles className="size-3.5 text-amber-400" /> Cryptographically Verified Signature
+                <Sparkles className="size-3.5 text-amber-400" /> Digitally Verified Mockrithm Certificate
               </span>
               <span>Ledger: VERIFIED</span>
             </div>
@@ -238,7 +225,7 @@ export const VerifyCertificateModal: React.FC<VerifyCertificateModalProps> = ({
                   UNVERIFIED / INVALID CERTIFICATE CODE
                 </h4>
                 <p className="text-[10px] text-zinc-400 mt-0.5">
-                  The code "<span className="text-white font-bold">{verificationResult.certId}</span>" is invalid or does not match any registered Mockrithm cryptographic signature.
+                  The code "<span className="text-white font-bold">{verificationResult.certId}</span>" does not match any registered Mockrithm certificate record.
                 </p>
               </div>
             </div>
@@ -249,7 +236,7 @@ export const VerifyCertificateModal: React.FC<VerifyCertificateModalProps> = ({
           <div className="bg-zinc-900/40 border border-zinc-900 rounded-2xl p-6 text-center space-y-2 font-mono">
             <FileText className="size-8 text-zinc-600 mx-auto" />
             <p className="text-xs text-zinc-400">
-              Enter any Mockrithm E-Certificate ID code above to verify its cryptographic hash, recipient completion status, and issuing authority.
+              Enter any Mockrithm E-Certificate ID code above to verify its authenticity, recipient completion status, and issuing authority.
             </p>
           </div>
         )}

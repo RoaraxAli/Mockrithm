@@ -53,6 +53,26 @@ export const ECertificateModal: React.FC<ECertificateModalProps> = ({
 
   const certId = `MCK-CERT-${gameId.toUpperCase()}-${hash.slice(0, 8)}`;
 
+  // Automatically register issued certificate in local verification ledger
+  React.useEffect(() => {
+    if (isOpen && certId) {
+      try {
+        const existing = localStorage.getItem("mockrithm_issued_certificates");
+        const registry = existing ? JSON.parse(existing) : {};
+        registry[certId] = {
+          certId,
+          recipientName,
+          gameId,
+          gameName,
+          levelReached,
+          completionPct,
+          issuedDate: displayDate
+        };
+        localStorage.setItem("mockrithm_issued_certificates", JSON.stringify(registry));
+      } catch (e) {}
+    }
+  }, [isOpen, certId, recipientName, gameId, gameName, levelReached, completionPct, displayDate]);
+
   // Fail-Safe Native 2D Canvas PDF Exporter (0% Failure Rate)
   const handleDownloadPdf = async () => {
     try {
