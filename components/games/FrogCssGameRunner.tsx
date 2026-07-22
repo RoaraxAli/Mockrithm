@@ -1,274 +1,368 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
+import dynamic from "next/dynamic";
 import { ALL_FROG_LEVELS, FrogLevel } from "@/lib/frogLevelsData";
 import { ThreeFrogViewport } from "./ThreeFrogViewport";
-import { CheckCircle2, ChevronLeft, ChevronRight, Map, Lightbulb, Play, RotateCcw, Sparkles, Award } from "lucide-react";
+import {
+  Code2, RotateCcw, HelpCircle, CheckCircle, ArrowLeft, Sparkles, Map, Play, CheckCircle2, ChevronLeft, ChevronRight
+} from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
 import { toast } from "sonner";
 
-export const FrogCssGameRunner: React.FC = () => {
-  const [currentLevelId, setCurrentLevelId] = useState(1);
+const Editor = dynamic(() => import("@monaco-editor/react"), { ssr: false });
+
+interface FrogCssGameRunnerProps {
+  onBack?: () => void;
+}
+
+export const FrogCssGameRunner: React.FC<FrogCssGameRunnerProps> = ({ onBack }) => {
+  const [currentLevelNum, setCurrentLevelNum] = useState(1);
   const [editorCode, setEditorCode] = useState("");
   const [userCss, setUserCss] = useState("");
   const [showHint, setShowHint] = useState(false);
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
-  const [isVictory, setIsVictory] = useState(false);
+  const [evaluationSuccess, setEvaluationSuccess] = useState<boolean | null>(null);
+  const [evalLogs, setEvalLogs] = useState<string[]>([]);
   const [completedLevels, setCompletedLevels] = useState<number[]>([]);
 
-  const level: FrogLevel = ALL_FROG_LEVELS.find((l) => l.id === currentLevelId) || ALL_FROG_LEVELS[0];
+  const activeLevelData: FrogLevel =
+    ALL_FROG_LEVELS.find((l) => l.id === currentLevelNum) || ALL_FROG_LEVELS[0];
 
   // Load progress from localStorage
   useEffect(() => {
     try {
-      const savedProgress = localStorage.getItem("mockrithm_frog_game_progress");
-      if (savedProgress) {
-        setCompletedLevels(JSON.parse(savedProgress));
-      }
+      const saved = localStorage.getItem("mockrithm_frog_game_progress");
+      if (saved) setCompletedLevels(JSON.parse(saved));
       const savedLevel = localStorage.getItem("mockrithm_frog_game_level");
       if (savedLevel) {
-        const lvlNum = parseInt(savedLevel, 10);
-        if (lvlNum >= 1 && lvlNum <= 100) {
-          setCurrentLevelId(lvlNum);
-        }
+        const lvl = parseInt(savedLevel, 10);
+        if (lvl >= 1 && lvl <= 100) setCurrentLevelNum(lvl);
       }
     } catch (e) {
-      console.warn("Failed to read progress from localStorage:", e);
+      console.warn("Failed to load progress:", e);
     }
   }, []);
 
-  // Update editor code when level changes
+  // Set editor code on level change
   useEffect(() => {
-    setEditorCode(level.starterCode);
-    setUserCss(level.starterCode);
-    setIsVictory(false);
+    setEditorCode(activeLevelData.starterCode);
+    setUserCss(activeLevelData.starterCode);
+    setEvaluationSuccess(null);
+    setEvalLogs([]);
     setShowHint(false);
-  }, [currentLevelId, level]);
+  }, [currentLevelNum, activeLevelData]);
 
-  // Code validation logic
-  const handleCheckAnswer = () => {
+  const runCodeOnly = () => {
     setUserCss(editorCode);
+    setEvalLogs(["Running CSS styling on 3D Frog...", "3D Mesh properties updated."]);
+    setEvaluationSuccess(null);
+  };
 
-    const { regexMatches } = level.validationRules;
-    let isPassed = true;
+  const evaluateCode = () => {
+    setUserCss(editorCode);
+    setEvalLogs(["Running validation test cases on 3D Frog..."]);
+
+    const { regexMatches } = activeLevelData.validationRules;
+    let allPassed = true;
+    const results: string[] = [];
 
     if (regexMatches && regexMatches.length > 0) {
-      for (const pattern of regexMatches) {
+      regexMatches.forEach((pattern, idx) => {
         const rx = new RegExp(pattern, "i");
-        if (!rx.test(editorCode)) {
-          isPassed = false;
-          break;
+        if (rx.test(editorCode)) {
+          results.push(`✔️ Test ${idx + 1}: CSS rule match passed`);
+        } else {
+          results.push(`❌ Test ${idx + 1}: CSS property missing or incorrect syntax`);
+          allPassed = false;
         }
-      }
+      });
     }
 
-    if (isPassed) {
-      setIsVictory(true);
-      toast.success(`🎉 Level ${level.id} Cleared! Excellent CSS skills!`);
+    setEvalLogs(results);
+    setEvaluationSuccess(allPassed);
 
-      // Update completed levels in state & localStorage
-      if (!completedLevels.includes(level.id)) {
-        const updated = [...completedLevels, level.id];
-        setCompletedLevels(updated);
-        localStorage.setItem("mockrithm_frog_game_progress", JSON.stringify(updated));
+    if (allPassed) {
+      toast.success(`🎓 Level ${currentLevelNum} Complete! Excellent work.`);
+      if (!completedLevels.includes(currentLevelNum)) {
+        const nextCompleted = [...completedLevels, currentLevelNum];
+        setCompletedLevels(nextCompleted);
+        localStorage.setItem("mockrithm_frog_game_progress", JSON.stringify(nextCompleted));
       }
     } else {
-      setIsVictory(false);
-      toast.error("Not quite right yet! Check your syntax and hints.");
+      toast.error("Some test cases failed. Check hints and test logs.");
     }
   };
 
-  const handleLevelSelect = (id: number) => {
-    setCurrentLevelId(id);
-    localStorage.setItem("mockrithm_frog_game_level", id.toString());
-    setIsDrawerOpen(false);
+  const handleSelectLevel = (lvl: number) => {
+    if (lvl >= 1 && lvl <= 100) {
+      setCurrentLevelNum(lvl);
+      localStorage.setItem("mockrithm_frog_game_level", lvl.toString());
+      setIsDrawerOpen(false);
+    }
   };
 
   const handleNextLevel = () => {
-    if (currentLevelId < 100) {
-      handleLevelSelect(currentLevelId + 1);
-    }
+    if (currentLevelNum < 100) handleSelectLevel(currentLevelNum + 1);
   };
 
   const handlePrevLevel = () => {
-    if (currentLevelId > 1) {
-      handleLevelSelect(currentLevelId - 1);
-    }
-  };
-
-  const handleResetCode = () => {
-    setEditorCode(level.starterCode);
-    setUserCss(level.starterCode);
-    setIsVictory(false);
-    toast.info("Reset level starter code.");
+    if (currentLevelNum > 1) handleSelectLevel(currentLevelNum - 1);
   };
 
   return (
-    <div className="w-full min-h-screen bg-slate-950 text-slate-100 flex flex-col font-sans">
-      {/* Top Header Bar */}
-      <header className="w-full h-16 border-b border-emerald-500/20 bg-slate-900/60 backdrop-blur-md px-6 flex items-center justify-between z-30">
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-emerald-400 to-teal-600 flex items-center justify-center text-xl shadow-lg shadow-emerald-500/20">
-            🐸
-          </div>
-          <div>
-            <h1 className="font-bold text-lg text-white flex items-center gap-2">
-              3D Froggy CSS <span className="text-xs px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">100 Levels</span>
-            </h1>
-            <p className="text-xs text-slate-400">Master modern CSS with interactive 3D frog models</p>
-          </div>
-        </div>
-
-        {/* Level Navigation & Drawer toggle */}
-        <div className="flex items-center gap-3">
+    <div className="flex flex-col gap-6 w-full text-zinc-100 font-sans">
+      {/* Game Header Bar */}
+      <div className="flex items-center justify-between border-b border-zinc-900 pb-4">
+        {onBack ? (
           <button
-            onClick={handlePrevLevel}
-            disabled={currentLevelId === 1}
-            className="p-2 rounded-lg bg-slate-800 hover:bg-slate-700 disabled:opacity-40 transition"
-            title="Previous Level"
+            onClick={onBack}
+            className="flex items-center gap-2 text-xs font-bold text-zinc-400 hover:text-white uppercase tracking-wider transition-colors cursor-pointer bg-zinc-900 px-4 py-2 border border-zinc-800 rounded-xl"
           >
-            <ChevronLeft className="w-5 h-5 text-slate-200" />
+            <ArrowLeft className="size-4" /> Back to CSS3
           </button>
+        ) : (
+          <div className="flex items-center gap-2 font-mono text-xs font-bold text-emerald-400">
+            🐸 3D FROG CSS ENGINE
+          </div>
+        )}
 
+        <div className="flex items-center gap-3">
           <button
             onClick={() => setIsDrawerOpen(!isDrawerOpen)}
-            className="px-4 py-2 rounded-xl bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/30 text-emerald-400 font-semibold text-sm flex items-center gap-2 transition"
+            className="px-3.5 py-1.5 rounded-xl bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/30 text-emerald-400 font-mono font-bold text-xs flex items-center gap-2 transition cursor-pointer"
           >
-            <Map className="w-4 h-4" />
-            Level {currentLevelId} of 100
+            <Map className="size-3.5" /> Level Map ({completedLevels.length}/100)
           </button>
+        </div>
+
+        {/* Level Navigation input */}
+        <div className="flex items-center gap-2 font-mono">
+          <button
+            onClick={handlePrevLevel}
+            disabled={currentLevelNum === 1}
+            className="px-2.5 py-1.5 rounded-lg bg-zinc-950 border border-zinc-900 hover:border-zinc-700 text-zinc-400 hover:text-white transition-all cursor-pointer disabled:opacity-30 disabled:pointer-events-none text-xs"
+          >
+            ◀
+          </button>
+
+          <div className="flex items-center gap-1 bg-zinc-950 border border-zinc-900 px-3 py-1.5 rounded-lg text-xs font-mono font-bold">
+            LEVEL
+            <input
+              type="number"
+              min={1}
+              max={100}
+              value={currentLevelNum}
+              onChange={(e) => handleSelectLevel(parseInt(e.target.value, 10))}
+              className="w-10 bg-transparent text-center focus:outline-none border-b border-zinc-800 focus:border-white text-white font-bold"
+            />
+            / 100
+          </div>
 
           <button
             onClick={handleNextLevel}
-            disabled={currentLevelId === 100}
-            className="p-2 rounded-lg bg-slate-800 hover:bg-slate-700 disabled:opacity-40 transition"
-            title="Next Level"
+            disabled={currentLevelNum === 100}
+            className="px-2.5 py-1.5 rounded-lg bg-zinc-950 border border-zinc-900 hover:border-zinc-700 text-zinc-400 hover:text-white transition-all cursor-pointer disabled:opacity-30 disabled:pointer-events-none text-xs"
           >
-            <ChevronRight className="w-5 h-5 text-slate-200" />
+            ▶
           </button>
-        </div>
-      </header>
-
-      {/* Main Split-Pane Workspace */}
-      <div className="flex-1 grid grid-cols-1 lg:grid-cols-12 overflow-hidden">
-        {/* Left Side: Code Editor & Instructions (5 Cols) */}
-        <div className="lg:col-span-5 border-r border-emerald-500/20 bg-slate-900/40 p-6 flex flex-col justify-between overflow-y-auto space-y-6">
-          {/* Level Prompt & Info */}
-          <div className="space-y-4">
-            <div className="flex items-center justify-between">
-              <span className="text-xs font-semibold px-3 py-1 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
-                {level.category}
-              </span>
-              <span className="text-xs text-slate-400 flex items-center gap-1">
-                <Award className="w-3.5 h-3.5 text-amber-400" /> Level {level.id}
-              </span>
-            </div>
-
-            <h2 className="text-xl font-bold text-white">{level.title}</h2>
-            <p className="text-sm text-slate-300 leading-relaxed">{level.prompt}</p>
-
-            {/* Hint Drawer */}
-            <div>
-              <button
-                onClick={() => setShowHint(!showHint)}
-                className="text-xs text-amber-400 hover:text-amber-300 flex items-center gap-1.5 transition font-semibold"
-              >
-                <Lightbulb className="w-4 h-4" /> {showHint ? "Hide Hints" : "Need a Hint?"}
-              </button>
-              {showHint && (
-                <div className="mt-2 p-3 rounded-lg bg-amber-500/10 border border-amber-500/20 text-xs text-amber-200 space-y-1">
-                  {level.hints.map((h, idx) => (
-                    <p key={idx}>• {h}</p>
-                  ))}
-                </div>
-              )}
-            </div>
-          </div>
-
-          {/* Code Editor Panel */}
-          <div className="flex-1 flex flex-col bg-slate-950 rounded-xl border border-slate-800 overflow-hidden shadow-2xl">
-            <div className="h-10 bg-slate-900 px-4 flex items-center justify-between border-b border-slate-800 text-xs text-slate-400">
-              <span className="font-mono text-emerald-400">styles.css</span>
-              <button
-                onClick={handleResetCode}
-                className="hover:text-white flex items-center gap-1 transition"
-                title="Reset Code"
-              >
-                <RotateCcw className="w-3.5 h-3.5" /> Reset
-              </button>
-            </div>
-
-            <div className="flex-1 relative p-4 font-mono text-sm">
-              <textarea
-                value={editorCode}
-                onChange={(e) => setEditorCode(e.target.value)}
-                className="w-full h-full min-h-[220px] bg-transparent text-emerald-300 focus:outline-none resize-none font-mono text-sm leading-relaxed"
-                spellCheck={false}
-              />
-            </div>
-          </div>
-
-          {/* Action Buttons */}
-          <div className="flex items-center gap-3">
-            <button
-              onClick={handleCheckAnswer}
-              className="flex-1 py-3.5 px-6 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-400 hover:to-teal-500 font-bold text-white shadow-lg shadow-emerald-500/25 flex items-center justify-center gap-2 transition"
-            >
-              <Play className="w-4 h-4 fill-white" /> Check Answer & Run Code
-            </button>
-
-            {isVictory && (
-              <button
-                onClick={handleNextLevel}
-                className="py-3.5 px-6 rounded-xl bg-slate-800 hover:bg-slate-700 text-emerald-400 font-bold flex items-center gap-2 border border-emerald-500/30 transition animate-pulse"
-              >
-                Next Level <ChevronRight className="w-4 h-4" />
-              </button>
-            )}
-          </div>
-        </div>
-
-        {/* Right Side: 3D Viewport & Visual Canvas (7 Cols) */}
-        <div className="lg:col-span-7 p-6 flex flex-col items-center justify-center bg-slate-950 relative">
-          <ThreeFrogViewport level={level} userCss={userCss} isVictory={isVictory} />
         </div>
       </div>
 
-      {/* Level Selection Drawer / Map Overlay */}
+      {/* Main 3-Column Grid matching Website Layout */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-stretch flex-1 min-h-0 select-none">
+        {/* Column 1: Info and Instructions */}
+        <div className="flex flex-col bg-zinc-950/40 border border-zinc-900 rounded-2xl p-6 overflow-y-auto max-h-[calc(100vh-140px)] gap-4 select-text">
+          <div className="flex justify-between items-center">
+            <span className="text-[10px] font-mono text-emerald-400 font-bold bg-emerald-500/10 border border-emerald-500/20 px-2 py-0.5 rounded-full">
+              {activeLevelData.category}
+            </span>
+            <span className="text-[10px] font-mono text-zinc-500 font-bold">+100 XP</span>
+          </div>
+
+          <h3 className="text-lg font-black tracking-wide text-white uppercase leading-tight font-mono">
+            {activeLevelData.title}
+          </h3>
+
+          <div className="h-[1px] bg-zinc-900 my-1" />
+
+          <p className="text-xs text-zinc-300 leading-relaxed font-mono">
+            {activeLevelData.prompt}
+          </p>
+
+          <div className="border-t border-zinc-900 pt-4 mt-2">
+            <h4 className="text-xs font-black tracking-wider text-white uppercase mb-2 font-mono">
+              Target CSS Rule
+            </h4>
+            <div className="bg-zinc-900/60 border border-zinc-800 rounded-xl p-3 text-[11px] font-mono text-emerald-300">
+              {activeLevelData.targetDescription}
+            </div>
+          </div>
+
+          {/* Hint Toggle */}
+          <div className="mt-2 border-t border-zinc-900 pt-4">
+            <button
+              onClick={() => setShowHint(!showHint)}
+              className="text-[10px] font-mono font-bold text-zinc-500 hover:text-white flex items-center gap-1 transition-colors cursor-pointer uppercase"
+            >
+              <HelpCircle className="size-3.5" /> {showHint ? "Hide Hint" : "Show Hint"}
+            </button>
+            <AnimatePresence>
+              {showHint && (
+                <motion.div
+                  initial={{ opacity: 0, y: -5 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -5 }}
+                  className="bg-zinc-900/60 border border-zinc-800 rounded-xl p-3.5 mt-3 text-[10.5px] text-zinc-400 font-mono leading-relaxed space-y-1.5"
+                >
+                  {activeLevelData.hints.map((hint, i) => (
+                    <p key={i}>• {hint}</p>
+                  ))}
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
+        </div>
+
+        {/* Column 2: Monaco Code Editor */}
+        <div className="flex flex-col bg-zinc-950 border border-zinc-900 rounded-2xl overflow-hidden shadow-2xl relative max-h-[calc(100vh-140px)] min-h-[380px]">
+          <div className="flex justify-between items-center bg-zinc-950 border-b border-zinc-900 px-4 py-2 select-none">
+            <span className="text-[10px] font-mono font-black text-zinc-500 uppercase tracking-widest flex items-center gap-1.5">
+              <Code2 className="size-3.5" /> Workspace Editor (CSS)
+            </span>
+            <button
+              onClick={() => {
+                setEditorCode(activeLevelData.starterCode);
+                setUserCss(activeLevelData.starterCode);
+              }}
+              className="text-[9px] font-mono text-zinc-500 hover:text-white flex items-center gap-1 transition-colors cursor-pointer uppercase font-bold"
+            >
+              <RotateCcw className="size-3" /> Reset Code
+            </button>
+          </div>
+
+          <div className="flex-1 min-h-0 select-text">
+            <Editor
+              height="100%"
+              language="css"
+              theme="vs-dark"
+              value={editorCode}
+              onChange={(val) => setEditorCode(val || "")}
+              options={{
+                fontSize: 12,
+                minimap: { enabled: false },
+                lineNumbers: "on",
+                roundedSelection: true,
+                scrollBeyondLastLine: false,
+                fontFamily: "var(--font-geist-mono), monospace",
+                padding: { top: 12 },
+              }}
+            />
+          </div>
+
+          <div className="p-4 border-t border-zinc-900 bg-zinc-950 flex gap-3 select-none">
+            <button
+              onClick={runCodeOnly}
+              className="flex-1 py-3 bg-zinc-900 hover:bg-zinc-800 text-zinc-300 text-xs font-bold uppercase tracking-widest rounded-xl transition-all cursor-pointer flex items-center justify-center gap-1.5 border border-zinc-800 shadow-lg shadow-black/20"
+            >
+              ⚙️ Run Code
+            </button>
+            <button
+              onClick={evaluateCode}
+              className="flex-1 py-3 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold uppercase tracking-widest rounded-xl transition-all cursor-pointer flex items-center justify-center gap-1.5 border border-emerald-600 shadow-lg shadow-emerald-950/20"
+            >
+              🚀 Verify Code
+            </button>
+          </div>
+        </div>
+
+        {/* Column 3: 3D Frog Viewport & Test Logs */}
+        <div className="flex flex-col gap-4 max-h-[calc(100vh-140px)] min-h-0">
+          {/* 3D Viewport canvas */}
+          <ThreeFrogViewport
+            level={activeLevelData}
+            userCss={userCss}
+            isVictory={evaluationSuccess === true}
+          />
+
+          {/* Test Execution Output Terminal */}
+          <div className="flex-1 min-h-[160px] bg-zinc-950 border border-zinc-900 rounded-2xl p-4 flex flex-col gap-2 overflow-y-auto shadow-2xl font-mono text-xs">
+            <div className="flex justify-between items-center border-b border-zinc-900 pb-2 select-none">
+              <span className="text-[10px] font-mono font-black text-zinc-500 uppercase tracking-widest">
+                Test Output Terminal
+              </span>
+              {evaluationSuccess === true && (
+                <span className="text-[9px] font-bold text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded border border-emerald-500/20">
+                  PASSED
+                </span>
+              )}
+              {evaluationSuccess === false && (
+                <span className="text-[9px] font-bold text-rose-400 bg-rose-500/10 px-2 py-0.5 rounded border border-rose-500/20">
+                  FAILED
+                </span>
+              )}
+            </div>
+
+            <div className="space-y-1 mt-1 text-[11px]">
+              {evalLogs.length === 0 ? (
+                <p className="text-zinc-600 italic">Click "Verify Code" to run test cases against the 3D Frog.</p>
+              ) : (
+                evalLogs.map((log, idx) => (
+                  <p
+                    key={idx}
+                    className={
+                      log.startsWith("✔️")
+                        ? "text-emerald-400 font-semibold"
+                        : log.startsWith("❌")
+                        ? "text-rose-400 font-semibold"
+                        : "text-zinc-400"
+                    }
+                  >
+                    {log}
+                  </p>
+                ))
+              )}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Level Selection Drawer Grid Modal */}
       {isDrawerOpen && (
-        <div className="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-md flex items-center justify-center p-6">
-          <div className="w-full max-w-4xl max-h-[85vh] bg-slate-900 border border-emerald-500/30 rounded-2xl p-6 flex flex-col space-y-4 shadow-2xl overflow-hidden">
-            <div className="flex items-center justify-between border-b border-slate-800 pb-4">
-              <h3 className="text-xl font-bold text-white flex items-center gap-2">
-                <Sparkles className="w-5 h-5 text-emerald-400" /> Select Level (1–100)
+        <div className="fixed inset-0 z-50 bg-zinc-950/80 backdrop-blur-md flex items-center justify-center p-6">
+          <div className="w-full max-w-4xl max-h-[85vh] bg-zinc-950 border border-zinc-800 rounded-2xl p-6 flex flex-col space-y-4 shadow-2xl overflow-hidden font-mono">
+            <div className="flex items-center justify-between border-b border-zinc-900 pb-4">
+              <h3 className="text-sm font-bold text-white uppercase tracking-wider flex items-center gap-2">
+                <Sparkles className="size-4 text-emerald-400" /> Select Level (1–100)
               </h3>
               <button
                 onClick={() => setIsDrawerOpen(false)}
-                className="px-3 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-xs font-semibold text-slate-300"
+                className="px-3 py-1 rounded-lg bg-zinc-900 hover:bg-zinc-800 text-xs font-semibold text-zinc-300 border border-zinc-800 cursor-pointer"
               >
                 Close Map
               </button>
             </div>
 
-            <div className="flex-1 overflow-y-auto grid grid-cols-5 sm:grid-cols-10 gap-2.5 p-2">
+            <div className="flex-1 overflow-y-auto grid grid-cols-5 sm:grid-cols-10 gap-2 p-1">
               {ALL_FROG_LEVELS.map((lvl) => {
                 const isCompleted = completedLevels.includes(lvl.id);
-                const isCurrent = lvl.id === currentLevelId;
+                const isCurrent = lvl.id === currentLevelNum;
 
                 return (
                   <button
                     key={lvl.id}
-                    onClick={() => handleLevelSelect(lvl.id)}
-                    className={`h-12 rounded-xl border font-mono text-sm font-bold flex items-center justify-center relative transition ${
+                    onClick={() => handleSelectLevel(lvl.id)}
+                    className={`aspect-square rounded-lg text-xs font-mono font-bold flex items-center justify-center relative transition cursor-pointer ${
                       isCurrent
-                        ? "bg-emerald-500 text-slate-950 border-emerald-300 shadow-lg shadow-emerald-500/40"
+                        ? "bg-white text-black border border-white shadow-lg"
                         : isCompleted
-                        ? "bg-emerald-950/60 text-emerald-400 border-emerald-500/40 hover:bg-emerald-900/60"
-                        : "bg-slate-800/60 text-slate-400 border-slate-700 hover:bg-slate-700"
+                        ? "bg-emerald-500/20 border border-emerald-500/40 text-emerald-400"
+                        : "bg-zinc-900/60 border border-zinc-800 text-zinc-500 hover:text-white hover:bg-zinc-800"
                     }`}
                   >
                     {lvl.id}
                     {isCompleted && (
-                      <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400 absolute top-1 right-1" />
+                      <CheckCircle2 className="size-3 text-emerald-400 absolute top-1 right-1" />
                     )}
                   </button>
                 );

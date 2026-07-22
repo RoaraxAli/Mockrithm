@@ -1555,13 +1555,7 @@ function GamesPageContent() {
             {gameView === "game-runner" && activeGame && (() => {
               if (activeGame.id === "css3") {
                 return (
-                  <div className="flex flex-col gap-4">
-                    <button onClick={() => { playSound("click"); setGameView("game-detail"); }}
-                      className="w-fit flex items-center gap-2 text-xs font-bold text-zinc-400 hover:text-white uppercase tracking-wider transition-colors cursor-pointer bg-zinc-900 px-4 py-2 border border-zinc-800 rounded-xl mb-2">
-                      <ArrowLeft className="size-4" /> Back to {activeGame.name}
-                    </button>
-                    <FrogCssGameRunner />
-                  </div>
+                  <FrogCssGameRunner onBack={() => { playSound("click"); setGameView("game-detail"); }} />
                 );
               }
               const maxLvl = 100;

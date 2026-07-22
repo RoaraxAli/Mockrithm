@@ -10,6 +10,29 @@ interface ThreeFrogViewportProps {
   isVictory: boolean;
 }
 
+// Simple CSS property parser helper
+function parseCssRules(cssText: string): Record<string, string> {
+  const styles: Record<string, string> = {};
+  try {
+    // Extract contents inside .frog { ... } or general declarations
+    const frogBlockMatch = cssText.match(/\.frog\s*\{([^}]+)\}/i);
+    const contentToParse = frogBlockMatch ? frogBlockMatch[1] : cssText;
+
+    const rules = contentToParse.split(";");
+    for (const rule of rules) {
+      const parts = rule.split(":");
+      if (parts.length === 2) {
+        const prop = parts[0].trim().toLowerCase();
+        const val = parts[1].trim().toLowerCase();
+        styles[prop] = val;
+      }
+    }
+  } catch (e) {
+    console.warn("CSS parsing error:", e);
+  }
+  return styles;
+}
+
 export const ThreeFrogViewport: React.FC<ThreeFrogViewportProps> = ({
   level,
   userCss,
@@ -18,9 +41,11 @@ export const ThreeFrogViewport: React.FC<ThreeFrogViewportProps> = ({
   const mountRef = useRef<HTMLDivElement>(null);
   const [webGlSupported, setWebGlSupported] = useState(true);
 
-  // Three.js scene references
+  // Three.js references
   const sceneRef = useRef<THREE.Scene | null>(null);
   const frogGroupRef = useRef<THREE.Group | null>(null);
+  const frogMatRef = useRef<THREE.MeshStandardMaterial | null>(null);
+  const outlineMeshRef = useRef<THREE.Mesh | null>(null);
   const rendererRef = useRef<THREE.WebGLRenderer | null>(null);
   const animFrameId = useRef<number | null>(null);
 
@@ -30,116 +55,118 @@ export const ThreeFrogViewport: React.FC<ThreeFrogViewportProps> = ({
 
     try {
       const container = mountRef.current;
-      const width = container.clientWidth || 500;
-      const height = container.clientHeight || 400;
+      const width = container.clientWidth || 320;
+      const height = container.clientHeight || 240;
 
       // 1. Scene & Camera
       const scene = new THREE.Scene();
-      scene.background = new THREE.Color(0x0a192f); // Dark pond night background
+      scene.background = new THREE.Color(0x09090b); // zinc-950
       sceneRef.current = scene;
 
-      const camera = new THREE.PerspectiveCamera(45, width / height, 0.1, 1000);
-      camera.position.set(0, 8, 12);
-      camera.lookAt(0, 0, 0);
+      const camera = new THREE.PerspectiveCamera(40, width / height, 0.1, 100);
+      camera.position.set(0, 5, 8);
+      camera.lookAt(0, 0.2, 0);
 
       // 2. Lights
-      const ambientLight = new THREE.AmbientLight(0xffffff, 0.8);
+      const ambientLight = new THREE.AmbientLight(0xffffff, 0.9);
       scene.add(ambientLight);
 
-      const dirLight = new THREE.DirectionalLight(0x2ecc71, 1.2);
-      dirLight.position.set(5, 12, 7);
+      const dirLight = new THREE.DirectionalLight(0x10b981, 1.2);
+      dirLight.position.set(4, 8, 5);
       scene.add(dirLight);
 
-      const pointLight = new THREE.PointLight(0x3498db, 1, 20);
-      pointLight.position.set(-5, 5, -5);
-      scene.add(pointLight);
-
-      // 3. Water Pond Base
-      const pondGeo = new THREE.CylinderGeometry(6, 6, 0.4, 32);
-      const pondMat = new THREE.MeshPhongMaterial({
-        color: 0x1b4965,
-        transparent: true,
-        opacity: 0.85,
-        shininess: 90,
+      // 3. Target Lily Pad Base (Pond)
+      const pondGeo = new THREE.CylinderGeometry(2.5, 2.5, 0.15, 32);
+      const pondMat = new THREE.MeshStandardMaterial({
+        color: 0x18181b, // zinc-900
+        roughness: 0.8,
       });
       const pondMesh = new THREE.Mesh(pondGeo, pondMat);
-      pondMesh.position.set(0, -0.2, 0);
+      pondMesh.position.set(0, -0.08, 0);
       scene.add(pondMesh);
 
-      // Water Ripple Ring
-      const ringGeo = new THREE.RingGeometry(4.5, 5.8, 32);
-      const ringMat = new THREE.MeshBasicMaterial({
-        color: 0x62b6cb,
+      // Target Pad Outline Ring
+      const targetRingGeo = new THREE.RingGeometry(1.6, 1.8, 32);
+      const targetRingMat = new THREE.MeshBasicMaterial({
+        color: 0x10b981, // emerald-500
         side: THREE.DoubleSide,
         transparent: true,
-        opacity: 0.3,
+        opacity: 0.4,
       });
-      const ringMesh = new THREE.Mesh(ringGeo, ringMat);
-      ringMesh.rotation.x = Math.PI / 2;
-      ringMesh.position.y = 0.01;
-      scene.add(ringMesh);
+      const targetRing = new THREE.Mesh(targetRingGeo, targetRingMat);
+      targetRing.rotation.x = Math.PI / 2;
+      targetRing.position.y = 0.01;
+      scene.add(targetRing);
 
       // 4. Procedural 3D Frog Mesh Group
       const frogGroup = new THREE.Group();
       frogGroupRef.current = frogGroup;
 
-      // Frog Body
-      const bodyGeo = new THREE.SphereGeometry(1.2, 32, 24);
-      bodyGeo.scale(1, 0.75, 1.1);
+      // Frog Material (Manipulated directly by user CSS!)
       const frogMat = new THREE.MeshStandardMaterial({
-        color: 0x2ecc71,
+        color: 0x10b981, // default emerald-500
         roughness: 0.3,
         metalness: 0.1,
+        transparent: true,
+        opacity: 1.0,
       });
+      frogMatRef.current = frogMat;
+
+      // Frog Body
+      const bodyGeo = new THREE.SphereGeometry(0.8, 24, 20);
+      bodyGeo.scale(1, 0.7, 1);
       const bodyMesh = new THREE.Mesh(bodyGeo, frogMat);
-      bodyMesh.position.y = 0.9;
+      bodyMesh.position.y = 0.6;
       frogGroup.add(bodyMesh);
+
+      // Outline Mesh (for border property)
+      const outlineGeo = new THREE.SphereGeometry(0.85, 24, 20);
+      outlineGeo.scale(1, 0.7, 1);
+      const outlineMat = new THREE.MeshBasicMaterial({
+        color: 0xef4444,
+        side: THREE.BackSide,
+        visible: false,
+      });
+      const outlineMesh = new THREE.Mesh(outlineGeo, outlineMat);
+      outlineMesh.position.y = 0.6;
+      outlineMeshRef.current = outlineMesh;
+      frogGroup.add(outlineMesh);
 
       // Eyes Left & Right
       const eyeMat = new THREE.MeshBasicMaterial({ color: 0xffffff });
       const pupilMat = new THREE.MeshBasicMaterial({ color: 0x000000 });
-      const eyeGeo = new THREE.SphereGeometry(0.35, 16, 16);
-      const pupilGeo = new THREE.SphereGeometry(0.18, 16, 16);
+      const eyeGeo = new THREE.SphereGeometry(0.22, 16, 16);
+      const pupilGeo = new THREE.SphereGeometry(0.1, 16, 16);
 
-      // Left Eye
       const eyeL = new THREE.Mesh(eyeGeo, eyeMat);
-      eyeL.position.set(-0.5, 1.6, 0.4);
+      eyeL.position.set(-0.35, 1.1, 0.3);
       const pupilL = new THREE.Mesh(pupilGeo, pupilMat);
-      pupilL.position.set(-0.5, 1.6, 0.7);
+      pupilL.position.set(-0.35, 1.1, 0.5);
       frogGroup.add(eyeL, pupilL);
 
-      // Right Eye
       const eyeR = new THREE.Mesh(eyeGeo, eyeMat);
-      eyeR.position.set(0.5, 1.6, 0.4);
+      eyeR.position.set(0.35, 1.1, 0.3);
       const pupilR = new THREE.Mesh(pupilGeo, pupilMat);
-      pupilR.position.set(0.5, 1.6, 0.7);
+      pupilR.position.set(0.35, 1.1, 0.5);
       frogGroup.add(eyeR, pupilR);
 
       // Legs Left & Right
-      const legGeo = new THREE.SphereGeometry(0.5, 16, 16);
-      legGeo.scale(1.4, 0.5, 0.8);
+      const legGeo = new THREE.SphereGeometry(0.35, 16, 16);
+      legGeo.scale(1.3, 0.4, 0.7);
       const legL = new THREE.Mesh(legGeo, frogMat);
-      legL.position.set(-1.1, 0.4, -0.2);
+      legL.position.set(-0.75, 0.3, -0.1);
       const legR = new THREE.Mesh(legGeo, frogMat);
-      legR.position.set(1.1, 0.4, -0.2);
+      legR.position.set(0.75, 0.3, -0.1);
       frogGroup.add(legL, legR);
-
-      // Lily Pad Base
-      const lilyGeo = new THREE.CylinderGeometry(1.8, 1.8, 0.1, 24);
-      const lilyMat = new THREE.MeshStandardMaterial({ color: 0x27ae60 });
-      const lilyPad = new THREE.Mesh(lilyGeo, lilyMat);
-      lilyPad.position.set(0, 0.05, 0);
-      frogGroup.add(lilyPad);
 
       scene.add(frogGroup);
 
-      // 5. Renderer setup
+      // 5. WebGL Renderer
       const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
       renderer.setSize(width, height);
       renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
       rendererRef.current = renderer;
 
-      // Clear container and append canvas
       container.appendChild(renderer.domElement);
 
       // Animation Loop
@@ -147,16 +174,15 @@ export const ThreeFrogViewport: React.FC<ThreeFrogViewportProps> = ({
       const animate = () => {
         const elapsedTime = clock.getElapsedTime();
 
-        // Idle 3D breathing / floating motion
-        if (frogGroupRef.current && !isVictory) {
-          frogGroupRef.current.position.y = Math.sin(elapsedTime * 2) * 0.1;
-          ringMesh.scale.setScalar(1 + Math.sin(elapsedTime * 1.5) * 0.08);
-        }
-
-        // Victory celebration animation: Hop and spin!
-        if (frogGroupRef.current && isVictory) {
-          frogGroupRef.current.position.y = Math.abs(Math.sin(elapsedTime * 6)) * 2;
-          frogGroupRef.current.rotation.y += 0.08;
+        if (frogGroupRef.current) {
+          if (isVictory) {
+            // Hop & 360 Spin celebration!
+            frogGroupRef.current.position.y = Math.abs(Math.sin(elapsedTime * 6)) * 1.2;
+            frogGroupRef.current.rotation.y += 0.08;
+          } else {
+            // Idle breathing motion
+            frogGroupRef.current.position.y = Math.sin(elapsedTime * 2) * 0.04;
+          }
         }
 
         renderer.render(scene, camera);
@@ -165,7 +191,6 @@ export const ThreeFrogViewport: React.FC<ThreeFrogViewportProps> = ({
 
       animate();
 
-      // Handle Resize
       const handleResize = () => {
         if (!mountRef.current || !rendererRef.current) return;
         const w = mountRef.current.clientWidth;
@@ -184,79 +209,120 @@ export const ThreeFrogViewport: React.FC<ThreeFrogViewportProps> = ({
           rendererRef.current.domElement.remove();
         }
       };
-    } catch (err) {
-      console.warn("WebGL initialization failed, falling back to 2D/3D CSS layer:", err);
+    } catch (e) {
+      console.warn("WebGL fallback initialized:", e);
       setWebGlSupported(false);
     }
   }, [isVictory]);
 
-  return (
-    <div className="relative w-full h-full min-h-[380px] bg-slate-950 rounded-2xl overflow-hidden border border-emerald-500/20 shadow-2xl flex flex-col items-center justify-center p-4">
-      {/* Dynamic Inject Style Tag for User CSS */}
-      <style>{`
-        #pond {
-          transition: all 0.3s ease;
+  // Dynamically apply user CSS directly to the 3D Frog Mesh!
+  useEffect(() => {
+    if (!frogMatRef.current || !frogGroupRef.current) return;
+
+    const parsed = parseCssRules(userCss);
+
+    // 1. Color / Background Color -> Directly sets 3D Frog Material Color
+    const colorVal = parsed["background-color"] || parsed["color"] || parsed["background"];
+    if (colorVal) {
+      try {
+        let hexColor = 0x10b981; // default
+        if (colorVal.includes("green")) hexColor = 0x2ecc71;
+        else if (colorVal.includes("blue") || colorVal.includes("3498db")) hexColor = 0x3498db;
+        else if (colorVal.includes("red") || colorVal.includes("e74c3c")) hexColor = 0xe74c3c;
+        else if (colorVal.includes("purple") || colorVal.includes("9b59b6")) hexColor = 0x9b59b6;
+        else if (colorVal.includes("1abc9c") || colorVal.includes("teal")) hexColor = 0x1abc9c;
+        else if (colorVal.startsWith("#")) {
+          hexColor = parseInt(colorVal.replace("#", "0x"), 16);
         }
-        ${userCss}
-      `}</style>
+        if (!isNaN(hexColor)) {
+          frogMatRef.current.color.setHex(hexColor);
+        }
+      } catch (e) {
+        /* ignore invalid color formats */
+      }
+    } else if (level.targetFrogStyle?.backgroundColor || level.targetFrogStyle?.color) {
+      const targetColor = level.targetFrogStyle.backgroundColor || level.targetFrogStyle.color;
+      if (targetColor && targetColor.startsWith("#")) {
+        frogMatRef.current.color.setHex(parseInt(targetColor.replace("#", "0x"), 16));
+      }
+    }
 
-      {/* Background Three.js 3D WebGL Canvas */}
-      {webGlSupported && (
-        <div
-          ref={mountRef}
-          className="absolute inset-0 z-0 opacity-40 pointer-events-none"
-        />
-      )}
+    // 2. Opacity -> Sets 3D Frog Material Opacity
+    if (parsed["opacity"]) {
+      const op = parseFloat(parsed["opacity"]);
+      if (!isNaN(op)) {
+        frogMatRef.current.opacity = Math.max(0.1, Math.min(1.0, op));
+      }
+    }
 
-      {/* Victory Sparkle Effects */}
-      {isVictory && (
-        <div className="absolute inset-0 z-30 pointer-events-none flex items-center justify-center">
-          <div className="animate-bounce text-6xl">✨ 🐸 ✨</div>
-          <div className="absolute inset-0 bg-emerald-500/10 animate-pulse" />
-        </div>
-      )}
+    // 3. Border -> Enables 3D Outline Mesh around the frog
+    if (parsed["border"] || parsed["outline"]) {
+      if (outlineMeshRef.current) {
+        outlineMeshRef.current.visible = true;
+        if ((parsed["border"] || "").includes("dashed")) {
+          (outlineMeshRef.current.material as THREE.MeshBasicMaterial).wireframe = true;
+        } else {
+          (outlineMeshRef.current.material as THREE.MeshBasicMaterial).wireframe = false;
+        }
+      }
+    } else if (outlineMeshRef.current) {
+      outlineMeshRef.current.visible = false;
+    }
 
-      {/* Target Preview Overlay Indicator */}
-      <div className="absolute top-4 right-4 z-20 bg-slate-900/80 backdrop-blur-md px-3 py-1.5 rounded-lg text-xs font-mono text-emerald-400 border border-emerald-500/30 flex items-center gap-2">
-        <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping" />
-        Live 3D Viewport Target: <span className="font-bold text-white">{level.targetDescription}</span>
+    // 4. Scale / Transforms -> Directly transforms the 3D Frog Group in 3D Space
+    if (parsed["scale"]) {
+      const s = parseFloat(parsed["scale"]);
+      if (!isNaN(s)) frogGroupRef.current.scale.set(s, s, s);
+    } else if (parsed["transform"] && parsed["transform"].includes("scale")) {
+      const scaleMatch = parsed["transform"].match(/scale\(([^)]+)\)/);
+      if (scaleMatch) {
+        const s = parseFloat(scaleMatch[1]);
+        if (!isNaN(s)) frogGroupRef.current.scale.set(s, s, s);
+      }
+    } else {
+      frogGroupRef.current.scale.set(1, 1, 1);
+    }
+
+    // 5. Rotation -> Rotates 3D Frog model
+    if (parsed["transform"] && parsed["transform"].includes("rotate")) {
+      const rotMatch = parsed["transform"].match(/rotate\(([^)]+)deg\)/);
+      if (rotMatch) {
+        const deg = parseFloat(rotMatch[1]);
+        if (!isNaN(deg)) frogGroupRef.current.rotation.y = (deg * Math.PI) / 180;
+      }
+    }
+
+    // 6. Positioning / Flex Alignment -> Translates 3D Frog model on X/Z plane
+    if (parsed["justify-content"] || parsed["align-items"]) {
+      const justify = parsed["justify-content"];
+      if (justify === "flex-end" || justify === "right") frogGroupRef.current.position.x = 1.2;
+      else if (justify === "center") frogGroupRef.current.position.x = 0;
+      else if (justify === "flex-start" || justify === "left") frogGroupRef.current.position.x = -1.2;
+    }
+  }, [userCss, level]);
+
+  return (
+    <div className="w-full h-full min-h-[200px] bg-zinc-950 border border-zinc-900 rounded-2xl overflow-hidden relative flex flex-col items-center justify-center p-2 shadow-2xl">
+      {/* Target Description Header */}
+      <div className="absolute top-3 left-3 z-10 bg-zinc-900/90 backdrop-blur-md px-3 py-1 rounded-lg text-[10px] font-mono text-zinc-400 border border-zinc-800 flex items-center gap-1.5">
+        <span className="w-2 h-2 rounded-full bg-emerald-500 animate-ping" />
+        Target: <span className="font-bold text-white">{level.targetDescription}</span>
       </div>
 
-      {/* Interactive HTML/CSS Pond & Frog Layer */}
-      <div className="relative z-10 w-full max-w-lg h-[300px] bg-emerald-950/40 rounded-xl border border-emerald-500/30 p-6 flex flex-col justify-between overflow-hidden shadow-inner">
-        {/* Pond Water Ripple Grid background */}
-        <div className="absolute inset-0 bg-[radial-gradient(#2ecc71_1px,transparent_1px)] [background-size:16px_16px] opacity-10 pointer-events-none" />
+      {/* WebGL 3D Viewport Canvas */}
+      <div ref={mountRef} className="w-full h-[220px] relative z-0" />
 
-        {/* Level Pond Container (#pond) */}
-        <div
-          id="pond"
-          className="w-full h-full relative transition-all duration-300 flex items-center justify-center rounded-lg"
-          style={level.targetPondStyle}
-        >
-          {/* Target Lily Pad outline */}
-          <div className="absolute w-24 h-24 rounded-full border-2 border-dashed border-emerald-400/60 bg-emerald-500/10 flex items-center justify-center text-[10px] font-mono text-emerald-300/80 animate-pulse pointer-events-none">
-            Target Pad 🎯
-          </div>
-
-          {/* Interactive User 3D Frog Element (.frog) */}
+      {/* Fallback 2D/3D CSS box if WebGL is unsupported */}
+      {!webGlSupported && (
+        <div className="relative z-10 w-full h-[180px] bg-zinc-900 rounded-xl flex items-center justify-center">
           <div
-            className={`frog relative w-24 h-24 rounded-2xl bg-emerald-600 text-white font-bold flex flex-col items-center justify-center shadow-lg transition-all duration-300 border-2 border-emerald-400 select-none ${
-              isVictory ? "animate-bounce ring-4 ring-emerald-400" : ""
-            }`}
-            style={{
-              boxShadow: "0 10px 25px -5px rgba(46, 204, 113, 0.4)",
-              ...level.targetFrogStyle,
-            }}
+            className="frog w-20 h-20 bg-emerald-500 text-white rounded-xl flex flex-col items-center justify-center font-bold text-xs shadow-lg transition-all"
+            style={{ ...level.targetFrogStyle }}
           >
-            {/* 3D Frog Face Graphic */}
-            <div className="flex items-center gap-2 mb-1">
-              <span className="w-3 h-3 rounded-full bg-white flex items-center justify-center text-[8px]">👀</span>
-              <span className="w-3 h-3 rounded-full bg-white flex items-center justify-center text-[8px]">👀</span>
-            </div>
-            <span className="text-xs font-mono tracking-wider">.frog</span>
+            🐸 .frog
           </div>
         </div>
-      </div>
+      )}
     </div>
   );
 };
