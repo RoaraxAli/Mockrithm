@@ -38,7 +38,6 @@ function parseCssSelectorRules(cssText: string): {
   const result = { frog: {} as Record<string, string>, pond: {} as Record<string, string> };
 
   try {
-    // Match .frog { ... } block
     const frogBlockMatch = cssText.match(/\.frog\s*\{([^}]+)\}/i);
     if (frogBlockMatch) {
       const rules = frogBlockMatch[1].split(";");
@@ -49,7 +48,6 @@ function parseCssSelectorRules(cssText: string): {
         }
       }
     } else {
-      // Fallback: parse un-bracketed rules into frog
       const rules = cssText.split(";");
       for (const rule of rules) {
         const parts = rule.split(":");
@@ -59,7 +57,6 @@ function parseCssSelectorRules(cssText: string): {
       }
     }
 
-    // Match #pond { ... } block
     const pondBlockMatch = cssText.match(/#pond\s*\{([^}]+)\}/i);
     if (pondBlockMatch) {
       const rules = pondBlockMatch[1].split(";");
@@ -96,7 +93,7 @@ export const ThreeFrogViewport: React.FC<ThreeFrogViewportProps> = ({
   const frogMatRef = useRef<THREE.MeshStandardMaterial | null>(null);
   const eyeMatRef = useRef<THREE.MeshBasicMaterial | null>(null);
   const pondMatRef = useRef<THREE.MeshStandardMaterial | null>(null);
-  const outlineMeshRef = useRef<THREE.Mesh | null>(null);
+  const borderRingRef = useRef<THREE.Mesh | null>(null);
   const rendererRef = useRef<THREE.WebGLRenderer | null>(null);
   const animFrameId = useRef<number | null>(null);
 
@@ -124,11 +121,9 @@ export const ThreeFrogViewport: React.FC<ThreeFrogViewportProps> = ({
     const socketGeo = new THREE.SphereGeometry(0.35, 20, 20);
     const eyeWhiteGeo = new THREE.SphereGeometry(0.24, 20, 20);
     const pupilGeo = new THREE.SphereGeometry(0.12, 16, 16);
-    const shineGeo = new THREE.SphereGeometry(0.04, 8, 8);
 
     const eyeWhiteMat = new THREE.MeshBasicMaterial({ color: 0xffffff });
     const pupilMat = new THREE.MeshBasicMaterial({ color: 0x09090b });
-    const shineMat = new THREE.MeshBasicMaterial({ color: 0xffffff });
 
     const socketL = new THREE.Mesh(socketGeo, frogMat);
     socketL.position.set(-0.48, 1.15, 0.4);
@@ -237,19 +232,6 @@ export const ThreeFrogViewport: React.FC<ThreeFrogViewportProps> = ({
       lilyPadMesh.position.set(0, -0.06, 0);
       scene.add(lilyPadMesh);
 
-      // Water Ripple Ring around Lily Pad
-      const ringGeo = new THREE.RingGeometry(2.85, 3.1, 36);
-      const ringMat = new THREE.MeshBasicMaterial({
-        color: 0x10b981,
-        side: THREE.DoubleSide,
-        transparent: true,
-        opacity: 0.3,
-      });
-      const waterRing = new THREE.Mesh(ringGeo, ringMat);
-      waterRing.rotation.x = Math.PI / 2;
-      waterRing.position.y = -0.05;
-      scene.add(waterRing);
-
       // User 3D Frog
       const userData = createFrogMeshGroup(0x52525b); // Neutral slate default
       frogGroupRef.current = userData.group;
@@ -258,18 +240,17 @@ export const ThreeFrogViewport: React.FC<ThreeFrogViewportProps> = ({
       userData.group.position.set(0, 0, 0);
       scene.add(userData.group);
 
-      // Outline Mesh (for border property)
-      const outlineGeo = new THREE.SphereGeometry(1.05, 24, 20);
-      outlineGeo.scale(1.1, 0.75, 1.2);
-      const outlineMat = new THREE.MeshBasicMaterial({
+      // 3D Border Aura Ring around Frog (Reacts to `border` and `border-radius`)
+      const borderGeo = new THREE.TorusGeometry(1.6, 0.08, 16, 48);
+      const borderMat = new THREE.MeshBasicMaterial({
         color: 0x27ae60,
-        side: THREE.BackSide,
         visible: false,
       });
-      const outlineMesh = new THREE.Mesh(outlineGeo, outlineMat);
-      outlineMesh.position.y = 0.65;
-      outlineMeshRef.current = outlineMesh;
-      userData.group.add(outlineMesh);
+      const borderRing = new THREE.Mesh(borderGeo, borderMat);
+      borderRing.rotation.x = Math.PI / 2;
+      borderRing.position.y = 0.05;
+      borderRingRef.current = borderRing;
+      userData.group.add(borderRing);
 
       // Renderer
       const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
@@ -365,19 +346,27 @@ export const ThreeFrogViewport: React.FC<ThreeFrogViewportProps> = ({
       frogMatRef.current.opacity = 1.0;
     }
 
-    // 5. .frog border
+    // 5. .frog border -> 3D Glowing Border Ring
     if (parsed.frog["border"] || parsed.frog["outline"]) {
-      if (outlineMeshRef.current) {
-        outlineMeshRef.current.visible = true;
+      if (borderRingRef.current) {
+        borderRingRef.current.visible = true;
         const bVal = parsed.frog["border"] || parsed.frog["outline"] || "";
         const bColor = parseCssColorToHex(bVal) || 0x27ae60;
-        (outlineMeshRef.current.material as THREE.MeshBasicMaterial).color.setHex(bColor);
+        (borderRingRef.current.material as THREE.MeshBasicMaterial).color.setHex(bColor);
+
+        // Adjust 3D border thickness if px is specified
+        const widthMatch = bVal.match(/(\d+)px/);
+        if (widthMatch) {
+          const px = parseInt(widthMatch[1], 10);
+          const scaleFactor = 1 + px * 0.05;
+          borderRingRef.current.scale.set(scaleFactor, scaleFactor, scaleFactor);
+        }
       }
-    } else if (outlineMeshRef.current) {
-      outlineMeshRef.current.visible = false;
+    } else if (borderRingRef.current) {
+      borderRingRef.current.visible = false;
     }
 
-    // 6. .frog scale
+    // 6. .frog scale / width / height
     if (parsed.frog["scale"]) {
       const s = parseFloat(parsed.frog["scale"]);
       if (!isNaN(s)) frogGroupRef.current.scale.set(s, s, s);
@@ -387,6 +376,10 @@ export const ThreeFrogViewport: React.FC<ThreeFrogViewportProps> = ({
         const s = parseFloat(scaleMatch[1]);
         if (!isNaN(s)) frogGroupRef.current.scale.set(s, s, s);
       }
+    } else if (parsed.frog["width"] || parsed.frog["height"]) {
+      const wPx = parseInt(parsed.frog["width"] || "100", 10);
+      const scaleW = Math.max(0.5, Math.min(2.0, wPx / 100));
+      frogGroupRef.current.scale.set(scaleW, scaleW, scaleW);
     } else {
       frogGroupRef.current.scale.set(1, 1, 1);
     }
@@ -405,9 +398,9 @@ export const ThreeFrogViewport: React.FC<ThreeFrogViewportProps> = ({
     // 8. #pond flex positioning
     if (parsed.pond["justify-content"] || parsed.pond["align-items"]) {
       const justify = parsed.pond["justify-content"];
-      if (justify === "flex-end" || justify === "right") frogGroupRef.current.position.x = 1.2;
+      if (justify === "flex-end" || justify === "right") frogGroupRef.current.position.x = 1.3;
       else if (justify === "center") frogGroupRef.current.position.x = 0;
-      else if (justify === "flex-start" || justify === "left") frogGroupRef.current.position.x = -1.2;
+      else if (justify === "flex-start" || justify === "left") frogGroupRef.current.position.x = -1.3;
     } else {
       frogGroupRef.current.position.set(0, 0, 0);
     }
