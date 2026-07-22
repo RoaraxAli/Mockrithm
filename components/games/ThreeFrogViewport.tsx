@@ -18,10 +18,18 @@ function parseCssColorToHex(colorStr: string): number | null {
   try {
     const cleaned = colorStr.trim().toLowerCase();
     
-    // First check direct tokens (e.g. from "4px solid white" -> check "white")
-    const tokens = cleaned.split(/\s+/);
+    // Check tokens in compound strings like "14px solid white" -> "white"
+    const tokens = cleaned.split(/[\s,]+/);
     for (const token of tokens) {
-      if (token === "solid" || token === "dashed" || token === "dotted" || token.endsWith("px")) continue;
+      if (!token || token === "solid" || token === "dashed" || token === "dotted" || token.endsWith("px")) continue;
+      
+      // Known named colors check for instant speed
+      if (token === "white" || token === "#fff" || token === "#ffffff") return 0xffffff;
+      if (token === "black" || token === "#000" || token === "#000000") return 0x000000;
+      if (token === "red") return 0xef4444;
+      if (token === "green") return 0x2ecc71;
+      if (token === "blue") return 0x3b82f6;
+
       const ctx = document.createElement("canvas").getContext("2d");
       if (!ctx) continue;
       ctx.fillStyle = token;
@@ -36,48 +44,41 @@ function parseCssColorToHex(colorStr: string): number | null {
   return null;
 }
 
-// Extract CSS properties grouped by selector (.frog vs #pond)
-function parseCssSelectorRules(cssText: string): {
+// Ultra-robust CSS Parser: extracts properties regardless of missing brackets/selectors
+function parseCssPropertiesBulletproof(cssText: string): {
   frog: Record<string, string>;
   pond: Record<string, string>;
 } {
-  const result = { frog: {} as Record<string, string>, pond: {} as Record<string, string> };
+  const frogProps: Record<string, string> = {};
+  const pondProps: Record<string, string> = {};
 
   try {
-    const frogBlockMatch = cssText.match(/\.frog\s*\{([^}]+)\}/i);
-    if (frogBlockMatch) {
-      const rules = frogBlockMatch[1].split(";");
-      for (const rule of rules) {
-        const parts = rule.split(":");
-        if (parts.length >= 2) {
-          result.frog[parts[0].trim().toLowerCase()] = parts.slice(1).join(":").trim().toLowerCase();
-        }
-      }
-    } else {
-      const rules = cssText.split(";");
-      for (const rule of rules) {
-        const parts = rule.split(":");
-        if (parts.length >= 2) {
-          result.frog[parts[0].trim().toLowerCase()] = parts.slice(1).join(":").trim().toLowerCase();
-        }
-      }
-    }
+    // Split by semicolons or newlines
+    const lines = cssText.split(/[;\n]+/);
+    for (const line of lines) {
+      const cleanLine = line.replace(/[\{\}]/g, "").trim();
+      if (!cleanLine) continue;
 
-    const pondBlockMatch = cssText.match(/#pond\s*\{([^}]+)\}/i);
-    if (pondBlockMatch) {
-      const rules = pondBlockMatch[1].split(";");
-      for (const rule of rules) {
-        const parts = rule.split(":");
-        if (parts.length >= 2) {
-          result.pond[parts[0].trim().toLowerCase()] = parts.slice(1).join(":").trim().toLowerCase();
+      const parts = cleanLine.split(":");
+      if (parts.length >= 2) {
+        let rawProp = parts[0].trim().toLowerCase();
+        const rawVal = parts.slice(1).join(":").trim().toLowerCase();
+
+        // Clean out selector prefixes like ".frog background-color" -> "background-color"
+        rawProp = rawProp.replace(/\.frog/g, "").replace(/#pond/g, "").trim();
+
+        if (cleanLine.includes("#pond") || rawProp.startsWith("pond-")) {
+          pondProps[rawProp] = rawVal;
+        } else {
+          frogProps[rawProp] = rawVal;
         }
       }
     }
   } catch (e) {
-    console.warn("CSS parsing error:", e);
+    console.warn("Bulletproof CSS parser error:", e);
   }
 
-  return result;
+  return { frog: frogProps, pond: pondProps };
 }
 
 export const ThreeFrogViewport: React.FC<ThreeFrogViewportProps> = ({
@@ -99,6 +100,7 @@ export const ThreeFrogViewport: React.FC<ThreeFrogViewportProps> = ({
   const frogMatRef = useRef<THREE.MeshStandardMaterial | null>(null);
   const eyeMatRef = useRef<THREE.MeshBasicMaterial | null>(null);
   const pondMatRef = useRef<THREE.MeshStandardMaterial | null>(null);
+  const borderOutlineMeshRef = useRef<THREE.Mesh | null>(null);
   const borderRingRef = useRef<THREE.Mesh | null>(null);
   const rendererRef = useRef<THREE.WebGLRenderer | null>(null);
   const animFrameId = useRef<number | null>(null);
@@ -230,7 +232,7 @@ export const ThreeFrogViewport: React.FC<ThreeFrogViewportProps> = ({
       // Lily Pad Base (#pond)
       const lilyPadGeo = new THREE.CylinderGeometry(2.8, 2.8, 0.12, 36);
       const lilyPadMat = new THREE.MeshStandardMaterial({
-        color: 0x15803d, // default dark green
+        color: 0x15803d,
         roughness: 0.4,
       });
       pondMatRef.current = lilyPadMat;
@@ -246,15 +248,28 @@ export const ThreeFrogViewport: React.FC<ThreeFrogViewportProps> = ({
       userData.group.position.set(0, 0, 0);
       scene.add(userData.group);
 
-      // Highly Visible 3D Border Aura Ring around Frog (Reacts to `border`)
-      const borderGeo = new THREE.TorusGeometry(1.65, 0.12, 16, 48);
-      const borderMat = new THREE.MeshBasicMaterial({
+      // 1. 3D Body Outline Shell Mesh (Reacts to `border`)
+      const borderOutlineGeo = new THREE.SphereGeometry(1.12, 32, 24);
+      borderOutlineGeo.scale(1.1, 0.75, 1.2);
+      const borderOutlineMat = new THREE.MeshBasicMaterial({
+        color: 0xffffff,
+        side: THREE.BackSide,
+        visible: false,
+      });
+      const borderOutlineMesh = new THREE.Mesh(borderOutlineGeo, borderOutlineMat);
+      borderOutlineMesh.position.y = 0.65;
+      borderOutlineMeshRef.current = borderOutlineMesh;
+      userData.group.add(borderOutlineMesh);
+
+      // 2. 3D Base Border Ring (Reacts to `border`)
+      const borderRingGeo = new THREE.TorusGeometry(1.6, 0.1, 16, 48);
+      const borderRingMat = new THREE.MeshBasicMaterial({
         color: 0xffffff,
         visible: false,
       });
-      const borderRing = new THREE.Mesh(borderGeo, borderMat);
+      const borderRing = new THREE.Mesh(borderRingGeo, borderRingMat);
       borderRing.rotation.x = Math.PI / 2;
-      borderRing.position.y = 0.2; // Slightly raised off pad for maximum visibility!
+      borderRing.position.y = 0.15;
       borderRingRef.current = borderRing;
       userData.group.add(borderRing);
 
@@ -314,7 +329,7 @@ export const ThreeFrogViewport: React.FC<ThreeFrogViewportProps> = ({
   useEffect(() => {
     if (!mounted || !frogMatRef.current || !frogGroupRef.current) return;
 
-    const parsed = parseCssSelectorRules(userCss);
+    const parsed = parseCssPropertiesBulletproof(userCss);
 
     // 1. .frog background-color -> 3D Frog Skin Color
     if (parsed.frog["background-color"] || parsed.frog["background"]) {
@@ -352,29 +367,36 @@ export const ThreeFrogViewport: React.FC<ThreeFrogViewportProps> = ({
       frogMatRef.current.opacity = 1.0;
     }
 
-    // 5. .frog border -> Highly Visible 3D Border Ring!
+    // 5. .frog border -> 3D Glowing Shell & Ring Outlines!
     if (parsed.frog["border"] || parsed.frog["outline"]) {
+      const bVal = parsed.frog["border"] || parsed.frog["outline"] || "";
+      const bColor = parseCssColorToHex(bVal) || 0xffffff;
+
+      if (borderOutlineMeshRef.current) {
+        borderOutlineMeshRef.current.visible = true;
+        (borderOutlineMeshRef.current.material as THREE.MeshBasicMaterial).color.setHex(bColor);
+      }
       if (borderRingRef.current) {
         borderRingRef.current.visible = true;
-        const bVal = parsed.frog["border"] || parsed.frog["outline"] || "";
-        const bColor = parseCssColorToHex(bVal) || 0xffffff;
         (borderRingRef.current.material as THREE.MeshBasicMaterial).color.setHex(bColor);
 
-        // Adjust thickness based on px width
+        // Adjust scale based on border px width
         const widthMatch = bVal.match(/(\d+)px/);
         if (widthMatch) {
           const px = parseInt(widthMatch[1], 10);
-          const scaleFactor = 1 + (px * 0.08);
+          const scaleFactor = 1 + (px * 0.04);
           borderRingRef.current.scale.set(scaleFactor, scaleFactor, scaleFactor);
-        } else {
-          borderRingRef.current.scale.set(1.1, 1.1, 1.1);
+          if (borderOutlineMeshRef.current) {
+            borderOutlineMeshRef.current.scale.set(1.1 * scaleFactor, 0.75 * scaleFactor, 1.2 * scaleFactor);
+          }
         }
       }
-    } else if (borderRingRef.current) {
-      borderRingRef.current.visible = false;
+    } else {
+      if (borderOutlineMeshRef.current) borderOutlineMeshRef.current.visible = false;
+      if (borderRingRef.current) borderRingRef.current.visible = false;
     }
 
-    // 6. .frog scale
+    // 6. .frog scale / width / height
     if (parsed.frog["scale"]) {
       const s = parseFloat(parsed.frog["scale"]);
       if (!isNaN(s)) frogGroupRef.current.scale.set(s, s, s);
