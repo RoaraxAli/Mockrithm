@@ -12,7 +12,7 @@ import {
   Play, Lock, CheckCircle, HelpCircle, ArrowLeft, ArrowRight, Award, BookOpen,
   Code2, RotateCcw, AlertCircle, MessageSquare, Users, Trophy,
   Plus, Send, User as UserIcon, Activity, Phone, PhoneOff, Mic, MicOff,
-  MapPin, ChevronDown, Music, Volume2, VolumeX, List, Star, Gamepad2
+  MapPin, ChevronDown, Music, Volume2, VolumeX, List, Star, Gamepad2, ShieldCheck
 } from "lucide-react";
 import { toast } from "sonner";
 import { GAMES_LIST, generateLevel, LevelData, GameInfo } from "@/lib/gamesData";
@@ -31,6 +31,7 @@ import LivePreview from "@/components/games/LivePreview";
 const FrogCssGameRunner = dynamic(() => import("@/components/games/FrogCssGameRunner").then(m => m.FrogCssGameRunner), { ssr: false });
 import Footer from "@/components/shared/Footer";
 import { ECertificateModal } from "@/components/games/ECertificateModal";
+import { VerifyCertificateModal } from "@/components/games/VerifyCertificateModal";
 
 // --- Country → valid cities map for location validation ---
 const COUNTRY_CITIES: Record<string, string[]> = {
@@ -239,6 +240,8 @@ function GamesPageContent() {
     });
     setIsCertModalOpen(true);
   };
+
+  const [showVerifyCertModal, setShowVerifyCertModal] = useState(false);
 
   // Location onboarding modal
   const [showLocationModal, setShowLocationModal] = useState(false);
@@ -1290,13 +1293,24 @@ function GamesPageContent() {
               { id: "achievements", label: "Achievements", icon: Trophy, badge: unclaimedCount },
               { id: "leaderboard", label: "Leaderboards", icon: Layers },
               { id: "friends", label: "Friends", icon: Users },
-              { id: "social", label: "Chat", icon: MessageSquare }
+              { id: "social", label: "Chat", icon: MessageSquare },
+              { id: "verify-cert", label: "Verify Cert", icon: ShieldCheck }
             ].map(item => {
               const Icon = item.icon;
               const isActive = activeTab === item.id;
               return (
                 <button key={item.id}
-                  onClick={() => { if (!(item as any).disabled) { playSound("click"); setActiveTab(item.id as any); if (item.id === "dashboard") { setGameView("dashboard"); setActiveGame(null); } } }}
+                  onClick={() => {
+                    if (!(item as any).disabled) {
+                      playSound("click");
+                      if (item.id === "verify-cert") {
+                        setShowVerifyCertModal(true);
+                        return;
+                      }
+                      setActiveTab(item.id as any);
+                      if (item.id === "dashboard") { setGameView("dashboard"); setActiveGame(null); }
+                    }
+                  }}
                   disabled={(item as any).disabled}
                   className={`w-full flex items-center justify-between px-4 py-3 rounded-xl transition-all font-bold text-xs uppercase tracking-wider ${
                     isActive ? "bg-white text-black font-extrabold" : "text-zinc-400 hover:bg-zinc-900 hover:text-white"
@@ -2339,6 +2353,11 @@ function GamesPageContent() {
           levelReached={certModalData.levelReached}
         />
       )}
+
+      <VerifyCertificateModal
+        isOpen={showVerifyCertModal}
+        onClose={() => setShowVerifyCertModal(false)}
+      />
 
     </div>
   );
