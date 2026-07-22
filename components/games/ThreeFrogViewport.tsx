@@ -17,12 +17,18 @@ function parseCssColorToHex(colorStr: string): number | null {
 
   try {
     const cleaned = colorStr.trim().toLowerCase();
-    const ctx = document.createElement("canvas").getContext("2d");
-    if (!ctx) return null;
-    ctx.fillStyle = cleaned;
-    const computed = ctx.fillStyle;
-    if (computed.startsWith("#")) {
-      return parseInt(computed.replace("#", "0x"), 16);
+    
+    // First check direct tokens (e.g. from "4px solid white" -> check "white")
+    const tokens = cleaned.split(/\s+/);
+    for (const token of tokens) {
+      if (token === "solid" || token === "dashed" || token === "dotted" || token.endsWith("px")) continue;
+      const ctx = document.createElement("canvas").getContext("2d");
+      if (!ctx) continue;
+      ctx.fillStyle = token;
+      const computed = ctx.fillStyle;
+      if (computed.startsWith("#")) {
+        return parseInt(computed.replace("#", "0x"), 16);
+      }
     }
   } catch (e) {
     /* ignore parsing error */
@@ -240,15 +246,15 @@ export const ThreeFrogViewport: React.FC<ThreeFrogViewportProps> = ({
       userData.group.position.set(0, 0, 0);
       scene.add(userData.group);
 
-      // 3D Border Aura Ring around Frog (Reacts to `border` and `border-radius`)
-      const borderGeo = new THREE.TorusGeometry(1.6, 0.08, 16, 48);
+      // Highly Visible 3D Border Aura Ring around Frog (Reacts to `border`)
+      const borderGeo = new THREE.TorusGeometry(1.65, 0.12, 16, 48);
       const borderMat = new THREE.MeshBasicMaterial({
-        color: 0x27ae60,
+        color: 0xffffff,
         visible: false,
       });
       const borderRing = new THREE.Mesh(borderGeo, borderMat);
       borderRing.rotation.x = Math.PI / 2;
-      borderRing.position.y = 0.05;
+      borderRing.position.y = 0.2; // Slightly raised off pad for maximum visibility!
       borderRingRef.current = borderRing;
       userData.group.add(borderRing);
 
@@ -346,27 +352,29 @@ export const ThreeFrogViewport: React.FC<ThreeFrogViewportProps> = ({
       frogMatRef.current.opacity = 1.0;
     }
 
-    // 5. .frog border -> 3D Glowing Border Ring
+    // 5. .frog border -> Highly Visible 3D Border Ring!
     if (parsed.frog["border"] || parsed.frog["outline"]) {
       if (borderRingRef.current) {
         borderRingRef.current.visible = true;
         const bVal = parsed.frog["border"] || parsed.frog["outline"] || "";
-        const bColor = parseCssColorToHex(bVal) || 0x27ae60;
+        const bColor = parseCssColorToHex(bVal) || 0xffffff;
         (borderRingRef.current.material as THREE.MeshBasicMaterial).color.setHex(bColor);
 
-        // Adjust 3D border thickness if px is specified
+        // Adjust thickness based on px width
         const widthMatch = bVal.match(/(\d+)px/);
         if (widthMatch) {
           const px = parseInt(widthMatch[1], 10);
-          const scaleFactor = 1 + px * 0.05;
+          const scaleFactor = 1 + (px * 0.08);
           borderRingRef.current.scale.set(scaleFactor, scaleFactor, scaleFactor);
+        } else {
+          borderRingRef.current.scale.set(1.1, 1.1, 1.1);
         }
       }
     } else if (borderRingRef.current) {
       borderRingRef.current.visible = false;
     }
 
-    // 6. .frog scale / width / height
+    // 6. .frog scale
     if (parsed.frog["scale"]) {
       const s = parseFloat(parsed.frog["scale"]);
       if (!isNaN(s)) frogGroupRef.current.scale.set(s, s, s);
