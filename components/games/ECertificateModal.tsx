@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useRef, useState } from "react";
-import { Award, CheckCircle2, Download, Printer, Share2, X, Sparkles, UserCheck, Loader2 } from "lucide-react";
+import { Award, CheckCircle2, Download, Share2, X, Sparkles, UserCheck, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 
 export interface ECertificateModalProps {
@@ -52,49 +52,48 @@ export const ECertificateModal: React.FC<ECertificateModalProps> = ({
 
   const certId = `MCK-CERT-${gameId.toUpperCase()}-${hash.slice(0, 8)}`;
 
-  const handlePrint = () => {
-    window.print();
-  };
-
-  const handleDirectDownload = async () => {
+  const handleDownloadPdf = async () => {
     if (!certRef.current) return;
 
     try {
       setIsDownloading(true);
-      toast.loading("Rendering high-res certificate image...", { id: "cert-dl" });
+      toast.loading("Generating landscape PDF certificate...", { id: "cert-pdf" });
 
       const html2canvas = (await import("html2canvas")).default;
+      const jsPDF = (await import("jspdf")).default;
+
       const element = certRef.current;
 
+      // Capture full-color high-resolution element
       const canvas = await html2canvas(element, {
         scale: 2,
         backgroundColor: "#09090b",
         useCORS: true,
         allowTaint: true,
         logging: false,
-        onclone: (clonedDoc) => {
-          const el = clonedDoc.getElementById("printable-certificate");
-          if (el) {
-            el.style.transform = "none";
-            el.style.margin = "0";
-            el.style.borderRadius = "0";
-          }
-        },
       });
 
-      const image = canvas.toDataURL("image/png");
-      const link = document.createElement("a");
-      const safeName = recipientName.trim().replace(/\s+/g, "_") || "Developer";
-      link.href = image;
-      link.download = `Mockrithm_Certificate_${gameId.toUpperCase()}_${safeName}.png`;
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
+      const imgData = canvas.toDataURL("image/png");
 
-      toast.success("Certificate downloaded successfully!", { id: "cert-dl" });
+      // Generate Landscape A4 PDF document (297mm x 210mm)
+      const pdf = new jsPDF({
+        orientation: "landscape",
+        unit: "mm",
+        format: "a4",
+      });
+
+      const pdfWidth = pdf.internal.pageSize.getWidth();
+      const pdfHeight = pdf.internal.pageSize.getHeight();
+
+      pdf.addImage(imgData, "PNG", 0, 0, pdfWidth, pdfHeight);
+
+      const safeName = recipientName.trim().replace(/\s+/g, "_") || "Developer";
+      pdf.save(`Mockrithm_Certificate_${gameId.toUpperCase()}_${safeName}.pdf`);
+
+      toast.success("PDF certificate downloaded successfully!", { id: "cert-pdf" });
     } catch (e: any) {
-      console.error("Certificate image export failed:", e);
-      toast.error("Image generation fallback: Opening Print / Save PDF", { id: "cert-dl" });
+      console.error("PDF export failed:", e);
+      toast.error("Generating fallback PDF print view...", { id: "cert-pdf" });
       window.print();
     } finally {
       setIsDownloading(false);
@@ -108,8 +107,8 @@ export const ECertificateModal: React.FC<ECertificateModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-md overflow-y-auto animate-in fade-in duration-200">
-      {/* Landscape Print CSS with zero margins (strips browser header dates & footer URLs) */}
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-md overflow-y-auto animate-in fade-in duration-200 font-sans">
+      {/* Fallback Print Styles */}
       <style jsx global>{`
         @media print {
           @page {
@@ -151,7 +150,7 @@ export const ECertificateModal: React.FC<ECertificateModalProps> = ({
       `}</style>
 
       <div className="relative w-full max-w-4xl my-6 bg-zinc-950 border border-amber-500/40 rounded-2xl shadow-2xl overflow-hidden text-zinc-100 font-sans">
-        {/* Real Name Modal Bar & Action Buttons */}
+        {/* Header Bar with SINGLE Download PDF Button */}
         <div className="no-print p-4 sm:p-5 bg-zinc-900/80 border-b border-zinc-800 flex flex-col sm:flex-row items-center justify-between gap-4">
           {/* Real Name Input */}
           <div className="flex items-center gap-2.5 w-full sm:w-auto">
@@ -168,39 +167,29 @@ export const ECertificateModal: React.FC<ECertificateModalProps> = ({
             />
           </div>
 
-          <div className="flex items-center gap-2.5 w-full sm:w-auto justify-end">
+          <div className="flex items-center gap-3 w-full sm:w-auto justify-end">
             <button
               onClick={handleCopyLink}
-              className="flex items-center gap-1.5 px-3 py-2 text-xs font-semibold rounded-xl bg-zinc-800 text-zinc-200 hover:bg-zinc-700 transition-colors cursor-pointer"
+              className="flex items-center gap-1.5 px-3.5 py-2 text-xs font-semibold rounded-xl bg-zinc-800 text-zinc-200 hover:bg-zinc-700 transition-colors cursor-pointer"
               title="Copy certificate link"
             >
               <Share2 className="size-3.5" />
               <span>Share</span>
             </button>
 
-            {/* Direct 1-Click Download Button */}
+            {/* SINGLE DIRECT DOWNLOAD PDF BUTTON */}
             <button
-              onClick={handleDirectDownload}
+              onClick={handleDownloadPdf}
               disabled={isDownloading}
-              className="flex items-center gap-1.5 px-4 py-2 text-xs font-bold rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 transition-all shadow-md shadow-emerald-500/20 cursor-pointer disabled:opacity-50"
-              title="Direct Download Certificate Image"
+              className="flex items-center gap-2 px-5 py-2.5 text-xs font-bold rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 transition-all shadow-md shadow-amber-500/20 cursor-pointer disabled:opacity-50 font-mono uppercase tracking-wider"
+              title="Download PDF Certificate"
             >
               {isDownloading ? (
-                <Loader2 className="size-3.5 animate-spin" />
+                <Loader2 className="size-4 animate-spin" />
               ) : (
-                <Download className="size-3.5" />
+                <Download className="size-4" />
               )}
-              <span>Download Image</span>
-            </button>
-
-            {/* Print / Save PDF Button */}
-            <button
-              onClick={handlePrint}
-              className="flex items-center gap-1.5 px-3.5 py-2 text-xs font-bold rounded-xl bg-amber-500 hover:bg-amber-400 text-black transition-all shadow-md shadow-amber-500/20 cursor-pointer"
-              title="Print or Save PDF"
-            >
-              <Printer className="size-3.5" />
-              <span>Print / PDF</span>
+              <span>Download PDF</span>
             </button>
 
             <button
