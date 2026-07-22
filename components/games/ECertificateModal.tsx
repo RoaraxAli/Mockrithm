@@ -1,8 +1,9 @@
 "use client";
 
 import React, { useRef, useState } from "react";
-import { Award, CheckCircle2, Printer, Share2, X, Sparkles, UserCheck } from "lucide-react";
+import { Award, CheckCircle2, Download, Printer, Share2, X, Sparkles, UserCheck, Loader2 } from "lucide-react";
 import { toast } from "sonner";
+import html2canvas from "html2canvas";
 
 export interface ECertificateModalProps {
   isOpen: boolean;
@@ -27,6 +28,7 @@ export const ECertificateModal: React.FC<ECertificateModalProps> = ({
 }) => {
   const certRef = useRef<HTMLDivElement>(null);
   const [recipientName, setRecipientName] = useState<string>(userName || "Developer Candidate");
+  const [isDownloading, setIsDownloading] = useState(false);
 
   if (!isOpen) return null;
 
@@ -53,6 +55,38 @@ export const ECertificateModal: React.FC<ECertificateModalProps> = ({
 
   const handlePrint = () => {
     window.print();
+  };
+
+  const handleDirectDownload = async () => {
+    if (!certRef.current) return;
+
+    try {
+      setIsDownloading(true);
+      toast.loading("Rendering high-res certificate download...", { id: "cert-dl" });
+
+      const canvas = await html2canvas(certRef.current, {
+        scale: 3, // High resolution crisp image render
+        backgroundColor: "#09090b",
+        useCORS: true,
+        logging: false,
+      });
+
+      const image = canvas.toDataURL("image/png");
+      const link = document.createElement("a");
+      const safeName = recipientName.trim().replace(/\s+/g, "_") || "Developer";
+      link.href = image;
+      link.download = `Mockrithm_Certificate_${gameId.toUpperCase()}_${safeName}.png`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+
+      toast.success("Certificate downloaded successfully!", { id: "cert-dl" });
+    } catch (e: any) {
+      console.error("Certificate image export failed:", e);
+      toast.error("Download failed. Use Print / Save PDF instead.", { id: "cert-dl" });
+    } finally {
+      setIsDownloading(false);
+    }
   };
 
   const handleCopyLink = () => {
@@ -105,7 +139,7 @@ export const ECertificateModal: React.FC<ECertificateModalProps> = ({
       `}</style>
 
       <div className="relative w-full max-w-4xl my-6 bg-zinc-950 border border-amber-500/40 rounded-2xl shadow-2xl overflow-hidden text-zinc-100 font-sans">
-        {/* Real Name Modal Bar & Actions */}
+        {/* Real Name Modal Bar & Action Buttons */}
         <div className="no-print p-4 sm:p-5 bg-zinc-900/80 border-b border-zinc-800 flex flex-col sm:flex-row items-center justify-between gap-4">
           {/* Real Name Input */}
           <div className="flex items-center gap-2.5 w-full sm:w-auto">
@@ -122,7 +156,7 @@ export const ECertificateModal: React.FC<ECertificateModalProps> = ({
             />
           </div>
 
-          <div className="flex items-center gap-3 w-full sm:w-auto justify-end">
+          <div className="flex items-center gap-2.5 w-full sm:w-auto justify-end">
             <button
               onClick={handleCopyLink}
               className="flex items-center gap-1.5 px-3 py-2 text-xs font-semibold rounded-xl bg-zinc-800 text-zinc-200 hover:bg-zinc-700 transition-colors cursor-pointer"
@@ -132,13 +166,29 @@ export const ECertificateModal: React.FC<ECertificateModalProps> = ({
               <span>Share</span>
             </button>
 
+            {/* Direct 1-Click Download Button */}
+            <button
+              onClick={handleDirectDownload}
+              disabled={isDownloading}
+              className="flex items-center gap-1.5 px-4 py-2 text-xs font-bold rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 transition-all shadow-md shadow-emerald-500/20 cursor-pointer disabled:opacity-50"
+              title="Direct Download Certificate Image"
+            >
+              {isDownloading ? (
+                <Loader2 className="size-3.5 animate-spin" />
+              ) : (
+                <Download className="size-3.5" />
+              )}
+              <span>Download Image</span>
+            </button>
+
+            {/* Print / Save PDF Button */}
             <button
               onClick={handlePrint}
-              className="flex items-center gap-1.5 px-4 py-2 text-xs font-bold rounded-xl bg-amber-500 hover:bg-amber-400 text-black transition-all shadow-md shadow-amber-500/20 cursor-pointer"
+              className="flex items-center gap-1.5 px-3.5 py-2 text-xs font-bold rounded-xl bg-amber-500 hover:bg-amber-400 text-black transition-all shadow-md shadow-amber-500/20 cursor-pointer"
               title="Print or Save PDF"
             >
               <Printer className="size-3.5" />
-              <span>Download / Save PDF (Landscape)</span>
+              <span>Print / PDF</span>
             </button>
 
             <button
