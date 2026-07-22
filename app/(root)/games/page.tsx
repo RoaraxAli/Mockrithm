@@ -28,6 +28,7 @@ const Editor = dynamic(() => import("@monaco-editor/react"), { ssr: false });
 
 import GitGame from "@/components/games/GitGame";
 import LivePreview from "@/components/games/LivePreview";
+import { FrogCssGameRunner } from "@/components/games/FrogCssGameRunner";
 import Footer from "@/components/shared/Footer";
 import { ECertificateModal } from "@/components/games/ECertificateModal";
 
@@ -1552,6 +1553,17 @@ function GamesPageContent() {
 
             {/* ── VIEW: GAME RUNNER ── */}
             {gameView === "game-runner" && activeGame && (() => {
+              if (activeGame.id === "css3") {
+                return (
+                  <div className="flex flex-col gap-4">
+                    <button onClick={() => { playSound("click"); setGameView("game-detail"); }}
+                      className="w-fit flex items-center gap-2 text-xs font-bold text-zinc-400 hover:text-white uppercase tracking-wider transition-colors cursor-pointer bg-zinc-900 px-4 py-2 border border-zinc-800 rounded-xl mb-2">
+                      <ArrowLeft className="size-4" /> Back to {activeGame.name}
+                    </button>
+                    <FrogCssGameRunner />
+                  </div>
+                );
+              }
               const maxLvl = 100;
               return (
                 <div className="flex flex-col gap-6">
@@ -2848,7 +2860,7 @@ function sanitizeInput(input: string): string {
 
               {/* Lessons details */}
               <ul className="space-y-4">
-                {selectedTopic.lessons.map((lesson, idx) => (
+                {selectedTopic.lessons.map((lesson: string, idx: number) => (
                   <li key={idx} className="flex gap-3 items-start">
                     <div className="p-1 rounded bg-zinc-900 border border-zinc-800 text-emerald-400 mt-0.5 shrink-0">
                       <CheckCircle className="size-3.5" />
