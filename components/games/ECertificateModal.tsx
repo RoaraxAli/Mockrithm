@@ -3,7 +3,6 @@
 import React, { useRef, useState } from "react";
 import { Award, CheckCircle2, Download, Printer, Share2, X, Sparkles, UserCheck, Loader2 } from "lucide-react";
 import { toast } from "sonner";
-import html2canvas from "html2canvas";
 
 export interface ECertificateModalProps {
   isOpen: boolean;
@@ -62,13 +61,25 @@ export const ECertificateModal: React.FC<ECertificateModalProps> = ({
 
     try {
       setIsDownloading(true);
-      toast.loading("Rendering high-res certificate download...", { id: "cert-dl" });
+      toast.loading("Rendering high-res certificate image...", { id: "cert-dl" });
 
-      const canvas = await html2canvas(certRef.current, {
-        scale: 3, // High resolution crisp image render
+      const html2canvas = (await import("html2canvas")).default;
+      const element = certRef.current;
+
+      const canvas = await html2canvas(element, {
+        scale: 2,
         backgroundColor: "#09090b",
         useCORS: true,
+        allowTaint: true,
         logging: false,
+        onclone: (clonedDoc) => {
+          const el = clonedDoc.getElementById("printable-certificate");
+          if (el) {
+            el.style.transform = "none";
+            el.style.margin = "0";
+            el.style.borderRadius = "0";
+          }
+        },
       });
 
       const image = canvas.toDataURL("image/png");
@@ -83,7 +94,8 @@ export const ECertificateModal: React.FC<ECertificateModalProps> = ({
       toast.success("Certificate downloaded successfully!", { id: "cert-dl" });
     } catch (e: any) {
       console.error("Certificate image export failed:", e);
-      toast.error("Download failed. Use Print / Save PDF instead.", { id: "cert-dl" });
+      toast.error("Image generation fallback: Opening Print / Save PDF", { id: "cert-dl" });
+      window.print();
     } finally {
       setIsDownloading(false);
     }
@@ -200,7 +212,7 @@ export const ECertificateModal: React.FC<ECertificateModalProps> = ({
           </div>
         </div>
 
-        {/* Certificate Printable Body (100% Exact Layout Fidelity) */}
+        {/* Certificate Printable Body */}
         <div
           id="printable-certificate"
           ref={certRef}

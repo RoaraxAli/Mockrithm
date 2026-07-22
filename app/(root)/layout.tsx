@@ -1,6 +1,8 @@
 import { ReactNode } from "react";
 import { headers } from "next/headers";
 
+import { WeeklyGamesModal } from "@/components/shared/WeeklyGamesModal";
+
 const Layout = async ({ children }: { children: ReactNode }) => {
   const headerList = await headers();
   const host = headerList.get("host") || "";
@@ -12,6 +14,7 @@ const Layout = async ({ children }: { children: ReactNode }) => {
   return (
     <>
       {children}
+      <WeeklyGamesModal />
     </>
   );
 };
