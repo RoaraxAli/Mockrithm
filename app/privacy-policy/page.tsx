@@ -60,7 +60,7 @@ export default function PrivacyPolicyPage() {
               <li>Deliver real-time voice-driven AI evaluations and feedback reports.</li>
               <li>Provide customer support, reply to your inquiries, and resolve service issues.</li>
               <li>Analyze platform traffic to optimize site performance and fix system bugs.</li>
-              <li>Process transactions securely through our payment integration partners (Safepay).</li>
+              <li>Process transactions securely through our payment integration partners (Paddle).</li>
             </ul>
           </section>
 
@@ -71,7 +71,7 @@ export default function PrivacyPolicyPage() {
             </p>
             <ul className="list-disc pl-5 space-y-2 text-zinc-400">
               <li>
-                <strong className="text-white">Third-Party Service Providers:</strong> We share necessary data with trusted vendors that perform services for us, such as Clerk (Authentication), Vapi/OpenAI/ElevenLabs (AI Voice Engine & Processing), and Safepay (Payment Processing).
+                <strong className="text-white">Third-Party Service Providers:</strong> We share necessary data with trusted vendors that perform services for us, such as Clerk (Authentication), Vapi/OpenAI/ElevenLabs (AI Voice Engine & Processing), and Paddle (Payment Processing).
               </li>
               <li>
                 <strong className="text-white">Legal Obligations:</strong> We may disclose your information where we are legally required to do so to comply with applicable laws, governmental requests, or judicial proceedings.
@@ -89,7 +89,7 @@ export default function PrivacyPolicyPage() {
           <section className="space-y-3">
             <h2 className="text-lg font-black text-white uppercase tracking-wider">6. Your Rights</h2>
             <p>
-              Depending on your location, you have rights regarding access to, correction of, or deletion of your personal data. You can update your profile details at any time inside your dashboard. To make a data request or delete your records, please contact our support team at <a href="mailto:mockrithm@gmail.com" className="text-white underline font-bold">mockrithm@gmail.com</a>.
+              Depending on your location, you have rights regarding access to, correction of, or deletion of your personal data. You can update your profile details at any time inside your dashboard. To make a data request or delete your records, please contact our support team at <a href="mailto:support@mockrithm.me" className="text-white underline font-bold">support@mockrithm.me</a>.
             </p>
           </section>
 
@@ -99,9 +99,8 @@ export default function PrivacyPolicyPage() {
               If you have any questions or concerns about this Privacy Policy, please reach out to us:
             </p>
             <div className="bg-zinc-950/40 border border-zinc-900 rounded-xl p-6 mt-4 space-y-2 text-zinc-400">
-              <p><strong className="text-white">Email:</strong> mockrithm@gmail.com</p>
-              <p><strong className="text-white">Phone:</strong> +03001477141714</p>
-              <p><strong className="text-white">Address:</strong> Office 402, 4th Floor, Safa Gold Mall, F-7 Markaz, Islamabad, Pakistan</p>
+              <p><strong className="text-white">Email:</strong> support@mockrithm.me</p>
+              <p><strong className="text-white">Location:</strong> Islamabad, Pakistan</p>
             </div>
           </section>
         </div>

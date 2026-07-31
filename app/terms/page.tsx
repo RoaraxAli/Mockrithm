@@ -39,9 +39,8 @@ export default function TermsAndConditionsPage() {
             </p>
             <div className="bg-zinc-950/40 border border-zinc-900 rounded-xl p-6 space-y-2 text-zinc-400">
               <p><strong className="text-white">Legal Business Name:</strong> Mockrithm Inc.</p>
-              <p><strong className="text-white">Registered Address:</strong> Office 402, 4th Floor, Safa Gold Mall, F-7 Markaz, Islamabad, Pakistan</p>
-              <p><strong className="text-white">Contact Email:</strong> mockrithm@gmail.com</p>
-              <p><strong className="text-white">Contact Phone:</strong> +03001477141714</p>
+              <p><strong className="text-white">Registered Location:</strong> Islamabad, Pakistan</p>
+              <p><strong className="text-white">Contact Email:</strong> support@mockrithm.me</p>
             </div>
           </section>
 
@@ -62,7 +61,7 @@ export default function TermsAndConditionsPage() {
           <section className="space-y-3">
             <h2 className="text-lg font-black text-white uppercase tracking-wider">5. Fees and Payments</h2>
             <p>
-              We accept payments for subscription credits and premium tiers through our integrated checkout gateway (Safepay). You agree to provide current, complete, and accurate purchase and account information for all transactions. You further agree to promptly update account and payment information (including email and card details) so that we can complete your transactions and contact you as needed.
+              We accept payments for subscription credits and premium tiers through our integrated checkout gateway (Paddle). You agree to provide current, complete, and accurate purchase and account information for all transactions. You further agree to promptly update account and payment information (including email and card details) so that we can complete your transactions and contact you as needed.
             </p>
             <p>
               Sales tax will be added to the price of purchases as deemed required by local regulatory authorities. All prices and plans are subject to change.
@@ -97,9 +96,8 @@ export default function TermsAndConditionsPage() {
             </p>
             <p className="text-zinc-400">
               Mockrithm Inc.<br/>
-              Office 402, 4th Floor, Safa Gold Mall, F-7 Markaz, Islamabad, Pakistan<br/>
-              Phone: +03001477141714<br/>
-              Email: mockrithm@gmail.com
+              Islamabad, Pakistan<br/>
+              Email: support@mockrithm.me
             </p>
           </section>
         </div>

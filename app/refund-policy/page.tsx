@@ -69,7 +69,7 @@ export default function RefundPolicyPage() {
           <section className="space-y-3">
             <h2 className="text-lg font-black text-white uppercase tracking-wider">5. How to Request a Refund</h2>
             <p>
-              To claim a refund or dispute a charge, please email our support team at <a href="mailto:mockrithm@gmail.com" className="text-white underline font-bold">mockrithm@gmail.com</a>.
+              To claim a refund or dispute a charge, please email our support team at <a href="mailto:support@mockrithm.me" className="text-white underline font-bold">support@mockrithm.me</a>.
             </p>
             <p>
               Your email must include:
@@ -92,9 +92,8 @@ export default function RefundPolicyPage() {
             </p>
             <p className="text-zinc-400">
               Mockrithm Inc.<br/>
-              Office 402, 4th Floor, Safa Gold Mall, F-7 Markaz, Islamabad, Pakistan<br/>
-              Phone: +03001477141714<br/>
-              Email: mockrithm@gmail.com
+              Islamabad, Pakistan<br/>
+              Email: support@mockrithm.me
             </p>
           </section>
         </div>

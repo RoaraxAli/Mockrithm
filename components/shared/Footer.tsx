@@ -110,9 +110,6 @@ const Footer: React.FC<FooterProps> = ({ className = "", isSignedIn = false }) =
                   <Link href="/refund-policy" className="text-[10.5px] text-zinc-400 hover:text-white font-medium transition-colors">
                     Refund Policy
                   </Link>
-                  <Link href="/ownership-statement" className="text-[10.5px] text-zinc-400 hover:text-white font-medium transition-colors">
-                    Ownership Statement
-                  </Link>
                 </div>
               </div>
             </>
@@ -174,9 +171,6 @@ const Footer: React.FC<FooterProps> = ({ className = "", isSignedIn = false }) =
                   </Link>
                   <Link href="/refund-policy" className="text-[10.5px] text-zinc-400 hover:text-white font-medium transition-colors">
                     Refund Policy
-                  </Link>
-                  <Link href="/ownership-statement" className="text-[10.5px] text-zinc-400 hover:text-white font-medium transition-colors">
-                    Ownership Statement
                   </Link>
                 </div>
               </div>
