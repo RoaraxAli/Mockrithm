@@ -139,7 +139,7 @@ export default function OnboardingWizardClient({ userId, userName, userTier = "f
 
       const data = await res.json();
       if (data.transactionId) {
-        const opened = openPaddleCheckout(data.transactionId);
+        const opened = await openPaddleCheckout(data.transactionId);
         if (!opened && data.checkoutUrl) {
           window.location.href = data.checkoutUrl;
         } else {

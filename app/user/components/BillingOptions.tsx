@@ -67,7 +67,7 @@ export function BillingOptions({ user, onRefresh }: BillingOptionsProps) {
       const data = await res.json();
       if (data.transactionId) {
         toast.success("Opening Paddle checkout modal...");
-        const opened = openPaddleCheckout(data.transactionId);
+        const opened = await openPaddleCheckout(data.transactionId);
         if (!opened && data.checkoutUrl) {
           window.location.href = data.checkoutUrl;
         } else {

@@ -63,7 +63,7 @@ export default function PlanSelectionModal({
       const data = await res.json();
       if (data.transactionId) {
         toast.success("Opening Paddle secure checkout...");
-        const opened = openPaddleCheckout(data.transactionId);
+        const opened = await openPaddleCheckout(data.transactionId);
         if (!opened && data.checkoutUrl) {
           window.location.href = data.checkoutUrl;
         } else {
