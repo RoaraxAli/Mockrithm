@@ -20,6 +20,7 @@ import {
   Key,
   Shield,
   ChevronsUpDown,
+  DollarSign,
 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -34,6 +35,7 @@ import { cn } from "@/lib/utils";
 const navigation = [
   { name: "Dashboard", href: "/admin", icon: LayoutDashboard },
   { name: "Users", href: "/admin/users", icon: Users },
+  { name: "Revenue", href: "/admin/revenue", icon: DollarSign },
   { name: "Interviews", href: "/admin/interviews", icon: ListChecks }, // single link
   {
     name: "Interview Feedback",

@@ -353,7 +353,22 @@ export default function UsersPage() {
                             className="border-white/20 data-[state=checked]:bg-indigo-500 data-[state=checked]:border-indigo-500"
                           />
                         </TableCell>
-                        <TableCell className="font-medium text-zinc-100">{user.name}</TableCell>
+                        <TableCell className="font-medium text-zinc-100 flex items-center gap-2">
+                          <span className="truncate">{user.name}</span>
+                          {user.tier === "Pro" ? (
+                            <Badge className="bg-gradient-to-r from-amber-500/20 to-purple-500/20 text-amber-300 border-amber-500/30 text-[10px] px-2 py-0.5 font-bold uppercase tracking-wider shadow-sm flex-shrink-0">
+                              PRO
+                            </Badge>
+                          ) : user.tier === "Premium" ? (
+                            <Badge className="bg-gradient-to-r from-emerald-500/20 to-teal-500/20 text-emerald-300 border-emerald-500/30 text-[10px] px-2 py-0.5 font-bold uppercase tracking-wider shadow-sm flex-shrink-0">
+                              PREMIUM
+                            </Badge>
+                          ) : (
+                            <Badge variant="outline" className="bg-zinc-900/50 text-zinc-400 border-zinc-800 text-[10px] px-1.5 py-0 flex-shrink-0">
+                              FREE
+                            </Badge>
+                          )}
+                        </TableCell>
                         <TableCell className="text-zinc-400">{user.email}</TableCell>
                         <TableCell>
                           <Badge

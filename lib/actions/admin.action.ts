@@ -37,16 +37,30 @@ export async function getAdminUsers() {
     }
 
     const querySnapshot = await db.collection("users").orderBy("createdAt", "desc").get();
-    const users = querySnapshot.docs.map((doc: any) => ({
-      id: doc.id,
-      name: doc.data().name || "",
-      email: doc.data().email || "",
-      role: doc.data().role || "User",
-      status: doc.data().status || "Active",
-      createdAt: doc.data().createdAt?.toDate
-        ? doc.data().createdAt.toDate().toISOString()
-        : doc.data().createdAt ?? null,
-    }));
+    const users = querySnapshot.docs.map((doc: any) => {
+      const data = doc.data();
+      const rawTier = (data.tier || data.plan || "Free").toString();
+      const normalizedTier =
+        rawTier.toLowerCase() === "pro"
+          ? "Pro"
+          : rawTier.toLowerCase() === "premium"
+          ? "Premium"
+          : "Free";
+
+      return {
+        id: doc.id,
+        name: data.name || "",
+        email: data.email || "",
+        role: data.role || "User",
+        status: data.status || "Active",
+        tier: normalizedTier,
+        billingInterval: data.billingInterval || "N/A",
+        subscriptionUpdatedAt: serializeDate(data.premiumUpdatedAt || data.subscriptionUpdatedAt || data.updatedAt),
+        createdAt: data.createdAt?.toDate
+          ? data.createdAt.toDate().toISOString()
+          : data.createdAt ?? null,
+      };
+    });
     return { success: true, data: users };
   } catch (error: any) {
     console.error("Failed to fetch users:", error);
@@ -72,16 +86,30 @@ export async function getAdminUsersPaginated(pageSize: number = 20, startAfterId
     }
 
     const snapshot = await query.get();
-    const users = snapshot.docs.map((doc: any) => ({
-      id: doc.id,
-      name: doc.data().name || "",
-      email: doc.data().email || "",
-      role: doc.data().role || "User",
-      status: doc.data().status || "Active",
-      createdAt: doc.data().createdAt?.toDate
-        ? doc.data().createdAt.toDate().toISOString()
-        : doc.data().createdAt ?? null,
-    }));
+    const users = snapshot.docs.map((doc: any) => {
+      const data = doc.data();
+      const rawTier = (data.tier || data.plan || "Free").toString();
+      const normalizedTier =
+        rawTier.toLowerCase() === "pro"
+          ? "Pro"
+          : rawTier.toLowerCase() === "premium"
+          ? "Premium"
+          : "Free";
+
+      return {
+        id: doc.id,
+        name: data.name || "",
+        email: data.email || "",
+        role: data.role || "User",
+        status: data.status || "Active",
+        tier: normalizedTier,
+        billingInterval: data.billingInterval || "N/A",
+        subscriptionUpdatedAt: serializeDate(data.premiumUpdatedAt || data.subscriptionUpdatedAt || data.updatedAt),
+        createdAt: data.createdAt?.toDate
+          ? data.createdAt.toDate().toISOString()
+          : data.createdAt ?? null,
+      };
+    });
 
     const lastDoc = snapshot.docs[snapshot.docs.length - 1];
     return {
@@ -92,6 +120,123 @@ export async function getAdminUsersPaginated(pageSize: number = 20, startAfterId
     };
   } catch (error: any) {
     console.error("Failed to fetch paginated users:", error);
+    return { success: false, error: error.message };
+  }
+}
+
+export async function getAdminRevenueData() {
+  try {
+    const user = await getCurrentUser();
+    if (!user || user.role?.toLowerCase() !== "admin") {
+      return { success: false, error: "Forbidden" };
+    }
+
+    const snapshot = await db.collection("users").get();
+
+    let totalRevenue = 0;
+    let mrr = 0;
+    let proCount = 0;
+    let premiumCount = 0;
+    let freeCount = 0;
+    let proRevenue = 0;
+    let premiumRevenue = 0;
+
+    const subscribers: any[] = [];
+
+    snapshot.docs.forEach((doc: any) => {
+      const data = doc.data();
+      const rawTier = (data.tier || data.plan || "Free").toString().toLowerCase();
+      const billingInterval = (data.billingInterval || "monthly").toString().toLowerCase();
+
+      const name = data.name || "Anonymous User";
+      const email = data.email || "N/A";
+      const subscriptionUpdatedAt = serializeDate(
+        data.premiumUpdatedAt || data.subscriptionUpdatedAt || data.updatedAt || data.createdAt
+      );
+
+      let itemRevenue = 0;
+      let monthlyVal = 0;
+      let displayTier = "Free";
+
+      if (rawTier === "pro") {
+        displayTier = "Pro";
+        proCount++;
+        if (billingInterval === "annual") {
+          itemRevenue = 288;
+          monthlyVal = 24;
+        } else {
+          itemRevenue = 30;
+          monthlyVal = 30;
+        }
+        proRevenue += itemRevenue;
+        mrr += monthlyVal;
+        totalRevenue += itemRevenue;
+
+        subscribers.push({
+          id: doc.id,
+          name,
+          email,
+          tier: displayTier,
+          billingInterval: billingInterval === "annual" ? "Annual" : "Monthly",
+          amount: itemRevenue,
+          subscriptionUpdatedAt: subscriptionUpdatedAt || new Date().toISOString(),
+        });
+      } else if (rawTier === "premium") {
+        displayTier = "Premium";
+        premiumCount++;
+        if (billingInterval === "annual") {
+          itemRevenue = 144;
+          monthlyVal = 12;
+        } else {
+          itemRevenue = 15;
+          monthlyVal = 15;
+        }
+        premiumRevenue += itemRevenue;
+        mrr += monthlyVal;
+        totalRevenue += itemRevenue;
+
+        subscribers.push({
+          id: doc.id,
+          name,
+          email,
+          tier: displayTier,
+          billingInterval: billingInterval === "annual" ? "Annual" : "Monthly",
+          amount: itemRevenue,
+          subscriptionUpdatedAt: subscriptionUpdatedAt || new Date().toISOString(),
+        });
+      } else {
+        freeCount++;
+      }
+    });
+
+    subscribers.sort((a, b) => {
+      const tA = new Date(a.subscriptionUpdatedAt).getTime();
+      const tB = new Date(b.subscriptionUpdatedAt).getTime();
+      return tB - tA;
+    });
+
+    const totalPaidUsers = proCount + premiumCount;
+    const totalUsers = snapshot.docs.length;
+    const arpu = totalPaidUsers > 0 ? (totalRevenue / totalPaidUsers).toFixed(2) : "0.00";
+
+    return {
+      success: true,
+      data: {
+        totalRevenue,
+        mrr,
+        totalPaidUsers,
+        totalUsers,
+        arpu,
+        proCount,
+        premiumCount,
+        freeCount,
+        proRevenue,
+        premiumRevenue,
+        subscribers,
+      },
+    };
+  } catch (error: any) {
+    console.error("Error fetching admin revenue data:", error);
     return { success: false, error: error.message };
   }
 }
