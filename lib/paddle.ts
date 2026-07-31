@@ -17,7 +17,6 @@ export async function openPaddleCheckout(transactionId: string): Promise<boolean
           }
           existingScript.addEventListener("load", () => resolve());
           existingScript.addEventListener("error", (e) => reject(e));
-          // Safety timeout in case load event already fired
           setTimeout(() => resolve(), 1000);
           return;
         }
@@ -41,6 +40,8 @@ export async function openPaddleCheckout(transactionId: string): Promise<boolean
     try {
       const paddleEnv = (process.env.NEXT_PUBLIC_PADDLE_ENV || "sandbox").toLowerCase();
       const clientToken = process.env.NEXT_PUBLIC_PADDLE_CLIENT_TOKEN || "test_c427f9f3ec0624dfd1794a8446d";
+      const origin = window.location.origin;
+      const targetSuccessUrl = `${origin}/payment/success?_ptxn=${encodeURIComponent(transactionId)}`;
 
       if (Paddle.Environment && typeof Paddle.Environment.set === "function") {
         Paddle.Environment.set(paddleEnv);
@@ -49,6 +50,15 @@ export async function openPaddleCheckout(transactionId: string): Promise<boolean
       if (Paddle.Initialize && typeof Paddle.Initialize === "function") {
         Paddle.Initialize({
           token: clientToken,
+          eventCallback: (event: any) => {
+            console.log("Paddle Event Received:", event?.name, event);
+            if (event?.name === "checkout.completed") {
+              const completedTxnId = event?.data?.id || transactionId;
+              const redirectUrl = `${origin}/payment/success?_ptxn=${encodeURIComponent(completedTxnId)}`;
+              console.log("Checkout Completed! Redirecting to:", redirectUrl);
+              window.location.href = redirectUrl;
+            }
+          },
         });
       }
 
@@ -59,6 +69,7 @@ export async function openPaddleCheckout(transactionId: string): Promise<boolean
           settings: {
             displayMode: "overlay",
             theme: "dark",
+            successUrl: targetSuccessUrl,
           },
         });
         return true;
