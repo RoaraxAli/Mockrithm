@@ -14,6 +14,7 @@ import { Button } from "@/components/ui/button";
 import { saveOnboardingData } from "@/lib/actions/onboarding.action";
 import { getResumeById } from "@/lib/actions/resume.action";
 import { updateUserTier } from "@/lib/actions/auth.action";
+import { openPaddleCheckout } from "@/lib/paddle";
 import PDFRenderer from "@/components/resume/PDFRenderer";
 
 // Interactive Legible Resume Preview Component
@@ -137,7 +138,14 @@ export default function OnboardingWizardClient({ userId, userName, userTier = "f
       });
 
       const data = await res.json();
-      if (data.checkoutUrl) {
+      if (data.transactionId) {
+        const opened = openPaddleCheckout(data.transactionId);
+        if (!opened && data.checkoutUrl) {
+          window.location.href = data.checkoutUrl;
+        } else {
+          setIsProcessing(false);
+        }
+      } else if (data.checkoutUrl) {
         window.location.href = data.checkoutUrl;
       } else {
         setError(data.error || "Failed to initialize checkout.");

@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Check, Crown, ArrowRight, Sparkles, Loader2 } from "lucide-react";
 import { updateUserTier } from "@/lib/actions/auth.action";
 import { toast } from "sonner";
+import { openPaddleCheckout } from "@/lib/paddle";
 
 interface PlanSelectionModalProps {
   userId: string;
@@ -60,7 +61,15 @@ export default function PlanSelectionModal({
       });
 
       const data = await res.json();
-      if (data.checkoutUrl) {
+      if (data.transactionId) {
+        toast.success("Opening Paddle secure checkout...");
+        const opened = openPaddleCheckout(data.transactionId);
+        if (!opened && data.checkoutUrl) {
+          window.location.href = data.checkoutUrl;
+        } else {
+          setLoading(false);
+        }
+      } else if (data.checkoutUrl) {
         toast.success("Redirecting to Paddle secure checkout...");
         window.location.href = data.checkoutUrl;
       } else {

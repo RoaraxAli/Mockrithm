@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { Check, Crown, ArrowRight, Sparkles, Loader2, Zap } from "lucide-react";
 import { toast } from "sonner";
 import { useUser } from "@clerk/nextjs";
+import { openPaddleCheckout } from "@/lib/paddle";
 import type { User } from "../types";
 
 interface BillingOptionsProps {
@@ -64,7 +65,15 @@ export function BillingOptions({ user, onRefresh }: BillingOptionsProps) {
       });
 
       const data = await res.json();
-      if (data.checkoutUrl) {
+      if (data.transactionId) {
+        toast.success("Opening Paddle checkout modal...");
+        const opened = openPaddleCheckout(data.transactionId);
+        if (!opened && data.checkoutUrl) {
+          window.location.href = data.checkoutUrl;
+        } else {
+          setLoadingPlan(null);
+        }
+      } else if (data.checkoutUrl) {
         toast.success("Redirecting to Paddle secure checkout...");
         window.location.href = data.checkoutUrl;
       } else {

@@ -231,15 +231,16 @@ export async function POST(request: Request) {
         const txnData = await txnRes.json();
         console.log("Paddle Transaction Response:", txnData.data?.id, "Checkout URL:", txnData.data?.checkout?.url);
 
-        // A) If Paddle API returned a direct checkout URL in checkout.url
-        if (txnRes.ok && txnData.data?.checkout?.url) {
-          return NextResponse.json({ success: true, checkoutUrl: txnData.data.checkout.url, provider: "paddle" });
-        }
-
-        // B) If transaction ID (txn_...) was generated successfully, use official Paddle v2 transaction checkout URL
+        // If transaction ID (txn_...) was generated successfully, return transactionId for overlay & checkoutUrl as fallback
         if (txnRes.ok && txnData.data?.id) {
-          const hostedCheckoutUrl = `${paddleBuyDomain}/checkout/build?_ptxn=${txnData.data.id}`;
-          return NextResponse.json({ success: true, checkoutUrl: hostedCheckoutUrl, provider: "paddle" });
+          const transactionId = txnData.data.id;
+          const checkoutUrl = txnData.data?.checkout?.url || `${paddleBuyDomain}/checkout/build?_ptxn=${transactionId}`;
+          return NextResponse.json({
+            success: true,
+            transactionId,
+            checkoutUrl,
+            provider: "paddle"
+          });
         }
 
         if (!txnRes.ok) {
