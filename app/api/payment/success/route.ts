@@ -5,15 +5,32 @@ import Stripe from "stripe";
 export async function GET(request: Request) {
   try {
     const { searchParams } = new URL(request.url);
-    const sessionId = searchParams.get("session_id") || searchParams.get("transaction_id") || searchParams.get("checkout_id");
-    const provider = searchParams.get("provider");
-    const plan = searchParams.get("plan") || "premium";
-    const billingInterval = searchParams.get("billingInterval") || "monthly";
+    const sessionId =
+      searchParams.get("_ptxn") ||
+      searchParams.get("session_id") ||
+      searchParams.get("transaction_id") ||
+      searchParams.get("checkout_id") ||
+      searchParams.get("txn") ||
+      searchParams.get("pdl_txn");
+
+    let provider = searchParams.get("provider");
+    let plan = searchParams.get("plan") || "pro";
+    let billingInterval = searchParams.get("billingInterval") || "monthly";
 
     const origin = new URL(request.url).origin;
+    const acceptHeader = request.headers.get("accept") || "";
+    const isJsonRequest = acceptHeader.includes("application/json");
 
     if (!sessionId) {
-      return NextResponse.json({ error: "Missing session_id parameter" }, { status: 400 });
+      if (isJsonRequest) {
+        return NextResponse.json({ success: false, error: "Missing session_id or _ptxn parameter" }, { status: 400 });
+      }
+      return NextResponse.redirect(`${origin}/payment/success?status=failure&error=missing_transaction_id`, 303);
+    }
+
+    // Auto-detect provider if sessionId starts with txn_ (Paddle Billing v2)
+    if (sessionId.startsWith("txn_")) {
+      provider = "paddle";
     }
 
     // -------------------------------------------------------------
@@ -23,18 +40,21 @@ export async function GET(request: Request) {
       const secretKey = process.env.STRIPE_SECRET_KEY;
       if (!secretKey) {
         console.error("STRIPE_SECRET_KEY is not configured.");
-        return NextResponse.json({ error: "Stripe Secret Key not configured" }, { status: 500 });
+        if (isJsonRequest) return NextResponse.json({ error: "Stripe Secret Key not configured" }, { status: 500 });
+        return NextResponse.redirect(`${origin}/payment/success?status=failure&error=stripe_key_missing`, 303);
       }
 
       const stripe = new Stripe(secretKey);
       const session = await stripe.checkout.sessions.retrieve(sessionId);
 
       if (session.payment_status !== "paid" || session.status !== "complete") {
+        if (isJsonRequest) return NextResponse.json({ success: false, error: "Payment not completed" }, { status: 400 });
         return NextResponse.redirect(`${origin}/payment/success?status=failure&error=payment_not_completed`, 303);
       }
 
       const userId = session.metadata?.userId;
       if (!userId) {
+        if (isJsonRequest) return NextResponse.json({ success: false, error: "Missing user metadata" }, { status: 400 });
         return NextResponse.redirect(`${origin}/payment/success?status=failure&error=missing_user_metadata`, 303);
       }
 
@@ -46,6 +66,7 @@ export async function GET(request: Request) {
           tier: stripePlan,
           billingInterval: stripeInterval,
           premiumUpdatedAt: new Date(),
+          subscriptionUpdatedAt: new Date(),
           stripeSessionId: session.id,
           stripePaymentIntentId: (session.payment_intent as string) || "N/A",
           paymentProvider: "stripe",
@@ -55,6 +76,10 @@ export async function GET(request: Request) {
 
       const amount = (session.amount_total ? session.amount_total / 100 : 15.00).toFixed(2);
       const currency = (session.currency || "USD").toUpperCase();
+
+      if (isJsonRequest) {
+        return NextResponse.json({ success: true, sessionId, plan: stripePlan, amount, currency, provider: "stripe" });
+      }
 
       return NextResponse.redirect(
         `${origin}/payment/success?status=success&session_id=${sessionId}&amount=${amount}&currency=${currency}&plan=${stripePlan}&provider=stripe`,
@@ -70,8 +95,9 @@ export async function GET(request: Request) {
     const apiBase = paddleEnv === "sandbox" ? "https://sandbox-api.paddle.com" : "https://api.paddle.com";
 
     let userId = "";
+    let calculatedAmount = plan === "pro" ? (billingInterval === "annual" ? "288.00" : "30.00") : (billingInterval === "annual" ? "144.00" : "15.00");
 
-    if (apiKey && apiKey.startsWith("pdl_") && !sessionId.startsWith("PAD-")) {
+    if (apiKey && apiKey.startsWith("pdl_")) {
       try {
         const res = await fetch(`${apiBase}/transactions/${sessionId}`, {
           headers: {
@@ -81,7 +107,22 @@ export async function GET(request: Request) {
         });
         if (res.ok) {
           const data = await res.json();
-          userId = data.data?.custom_data?.userId || "";
+          const txn = data.data || {};
+          userId = txn.custom_data?.userId || "";
+          if (txn.custom_data?.plan) {
+            plan = txn.custom_data.plan;
+          }
+          if (txn.custom_data?.billingInterval) {
+            billingInterval = txn.custom_data.billingInterval;
+          }
+          if (txn.details?.totals?.grand_total) {
+            const rawTotal = txn.details.totals.grand_total;
+            calculatedAmount = typeof rawTotal === "number" ? (rawTotal / 100).toFixed(2) : parseFloat(rawTotal).toFixed(2);
+          } else {
+            calculatedAmount = plan.toLowerCase() === "pro" ? (billingInterval === "annual" ? "288.00" : "30.00") : (billingInterval === "annual" ? "144.00" : "15.00");
+          }
+        } else {
+          console.warn("Paddle Transaction lookup returned non-200:", res.status);
         }
       } catch (e) {
         console.error("Warning: could not verify Paddle transaction via API:", e);
@@ -94,6 +135,7 @@ export async function GET(request: Request) {
           tier: plan,
           billingInterval: billingInterval,
           premiumUpdatedAt: new Date(),
+          subscriptionUpdatedAt: new Date(),
           paddleTransactionId: sessionId,
           paymentProvider: "paddle",
         },
@@ -101,10 +143,19 @@ export async function GET(request: Request) {
       );
     }
 
-    const amount = (plan === "pro" ? (billingInterval === "annual" ? "288.00" : "30.00") : (billingInterval === "annual" ? "144.00" : "15.00"));
+    if (isJsonRequest) {
+      return NextResponse.json({
+        success: true,
+        sessionId,
+        plan,
+        amount: calculatedAmount,
+        currency: "USD",
+        provider: "paddle",
+      });
+    }
 
     return NextResponse.redirect(
-      `${origin}/payment/success?status=success&session_id=${encodeURIComponent(sessionId)}&amount=${amount}&currency=USD&plan=${plan}&provider=paddle`,
+      `${origin}/payment/success?status=success&session_id=${encodeURIComponent(sessionId)}&amount=${calculatedAmount}&currency=USD&plan=${encodeURIComponent(plan)}&provider=paddle`,
       303
     );
   } catch (error: any) {

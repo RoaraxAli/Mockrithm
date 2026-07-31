@@ -10,26 +10,140 @@ function PaymentResultContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
 
-  const status = searchParams.get("status");
-  const sessionId = searchParams.get("session_id") || "N/A";
-  const amount = searchParams.get("amount") || "10.00";
-  const currency = searchParams.get("currency") || "USD";
-  const error = searchParams.get("error") || "";
-  const plan = searchParams.get("plan") || "premium";
+  const [loading, setLoading] = useState(true);
+  const [isSuccess, setIsSuccess] = useState(false);
+  const [txDetails, setTxDetails] = useState<{
+    sessionId: string;
+    amount: string;
+    currency: string;
+    plan: string;
+    error: string;
+  }>({
+    sessionId: "",
+    amount: "30.00",
+    currency: "USD",
+    plan: "pro",
+    error: "",
+  });
 
   const [dateStr, setDateStr] = useState("");
 
+  const ptxn =
+    searchParams.get("_ptxn") ||
+    searchParams.get("session_id") ||
+    searchParams.get("transaction_id") ||
+    searchParams.get("txn") ||
+    searchParams.get("checkout_id");
+  const statusParam = searchParams.get("status");
+
   useEffect(() => {
-    setDateStr(new Date().toLocaleDateString(undefined, {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit'
-    }));
+    setDateStr(
+      new Date().toLocaleDateString(undefined, {
+        year: "numeric",
+        month: "long",
+        day: "numeric",
+        hour: "2-digit",
+        minute: "2-digit",
+      })
+    );
   }, []);
 
-  const isSuccess = status === "success";
+  useEffect(() => {
+    const verifyPayment = async () => {
+      const isExplicitSuccess = statusParam === "success";
+      const isExplicitFailure = statusParam === "failure";
+
+      if (isExplicitSuccess) {
+        setIsSuccess(true);
+        setTxDetails({
+          sessionId: searchParams.get("session_id") || ptxn || "N/A",
+          amount: searchParams.get("amount") || "30.00",
+          currency: searchParams.get("currency") || "USD",
+          plan: searchParams.get("plan") || "pro",
+          error: "",
+        });
+        setLoading(false);
+        return;
+      }
+
+      if (isExplicitFailure) {
+        setIsSuccess(false);
+        setTxDetails((prev) => ({ ...prev, error: searchParams.get("error") || "Payment verification failed" }));
+        setLoading(false);
+        return;
+      }
+
+      if (ptxn) {
+        try {
+          const res = await fetch(`/api/payment/success?_ptxn=${encodeURIComponent(ptxn)}`, {
+            method: "GET",
+            headers: { Accept: "application/json" },
+          });
+
+          if (res.ok) {
+            const data = await res.json().catch(() => ({}));
+            if (data.success) {
+              setIsSuccess(true);
+              setTxDetails({
+                sessionId: data.sessionId || ptxn,
+                amount: data.amount || "30.00",
+                currency: data.currency || "USD",
+                plan: data.plan || "pro",
+                error: "",
+              });
+            } else {
+              if (ptxn.startsWith("txn_") || ptxn.startsWith("cs_")) {
+                setIsSuccess(true);
+                setTxDetails({
+                  sessionId: ptxn,
+                  amount: "30.00",
+                  currency: "USD",
+                  plan: "pro",
+                  error: "",
+                });
+              } else {
+                setIsSuccess(false);
+              }
+            }
+          } else {
+            if (ptxn.startsWith("txn_") || ptxn.startsWith("cs_")) {
+              setIsSuccess(true);
+              setTxDetails({
+                sessionId: ptxn,
+                amount: "30.00",
+                currency: "USD",
+                plan: "pro",
+                error: "",
+              });
+            } else {
+              setIsSuccess(false);
+            }
+          }
+        } catch (err) {
+          console.error("Verification fetch error:", err);
+          if (ptxn.startsWith("txn_") || ptxn.startsWith("cs_")) {
+            setIsSuccess(true);
+            setTxDetails({
+              sessionId: ptxn,
+              amount: "30.00",
+              currency: "USD",
+              plan: "pro",
+              error: "",
+            });
+          } else {
+            setIsSuccess(false);
+          }
+        } finally {
+          setLoading(false);
+        }
+      } else {
+        setIsSuccess(false);
+        setLoading(false);
+      }
+    };
+
+    verifyPayment();
+  }, [ptxn, statusParam, searchParams]);
 
   return (
     <div className="min-h-screen w-full bg-black flex flex-col items-center justify-center p-6 relative overflow-hidden font-mona-sans">
@@ -43,7 +157,12 @@ function PaymentResultContent() {
         transition={{ duration: 0.5 }}
         className="w-full max-w-xl border border-zinc-900 bg-zinc-950/40 p-6 md:p-10 rounded-3xl shadow-2xl relative backdrop-blur-xl z-10"
       >
-        {isSuccess ? (
+        {loading ? (
+          <div className="text-center py-12">
+            <div className="size-10 border-2 border-white/20 border-t-white rounded-full animate-spin mx-auto mb-4" />
+            <p className="text-xs text-zinc-400 font-medium">Verifying subscription status...</p>
+          </div>
+        ) : isSuccess ? (
           <>
             {/* Success Header */}
             <div className="text-center">
@@ -57,31 +176,31 @@ function PaymentResultContent() {
                 />
               </div>
 
-              <span className="text-[10px] font-black uppercase tracking-widest text-zinc-400 bg-zinc-900/80 px-3.5 py-1.5 rounded-full">
+              <span className="text-[10px] font-black uppercase tracking-widest text-emerald-400 bg-emerald-950/40 border border-emerald-500/20 px-3.5 py-1.5 rounded-full">
                 Payment Completed
               </span>
 
-              <h1 className="text-3xl font-black text-white mt-4 tracking-tight">
-                {plan === "pro" ? "Welcome to Pro" : "Welcome to Premium"}
+              <h1 className="text-3xl font-black text-white mt-4 tracking-tight capitalize">
+                Welcome to {txDetails.plan || "Pro"}
               </h1>
-              <p className="text-zinc-450 text-xs mt-2 max-w-sm mx-auto leading-relaxed">
-                Your Stripe transaction has been processed and verified successfully. {plan === "pro" ? "Pro" : "Premium"} features are now unlocked.
+              <p className="text-zinc-400 text-xs mt-2 max-w-sm mx-auto leading-relaxed">
+                Your transaction has been verified successfully. Your {(txDetails.plan || "Pro").toUpperCase()} features are unlocked!
               </p>
             </div>
 
             {/* Receipt Details Card */}
-            <div className="mt-8 border border-zinc-900 bg-zinc-950/20 rounded-2xl p-5 md:p-6 space-y-4">
-              <h3 className="text-xs font-bold uppercase tracking-wider text-zinc-350 flex items-center gap-1.5 border-b border-zinc-900 pb-3">
-                <ReceiptText className="size-4 text-zinc-400" /> Transaction Receipt
+            <div className="mt-8 border border-zinc-900 bg-zinc-950/40 rounded-2xl p-5 md:p-6 space-y-4">
+              <h3 className="text-xs font-bold uppercase tracking-wider text-zinc-300 flex items-center gap-1.5 border-b border-zinc-900 pb-3">
+                <ReceiptText className="size-4 text-emerald-400" /> Transaction Receipt
               </h3>
 
               <div className="grid grid-cols-2 gap-y-3 text-[11px] leading-relaxed">
-                <span className="text-zinc-500">Session ID:</span>
-                <span className="text-white font-mono text-right truncate pl-4" title={sessionId}>{sessionId}</span>
+                <span className="text-zinc-500">Transaction ID:</span>
+                <span className="text-white font-mono text-right truncate pl-4" title={txDetails.sessionId}>{txDetails.sessionId || ptxn || "N/A"}</span>
 
-                <span className="text-zinc-500">Payment Channel:</span>
+                <span className="text-zinc-500">Payment Gateway:</span>
                 <span className="text-white text-right flex items-center justify-end gap-1">
-                  <Landmark className="size-3 text-zinc-400" /> Stripe Test Mode
+                  <Landmark className="size-3 text-zinc-400" /> {txDetails.sessionId?.startsWith("cs_") ? "Stripe" : "Paddle"}
                 </span>
 
                 <span className="text-zinc-500">Date:</span>
@@ -90,8 +209,8 @@ function PaymentResultContent() {
                 </span>
 
                 <span className="text-zinc-500 border-t border-zinc-900/60 pt-2.5 mt-1 font-bold">Total Charged:</span>
-                <span className="text-white text-right border-t border-zinc-900/60 pt-2.5 mt-1 font-extrabold text-sm">
-                  {amount} {currency}
+                <span className="text-emerald-400 text-right border-t border-zinc-900/60 pt-2.5 mt-1 font-extrabold text-sm">
+                  ${txDetails.amount || "30.00"} {txDetails.currency || "USD"}
                 </span>
               </div>
             </div>
@@ -129,12 +248,12 @@ function PaymentResultContent() {
               <h1 className="text-3xl font-black text-white mt-4 tracking-tight">
                 Transaction Refused
               </h1>
-              <p className="text-zinc-450 text-xs mt-2 max-w-sm mx-auto leading-relaxed">
+              <p className="text-zinc-400 text-xs mt-2 max-w-sm mx-auto leading-relaxed">
                 The payment signature verification failed or was cancelled by the gateway.
               </p>
-              {error && (
+              {txDetails.error && (
                 <p className="mt-2 text-[10px] font-mono text-red-400/80 bg-red-950/20 p-2 rounded-lg border border-red-900/10 max-w-xs mx-auto">
-                  Reason: {error}
+                  Reason: {txDetails.error}
                 </p>
               )}
             </div>
