@@ -1,6 +1,6 @@
 "use client";
 
-export async function openPaddleCheckout(transactionId: string): Promise<boolean> {
+export async function openPaddleCheckout(transactionId: string, paddleCustomerId?: string): Promise<boolean> {
   if (typeof window === "undefined") return false;
 
   const win = window as any;
@@ -48,7 +48,7 @@ export async function openPaddleCheckout(transactionId: string): Promise<boolean
       }
 
       if (Paddle.Initialize && typeof Paddle.Initialize === "function") {
-        Paddle.Initialize({
+        const initParams: any = {
           token: clientToken,
           eventCallback: (event: any) => {
             console.log("Paddle Event Received:", event?.name, event);
@@ -59,7 +59,14 @@ export async function openPaddleCheckout(transactionId: string): Promise<boolean
               window.location.href = redirectUrl;
             }
           },
-        });
+        };
+
+        // Paddle Retain integration: attach pwCustomer if Paddle customer ID (ctm_...) is available
+        if (paddleCustomerId && paddleCustomerId.startsWith("ctm_")) {
+          initParams.pwCustomer = { id: paddleCustomerId };
+        }
+
+        Paddle.Initialize(initParams);
       }
 
       if (Paddle.Checkout && typeof Paddle.Checkout.open === "function") {

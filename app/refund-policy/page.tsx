@@ -76,7 +76,7 @@ export default function RefundPolicyPage() {
             </p>
             <ul className="list-disc pl-5 space-y-1 text-zinc-400">
               <li>Your Mockrithm Account Email</li>
-              <li>Safepay Transaction ID / Reference Number</li>
+              <li>Paddle Transaction ID / Session Reference</li>
               <li>Date of Purchase</li>
               <li>Reason for the Refund Request</li>
             </ul>

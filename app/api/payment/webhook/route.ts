@@ -32,6 +32,28 @@ export async function POST(request: Request) {
       }
     }
 
+    // Dynamic IP Allowlist Check from https://api.paddle.com/ips
+    const clientIp = request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || request.headers.get("x-real-ip");
+    if (clientIp) {
+      try {
+        const paddleEnv = process.env.PADDLE_ENV || "sandbox";
+        const ipBase = paddleEnv === "sandbox" ? "https://sandbox-api.paddle.com" : "https://api.paddle.com";
+        const ipRes = await fetch(`${ipBase}/ips`, { next: { revalidate: 86400 } });
+        if (ipRes.ok) {
+          const ipData = await ipRes.json();
+          const cidrs: string[] = ipData.data?.ipv4_cidrs || [];
+          if (cidrs.length > 0) {
+            const allowedIps = cidrs.map((c) => c.split("/")[0]);
+            if (!allowedIps.includes(clientIp)) {
+              console.warn(`[Paddle Webhook Warning] Webhook call from IP ${clientIp} not in official Paddle IP list.`);
+            }
+          }
+        }
+      } catch (e) {
+        console.error("[Paddle Webhook] Warning: Failed to fetch Paddle IPs for verification:", e);
+      }
+    }
+
     const payload = JSON.parse(rawBody || "{}");
     const eventType = payload.event_type || payload.type || "";
     const data = payload.data || {};
