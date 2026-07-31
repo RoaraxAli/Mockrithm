@@ -91,8 +91,8 @@ export default function RefundPolicyPage() {
               For further questions regarding refunds, cancellations, or billing issues, please contact our billing department:
             </p>
             <p className="text-zinc-400">
-              Mockrithm Inc.<br/>
-              Islamabad, Pakistan<br/>
+              MOCKRITHM<br/>
+              Karachi, Pakistan<br/>
               Email: support@mockrithm.me
             </p>
           </section>

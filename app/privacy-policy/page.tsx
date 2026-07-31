@@ -100,7 +100,7 @@ export default function PrivacyPolicyPage() {
             </p>
             <div className="bg-zinc-950/40 border border-zinc-900 rounded-xl p-6 mt-4 space-y-2 text-zinc-400">
               <p><strong className="text-white">Email:</strong> support@mockrithm.me</p>
-              <p><strong className="text-white">Location:</strong> Islamabad, Pakistan</p>
+              <p><strong className="text-white">Location:</strong> Karachi, Pakistan</p>
             </div>
           </section>
         </div>

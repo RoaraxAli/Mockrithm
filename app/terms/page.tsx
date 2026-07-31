@@ -25,7 +25,7 @@ export default function TermsAndConditionsPage() {
           <section className="space-y-3">
             <h2 className="text-lg font-black text-white uppercase tracking-wider">1. Agreement to Terms</h2>
             <p>
-              These Terms and Conditions constitute a legally binding agreement made between you, whether personally or on behalf of an entity ("you") and <strong className="text-white">Mockrithm Inc.</strong> ("Company," "we," "us," or "our"), concerning your access to and use of the Mockrithm website (https://mockrithm.me) as well as any other media form, media channel, mobile website or mobile application related, linked, or otherwise connected thereto (collectively, the "Site").
+              These Terms and Conditions constitute a legally binding agreement made between you, whether personally or on behalf of an entity ("you") and <strong className="text-white">MOCKRITHM</strong> ("Company," "we," "us," or "our"), concerning your access to and use of the Mockrithm website (https://mockrithm.me) as well as any other media form, media channel, mobile website or mobile application related, linked, or otherwise connected thereto (collectively, the "Site").
             </p>
             <p>
               By accessing the Site, you acknowledge that you have read, understood, and agreed to be bound by all of these Terms and Conditions. If you do not agree with all of these terms, you are expressly prohibited from using the Site and must discontinue use immediately.
@@ -38,8 +38,8 @@ export default function TermsAndConditionsPage() {
               In compliance with local laws and payment gateway transparency guidelines, our official corporate details are listed below:
             </p>
             <div className="bg-zinc-950/40 border border-zinc-900 rounded-xl p-6 space-y-2 text-zinc-400">
-              <p><strong className="text-white">Legal Business Name:</strong> Mockrithm Inc.</p>
-              <p><strong className="text-white">Registered Location:</strong> Islamabad, Pakistan</p>
+              <p><strong className="text-white">Legal Business Name:</strong> MOCKRITHM</p>
+              <p><strong className="text-white">Registered Location:</strong> Karachi, Pakistan</p>
               <p><strong className="text-white">Contact Email:</strong> support@mockrithm.me</p>
             </div>
           </section>
@@ -78,14 +78,14 @@ export default function TermsAndConditionsPage() {
           <section className="space-y-3">
             <h2 className="text-lg font-black text-white uppercase tracking-wider">7. Limitation of Liability</h2>
             <p>
-              In no event will Mockrithm Inc. or our directors, employees, or agents be liable to you or any third party for any direct, indirect, consequential, exemplary, incidental, special, or punitive damages, including lost profit, lost revenue, loss of data, or other damages arising from your use of the Site or our AI voice engine.
+              In no event will MOCKRITHM or our directors, employees, or agents be liable to you or any third party for any direct, indirect, consequential, exemplary, incidental, special, or punitive damages, including lost profit, lost revenue, loss of data, or other damages arising from your use of the Site or our AI voice engine.
             </p>
           </section>
 
           <section className="space-y-3">
             <h2 className="text-lg font-black text-white uppercase tracking-wider">8. Governing Law</h2>
             <p>
-              These Terms and Conditions and your use of the Site are governed by and construed in accordance with the laws of Pakistan. Any legal actions or proceedings arising out of these Terms shall be resolved in the competent courts located in Islamabad, Pakistan.
+              These Terms and Conditions and your use of the Site are governed by and construed in accordance with the laws of Pakistan. Any legal actions or proceedings arising out of these Terms shall be resolved in the competent courts located in Karachi, Pakistan.
             </p>
           </section>
 
@@ -95,8 +95,8 @@ export default function TermsAndConditionsPage() {
               In order to resolve a complaint regarding the Site or to receive further information regarding use of our services, please contact us at:
             </p>
             <p className="text-zinc-400">
-              Mockrithm Inc.<br/>
-              Islamabad, Pakistan<br/>
+              MOCKRITHM<br/>
+              Karachi, Pakistan<br/>
               Email: support@mockrithm.me
             </p>
           </section>
