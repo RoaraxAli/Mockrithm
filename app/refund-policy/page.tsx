@@ -32,12 +32,12 @@ export default function RefundPolicyPage() {
           <section className="space-y-3">
             <h2 className="text-lg font-black text-white uppercase tracking-wider">2. Cancellation Policy</h2>
             <p>
-              You may cancel your Mockrithm account or monthly subscription plans at any time:
+              You may cancel your Mockrithm account or active subscription plans at any time:
             </p>
             <ul className="list-disc pl-5 space-y-2 text-zinc-400">
-              <li>Subscribers can cancel their renewals directly inside the Account Settings/Billing page.</li>
-              <li>Upon cancellation of a subscription, your access to premium features will continue until the end of your current billing cycle. No further automatic renewals or charges will occur.</li>
-              <li>Unused interview credits accumulated under a subscription do not roll over or hold cash values upon deletion/cancellation of your account.</li>
+              <li>Subscribers can cancel their subscription renewals directly inside their <strong className="text-white">Account Settings / Billing</strong> page by clicking "Cancel Subscription", or by emailing our support team at <strong className="text-white">support@mockrithm.me</strong>.</li>
+              <li>Upon cancellation of a subscription, your access to paid features will continue until the end of your current billing cycle. No further automatic renewals or charges will occur.</li>
+              <li>Unused interview credits accumulated under a subscription do not roll over or hold cash values upon cancellation of your account.</li>
             </ul>
           </section>
 

@@ -17,6 +17,26 @@ export function BillingOptions({ user, onRefresh }: BillingOptionsProps) {
   const [currentUser, setCurrentUser] = useState<User | null>(user || null);
   const [loadingPlan, setLoadingPlan] = useState<string | null>(null);
   const [isAnnual, setIsAnnual] = useState(false);
+  const [showCancelModal, setShowCancelModal] = useState(false);
+  const [canceling, setCanceling] = useState(false);
+
+  const handleCancelSubscription = async () => {
+    setCanceling(true);
+    try {
+      const res = await fetch("/api/payment/cancel", { method: "POST" });
+      if (res.ok) {
+        toast.success("Subscription cancellation requested. Your access continues until period end.");
+        setShowCancelModal(false);
+        if (onRefresh) onRefresh();
+      } else {
+        toast.info("Contact support@mockrithm.me to complete cancellation.");
+      }
+    } catch (e) {
+      toast.info("Contact support@mockrithm.me to complete cancellation.");
+    } finally {
+      setCanceling(false);
+    }
+  };
 
   useEffect(() => {
     if (user) {
@@ -119,7 +139,15 @@ export function BillingOptions({ user, onRefresh }: BillingOptionsProps) {
                 : "Your account is on the Free tier. Access up to 5 mock interviews and 5 ATS resume scans."}
             </p>
           </div>
-          
+
+          {currentTier !== "freemium" && (
+            <button
+              onClick={() => setShowCancelModal(true)}
+              className="px-3.5 py-1.5 rounded-xl bg-red-950/30 border border-red-500/30 text-red-300 hover:bg-red-900/40 text-xs font-bold transition-all cursor-pointer shrink-0"
+            >
+              Cancel Subscription
+            </button>
+          )}
         </div>
       </div>
 
@@ -291,6 +319,38 @@ export function BillingOptions({ user, onRefresh }: BillingOptionsProps) {
             <p className="text-xs text-zinc-400 max-w-md mx-auto leading-relaxed">
               Your Pro membership is active. You have full, unlimited access to all system simulations, telemetry features, and document tailoring engines.
             </p>
+          </div>
+        </div>
+      )}
+
+      {/* Cancel Subscription Confirmation Modal */}
+      {showCancelModal && (
+        <div className="fixed inset-0 z-[9999] bg-black/80 backdrop-blur-md flex items-center justify-center p-4">
+          <div className="bg-zinc-950 border border-zinc-800 rounded-3xl p-6 sm:p-8 max-w-md w-full text-center space-y-5 shadow-2xl relative">
+            <div className="size-12 rounded-2xl bg-red-950/40 border border-red-500/30 flex items-center justify-center mx-auto text-red-400">
+              <Zap className="size-6" />
+            </div>
+            <div className="space-y-2">
+              <h3 className="text-xl font-black text-white">Cancel Subscription Renewal?</h3>
+              <p className="text-xs text-zinc-400 leading-relaxed">
+                Are you sure you want to cancel your automatic subscription renewal? Your access to all features will remain active until the end of your current billing period. No further automatic charges will occur.
+              </p>
+            </div>
+            <div className="flex gap-3 pt-2">
+              <button
+                onClick={() => setShowCancelModal(false)}
+                className="flex-1 py-3 bg-zinc-900 border border-zinc-800 hover:bg-zinc-800 text-white rounded-xl text-xs font-bold transition-all cursor-pointer"
+              >
+                Keep Subscription
+              </button>
+              <button
+                onClick={handleCancelSubscription}
+                disabled={canceling}
+                className="flex-1 py-3 bg-red-600 hover:bg-red-500 text-white rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center justify-center gap-2"
+              >
+                {canceling ? <Loader2 className="size-4 animate-spin" /> : "Confirm Cancel"}
+              </button>
+            </div>
           </div>
         </div>
       )}
