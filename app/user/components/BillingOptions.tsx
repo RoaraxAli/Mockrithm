@@ -19,12 +19,15 @@ export function BillingOptions({ user, onRefresh }: BillingOptionsProps) {
   const [isAnnual, setIsAnnual] = useState(false);
   const [showCancelModal, setShowCancelModal] = useState(false);
   const [canceling, setCanceling] = useState(false);
+  const [isCanceled, setIsCanceled] = useState(false);
 
   const handleCancelSubscription = async () => {
     setCanceling(true);
     try {
       const res = await fetch("/api/payment/cancel", { method: "POST" });
       if (res.ok) {
+        setIsCanceled(true);
+        setCurrentUser((prev) => (prev ? ({ ...prev, subscriptionStatus: "canceling" } as any) : prev));
         toast.success("Subscription cancellation requested. Your access continues until period end.");
         setShowCancelModal(false);
         if (onRefresh) onRefresh();
@@ -141,12 +144,18 @@ export function BillingOptions({ user, onRefresh }: BillingOptionsProps) {
           </div>
 
           {currentTier !== "freemium" && (
-            <button
-              onClick={() => setShowCancelModal(true)}
-              className="px-3.5 py-1.5 rounded-xl bg-red-950/30 border border-red-500/30 text-red-300 hover:bg-red-900/40 text-xs font-bold transition-all cursor-pointer shrink-0"
-            >
-              Cancel Subscription
-            </button>
+            (isCanceled || currentUser.subscriptionStatus === "canceling" || currentUser.subscriptionStatus === "canceled") ? (
+              <div className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-zinc-900 border border-zinc-800 text-zinc-400 text-xs font-bold shrink-0">
+                <Check className="size-3 text-emerald-400" /> Canceled
+              </div>
+            ) : (
+              <button
+                onClick={() => setShowCancelModal(true)}
+                className="px-3.5 py-1.5 rounded-xl bg-red-950/30 border border-red-500/30 text-red-300 hover:bg-red-900/40 text-xs font-bold transition-all cursor-pointer shrink-0"
+              >
+                Cancel Subscription
+              </button>
+            )
           )}
         </div>
       </div>
