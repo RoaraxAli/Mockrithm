@@ -64,11 +64,29 @@ export async function POST(request: Request) {
           tier: plan,
           billingInterval: billingInterval,
           premiumUpdatedAt: new Date(),
+          subscriptionUpdatedAt: new Date(),
+          subscriptionStatus: "active",
           paddleTransactionId: data.id || "N/A",
           paddleCustomerId: data.customer_id || "N/A",
+          paddleSubscriptionId: data.subscription_id || data.id || "N/A",
         },
         { merge: true }
       );
+    } else if (eventType === "subscription.canceled") {
+      const customData = data.custom_data || {};
+      const userId = customData.userId || data.user_id;
+
+      if (userId) {
+        console.log(`[Paddle Webhook] Revoking access for canceled subscription of user: ${userId}`);
+        await db.collection("users").doc(userId).set(
+          {
+            tier: "free",
+            subscriptionStatus: "canceled",
+            subscriptionCanceledAt: new Date(),
+          },
+          { merge: true }
+        );
+      }
     }
 
     return NextResponse.json({ received: true });
