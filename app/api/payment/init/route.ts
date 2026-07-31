@@ -206,7 +206,7 @@ export async function POST(request: Request) {
       }
     }
 
-    // 4. Create Transaction on Paddle API
+    // 4. Create Transaction on Paddle API (v2)
     if (priceId) {
       try {
         const txnRes = await fetch(`${apiBase}/transactions`, {
@@ -229,26 +229,30 @@ export async function POST(request: Request) {
         });
 
         const txnData = await txnRes.json();
-        console.log("Paddle Transaction Created:", txnData.data?.id, "Checkout URL:", txnData.data?.checkout?.url);
+        console.log("Paddle Transaction Response:", txnData.data?.id, "Checkout URL:", txnData.data?.checkout?.url);
 
-        // A) If Paddle API returned a direct checkout URL
+        // A) If Paddle API returned a direct checkout URL in checkout.url
         if (txnRes.ok && txnData.data?.checkout?.url) {
           return NextResponse.json({ success: true, checkoutUrl: txnData.data.checkout.url, provider: "paddle" });
         }
 
-        // B) If transaction was created, build official Paddle Hosted Checkout URL using price ID
-        if (priceId) {
-          const hostedCheckoutUrl = `${paddleBuyDomain}/checkout/custom?price_id=${priceId}&passthrough=${encodeURIComponent(JSON.stringify({ userId: user.id, plan, billingInterval }))}`;
+        // B) If transaction ID (txn_...) was generated successfully, use official Paddle v2 transaction checkout URL
+        if (txnRes.ok && txnData.data?.id) {
+          const hostedCheckoutUrl = `${paddleBuyDomain}/checkout/build?_ptxn=${txnData.data.id}`;
           return NextResponse.json({ success: true, checkoutUrl: hostedCheckoutUrl, provider: "paddle" });
+        }
+
+        if (!txnRes.ok) {
+          console.error("Paddle Transaction API Error Response:", txnData);
         }
       } catch (err: any) {
         console.error("Paddle transaction API request failed:", err);
       }
     }
 
-    // C) Direct Hosted Checkout URL fallback using priceId or error if price creation failed
+    // C) Direct Hosted Checkout URL fallback using official Paddle v2 price_id parameter format
     if (priceId) {
-      const hostedCheckoutUrl = `${paddleBuyDomain}/checkout/custom?price_id=${priceId}`;
+      const hostedCheckoutUrl = `${paddleBuyDomain}/checkout/build?_price_id=${priceId}`;
       return NextResponse.json({ success: true, checkoutUrl: hostedCheckoutUrl, provider: "paddle" });
     }
 
