@@ -126,7 +126,8 @@ export async function GET(request: Request) {
           }
           if (txn.details?.totals?.grand_total) {
             const rawTotal = txn.details.totals.grand_total;
-            calculatedAmount = typeof rawTotal === "number" ? (rawTotal / 100).toFixed(2) : parseFloat(rawTotal).toFixed(2);
+            const numVal = typeof rawTotal === "number" ? rawTotal : parseFloat(rawTotal) || 0;
+            calculatedAmount = numVal >= 100 ? (numVal / 100).toFixed(2) : numVal.toFixed(2);
           } else {
             calculatedAmount = plan.toLowerCase() === "pro" ? (billingInterval === "annual" ? "288.00" : "30.00") : (billingInterval === "annual" ? "144.00" : "15.00");
           }
