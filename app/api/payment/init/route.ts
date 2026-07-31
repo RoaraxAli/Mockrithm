@@ -18,18 +18,14 @@ export async function POST(request: Request) {
     const plan = body.plan || body.tier || "premium";
     const billingInterval = body.billingInterval || "monthly";
 
-    // Set unit amount in cents ($15.00 or $30.00 default)
+    // Set unit amount in cents ($15.00 or $30.00 default, or custom amount like 1 for $1.00 test)
     let amountCents = 1500;
-    if (plan === "pro") {
+    if (typeof body.amount === "number" && body.amount > 0) {
+      amountCents = Math.round(body.amount * 100);
+    } else if (plan === "pro") {
       amountCents = billingInterval === "annual" ? 28800 : 3000;
-      if (body.amount === 240 || body.amount === 25) {
-        amountCents = body.amount * 100;
-      }
     } else {
       amountCents = billingInterval === "annual" ? 14400 : 1500;
-      if (body.amount === 10 || body.amount === 14.99) {
-        amountCents = Math.round(body.amount * 100);
-      }
     }
 
     // Check active Payment Gateway Provider setting from Firestore or environment
