@@ -244,20 +244,29 @@ export async function POST(request: Request) {
 
         if (!txnRes.ok) {
           console.error("Paddle Transaction API Error Response:", txnData);
+          if (txnData.error?.code === "transaction_default_checkout_url_not_set") {
+            return NextResponse.json(
+              {
+                error:
+                  "Paddle Dashboard Configuration Required: No default payment link has been set for your Paddle account. Please go to Paddle Dashboard -> Checkout Settings -> Default Payment Link and set a default URL (e.g. http://localhost:3000/payment/success or https://yourdomain.com/payment/success).",
+                code: "transaction_default_checkout_url_not_set",
+                detail: txnData.error.detail,
+              },
+              { status: 400 }
+            );
+          }
+          return NextResponse.json(
+            { error: txnData.error?.detail || "Failed to create Paddle transaction." },
+            { status: 400 }
+          );
         }
       } catch (err: any) {
         console.error("Paddle transaction API request failed:", err);
       }
     }
 
-    // C) Direct Hosted Checkout URL fallback using official Paddle v2 price_id parameter format
-    if (priceId) {
-      const hostedCheckoutUrl = `${paddleBuyDomain}/checkout/build?_price_id=${priceId}`;
-      return NextResponse.json({ success: true, checkoutUrl: hostedCheckoutUrl, provider: "paddle" });
-    }
-
     return NextResponse.json(
-      { error: "Could not create Paddle checkout session. Please check your Paddle API keys and Sandbox configuration." },
+      { error: "Could not create Paddle checkout session. Please verify your Paddle API key and dashboard configuration." },
       { status: 500 }
     );
   } catch (error: any) {
