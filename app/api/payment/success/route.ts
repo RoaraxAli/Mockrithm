@@ -95,6 +95,8 @@ export async function GET(request: Request) {
     const apiBase = paddleEnv === "sandbox" ? "https://sandbox-api.paddle.com" : "https://api.paddle.com";
 
     let userId = "";
+    let isTransactionPaid = false;
+    let transactionStatus = "unknown";
     let calculatedAmount = plan === "pro" ? (billingInterval === "annual" ? "288.00" : "30.00") : (billingInterval === "annual" ? "144.00" : "15.00");
 
     if (apiKey && apiKey.startsWith("pdl_")) {
@@ -108,7 +110,14 @@ export async function GET(request: Request) {
         if (res.ok) {
           const data = await res.json();
           const txn = data.data || {};
+          transactionStatus = (txn.status || "").toLowerCase();
           userId = txn.custom_data?.userId || "";
+
+          // Strict payment verification: status must be 'completed' or 'paid'
+          if (transactionStatus === "completed" || transactionStatus === "paid") {
+            isTransactionPaid = true;
+          }
+
           if (txn.custom_data?.plan) {
             plan = txn.custom_data.plan;
           }
@@ -129,7 +138,8 @@ export async function GET(request: Request) {
       }
     }
 
-    if (userId) {
+    // ONLY provision tier in database if payment is strictly verified as completed/paid
+    if (userId && isTransactionPaid) {
       await db.collection("users").doc(userId).set(
         {
           tier: plan,
@@ -140,6 +150,21 @@ export async function GET(request: Request) {
           paymentProvider: "paddle",
         },
         { merge: true }
+      );
+    }
+
+    if (!isTransactionPaid) {
+      const errMsg = `Transaction status is '${transactionStatus}'. Payment has not been completed.`;
+      if (isJsonRequest) {
+        return NextResponse.json({
+          success: false,
+          error: errMsg,
+          status: transactionStatus,
+        }, { status: 400 });
+      }
+      return NextResponse.redirect(
+        `${origin}/payment/success?status=failure&error=${encodeURIComponent(errMsg)}`,
+        303
       );
     }
 

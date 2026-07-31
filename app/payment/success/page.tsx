@@ -92,47 +92,18 @@ function PaymentResultContent() {
                 error: "",
               });
             } else {
-              if (ptxn.startsWith("txn_") || ptxn.startsWith("cs_")) {
-                setIsSuccess(true);
-                setTxDetails({
-                  sessionId: ptxn,
-                  amount: "30.00",
-                  currency: "USD",
-                  plan: "pro",
-                  error: "",
-                });
-              } else {
-                setIsSuccess(false);
-              }
-            }
-          } else {
-            if (ptxn.startsWith("txn_") || ptxn.startsWith("cs_")) {
-              setIsSuccess(true);
-              setTxDetails({
-                sessionId: ptxn,
-                amount: "30.00",
-                currency: "USD",
-                plan: "pro",
-                error: "",
-              });
-            } else {
               setIsSuccess(false);
+              setTxDetails((prev) => ({ ...prev, error: data.error || "Payment has not been completed." }));
             }
-          }
-        } catch (err) {
-          console.error("Verification fetch error:", err);
-          if (ptxn.startsWith("txn_") || ptxn.startsWith("cs_")) {
-            setIsSuccess(true);
-            setTxDetails({
-              sessionId: ptxn,
-              amount: "30.00",
-              currency: "USD",
-              plan: "pro",
-              error: "",
-            });
           } else {
+            const errData = await res.json().catch(() => ({}));
             setIsSuccess(false);
+            setTxDetails((prev) => ({ ...prev, error: errData.error || "Transaction verification failed or unpaid." }));
           }
+        } catch (err: any) {
+          console.error("Verification fetch error:", err);
+          setIsSuccess(false);
+          setTxDetails((prev) => ({ ...prev, error: "Network error during payment verification." }));
         } finally {
           setLoading(false);
         }
