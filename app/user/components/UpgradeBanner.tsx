@@ -26,47 +26,31 @@ export function UpgradeBanner() {
 
   const currentTier = currentUser.tier || "freemium";
 
-  if (currentTier === "freemium") {
-    return (
-      <Link 
-        href="/user/pricing" 
-        className="group flex w-full items-center justify-center gap-2 bg-zinc-900 border-b border-zinc-800 px-4 py-2 text-xs font-bold text-zinc-300 hover:text-white transition-colors cursor-pointer"
-      >
-        <span className="flex items-center gap-1.5">
-          <Crown className="size-3.5 text-zinc-400 group-hover:text-yellow-400 transition-colors" />
-          Upgrade to Premium or Pro
-        </span>
-        <ArrowRight className="size-3.5 opacity-50 group-hover:opacity-100 transition-opacity" />
-      </Link>
-    );
-  }
+  let text = "Upgrade to Premium or Pro";
+  let icon = <Crown className="size-3.5 text-yellow-400" />;
+  let color = "bg-gradient-to-r from-zinc-950 via-zinc-900 to-zinc-950 text-zinc-300 hover:text-white border-b border-white/10";
 
   if (currentTier === "premium") {
-    return (
-      <Link 
-        href="/user/pricing" 
-        className="group flex w-full items-center justify-center gap-2 bg-zinc-900 border-b border-zinc-800 px-4 py-2 text-xs font-bold text-zinc-300 hover:text-white transition-colors cursor-pointer"
-      >
-        <span className="flex items-center gap-1.5">
-          <Zap className="size-3.5 text-zinc-400 group-hover:text-yellow-400 transition-colors" />
-          Upgrade to Pro
-        </span>
-        <ArrowRight className="size-3.5 opacity-50 group-hover:opacity-100 transition-opacity" />
-      </Link>
-    );
+    text = "Upgrade to Pro";
+    icon = <Zap className="size-3.5 text-yellow-400" />;
+  } else if (currentTier === "pro") {
+    text = "You are Pro";
+    icon = <Zap className="size-3.5 text-yellow-400" />;
+    color = "bg-gradient-to-r from-zinc-950 via-yellow-950/30 to-zinc-950 text-yellow-400/90 hover:text-yellow-300 border-b border-yellow-500/20";
   }
 
-  // currentTier === "pro"
   return (
-    <Link 
-      href="/user/pricing" 
-      className="group flex w-full items-center justify-center gap-2 bg-zinc-950 border-b border-zinc-900 px-4 py-2 text-xs font-bold text-yellow-500/80 hover:text-yellow-400 transition-colors cursor-pointer"
-    >
-      <span className="flex items-center gap-1.5">
-        <Zap className="size-3.5" />
-        You are Pro
-      </span>
-      <ArrowRight className="size-3.5 opacity-50 group-hover:opacity-100 transition-opacity" />
-    </Link>
+    <div className="fixed top-0 left-0 right-0 z-[60] h-8 bg-zinc-950">
+      <Link 
+        href="/user/pricing" 
+        className={`group flex h-full w-full items-center justify-center gap-2 px-4 text-xs font-bold transition-all cursor-pointer ${color}`}
+      >
+        <span className="flex items-center gap-1.5">
+          {icon}
+          {text}
+        </span>
+        <ArrowRight className="size-3.5 opacity-60 group-hover:opacity-100 group-hover:translate-x-0.5 transition-all" />
+      </Link>
+    </div>
   );
 }

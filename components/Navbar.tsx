@@ -8,6 +8,7 @@ import { useClerk, UserButton } from "@clerk/nextjs";
 import { getAuthRedirectUrl } from "@/lib/utils/auth";
 import { BillingOptions } from "@/app/user/components/BillingOptions";
 import { UserResumePanel } from "@/app/user/components/UserResumePanel";
+import { UpgradeBanner } from "@/app/user/components/UpgradeBanner";
 import {
   ChevronDown,
   Menu,
@@ -123,6 +124,7 @@ const Navbar = ({ userId, userName, userRole }: NavbarProps) => {
 
   return (
     <>
+      {userId && <UpgradeBanner />}
       {isMobileMenuOpen && (
         <div
           className="fixed inset-0 bg-black/80 backdrop-blur-sm z-40 md:hidden"
@@ -132,9 +134,13 @@ const Navbar = ({ userId, userName, userRole }: NavbarProps) => {
 
       <nav
         className={`fixed z-50 transition-all duration-300 font-mona-sans ${
-          isScrolled
-            ? "top-4 left-[5%] right-[5%] rounded-full bg-zinc-950/85 backdrop-blur-xl shadow-2xl border border-white/10 px-4 py-0"
-            : "top-0 left-0 right-0 bg-black/50 backdrop-blur-md border-b border-white/5 py-1"
+          userId
+            ? isScrolled
+              ? "top-12 left-[5%] right-[5%] rounded-full bg-zinc-950/85 backdrop-blur-xl shadow-2xl border border-white/10 px-4 py-0"
+              : "top-8 left-0 right-0 bg-black/50 backdrop-blur-md border-b border-white/5 py-1"
+            : isScrolled
+              ? "top-4 left-[5%] right-[5%] rounded-full bg-zinc-950/85 backdrop-blur-xl shadow-2xl border border-white/10 px-4 py-0"
+              : "top-0 left-0 right-0 bg-black/50 backdrop-blur-md border-b border-white/5 py-1"
         }`}
       >
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 z-10">
@@ -500,7 +506,7 @@ const Navbar = ({ userId, userName, userRole }: NavbarProps) => {
         )}
       </nav>
 
-      <div className="h-16" />
+      <div className={userId ? "h-24" : "h-16"} />
     </>
   );
 };
