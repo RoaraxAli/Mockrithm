@@ -1,4 +1,5 @@
-import { BillingOptions } from "@/app/user/components/BillingOptions"
+import MarketingNavbar from "@/components/shared/MarketingNavbar"
+import PostLoginPricing from "./PostLoginPricing"
 
 export const metadata = {
   title: "Pricing | Mockrithm",
@@ -7,12 +8,9 @@ export const metadata = {
 
 export default function PricingPage() {
   return (
-    <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-black text-white uppercase tracking-wider font-mona-sans">Manage Subscription</h1>
-        <p className="text-sm text-zinc-400 mt-1">Upgrade your tier to unlock more features, or manage your existing subscription.</p>
-      </div>
-      <BillingOptions />
+    <div className="w-full flex flex-col font-mona-sans relative z-10 min-h-screen bg-zinc-950 text-white overflow-y-hidden selection:bg-white selection:text-black">
+      <MarketingNavbar />
+      <PostLoginPricing />
     </div>
   )
 }
