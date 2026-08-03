@@ -27,6 +27,7 @@ export default function RefundPolicyPage() {
             <p>
               At Mockrithm, we strive to deliver the highest quality conversational AI mock interview and evaluation services. Since our platform delivers digital goods (interview credits and automated scoring feedback) instantly upon checkout, we have established a fair refund and cancellation policy to protect both our customers and our operational infrastructure.
             </p>
+            <p>"Our order process is conducted by our Merchant of Record, Paddle.com. Paddle acts as the primary merchant for all our orders and handles all customer service inquiries and returns."</p>
           </section>
 
           <section className="space-y-3">
