@@ -89,7 +89,7 @@ export default function HeroSection() {
           <span>•</span>
           <span>System Design Drills</span>
           <span>•</span>
-          <span>ATS Resume Builder</span>
+          <span>ATS Resume Intelligence</span>
           <span>•</span>
           <span>Real-time Speech Telemetry</span>
           <span>•</span>
@@ -101,7 +101,7 @@ export default function HeroSection() {
           <span>•</span>
           <span>System Design Drills</span>
           <span>•</span>
-          <span>ATS Resume Builder</span>
+          <span>ATS Resume Intelligence</span>
           <span>•</span>
           <span>Real-time Speech Telemetry</span>
           <span>•</span>

@@ -236,7 +236,7 @@ export default function PricingSection() {
                 </div>
                 
                 <p className="text-xs text-zinc-300 mt-4 leading-relaxed font-semibold">
-                  Complete prep suite with unlimited speech assessments, dynamic ATS templates, and logs.
+                  Complete prep suite with unlimited speech assessments, speech pacing telemetry, and logs.
                 </p>
 
                 <div className="mt-8 border-t border-white/10 pt-6">
@@ -357,6 +357,12 @@ export default function PricingSection() {
               </Button>
             </div>
           </motion.div>
+        </div>
+
+        {/* Paddle Merchant of Record Compliance Note */}
+        <div className="mt-12 text-center text-[10px] font-mono text-zinc-500 max-w-xl mx-auto space-y-1">
+          <p>Payments and subscriptions are securely processed by our Merchant of Record, <strong className="text-zinc-400">Paddle.com</strong>.</p>
+          <p>Paddle handles all billing transactions, customer service inquiries, and returns. See our <Link href="/refund-policy" className="text-zinc-400 underline hover:text-white">Cancellation & Refund Policy</Link>.</p>
         </div>
 
       </div>

@@ -186,7 +186,7 @@ export default function PostLoginPricing() {
                     <span className="text-[11px] font-bold text-zinc-400">/ month</span>
                   </div>
                 </div>
-                <p className="text-xs text-zinc-300 mt-4 leading-relaxed font-semibold">Complete prep suite with unlimited speech assessments, dynamic ATS templates, and logs.</p>
+                <p className="text-xs text-zinc-300 mt-4 leading-relaxed font-semibold">Complete prep suite with unlimited speech assessments, speech pacing telemetry, and logs.</p>
                 <div className="mt-8 border-t border-white/10 pt-6">
                   <span className="text-[9px] font-black text-white/50 uppercase tracking-[0.2em] font-mono block mb-4">Included Parameters:</span>
                   <ul className="space-y-4 text-[11px] font-bold uppercase tracking-wider text-white">
