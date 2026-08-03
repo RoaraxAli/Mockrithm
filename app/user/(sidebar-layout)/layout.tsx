@@ -5,7 +5,7 @@ import { useState } from "react"
 import { Sidebar } from "@/app/user/components/Sidebar"
 import { Menu } from "lucide-react"
 
-import { redirect } from "next/navigation";
+import { UpgradeBanner } from "@/app/user/components/UpgradeBanner"
 
 export default function SidebarLayout({
   children,
@@ -38,6 +38,7 @@ export default function SidebarLayout({
 
       {/* Main Content Area */}
       <div className="flex-1 flex flex-col min-w-0 overflow-hidden relative">
+        <UpgradeBanner />
         {/* Mobile Header Top Navigation */}
         <header className="md:hidden flex h-16 items-center justify-between px-6 border-b border-white/5 bg-zinc-950/60 backdrop-blur-md z-40">
           <div className="flex items-center gap-3">
