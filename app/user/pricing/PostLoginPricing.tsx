@@ -191,6 +191,7 @@ export default function PostLoginPricing() {
                   <span className="text-[9px] font-black text-white/50 uppercase tracking-[0.2em] font-mono block mb-4">Included Parameters:</span>
                   <ul className="space-y-4 text-[11px] font-bold uppercase tracking-wider text-white">
                     <li className="flex items-center justify-between py-1.5 border-b border-white/[0.06]"><span className="text-zinc-400 font-medium normal-case">AI Voice Practice Engine</span><span className="text-white">Advanced</span></li>
+                    <li className="flex items-center justify-between py-1.5 border-b border-white/[0.06]"><span className="text-zinc-400 font-medium normal-case">Speech Pacing Telemetry</span><span className="text-white">Detailed Logs</span></li>
                     <li className="flex items-center justify-between py-1.5 border-b border-white/[0.06]"><span className="text-zinc-400 font-medium normal-case">Mock Evaluation Sessions</span><span className="text-white">70 Sessions</span></li>
                   </ul>
                 </div>
@@ -221,6 +222,7 @@ export default function PostLoginPricing() {
                   <span className="text-[9px] font-black text-zinc-455 uppercase tracking-[0.2em] font-mono block mb-4">Included Parameters:</span>
                   <ul className="space-y-4 text-[11px] font-bold uppercase tracking-wider text-zinc-300">
                     <li className="flex items-center justify-between py-1.5 border-b border-white/[0.03]"><span className="text-zinc-500 font-medium normal-case">AI Voice Practice Engine</span><span className="text-white">Ultra-Low</span></li>
+                    <li className="flex items-center justify-between py-1.5 border-b border-white/[0.03]"><span className="text-zinc-500 font-medium normal-case">Speech Pacing Telemetry</span><span className="text-white">Real-time</span></li>
                     <li className="flex items-center justify-between py-1.5 border-b border-white/[0.03]"><span className="text-zinc-500 font-medium normal-case">Mock Evaluation Sessions</span><span className="text-emerald-400">Unlimited</span></li>
                   </ul>
                 </div>
