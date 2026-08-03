@@ -346,20 +346,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    // 1.5. Enforce Limits
-    const userSnap = await db.collection("users").doc(user.id).get();
-    const userData = userSnap.data();
-    const userTier = userData?.tier || "freemium";
-
-    if (userTier === "freemium") {
-      const resumesCount = await db.collection("users").doc(user.id).collection("resumes").count().get();
-      if (resumesCount.data().count >= 5) {
-        return NextResponse.json(
-          { error: "Limit reached: Free tier accounts are limited to 5 ATS resume scans. Please upgrade to Premium to scan more." },
-          { status: 403 }
-        );
-      }
-    }
+    // ATS resume scanning is 100% free for all users with no tier limits
 
     // 2. Parse form data
     const formData = await request.formData();

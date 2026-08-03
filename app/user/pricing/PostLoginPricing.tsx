@@ -161,7 +161,6 @@ export default function PostLoginPricing() {
                     <li className="flex items-center justify-between py-1.5 border-b border-white/[0.03]"><span className="text-zinc-500 font-medium normal-case">AI Voice Practice Engine</span><span className="text-zinc-400">Standard</span></li>
                     <li className="flex items-center justify-between py-1.5 border-b border-white/[0.03]"><span className="text-zinc-500 font-medium normal-case">Speech Pacing Telemetry</span><span className="text-zinc-400">Standard</span></li>
                     <li className="flex items-center justify-between py-1.5 border-b border-white/[0.03]"><span className="text-zinc-500 font-medium normal-case">Mock Evaluation Sessions</span><span className="text-zinc-400">5 Sessions</span></li>
-                    <li className="flex items-center justify-between py-1.5 border-b border-white/[0.03]"><span className="text-zinc-500 font-medium normal-case">ATS Resume Checks</span><span className="text-zinc-400">5 Checks</span></li>
                   </ul>
                 </div>
               </div>
@@ -193,7 +192,6 @@ export default function PostLoginPricing() {
                   <ul className="space-y-4 text-[11px] font-bold uppercase tracking-wider text-white">
                     <li className="flex items-center justify-between py-1.5 border-b border-white/[0.06]"><span className="text-zinc-400 font-medium normal-case">AI Voice Practice Engine</span><span className="text-white">Advanced</span></li>
                     <li className="flex items-center justify-between py-1.5 border-b border-white/[0.06]"><span className="text-zinc-400 font-medium normal-case">Mock Evaluation Sessions</span><span className="text-white">70 Sessions</span></li>
-                    <li className="flex items-center justify-between py-1.5 border-b border-white/[0.06]"><span className="text-zinc-400 font-medium normal-case">ATS Resume Checks</span><span className="text-emerald-400">Unlimited</span></li>
                   </ul>
                 </div>
               </div>
@@ -224,7 +222,6 @@ export default function PostLoginPricing() {
                   <ul className="space-y-4 text-[11px] font-bold uppercase tracking-wider text-zinc-300">
                     <li className="flex items-center justify-between py-1.5 border-b border-white/[0.03]"><span className="text-zinc-500 font-medium normal-case">AI Voice Practice Engine</span><span className="text-white">Ultra-Low</span></li>
                     <li className="flex items-center justify-between py-1.5 border-b border-white/[0.03]"><span className="text-zinc-500 font-medium normal-case">Mock Evaluation Sessions</span><span className="text-emerald-400">Unlimited</span></li>
-                    <li className="flex items-center justify-between py-1.5 border-b border-white/[0.03]"><span className="text-zinc-500 font-medium normal-case">ATS Resume Checks</span><span className="text-emerald-400">Unlimited</span></li>
                   </ul>
                 </div>
               </div>

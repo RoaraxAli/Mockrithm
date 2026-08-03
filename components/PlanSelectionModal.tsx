@@ -127,10 +127,6 @@ export default function PlanSelectionModal({
                       <Check className="size-3.5 text-zinc-600 shrink-0" />
                       <span>5 Mock Interview Practices</span>
                     </li>
-                    <li className="flex items-center gap-2">
-                      <Check className="size-3.5 text-zinc-600 shrink-0" />
-                      <span>5 ATS Resume Scans</span>
-                    </li>
                   </ul>
                 </div>
                 <button
@@ -161,10 +157,6 @@ export default function PlanSelectionModal({
                     <li className="flex items-center gap-2">
                       <Check className="size-3.5 text-white shrink-0" />
                       <span>70 AI Voice Interviews / month</span>
-                    </li>
-                    <li className="flex items-center gap-2">
-                      <Check className="size-3.5 text-white shrink-0" />
-                      <span>Unlimited ATS Resume Scans</span>
                     </li>
                     <li className="flex items-center gap-2">
                       <Check className="size-3.5 text-white shrink-0" />

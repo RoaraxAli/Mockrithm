@@ -136,10 +136,10 @@ export function BillingOptions({ user, onRefresh }: BillingOptionsProps) {
             </div>
             <p className="text-xs text-zinc-400">
               {currentTier === "pro"
-                ? "You have full, unrestricted access to systems design, mock interviews, and advanced ATS tools."
+                ? "You have full, unrestricted access to systems design and mock interviews."
                 : currentTier === "premium"
-                ? "You have active access to 70 mock interviews per month, speech analysis, and unlimited resume scans."
-                : "Your account is on the Free tier. Access up to 5 mock interviews and 5 ATS resume scans."}
+                ? "You have active access to 70 mock interviews per month and speech analysis."
+                : "Your account is on the Free tier. Access up to 5 mock interviews per month."}
             </p>
           </div>
 
@@ -208,16 +208,12 @@ export function BillingOptions({ user, onRefresh }: BillingOptionsProps) {
               </div>
               <h3 className="text-lg font-bold text-white">Premium Upgrade</h3>
               <p className="text-zinc-400 text-xs mt-2 leading-relaxed">
-                Unlock 70 high-fidelity voice interviews per month and unlimited ATS resume scans.
+                Unlock 70 high-fidelity voice interviews per month and speech pacing telemetry.
               </p>
               <ul className="space-y-2.5 mt-5 text-[11px] text-zinc-350">
                 <li className="flex items-center gap-2">
                   <Check className="size-3.5 text-zinc-400 shrink-0" />
                   <span>70 AI Voice Interviews / month</span>
-                </li>
-                <li className="flex items-center gap-2">
-                  <Check className="size-3.5 text-zinc-400 shrink-0" />
-                  <span>Unlimited ATS Resume Scans</span>
                 </li>
                 <li className="flex items-center gap-2">
                   <Check className="size-3.5 text-zinc-400 shrink-0" />

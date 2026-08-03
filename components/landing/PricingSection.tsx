@@ -169,10 +169,6 @@ export default function PricingSection() {
                       <span className="text-zinc-400">5 Sessions</span>
                     </li>
                     <li className="flex items-center justify-between py-1.5 border-b border-white/[0.03]">
-                      <span className="text-zinc-500 font-medium font-mona-sans normal-case">ATS Resume Checks</span>
-                      <span className="text-zinc-400">5 Checks</span>
-                    </li>
-                    <li className="flex items-center justify-between py-1.5 border-b border-white/[0.03]">
                       <span className="text-zinc-500 font-medium font-mona-sans normal-case">Real-Time HTML Editor</span>
                       <span className="text-zinc-650">─</span>
                     </li>
@@ -259,10 +255,6 @@ export default function PricingSection() {
                       <span className="text-white">70 Sessions</span>
                     </li>
                     <li className="flex items-center justify-between py-1.5 border-b border-white/[0.06]">
-                      <span className="text-zinc-400 font-medium font-mona-sans normal-case">ATS Resume Checks</span>
-                      <span className="text-emerald-400">Unlimited</span>
-                    </li>
-                    <li className="flex items-center justify-between py-1.5 border-b border-white/[0.06]">
                       <span className="text-zinc-400 font-medium font-mona-sans normal-case">Real-Time HTML Editor</span>
                       <span className="text-emerald-400">Yes</span>
                     </li>
@@ -338,10 +330,6 @@ export default function PricingSection() {
                     </li>
                     <li className="flex items-center justify-between py-1.5 border-b border-white/[0.03]">
                       <span className="text-zinc-500 font-medium font-mona-sans normal-case">Mock Evaluation Sessions</span>
-                      <span className="text-emerald-400">Unlimited</span>
-                    </li>
-                    <li className="flex items-center justify-between py-1.5 border-b border-white/[0.03]">
-                      <span className="text-zinc-500 font-medium font-mona-sans normal-case">ATS Resume Checks</span>
                       <span className="text-emerald-400">Unlimited</span>
                     </li>
                     <li className="flex items-center justify-between py-1.5 border-b border-white/[0.03]">
