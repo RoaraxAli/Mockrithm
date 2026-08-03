@@ -288,14 +288,8 @@ chartPath = `M ${chartPoints[0].x} ${chartPoints[0].y} ` + chartPoints.slice(1).
           >
             <Button asChild className="bg-white hover:bg-zinc-200 text-black font-bold text-xs px-6 py-2.5 rounded-full cursor-pointer h-11 w-full sm:w-48 transition-all duration-300 shadow-lg shadow-white/5 hover:scale-[1.02]">
               <Link href="/interview" className="flex items-center justify-center gap-2">
-                <Play className="size-3.5 fill-black" /> Run Simulator
+                <Play className="size-3.5 fill-black" /> Take Interview
               </Link>
-            </Button>
-
-            <Button asChild variant="outline" className="border-white/5 hover:border-white/20 bg-zinc-900/30 text-zinc-300 hover:text-white font-bold text-xs px-6 py-2.5 rounded-full cursor-pointer h-11 w-full sm:w-48 transition-all duration-300 hover:scale-[1.02]">
-              <a href="https://resume.mockrithm.me" className="flex items-center justify-center gap-2">
-                Resume Desk {"→"}
-              </a>
             </Button>
           </motion.div>
 

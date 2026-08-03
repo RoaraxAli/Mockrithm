@@ -38,8 +38,12 @@ export async function openPaddleCheckout(transactionId: string, paddleCustomerId
 
   if (Paddle) {
     try {
-      const paddleEnv = (process.env.NEXT_PUBLIC_PADDLE_ENV || "sandbox").toLowerCase();
-      const clientToken = process.env.NEXT_PUBLIC_PADDLE_CLIENT_TOKEN || "test_c427f9f3ec0624dfd1794a8446d";
+      const paddleEnv = (process.env.NEXT_PUBLIC_PADDLE_ENV || process.env.PADDLE_ENV || "sandbox").toLowerCase();
+      const clientToken = process.env.NEXT_PUBLIC_PADDLE_CLIENT_TOKEN || (paddleEnv === "sandbox" ? "test_c427f9f3ec0624dfd1794a8446d" : "");
+      if (!clientToken) {
+        console.error("Paddle Client Token (NEXT_PUBLIC_PADDLE_CLIENT_TOKEN) is not defined in environment.");
+        return false;
+      }
       const origin = window.location.origin;
       const targetSuccessUrl = `${origin}/payment/success?_ptxn=${encodeURIComponent(transactionId)}`;
 
