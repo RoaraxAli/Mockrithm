@@ -7,8 +7,6 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useUser, useClerk, UserButton } from "@clerk/nextjs";
 import { useRouter } from "next/navigation";
-import { useTheme } from "next-themes";
-import { Sun, Moon, Laptop } from "lucide-react";
 import {
   CommandDialog,
   CommandInput,
@@ -32,7 +30,6 @@ const PALETTE_OPTIONS = [
 export function AdminNavbar() {
   const { isLoaded, isSignedIn, user } = useUser();
   const { signOut: clerkSignOut } = useClerk();
-  const { theme, setTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
   const [adminName, setAdminName] = useState("");
   const [activePalette, setActivePalette] = useState("Indigo");
@@ -173,40 +170,7 @@ export function AdminNavbar() {
 
         {/* Icons & Profile */}
         <div className="flex items-center space-x-4">
-          {/* Theme Switcher Segmented Control */}
-          {mounted ? (
-            <div className="flex items-center gap-0.5 bg-zinc-100 dark:bg-zinc-900/50 border border-zinc-200 dark:border-white/5 p-0.5 rounded-md">
-              <button
-                onClick={() => setTheme("light")}
-                className={`p-1.5 rounded-md hover:bg-zinc-200 dark:hover:bg-zinc-800 transition-all duration-200 cursor-pointer ${
-                  theme === "light" ? "bg-white text-zinc-950 shadow-sm" : "text-zinc-500 hover:text-zinc-700"
-                }`}
-                title="Light Mode"
-              >
-                <Sun className="h-3.5 w-3.5" />
-              </button>
-              <button
-                onClick={() => setTheme("dark")}
-                className={`p-1.5 rounded-md hover:bg-zinc-200 dark:hover:bg-zinc-800 transition-all duration-200 cursor-pointer ${
-                  theme === "dark" ? "bg-zinc-950 text-white shadow-sm border border-white/5" : "text-zinc-500 hover:text-zinc-300"
-                }`}
-                title="Dark Mode"
-              >
-                <Moon className="h-3.5 w-3.5" />
-              </button>
-              <button
-                onClick={() => setTheme("system")}
-                className={`p-1.5 rounded-md hover:bg-zinc-200 dark:hover:bg-zinc-800 transition-all duration-200 cursor-pointer ${
-                  theme === "system" ? "bg-zinc-950 text-white shadow-sm border border-white/5" : "text-zinc-500 hover:text-zinc-300"
-                }`}
-                title="System Preference"
-              >
-                <Laptop className="h-3.5 w-3.5" />
-              </button>
-            </div>
-          ) : (
-            <div className="h-8 w-24 bg-zinc-100 dark:bg-zinc-900/50 rounded-md animate-pulse border border-zinc-200 dark:border-white/5" />
-          )}
+
 
           {/* Color Palette Switcher Popover */}
           <Popover>

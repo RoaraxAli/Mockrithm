@@ -11,8 +11,7 @@ import { getCurrentUser } from "@/lib/actions/auth.action";
 import { Analytics } from "@vercel/analytics/react";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 
-import { RootProvider } from "fumadocs-ui/provider/next";
-import { ThemeProvider } from "@/components/theme-provider";
+import { ThemeManager } from "@/components/theme-manager";
 import "fumadocs-ui/style.css";
 import "./globals.css";
 
@@ -81,7 +80,22 @@ export default async function RootLayout({
   const user = await getCurrentUser();
 
   return (
-    <html lang="en" suppressHydrationWarning>
+    <html lang="en" className="dark" style={{ colorScheme: "dark" }} suppressHydrationWarning>
+      <head>
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              try {
+                if (!window.location.pathname.startsWith('/documentation')) {
+                  document.documentElement.classList.add('dark');
+                  document.documentElement.classList.remove('light');
+                  document.documentElement.style.colorScheme = 'dark';
+                }
+              } catch (_) {}
+            `,
+          }}
+        />
+      </head>
       <body
         className={`${monaSans.className} ${inter.variable} ${poppins.variable} ${merriweather.variable} ${playfairDisplay.variable} ${lora.variable} ${robotoSlab.variable} ${sourceSans3.variable} ${jetbrainsMono.variable} bg-background text-foreground antialiased pattern`}
         suppressHydrationWarning
@@ -104,11 +118,10 @@ export default async function RootLayout({
           <Analytics />
           <SpeedInsights />
           <MagneticCursor />
-          <RootProvider theme={{ attribute: "class", defaultTheme: "system", enableSystem: true }} search={{ enabled: false }}>
-            <AuthLayout initialUserId={user?.id} initialUserName={user?.name} initialUserRole={user?.role}>
-              {children}
-            </AuthLayout>
-          </RootProvider>
+          <ThemeManager />
+          <AuthLayout initialUserId={user?.id} initialUserName={user?.name} initialUserRole={user?.role}>
+            {children}
+          </AuthLayout>
           <Toaster />
         </ClerkProvider>
         <Script src="https://cdn.paddle.com/paddle/v2/paddle.js" strategy="afterInteractive" />

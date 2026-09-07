@@ -50,3 +50,7 @@ next-env.d.ts
 
 # local receipts
 /receipt.pdf
+
+# presentations
+*.pptx
+Mockrithm_Presentation.pptx
