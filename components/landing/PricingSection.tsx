@@ -5,7 +5,7 @@ import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
-import { Check, Crown, Zap, Sparkles, ArrowRight, HelpCircle, AlertCircle } from "lucide-react";
+import { Check, Crown, Zap, ArrowRight, HelpCircle, AlertCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { getAuthRedirectUrl } from "@/lib/utils/auth";
 
@@ -58,14 +58,6 @@ export default function PricingSection() {
 
   return (
     <section id="pricing" className="pt-24 pb-32 relative scroll-mt-16 z-10 text-white bg-transparent overflow-hidden">
-      
-      {/* Cool shape divider at the top */}
-      <div className="absolute top-0 left-0 right-0 w-full overflow-hidden leading-none z-10 pointer-events-none">
-        <svg className="relative block w-full h-[60px]" viewBox="0 0 1200 120" preserveAspectRatio="none">
-          <path d="M321.39,56.44c58-10.79,114.16-30.13,172-41.86,82.39-16.72,168.19-17.73,250.45-.39C823.78,31,906.67,72,985.66,92.83c70.05,18.48,146.53,26.09,214.34,3V0H0V120C121.24,120,242.43,86.91,321.39,56.44Z" className="fill-zinc-950/80"></path>
-        </svg>
-      </div>
-
       {/* Cinematic ambient background glow */}
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[1000px] h-[500px] bg-[radial-gradient(circle,rgba(255,255,255,0.015)_0%,rgba(0,0,0,0)_60%)] pointer-events-none z-0" />
 
@@ -73,9 +65,6 @@ export default function PricingSection() {
 
         {/* Heading Segment */}
         <div className="text-center mb-16">
-          <div className="inline-flex items-center gap-1.5 bg-zinc-900 border border-white/5 px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400 font-mono mb-6">
-            <Sparkles className="size-3.5 text-white" /> FLEXIBLE PREP PLANS
-          </div>
           <h2
             ref={headingRef}
             className="text-4xl sm:text-6xl md:text-7xl font-black tracking-tight leading-[1.05] flex flex-wrap justify-center gap-x-4 uppercase font-mona-sans"

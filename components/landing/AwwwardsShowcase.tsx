@@ -117,8 +117,8 @@ function DocumentVisual({ progress }: { progress: number }) {
   ];
   return (
     <div className="feature-visual relative w-full max-w-xs">
-      <div className="relative rounded-xl border border-white/10 bg-black/85 overflow-hidden shadow-2xl">
-        <div className="flex items-center gap-1.5 border-b border-white/5 px-4 py-2.5 bg-zinc-950/50">
+      <div className="relative rounded-xl border border-white/10 bg-transparent backdrop-blur-sm overflow-hidden shadow-2xl">
+        <div className="flex items-center gap-1.5 border-b border-white/5 px-4 py-2.5 bg-transparent">
           <span className="size-1.5 rounded-full bg-white/20" />
           <span className="size-1.5 rounded-full bg-white/15" />
           <span className="size-1.5 rounded-full bg-white/10" />
@@ -139,7 +139,7 @@ function DocumentVisual({ progress }: { progress: number }) {
             </div>
           ))}
         </div>
-        <div className="flex items-center justify-between border-t border-white/5 px-4 py-2 bg-zinc-950/50">
+        <div className="flex items-center justify-between border-t border-white/5 px-4 py-2 bg-transparent">
           <span className="text-[7.5px] font-mono tracking-[0.2em] text-zinc-550 uppercase">MATCH INDEX</span>
           <div className="flex items-center gap-2">
             <div className="w-12 h-0.5 bg-white/5 overflow-hidden">
@@ -160,7 +160,7 @@ function AnalyticsVisual({ progress }: { progress: number }) {
     const c = 2 * Math.PI * r;
     const dash = c * value;
     return (
-      <div className="flex flex-col items-center gap-1 bg-black/40 border border-white/5 rounded-xl p-2.5 flex-1 min-w-[70px] shadow-sm">
+      <div className="flex flex-col items-center gap-1 bg-transparent border border-white/10 rounded-xl p-2.5 flex-1 min-w-[70px] shadow-sm">
         <svg width={size} height={size} className="-rotate-90">
           <circle cx={size / 2} cy={size / 2} r={r} stroke="rgba(255,255,255,0.03)" strokeWidth="1.5" fill="none" />
           <circle cx={size / 2} cy={size / 2} r={r} stroke="#ffffff" strokeWidth="1.5" fill="none" strokeLinecap="round"
@@ -178,7 +178,7 @@ function AnalyticsVisual({ progress }: { progress: number }) {
   });
 
   return (
-    <div className="feature-visual relative w-full max-w-sm rounded-xl border border-white/10 bg-black/85 p-5 space-y-4 shadow-xl">
+    <div className="feature-visual relative w-full max-w-sm rounded-xl border border-white/10 bg-transparent backdrop-blur-sm p-5 space-y-4 shadow-xl">
       <div className="flex items-center justify-between border-b border-white/5 pb-2.5">
         <div className="flex items-center gap-1.5">
           <span className="size-1.5 rounded-full bg-white animate-pulse" />
@@ -193,7 +193,7 @@ function AnalyticsVisual({ progress }: { progress: number }) {
         <Ring value={Math.min(0.78, 0.05 + progress * 0.73)} label="STAR" />
       </div>
 
-      <div className="border border-white/5 rounded-xl p-3 bg-black/50 space-y-2">
+      <div className="border border-white/10 rounded-xl p-3 bg-transparent space-y-2">
         <div className="flex items-center justify-between text-[7px] font-mono tracking-widest text-zinc-500 uppercase">
           <span>Cadence telemetry</span>
           <span className="text-white font-bold">WPM: {Math.round(110 + progress * 40)}</span>
@@ -253,19 +253,19 @@ function ResourcesVisual({ progress }: { progress: number }) {
         return (
           <div
             key={i}
-            className="absolute w-60 h-32 rounded-xl border bg-black/90 shadow-2xl p-4 flex flex-col justify-between transition-all duration-300"
+            className="absolute w-60 h-32 rounded-xl border bg-transparent backdrop-blur-md shadow-2xl p-4 flex flex-col justify-between transition-all duration-300"
             style={{
               transform: `translateX(-50%) translateY(-50%) translate(${translateX}px, ${translateY}px) scale(${scale}) rotate(${rotate}deg)`,
               left: "50%",
               top: "50%",
               opacity: 0.3 + (i * 0.35) + (spreadProgress * 0.1),
               zIndex: i,
-              borderColor: `rgba(255,255,255,${0.03 + (i * 0.04)})`,
+              borderColor: `rgba(255,255,255,${0.08 + (i * 0.06)})`,
               boxShadow: "0 20px 40px -15px rgba(0,0,0,0.8)",
             }}
           >
             <div className="flex items-center justify-between">
-              <span className="text-[6.5px] font-mono font-bold tracking-[0.2em] text-zinc-400 uppercase border border-white/5 px-1.5 py-0.5 rounded-md bg-white/5">
+              <span className="text-[6.5px] font-mono font-bold tracking-widest text-zinc-400 uppercase border border-white/10 px-1.5 py-0.5 rounded-md bg-transparent">
                 {c.tag}
               </span>
               <span className="text-[6.5px] font-mono text-zinc-550">{c.time}</span>
@@ -300,7 +300,7 @@ function TiersVisual({ progress }: { progress: number }) {
       {tiers.map((t, i) => (
         <div
           key={t.name}
-          className="w-full rounded-xl border bg-black/70 px-5 py-3 shadow-2xl flex items-center justify-between transition-all duration-700"
+          className="w-full rounded-xl border bg-transparent backdrop-blur-sm px-5 py-3 shadow-2xl flex items-center justify-between transition-all duration-700"
           style={{
             transform: `translateY(${t.active ? 0 : 25}px) rotateX(${t.active ? 0 : 60}deg)`,
             opacity: t.active ? 1 : 0,
@@ -637,7 +637,7 @@ export default function AwwwardsShowcase() {
                 {/* Text column */}
                 <div className="flex flex-col gap-5 lg:items-start items-center text-center lg:text-left z-10">
                   <div className="flex items-center gap-2">
-                    <span className="text-[7.5px] font-mono font-bold tracking-widest px-2.5 py-0.5 border rounded-full transition-all duration-500 bg-white/5 text-zinc-300 border-white/10">
+                    <span className="text-[7.5px] font-mono font-bold tracking-widest px-2.5 py-0.5 border rounded-full transition-all duration-500 bg-transparent text-zinc-300 border-white/10">
                       FEAT // {feat.num}
                     </span>
                     <span className="text-[7.5px] font-black uppercase tracking-[0.25em] text-zinc-550">
@@ -669,7 +669,7 @@ export default function AwwwardsShowcase() {
                           style={{ willChange: "transform, opacity" }}
                         >
                           <span 
-                            className="size-4.5 rounded-full border bg-zinc-950 flex items-center justify-center text-[7.5px] font-mono font-bold shrink-0 mt-0.5 shadow-inner transition-all duration-500 border-white/10 text-white"
+                            className="size-4.5 rounded-full border bg-transparent flex items-center justify-center text-[7.5px] font-mono font-bold shrink-0 mt-0.5 shadow-inner transition-all duration-500 border-white/10 text-white"
                           >
                             {pIdx + 1}
                           </span>
