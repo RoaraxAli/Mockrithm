@@ -1,12 +1,29 @@
+import { createMDX } from "fumadocs-mdx/next";
 import type { NextConfig } from "next";
+
+const withMDX = createMDX();
 
 const nextConfig: NextConfig = {
   typescript: {
     ignoreBuildErrors: true,
   },
-  // Prevent Turbopack from trying to bundle server-only native packages.
-  // puppeteer ships with Chromium (~300MB) — bundling it kills HMR performance.
-  serverExternalPackages: ["pdf-parse", "puppeteer", "puppeteer-core"],
+
+  serverExternalPackages: ["pdf-parse", "msedge-tts", "firebase-admin"],
+  experimental: {
+    optimizePackageImports: ["lucide-react", "framer-motion", "date-fns", "dayjs"],
+  },
+  images: {
+    remotePatterns: [
+      {
+        protocol: "https",
+        hostname: "img.clerk.com",
+      },
+      {
+        protocol: "https",
+        hostname: "images.clerk.dev",
+      },
+    ],
+  },
 };
 
-export default nextConfig;
+export default withMDX(nextConfig);

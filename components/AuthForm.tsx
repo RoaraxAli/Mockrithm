@@ -49,7 +49,7 @@ const AuthForm = ({ type }: { type: FormType }) => {
       // 1. Check Rate Limit first
       const rateLimit = await checkRateLimit();
       if (rateLimit.isBanned) {
-        toast.error(rateLimit.message);
+        toast.error((rateLimit as any).message);
         return;
       }
 
@@ -80,7 +80,7 @@ const AuthForm = ({ type }: { type: FormType }) => {
         });
 
         if (!result.success) {
-          toast.error(result.message);
+          toast.error((result as any).message);
           return;
         }
 
@@ -124,20 +124,19 @@ const AuthForm = ({ type }: { type: FormType }) => {
         });
 
         if (!signInResult || !signInResult.success) {
-          toast.error(signInResult?.message || "Failed to establish a secure session. Please try again.");
+          toast.error((signInResult as any)?.message || "Failed to establish a secure session. Please try again.");
           return;
         }
 
         toast.success("Signed in successfully.");
 
-        const isAdmin = signInResult.role === "Admin";
-
+        const isAdmin = (signInResult as any).role === "Admin";
         if (isAdmin) {
-          router.replace("/admin");
-        } else if (!signInResult.hasResume) {
-          router.replace("/user/dashboard/resume");
+          localStorage.setItem("isAdmin", "true");
+          router.push("/admin");
         } else {
-          router.replace("/user/dashboard");
+          localStorage.removeItem("isAdmin");
+          router.replace("/dashboard");
         }
       }
     } catch (error) {

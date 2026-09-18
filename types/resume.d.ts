@@ -5,6 +5,10 @@ export interface ParsedResume {
     email: string;
     phone: string;
     summary: string;
+    github?: string;
+    linkedin?: string;
+    website?: string;
+    location?: string;
   };
   work: Array<{
     company: string;
@@ -36,6 +40,11 @@ export interface ParsedResume {
     url: string;
   }>;
   templateId?: string; // which template is currently selected
+  customStyles?: {
+    primaryColor?: string;
+    fontFamily?: string; // 'sans' | 'serif' | 'mono'
+    fontSize?: string; // 'sm' | 'base' | 'lg'
+  };
 }
 
 export interface AtsScoreResult {

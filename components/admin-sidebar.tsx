@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { gsap } from "gsap";
-import { auth } from "@/firebase/client";
+import { useClerk, UserButton, useUser } from "@clerk/nextjs";
 import {
   LayoutDashboard,
   Users,
@@ -16,6 +16,11 @@ import {
   LogOut,
   Globe,
   User,
+  BookOpen,
+  Key,
+  Shield,
+  ChevronsUpDown,
+  DollarSign,
 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -25,23 +30,12 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { cn } from "@/lib/utils";
 
-// Mock Firebase functions for demo
-const mockAuth: { currentUser: null | { uid: string } } = {
-  currentUser: { uid: "demo-uid" },
-};
-const mockGetDoc = async () => ({
-  exists: () => true,
-  data: () => ({
-    name: "Admin",
-    profileImage: "public/admin.png",
-    maintenance: false,
-  }),
-});
-const mockUpdateDoc = async () => {};
+// Firebase Admin config handled in API
 
 const navigation = [
   { name: "Dashboard", href: "/admin", icon: LayoutDashboard },
   { name: "Users", href: "/admin/users", icon: Users },
+  { name: "Revenue", href: "/admin/revenue", icon: DollarSign },
   { name: "Interviews", href: "/admin/interviews", icon: ListChecks }, // single link
   {
     name: "Interview Feedback",
@@ -49,11 +43,16 @@ const navigation = [
     icon: ClipboardList,
   },
   { name: "Feedback", href: "/admin/feedback", icon: MessageSquare },
+  { name: "Blogs", href: "/admin/blogs", icon: BookOpen },
+  { name: "API Telemetry", href: "/admin/keys", icon: Key },
+  { name: "Audit Logs", href: "/admin/audit", icon: Shield },
 ];
 
 export function AdminSidebar() {
   const pathname = usePathname();
   const router = useRouter();
+  const { signOut } = useClerk();
+  const { user: clerkUser } = useUser();
   const [adminName, setAdminName] = useState("");
   const [adminImage, setAdminImage] = useState("");
   const [maintenance, setMaintenance] = useState(false);
@@ -74,29 +73,23 @@ export function AdminSidebar() {
         delay: 0.2,
       }
     );
+  }, []);
 
-    const fetchAdminData = async () => {
-      const user = mockAuth.currentUser;
-      if (!user) return;
+  useEffect(() => {
+    if (clerkUser) {
+      setAdminName(clerkUser.fullName || clerkUser.firstName || "Admin");
+      setAdminImage(clerkUser.imageUrl || "");
+    }
+  }, [clerkUser]);
 
-      try {
-        const snap = await mockGetDoc();
-        if (snap.exists()) {
-          const data = snap.data();
-          setAdminName(data?.name || "Admin");
-          setAdminImage(data?.profileImage || "");
-        }
-      } catch (error) {
-        console.error("Failed to fetch admin data:", error);
-      }
-    };
-
-    fetchAdminData();
-
+  useEffect(() => {
     const fetchMaintenanceStatus = async () => {
       try {
-        const snap = await mockGetDoc();
-        if (snap.exists()) setMaintenance(snap.data()?.maintenance || false);
+        const { getMaintenanceMode } = await import("@/lib/actions/admin.action");
+        const res = await getMaintenanceMode();
+        if (res.success) {
+          setMaintenance(res.active || false);
+        }
       } catch (err) {
         console.error("Failed to fetch maintenance status:", err);
       } finally {
@@ -110,8 +103,14 @@ export function AdminSidebar() {
   const toggleMaintenance = async () => {
     try {
       setLoadingMaintenance(true);
-      await mockUpdateDoc();
-      setMaintenance(!maintenance);
+      const nextState = !maintenance;
+      const { toggleMaintenanceMode } = await import("@/lib/actions/admin.action");
+      const res = await toggleMaintenanceMode(nextState);
+      if (res.success) {
+        setMaintenance(nextState);
+      } else {
+        console.error("Failed to toggle maintenance:", res.error);
+      }
     } catch (err) {
       console.error("Failed to toggle maintenance:", err);
     } finally {
@@ -122,8 +121,9 @@ export function AdminSidebar() {
 
 const handleLogout = async () => {
   try {
+    document.cookie = "bypass_admin=; path=/; expires=Thu, 01 Jan 1970 00:00:00 UTC;";
     await Promise.all([
-      auth.signOut(),
+      signOut(),
       fetch("/api/auth/sign-out", { method: "POST" })
     ]);
     router.push("/sign-in");
@@ -135,20 +135,39 @@ const handleLogout = async () => {
   const SidebarContent = () => (
     <Card
       className={cn(
-        "h-full bg-black border-r border-white/10 rounded-none shadow-none transition-all duration-300",
+        "h-full bg-zinc-50 dark:bg-zinc-950 border-r border-zinc-200 dark:border-white/5 rounded-none shadow-none transition-all duration-300",
         isCollapsed ? "w-16" : "w-64"
       )}
     >
       <CardContent className="flex flex-col h-full p-0">
-        <div className="flex h-20 items-center justify-between px-6 border-b border-white/10">
+        <div className="flex h-16 items-center px-4 border-b border-zinc-200 dark:border-white/5">
           {!isCollapsed && (
-            <h1 className="text-xl font-bold text-white">Admin Panel</h1>
+            <div className="flex items-center justify-between w-full rounded-md border border-zinc-200 dark:border-white/5 bg-zinc-100 dark:bg-zinc-900/30 px-3 py-2 cursor-pointer hover:bg-zinc-200 dark:hover:bg-zinc-900/50 transition-colors">
+              <div className="flex items-center gap-3">
+                <div className="h-6 w-6 rounded-md bg-indigo-500/20 text-indigo-400 flex items-center justify-center font-bold text-xs">
+                  M
+                </div>
+                <div className="flex flex-col">
+                  <span className="text-sm font-medium text-zinc-900 dark:text-zinc-100 leading-none">Mockrithm</span>
+                  <span className="text-xs text-zinc-400 dark:text-zinc-500 mt-1 leading-none">Production</span>
+                </div>
+              </div>
+              <ChevronsUpDown className="h-4 w-4 text-zinc-400 dark:text-zinc-500" />
+            </div>
           )}
+          {isCollapsed && (
+            <div className="mx-auto h-8 w-8 rounded-md bg-indigo-500/20 text-indigo-400 flex items-center justify-center font-bold text-sm">
+              M
+            </div>
+          )}
+        </div>
+
+        <div className="flex justify-end p-2 pb-0">
           <Button
             variant="ghost"
             size="icon"
             onClick={() => setIsCollapsed(!isCollapsed)}
-            className="text-white hover:bg-white/10 ml-auto"
+            className="text-zinc-400 hover:bg-zinc-900 h-6 w-6"
           >
             {isCollapsed ? (
               <ChevronRight className="h-4 w-4" />
@@ -167,19 +186,20 @@ const handleLogout = async () => {
                   <Link
                     href={item.href}
                     className={cn(
-                      "sidebar-item flex items-center rounded-lg px-3 py-2 text-sm font-medium transition-all duration-200 cursor-pointer hover:bg-white/10",
+                      "sidebar-item flex items-center rounded-md px-3 py-2 text-sm font-medium transition-all duration-200 cursor-pointer group",
                       isActive
-                        ? "bg-white/10 text-white shadow"
-                        : "text-gray-400 hover:text-white",
-                      isCollapsed && "justify-center"
+                        ? "bg-accent-alpha-custom text-accent-custom border-l-2 border-accent-custom pl-[10px]"
+                        : "text-zinc-400 hover:bg-zinc-900/50 hover:text-zinc-200",
+                      isCollapsed && "justify-center border-l-0 pl-3"
                     )}
                     title={isCollapsed ? item.name : undefined}
                   >
                     {item.icon && (
                       <item.icon
                         className={cn(
-                          "h-5 w-5 flex-shrink-0",
-                          !isCollapsed && "mr-3"
+                          "h-4 w-4 flex-shrink-0 transition-colors",
+                          !isCollapsed && "mr-3",
+                          isActive ? "text-accent-custom" : "text-zinc-500 group-hover:text-zinc-300"
                         )}
                       />
                     )}
@@ -191,13 +211,13 @@ const handleLogout = async () => {
           </nav>
         </ScrollArea>
 
-        <div className="border-t border-white/10 p-4">
+        <div className="border-t border-zinc-200 dark:border-white/5 p-4">
           <div
             className={cn(
-              "sidebar-item flex items-center justify-between rounded-lg px-3 py-2 text-sm font-medium transition-all duration-200 cursor-pointer hover:bg-white/10",
+              "sidebar-item flex items-center justify-between rounded-md px-3 py-2 text-sm font-medium transition-all duration-200 cursor-pointer hover:bg-zinc-100 dark:hover:bg-zinc-900",
               adminSectionOpen
-                ? "bg-white/10 text-white"
-                : "text-gray-400 hover:text-white",
+                ? "bg-zinc-100 dark:bg-zinc-900 text-zinc-900 dark:text-zinc-100"
+                : "text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100",
               isCollapsed && "justify-center"
             )}
             onClick={() =>
@@ -211,17 +231,9 @@ const handleLogout = async () => {
                 isCollapsed && "space-x-0 justify-center"
               )}
             >
-              <Avatar className="h-8 w-8">
-                <AvatarImage
-                  src={adminImage || "/placeholder.svg"}
-                  alt={adminName}
-                />
-                <AvatarFallback className="bg-white/10 text-white">
-                  <User className="h-4 w-4" />
-                </AvatarFallback>
-              </Avatar>
+              <UserButton />
               {!isCollapsed && (
-                <span className="truncate">{adminName || "Admin"}</span>
+                <span className="truncate text-zinc-800 dark:text-zinc-200 font-medium">{adminName || "Admin"}</span>
               )}
             </div>
           </div>
@@ -231,8 +243,11 @@ const handleLogout = async () => {
               <Button
                 variant="ghost"
                 size="sm"
-                className="w-full justify-start text-gray-400 hover:text-white hover:bg-white/10"
-                onClick={() => router.push("/")}
+                className="w-full justify-start text-zinc-400 hover:text-zinc-100 hover:bg-zinc-900"
+                onClick={() => {
+                  document.cookie = "bypass_admin=true; path=/; max-age=86400"; // 1 day
+                  router.push("/");
+                }}
               >
                 <Globe className="mr-2 h-4 w-4" />
                 Visit Website
@@ -241,7 +256,7 @@ const handleLogout = async () => {
               <Button
                 variant="ghost"
                 size="sm"
-                className="w-full justify-start text-gray-400 hover:text-white hover:bg-white/10"
+                className="w-full justify-start text-zinc-400 hover:text-zinc-100 hover:bg-zinc-900"
                 onClick={toggleMaintenance}
                 disabled={loadingMaintenance}
               >
@@ -261,7 +276,7 @@ const handleLogout = async () => {
               <Button
                 variant="ghost"
                 size="sm"
-                className="w-full justify-start text-gray-400 hover:text-white hover:bg-white/10"
+                className="w-full justify-start text-zinc-400 hover:text-zinc-100 hover:bg-zinc-900"
                 onClick={handleLogout}
               >
                 <LogOut className="mr-2 h-4 w-4" />
@@ -292,12 +307,12 @@ const handleLogout = async () => {
           <Button
             variant="ghost"
             size="icon"
-            className="lg:hidden fixed top-4 left-4 z-50 bg-black/50 backdrop-blur-sm border border-white/10"
+            className="lg:hidden fixed top-4 left-4 z-50 bg-zinc-950/50 backdrop-blur-sm border border-white/5"
           >
             <Menu className="h-5 w-5" />
           </Button>
         </SheetTrigger>
-        <SheetContent side="left" className="w-64 p-0 bg-black border-white/10">
+        <SheetContent side="left" className="w-64 p-0 bg-zinc-950 border-white/5">
           <SidebarContent />
         </SheetContent>
       </Sheet>

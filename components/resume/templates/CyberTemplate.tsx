@@ -4,7 +4,7 @@ export default function CyberTemplate({ data }: { data: ParsedResume }) {
   const { basics, work = [], education = [], skills = [], projects = [], certifications = [], socialLinks = [] } = data;
 
   return (
-    <div className="p-8 bg-white text-slate-900 font-sans max-w-[800px] mx-auto min-h-[1050px] shadow-sm flex flex-col gap-6 border-t-8 border-slate-500">
+    <div className="p-8 bg-white text-slate-900 font-sans max-w-[800px] mx-auto min-h-[1131px] shadow-sm flex flex-col gap-6 border-t-8 border-slate-500">
       {/* Header */}
       <div className="flex flex-col gap-2">
         <h1 className="text-4xl font-extrabold tracking-tight text-slate-900">{basics.name || "Your Name"}</h1>
@@ -13,6 +13,10 @@ export default function CyberTemplate({ data }: { data: ParsedResume }) {
           <div className="flex flex-wrap justify-end gap-x-3 gap-y-0.5 text-[10px] text-slate-600 font-mono">
             {basics.email && <span>{basics.email}</span>}
             {basics.phone && <span>{basics.phone}</span>}
+            {basics.location && <span>{basics.location}</span>}
+            {basics.github && <span className="break-all">Github: {basics.github}</span>}
+            {basics.linkedin && <span className="break-all">LinkedIn: {basics.linkedin}</span>}
+            {basics.website && <span className="break-all">Website: {basics.website}</span>}
             {socialLinks.map((link, idx) => (
               <span key={idx}>{link.platform}: {link.url}</span>
             ))}

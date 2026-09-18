@@ -16,7 +16,7 @@ export default async function ResumeAnalysisPage({ params }: { params: Promise<{
     return (
       <div className="flex flex-col items-center justify-center p-12">
         <p className="text-slate-400">Resume not found.</p>
-        <Link href="/user/dashboard/resume" className="text-cyan-400 mt-4 underline">Back to Dashboard</Link>
+        <Link href="/user/resume" className="text-cyan-400 mt-4 underline">Back to Dashboard</Link>
       </div>
     );
   }
@@ -25,7 +25,7 @@ export default async function ResumeAnalysisPage({ params }: { params: Promise<{
     <div className="flex flex-col gap-6 w-full">
       <div className="flex flex-col gap-2">
         <Link 
-          href="/user/dashboard/resume" 
+          href="/user/resume" 
           className="flex items-center gap-1.5 text-xs font-mono font-bold text-slate-500 hover:text-cyan-400 transition-colors uppercase tracking-widest w-fit mb-2"
         >
           <ArrowLeft className="size-3.5" /> BACK TO PORTFOLIO

@@ -1,5 +1,20 @@
 import { NextResponse } from "next/server";
 import { getCurrentUser } from "@/lib/actions/auth.action";
+import { fetchGroq } from "@/lib/apiKeyManager";
+
+// Simple in-memory per-user rate limiter (60 requests per minute)
+const rateLimitMap = new Map<string, number[]>();
+const RATE_LIMIT_WINDOW_MS = 60_000;
+const RATE_LIMIT_MAX = 60;
+
+function checkRateLimit(userId: string): boolean {
+  const now = Date.now();
+  const timestamps = (rateLimitMap.get(userId) || []).filter(t => now - t < RATE_LIMIT_WINDOW_MS);
+  if (timestamps.length >= RATE_LIMIT_MAX) return false;
+  timestamps.push(now);
+  rateLimitMap.set(userId, timestamps);
+  return true;
+}
 
 export async function POST(request: Request) {
   const user = await getCurrentUser();
@@ -7,24 +22,34 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  const apiKey = process.env.GROQ_API_KEY;
-  if (!apiKey) {
-    return NextResponse.json({ error: "GROQ_API_KEY is not configured." }, { status: 400 });
+  if (!checkRateLimit(user.id)) {
+    return NextResponse.json({ error: "Rate limit exceeded. Please slow down." }, { status: 429 });
   }
 
   try {
     const body = await request.json();
+    let model = body.model || process.env.GROQ_LLM_MODEL || "llama-3.3-70b-versatile";
+    const userTier = (user as any).tier || "freemium";
+
+    // Enforce model tier limits
+    const isGenerateMode = (body.messages || []).some((m: any) => m.role === "system" && m.content.includes("configure their mock"));
+    if (userTier === "freemium" && !isGenerateMode) {
+      model = "llama-3.1-8b-instant";
+    } else {
+      model = "llama-3.3-70b-versatile";
+    }
+
+    console.log(`[DEBUG] Routing chat completion request to Groq API (${model})...`);
     const groqPayload = {
-      model: body.model || process.env.GROQ_LLM_MODEL || "llama-3.3-70b-versatile",
-      messages: body.messages || [],
+      model: model,
+      messages: (body.messages || []).slice(-30),
       stream: body.stream !== false,
     };
 
-    const response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+    const response = await fetchGroq("/chat/completions", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${apiKey}`,
       },
       body: JSON.stringify(groqPayload),
     });
@@ -48,3 +73,4 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: err.message }, { status: 500 });
   }
 }
+

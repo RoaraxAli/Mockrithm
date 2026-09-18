@@ -1,17 +1,21 @@
-
 import { ReactNode } from "react";
-import { redirect } from "next/navigation";
+import { headers } from "next/headers";
 
-import { isAuthenticated } from "@/lib/actions/auth.action";
+import { WeeklyGamesModal } from "@/components/shared/WeeklyGamesModal";
 
 const Layout = async ({ children }: { children: ReactNode }) => {
-  const isUserAuthenticated = await isAuthenticated();
-  if (!isUserAuthenticated) redirect("/sign-in");
+  const headerList = await headers();
+  const host = headerList.get("host") || "";
+
+  if (host.startsWith("docs.")) {
+    return <>{children}</>;
+  }
 
   return (
-    <div className="root-layout">
+    <>
       {children}
-    </div>
+      <WeeklyGamesModal />
+    </>
   );
 };
 

@@ -2,8 +2,7 @@
 
 import { useParams, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import { doc, getDoc } from "firebase/firestore";
-import { db } from "@/firebase/client";
+import { getFeedbackById } from "@/lib/actions/admin.action";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft } from "lucide-react";
 
@@ -16,10 +15,9 @@ export default function FeedbackDetailsPage() {
   useEffect(() => {
     const fetchFeedback = async () => {
       try {
-        const ref = doc(db, "feedback", id as string);
-        const snap = await getDoc(ref);
-        if (snap.exists()) {
-          setFeedback({ id: snap.id, ...snap.data() });
+        const res = await getFeedbackById(id as string);
+        if (res.success && res.data) {
+          setFeedback(res.data);
         }
       } catch (err) {
         console.error("Error loading feedback:", err);
@@ -56,8 +54,8 @@ export default function FeedbackDetailsPage() {
         <p><strong>Message:</strong> {feedback.message}</p>
         <p className="text-sm text-gray-400">
           <strong>Submitted:</strong>{" "}
-          {feedback.createdAt?.toDate
-            ? feedback.createdAt.toDate().toLocaleString()
+          {feedback.createdAt
+            ? new Date(feedback.createdAt).toLocaleString()
             : "N/A"}
         </p>
       </div>

@@ -20,7 +20,7 @@ interface ResumeState {
 export const useResumeStore = create<ResumeState>((set) => ({
   resumeId: null,
   parsedData: {
-    basics: { name: "", label: "", email: "", phone: "", summary: "" },
+    basics: { name: "", label: "", email: "", phone: "", summary: "", github: "", linkedin: "", website: "", location: "" },
     work: [],
     education: [],
     skills: [],

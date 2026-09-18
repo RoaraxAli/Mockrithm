@@ -1,0 +1,97 @@
+---
+title: ElevenLabs API Voice Synthesis
+description: Text-to-speech engine parameters, custom voice mapping configurations, and real-time audio chunk stream formats.
+---
+
+This page provides the configuration and developer setup details for integrating **ElevenLabs Text-to-Speech (TTS)** voice synthesis in Mockrithm's mock interview console.
+
+---
+
+## 1. Architectural Role
+
+ElevenLabs powers the speech generation for our AI interviewers. When the interview backend generates a text question or response, it is sent to the ElevenLabs streaming API to synthesize natural-sounding voice audio.
+
+```mermaid
+graph LR
+    Text[Question Text] --> API[ElevenLabs Streaming API]
+    API --> AudioChunks[PCM Audio Chunks]
+    AudioChunks --> WebSocket[WebSocket Client Buffer]
+    WebSocket --> Speaker[Speaker Playback]
+```
+
+---
+
+## 2. Voice Configurations Configurations
+
+We use specific voice presets to match different interviewer personas (e.g. Rachel for a friendly tone, Dom for a strict technical review).
+
+| Voice Name | Voice ID (ElevenLabs ID) | Tone Profile | Senority Mode |
+| :--- | :--- | :--- | :--- |
+| **Rachel** | `21m00Tcm4TlvDq8ikWAM` | Professional, friendly | Junior / Mid |
+| **Dom** | `AZnzlk1XvdvUeBnXmlld` | Direct, technical | Senior / Lead |
+| **Clyde** | `ErXwobaYiN019PkySvjV` | Conversational, steady | Behavioral |
+
+---
+
+## 3. Streaming Code Implementation
+
+Here is the implementation code to establish a real-time voice stream from ElevenLabs:
+
+```typescript
+import axios from "axios";
+import { Readable } from "stream";
+
+interface SynthesisConfig {
+  text: string;
+  voiceId: string;
+  stability?: number;
+  similarityBoost?: number;
+}
+
+export async function streamVoiceAudio({
+  text,
+  voiceId,
+  stability = 0.75,
+  similarityBoost = 0.85
+}: SynthesisConfig): Promise<Readable> {
+  const ELEVENLABS_API_KEY = process.env.ELEVENLABS_API_KEY;
+  if (!ELEVENLABS_API_KEY) throw new Error("ElevenLabs API Key not configured.");
+
+  const response = await axios({
+    method: "POST",
+    url: `https://api.elevenlabs.io/v1/text-to-speech/${voiceId}/stream`,
+    headers: {
+      "accept": "audio/mpeg",
+      "xi-api-key": ELEVENLABS_API_KEY,
+      "content-type": "application/json",
+    },
+    data: {
+      text,
+      model_id: "eleven_monolingual_v1",
+      voice_settings: {
+        stability,
+        similarity_boost: similarityBoost,
+      },
+    },
+    responseType: "stream",
+  });
+
+  return response.data as Readable;
+}
+```
+
+---
+
+## 4. Easing Latency & Best Practices
+
+<Accordions>
+  <Accordion title="Optimizing Streaming Bitrates">
+    ElevenLabs supports different audio formats. For real-time applications, configure the stream query parameter to use `audio/mpeg` at `128kbps` (`?output_format=mp3_44100_128`) to reduce bandwidth requirements and latency by **30%** compared to high-fidelity wav buffers.
+  </Accordion>
+  <Accordion title="Client-Side Buffering">
+    To prevent gaps during playback:
+    1. Stream PCM chunks from the server to the client.
+    2. Buffer the initial 3-4 chunks in a client-side queue.
+    3. Start playing the audio buffer while subsequent chunks continue to load.
+  </Accordion>
+</Accordions>

@@ -1,0 +1,8 @@
+{
+  "title": "Payment & Integrations",
+  "pages": [
+    "stripe",
+    "stripe-webhooks",
+    "clerk-webhooks"
+  ]
+}

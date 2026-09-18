@@ -1,0 +1,126 @@
+---
+title: Quickstart & Environment Setup
+description: Step-by-step developer onboarding guide to configure variables, install dependencies, and spin up the development environment.
+---
+
+This guide gets you up and running with the Mockrithm platform on your local machine.
+
+---
+
+## 1. Setup Checklist
+
+Before you begin, make sure you have the following installed:
+- **Node.js:** Version 18.x or later (Next.js 16/React 19 requirements)
+- **Package Manager:** NPM or PNPM
+- **Git**
+
+---
+
+## 2. Step-by-Step Installation
+
+Follow these steps to initialize your local environment:
+
+<Steps>
+  <Step>
+    ### Clone the Repository
+    Obtain the latest code from the source repository:
+    ```bash
+    git clone https://github.com/RoaraxAli/Mockrithm.git
+    cd Mockrithm
+    ```
+  </Step>
+  <Step>
+    ### Install Project Dependencies
+    Install dependencies using NPM:
+    ```bash
+    npm install
+    ```
+    
+    <Callout type="info" title="Lockfile Integrity">
+    We leverage a project-level `package-lock.json` lockfile. Avoid mixing package managers (e.g., executing both `npm install` and `pnpm install` in the same directory) to prevent duplicate builds.
+    </Callout>
+  </Step>
+  <Step>
+    ### Configure Environment Variables
+    Duplicate the sample environment blueprint into a local configuration file:
+    ```bash
+    cp .env.example .env
+    ```
+    Configure the variables in `.env` as shown in the section below.
+  </Step>
+  <Step>
+    ### Start Development Server
+    Boot up the compiler and hot-reloader:
+    ```bash
+    npm run dev
+    ```
+    Open [http://localhost:3000](http://localhost:3000) in your browser to inspect the application.
+  </Step>
+</Steps>
+
+---
+
+## 3. Environment Variable Specification
+
+Here is the format and details for the `.env` configuration file:
+
+```ini
+# ==============================================================================
+# Clerk Security Configuration
+# ==============================================================================
+NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=pk_test_dGVzdC1jbGVyay1hcHA...
+CLERK_SECRET_KEY=sk_test_c2VjcmV0LWNsZXJrLWtleS12YWxpZA...
+NEXT_PUBLIC_CLERK_SIGN_IN_URL=/sign-in
+NEXT_PUBLIC_CLERK_SIGN_UP_URL=/sign-up
+
+# ==============================================================================
+# Firebase Admin Cloud Infrastructure
+# ==============================================================================
+FIREBASE_PROJECT_ID=mockrithm-prod
+FIREBASE_CLIENT_EMAIL=firebase-adminsdk-xxxxx@mockrithm-prod.iam.gserviceaccount.com
+# Private key must contain inline newline escape markers (\n)
+FIREBASE_PRIVATE_KEY="-----BEGIN PRIVATE KEY-----\nMIIEvgIBADANBgkqhkiG9w0BAQEFAASCBKgwggSkAgEAAoIBAQC...\n-----END PRIVATE KEY-----"
+
+# ==============================================================================
+# Third-Party AI API Integrations
+# ==============================================================================
+GEMINI_API_KEY=AIzaSyA_example_gemini_key_123
+GROQ_API_KEY=gsk_v1_example_groq_key_987
+
+# ==============================================================================
+# Stripe Monetization Settings
+# ==============================================================================
+STRIPE_SECRET_KEY=sk_test_51Pz...
+STRIPE_WEBHOOK_SECRET=whsec_...
+```
+
+<Callout type="warn" title="Private Key Formatting">
+The `FIREBASE_PRIVATE_KEY` must be enclosed in double quotes (`"`) and have all carriage returns replaced with actual `\n` characters to ensure the JSON parser compiles the multi-line certificate correctly.
+</Callout>
+
+---
+
+## 4. Verification & Testing Commands
+
+To verify that your installation is fully functional, run the following validation scripts:
+
+<Tabs items={['Build Check', 'Linting Checks', 'Firestore Rules']}>
+  <Tab value="Build Check">
+    Verify the Next.js compilation works:
+    ```bash
+    npm run build
+    ```
+  </Tab>
+  <Tab value="Linting Checks">
+    Run ESLint across pages and component files:
+    ```bash
+    npm run lint
+    ```
+  </Tab>
+  <Tab value="Firestore Rules">
+    If you are developing security rules, validate them against the local firestore emulator:
+    ```bash
+    npx firebase emulators:start --only firestore
+    ```
+  </Tab>
+</Tabs>

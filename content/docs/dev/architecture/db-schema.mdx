@@ -1,0 +1,216 @@
+---
+title: Firestore Database Schema
+description: Architectural schema specifications, indexing parameters, and security policies for Google Cloud Firestore collections.
+---
+
+This page provides the database schemas, subcollections, and indexing rules for Mockrithm's Google Cloud Firestore.
+
+---
+
+## 1. Database Architecture Overview
+
+Mockrithm utilizes a serverless, NoSQL database design on Firestore. The data model balances root-level collections for global/cross-user audits with subcollections for user-isolated data paths (like resumes and draft interview settings).
+
+### Collection Topology
+```
+Firestore Root/
+├── users/ (users root profile matching Clerk IDs)
+│   └── [userId]/
+│       ├── resumes/ (subcollection of candidate resume editions)
+│       └── customTemplates/ (subcollection of custom JSON resume templates)
+├── interviews/ (global/root index of voice session telemetry)
+└── interviewsfeedback/ (global/root index of session analytics)
+```
+
+---
+
+## 2. Collection Schema References
+
+<Tabs items={['Users Collection', 'Resumes Subcollection', 'Interviews Collection', 'Interview Feedback']}>
+  <Tab value="Users Collection">
+    ### Users Schema (`/users/{userId}`)
+    Stores candidate metadata, role permissions, and active billing subscription states. User IDs map directly to the authenticated Clerk ID.
+
+    ```json
+    {
+      "id": "user_2Tsh3K8p5x9J...", 
+      "name": "Muhammad Ali",
+      "email": "ali@example.com",
+      "role": "Admin", // Options: "Admin" | "User"
+      "status": "Active", // Options: "Active" | "Suspended"
+      "tier": "premium", // Options: "freemium" | "premium" | "pro"
+      "stripeCustomerId": "cus_Q123456789...",
+      "createdAt": "2026-06-25T17:45:00.000Z",
+      "updatedAt": "2026-06-25T17:45:00.000Z"
+    }
+    ```
+    
+    <Callout type="info" title="User Syncing">
+      The User record is created and synchronized automatically via the Clerk webhook endpoint (`/api/auth/sync`).
+    </Callout>
+  </Tab>
+  <Tab value="Resumes Subcollection">
+    ### Resumes Schema (`/users/{userId}/resumes/{resumeId}`)
+    Stores parsed CV details, template targets, and ATS checker reports.
+
+    ```json
+    {
+      "id": "resume_uuid_987654...",
+      "userId": "user_2Tsh3K8p5x9J...",
+      "fileName": "Software_Engineer_CV.pdf",
+      "rawText": "Experienced Developer specializing in Next.js...",
+      "templateId": "ATS-Template-V1",
+      "parsedData": {
+        "basics": {
+          "name": "Muhammad Ali",
+          "email": "ali@example.com",
+          "phone": "+1 123-456-7890",
+          "summary": "Technical lead with a focus on web performance..."
+        },
+        "work": [
+          {
+            "company": "Mockrithm Inc.",
+            "role": "Technical Lead",
+            "startDate": "2024-01",
+            "endDate": "2026-06",
+            "highlights": [
+              "Architected low-latency web sockets voice portal.",
+              "Improved page load performance by 40% using Next.js ISR."
+            ]
+          }
+        ],
+        "skills": ["TypeScript", "Next.js", "Firebase", "WebSockets"],
+        "projects": [
+          {
+            "name": "Voice Calibration Engine",
+            "description": "Dynamic latency pinging client",
+            "url": "https://github.com/..."
+          }
+        ]
+      },
+      "atsAnalysis": {
+        "score": 92,
+        "parsingSuccess": true,
+        "issues": [
+          "Add target profile portfolio URL",
+          "Expand bullet highlights on oldest position"
+        ]
+      },
+      "createdAt": "2026-06-25T17:45:00.000Z"
+    }
+    ```
+  </Tab>
+  <Tab value="Interviews Collection">
+    ### Interviews Schema (`/interviews/{interviewId}`)
+    Tracks voice session states, dynamic calibration markers, and transcripts.
+
+    ```json
+    {
+      "id": "session_uuid_abc123...",
+      "userId": "user_2Tsh3K8p5x9J...",
+      "role": "Senior Software Engineer",
+      "experience": "Senior", // Options: "Junior" | "Mid" | "Senior" | "Lead"
+      "questions": [
+        "Explain the differences between WebSockets and HTTP Polling.",
+        "How do you resolve memory leaks in Next.js Server Components?"
+      ],
+      "transcript": [
+        { "role": "interviewer", "content": "Welcome! Let's start with WebSockets." },
+        { "role": "candidate", "content": "WebSockets support a single persistent TCP connection..." }
+      ],
+      "finalized": true,
+      "createdAt": "2026-06-25T17:45:00.000Z"
+    }
+    ```
+  </Tab>
+  <Tab value="Interview Feedback">
+    ### Interview Feedback Schema (`/interviewsfeedback/{feedbackId}`)
+    Stores granular assessments and vocal pacing diagnostics.
+
+    ```json
+    {
+      "id": "feedback_uuid_xyz987...",
+      "interviewId": "session_uuid_abc123...",
+      "userId": "user_2Tsh3K8p5x9J...",
+      "candidateName": "Muhammad Ali",
+      "email": "ali@example.com",
+      "totalScore": 88,
+      "categoryScores": [
+        { "name": "Communication Skills", "score": 90, "comment": "Excellent speaking flow." },
+        { "name": "Technical Knowledge", "score": 85, "comment": "Understands network protocols well." }
+      ],
+      "strengths": [
+        "Structured STAR methodology implementation",
+        "Excellent pacing control"
+      ],
+      "areasForImprovement": [
+        "Reduce vocal fill rates on abstract design questions"
+      ],
+      "averageWpm": 132,
+      "topFillerWords": ["like", "um"],
+      "createdAt": "2026-06-25T17:45:00.000Z"
+    }
+    ```
+  </Tab>
+</Tabs>
+
+---
+
+## 3. Database Indexes
+
+To support complex dashboard queries, you must configure the following indexes:
+
+| Collection Path | Fields Indexed | Query Type |
+| :--- | :--- | :--- |
+| `/interviews` | `userId` (Ascending), `createdAt` (Descending) | Composite |
+| `/interviewsfeedback` | `userId` (Ascending), `createdAt` (Descending) | Composite |
+| `/users/{userId}/resumes` | `createdAt` (Descending) | Single-Field |
+
+Deploy these configurations via the CLI:
+```bash
+firebase deploy --only firestore:indexes
+```
+
+---
+
+## 4. Security Rules Configuration
+
+We enforce rules on Firestore access to ensure that users can query only their own files. Here is a preview of the Firestore rules:
+
+```javascript
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // Check if the requester is signed in
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    // Verify if the active user matches the document resource path
+    function isOwner(userId) {
+      return request.auth.uid == userId;
+    }
+
+    // Match root profile documents
+    match /users/{userId} {
+      allow read, write: if isSignedIn() && isOwner(userId);
+    }
+
+    // Match candidate resumes subcollection documents
+    match /users/{userId}/resumes/{resumeId} {
+      allow read, write: if isSignedIn() && isOwner(userId);
+    }
+
+    // Match global interviews indexing
+    match /interviews/{interviewId} {
+      allow read, write: if isSignedIn() && (resource == null || resource.data.userId == request.auth.uid);
+    }
+
+    // Match global feedback records
+    match /interviewsfeedback/{feedbackId} {
+      allow read, write: if isSignedIn() && (resource == null || resource.data.userId == request.auth.uid);
+    }
+  }
+}
+```

@@ -1,0 +1,103 @@
+---
+title: Three.js WebGL Unreal Bloom Pass
+description: High-performance post-processing pipelines, glow shaders configuration, and rendering optimization strategies.
+---
+
+This page provides implementation details for Mockrithm's WebGL post-processing unreal bloom effects, which power the dynamic neon outlines and glowing grid transitions on the marketing landing pages.
+
+---
+
+## 1. Unreal Bloom Architecture
+
+The landing page features a three-dimensional particles grid that pulses in response to user scroll events. To achieve realistic neon effects without overloading the GPU, we implement an **Unreal Bloom Pass** via an `EffectComposer`.
+
+```mermaid
+graph LR
+    Scene[WebGL Scene & Camera] --> Composer[EffectComposer Pipeline]
+    Composer --> RenderPass[RenderPass: Draw Base Geometry]
+    RenderPass --> BloomPass[UnrealBloomPass: Calculate Glow]
+    BloomPass --> Output[Output: Screen Buffer]
+```
+
+---
+
+## 2. WebGL Code Implementation
+
+Below is the code configuration to initialize and manage the post-processing stack in a Next.js client component:
+
+```typescript
+import * as THREE from 'three';
+import { EffectComposer } from 'three/examples/jsm/postprocessing/EffectComposer.js';
+import { RenderPass } from 'three/examples/jsm/postprocessing/RenderPass.js';
+import { UnrealBloomPass } from 'three/examples/jsm/postprocessing/UnrealBloomPass.js';
+
+export function initializeGlowPipeline(
+  container: HTMLDivElement,
+  scene: THREE.Scene,
+  camera: THREE.PerspectiveCamera,
+  renderer: THREE.WebGLRenderer
+) {
+  // 1. Initialize Composer
+  const composer = new EffectComposer(renderer);
+  
+  // 2. Add Base Render Pass
+  const renderPass = new RenderPass(scene, camera);
+  composer.addPass(renderPass);
+
+  // 3. Define Bloom Parameters
+  const resolution = new THREE.Vector2(window.innerWidth, window.innerHeight);
+  const strength = 1.5; // Intensity of the glow
+  const radius = 0.4;   // Dispersion radius
+  const threshold = 0.85; // Luminosity floor to trigger glow
+
+  // 4. Instantiate and Append Bloom Pass
+  const bloomPass = new UnrealBloomPass(resolution, strength, radius, threshold);
+  composer.addPass(bloomPass);
+
+  return {
+    composer,
+    updateBloomThreshold: (val: number) => { bloomPass.threshold = val; },
+    updateBloomStrength: (val: number) => { bloomPass.strength = val; }
+  };
+}
+```
+
+---
+
+## 3. Bloom Configurations Configuration
+
+<Callout type="info" title="Performance Target">
+We target a consistent **60 FPS** on mid-range mobile devices by dynamically adjusting resolution mapping when canvas pixel density exceeds `2.0`.
+</Callout>
+
+Adjust the bloom properties using the parameters below:
+
+| Parameter Key | Recommended Value | Range | Impact on Scene |
+| :--- | :--- | :--- | :--- |
+| `strength` | `1.2` | `0.0 - 3.0` | Controls the brightness of the glowing outline. |
+| `radius` | `0.5` | `0.0 - 1.0` | Controls the spread distance of the glow dispersion. |
+| `threshold` | `0.85` | `0.0 - 1.0` | Determines the minimum luminosity required to glow. |
+
+---
+
+## 4. Render Optimization Best Practices
+
+<Accordions>
+  <Accordion title="Selective Bloom Implementation">
+    To prevent the entire screen from becoming blurry, we use a selective bloom layer masking setup:
+    1. Set the background objects on `layer 0`.
+    2. Place the emissive glowing meshes on `layer 1`.
+    3. During the render tick, toggle layers before writing to the post-processing buffer.
+  </Accordion>
+  <Accordion title="Handling Window Resize">
+    When a resize event is fired, update both the renderer and the composer resolution:
+    ```typescript
+    window.addEventListener('resize', () => {
+      camera.aspect = window.innerWidth / window.innerHeight;
+      camera.updateProjectionMatrix();
+      renderer.setSize(window.innerWidth, window.innerHeight);
+      composer.setSize(window.innerWidth, window.innerHeight);
+    });
+    ```
+  </Accordion>
+</Accordions>

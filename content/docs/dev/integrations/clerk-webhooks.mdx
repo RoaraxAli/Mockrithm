@@ -1,0 +1,115 @@
+---
+title: Clerk Webhook Integrations (Svix Validation)
+description: Technical implementation details for Svix header verification, User lifecycle webhooks, and database user provisioning.
+---
+
+This page documents the setup and signature verification for **Clerk Webhooks** inside Mockrithm.
+
+---
+
+## 1. Lifecycle Sync Pipeline
+
+To keep our database in sync with Clerk, we listen for user authentication lifecycle events (like registration and deletion). Clerk forwards these events to our webhook endpoint via **Svix**, which we use to verify the payload signature.
+
+```mermaid
+graph TD
+    Clerk[Clerk Auth Portal] -->|Event: user.created| Endpoint[API Route: /api/auth/clerk-webhook]
+    Endpoint --> Verify{Verify Svix headers}
+    
+    Verify -- Valid --> WriteDB[Provision profile in Firestore: /users/{id}]
+    Verify -- Invalid --> Error400[Return HTTP 400 Bad Request]
+```
+
+---
+
+## 2. API Webhook Route Implementation
+
+Here is the implementation code to verify Svix signatures and process Clerk events (`app/api/auth/clerk-webhook/route.ts`):
+
+```typescript
+import { NextRequest, NextResponse } from "next/server";
+import { Webhook } from "svix";
+import { db } from "@/firebase/admin";
+
+const webhookSecret = process.env.CLERK_WEBHOOK_SECRET!;
+
+export async function POST(request: NextRequest) {
+  const payload = await request.text();
+  const headers = request.headers;
+
+  // 1. Extract Svix validation headers
+  const svixId = headers.get("svix-id");
+  const svixTimestamp = headers.get("svix-timestamp");
+  const svixSignature = headers.get("svix-signature");
+
+  if (!svixId || !svixTimestamp || !svixSignature) {
+    return new NextResponse("Error: Missing Svix headers", { status: 400 });
+  }
+
+  // 2. Verify Svix signature
+  const wh = new Webhook(webhookSecret);
+  let evt: any;
+
+  try {
+    evt = wh.verify(payload, {
+      "svix-id": svixId,
+      "svix-timestamp": svixTimestamp,
+      "svix-signature": svixSignature,
+    }) as any;
+  } catch (err: any) {
+    console.error("Svix verification failed:", err.message);
+    return new NextResponse("Error: Signature verification failed", { status: 400 });
+  }
+
+  // 3. Route user lifecycle events
+  const { id } = evt.data;
+  const eventType = evt.type;
+
+  try {
+    if (eventType === "user.created") {
+      const { email_addresses, first_name, last_name, image_url } = evt.data;
+      const email = email_addresses[0]?.email_address;
+      const fullName = `${first_name || ""} ${last_name || ""}`.trim();
+
+      // Provision user profile in Firestore
+      await db.collection("users").doc(id).set({
+        email: email,
+        name: fullName || "Anonymous User",
+        avatarUrl: image_url,
+        role: "User", // Default role
+        tier: "freemium", // Default tier
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString()
+      });
+    }
+
+    if (eventType === "user.deleted") {
+      // Purge candidate data or mark profile status suspended
+      await db.collection("users").doc(id).set({
+        status: "Suspended",
+        updatedAt: new Date().toISOString()
+      }, { merge: true });
+    }
+
+    return NextResponse.json({ success: true });
+
+  } catch (error) {
+    console.error("Error processing Clerk webhook event:", error);
+    return new NextResponse("Internal database processing error", { status: 500 });
+  }
+}
+```
+
+---
+
+## 3. Webhook Events Reference
+
+| Event Name (`evt.type`) | Trigger | Action Taken |
+| :--- | :--- | :--- |
+| `user.created` | Candidate registers account | Creates a new user profile document in Firestore. |
+| `user.updated` | Candidate edits profile details | Updates matching document fields (like name or avatar URL). |
+| `user.deleted` | User requests account removal | Sets the document `status` to Suspended in Firestore. |
+
+<Callout type="info" title="Local Verification Setup">
+To debug Svix signatures locally, use tools like **ngrok** or **Localtunnel** to expose your local port `3000` to the internet, then add your public forwarding URL to your Clerk developer dashboard webhook settings.
+</Callout>

@@ -1,18 +1,80 @@
 import type { Metadata } from "next";
-import { Mona_Sans } from "next/font/google";
+import Script from "next/script";
+import { Mona_Sans, Inter, Instrument_Serif, Poppins, Merriweather, Playfair_Display, Lora, Roboto_Slab, Source_Sans_3, Plus_Jakarta_Sans } from "next/font/google";
 import { Toaster } from "sonner";
+import { ClerkProvider } from "@clerk/nextjs";
 
 import AuthLayout from "@/components/Authlayout";
 import Preloader from "@/components/shared/Preloader";
-import FooterWrapper from "@/components/shared/FooterWrapper";
+import MagneticCursor from "@/components/landing/MagneticCursor";
 import { getCurrentUser } from "@/lib/actions/auth.action";
 import { Analytics } from "@vercel/analytics/react";
+import { SpeedInsights } from "@vercel/speed-insights/next";
 
+import { ThemeManager } from "@/components/theme-manager";
+import "fumadocs-ui/style.css";
 import "./globals.css";
 
 const monaSans = Mona_Sans({
   variable: "--font-mona-sans",
   subsets: ["latin"],
+  display: "swap",
+});
+
+const inter = Inter({
+  variable: "--font-inter",
+  subsets: ["latin"],
+  display: "swap",
+});
+
+const instrumentSerif = Instrument_Serif({
+  variable: "--font-instrument-serif",
+  subsets: ["latin"],
+  weight: ["400"],
+  style: ["normal", "italic"],
+  display: "swap",
+});
+
+const poppins = Poppins({
+  variable: "--font-poppins",
+  subsets: ["latin"],
+  weight: ["400", "500", "600", "700", "800"],
+});
+
+const merriweather = Merriweather({
+  variable: "--font-merriweather",
+  subsets: ["latin"],
+  weight: ["400", "700"],
+});
+
+const playfairDisplay = Playfair_Display({
+  variable: "--font-playfair",
+  subsets: ["latin"],
+  weight: ["400", "500", "600", "700", "800"],
+});
+
+const lora = Lora({
+  variable: "--font-lora",
+  subsets: ["latin"],
+  weight: ["400", "500", "600", "700"],
+});
+
+const robotoSlab = Roboto_Slab({
+  variable: "--font-roboto-slab",
+  subsets: ["latin"],
+  weight: ["400", "500", "600", "700"],
+});
+
+const sourceSans3 = Source_Sans_3({
+  variable: "--font-source-sans",
+  subsets: ["latin"],
+  weight: ["400", "500", "600", "700"],
+});
+
+const jetbrainsMono = Plus_Jakarta_Sans({
+  variable: "--font-jetbrains-mono",
+  subsets: ["latin"],
+  weight: ["400", "500", "600", "700", "800"],
 });
 
 export const metadata: Metadata = {
@@ -28,18 +90,53 @@ export default async function RootLayout({
   const user = await getCurrentUser();
 
   return (
-    <html lang="en" className="dark">
+    <html lang="en" className="dark" style={{ colorScheme: "dark" }} suppressHydrationWarning>
+      <head>
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              try {
+                if (!window.location.pathname.startsWith('/documentation')) {
+                  document.documentElement.classList.add('dark');
+                  document.documentElement.classList.remove('light');
+                  document.documentElement.style.colorScheme = 'dark';
+                }
+              } catch (_) {}
+            `,
+          }}
+        />
+      </head>
       <body
-        className={`${monaSans.className} bg-black text-white antialiased pattern`}
+        className={`${monaSans.className} ${inter.variable} ${instrumentSerif.variable} ${poppins.variable} ${merriweather.variable} ${playfairDisplay.variable} ${lora.variable} ${robotoSlab.variable} ${sourceSans3.variable} ${jetbrainsMono.variable} bg-background text-foreground antialiased pattern`}
+        suppressHydrationWarning
       >
-        <Preloader />
-        <Analytics />
-        <AuthLayout initialUserId={user?.id} initialUserName={user?.name} initialUserRole={user?.role}>
-          {children}
-        </AuthLayout>
-        <Toaster />
-        <FooterWrapper />
+        <ClerkProvider
+          localization={{
+            userButton: {
+              action__manageAccount: "Settings",
+            }
+          }}
+          appearance={{
+            variables: {
+              colorPrimary: "#ffffff",
+              colorBackground: "#09090b", // zinc-950
+              colorBorder: "#27272a", // zinc-800
+            }
+          }}
+        >
+          <Preloader />
+          <Analytics />
+          <SpeedInsights />
+          <MagneticCursor />
+          <ThemeManager />
+          <AuthLayout initialUserId={user?.id} initialUserName={user?.name} initialUserRole={user?.role}>
+            {children}
+          </AuthLayout>
+          <Toaster />
+        </ClerkProvider>
+        <Script src="https://cdn.paddle.com/paddle/v2/paddle.js" strategy="lazyOnload" />
       </body>
     </html>
   );
 }
+

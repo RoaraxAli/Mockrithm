@@ -1,20 +1,26 @@
 import Agent from "@/components/Agent";
 import { getCurrentUser } from "@/lib/actions/auth.action";
+import { redirect } from "next/navigation";
 
 const Page = async () => {
   const user = await getCurrentUser();
+  if (!user) redirect("/sign-in");
 
   return (
-    <>
-      <h3>Interview generation</h3>
-
+    <div className="root-layout">
       <Agent
-        userName={user?.name!}
-        userId={user?.id}
-        profileImage={user?.profileURL}
+        userName={user.name}
+        userId={user.id}
+        profileImage={user.imageUrl || ""}
         type="generate"
+        userResumeData={{
+          targetRole: (user as any).targetRole || "",
+          resumeData: user.resumeData || null,
+          country: user.country || "",
+        }}
+        userTier={(user as any).tier || "freemium"}
       />
-    </>
+    </div>
   );
 };
 

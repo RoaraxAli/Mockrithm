@@ -41,3 +41,23 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# clerk configuration (can include secrets)
+/.clerk/
+
+# temporary scratch files
+/scratch/
+
+# local receipts
+/receipt.pdf
+
+# presentations
+*.pptx
+Mockrithm_Presentation.pptx
+
+# local testing and reports
+lighthouse_report.html
+*.report.html
+test_whisper_models.js
+ahmed.json
+ali.json

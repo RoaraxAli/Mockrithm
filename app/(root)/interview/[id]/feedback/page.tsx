@@ -7,277 +7,296 @@ import {
 } from "@/lib/actions/general.action";
 import { Button } from "@/components/ui/button";
 import { getCurrentUser } from "@/lib/actions/auth.action";
+import { FeedbackTabs } from "@/components/FeedbackTabs";
+import { 
+  TrendingUp, Clock, Mic, Activity, ChevronRight, 
+  Award, FileText, CheckCircle2 
+} from "lucide-react";
+
+interface RouteParams {
+  params: Promise<{ id: string }>;
+}
 
 const Feedback = async ({ params }: RouteParams) => {
   const { id } = await params;
   const user = await getCurrentUser();
+  if (!user) redirect("/sign-in");
 
   const interview = await getInterviewById(id);
   if (!interview) redirect("/");
 
   const feedback = await getFeedbackByInterviewId({
     interviewId: id,
-    userId: user?.id!,
+    userId: user.id,
   });
 
+  if (!feedback) {
+    return (
+      <div className="dark bg-zinc-950 text-zinc-50 min-h-screen w-full flex flex-col items-center justify-center font-mona-sans p-6 text-center">
+        <div className="max-w-md border border-zinc-900 bg-zinc-900/20 p-8 rounded-2xl flex flex-col items-center gap-4 backdrop-blur-xl">
+          <Activity className="size-10 text-zinc-500 animate-pulse" />
+          <h2 className="text-xl font-bold uppercase tracking-tight text-white">Report Not Found</h2>
+          <p className="text-xs text-zinc-400 leading-relaxed font-mono">
+            No evaluation report could be loaded for session #{id.slice(0, 8)}.
+          </p>
+          <Button asChild className="mt-4 rounded-full bg-white text-black font-bold text-xs uppercase px-6 h-10 border border-white hover:bg-zinc-200 transition-all">
+            <Link href="/">Return to Dashboard</Link>
+          </Button>
+        </div>
+      </div>
+    );
+  }
+
   const formattedDate = feedback?.createdAt
-    ? dayjs(feedback.createdAt).format("MMM D, YYYY — h:mm A")
+    ? dayjs(feedback.createdAt).format("MMMM D, YYYY")
     : "N/A";
 
   const totalScore = feedback?.totalScore || 0;
   const averageWpm = feedback?.averageWpm || 140;
 
   return (
-    <section className="max-w-5xl mx-auto flex flex-col gap-8 px-4 sm:px-6 py-8 font-mona-sans text-zinc-100 animate-fadeIn relative">
-      
-      {/* Title Header: Premium SaaS Report Header */}
-      <div className="flex flex-col items-center text-center gap-3">
-        <span className="text-[10px] font-bold tracking-wider text-violet-400 bg-violet-500/10 px-4 py-1.5 rounded-full border border-violet-500/20 uppercase shadow-sm">
-          Performance Report
-        </span>
-        <h1 className="text-3xl sm:text-5xl font-extrabold leading-tight tracking-tight text-white uppercase mt-1">
-          Evaluation Analysis
-        </h1>
-        <p className="text-xs font-semibold text-zinc-500 tracking-wider uppercase mt-0.5">
-          Role: <span className="text-zinc-300 font-extrabold">{interview.role}</span>
-        </p>
-      </div>
+    <div className="dark bg-zinc-950 text-zinc-50 min-h-screen w-full flex flex-col font-mona-sans relative z-10 select-none pb-12">
+      {/* Background patterns matching premium SaaS dashboard */}
+      <div className="absolute inset-0 premium-grid-dot pointer-events-none opacity-10 z-0" />
+      <div className="absolute top-0 left-0 right-0 h-[600px] bg-gradient-to-b from-white/[0.005] to-transparent pointer-events-none z-0" />
 
-      {/* Quick Stats Telemetry Ribbon */}
-      <div className="flex flex-row justify-center mt-2">
-        <div className="flex flex-row gap-4 items-center flex-wrap justify-center font-mono text-[10px]">
-          {/* Rating */}
-          <div className="flex flex-row gap-2.5 items-center backdrop-blur-xl bg-zinc-950/40 border border-zinc-900 px-5 py-2.5 rounded-xl shadow-lg">
-            <svg className="w-4 h-4 text-violet-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z" />
-            </svg>
-            <p className="text-zinc-400 uppercase tracking-wider font-semibold">
-              Match Rating:{" "}
-              <span className="text-violet-400 font-extrabold text-xs ml-1">
-                {totalScore}% Match
-              </span>
-            </p>
+      <section className="root-layout max-w-6xl mx-auto w-full px-6 sm:px-8 py-12 flex flex-col gap-12 z-10">
+        
+        {/* Breadcrumb Trail */}
+        <div className="flex items-center gap-2 text-[10px] font-mono tracking-wider text-zinc-500 uppercase">
+          <Link href="/" className="hover:text-white transition-colors">Dashboard</Link>
+          <ChevronRight className="size-3 text-zinc-700" />
+          <Link href="/interview" className="hover:text-white transition-colors">Simulator</Link>
+          <ChevronRight className="size-3 text-zinc-700" />
+          <span className="text-zinc-300 font-bold">Report #{id.slice(0, 8)}</span>
+        </div>
+
+        {/* Header - Editorial Premium Style */}
+        <div className="flex flex-col gap-6 border-b border-zinc-900 pb-10">
+          <div className="flex justify-between items-center text-[10px] text-zinc-500 uppercase tracking-widest font-semibold font-mono">
+            <span className="flex items-center gap-1.5"><Activity className="size-3 text-zinc-500" /> Session: {id.slice(0, 8)}</span>
+            <span>Date: {formattedDate}</span>
           </div>
-
-          {/* Timestamp */}
-          <div className="flex flex-row gap-2.5 items-center backdrop-blur-xl bg-zinc-950/40 border border-zinc-900 px-5 py-2.5 rounded-xl shadow-lg">
-            <svg className="w-4 h-4 text-zinc-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-            </svg>
-            <p className="text-zinc-400 uppercase tracking-wider font-semibold">
-              Completed: <span className="text-zinc-300 ml-1 font-sans">{formattedDate}</span>
-            </p>
+          
+          <div className="flex flex-col gap-3">
+            <h1 className="text-4xl sm:text-5xl font-black text-white tracking-tight leading-tight uppercase font-mona-sans">
+              Evaluation Report
+            </h1>
+            <div className="flex flex-wrap items-center gap-3">
+              <span className="px-3 py-1 text-[10px] font-bold font-mono uppercase bg-zinc-900 border border-zinc-800 text-zinc-300 rounded-full">
+                {interview.role}
+              </span>
+              <span className="px-3 py-1 text-[10px] font-bold font-mono uppercase bg-white/5 border border-white/10 text-zinc-400 rounded-full">
+                {interview.type}
+              </span>
+              <span className="text-xs font-semibold text-zinc-400 font-mono ml-1">
+                Candidate: {user?.name}
+              </span>
+            </div>
           </div>
         </div>
-      </div>
 
-      {/* Main Executive Summary Panel */}
-      <div className="p-7 backdrop-blur-xl bg-zinc-950/40 border border-zinc-900 rounded-2xl shadow-2xl relative overflow-hidden group">
-        <h3 className="text-xs font-bold text-zinc-400 uppercase tracking-wider mb-4 flex items-center gap-2">
-          <svg className="size-4.5 text-violet-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
-          </svg>
-          Executive Summary
-        </h3>
-        
-        <p className="text-sm text-zinc-300 leading-relaxed bg-zinc-950/60 border border-zinc-900/60 p-5 rounded-xl">
-          {feedback?.finalAssessment || "No summary assessment loaded."}
-        </p>
-      </div>
-
-      {/* Speech Pacing Speedometer & Filler Word Telemetry Dials */}
-      <div className="grid grid-cols-1 md:grid-cols-12 gap-6 backdrop-blur-xl bg-zinc-950/40 p-7 border border-zinc-900 rounded-2xl shadow-2xl relative overflow-hidden">
-        {/* Speech Pacing Speedometer */}
-        <div className="md:col-span-6 flex flex-col gap-4">
-          <h3 className="text-xs font-bold text-zinc-400 tracking-wider uppercase flex items-center gap-2">
-            <svg className="size-4.5 text-violet-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M13 10V3L4 14h7v7l9-11h-7z" />
-            </svg>
-            Speech Pacing Cadence (WPM)
-          </h3>
-          
-          <div className="flex items-center gap-5 sm:gap-6 mt-1 flex-wrap sm:flex-nowrap">
-            {/* Holographic Speedometer Gauge */}
-            <div className="relative size-24 flex items-center justify-center shrink-0">
-              <svg className="size-full transform -rotate-90" viewBox="0 0 36 36">
-                <path
-                  className="stroke-zinc-900"
-                  strokeWidth="3.5"
-                  fill="none"
-                  strokeLinecap="round"
-                  d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
-                />
-                <path
-                  className={
-                    averageWpm >= 130 && averageWpm <= 150
-                      ? "stroke-emerald-400"
-                      : ((averageWpm >= 110 && averageWpm < 130) || (averageWpm > 150 && averageWpm <= 170))
-                      ? "stroke-cyan-400"
-                      : "stroke-rose-400"
-                  }
-                  strokeWidth="3.5"
-                  strokeDasharray={`${Math.min(100, Math.round((averageWpm / 200) * 100))}, 100`}
-                  fill="none"
-                  strokeLinecap="round"
-                  d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
-                />
-              </svg>
-              <div className="absolute flex flex-col items-center justify-center">
-                <span className="text-2xl font-bold text-white leading-none">{averageWpm}</span>
-                <span className="text-[7px] text-zinc-500 font-bold uppercase mt-1">WPM</span>
+        {/* Grid: Score & Executive Summary */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 items-stretch">
+          {/* Score Card */}
+          <div className="md:col-span-1 p-8 border border-zinc-900 bg-zinc-900/20 backdrop-blur-xl rounded-2xl flex flex-col justify-between relative overflow-hidden group">
+            {/* Subtle glow */}
+            <div className="absolute -top-12 -left-12 w-24 h-24 bg-white/[0.02] blur-xl rounded-full pointer-events-none group-hover:bg-white/[0.04] transition-all" />
+            
+            <div>
+              <span className="text-[10px] text-zinc-500 font-bold uppercase tracking-widest font-mono flex items-center gap-1.5">
+                <Award className="size-3.5" /> Overall Fit Match
+              </span>
+              <div className="flex items-baseline gap-1 mt-6">
+                <span className="text-7xl font-black text-white tracking-tighter leading-none">{totalScore}</span>
+                <span className="text-xl text-zinc-500 font-light">%</span>
               </div>
             </div>
-
-            <div className="flex flex-col gap-1.5 flex-1">
-              <span className="text-[10px] font-bold uppercase text-zinc-300 tracking-wider">
-                Cadence Status:{" "}
-                <span className={
-                  averageWpm >= 130 && averageWpm <= 150
-                    ? "text-emerald-400 font-bold"
-                    : ((averageWpm >= 110 && averageWpm < 130) || (averageWpm > 150 && averageWpm <= 170))
-                    ? "text-cyan-400 font-bold"
-                    : "text-rose-400 font-bold"
-                }>
-                  {averageWpm >= 130 && averageWpm <= 150
-                    ? "Ideal Cadence"
-                    : ((averageWpm >= 110 && averageWpm < 130) || (averageWpm > 150 && averageWpm <= 170))
-                    ? "Acceptable Cadence"
-                    : "Unbalanced Speed"}
+            <div className="mt-8 border-t border-zinc-900 pt-4 flex flex-col gap-2">
+              <div className="flex justify-between items-center">
+                <span className="text-[10px] text-zinc-400 font-black uppercase tracking-wider font-mono">
+                  Status:
                 </span>
+                <span className={`text-[10px] font-bold uppercase tracking-wider font-mono px-2.5 py-1 rounded bg-zinc-950 border ${
+                  totalScore >= 80 ? "text-emerald-400 border-emerald-500/20" :
+                  totalScore >= 60 ? "text-blue-400 border-blue-500/20" :
+                  totalScore >= 40 ? "text-amber-400 border-amber-500/20" :
+                  "text-rose-450 border-rose-500/20"
+                }`}>
+                  {totalScore >= 80 ? "Excellent Fit" :
+                   totalScore >= 60 ? "Strong Match" :
+                   totalScore >= 40 ? "Partial Match" :
+                   "Weak Match"}
+                </span>
+              </div>
+
+              {(feedback as any)?.eloResult && (
+                <div className="flex justify-between items-center text-xs font-mono border-t border-zinc-900/80 pt-2 mt-1">
+                  <span className="text-[10px] text-zinc-400 font-bold uppercase tracking-wider">
+                    Elo Rating Update:
+                  </span>
+                  <span className="font-bold text-indigo-400">
+                    {(feedback as any).eloResult.overallElo} ELO ({(feedback as any).eloResult.overallDelta >= 0 ? `+${(feedback as any).eloResult.overallDelta}` : (feedback as any).eloResult.overallDelta} ELO)
+                  </span>
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Executive Summary */}
+          <div className="md:col-span-2 p-8 border border-zinc-900 bg-zinc-900/10 backdrop-blur-md rounded-2xl flex flex-col justify-between">
+            <div className="flex flex-col gap-4">
+              <span className="text-[10px] text-zinc-500 font-bold uppercase tracking-widest font-mono flex items-center gap-1.5">
+                <FileText className="size-3.5" /> Executive Summary
               </span>
-              <p className="text-[11px] text-zinc-400 leading-relaxed font-semibold">
-                {averageWpm < 110
-                  ? "Speaking pace is slow. Introduce momentum to present strong confidence."
-                  : averageWpm >= 110 && averageWpm < 130
-                  ? "Measured, clear cadence. Increasing energy slightly could convey stronger confidence."
-                  : averageWpm >= 130 && averageWpm <= 150
-                  ? "Optimal speaking rate. Pacing aligns perfectly with elite communication benchmarks under pressure."
-                  : averageWpm > 150 && averageWpm <= 170
-                  ? "Slightly accelerated. Integrate pauses between arguments to maximize impact."
-                  : "Rapid speaking pace. Deepen breathing cycles to throttle pacing."}
+              <p className="text-sm text-zinc-350 leading-relaxed font-semibold select-text">
+                {feedback?.finalAssessment || "No summary assessment loaded."}
               </p>
             </div>
           </div>
         </div>
 
-        {/* Filler Word Counter */}
-        <div className="md:col-span-6 flex flex-col gap-4 border-t md:border-t-0 md:border-l border-zinc-900 pt-4 md:pt-0 md:pl-6">
-          <h3 className="text-xs font-bold text-zinc-400 tracking-wider uppercase flex items-center gap-2">
-            <svg className="size-4.5 text-violet-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z" />
-            </svg>
-            Vocal Filler Diagnostics
-          </h3>
-          
-          <div className="flex flex-col gap-3 mt-1">
-            <div className="flex flex-wrap gap-2">
+        {/* Multi-file submitted code viewer */}
+        {(feedback as any)?.candidateCode && (
+          <div className="w-full">
+            <FeedbackTabs candidateCode={(feedback as any).candidateCode} />
+          </div>
+        )}
+
+        {/* Speech Metrics Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 border-t border-b border-zinc-900 py-12">
+          {/* Cadence */}
+          <div className="flex flex-col gap-4">
+            <span className="text-[10px] text-zinc-500 font-bold uppercase tracking-widest font-mono flex items-center gap-1.5">
+              <Clock className="size-3.5" /> Speech Pacing
+            </span>
+            <div className="flex items-baseline gap-2">
+              <span className="text-5xl font-black text-white leading-none">{averageWpm}</span>
+              <span className="text-[10px] text-zinc-500 uppercase tracking-wider font-semibold font-mono">WPM</span>
+            </div>
+            <p className="text-xs text-zinc-400 leading-relaxed font-semibold mt-2">
+              {averageWpm < 110
+                ? "Your pace is slightly measured. Speaking with more momentum will keep the interviewer highly engaged."
+                : averageWpm >= 110 && averageWpm < 130
+                ? "Good steady pace. Incorporating brief pauses to transition between main ideas will add impact."
+                : averageWpm >= 130 && averageWpm <= 150
+                ? "Excellent cadence. This is the optimal pace for professional voice communication."
+                : "Your delivery is quick. Try structuring your sentences to speak more deliberately."}
+            </p>
+          </div>
+
+          {/* Vocal Fillers */}
+          <div className="flex flex-col gap-4 border-l border-zinc-900 pl-8 max-md:border-l-0 max-md:pl-0">
+            <span className="text-[10px] text-zinc-500 font-bold uppercase tracking-widest font-mono flex items-center gap-1.5">
+              <Mic className="size-3.5" /> Filler Word Diagnostics
+            </span>
+            <div className="flex flex-wrap gap-2 mt-2">
               {feedback?.topFillerWords && feedback.topFillerWords.length > 0 ? (
                 feedback.topFillerWords.map((item, index) => (
                   <span
                     key={index}
-                    className="text-[9px] font-bold tracking-wider uppercase px-3 py-1 rounded-full bg-rose-950/20 border border-rose-500/20 text-rose-400 flex items-center gap-2 shadow-sm"
+                    className="text-[10px] font-semibold font-mono px-3 py-1 rounded bg-zinc-900 border border-zinc-800 text-zinc-300 flex items-center gap-2"
                   >
-                    <span>"{item.word}"</span>
-                    <span className="bg-rose-500 text-white text-[9px] px-1.5 py-0.5 rounded-full font-black">
-                      {item.count}x
+                    <span>"{item.word.toUpperCase()}"</span>
+                    <span className="bg-zinc-800 text-white text-[9px] px-1 rounded-sm">
+                      {item.count}X
                     </span>
                   </span>
                 ))
               ) : (
-                <span className="text-[9px] font-bold tracking-wider uppercase px-3 py-1 rounded-full bg-emerald-950/20 border border-emerald-500/20 text-emerald-400 flex items-center gap-1.5 shadow-sm">
-                  ✓ No Vocal Fillers Detected
+                <span className="text-[10px] font-semibold font-mono px-3 py-1 rounded bg-zinc-900 border border-zinc-800 text-white">
+                  ✓ Zero Vocal Fillers Detected
                 </span>
               )}
             </div>
-            
-            <p className="text-[11px] text-zinc-400 leading-relaxed font-semibold">
-              Fillers like "um", "uh", or "like" reduce authority. Replacing these words with momentary silence projects superior intellectual composure.
+            <p className="text-xs text-zinc-400 leading-relaxed font-semibold mt-2">
+              Vocal fillers are natural, but replacement with deliberate silence conveys confidence and professional poise.
             </p>
           </div>
         </div>
-      </div>
 
-      {/* Categories & Competencies score list */}
-      <div className="flex flex-col gap-4">
-        <h2 className="text-xs font-bold tracking-widest text-zinc-400 uppercase flex items-center gap-2.5">
-          <span className="h-3.5 w-1 bg-violet-500 rounded-md" />
-          Competency Matrices
-        </h2>
-        
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          {feedback?.categoryScores?.map((category, index) => (
-            <div 
-              key={index} 
-              className="p-5 backdrop-blur-xl bg-zinc-950/20 border border-zinc-900 rounded-2xl flex flex-col gap-3.5 relative overflow-hidden transition-all duration-300 hover:border-violet-500/30 shadow-xl group"
-            >
-              <div className="flex justify-between items-center text-xs font-bold text-white uppercase tracking-wider">
-                <span className="truncate max-w-[190px]">{category.name}</span>
-                <span className="text-violet-400 bg-violet-500/10 border border-violet-500/20 px-2.5 py-0.5 rounded-full text-[9px] font-bold shadow-sm">
-                  {category.score} / 100
-                </span>
+        {/* Competency Breakdown */}
+        <div className="flex flex-col gap-6">
+          <span className="text-[10px] text-zinc-500 font-bold uppercase tracking-widest font-mono flex items-center gap-1.5">
+            <TrendingUp className="size-3.5" /> Competency Matrices
+          </span>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {feedback?.categoryScores?.map((category, index) => (
+              <div 
+                key={index} 
+                className="p-6 bg-zinc-900/10 border border-zinc-900 rounded-2xl flex flex-col gap-4 relative overflow-hidden"
+              >
+                <div className="flex justify-between items-center text-xs font-semibold text-white uppercase tracking-wider">
+                  <span>{category.name}</span>
+                  <span className="font-mono text-zinc-400">{category.score} / 100</span>
+                </div>
+
+                {/* Progress bar */}
+                <div className="w-full h-[3px] bg-zinc-900 rounded-full overflow-hidden">
+                  <div 
+                    className="h-full bg-white transition-all duration-500"
+                    style={{ width: `${category.score}%` }}
+                  />
+                </div>
+                
+                <p className="text-xs text-zinc-400 leading-relaxed font-semibold">
+                  {category.comment}
+                </p>
               </div>
-              
-              <p className="text-[11px] text-zinc-400 leading-relaxed font-semibold bg-zinc-950/60 p-3 rounded-xl border border-zinc-900/60">
-                {category.comment}
-              </p>
-            </div>
-          ))}
-        </div>
-      </div>
-
-      {/* Strengths & Improvements */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 font-sans">
-        
-        {/* Core Strengths */}
-        <div className="p-6 backdrop-blur-xl bg-zinc-950/20 border border-zinc-900 rounded-2xl flex flex-col gap-4 relative overflow-hidden shadow-2xl">
-          <h3 className="text-[10px] font-bold uppercase tracking-widest text-emerald-400 flex items-center gap-2">
-            <span className="h-2 w-2 rounded-full bg-emerald-400" />
-            Key Strengths
-          </h3>
-          
-          <ul className="space-y-3">
-            {feedback?.strengths?.map((strength, index) => (
-              <li key={index} className="text-zinc-350 text-xs font-semibold flex items-start gap-2.5 leading-relaxed">
-                <span className="text-emerald-400 font-bold text-sm leading-none mt-0.5">✓</span>
-                <span className="text-zinc-400">{strength}</span>
-              </li>
             ))}
-          </ul>
+          </div>
         </div>
 
-        {/* Actionable Optimizations */}
-        <div className="p-6 backdrop-blur-xl bg-zinc-950/20 border border-zinc-900 rounded-2xl flex flex-col gap-4 relative overflow-hidden shadow-2xl">
-          <h3 className="text-[10px] font-bold uppercase tracking-widest text-rose-400 flex items-center gap-2">
-            <span className="h-2 w-2 rounded-full bg-rose-400" />
-            Recommended Improvements
-          </h3>
-          
-          <ul className="space-y-3">
-            {feedback?.areasForImprovement?.map((area, index) => (
-              <li key={index} className="text-zinc-350 text-xs font-semibold flex items-start gap-2.5 leading-relaxed">
-                <span className="text-rose-400 font-bold text-sm leading-none mt-0.5">•</span>
-                <span className="text-zinc-400">{area}</span>
-              </li>
-            ))}
-          </ul>
+        {/* Detailed Recommendations */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 border-t border-zinc-900 pt-12">
+          {/* Key Strengths */}
+          <div className="flex flex-col gap-4">
+            <h3 className="text-sm font-bold text-white uppercase tracking-wider flex items-center gap-2">
+              <CheckCircle2 className="size-4.5 text-zinc-455" /> Key Strengths
+            </h3>
+            <ul className="space-y-3 mt-2">
+              {feedback?.strengths?.map((strength, index) => (
+                <li key={index} className="text-zinc-400 text-xs font-semibold flex items-start gap-3 leading-relaxed">
+                  <span className="text-white font-bold font-mono">[✓]</span>
+                  <span>{strength}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          {/* Areas for Improvement */}
+          <div className="flex flex-col gap-4 border-l border-zinc-900 pl-8 max-md:border-l-0 max-md:pl-0">
+            <h3 className="text-sm font-bold text-white uppercase tracking-wider flex items-center gap-2">
+              <Activity className="size-4.5 text-zinc-405" /> Optimizations
+            </h3>
+            <ul className="space-y-3 mt-2">
+              {feedback?.areasForImprovement?.map((area, index) => (
+                <li key={index} className="text-zinc-400 text-xs font-semibold flex items-start gap-3 leading-relaxed">
+                  <span className="text-zinc-500 font-bold font-mono">[!]</span>
+                  <span>{area}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
         </div>
-      </div>
 
-      {/* Navigation Buttons Deck */}
-      <div className="flex w-full justify-evenly gap-4 max-sm:flex-col max-sm:items-center mt-6">
-        <Button className="text-[10px] font-bold uppercase tracking-wider flex-1 rounded-xl h-12 bg-zinc-900/60 border border-zinc-800 text-zinc-300 hover:bg-zinc-800 hover:text-white transition-all duration-300 w-full shadow-2xl" asChild>
-          <Link href="/">
-            Back to Dashboard
-          </Link>
-        </Button>
+        {/* Footer Navigation */}
+        <div className="flex w-full justify-between gap-6 max-sm:flex-col mt-8">
+          <Button className="text-xs font-bold uppercase tracking-wider flex-1 rounded-full h-11 bg-zinc-900/50 border border-zinc-800 text-zinc-350 hover:bg-zinc-800 hover:text-white transition-all duration-300 w-full" asChild>
+            <Link href="/">
+              Return Dashboard
+            </Link>
+          </Button>
 
-        <Button className="text-[10px] font-bold uppercase tracking-wider flex-1 rounded-xl h-12 bg-white text-black hover:bg-zinc-200 transition-all duration-300 w-full shadow-2xl border border-white hover:shadow-[0_4px_25px_rgba(255,255,255,0.15)]" asChild>
-          <Link href={`/interview/${id}`}>
-            Retake Session
-          </Link>
-        </Button>
-      </div>
-    </section>
+          <Button className="text-xs font-bold uppercase tracking-wider flex-1 rounded-full h-11 bg-white text-black hover:bg-zinc-200 transition-all duration-300 w-full border border-white" asChild>
+            <Link href={`/interview/${id}`}>
+              Restart Session
+            </Link>
+          </Button>
+        </div>
+      </section>
+    </div>
   );
 };
 

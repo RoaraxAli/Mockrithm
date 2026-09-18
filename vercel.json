@@ -1,0 +1,219 @@
+{
+  "redirects": [
+    {
+      "source": "/documentation",
+      "has": [
+        {
+          "type": "host",
+          "value": "mockrithm.me"
+        }
+      ],
+      "destination": "https://docs.mockrithm.me",
+      "permanent": false
+    },
+    {
+      "source": "/games",
+      "has": [
+        {
+          "type": "host",
+          "value": "mockrithm.me"
+        }
+      ],
+      "destination": "https://games.mockrithm.me",
+      "permanent": false
+    },
+    {
+      "source": "/blogs",
+      "has": [
+        {
+          "type": "host",
+          "value": "mockrithm.me"
+        }
+      ],
+      "destination": "https://blog.mockrithm.me",
+      "permanent": false
+    },
+    {
+      "source": "/blog",
+      "has": [
+        {
+          "type": "host",
+          "value": "mockrithm.me"
+        }
+      ],
+      "destination": "https://blog.mockrithm.me",
+      "permanent": false
+    },
+    {
+      "source": "/resume",
+      "has": [
+        {
+          "type": "host",
+          "value": "mockrithm.me"
+        }
+      ],
+      "destination": "https://resume.mockrithm.me",
+      "permanent": false
+    }
+  ],
+  "rewrites": [
+    {
+      "source": "/_next/:path*",
+      "destination": "/_next/:path*"
+    },
+    {
+      "source": "/api/:path*",
+      "destination": "/api/:path*"
+    },
+    {
+      "source": "/",
+      "has": [
+        {
+          "type": "host",
+          "value": "docs.mockrithm.me"
+        }
+      ],
+      "destination": "/documentation"
+    },
+    {
+      "source": "/documentation/:path*",
+      "has": [
+        {
+          "type": "host",
+          "value": "docs.mockrithm.me"
+        }
+      ],
+      "destination": "/documentation/:path*"
+    },
+    {
+      "source": "/:path*",
+      "has": [
+        {
+          "type": "host",
+          "value": "docs.mockrithm.me"
+        }
+      ],
+      "destination": "/documentation/:path*"
+    },
+    {
+      "source": "/",
+      "has": [
+        {
+          "type": "host",
+          "value": "games.mockrithm.me"
+        }
+      ],
+      "destination": "/games"
+    },
+    {
+      "source": "/games/:path*",
+      "has": [
+        {
+          "type": "host",
+          "value": "games.mockrithm.me"
+        }
+      ],
+      "destination": "/games/:path*"
+    },
+    {
+      "source": "/:path*",
+      "has": [
+        {
+          "type": "host",
+          "value": "games.mockrithm.me"
+        }
+      ],
+      "destination": "/games/:path*"
+    },
+    {
+      "source": "/",
+      "has": [
+        {
+          "type": "host",
+          "value": "blog.mockrithm.me"
+        }
+      ],
+      "destination": "/blogs"
+    },
+    {
+      "source": "/blogs/:path*",
+      "has": [
+        {
+          "type": "host",
+          "value": "blog.mockrithm.me"
+        }
+      ],
+      "destination": "/blogs/:path*"
+    },
+    {
+      "source": "/:path*",
+      "has": [
+        {
+          "type": "host",
+          "value": "blog.mockrithm.me"
+        }
+      ],
+      "destination": "/blogs/:path*"
+    },
+    {
+      "source": "/",
+      "has": [
+        {
+          "type": "host",
+          "value": "resume.mockrithm.me"
+        }
+      ],
+      "destination": "/resume"
+    },
+    {
+      "source": "/resume/:path*",
+      "has": [
+        {
+          "type": "host",
+          "value": "resume.mockrithm.me"
+        }
+      ],
+      "destination": "/resume/:path*"
+    },
+    {
+      "source": "/:path*",
+      "has": [
+        {
+          "type": "host",
+          "value": "resume.mockrithm.me"
+        }
+      ],
+      "destination": "/resume/:path*"
+    },
+    {
+      "source": "/",
+      "has": [
+        {
+          "type": "host",
+          "value": "admin.mockrithm.me"
+        }
+      ],
+      "destination": "/admin"
+    },
+    {
+      "source": "/admin/:path*",
+      "has": [
+        {
+          "type": "host",
+          "value": "admin.mockrithm.me"
+        }
+      ],
+      "destination": "/admin/:path*"
+    },
+    {
+      "source": "/:path*",
+      "has": [
+        {
+          "type": "host",
+          "value": "admin.mockrithm.me"
+        }
+      ],
+      "destination": "/admin/:path*"
+    }
+  ]
+}

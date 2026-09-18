@@ -1,0 +1,102 @@
+---
+title: ATS Resume Validation Schema & Rules
+description: TypeScript models, data constraints, validation parameters, and parser rules for ATS-friendly resume components.
+---
+
+This page documents the structural rules and JSON schema properties that all resumes must satisfy to be flagged as "ATS-Friendly" by the Mockrithm analyzer.
+
+---
+
+## 1. Schema Design Principles
+
+To maximize compatibility with applicant tracking systems (like Workday, Greenhouse, or Lever), Mockrithm enforces a standardized schema based on the open **JSON Resume** specification. This format ensures that:
+- **No Complex Nested Arrays:** Prevents database parsing errors.
+- **ISO Date Formatting:** Enforces standard date parsing rules (e.g. `YYYY-MM`).
+- **Required Contact Details:** Ensures contact fields are not left blank.
+
+---
+
+## 2. Complete TypeScript Interface
+
+All resume editor forms and PDF generator schemas map directly to this TypeScript interface:
+
+```typescript
+export interface ResumeSchema {
+  id: string;
+  userId: string;
+  basics: {
+    name: string;
+    label: string; // e.g., "Software Engineer"
+    email: string;
+    phone: string;
+    url?: string;  // Portfolio or Website
+    githubUrl?: string;
+    linkedinUrl?: string;
+    summary: string; // 2-4 sentences target
+  };
+  work: Array<{
+    company: string;
+    position: string;
+    url?: string;
+    startDate: string; // ISO 8601 Format: YYYY-MM
+    endDate?: string;   // ISO 8601 Format or "Present"
+    summary?: string;
+    highlights: string[]; // Bullet lists must use action verbs
+  }>;
+  education: Array<{
+    institution: string;
+    area: string;      // Field of study
+    studyType: string; // e.g., "Bachelor of Science"
+    startDate: string;
+    endDate?: string;
+    score?: string;     // GPA or equivalent
+  }>;
+  skills: Array<{
+    name: string;      // e.g., "Languages"
+    keywords: string[]; // e.g., ["TypeScript", "JavaScript", "Go"]
+  }>;
+  projects: Array<{
+    name: string;
+    description: string;
+    url?: string;
+    keywords?: string[];
+  }>;
+}
+```
+
+---
+
+## 3. Validation Guidelines
+
+The resume analyzer parses the schema against the following scoring weights:
+
+<Tabs items={['Basics Verification', 'Work History Constraints', 'Skills Normalization']}>
+  <Tab value="Basics Verification">
+    - **Name & Contacts:** Must not be blank.
+    - **Links:** Enforces url formats for LinkedIn and GitHub profiles.
+    - **Summary length:** Must be between `150` and `400` characters to pass validation checks.
+  </Tab>
+  <Tab value="Work History Constraints">
+    - **Date Format:** Must match `^\d{4}-\d{2}$` (e.g., `2024-05`) or `"Present"`.
+    - **Bullet Highlights:** Each job entry must contain at least `3` bullet points.
+    - **Action Verbs:** The analyzer checks if bullet points begin with active verbs (e.g., *Built*, *Designed*, *Led*).
+  </Tab>
+  <Tab value="Skills Normalization">
+    - **Category Grouping:** Skills must be categorized (e.g., group database technologies separate from frontend frameworks).
+    - **Keyword Density:** Limits individual categories to `8` keywords to avoid keyword stuffing flags.
+  </Tab>
+</Tabs>
+
+---
+
+## 4. ATS Parser Scoring Rubric
+
+<Callout type="info" title="Scoring Impact">
+Resumes that fail schema validation rules are flagged, lowering the candidate's overall profile score on the user dashboard.
+</Callout>
+
+| Rule Key | Validation Rule | Impact | Action if Failed |
+| :--- | :--- | :--- | :--- |
+| `ERR-BAS-EMAIL` | Valid email pattern | Rejection | Disables PDF generation. |
+| `WARN-WRK-BULL` | Highlight array length < 3 | -10 points | Suggests expanding job descriptions. |
+| `WARN-SKL-DENS` | Keyword items > 10 in group | -5 points | Recommends splitting into subcategories. |

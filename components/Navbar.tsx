@@ -1,19 +1,14 @@
 "use client";
 
 import Link from "next/link";
-import { useRouter } from "next/navigation";
-import { auth, db } from "@/firebase/client";
-import { usePathname } from "next/navigation";
-import { signOut } from "firebase/auth";
-import Image from "next/image";
-import {
-  doc,
-  getDoc,
-  deleteDoc,
-  collection,
-  getDocs,
-} from "firebase/firestore";
+import { useRouter, usePathname } from "next/navigation";
 import { useState, useEffect } from "react";
+import Image from "next/image";
+import { useClerk, UserButton } from "@clerk/nextjs";
+import { getAuthRedirectUrl } from "@/lib/utils/auth";
+import { BillingOptions } from "@/app/user/components/BillingOptions";
+import { UserResumePanel } from "@/app/user/components/UserResumePanel";
+import { UpgradeBanner } from "@/app/user/components/UpgradeBanner";
 import {
   ChevronDown,
   Menu,
@@ -24,6 +19,14 @@ import {
   Home,
   Info,
   Mail,
+  LayoutDashboard,
+  PlayCircle,
+  Sparkles,
+  FileText,
+  MessageSquare,
+  CreditCard,
+  Mic,
+  Gamepad2,
 } from "lucide-react";
 
 interface NavbarProps {
@@ -35,8 +38,19 @@ interface NavbarProps {
 const Navbar = ({ userId, userName, userRole }: NavbarProps) => {
   const router = useRouter();
   const pathname = usePathname();
+  const { signOut: clerkSignOut } = useClerk();
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isGamesSubdomain, setIsGamesSubdomain] = useState(false);
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const hostname = window.location.hostname;
+      if (hostname.includes("games.mockrithm") || hostname.includes("games.localhost")) {
+        setIsGamesSubdomain(true);
+      }
+    }
+  }, []);
   const [isScrolled, setIsScrolled] = useState(false);
   const [isAdmin, setIsAdmin] = useState(userRole?.toLowerCase() === "admin");
 
@@ -63,10 +77,8 @@ const Navbar = ({ userId, userName, userRole }: NavbarProps) => {
 
   const handleLogout = async () => {
     try {
-      await Promise.all([
-        signOut(auth),
-        fetch("/api/auth/sign-out", { method: "POST" })
-      ]);
+      document.cookie = "bypass_admin=; path=/; expires=Thu, 01 Jan 1970 00:00:00 UTC;";
+      await clerkSignOut();
       window.location.href = "/sign-in";
     } catch (error) {
       console.error("Logout failed:", error);
@@ -81,32 +93,38 @@ const Navbar = ({ userId, userName, userRole }: NavbarProps) => {
     )
       return;
     try {
-      const interviewsRef = collection(db, "users", userId, "interviews");
-      const interviewDocs = await getDocs(interviewsRef);
-      await Promise.all(interviewDocs.docs.map((doc) => deleteDoc(doc.ref)));
-      await deleteDoc(doc(db, "users", userId));
-      const currentUser = auth.currentUser;
-      if (currentUser) await currentUser.delete();
-      await Promise.all([
-        signOut(auth),
-        fetch("/api/auth/sign-out", { method: "POST" })
-      ]);
-      window.location.href = "/sign-in";
+      const { deleteUserAccount } = await import("@/lib/actions/auth.action");
+      const res = await deleteUserAccount(userId);
+      if (res && res.success) {
+        document.cookie = "bypass_admin=; path=/; expires=Thu, 01 Jan 1970 00:00:00 UTC;";
+        await clerkSignOut();
+        window.location.href = "/sign-in";
+      } else {
+        alert("Failed to delete account securely.");
+      }
     } catch (error) {
       console.error("Account deletion failed:", error);
     }
   };
 
-  const navLinks = [
-    { href: "/", label: "Home", icon: Home },
-    { href: "/about", label: "About", icon: Info },
-    { href: "/contact", label: "Contact", icon: Mail },
-  ];
+  const navLinks = userId
+    ? [
+        { href: "/", label: "Home", icon: Home },
+        { href: "/about", label: "About", icon: Info },
+        { href: "/interview", label: "Interview", icon: PlayCircle },
+      ]
+    : [
+        { href: "/#intro", label: "Intro", icon: Home },
+        { href: "/#features", label: "Features", icon: Info },
+        { href: "/#pricing", label: "Pricing", icon: CreditCard },
+        { href: "/documentation", label: "Documentation", icon: Info },
+      ];
 
-  if (pathname.startsWith("/admin")) return null;
+  if (isGamesSubdomain || pathname.startsWith("/admin") || pathname.startsWith("/games") || pathname === "/games") return null;
 
   return (
     <>
+      {userId && <UpgradeBanner />}
       {isMobileMenuOpen && (
         <div
           className="fixed inset-0 bg-black/80 backdrop-blur-sm z-40 md:hidden"
@@ -115,58 +133,54 @@ const Navbar = ({ userId, userName, userRole }: NavbarProps) => {
       )}
 
       <nav
-        className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 font-mona-sans ${
-          isScrolled
-            ? "bg-zinc-950/75 backdrop-blur-xl shadow-2xl border-b border-white/10"
-            : "bg-black/50 backdrop-blur-md border-b border-white/5"
+        className={`fixed z-50 transition-all duration-300 font-mona-sans ${
+          userId
+            ? isScrolled
+              ? "top-12 left-[5%] right-[5%] rounded-full bg-zinc-950/85 backdrop-blur-xl shadow-2xl border border-white/10 px-4 py-0"
+              : "top-8 left-0 right-0 bg-black/50 backdrop-blur-md border-b border-white/5 py-1"
+            : isScrolled
+              ? "top-4 left-[5%] right-[5%] rounded-full bg-zinc-950/85 backdrop-blur-xl shadow-2xl border border-white/10 px-4 py-0"
+              : "top-0 left-0 right-0 bg-black/50 backdrop-blur-md border-b border-white/5 py-1"
         }`}
       >
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 z-10">
-          <div className="relative flex items-center h-16 justify-between">
+          <div className={`relative flex items-center justify-between transition-all duration-300 ${isScrolled ? "h-12" : "h-16"}`}>
             {/* Logo */}
             <Link
               href="/"
-              className="group flex items-center space-x-3 transition-all duration-300 hover:scale-105"
+              className={`group flex items-center transition-all duration-300 hover:scale-105 ${isScrolled ? "space-x-2" : "space-x-3"}`}
               aria-label="Mockrithm Home"
             >
-              <div className="relative">
-                <div className="absolute inset-0 bg-white rounded-lg blur opacity-10 group-hover:opacity-30 transition-opacity duration-300" />
-                <div className="relative bg-white/5 p-2 rounded-lg border border-white/10 group-hover:border-white/30 transition-colors duration-300 backdrop-blur-sm">
-                  <Image
-                    src="/logo.svg"
-                    alt="Mockrithm Logo"
-                    width={28}
-                    height={28}
-                    priority
-                    className="w-7 h-7"
-                  />
-                </div>
-              </div>
+              <Image
+                src="/logo.svg"
+                alt="Mockrithm Logo"
+                width={32}
+                height={32}
+                priority
+                className={`transition-all duration-300 brightness-0 invert opacity-80 group-hover:opacity-100 ${isScrolled ? "w-7 h-7" : "w-8 h-8"}`}
+              />
               <div className="flex flex-col leading-tight">
-                <span className="text-[16px] font-black tracking-wider text-white group-hover:text-gray-200 transition-colors duration-300">
+                <span className={`font-black tracking-wider text-white group-hover:text-gray-200 transition-all duration-300 ${isScrolled ? "text-[13px]" : "text-[16px]"}`}>
                   MOCKRITHM
-                </span>
-                <span className="text-[10px] font-bold tracking-widest text-zinc-500 group-hover:text-zinc-400 transition-colors duration-300 uppercase">
-                  Face the Machine
                 </span>
               </div>
             </Link>
 
             {/* Desktop Nav Links */}
-            <div className="hidden md:flex items-center space-x-2 absolute left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2">
+            <div className="hidden md:flex items-center space-x-1 absolute left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2">
               {navLinks.map((link) => {
-                const isActive = pathname === link.href;
+                const isActive = pathname === link.href || (pathname === "/" && link.href === "/#intro");
                 return (
                   <Link
                     key={link.href}
                     href={link.href}
-                    className={`group relative px-4 py-2 rounded-xl transition-all duration-300 ${
+                    className={`group relative rounded-xl transition-all duration-300 ${
                       isActive
                         ? "text-white bg-white/5 border border-white/10 shadow-[0_0_15px_rgba(255,255,255,0.05)]"
                         : "text-gray-300 hover:text-white hover:bg-white/5"
-                    }`}
+                    } ${isScrolled ? "px-3 py-1.5" : "px-4 py-2"}`}
                   >
-                    <span className="text-sm font-semibold tracking-wide">{link.label}</span>
+                    <span className={`transition-all duration-300 font-semibold tracking-wide ${isScrolled ? "text-xs" : "text-sm"}`}>{link.label}</span>
                     <span
                       className={`absolute left-1/2 -translate-x-1/2 bottom-0 h-[2px] w-1/2 bg-white transition-transform duration-300 origin-center ${
                         isActive
@@ -182,94 +196,185 @@ const Navbar = ({ userId, userName, userRole }: NavbarProps) => {
             {/* Desktop User Dropdown / Login */}
             <div className="hidden md:flex items-center ml-auto">
               {!userId ? (
-                <Link
-                  href="/sign-in"
-                  className="px-6 py-2 rounded-md bg-white text-black text-sm font-bold hover:bg-zinc-200 hover:shadow-[0_0_15px_rgba(255,255,255,0.15)] transition-all duration-300 border border-white"
-                >
-                  Sign In
-                </Link>
-              ) : (
-                <div className="relative dropdown-container">
-                  <button
-                    onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-                    className="group flex items-center space-x-2 px-4 py-2 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 hover:border-white/30 text-gray-300 hover:text-white transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-white/20 backdrop-blur-sm cursor-pointer"
+                <div className="flex items-center space-x-2">
+                  <Link
+                    href={getAuthRedirectUrl("sign-in")}
+                    className={`transition-all duration-300 text-zinc-300 hover:text-white font-semibold ${isScrolled ? "text-xs px-3 py-1.5" : "text-sm px-4 py-2"}`}
                   >
-                    <div className="flex items-center space-x-2">
-                      <div className="w-6 h-6 bg-zinc-800 rounded-md flex items-center justify-center border border-zinc-700">
-                        <User className="w-3.5 h-3.5 text-white" />
-                      </div>
-                      <span className="text-sm font-semibold max-w-24 truncate">
-                        {userName}
-                      </span>
-                    </div>
-                    <ChevronDown
-                      className={`w-4 h-4 transition-transform duration-300 text-zinc-400 group-hover:text-white ${
-                        isDropdownOpen ? "rotate-180" : "rotate-0"
-                      }`}
-                    />
-                  </button>
-
-                  {isDropdownOpen && (
-                    <div className="absolute right-0 mt-2 w-56 bg-zinc-950/90 backdrop-blur-xl rounded-2xl shadow-2xl border border-white/10 py-2.5 z-10 animate-in fade-in slide-in-from-top-2 duration-200">
-                      {/* User Info */}
-                      <div className="px-4 py-3 border-b border-white/5">
-                        <p className="text-sm font-bold text-white">
-                          {userName}
-                        </p>
-                        <p className="text-xs text-zinc-400 truncate">{userId}</p>
-                      </div>
-
-                      {isAdmin ? (
-                        // Admin only → Admin Panel
-                        <Link
-                          href="/admin"
-                          className="group flex items-center space-x-3 w-full px-4 py-3 text-sm text-gray-300 hover:text-white hover:bg-white/5 transition-all duration-200"
-                        >
-                          <Home className="w-4 h-4 text-zinc-400 group-hover:scale-110 transition-transform duration-200" />
-                          <span className="font-medium">Admin Panel</span>
-                        </Link>
-                      ) : (
-                        <>
-                          {/* User Panel */}
-                          <Link
-                            href="/user"
-                            className="group flex items-center space-x-3 w-full px-4 py-3 text-sm text-gray-300 hover:text-white hover:bg-white/5 transition-all duration-200"
-                          >
-                            <User className="w-4 h-4 text-zinc-400 group-hover:scale-110 transition-transform duration-200" />
-                            <span className="font-medium">User Panel</span>
-                          </Link>
-
-                          {/* Sign Out */}
-                          <button
-                            onClick={() => {
-                              handleLogout();
-                              setIsDropdownOpen(false);
-                            }}
-                            className="group flex items-center space-x-3 w-full px-4 py-3 text-sm text-gray-300 hover:text-white hover:bg-white/5 transition-all duration-200 cursor-pointer"
-                          >
-                            <LogOut className="w-4 h-4 text-rose-500 group-hover:scale-110 transition-transform duration-200" />
-                            <span className="font-medium">Sign Out</span>
-                          </button>
-                        </>
-                      )}
-                    </div>
+                    Sign In
+                  </Link>
+                  <Link
+                    href={getAuthRedirectUrl("sign-up")}
+                    className={`bg-white text-black font-bold hover:bg-zinc-200 hover:shadow-[0_0_15px_rgba(255,255,255,0.15)] transition-all duration-300 border border-white rounded-xl ${isScrolled ? "text-xs px-4 py-1.5" : "text-sm px-5 py-2"}`}
+                  >
+                    Start Prep
+                  </Link>
+                </div>
+              ) : (
+                <div className="flex items-center space-x-4 flex-row">
+                  {isAdmin && (
+                    <a
+                      href="/admin"
+                      className="text-xs font-bold uppercase tracking-wider px-3.5 py-1.5 rounded-lg border border-red-500/20 bg-red-500/5 text-red-400 hover:bg-red-500/10 hover:text-red-300 transition-all mr-2"
+                    >
+                      Admin
+                    </a>
                   )}
+
+                  <UserButton
+                    appearance={{
+                      variables: {
+                        colorPrimary: "#ffffff",
+                        colorBackground: "#09090b", // zinc-950
+                        colorText: "#ffffff",
+                        colorTextSecondary: "#a1a1aa", // zinc-400
+                        colorBorder: "#27272a", // zinc-800
+                        colorInputBackground: "#09090b",
+                        colorInputText: "#ffffff",
+                        fontFamily: "var(--font-mona-sans), sans-serif",
+                      } as any,
+                      elements: {
+                        userButtonAvatarBox: "w-8 h-8 rounded-lg border border-white/10 hover:border-white/30 transition-colors",
+                        card: "border border-white/10 shadow-2xl rounded-2xl bg-zinc-950/20 backdrop-blur-3xl",
+                        navbar: "border-r border-white/5 bg-transparent",
+                        navbarButton: "text-zinc-400 hover:text-white hover:bg-white/5 rounded-lg text-xs font-semibold uppercase tracking-wider transition-all",
+                        navbarButtonActive: "text-white bg-white/5 font-black border-l-2 border-white",
+                        pageScrollable: "bg-transparent p-6 sm:p-8",
+                        headerTitle: "text-xl font-black text-white",
+                        headerSubtitle: "text-xs text-zinc-450",
+                        profileSectionTitleText: "text-xs font-bold text-zinc-500 uppercase tracking-wider",
+                        formButtonPrimary: "bg-white hover:bg-zinc-200 text-black text-xs font-bold py-2 rounded-lg transition-all border border-white cursor-pointer",
+                        formButtonReset: "border border-zinc-800 hover:bg-zinc-900 text-zinc-300 text-xs font-bold py-2 rounded-lg transition-all cursor-pointer",
+                        scrollBox: "bg-transparent",
+                        userBox: "bg-zinc-950 text-white",
+                        userBoxTitle: "text-white font-bold",
+                        userBoxSubtitle: "text-zinc-400 font-medium",
+                        userBoxText: "text-white",
+                        userBoxTextContainer: "text-white",
+                        userBoxLabel: "text-white",
+                        userButtonPopoverCard: "bg-zinc-950 border border-white/10 text-white",
+                        userButtonPopoverActions: "bg-transparent",
+                        userButtonPopoverActionButton: "text-zinc-200! hover:text-white! hover:bg-white/5",
+                        userButtonPopoverActionButtonText: "text-zinc-200! !text-zinc-200 hover:text-white! !hover:text-white font-medium",
+                        userButtonPopoverActionButtonIcon: "text-zinc-400",
+                        userButtonPopoverCustomMenuItemButton: "text-zinc-200! hover:text-white! hover:bg-white/5",
+                        userButtonPopoverCustomMenuItemText: "text-zinc-200! !text-zinc-200 hover:text-white! !hover:text-white font-medium",
+                        userButtonPopoverFooter: "border-t border-white/5 bg-zinc-950",
+                        userButtonPopoverFooterText: "text-zinc-500",
+                      }
+                    }}
+                  >
+
+                    <UserButton.UserProfilePage
+                      label="Resume Builder"
+                      url="resume"
+                      labelIcon={<Sparkles className="size-4" />}
+                    >
+                      <UserResumePanel />
+                    </UserButton.UserProfilePage>
+
+                    <UserButton.UserProfilePage
+                      label="Billing & Subscription"
+                      url="billing"
+                      labelIcon={<CreditCard className="size-4" />}
+                    >
+                      <BillingOptions />
+                    </UserButton.UserProfilePage>
+                  </UserButton>
                 </div>
               )}
             </div>
 
+            {/* Mobile User Button */}
+            {userId && (
+              <div className="md:hidden flex items-center mr-2">
+                <UserButton
+                  appearance={{
+                    variables: {
+                      colorPrimary: "#ffffff",
+                      colorBackground: "#09090b", // zinc-950
+                      colorText: "#ffffff",
+                      colorTextSecondary: "#a1a1aa", // zinc-400
+                      colorBorder: "#27272a", // zinc-800
+                      colorInputBackground: "#09090b",
+                      colorInputText: "#ffffff",
+                      fontFamily: "var(--font-mona-sans), sans-serif",
+                    } as any,
+                    elements: {
+                      userButtonAvatarBox: "w-8 h-8 rounded-lg border border-white/10",
+                      card: "border border-white/10 shadow-2xl rounded-2xl bg-zinc-950/20 backdrop-blur-3xl",
+                      navbar: "border-r border-white/5 bg-transparent",
+                      navbarButton: "text-zinc-400 hover:text-white hover:bg-white/5 rounded-lg text-xs font-semibold uppercase tracking-wider transition-all",
+                      navbarButtonActive: "text-white bg-white/5 font-black border-l-2 border-white",
+                      pageScrollable: "bg-transparent p-6 sm:p-8",
+                      headerTitle: "text-xl font-black text-white",
+                      headerSubtitle: "text-xs text-zinc-450",
+                      profileSectionTitleText: "text-xs font-bold text-zinc-500 uppercase tracking-wider",
+                      formButtonPrimary: "bg-white hover:bg-zinc-200 text-black text-xs font-bold py-2 rounded-lg transition-all border border-white cursor-pointer",
+                      formButtonReset: "border border-zinc-800 hover:bg-zinc-900 text-zinc-300 text-xs font-bold py-2 rounded-lg transition-all cursor-pointer",
+                      scrollBox: "bg-transparent",
+                      userBox: "bg-zinc-950 text-white",
+                      userBoxTitle: "text-white font-bold",
+                      userBoxSubtitle: "text-zinc-400 font-medium",
+                      userBoxText: "text-white",
+                      userBoxTextContainer: "text-white",
+                      userBoxLabel: "text-white",
+                      userButtonPopoverCard: "bg-zinc-950 border border-white/10 text-white",
+                      userButtonPopoverActions: "bg-transparent",
+                      userButtonPopoverActionButton: "text-zinc-200! hover:text-white! hover:bg-white/5",
+                      userButtonPopoverActionButtonText: "text-zinc-200! !text-zinc-200 hover:text-white! !hover:text-white font-medium",
+                      userButtonPopoverActionButtonIcon: "text-zinc-400",
+                      userButtonPopoverCustomMenuItemButton: "text-zinc-200! hover:text-white! hover:bg-white/5",
+                      userButtonPopoverCustomMenuItemText: "text-zinc-200! !text-zinc-200 hover:text-white! !hover:text-white font-medium",
+                      userButtonPopoverFooter: "border-t border-white/5 bg-zinc-950",
+                      userButtonPopoverFooterText: "text-zinc-500",
+                    }
+                  }}
+                >
 
-            {/* Mobile Menu Toggle */}
-            <button
-              className="md:hidden relative p-2 rounded-lg bg-white/10 hover:bg-white/20 border border-white/20 hover:border-white/40 text-gray-300 hover:text-white transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-white/50 backdrop-blur-sm"
-              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-            >
-              {isMobileMenuOpen ? (
-                <X className="w-5 h-5" />
-              ) : (
-                <Menu className="w-5 h-5" />
+                  <UserButton.UserProfilePage
+                    label="Resume Builder"
+                    url="resume"
+                    labelIcon={<Sparkles className="size-4" />}
+                  >
+                    <UserResumePanel />
+                  </UserButton.UserProfilePage>
+
+                  <UserButton.UserProfilePage
+                    label="Billing & Subscription"
+                    url="billing"
+                    labelIcon={<CreditCard className="size-4" />}
+                  >
+                    <BillingOptions />
+                  </UserButton.UserProfilePage>
+                </UserButton>
+              </div>
+            )}
+
+            {/* Mobile Actions Container */}
+            <div className="flex items-center space-x-2 md:hidden">
+              {!userId && (
+                <Link
+                  href={getAuthRedirectUrl("sign-up")}
+                  className="bg-white text-black font-extrabold hover:bg-zinc-200 transition-all border border-white rounded-xl text-[9px] uppercase tracking-wider px-3.5 py-1.5"
+                >
+                  Start Prep
+                </Link>
               )}
-            </button>
+
+
+              {/* Mobile Menu Toggle */}
+              <button
+                className="relative p-2 rounded-lg bg-white/10 hover:bg-white/20 border border-white/20 hover:border-white/40 text-gray-300 hover:text-white transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-white/50 backdrop-blur-sm"
+                onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+              >
+                {isMobileMenuOpen ? (
+                  <X className="w-5 h-5" />
+                ) : (
+                  <Menu className="w-5 h-5" />
+                )}
+              </button>
+            </div>
           </div>
         </div>
 
@@ -303,35 +408,71 @@ const Navbar = ({ userId, userName, userRole }: NavbarProps) => {
 
               <div className="border-t border-white/20 pt-4 mt-4 space-y-2">
                 {!userId ? (
-                  <Link
-                    href="/sign-in"
-                    className="group flex items-center space-x-3 w-full px-4 py-3 rounded-lg text-white bg-white/10 hover:bg-white/20 transition-all duration-300"
-                    onClick={() => setIsMobileMenuOpen(false)}
-                  >
-                    <User className="w-5 h-5" />
-                    <span className="font-medium">Sign In</span>
-                  </Link>
+                  <div className="flex flex-col gap-2">
+                    <Link
+                      href={getAuthRedirectUrl("sign-in")}
+                      className="group flex items-center space-x-3 w-full px-4 py-3 rounded-lg text-gray-300 hover:text-white hover:bg-white/10 transition-all duration-300"
+                      onClick={() => setIsMobileMenuOpen(false)}
+                    >
+                      <User className="w-5 h-5" />
+                      <span className="font-medium">Access Portal</span>
+                    </Link>
+                    <Link
+                      href={getAuthRedirectUrl("sign-up")}
+                      className="group flex items-center space-x-3 w-full px-4 py-3 rounded-lg text-white bg-white/10 hover:bg-white/20 transition-all duration-300"
+                      onClick={() => setIsMobileMenuOpen(false)}
+                    >
+                      <User className="w-5 h-5" />
+                      <span className="font-medium">Start Prep</span>
+                    </Link>
+                  </div>
                 ) : isAdmin ? (
-                  // Admin only → Admin Panel
-                  <Link
+                  // Admin only → Admin Panel (external subdomain)
+                  <a
                     href="/admin"
                     className="group flex items-center space-x-3 w-full px-4 py-3 text-sm text-gray-300 hover:text-white hover:bg-white/10 transition-all duration-200"
                     onClick={() => setIsMobileMenuOpen(false)}
                   >
                     <Home className="w-5 h-5 group-hover:scale-110 transition-transform duration-300" />
                     <span className="font-medium">Admin Panel</span>
-                  </Link>
+                  </a>
                 ) : (
                   <>
-                    {/* User Panel */}
+                    {/* User Panel Pages */}
+
                     <Link
-                      href="/user"
+                      href="/user/take-interview"
                       className="group flex items-center space-x-3 w-full px-4 py-3 text-sm text-gray-300 hover:text-white hover:bg-white/10 transition-all duration-200"
                       onClick={() => setIsMobileMenuOpen(false)}
                     >
-                      <User className="w-5 h-5 group-hover:scale-110 transition-transform duration-300" />
-                      <span className="font-medium">User Panel</span>
+                      <PlayCircle className="w-5 h-5 text-zinc-500 group-hover:text-white transition-colors" />
+                      <span className="font-medium">Take Interview</span>
                     </Link>
+                    <a
+                      href="https://resume.mockrithm.me"
+                      className="group flex items-center space-x-3 w-full px-4 py-3 text-sm text-gray-300 hover:text-white hover:bg-white/10 transition-all duration-200"
+                      onClick={() => setIsMobileMenuOpen(false)}
+                    >
+                      <Sparkles className="w-5 h-5 text-zinc-500 group-hover:text-white transition-colors" />
+                      <span className="font-medium">Resume Builder</span>
+                    </a>
+                    <Link
+                      href="/user/interviews"
+                      className="group flex items-center space-x-3 w-full px-4 py-3 text-sm text-gray-300 hover:text-white hover:bg-white/10 transition-all duration-200"
+                      onClick={() => setIsMobileMenuOpen(false)}
+                    >
+                      <FileText className="w-5 h-5 text-zinc-500 group-hover:text-white transition-colors" />
+                      <span className="font-medium">Your Interviews</span>
+                    </Link>
+                    <Link
+                      href="/user/feedback"
+                      className="group flex items-center space-x-3 w-full px-4 py-3 text-sm text-gray-300 hover:text-white hover:bg-white/10 transition-all duration-200"
+                      onClick={() => setIsMobileMenuOpen(false)}
+                    >
+                      <MessageSquare className="w-5 h-5 text-zinc-500 group-hover:text-white transition-colors" />
+                      <span className="font-medium">Feedback</span>
+                    </Link>
+
 
                     {/* Sign Out */}
                     <button
@@ -339,9 +480,9 @@ const Navbar = ({ userId, userName, userRole }: NavbarProps) => {
                         handleLogout();
                         setIsMobileMenuOpen(false);
                       }}
-                      className="group flex items-center space-x-3 w-full px-4 py-3 text-sm text-gray-300 hover:text-white hover:bg-white/10 transition-all duration-300"
+                      className="group flex items-center space-x-3 w-full px-4 py-3 text-sm text-gray-300 hover:text-white hover:bg-white/10 transition-all duration-300 cursor-pointer"
                     >
-                      <LogOut className="w-5 h-5 group-hover:scale-110 transition-transform duration-300" />
+                      <LogOut className="w-5 h-5 text-zinc-500 group-hover:text-rose-450 transition-colors" />
                       <span className="font-medium">Sign Out</span>
                     </button>
 
@@ -351,9 +492,9 @@ const Navbar = ({ userId, userName, userRole }: NavbarProps) => {
                         handleDeleteAccount();
                         setIsMobileMenuOpen(false);
                       }}
-                      className="group flex items-center space-x-3 w-full px-4 py-3 text-sm text-white hover:text-red-300 hover:bg-red-500/10 transition-all duration-300"
+                      className="group flex items-center space-x-3 w-full px-4 py-3 text-sm text-white hover:text-red-300 hover:bg-red-500/10 transition-all duration-300 cursor-pointer"
                     >
-                      <Trash2 className="w-5 h-5 group-hover:scale-110 transition-transform duration-300 text-white group-hover:text-red-300" />
+                      <Trash2 className="w-5 h-5 text-white group-hover:text-red-300" />
                       <span className="font-medium">Delete Account</span>
                     </button>
                   </>
@@ -365,7 +506,7 @@ const Navbar = ({ userId, userName, userRole }: NavbarProps) => {
         )}
       </nav>
 
-      <div className="h-16" />
+      <div className={userId ? "h-24" : "h-16"} />
     </>
   );
 };

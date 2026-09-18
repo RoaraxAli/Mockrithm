@@ -45,6 +45,7 @@ interface CreateFeedbackParams {
   feedbackId?: string;
   averageWpm?: number;
   topFillerWords?: { word: string; count: number }[];
+  candidateCode?: string;
 }
 
 interface User {
@@ -52,10 +53,17 @@ interface User {
   email: string;
   id: string;
   role?: string;
-  status?: string;
   resumeLink?: string;
   profileURL?: string;
-  createdAt?: any;
+  imageUrl?: string;
+  tier?: "freemium" | "premium" | "pro";
+  billingInterval?: "monthly" | "annual" | "lifetime";
+  onboarded?: boolean;
+  resumeData?: any;
+  country?: string;
+  targetRole?: string;
+  gamesProgress?: Record<string, { completedLevel: number; xp: number; updatedAt?: string }>;
+  gamesXp?: number;
 }
 
 interface InterviewCardProps {
@@ -82,6 +90,11 @@ interface AgentProps {
     templateCode: string;
     language: string;
   } | null;
+  userResumeData?: any;
+  userCountry?: string;
+  role?: string;
+  sessionType?: string;
+  userTier?: string;
 }
 
 interface RouteParams {
