@@ -5,6 +5,7 @@ import { useState, useEffect } from "react";
 export default function AwwwardsHero() {
   const [videoSrc, setVideoSrc] = useState<string | null>(null);
 
+  useEffect(() => {
     // Only load the 3.6MB video on desktop devices without saveData/bot throttling
     if (typeof window === "undefined") return;
     const isMobile = window.innerWidth < 768 || window.matchMedia("(pointer: coarse)").matches;

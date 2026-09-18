@@ -3,8 +3,6 @@ import { redirect } from "next/navigation";
 import dynamic from "next/dynamic";
 import { getCurrentUser } from "@/lib/actions/auth.action";
 import MarketingLandingWrapper from "@/components/MarketingLandingWrapper";
-import ResumeLandingPage from "./resume/page";
-import GamesLandingPage from "./games/page";
 
 const BlogsPage = dynamic(() => import("../blog/page"));
 const LandingDashboard = dynamic(() => import("@/components/LandingDashboard"));
