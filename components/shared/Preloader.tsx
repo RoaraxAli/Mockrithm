@@ -35,7 +35,6 @@ export default function Preloader() {
     ) {
       return;
     }
-
     // Only show on first launch of the session
     const hasVisited = sessionStorage.getItem("mockrithm_visited");
     if (hasVisited) {

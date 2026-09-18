@@ -5,7 +5,6 @@ import { useState, useEffect } from "react";
 export default function AwwwardsHero() {
   const [videoSrc, setVideoSrc] = useState<string | null>(null);
 
-  useEffect(() => {
     // Only load the 3.6MB video on desktop devices without saveData/bot throttling
     if (typeof window === "undefined") return;
     const isMobile = window.innerWidth < 768 || window.matchMedia("(pointer: coarse)").matches;
@@ -44,6 +43,7 @@ export default function AwwwardsHero() {
         <div className="fixed inset-0 w-full h-full bg-zinc-950 z-0" />
       )}
 
+
       {/* Dark overlay for text readability */}
       <div className="fixed inset-0 bg-black/30 z-[1]" />
 
@@ -69,7 +69,6 @@ export default function AwwwardsHero() {
           Amid the noise, we create private spaces for focused practice and real skill growth.
         </p>
 
-
         {/* Big CTA */}
         <button
           onClick={handleJourneyBegin}
@@ -89,6 +88,7 @@ export default function AwwwardsHero() {
           <div className="w-[1px] h-8 bg-gradient-to-b from-white to-transparent" />
         </div>
       </div>
+
     </section>
   );
 }

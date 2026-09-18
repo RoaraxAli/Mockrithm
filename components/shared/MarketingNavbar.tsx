@@ -41,6 +41,7 @@ export default function MarketingNavbar() {
 
         {/* Links */}
         <div className="hidden md:flex items-center gap-8 text-sm font-medium" style={{ fontFamily: "var(--font-inter), 'Inter', sans-serif" }}>
+
           <Link href="https://mockrithm.me" className="text-white/60 hover:text-white transition-colors duration-200">
             Home
           </Link>

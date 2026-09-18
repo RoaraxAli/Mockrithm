@@ -54,10 +54,10 @@ next-env.d.ts
 # presentations
 *.pptx
 Mockrithm_Presentation.pptx
-
 # local testing and reports
 lighthouse_report.html
 *.report.html
 test_whisper_models.js
 ahmed.json
 ali.json
+
