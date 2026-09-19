@@ -103,8 +103,11 @@ export default function OnboardingWizardClient({ userId, userName, userTier = "f
   const paramResumeId = searchParams.get("resumeId");
   const [step, setStep] = useState<1 | 2 | 3 | 4 | 5 | 6>(1);
 
+  const [isFreemiumLoading, setIsFreemiumLoading] = useState(false);
+  const [isPremiumLoading, setIsPremiumLoading] = useState(false);
+
   const handleSelectFreemium = async () => {
-    setIsProcessing(true);
+    setIsFreemiumLoading(true);
     try {
       const res = await updateUserTier(userId, "freemium");
       if (res.success) {
@@ -120,12 +123,12 @@ export default function OnboardingWizardClient({ userId, userName, userTier = "f
       console.error(e);
       setError("An error occurred selecting plan.");
     } finally {
-      setIsProcessing(false);
+      setIsFreemiumLoading(false);
     }
   };
 
   const handlePay = async () => {
-    setIsProcessing(true);
+    setIsPremiumLoading(true);
     try {
       const res = await fetch("/api/payment/init", {
         method: "POST",
@@ -143,18 +146,18 @@ export default function OnboardingWizardClient({ userId, userName, userTier = "f
         if (!opened && data.checkoutUrl) {
           window.location.href = data.checkoutUrl;
         } else {
-          setIsProcessing(false);
+          setIsPremiumLoading(false);
         }
       } else if (data.checkoutUrl) {
         window.location.href = data.checkoutUrl;
       } else {
         setError(data.error || "Failed to initialize checkout.");
-        setIsProcessing(false);
+        setIsPremiumLoading(false);
       }
     } catch (e: any) {
       console.error(e);
       setError("Could not reach payment gateway.");
-      setIsProcessing(false);
+      setIsPremiumLoading(false);
     }
   };
   const [country, setCountry] = useState("");
@@ -772,7 +775,7 @@ export default function OnboardingWizardClient({ userId, userName, userTier = "f
                 >
                   {isProcessing ? (
                     <span className="flex items-center justify-center gap-1.5">
-                      <Loader2 className="size-4 animate-spin" /> Ingestion...
+                      <Loader2 className="size-4 animate-spin" /> Processing...
                     </span>
                   ) : (
                     "Upload and Parse"
@@ -1290,10 +1293,10 @@ export default function OnboardingWizardClient({ userId, userName, userTier = "f
                   </div>
                   <Button
                     onClick={handleSelectFreemium}
-                    disabled={isProcessing}
+                    disabled={isFreemiumLoading || isPremiumLoading}
                     className="mt-6 w-full py-2.5 rounded-lg border border-zinc-850 hover:bg-zinc-900 hover:text-white text-zinc-300 text-xs font-bold transition-all disabled:opacity-50 cursor-pointer flex justify-center items-center gap-1.5"
                   >
-                    {isProcessing ? <Loader2 className="size-3.5 animate-spin" /> : "Continue Freemium"}
+                    {isFreemiumLoading ? <Loader2 className="size-3.5 animate-spin" /> : "Continue Freemium"}
                   </Button>
                 </div>
 
@@ -1325,10 +1328,10 @@ export default function OnboardingWizardClient({ userId, userName, userTier = "f
                   </div>
                   <Button
                     onClick={handlePay}
-                    disabled={isProcessing}
+                    disabled={isFreemiumLoading || isPremiumLoading}
                     className="mt-6 w-full py-2.5 rounded-lg bg-white hover:bg-zinc-200 text-black text-xs font-bold transition-all disabled:opacity-50 cursor-pointer flex justify-center items-center gap-1.5"
                   >
-                    {isProcessing ? (
+                    {isPremiumLoading ? (
                       <>
                         <Loader2 className="size-3.5 animate-spin" /> Initializing...
                       </>

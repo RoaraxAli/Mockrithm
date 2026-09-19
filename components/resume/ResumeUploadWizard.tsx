@@ -250,7 +250,7 @@ export default function ResumeUploadWizard({ userId }: { userId: string }) {
             <div className="flex flex-col gap-4 animate-fadeIn">
               <h3 className="text-[11px] font-mono font-bold text-zinc-400 tracking-[0.2em] uppercase flex items-center gap-2">
                 <FileText className="size-4.5 text-white" />
-                INGESTION GATE
+                RESUME UPLOAD
               </h3>
               <p className="text-xs text-zinc-400 leading-relaxed font-semibold">
                 Upload your resume in PDF format. The parsing engine will extract text and map your professional history into structured data.
@@ -424,7 +424,7 @@ export default function ResumeUploadWizard({ userId }: { userId: string }) {
             </h4>
             <p className="text-xs text-zinc-400 leading-relaxed font-semibold">
               {step === 1 
-                ? "Upload a readable PDF resume. Highly visual or graphical designs will be mapped clean for optimal ATS ingestion."
+                ? "Upload a readable PDF resume. Highly visual or graphical designs will be mapped clean for optimal ATS scanning."
                 : step === 2 
                 ? "Specifying target country and description parameters permits the analyzer to trace target keywords."
                 : "Verify the rendered layout. Our templates are guaranteed to achieve high parsing yields in major ATS systems."
