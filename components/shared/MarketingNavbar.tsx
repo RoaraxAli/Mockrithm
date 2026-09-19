@@ -7,17 +7,27 @@ import { cn } from "@/lib/utils";
 export default function MarketingNavbar() {
   const [scrolled, setScrolled] = useState(false);
 
+  const [docsHref, setDocsHref] = useState("https://docs.mockrithm.me");
+
   useEffect(() => {
     const handleScroll = () => {
       setScrolled(window.scrollY > 20);
     };
+
+    if (typeof window !== "undefined" && window.location.hostname.includes("localhost")) {
+      setDocsHref("/documentation");
+    }
 
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
   const handleJourneyBegin = () => {
-    window.location.href = "https://accounts.mockrithm.me/sign-up";
+    if (typeof window !== "undefined" && window.location.hostname.includes("localhost")) {
+      window.location.href = "/sign-up";
+    } else {
+      window.location.href = "https://accounts.mockrithm.me/sign-up";
+    }
   };
 
   return (
@@ -32,7 +42,7 @@ export default function MarketingNavbar() {
       <div className="w-full max-w-7xl mx-auto px-6 md:px-8 flex items-center justify-between">
         {/* Logo */}
         <Link 
-          href="https://mockrithm.me"
+          href="/"
           className="text-2xl md:text-3xl tracking-tight text-white select-none cursor-pointer"
           style={{ fontFamily: "var(--font-instrument-serif), 'Instrument Serif', serif" }}
         >
@@ -42,10 +52,10 @@ export default function MarketingNavbar() {
         {/* Links */}
         <div className="hidden md:flex items-center gap-8 text-sm font-medium" style={{ fontFamily: "var(--font-inter), 'Inter', sans-serif" }}>
 
-          <Link href="https://mockrithm.me" className="text-white/60 hover:text-white transition-colors duration-200">
+          <Link href="/" className="text-white/60 hover:text-white transition-colors duration-200">
             Home
           </Link>
-          <Link href="https://mockrithm.me/interview" className="text-white/60 hover:text-white transition-colors duration-200">
+          <Link href="/interview" className="text-white/60 hover:text-white transition-colors duration-200">
             Interview
           </Link>
           <Link href="https://games.mockrithm.me" className="text-white/60 hover:text-white transition-colors duration-200">
@@ -54,16 +64,16 @@ export default function MarketingNavbar() {
           <Link href="https://resume.mockrithm.me" className="text-white/60 hover:text-white transition-colors duration-200">
             Resume
           </Link>
-          <Link href="https://docs.mockrithm.me" className="text-white/60 hover:text-white transition-colors duration-200">
+          <Link href={docsHref} className="text-white/60 hover:text-white transition-colors duration-200">
             Docs
           </Link>
-          <Link href="https://mockrithm.me/blog" className="text-white/60 hover:text-white transition-colors duration-200">
+          <Link href="/blog" className="text-white/60 hover:text-white transition-colors duration-200">
             Blog
           </Link>
-          <Link href="https://mockrithm.me/about" className="text-white/60 hover:text-white transition-colors duration-200">
+          <Link href="/about" className="text-white/60 hover:text-white transition-colors duration-200">
             About
           </Link>
-          <Link href="https://mockrithm.me/about#contact" className="text-white/60 hover:text-white transition-colors duration-200">
+          <Link href="/about#contact" className="text-white/60 hover:text-white transition-colors duration-200">
             Reach Us
           </Link>
         </div>

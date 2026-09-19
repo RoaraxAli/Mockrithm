@@ -21,14 +21,14 @@ export default function NotFound() {
   }, []);
 
   const navLinks = [
-    { href: "https://mockrithm.me", label: "Home" },
-    { href: "https://mockrithm.me/interview", label: "Interview" },
+    { href: "/", label: "Home" },
+    { href: "/interview", label: "Interview" },
     { href: "https://games.mockrithm.me", label: "Games" },
     { href: "https://resume.mockrithm.me", label: "Resume" },
-    { href: "https://docs.mockrithm.me", label: "Docs" },
-    { href: "https://mockrithm.me/blog", label: "Blog" },
-    { href: "https://mockrithm.me/about", label: "About" },
-    { href: "https://mockrithm.me/about#contact", label: "Reach Us" },
+    { href: "/documentation", label: "Docs" },
+    { href: "/blog", label: "Blog" },
+    { href: "/about", label: "About" },
+    { href: "/about#contact", label: "Reach Us" },
   ];
 
   if (!mounted) return null;
@@ -161,7 +161,7 @@ export default function NotFound() {
         <div className="w-full max-w-[1100px] px-6 md:px-10 py-7 flex items-center justify-between">
           
           {/* Left: Logo (Actual Logo + Text Mockrithm® overlay) */}
-          <Link href="https://mockrithm.me" className="relative group flex items-center justify-start py-1">
+          <Link href="/" className="relative group flex items-center justify-start py-1">
             {/* The mockrithm logo shown behind the text */}
             <div className="absolute -left-3 -top-2 w-14 h-14 opacity-25 z-0 pointer-events-none select-none filter invert brightness-200">
               <img src="/logo.svg" alt="" className="w-full h-full object-contain" />
@@ -187,7 +187,13 @@ export default function NotFound() {
           {/* Right: CTA button "Begin Journey" */}
           <div className="hidden md:block">
             <button
-              onClick={() => window.location.href = "https://accounts.mockrithm.me/sign-up"}
+              onClick={() => {
+                if (typeof window !== "undefined" && window.location.hostname.includes("localhost")) {
+                  window.location.href = "/sign-up";
+                } else {
+                  window.location.href = "https://accounts.mockrithm.me/sign-up";
+                }
+              }}
               className="relative flex items-center gap-3 bg-gradient-to-b from-[#2c2c2c] to-[#111111] hover:from-[#3a3a3a] hover:to-[#1a1a1a] border border-white/10 hover:border-white/20 text-white text-[13px] font-medium py-1 px-4 pr-5 rounded-full transition-all duration-300 shadow-[0_4px_15px_rgba(0,0,0,0.3)] hover:-translate-y-0.5 hover:shadow-[0_6px_20px_rgba(0,0,0,0.4)] cursor-pointer"
             >
               <div className="w-6 h-6 rounded-full bg-white flex items-center justify-center -ml-2 select-none shadow-md">
@@ -309,8 +315,8 @@ export default function NotFound() {
         <div className="flex flex-col gap-3 w-full max-w-[460px] mt-auto mb-10 nav-card-container">
           
           {/* Card 1: Main Page */}
-          <a 
-            href="https://mockrithm.me"
+          <Link 
+            href="/"
             className="group flex items-center justify-between bg-zinc-900/60 backdrop-blur-md border border-white/5 hover:border-white/10 rounded-[18px] p-[18px] px-[22px] transition-all duration-300 shadow-[0_2px_12px_rgba(0,0,0,0.15)] hover:shadow-[0_8px_28px_rgba(0,0,0,0.3)] hover:-translate-y-[3px] w-full text-left"
           >
             <div className="flex items-center gap-4">
@@ -328,11 +334,11 @@ export default function NotFound() {
             <span className="text-[21px] text-zinc-500 group-hover:text-white transition-all duration-300 transform group-hover:translate-x-1.5 select-none leading-none pr-1">
               &rsaquo;
             </span>
-          </a>
+          </Link>
 
           {/* Card 2: Showcase */}
-          <a 
-            href="https://mockrithm.me/interview"
+          <Link 
+            href="/interview"
             className="group flex items-center justify-between bg-zinc-900/60 backdrop-blur-md border border-white/5 hover:border-white/10 rounded-[18px] p-[18px] px-[22px] transition-all duration-300 shadow-[0_2px_12px_rgba(0,0,0,0.15)] hover:shadow-[0_8px_28px_rgba(0,0,0,0.3)] hover:-translate-y-[3px] w-full text-left"
           >
             <div className="flex items-center gap-4">
@@ -350,7 +356,7 @@ export default function NotFound() {
             <span className="text-[21px] text-zinc-500 group-hover:text-white transition-all duration-300 transform group-hover:translate-x-1.5 select-none leading-none pr-1">
               &rsaquo;
             </span>
-          </a>
+          </Link>
 
         </div>
 

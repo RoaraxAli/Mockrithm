@@ -21,7 +21,11 @@ export default function AwwwardsHero() {
   }, []);
 
   const handleJourneyBegin = () => {
-    window.location.href = "https://accounts.mockrithm.me/sign-up";
+    if (typeof window !== "undefined" && window.location.hostname.includes("localhost")) {
+      window.location.href = "/sign-up";
+    } else {
+      window.location.href = "https://accounts.mockrithm.me/sign-up";
+    }
   };
 
   return (
