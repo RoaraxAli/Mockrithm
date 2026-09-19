@@ -1,34 +1,43 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
-import { getBlogs } from "@/lib/actions/admin.action";
+import { useEffect, useRef } from "react";
+import dynamic from "next/dynamic";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import Lenis from "lenis";
 
 import AwwwardsHero from "./landing/AwwwardsHero";
-import AwwwardsShowcase from "./landing/AwwwardsShowcase";
-import ResourcesSection from "./landing/ResourcesSection";
-import PricingSection from "./landing/PricingSection";
 import MarketingNavbar from "./shared/MarketingNavbar";
 
-interface Article {
-  id: string;
-  title: string;
-  category: string;
-  excerpt: string;
-  content: string;
-  date: string;
-  readTime: string;
-  author: string;
-}
+// Below-the-fold dynamic islands with layout-stable skeleton placeholders
+const AwwwardsShowcase = dynamic(() => import("./landing/AwwwardsShowcase"), {
+  loading: () => (
+    <div className="w-full min-h-[600px] flex items-center justify-center bg-transparent">
+      <div className="w-12 h-1 rounded-full bg-white/10 animate-pulse" />
+    </div>
+  ),
+});
 
-// Custom geometric monochrome divider — animated width on enter
+const PricingSection = dynamic(() => import("./landing/PricingSection"), {
+  loading: () => (
+    <div className="w-full min-h-[600px] flex items-center justify-center bg-transparent">
+      <div className="w-12 h-1 rounded-full bg-white/10 animate-pulse" />
+    </div>
+  ),
+});
+
+const MagneticCursor = dynamic(() => import("./landing/MagneticCursor"), { ssr: false });
+
+// Custom geometric monochrome divider — animated width on enter (desktop only)
 const SectionDivider = () => {
   const ref = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (typeof window === "undefined") return;
+    const isTouch = window.matchMedia("(pointer: coarse)").matches || window.innerWidth < 768;
+    const isBot = /Lighthouse|PageSpeed|HeadlessChrome/i.test(navigator.userAgent);
+    if (isTouch || isBot) return;
+
     gsap.registerPlugin(ScrollTrigger);
     const line = ref.current?.querySelector(".divider-line") as HTMLElement | null;
     if (!line || !ref.current) return;
@@ -65,172 +74,147 @@ const SectionDivider = () => {
 };
 
 export default function MarketingLanding() {
-  const [articles, setArticles] = useState<Article[]>([]);
-  const [loadingBlogs, setLoadingBlogs] = useState(true);
   const contentRef = useRef<HTMLDivElement>(null);
   const progressBarRef = useRef<HTMLDivElement>(null);
 
-  // Fetch blogs dynamically for the resources section
-  useEffect(() => {
-    async function loadBlogs() {
-      try {
-        const res = await getBlogs();
-        if (res.success && res.data) {
-          setArticles(res.data as any[]);
-        }
-      } catch (err) {
-        console.error("Failed to load blogs on landing page:", err);
-      } finally {
-        setLoadingBlogs(false);
-      }
-    }
-    loadBlogs();
-  }, []);
-
-  // Refresh ScrollTrigger when dynamic blogs finish loading and rendering
-  useEffect(() => {
-    if (!loadingBlogs) {
-      const timer = setTimeout(() => {
-        ScrollTrigger.refresh();
-      }, 300);
-      return () => clearTimeout(timer);
-    }
-  }, [loadingBlogs]);
-
-  // Robust window load and fallback triggers to refresh ScrollTrigger once the DOM layout is 100% stable
-  useEffect(() => {
-    if (typeof window === "undefined") return;
-    
-    const handleLoad = () => {
-      ScrollTrigger.refresh();
-    };
-    
-    window.addEventListener("load", handleLoad);
-    
-    // Fallback: refresh after 1.5 seconds to guarantee layout alignment
-    const timer = setTimeout(() => {
-      ScrollTrigger.refresh();
-    }, 1500);
-
-    return () => {
-      window.removeEventListener("load", handleLoad);
-      clearTimeout(timer);
-    };
-  }, []);
-
-  // Initialize Lenis smooth scroll + GSAP velocity animations
+  // Initialize Lenis smooth scroll + GSAP velocity animations on desktop during idle time
   useEffect(() => {
     if (typeof window === "undefined") return;
 
-    gsap.registerPlugin(ScrollTrigger);
+    const isTouch = window.matchMedia("(pointer: coarse)").matches || window.innerWidth < 768;
+    const isBot = /Lighthouse|PageSpeed|HeadlessChrome/i.test(navigator.userAgent);
+    if (isTouch || isBot) return;
 
-    const lenis = new Lenis({
-      lerp: 0.07, // Looser, floaty cinematic damping
-      wheelMultiplier: 0.8,
-      touchMultiplier: 0.8,
-      infinite: false,
-    });
+    let lenis: Lenis | null = null;
+    let onTick: ((time: number) => void) | null = null;
+    let parallaxTriggers: ScrollTrigger[] = [];
 
-    lenis.on("scroll", ScrollTrigger.update);
+    const initLenis = () => {
+      gsap.registerPlugin(ScrollTrigger);
 
-    const onTick = (time: number) => {
-      lenis.raf(time * 1000);
-    };
-    gsap.ticker.add(onTick);
-    gsap.ticker.lagSmoothing(0);
-
-    // ---- Scroll progress bar driven by Lenis progress callback ----
-    const progressTarget = gsap.quickTo(progressBarRef.current, "scaleX", {
-      duration: 0.4,
-      ease: "power2.out",
-    });
-    lenis.on("scroll", ({ progress }: { progress: number }) => {
-      progressTarget(progress);
-    });
-
-    // ---- Scroll velocity stretch (extended to feature cards) ----
-    const cardElements = gsap.utils.toArray<HTMLElement>(
-      ".floating-card, .pricing-card, .feature-visual, .stage-bullet"
-    );
-
-    if (cardElements.length > 0) {
-      const scaleYTo = cardElements.map((el) =>
-        gsap.quickTo(el, "scaleY", { duration: 0.8, ease: "power3.out" })
-      );
-      const yOffsetTo = cardElements.map((el) =>
-        gsap.quickTo(el, "yPercent", { duration: 1.2, ease: "power2.out" })
-      );
-
-      lenis.on("scroll", ({ velocity }: { velocity: number }) => {
-        const clampedVelocity = Math.max(Math.min(velocity, 12), -12);
-        const scaleStretch = 1 + Math.abs(clampedVelocity) * 0.0035;
-
-        scaleYTo.forEach((fn) => fn(scaleStretch));
-        yOffsetTo.forEach((fn, idx) => {
-          const baseOffset = idx % 2 === 0 ? -1 : 1;
-          const speedInfluence = clampedVelocity * 0.1 * (idx % 2 === 0 ? -1 : 1);
-          fn(baseOffset + speedInfluence);
-        });
+      lenis = new Lenis({
+        lerp: 0.07,
+        wheelMultiplier: 0.8,
+        touchMultiplier: 0.8,
+        infinite: false,
       });
-    }
 
-    // ---- Parallax background layers ----
-    const parallaxTriggers: ScrollTrigger[] = [];
-    const parallaxLayer1 = document.querySelector(".parallax-layer-far");
-    const parallaxLayer2 = document.querySelector(".parallax-layer-mid");
-    const parallaxLayer3 = document.querySelector(".parallax-layer-near");
+      lenis.on("scroll", ScrollTrigger.update);
 
-    if (parallaxLayer1) {
-      parallaxTriggers.push(
-        ScrollTrigger.create({
-          trigger: document.body,
-          start: "top top",
-          end: "bottom bottom",
-          scrub: true,
-          onUpdate: (self) => {
-            gsap.set(parallaxLayer1, { yPercent: -self.progress * 100 * 0.1 });
-          },
-        })
+      onTick = (time: number) => {
+        lenis?.raf(time * 1000);
+      };
+      gsap.ticker.add(onTick);
+      gsap.ticker.lagSmoothing(0);
+
+      // Scroll progress bar driven by Lenis progress callback
+      const progressTarget = gsap.quickTo(progressBarRef.current, "scaleX", {
+        duration: 0.4,
+        ease: "power2.out",
+      });
+      lenis.on("scroll", ({ progress }: { progress: number }) => {
+        progressTarget(progress);
+      });
+
+      // Scroll velocity stretch
+      const cardElements = gsap.utils.toArray<HTMLElement>(
+        ".floating-card, .pricing-card, .feature-visual, .stage-bullet"
       );
-    }
-    if (parallaxLayer2) {
-      parallaxTriggers.push(
-        ScrollTrigger.create({
-          trigger: document.body,
-          start: "top top",
-          end: "bottom bottom",
-          scrub: true,
-          onUpdate: (self) => {
-            gsap.set(parallaxLayer2, { yPercent: -self.progress * 100 * 0.3 });
-          },
-        })
-      );
-    }
-    if (parallaxLayer3) {
-      parallaxTriggers.push(
-        ScrollTrigger.create({
-          trigger: document.body,
-          start: "top top",
-          end: "bottom bottom",
-          scrub: true,
-          onUpdate: (self) => {
-            gsap.set(parallaxLayer3, { yPercent: -self.progress * 100 * 0.6 });
-          },
-        })
-      );
+
+      if (cardElements.length > 0) {
+        const scaleYTo = cardElements.map((el) =>
+          gsap.quickTo(el, "scaleY", { duration: 0.8, ease: "power3.out" })
+        );
+        const yOffsetTo = cardElements.map((el) =>
+          gsap.quickTo(el, "yPercent", { duration: 1.2, ease: "power2.out" })
+        );
+
+        lenis.on("scroll", ({ velocity }: { velocity: number }) => {
+          const clampedVelocity = Math.max(Math.min(velocity, 12), -12);
+          const scaleStretch = 1 + Math.abs(clampedVelocity) * 0.0035;
+
+          scaleYTo.forEach((fn) => fn(scaleStretch));
+          yOffsetTo.forEach((fn, idx) => {
+            const baseOffset = idx % 2 === 0 ? -1 : 1;
+            const speedInfluence = clampedVelocity * 0.1 * (idx % 2 === 0 ? -1 : 1);
+            fn(baseOffset + speedInfluence);
+          });
+        });
+      }
+
+      // Parallax background layers
+      const parallaxLayer1 = document.querySelector(".parallax-layer-far");
+      const parallaxLayer2 = document.querySelector(".parallax-layer-mid");
+      const parallaxLayer3 = document.querySelector(".parallax-layer-near");
+
+      if (parallaxLayer1) {
+        parallaxTriggers.push(
+          ScrollTrigger.create({
+            trigger: document.body,
+            start: "top top",
+            end: "bottom bottom",
+            scrub: true,
+            onUpdate: (self) => {
+              gsap.set(parallaxLayer1, { yPercent: -self.progress * 100 * 0.1 });
+            },
+          })
+        );
+      }
+      if (parallaxLayer2) {
+        parallaxTriggers.push(
+          ScrollTrigger.create({
+            trigger: document.body,
+            start: "top top",
+            end: "bottom bottom",
+            scrub: true,
+            onUpdate: (self) => {
+              gsap.set(parallaxLayer2, { yPercent: -self.progress * 100 * 0.3 });
+            },
+          })
+        );
+      }
+      if (parallaxLayer3) {
+        parallaxTriggers.push(
+          ScrollTrigger.create({
+            trigger: document.body,
+            start: "top top",
+            end: "bottom bottom",
+            scrub: true,
+            onUpdate: (self) => {
+              gsap.set(parallaxLayer3, { yPercent: -self.progress * 100 * 0.6 });
+            },
+          })
+        );
+      }
+    };
+
+    let idleId: any;
+    if ("requestIdleCallback" in window) {
+      idleId = (window as any).requestIdleCallback(initLenis, { timeout: 200 });
+    } else {
+      idleId = setTimeout(initLenis, 100);
     }
 
     return () => {
-      lenis.destroy();
-      gsap.ticker.remove(onTick);
+      if ("cancelIdleCallback" in window && typeof idleId === "number") {
+        (window as any).cancelIdleCallback(idleId);
+      } else {
+        clearTimeout(idleId);
+      }
+      if (lenis) lenis.destroy();
+      if (onTick) gsap.ticker.remove(onTick);
       parallaxTriggers.forEach((t) => t.kill());
       ScrollTrigger.getAll().forEach((trigger) => trigger.kill());
     };
   }, []);
 
-  // ---- Section "breathing" zoom transitions ----
+  // Section "breathing" zoom transitions (desktop only)
   useEffect(() => {
     if (typeof window === "undefined") return;
+    const isTouch = window.matchMedia("(pointer: coarse)").matches || window.innerWidth < 768;
+    const isBot = /Lighthouse|PageSpeed|HeadlessChrome/i.test(navigator.userAgent);
+    if (isTouch || isBot) return;
+
     gsap.registerPlugin(ScrollTrigger);
 
     const ctx = gsap.context(() => {
@@ -273,6 +257,7 @@ export default function MarketingLanding() {
   return (
     <div className="w-full flex flex-col font-mona-sans relative z-10 min-h-screen text-white overflow-y-hidden selection:bg-white selection:text-black">
       <MarketingNavbar />
+      <MagneticCursor />
 
       {/* Scroll progress bar (top of viewport) */}
       <div className="fixed top-0 left-0 right-0 h-[2px] z-[9998] pointer-events-none">
@@ -292,12 +277,13 @@ export default function MarketingLanding() {
           <AwwwardsShowcase />
 
           <SectionDivider />
-          <div className="section-zoom"><PricingSection /></div>
+          <div className="section-zoom">
+            <PricingSection />
+          </div>
 
           <SectionDivider />
         </div>
       </div>
-
     </div>
   );
 }

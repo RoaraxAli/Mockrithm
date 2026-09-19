@@ -43,7 +43,7 @@ export const MonacoSandbox = React.memo(function MonacoSandbox({
         scrollBeyondLastLine: false,
         readOnly: readOnly,
         theme: "vs-dark",
-        fontFamily: "var(--font-jetbrains-mono), monospace",
+        fontFamily: "'JetBrains Mono', Consolas, Menlo, Monaco, 'Courier New', monospace",
         wordWrap: "on"
       }}
     />

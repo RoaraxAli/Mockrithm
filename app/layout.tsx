@@ -1,13 +1,12 @@
 import type { Metadata } from "next";
 import Script from "next/script";
-import { Mona_Sans, Inter, Instrument_Serif, Poppins, Merriweather, Playfair_Display, Lora, Roboto_Slab, Source_Sans_3, Plus_Jakarta_Sans } from "next/font/google";
+import { Mona_Sans, Inter, Instrument_Serif } from "next/font/google";
 
 import { Toaster } from "sonner";
 import { ClerkProvider } from "@clerk/nextjs";
 
 import AuthLayout from "@/components/Authlayout";
 import Preloader from "@/components/shared/Preloader";
-import MagneticCursor from "@/components/landing/MagneticCursor";
 import { getCurrentUser } from "@/lib/actions/auth.action";
 import { Analytics } from "@vercel/analytics/react";
 import { SpeedInsights } from "@vercel/speed-insights/next";
@@ -34,48 +33,6 @@ const instrumentSerif = Instrument_Serif({
   weight: ["400"],
   style: ["normal", "italic"],
   display: "swap",
-});
-
-const poppins = Poppins({
-  variable: "--font-poppins",
-  subsets: ["latin"],
-  weight: ["400", "500", "600", "700", "800"],
-});
-
-const merriweather = Merriweather({
-  variable: "--font-merriweather",
-  subsets: ["latin"],
-  weight: ["400", "700"],
-});
-
-const playfairDisplay = Playfair_Display({
-  variable: "--font-playfair",
-  subsets: ["latin"],
-  weight: ["400", "500", "600", "700", "800"],
-});
-
-const lora = Lora({
-  variable: "--font-lora",
-  subsets: ["latin"],
-  weight: ["400", "500", "600", "700"],
-});
-
-const robotoSlab = Roboto_Slab({
-  variable: "--font-roboto-slab",
-  subsets: ["latin"],
-  weight: ["400", "500", "600", "700"],
-});
-
-const sourceSans3 = Source_Sans_3({
-  variable: "--font-source-sans",
-  subsets: ["latin"],
-  weight: ["400", "500", "600", "700"],
-});
-
-const jetbrainsMono = Plus_Jakarta_Sans({
-  variable: "--font-jetbrains-mono",
-  subsets: ["latin"],
-  weight: ["400", "500", "600", "700", "800"],
 });
 
 export const metadata: Metadata = {
@@ -108,7 +65,7 @@ export default async function RootLayout({
         />
       </head>
       <body
-        className={`${monaSans.className} ${inter.variable} ${instrumentSerif.variable} ${poppins.variable} ${merriweather.variable} ${playfairDisplay.variable} ${lora.variable} ${robotoSlab.variable} ${sourceSans3.variable} ${jetbrainsMono.variable} bg-background text-foreground antialiased pattern`}
+        className={`${monaSans.className} ${inter.variable} ${instrumentSerif.variable} bg-background text-foreground antialiased pattern`}
         suppressHydrationWarning
       >
         <ClerkProvider
@@ -128,7 +85,6 @@ export default async function RootLayout({
           <Preloader />
           <Analytics />
           <SpeedInsights />
-          <MagneticCursor />
           <ThemeManager />
           <AuthLayout initialUserId={user?.id} initialUserName={user?.name} initialUserRole={user?.role}>
             {children}
