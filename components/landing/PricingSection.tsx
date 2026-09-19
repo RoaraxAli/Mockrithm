@@ -346,8 +346,6 @@ export default function PricingSection() {
               </Button>
             </div>
           </motion.div>
-            </div>
-          </motion.div>
         </div>
 
         {/* Paddle Merchant of Record Compliance Note */}
