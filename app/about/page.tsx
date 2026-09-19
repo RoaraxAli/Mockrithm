@@ -179,9 +179,9 @@ export default function AboutPage() {
       sections.forEach((section) => {
         gsap.fromTo(
           section,
-          { scale: 1.03, opacity: 0.85 },
+          { y: 24, opacity: 0.85 },
           {
-            scale: 1,
+            y: 0,
             opacity: 1,
             ease: "none",
             scrollTrigger: {
@@ -217,7 +217,7 @@ export default function AboutPage() {
   ];
 
   return (
-    <div className="min-h-screen bg-zinc-950 text-white relative font-mona-sans selection:bg-white selection:text-black">
+    <div className="min-h-screen bg-zinc-950 text-white relative font-mona-sans selection:bg-white selection:text-black overflow-x-hidden w-full max-w-full">
       {!isSignedIn && <MarketingNavbar />}
 
       {/* Scroll progress bar (top of viewport) */}
@@ -230,7 +230,7 @@ export default function AboutPage() {
       </div>
 
       {/* Fixed Fullscreen Background Video & Overlay */}
-      <div className="fixed inset-0 w-full h-screen z-0 pointer-events-none bg-zinc-950">
+      <div className="fixed inset-0 w-full h-screen z-0 pointer-events-none bg-zinc-950 overflow-hidden">
         {videoSrc ? (
           <video
             autoPlay
@@ -249,16 +249,16 @@ export default function AboutPage() {
       {/* Cinematic ambient background glow spot */}
       <div className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[1000px] h-[500px] bg-[radial-gradient(circle,rgba(255,255,255,0.025)_0%,rgba(0,0,0,0)_60%)] pointer-events-none z-0" />
 
-      <main ref={contentRef} className="relative z-10 max-w-[1400px] mx-auto pt-32 flex flex-col gap-12">
+      <main ref={contentRef} className="relative z-10 max-w-[1400px] mx-auto pt-4 sm:pt-6 flex flex-col gap-10 overflow-x-clip w-full">
         
         {/* Hero Section */}
-        <section className="text-center flex flex-col items-center max-w-4xl mx-auto pt-16 px-6">
+        <section className="text-center flex flex-col items-center max-w-4xl mx-auto pt-0 px-6">
           <motion.div 
             initial={{ opacity: 0, y: -10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, ease: "easeOut" }}
           >
-            <div className="inline-flex items-center gap-1.5 bg-zinc-900/80 border border-white/10 px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400 font-mono mb-8 backdrop-blur-md shadow-lg">
+            <div className="inline-flex items-center gap-1.5 bg-zinc-900/80 border border-white/10 px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400 font-mono mb-4 backdrop-blur-md shadow-lg">
               <Sparkles className="size-3.5 text-white" /> THE PHILOSOPHY
             </div>
           </motion.div>
